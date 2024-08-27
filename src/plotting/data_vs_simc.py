@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 15:24:14 trottar"
+# Time-stamp: "2024-08-27 16:53:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -643,11 +643,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         C_ssdelta_ssxptar[i].Divide(2,1)
         C_ssdelta_ssxptar[i].cd(1)
         h_ssxptar_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ssxptar_DATA"], h2d_name="h_ssxptar_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS Delta;SHMS xptar")
-        h_ssxptar_ssdelta_data.SetMinimum(1)        
+        h_ssxptar_ssdelta_data.SetMinimum(1e-8)
         h_ssxptar_ssdelta_data.Draw("COLZ")
         C_ssdelta_ssxptar[i].cd(2)
         h_ssxptar_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ssxptar_SIMC"], h2d_name="h_ssxptar_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS Delta;SHMS xptar")
-        h_ssxptar_ssdelta_simc.SetMinimum(1)        
+        h_ssxptar_ssdelta_simc.SetMinimum(1e-8)        
         h_ssxptar_ssdelta_simc.Draw("COLZ")
         C_ssdelta_ssxptar[i].Print(outputpdf)
 
@@ -657,11 +657,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         C_hsdelta_hsxptar[i].Divide(2,1)
         C_hsdelta_hsxptar[i].cd(1)
         h_hsxptar_hsdelta_data = plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_hsxptar_DATA"], h2d_name="h_hsxptar_hsdelta_data", title=f"{phisetlist[i]} Data;HMS Delta;HMS xptar")
-        h_hsxptar_hsdelta_data.SetMinimum(1)        
+        h_hsxptar_hsdelta_data.SetMinimum(1e-8)        
         h_hsxptar_hsdelta_data.Draw("COLZ")
         C_hsdelta_hsxptar[i].cd(2)
         h_hsxptar_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsxptar_SIMC"], h2d_name="h_hsxptar_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS Delta;HMS xptar")
-        h_hsxptar_hsdelta_simc.SetMinimum(1)        
+        h_hsxptar_hsdelta_simc.SetMinimum(1e-8)        
         h_hsxptar_hsdelta_simc.Draw("COLZ")
         C_hsdelta_hsxptar[i].Print(outputpdf)
 
@@ -671,11 +671,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         C_ssdelta_ssyptar[i].Divide(2,1)
         C_ssdelta_ssyptar[i].cd(1)
         h_ssyptar_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ssyptar_DATA"], h2d_name="h_ssyptar_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS Delta;SHMS yptar")
-        h_ssyptar_ssdelta_data.SetMinimum(1)        
+        h_ssyptar_ssdelta_data.SetMinimum(1e-8)        
         h_ssyptar_ssdelta_data.Draw("COLZ")
         C_ssdelta_ssyptar[i].cd(2)
         h_ssyptar_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ssyptar_SIMC"], h2d_name="h_ssyptar_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS Delta;SHMS yptar")
-        h_ssyptar_ssdelta_simc.SetMinimum(1)        
+        h_ssyptar_ssdelta_simc.SetMinimum(1e-8)        
         h_ssyptar_ssdelta_simc.Draw("COLZ")
         C_ssdelta_ssyptar[i].Print(outputpdf)
 
@@ -685,11 +685,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         C_hsdelta_hsyptar[i].Divide(2,1)
         C_hsdelta_hsyptar[i].cd(1)
         h_hsyptar_hsdelta_data = plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_hsyptar_DATA"], h2d_name="h_hsyptar_hsdelta_data", title=f"{phisetlist[i]} Data;HMS Delta;HMS yptar")
-        h_hsyptar_hsdelta_data.SetMinimum(1)        
+        h_hsyptar_hsdelta_data.SetMinimum(1e-8)        
         h_hsyptar_hsdelta_data.Draw("COLZ")
         C_hsdelta_hsyptar[i].cd(2)
         h_hsyptar_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="h_hsyptar_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS Delta;HMS yptar")
-        h_hsyptar_hsdelta_simc.SetMinimum(1)        
+        h_hsyptar_hsdelta_simc.SetMinimum(1e-8)        
         h_hsyptar_hsdelta_simc.Draw("COLZ")
         C_hsdelta_hsyptar[i].Print(outputpdf)
 
@@ -699,11 +699,11 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         C_ssdelta_hsdelta[i].Divide(2,1)
         C_ssdelta_hsdelta[i].cd(1)
         h_hsdelta_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_hsdelta_DATA"], h2d_name="h_hsdelta_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;HMS Delta")
-        h_hsdelta_ssdelta_data.SetMinimum(1)        
+        h_hsdelta_ssdelta_data.SetMinimum(1e-8)        
         h_hsdelta_ssdelta_data.Draw("COLZ")
         C_ssdelta_hsdelta[i].cd(2)
         h_hsdelta_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_hsdelta_SIMC"], h2d_name="h_hsdelta_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;HMS Delta")
-        h_hsdelta_ssdelta_simc.SetMinimum(1)        
+        h_hsdelta_ssdelta_simc.SetMinimum(1e-8)        
         h_hsdelta_ssdelta_simc.Draw("COLZ")
         C_ssdelta_hsdelta[i].Print(outputpdf)
         
