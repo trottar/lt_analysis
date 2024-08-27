@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 15:43:19 trottar"
+# Time-stamp: "2024-08-27 15:44:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -237,6 +237,8 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     # Get the bin edges (range) directly from the TH1Ds
     x_bins = np.array([h1.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_x + 2)])
     y_bins = np.array([h2.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_y + 2)])
+
+    print(f"!!!!!!!!! x={x_bins} y={y_bins}")
     
     # Create a 2D histogram dynamically based on h1 and h2 bin edges
     h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
