@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 15:01:38 trottar"
+# Time-stamp: "2024-08-27 15:09:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -226,7 +226,7 @@ def flatten_hist(histogram):
 ################################################################################################################################################
 
 def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
-    # Determine the number of bins and range for the 2D histogram based on h1 and h2
+    # Determine the number of bins for the 2D histogram based on h1 and h2
     n_bins_x = h1.GetNbinsX()
     n_bins_y = h2.GetNbinsX()
 
@@ -234,14 +234,12 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     if n_bins_x != n_bins_y:
         raise ValueError("The two histograms must have the same number of bins")
 
-    # Get the range for the 2D histogram
-    x_min = h1.GetXaxis().GetXmin()
-    x_max = h1.GetXaxis().GetXmax()
-    y_min = h2.GetXaxis().GetXmin()
-    y_max = h2.GetXaxis().GetXmax()
+    # Get the bin edges (range) directly from the TH1Ds
+    x_bins = [h1.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_x + 2)]
+    y_bins = [h2.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_y + 2)]
     
-    # Create a 2D histogram dynamically based on h1 and h2
-    h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_min, x_max, n_bins_y, y_min, y_max)
+    # Create a 2D histogram dynamically based on h1 and h2 bin edges
+    h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
     
     # Fill the 2D histogram using the contents of the two 1D histograms
     for i in range(1, n_bins_x + 1):
