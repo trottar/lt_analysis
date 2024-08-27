@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 14:07:15 trottar"
+# Time-stamp: "2024-08-27 14:08:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -651,6 +651,20 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsxptar_SIMC"], h2d_name="hsxptar vs hsdelta", title=f"{phisetlist[i]} Simc;HMS xptar;HMS Delta")
         C_hsdelta_hsxptar.Print(outputpdf)
 
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_ssyptar = TCanvas()
+        C_ssdelta_ssyptar.cd(i+1)
+        plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ssyptar_DATA"], h2d_name="ssyptar vs ssdelta", title=f"{phisetlist[i]} Data;SHMS yptar;SHMS Delta")
+        plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ssyptar_SIMC"], h2d_name="ssyptar vs ssdelta", title=f"{phisetlist[i]} Simc;SHMS yptar;SHMS Delta")
+        C_ssdelta_ssyptar.Print(outputpdf)
+
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_hsyptar = TCanvas()
+        C_hsdelta_hsyptar.cd(i+1)
+        plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_hsyptar_DATA"], h2d_name="hsyptar vs hsdelta", title=f"{phisetlist[i]} Data;HMS yptar;HMS Delta")
+        plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="hsyptar vs hsdelta", title=f"{phisetlist[i]} Simc;HMS yptar;HMS Delta")
+        C_hsdelta_hsyptar.Print(outputpdf)
+        
     for i,hist in enumerate(histlist_copy):
         C_ssdelta_hsdelta = TCanvas()
         C_ssdelta_hsdelta.cd(i+1)
