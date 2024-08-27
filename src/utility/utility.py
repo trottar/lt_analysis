@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 16:23:47 trottar"
+# Time-stamp: "2024-08-27 16:29:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -251,13 +251,24 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
             
             # Calculate the new bin content and error
             z_value = z_value1 * z_value2
-            z_error = z_value * np.sqrt((z_error1/z_value1)**2 + (z_error2/z_value2)**2)
+
+            # Calculate the new bin error, avoiding divide by zero
+            if z_value1 != 0 and z_value2 != 0:
+                rel_error1 = z_error1 / z_value1
+                rel_error2 = z_error2 / z_value2
+                z_error = z_value * np.sqrt(rel_error1**2 + rel_error2**2)
+            elif z_value1 == 0 and z_value2 == 0:
+                z_error = 0
+            elif z_value1 == 0:
+                z_error = z_value2 * z_error1
+            else:  # z_value2 == 0
+                z_error = z_value1 * z_error2            
             
             # Fill the bin
-            bin = h2d.Fill(x_value, y_value, z_value)
+            bin_val = h2d.Fill(x_value, y_value, z_value)
             
             # Set the bin error
-            h2d.SetBinError(bin, z_error)
+            h2d.SetBinError(bin_val, z_error)
 
     return h2d
 
