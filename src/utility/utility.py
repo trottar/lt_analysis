@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:37:40 trottar"
+# Time-stamp: "2024-08-27 13:58:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -222,6 +222,32 @@ def flatten_hist(histogram):
     flattened_histogram = [edge for edge, count in zip(edges, contents) for _ in range(int(count))]
 
     return flattened_histogram
+
+################################################################################################################################################
+
+def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
+    # Determine the number of bins and range for the 2D histogram based on h1 and h2
+    n_bins_x = h1.GetNbinsX()
+    n_bins_y = h2.GetNbinsX()
+    x_min = h1.GetXaxis().GetXmin()
+    x_max = h1.GetXaxis().GetXmax()
+    y_min = h2.GetXaxis().GetXmin()
+    y_max = h2.GetXaxis().GetXmax()
+    
+    # Create a 2D histogram dynamically based on h1 and h2
+    h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_min, x_max, n_bins_y, y_min, y_max)
+    
+    # Fill the 2D histogram using the two 1D histograms
+    for i in range(1, n_bins_x + 1):
+        x_value = h1.GetBinCenter(i)
+        y_value = h2.GetBinContent(i)
+        h2d.Fill(x_value, y_value)
+    
+    # Draw the 2D histogram
+    h2d.Draw("COLZ")
+    
+    # Return the 2D histogram in case further manipulation is needed
+    return h2d
 
 ################################################################################################################################################
 

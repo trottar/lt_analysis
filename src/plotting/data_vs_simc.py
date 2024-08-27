@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-05-01 14:34:38 trottar"
+# Time-stamp: "2024-08-27 14:07:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,6 +46,12 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import plot1DAs2D
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -631,6 +637,27 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hDelta.Print(outputpdf)
 
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_ssxptar = TCanvas()
+        C_ssdelta_ssxptar.cd(i+1)
+        plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ssxptar_DATA"], h2d_name="ssxptar vs ssdelta", title=f"{phisetlist[i]} Data;SHMS xptar;SHMS Delta")
+        plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ssxptar_SIMC"], h2d_name="ssxptar vs ssdelta", title=f"{phisetlist[i]} Simc;SHMS xptar;SHMS Delta")
+        C_ssdelta_ssxptar.Print(outputpdf)
+
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_hsxptar = TCanvas()
+        C_hsdelta_hsxptar.cd(i+1)
+        plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_hsxptar_DATA"], h2d_name="hsxptar vs hsdelta", title=f"{phisetlist[i]} Data;HMS xptar;HMS Delta")
+        plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsxptar_SIMC"], h2d_name="hsxptar vs hsdelta", title=f"{phisetlist[i]} Simc;HMS xptar;HMS Delta")
+        C_hsdelta_hsxptar.Print(outputpdf)
+
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_hsdelta = TCanvas()
+        C_ssdelta_hsdelta.cd(i+1)
+        plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_hsdelta_DATA"], h2d_name="hsdelta vs ssdelta", title=f"{phisetlist[i]} Data;SHMS delta;HMS Delta")
+        plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_hsdelta_SIMC"], h2d_name="hsdelta vs ssdelta", title=f"{phisetlist[i]} Simc;SHMS delta;HMS Delta")
+        C_ssdelta_hsdelta.Print(outputpdf)
+        
     Cph_q = TCanvas()
 
     binmax = []
