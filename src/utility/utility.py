@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 14:52:45 trottar"
+# Time-stamp: "2024-08-27 15:01:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -229,6 +229,12 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     # Determine the number of bins and range for the 2D histogram based on h1 and h2
     n_bins_x = h1.GetNbinsX()
     n_bins_y = h2.GetNbinsX()
+
+    # Ensure both histograms have the same number of bins
+    if n_bins_x != n_bins_y:
+        raise ValueError("The two histograms must have the same number of bins")
+
+    # Get the range for the 2D histogram
     x_min = h1.GetXaxis().GetXmin()
     x_max = h1.GetXaxis().GetXmax()
     y_min = h2.GetXaxis().GetXmin()
@@ -237,9 +243,9 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
     # Create a 2D histogram dynamically based on h1 and h2
     h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_min, x_max, n_bins_y, y_min, y_max)
     
-    # Fill the 2D histogram using the two 1D histograms
+    # Fill the 2D histogram using the contents of the two 1D histograms
     for i in range(1, n_bins_x + 1):
-        x_value = h1.GetBinCenter(i)
+        x_value = h1.GetBinContent(i)
         y_value = h2.GetBinContent(i)
         h2d.Fill(x_value, y_value)
         
