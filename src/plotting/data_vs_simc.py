@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 14:08:26 trottar"
+# Time-stamp: "2024-08-27 14:26:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -637,40 +637,45 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hDelta.Print(outputpdf)
 
+    C_ssdelta_ssxptar = []    
     for i,hist in enumerate(histlist_copy):
-        C_ssdelta_ssxptar = TCanvas()
-        C_ssdelta_ssxptar.cd(i+1)
+        C_ssdelta_ssxptar[i] = TCanvas()
+        C_ssdelta_ssxptar[i].cd(i+1)
         plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ssxptar_DATA"], h2d_name="ssxptar vs ssdelta", title=f"{phisetlist[i]} Data;SHMS xptar;SHMS Delta")
         plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ssxptar_SIMC"], h2d_name="ssxptar vs ssdelta", title=f"{phisetlist[i]} Simc;SHMS xptar;SHMS Delta")
-        C_ssdelta_ssxptar.Print(outputpdf)
+        C_ssdelta_ssxptar[i].Print(outputpdf)
 
+    C_hsdelta_hsxptar = []        
     for i,hist in enumerate(histlist_copy):
-        C_hsdelta_hsxptar = TCanvas()
-        C_hsdelta_hsxptar.cd(i+1)
+        C_hsdelta_hsxptar[i] = TCanvas()
+        C_hsdelta_hsxptar[i].cd(i+1)
         plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_hsxptar_DATA"], h2d_name="hsxptar vs hsdelta", title=f"{phisetlist[i]} Data;HMS xptar;HMS Delta")
         plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsxptar_SIMC"], h2d_name="hsxptar vs hsdelta", title=f"{phisetlist[i]} Simc;HMS xptar;HMS Delta")
-        C_hsdelta_hsxptar.Print(outputpdf)
+        C_hsdelta_hsxptar[i].Print(outputpdf)
 
+    C_ssdelta_ssyptar = []        
     for i,hist in enumerate(histlist_copy):
-        C_ssdelta_ssyptar = TCanvas()
-        C_ssdelta_ssyptar.cd(i+1)
+        C_ssdelta_ssyptar[i] = TCanvas()
+        C_ssdelta_ssyptar[i].cd(i+1)
         plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ssyptar_DATA"], h2d_name="ssyptar vs ssdelta", title=f"{phisetlist[i]} Data;SHMS yptar;SHMS Delta")
         plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ssyptar_SIMC"], h2d_name="ssyptar vs ssdelta", title=f"{phisetlist[i]} Simc;SHMS yptar;SHMS Delta")
-        C_ssdelta_ssyptar.Print(outputpdf)
+        C_ssdelta_ssyptar[i].Print(outputpdf)
 
+    C_hsdelta_hsyptar = []        
     for i,hist in enumerate(histlist_copy):
-        C_hsdelta_hsyptar = TCanvas()
-        C_hsdelta_hsyptar.cd(i+1)
+        C_hsdelta_hsyptar[i] = TCanvas()
+        C_hsdelta_hsyptar[i].cd(i+1)
         plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_hsyptar_DATA"], h2d_name="hsyptar vs hsdelta", title=f"{phisetlist[i]} Data;HMS yptar;HMS Delta")
         plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="hsyptar vs hsdelta", title=f"{phisetlist[i]} Simc;HMS yptar;HMS Delta")
-        C_hsdelta_hsyptar.Print(outputpdf)
-        
+        C_hsdelta_hsyptar[i].Print(outputpdf)
+
+    C_ssdelta_hsdelta = []        
     for i,hist in enumerate(histlist_copy):
-        C_ssdelta_hsdelta = TCanvas()
-        C_ssdelta_hsdelta.cd(i+1)
+        C_ssdelta_hsdelta[i] = TCanvas()
+        C_ssdelta_hsdelta[i].cd(i+1)
         plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_hsdelta_DATA"], h2d_name="hsdelta vs ssdelta", title=f"{phisetlist[i]} Data;SHMS delta;HMS Delta")
         plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_hsdelta_SIMC"], h2d_name="hsdelta vs ssdelta", title=f"{phisetlist[i]} Simc;SHMS delta;HMS Delta")
-        C_ssdelta_hsdelta.Print(outputpdf)
+        C_ssdelta_hsdelta[i].Print(outputpdf)
         
     Cph_q = TCanvas()
 
