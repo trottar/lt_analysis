@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 16:46:21 trottar"
+# Time-stamp: "2024-08-27 16:53:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -274,7 +274,6 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
             h2d.SetBinError(bin_val, z_error)
 
     print(f"Output histogram: {h2d.GetName()}, bins: {h2d.GetNbinsX()}x{h2d.GetNbinsY()}, integral: {h2d.Integral()}")
-    sys.exit(2)
             
     return h2d
 
