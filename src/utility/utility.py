@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-28 13:21:07 trottar"
+# Time-stamp: "2024-08-28 13:33:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,7 +225,7 @@ def flatten_hist(histogram):
 
 ################################################################################################################################################
 
-def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis", 
+def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis", 
                n_bins=None, x_min=None, x_max=None, y_min=None, y_max=None):
     # Get the number of bins and ranges for each histogram
     orig_n_bins_x = h1.GetNbinsX()
