@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 17:45:25 trottar"
+# Time-stamp: "2024-08-28 11:06:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -720,6 +720,102 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         h_hsyptar_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="h_hsyptar_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS Delta;HMS yptar")
         h_hsyptar_hsdelta_simc.Draw("COLZ")
         C_hsdelta_hsyptar[i].Print(outputpdf)
+
+    C_ssdelta_Q2 = []        
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_Q2.append(TCanvas())
+        C_ssdelta_Q2[i].Divide(1,2)
+        C_ssdelta_Q2[i].cd(1)
+        h_Q2_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_Q2_DATA"], h2d_name="h_Q2_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;Q2")
+        h_Q2_ssdelta_data.Draw("COLZ")
+        C_ssdelta_Q2[i].cd(2)
+        h_Q2_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_Q2_SIMC"], h2d_name="h_Q2_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;Q2")
+        h_Q2_ssdelta_simc.Draw("COLZ")
+        C_ssdelta_Q2[i].Print(outputpdf)
+
+    C_hsdelta_Q2 = []        
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_Q2.append(TCanvas())
+        C_hsdelta_Q2[i].Divide(1,2)
+        C_hsdelta_Q2[i].cd(1)
+        h_Q2_hsdelta_data = plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_Q2_DATA"], h2d_name="h_Q2_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;Q2")
+        h_Q2_hsdelta_data.Draw("COLZ")
+        C_hsdelta_Q2[i].cd(2)
+        h_Q2_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_Q2_SIMC"], h2d_name="h_Q2_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;Q2")
+        h_Q2_hsdelta_simc.Draw("COLZ")
+        C_hsdelta_Q2[i].Print(outputpdf)
+
+    C_ssdelta_W = []        
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_W.append(TCanvas())
+        C_ssdelta_W[i].Divide(1,2)
+        C_ssdelta_W[i].cd(1)
+        h_W_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_W_DATA"], h2d_name="h_W_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;W")
+        h_W_ssdelta_data.Draw("COLZ")
+        C_ssdelta_W[i].cd(2)
+        h_W_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_W_SIMC"], h2d_name="h_W_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;W")
+        h_W_ssdelta_simc.Draw("COLZ")
+        C_ssdelta_W[i].Print(outputpdf)
+
+    C_hsdelta_W = []        
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_W.append(TCanvas())
+        C_hsdelta_W[i].Divide(1,2)
+        C_hsdelta_W[i].cd(1)
+        h_W_hsdelta_data = plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_W_DATA"], h2d_name="h_W_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;W")
+        h_W_hsdelta_data.Draw("COLZ")
+        C_hsdelta_W[i].cd(2)
+        h_W_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_W_SIMC"], h2d_name="h_W_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;W")
+        h_W_hsdelta_simc.Draw("COLZ")
+        C_hsdelta_W[i].Print(outputpdf)
+        
+    C_ssdelta_t = []        
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_t.append(TCanvas())
+        C_ssdelta_t[i].Divide(1,2)
+        C_ssdelta_t[i].cd(1)
+        h_t_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_t_DATA"], h2d_name="h_t_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;|-t|")
+        h_t_ssdelta_data.Draw("COLZ")
+        C_ssdelta_t[i].cd(2)
+        h_t_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_t_SIMC"], h2d_name="h_t_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;|-t|")
+        h_t_ssdelta_simc.Draw("COLZ")
+        C_ssdelta_t[i].Print(outputpdf)
+        
+    C_hsdelta_t = []        
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_t.append(TCanvas())
+        C_hsdelta_t[i].Divide(1,2)
+        C_hsdelta_t[i].cd(1)
+        h_t_hsdelta_data = plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_t_DATA"], h2d_name="h_t_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;|-t|")
+        h_t_hsdelta_data.Draw("COLZ")
+        C_hsdelta_t[i].cd(2)
+        h_t_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_t_SIMC"], h2d_name="h_t_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;|-t|")
+        h_t_hsdelta_simc.Draw("COLZ")
+        C_hsdelta_t[i].Print(outputpdf)
+
+    C_ssdelta_ph_q = []        
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_ph_q.append(TCanvas())
+        C_ssdelta_ph_q[i].Divide(1,2)
+        C_ssdelta_ph_q[i].cd(1)
+        h_ph_q_ssdelta_data = plot1DAs2D(hist["H_ssdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;ph_q")
+        h_ph_q_ssdelta_data.Draw("COLZ")
+        C_ssdelta_ph_q[i].cd(2)
+        h_ph_q_ssdelta_simc = plot1DAs2D(hist["H_ssdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;ph_q")
+        h_ph_q_ssdelta_simc.Draw("COLZ")
+        C_ssdelta_ph_q[i].Print(outputpdf)
+
+    C_hsdelta_ph_q = []        
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_ph_q.append(TCanvas())
+        C_hsdelta_ph_q[i].Divide(1,2)
+        C_hsdelta_ph_q[i].cd(1)
+        h_ph_q_hsdelta_data = plot1DAs2D(hist["H_hsdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;ph_q")
+        h_ph_q_hsdelta_data.Draw("COLZ")
+        C_hsdelta_ph_q[i].cd(2)
+        h_ph_q_hsdelta_simc = plot1DAs2D(hist["H_hsdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q")
+        h_ph_q_hsdelta_simc.Draw("COLZ")
+        C_hsdelta_ph_q[i].Print(outputpdf)
         
     Cph_q = TCanvas()
 
