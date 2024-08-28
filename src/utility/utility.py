@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-27 17:05:50 trottar"
+# Time-stamp: "2024-08-28 13:21:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,24 +225,41 @@ def flatten_hist(histogram):
 
 ################################################################################################################################################
 
-def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
-    # Get the number of bins for each histogram
-    n_bins_x = h1.GetNbinsX()
-    n_bins_y = h2.GetNbinsX()
+def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis", 
+               n_bins=None, x_min=None, x_max=None, y_min=None, y_max=None):
+    # Get the number of bins and ranges for each histogram
+    orig_n_bins_x = h1.GetNbinsX()
+    orig_n_bins_y = h2.GetNbinsX()
+    
+    # Determine the number of bins to use
+    if n_bins is None:
+        n_bins = min(orig_n_bins_x, orig_n_bins_y)
+    else:
+        # Check that n_bins does not exceed the original number of bins
+        max_allowed_bins = min(orig_n_bins_x, orig_n_bins_y)
+        if n_bins > max_allowed_bins:
+            print(f"Warning: Requested {n_bins} bins, but input histograms have {orig_n_bins_x} and {orig_n_bins_y} bins.")
+            print(f"Using {max_allowed_bins} bins instead.")
+            n_bins = max_allowed_bins
 
-    # Get the bin edges directly from the TH1Ds
-    x_bins = np.array([h1.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_x + 2)])
-    y_bins = np.array([h2.GetXaxis().GetBinLowEdge(i) for i in range(1, n_bins_y + 2)])
-
-    # Create a 2D histogram
-    h2d = ROOT.TH2D(h2d_name, title, n_bins_x, x_bins, n_bins_y, y_bins)
-
-    #print(f"Input histogram 1: {h1.GetName()}, bins: {h1.GetNbinsX()}, integral: {h1.Integral()}")
-    #print(f"Input histogram 2: {h2.GetName()}, bins: {h2.GetNbinsX()}, integral: {h2.Integral()}")
+    # Use original ranges if custom ranges are not specified
+    x_min = x_min if x_min is not None else h1.GetXaxis().GetXmin()
+    x_max = x_max if x_max is not None else h1.GetXaxis().GetXmax()
+    y_min = y_min if y_min is not None else h2.GetXaxis().GetXmin()
+    y_max = y_max if y_max is not None else h2.GetXaxis().GetXmax()
+    
+    # Create a 2D histogram with specified or original binning
+    h2d = ROOT.TH2D(h2d_name, title, n_bins, x_min, x_max, n_bins, y_min, y_max)
+    
+    # Calculate bin widths for input and output histograms
+    input_bin_width_x = (h1.GetXaxis().GetXmax() - h1.GetXaxis().GetXmin()) / orig_n_bins_x
+    input_bin_width_y = (h2.GetXaxis().GetXmax() - h2.GetXaxis().GetXmin()) / orig_n_bins_y
+    output_bin_width_x = (x_max - x_min) / n_bins
+    output_bin_width_y = (y_max - y_min) / n_bins
     
     # Fill the 2D histogram
-    for i in range(1, n_bins_x + 1):
-        for j in range(1, n_bins_y + 1):
+    for i in range(1, orig_n_bins_x + 1):
+        for j in range(1, orig_n_bins_y + 1):
             x_value = h1.GetBinCenter(i)
             y_value = h2.GetBinCenter(j)
             
@@ -254,7 +271,6 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
             
             # Calculate the new bin content and error
             z_value = z_value1 * z_value2
-
             # Calculate the new bin error, avoiding divide by zero
             if z_value1 != 0 and z_value2 != 0:
                 rel_error1 = z_error1 / z_value1
@@ -265,16 +281,20 @@ def plot1DAs2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis"):
             elif z_value1 == 0:
                 z_error = z_value2 * z_error1
             else:  # z_value2 == 0
-                z_error = z_value1 * z_error2            
+                z_error = z_value1 * z_error2
+            
+            # Scale the content and error based on the change in bin widths
+            scale_factor_x = input_bin_width_x / output_bin_width_x
+            scale_factor_y = input_bin_width_y / output_bin_width_y
+            z_value *= scale_factor_x * scale_factor_y
+            z_error *= scale_factor_x * scale_factor_y
             
             # Fill the bin
             bin_val = h2d.Fill(x_value, y_value, z_value)
             
             # Set the bin error
             h2d.SetBinError(bin_val, z_error)
-
-    #print(f"Output histogram: {h2d.GetName()}, bins: {h2d.GetNbinsX()}x{h2d.GetNbinsY()}, integral: {h2d.Integral()}")
-            
+    
     return h2d
 
 ################################################################################################################################################
