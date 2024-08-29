@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:37:05 trottar"
+# Time-stamp: "2024-08-29 16:50:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -309,7 +309,7 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     # Extract data from histogram
     n_points = hist.GetN()
     phi_values = hist.GetX()
-    t_values = hist.GetY()
+    r_values = hist.GetY()
 
     # Convert phi from [-pi, pi] to [0, 2pi]
     phi_converted = []
@@ -320,14 +320,14 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
         phi_converted.append(phi)
 
     # Create the polar plot
-    polar_plot = ROOT.TGraphPolar(n_points, array('d', phi_converted), array('d', t_values))
+    polar_plot = ROOT.TGraphPolar(n_points, np.array(phi_converted, dtype='float64'), r_values)
     polar_plot.SetMarkerColor(marker_color)
     polar_plot.SetMarkerSize(marker_size)
     polar_plot.SetMarkerStyle(marker_style)
 
     # Set titles and axes
     polar_plot.SetTitle(title)
-    polar_plot.GetPolargram().SetRangeRadial(0, max(t_values))
+    polar_plot.GetPolargram().SetRangeRadial(0, max(r_values))
     polar_plot.GetPolargram().SetNdivRadial(505)
     polar_plot.GetPolargram().SetNdivPolar(508)
 
