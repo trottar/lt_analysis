@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-22 12:32:29 trottar"
+# Time-stamp: "2024-08-29 16:31:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -838,7 +838,8 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to fix polar plots
-          phi_shift = (evt.ph_q+math.pi)
+          #phi_shift = (evt.ph_q+math.pi)
+          phi_shift = (evt.ph_q)          
           
           MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -945,7 +946,8 @@ def rand_sub(phi_setting, inpDict):
 
 
           # Phase shift to fix polar plots
-          phi_shift = (evt.ph_q+math.pi)
+          #phi_shift = (evt.ph_q+math.pi)
+          phi_shift = (evt.ph_q)          
           
           MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -1044,7 +1046,8 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to fix polar plots
-          phi_shift = (evt.ph_q+math.pi)
+          #phi_shift = (evt.ph_q+math.pi)
+          phi_shift = (evt.ph_q)          
           
           MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
@@ -1140,7 +1143,8 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM)                    
 
           # Phase shift to fix polar plots
-          phi_shift = (evt.ph_q+math.pi)
+          #phi_shift = (evt.ph_q+math.pi)
+          phi_shift = (evt.ph_q)          
           
           MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)

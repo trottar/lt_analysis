@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 13:15:52 trottar"
+# Time-stamp: "2024-08-29 16:31:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -220,7 +220,8 @@ def compare_simc(hist, inpDict):
           P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
 
           # Phase shift to fix polar plots
-          phi_shift = (evt.phipq+math.pi)
+          #phi_shift = (evt.phipq+math.pi)
+          phi_shift = (evt.phipq)          
           
           # SIMC goes from 0 to 2pi so no need for +pi/2
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), -evt.t)
