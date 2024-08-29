@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-17 17:33:12 trottar"
+# Time-stamp: "2024-08-29 17:47:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,7 +113,7 @@ def find_bins(histlist, inpDict):
     def find_phibins(H_phi_BinTest):
 
         print("\nFinding phi bins...")
-        bin_edges = np.linspace(0.0, 360.0, inpDict["NumPhiBins"]+1)
+        bin_edges = np.linspace(-180.0, 180.0, inpDict["NumPhiBins"]+1)
         n, bins = np.histogram(H_phi_BinTest, bin_edges)
 
         ##############
@@ -129,7 +129,7 @@ def find_bins(histlist, inpDict):
         ##############
 
         num_phi_bins = inpDict["NumPhiBins"]
-        bin_edges = np.linspace(0.0, 360.0, num_phi_bins + 1)
+        bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
 
         while True:
             n, bins = np.histogram(H_phi_BinTest, bin_edges)
@@ -147,7 +147,7 @@ def find_bins(histlist, inpDict):
                 print("ERROR: Only {} phi-bins achieve a minimum of {} events!\nTry decreasing the minimum number of events per bin.".format(num_phi_bins, bad_bins_threshold))
                 sys.exit(2)
 
-            bin_edges = np.linspace(0.0, 360.0, num_phi_bins + 1)
+            bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
 
         # Redefine number of phi-bins
         if num_phi_bins != inpDict["NumPhiBins"]:
