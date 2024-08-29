@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:01:03 trottar"
+# Time-stamp: "2024-08-29 17:04:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,6 +311,8 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     phi_values = hist.GetX()
     r_values = hist.GetY()
 
+    print("!!!!!!!!!!!",type(r_values))
+    
     # Convert phi from [-pi, pi] to [0, 2pi]
     phi_converted = []
     for i in range(n_points):
