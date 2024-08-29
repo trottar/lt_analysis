@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:07:30 trottar"
+# Time-stamp: "2024-08-29 17:10:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -327,7 +327,7 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     polar_plot.SetMarkerSize(marker_size)
     polar_plot.SetMarkerStyle(marker_style)
 
-    r_max = hist.GetMaximum()
+    r_max = hist.GetMaximumBin()
     
     # Set titles and axes
     polar_plot.SetTitle(title)
