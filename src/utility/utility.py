@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:18:52 trottar"
+# Time-stamp: "2024-08-29 17:20:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,8 +311,6 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     phi_values = hist.GetX()
     r_values = hist.GetY()
 
-    print("!!!!!!!!!!!",type(r_values))
-    
     # Convert phi from [-pi, pi] to [0, 2pi]
     phi_converted = []
     for i in range(n_points):
@@ -331,10 +329,11 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     
     # Set titles and axes
     polar_plot.SetTitle(title)
-    polar_plot.GetPolargram().SetRangeRadial(0, r_max)
-    polar_plot.GetPolargram().SetNdivRadial(505)
-    polar_plot.GetPolargram().SetNdivPolar(508)
 
+    # Set the range and divisions
+    polar_plot.SetMaxRadial(r_max)
+    polar_plot.SetNdivPolar(508)
+    
     # Set custom angular labels
     for i in range(8):
         angle = i * math.pi / 4
@@ -347,7 +346,7 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
             label = "#pi/2"
         elif i == 6:
             label = "3#pi/2"
-        polar_plot.GetPolargram().SetPolarLabel(i, label)
+        polar_plot.SetPolarLabel(i, label)
 
     return polar_plot
 
