@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 13:30:18 trottar"
+# Time-stamp: "2024-08-29 13:43:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,21 +300,6 @@ def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis",
         h2d.GetZaxis().SetRangeUser(z_min, z_max)            
     
     return h2d
-
-################################################################################################################################################
-
-def round_to_nearest_sig_fig(number):
-    if number == 0:
-        return 0
-    
-    # Calculate the base-10 logarithm of the absolute value of the number
-    log_value = math.log10(abs(number))
-    
-    # Round the logarithm to the nearest integer
-    nearest_sig_fig = round(log_value)
-    
-    # Return the power of 10
-    return 10**nearest_sig_fig
 
 ################################################################################################################################################
 
