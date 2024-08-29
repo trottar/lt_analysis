@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:10:22 trottar"
+# Time-stamp: "2024-08-29 17:14:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -322,12 +322,12 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
         phi_converted.append(phi)
 
     # Create the polar plot
-    polar_plot = ROOT.TGraphPolar(n_points, np.array(phi_converted, dtype='float64'), r_values)
+    polar_plot = ROOT.TGraphPolar(n_points, np.array(phi_converted, dtype='float64'), np.array(r_values, dtype='float64'))
     polar_plot.SetMarkerColor(marker_color)
     polar_plot.SetMarkerSize(marker_size)
     polar_plot.SetMarkerStyle(marker_style)
 
-    r_max = hist.GetMaximumBin()
+    r_max = max(np.array(r_values, dtype='float64'))
     
     # Set titles and axes
     polar_plot.SetTitle(title)
