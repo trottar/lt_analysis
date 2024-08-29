@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 10:55:30 trottar"
+# Time-stamp: "2024-08-29 11:05:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -528,9 +528,13 @@ for tmin, tmax in tmin_tmax_pairs:
                             markerfacecolor='none', capsize=2)
 
             # Generate points for smooth curve
-            q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
-            t_fit = np.linspace(tmin, tmax, 100)
-            theta_fit = np.linspace(df['th_cm'].min(), df['th_cm'].max(), 100)
+            #q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
+            #t_fit = np.linspace(tmin, tmax, 100)
+            #theta_fit = np.linspace(df['th_cm'].min(), df['th_cm'].max(), 100)
+            q2_fit = np.linspace(0.0, 10.0, 100)
+            t_fit = np.linspace(0.0, 2.0, 100)
+            theta_fit = np.linspace(0.0, 360.0, 100)
+
                 
             if sig == "sigL":
                 # Perform exponential fit
