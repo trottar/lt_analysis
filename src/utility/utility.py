@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:20:35 trottar"
+# Time-stamp: "2024-08-29 17:23:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -332,7 +332,6 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
 
     # Set the range and divisions
     polar_plot.SetMaxRadial(r_max)
-    polar_plot.SetNdivPolar(508)
     
     # Set custom angular labels
     for i in range(8):
