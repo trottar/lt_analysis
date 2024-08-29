@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 09:49:30 trottar"
+# Time-stamp: "2024-08-29 09:54:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -840,78 +840,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         h_ph_q_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q", n_bins=50)
         h_ph_q_hsdelta_simc.Draw("COLZ")
         C_hsdelta_ph_q[i].Print(outputpdf)
-        
-    # Create a list to store all polar plots
-    C_ssdelta_ph_q = []        
-    for i, hist in enumerate(histlist_copy):
-        C_ssdelta_ph_q.append(TCanvas())
-        C_ssdelta_ph_q[i].Divide(1,2)
-        
-        lst_ph_q_ssdelta_data = []
-        C_ssdelta_ph_q[i].cd(1)
-        h_ph_q_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_ssdelta_data", title=f"{phisetlist[i]} Data;HMS delta;ph_q", n_bins=50)
-        polar_ph_q_ssdelta_data = TGraphPolar(h_ph_q_ssdelta_data.GetN(), h_ph_q_ssdelta_data.GetX(), h_ph_q_ssdelta_data.GetY())
-        polar_ph_q_ssdelta_data.SetMarkerColor(i+1)
-        polar_ph_q_ssdelta_data.SetMarkerSize(0.5)
-        polar_ph_q_ssdelta_data.SetMarkerStyle(20)
-        lst_ph_q_ssdelta_data.append(polar_ph_q_ssdelta_data)  # Store the plot in the list
-        polar_ph_q_ssdelta_data.Draw("AP same")
-        # Set titles and axes for the last plot
-        lst_ph_q_ssdelta_data[-1].GetXaxis().SetName("#Phi")
-        lst_ph_q_ssdelta_data[-1].GetYaxis().SetName("-t")
-        lst_ph_q_ssdelta_data[-1].SetTitle("") # DATA
-
-        lst_ph_q_ssdelta_simc = []
-        C_ssdelta_ph_q[i].cd(2)
-        h_ph_q_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_ssdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q", n_bins=50)
-        polar_ph_q_ssdelta_simc = TGraphPolar(h_ph_q_ssdelta_simc.GetN(), h_ph_q_ssdelta_simc.GetX(), h_ph_q_ssdelta_simc.GetY())
-        polar_ph_q_ssdelta_simc.SetMarkerColor(i+1)
-        polar_ph_q_ssdelta_simc.SetMarkerSize(0.5)
-        polar_ph_q_ssdelta_simc.SetMarkerStyle(20)
-        lst_ph_q_ssdelta_simc.append(polar_ph_q_ssdelta_simc)  # Store the plot in the list
-        polar_ph_q_ssdelta_simc.Draw("AP same")
-        # Set titles and axes for the last plot
-        lst_ph_q_ssdelta_simc[-1].GetXaxis().SetName("#Phi")
-        lst_ph_q_ssdelta_simc[-1].GetYaxis().SetName("-t")
-        lst_ph_q_ssdelta_simc[-1].SetTitle("") # SIMC
-        
-        C_ssdelta_ph_q[i].Print(outputpdf)    
-
-    # Create a list to store all polar plots
-    C_hsdelta_ph_q = []        
-    for i, hist in enumerate(histlist_copy):
-        C_hsdelta_ph_q.append(TCanvas())
-        C_hsdelta_ph_q[i].Divide(1,2)
-        
-        lst_ph_q_hsdelta_data = []
-        C_hsdelta_ph_q[i].cd(1)
-        h_ph_q_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;ph_q", n_bins=50)
-        polar_ph_q_hsdelta_data = TGraphPolar(h_ph_q_hsdelta_data.GetN(), h_ph_q_hsdelta_data.GetX(), h_ph_q_hsdelta_data.GetY())
-        polar_ph_q_hsdelta_data.SetMarkerColor(i+1)
-        polar_ph_q_hsdelta_data.SetMarkerSize(0.5)
-        polar_ph_q_hsdelta_data.SetMarkerStyle(20)
-        lst_ph_q_hsdelta_data.append(polar_ph_q_hsdelta_data)  # Store the plot in the list
-        polar_ph_q_hsdelta_data.Draw("AP same")
-        # Set titles and axes for the last plot
-        lst_ph_q_hsdelta_data[-1].GetXaxis().SetName("#Phi")
-        lst_ph_q_hsdelta_data[-1].GetYaxis().SetName("-t")
-        lst_ph_q_hsdelta_data[-1].SetTitle("") # DATA
-
-        lst_ph_q_hsdelta_simc = []
-        C_hsdelta_ph_q[i].cd(2)
-        h_ph_q_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q", n_bins=50)
-        polar_ph_q_hsdelta_simc = TGraphPolar(h_ph_q_hsdelta_simc.GetN(), h_ph_q_hsdelta_simc.GetX(), h_ph_q_hsdelta_simc.GetY())
-        polar_ph_q_hsdelta_simc.SetMarkerColor(i+1)
-        polar_ph_q_hsdelta_simc.SetMarkerSize(0.5)
-        polar_ph_q_hsdelta_simc.SetMarkerStyle(20)
-        lst_ph_q_hsdelta_simc.append(polar_ph_q_hsdelta_simc)  # Store the plot in the list
-        polar_ph_q_hsdelta_simc.Draw("AP same")
-        # Set titles and axes for the last plot
-        lst_ph_q_hsdelta_simc[-1].GetXaxis().SetName("#Phi")
-        lst_ph_q_hsdelta_simc[-1].GetYaxis().SetName("-t")
-        lst_ph_q_hsdelta_simc[-1].SetTitle("") # SIMC
-        
-        C_hsdelta_ph_q[i].Print(outputpdf)    
         
     Cph_q = TCanvas()
 
