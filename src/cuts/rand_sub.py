@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:31:11 trottar"
+# Time-stamp: "2024-08-29 16:42:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_negative_bins
+from utility import remove_negative_bins, create_polar_plot
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -1761,22 +1761,26 @@ def rand_sub(phi_setting, inpDict):
     
     ###
     # t-Phi plots        
-    Cpht_data = TCanvas()
+    Cpht_data = ROOT.TCanvas()
 
     # Create a list to store all polar plots
     polar_plots = []
 
-    polar_plot = TGraphPolar(histDict["polar_phiq_vs_t_DATA"].GetN(), histDict["polar_phiq_vs_t_DATA"].GetX(), histDict["polar_phiq_vs_t_DATA"].GetY())
+    # Create the polar plot using the function
+    polar_plot = create_polar_plot(histDict["polar_phiq_vs_t_DATA"])
+
     polar_plot.SetMarkerColor(1)
     polar_plot.SetMarkerSize(0.5)
     polar_plot.SetMarkerStyle(20)
     polar_plots.append(polar_plot)  # Store the plot in the list
-    polar_plot.Draw("AP same")
+
+    # Draw the plot
+    polar_plot.Draw("AP")
 
     # Set titles and axes for the last plot
+    polar_plots[-1].SetTitle("")
     polar_plots[-1].GetXaxis().SetName("#Phi")
     polar_plots[-1].GetYaxis().SetName("-t")
-    polar_plots[-1].SetTitle("")
     
     Cpht_data.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 

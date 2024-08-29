@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:31:52 trottar"
+# Time-stamp: "2024-08-29 16:41:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,6 +47,12 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import create_polar_plot
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -332,23 +338,27 @@ def compare_simc(hist, inpDict):
 
     ###
     # t-Phi plots        
-    Cpht_data = TCanvas()
+    Cpht_data = ROOT.TCanvas()
 
     # Create a list to store all polar plots
     polar_plots = []
 
-    polar_plot = TGraphPolar(histDict["polar_phiq_vs_t_SIMC"].GetN(), histDict["polar_phiq_vs_t_SIMC"].GetX(), histDict["polar_phiq_vs_t_SIMC"].GetY())
+    # Create the polar plot using the function
+    polar_plot = create_polar_plot(histDict["polar_phiq_vs_t_SIMC"])
+
     polar_plot.SetMarkerColor(1)
     polar_plot.SetMarkerSize(0.5)
     polar_plot.SetMarkerStyle(20)
     polar_plots.append(polar_plot)  # Store the plot in the list
-    polar_plot.Draw("AP same")
+
+    # Draw the plot
+    polar_plot.Draw("AP")
 
     # Set titles and axes for the last plot
+    polar_plots[-1].SetTitle("")
     polar_plots[-1].GetXaxis().SetName("#Phi")
     polar_plots[-1].GetYaxis().SetName("-t")
-    polar_plots[-1].SetTitle("")
-    
+
     Cpht_data.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
 
     ###

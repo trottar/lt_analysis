@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 13:43:00 trottar"
+# Time-stamp: "2024-08-29 16:37:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -300,6 +300,52 @@ def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis",
         h2d.GetZaxis().SetRangeUser(z_min, z_max)            
     
     return h2d
+
+################################################################################################################################################
+
+# Create a polar plot from a histogram with phi range from -pi to pi.
+def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_style=20):    
+    
+    # Extract data from histogram
+    n_points = hist.GetN()
+    phi_values = hist.GetX()
+    t_values = hist.GetY()
+
+    # Convert phi from [-pi, pi] to [0, 2pi]
+    phi_converted = []
+    for i in range(n_points):
+        phi = phi_values[i]
+        if phi < 0:
+            phi += 2 * math.pi
+        phi_converted.append(phi)
+
+    # Create the polar plot
+    polar_plot = ROOT.TGraphPolar(n_points, array('d', phi_converted), array('d', t_values))
+    polar_plot.SetMarkerColor(marker_color)
+    polar_plot.SetMarkerSize(marker_size)
+    polar_plot.SetMarkerStyle(marker_style)
+
+    # Set titles and axes
+    polar_plot.SetTitle(title)
+    polar_plot.GetPolargram().SetRangeRadial(0, max(t_values))
+    polar_plot.GetPolargram().SetNdivRadial(505)
+    polar_plot.GetPolargram().SetNdivPolar(508)
+
+    # Set custom angular labels
+    for i in range(8):
+        angle = i * math.pi / 4
+        label = f"{angle:.2f}"
+        if i == 0:
+            label = "0"
+        elif i == 4:
+            label = "#pi"
+        elif i == 2:
+            label = "#pi/2"
+        elif i == 6:
+            label = "3#pi/2"
+        polar_plot.GetPolargram().SetPolarLabel(i, label)
+
+    return polar_plot
 
 ################################################################################################################################################
 

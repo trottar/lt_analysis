@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 15:47:58 trottar"
+# Time-stamp: "2024-08-29 16:41:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import TH1D_to_TH2D
+from utility import TH1D_to_TH2D, create_polar_plot
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -1147,44 +1147,50 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     CMMt.Print(outputpdf)
     
-    Cpht_simc = TCanvas()
-
-    # Create a list to store all polar plots
-    polar_plots = []
+    # For SIMC plots
+    Cpht_simc = ROOT.TCanvas()
+    polar_plots_simc = []
 
     for i, hist in enumerate(histlist_copy):
-        polar_plot = TGraphPolar(hist["polar_phiq_vs_t_SIMC"].GetN(), hist["polar_phiq_vs_t_SIMC"].GetX(), hist["polar_phiq_vs_t_SIMC"].GetY())
+        polar_plot = create_polar_plot(hist["polar_phiq_vs_t_SIMC"])
         polar_plot.SetMarkerColor(i+1)
         polar_plot.SetMarkerSize(0.5)
         polar_plot.SetMarkerStyle(20)
-        polar_plots.append(polar_plot)  # Store the plot in the list
-        polar_plot.Draw("AP same")
+        polar_plots_simc.append(polar_plot)
+
+        if i == 0:
+            polar_plot.Draw("AP")
+        else:
+            polar_plot.Draw("P same")
 
         # Set titles and axes for the last plot
-        polar_plots[-1].GetXaxis().SetName("#Phi")
-        polar_plots[-1].GetYaxis().SetName("-t")
-        polar_plots[-1].SetTitle("") # SIMC
-    
+        polar_plot.GetXaxis().SetName("#Phi")
+        polar_plot.GetYaxis().SetName("-t")
+        polar_plot.SetTitle("")  # SIMC
+
     Cpht_simc.Print(outputpdf)
-    
-    Cpht = TCanvas()
 
-    # Create a list to store all polar plots
-    polar_plots = []
+    # For DATA plots
+    Cpht = ROOT.TCanvas()
+    polar_plots_data = []
 
     for i, hist in enumerate(histlist_copy):
-        polar_plot = TGraphPolar(hist["polar_phiq_vs_t_DATA"].GetN(), hist["polar_phiq_vs_t_DATA"].GetX(), hist["polar_phiq_vs_t_DATA"].GetY())
+        polar_plot = create_polar_plot(hist["polar_phiq_vs_t_DATA"])
         polar_plot.SetMarkerColor(i+1)
         polar_plot.SetMarkerSize(0.5)
         polar_plot.SetMarkerStyle(20)
-        polar_plots.append(polar_plot)  # Store the plot in the list
-        polar_plot.Draw("AP same")
+        polar_plots_data.append(polar_plot)
+
+        if i == 0:
+            polar_plot.Draw("AP")
+        else:
+            polar_plot.Draw("P same")
 
         # Set titles and axes for the last plot
-        polar_plots[-1].GetXaxis().SetName("#Phi")
-        polar_plots[-1].GetYaxis().SetName("-t")
-        polar_plots[-1].SetTitle("") # DATA
-    
+        polar_plot.GetXaxis().SetName("#Phi")
+        polar_plot.GetYaxis().SetName("-t")
+        polar_plot.SetTitle("")  # DATA
+
     Cpht.Print(outputpdf)
 
     cut_summary_lst = ""
