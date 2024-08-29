@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:26:05 trottar"
+# Time-stamp: "2024-08-29 17:37:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1763,20 +1763,10 @@ def rand_sub(phi_setting, inpDict):
     # t-Phi plots        
     Cpht_data = ROOT.TCanvas()
 
-    # Create a list to store all polar plots
-    polar_plots = []
-
     # Create the polar plot using the function
     polar_plot = create_polar_plot(histDict["polar_phiq_vs_t_DATA"])
-    polar_plots.append(polar_plot)  # Store the plot in the list
-
     # Draw the plot
     polar_plot.Draw("AP")
-
-    # Set titles and axes for the last plot
-    polar_plots[-1].SetTitle("")
-    polar_plots[-1].GetXaxis().SetName("#Phi")
-    polar_plots[-1].GetYaxis().SetName("-t")
     
     Cpht_data.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 

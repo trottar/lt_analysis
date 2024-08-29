@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:27:07 trottar"
+# Time-stamp: "2024-08-29 17:36:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -304,7 +304,7 @@ def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis",
 ################################################################################################################################################
 
 # Create a polar plot from a histogram with phi range from -pi to pi.
-def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_style=20):    
+def create_polar_plot(hist, title="", r_title='|-t|', phi_title='#Phi', marker_color=1, marker_size=0.5, marker_style=20):    
     
     # Extract data from histogram
     n_points = hist.GetN()
@@ -328,6 +328,10 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     # Set titles and axes
     polar_plot.SetTitle(title)
 
+    polar_plots.append(polar_plot)  # Store the plot in the list
+    polar_plot.GetXaxis().SetName(phi_title)
+    polar_plot.GetYaxis().SetName(r_title)
+    
     return polar_plot
 
 ################################################################################################################################################

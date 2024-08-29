@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:56:50 trottar"
+# Time-stamp: "2024-08-29 17:35:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1149,44 +1149,27 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
     # For SIMC plots
     Cpht_simc = ROOT.TCanvas()
-    polar_plots_simc = []
 
     for i, hist in enumerate(histlist_copy):
         polar_plot = create_polar_plot(hist["polar_phiq_vs_t_SIMC"], marker_color=i+1)
-        polar_plots_simc.append(polar_plot)
 
         if i == 0:
             polar_plot.Draw("AP")
         else:
             polar_plot.Draw("P same")
-
-        # Set titles and axes for the last plot
-        polar_plot.GetXaxis().SetName("#Phi")
-        polar_plot.GetYaxis().SetName("-t")
-        polar_plot.SetTitle("")  # SIMC
 
     Cpht_simc.Print(outputpdf)
 
     # For DATA plots
     Cpht = ROOT.TCanvas()
-    polar_plots_data = []
 
     for i, hist in enumerate(histlist_copy):
-        polar_plot = create_polar_plot(hist["polar_phiq_vs_t_DATA"])
-        polar_plot.SetMarkerColor(i+1)
-        polar_plot.SetMarkerSize(0.5)
-        polar_plot.SetMarkerStyle(20)
-        polar_plots_data.append(polar_plot)
+        polar_plot = create_polar_plot(hist["polar_phiq_vs_t_DATA"], marker_color=i+1)
 
         if i == 0:
             polar_plot.Draw("AP")
         else:
             polar_plot.Draw("P same")
-
-        # Set titles and axes for the last plot
-        polar_plot.GetXaxis().SetName("#Phi")
-        polar_plot.GetYaxis().SetName("-t")
-        polar_plot.SetTitle("")  # DATA
 
     Cpht.Print(outputpdf)
 
