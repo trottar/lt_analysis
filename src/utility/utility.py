@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:14:59 trottar"
+# Time-stamp: "2024-08-29 17:15:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -331,7 +331,7 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
     
     # Set titles and axes
     polar_plot.SetTitle(title)
-    polar_plot.GetPolargram().SetRangeRadial(0, hist.GetXaxis().GetBinCenter(r_max))
+    polar_plot.GetPolargram().SetRangeRadial(0, r_max)
     polar_plot.GetPolargram().SetRangeRadial(0, r_max)
     polar_plot.GetPolargram().SetNdivRadial(505)
     polar_plot.GetPolargram().SetNdivPolar(508)
