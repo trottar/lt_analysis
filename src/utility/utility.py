@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:36:32 trottar"
+# Time-stamp: "2024-08-29 17:39:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -327,8 +327,6 @@ def create_polar_plot(hist, title="", r_title='|-t|', phi_title='#Phi', marker_c
     
     # Set titles and axes
     polar_plot.SetTitle(title)
-
-    polar_plots.append(polar_plot)  # Store the plot in the list
     polar_plot.GetXaxis().SetName(phi_title)
     polar_plot.GetYaxis().SetName(r_title)
     
