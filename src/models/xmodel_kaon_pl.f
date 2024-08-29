@@ -174,8 +174,7 @@ c      sigL=sigL*0.90-0.1
       sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
      >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
 
-      sig=sig/1./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad      
-*      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
+      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
 
       x_mod=sig

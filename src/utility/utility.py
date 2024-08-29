@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-28 13:33:04 trottar"
+# Time-stamp: "2024-08-29 12:58:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -226,7 +226,8 @@ def flatten_hist(histogram):
 ################################################################################################################################################
 
 def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis", 
-               n_bins=None, x_min=None, x_max=None, y_min=None, y_max=None):
+                 n_bins=None, x_min=None, x_max=None, y_min=None, y_max=None,
+                 z_min=None, z_max=None):
     # Get the number of bins and ranges for each histogram
     orig_n_bins_x = h1.GetNbinsX()
     orig_n_bins_y = h2.GetNbinsX()
@@ -294,6 +295,10 @@ def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis",
             
             # Set the bin error
             h2d.SetBinError(bin_val, z_error)
+
+    # Set the z-axis range if specified
+    if z_min is not None and z_max is not None:
+        h2d.GetZaxis().SetRangeUser(z_min, z_max)            
     
     return h2d
 
