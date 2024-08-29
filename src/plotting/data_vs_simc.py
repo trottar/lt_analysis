@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-28 13:36:38 trottar"
+# Time-stamp: "2024-08-29 09:27:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -745,6 +745,30 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         h_Q2_hsdelta_simc.Draw("COLZ")
         C_hsdelta_Q2[i].Print(outputpdf)
 
+    C_ssdelta_MM = []        
+    for i,hist in enumerate(histlist_copy):
+        C_ssdelta_MM.append(TCanvas())
+        C_ssdelta_MM[i].Divide(1,2)
+        C_ssdelta_MM[i].cd(1)
+        h_MM_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_MM_DATA"], h2d_name="h_MM_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;MM", n_bins=50)
+        h_MM_ssdelta_data.Draw("COLZ")
+        C_ssdelta_MM[i].cd(2)
+        h_MM_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_MM_SIMC"], h2d_name="h_MM_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;MM", n_bins=50)
+        h_MM_ssdelta_simc.Draw("COLZ")
+        C_ssdelta_MM[i].Print(outputpdf)
+
+    C_hsdelta_MM = []        
+    for i,hist in enumerate(histlist_copy):
+        C_hsdelta_MM.append(TCanvas())
+        C_hsdelta_MM[i].Divide(1,2)
+        C_hsdelta_MM[i].cd(1)
+        h_MM_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_MM_DATA"], h2d_name="h_MM_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;MM", n_bins=50)
+        h_MM_hsdelta_data.Draw("COLZ")
+        C_hsdelta_MM[i].cd(2)
+        h_MM_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_MM_SIMC"], h2d_name="h_MM_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;MM", n_bins=50)
+        h_MM_hsdelta_simc.Draw("COLZ")
+        C_hsdelta_MM[i].Print(outputpdf)        
+        
     C_ssdelta_W = []        
     for i,hist in enumerate(histlist_copy):
         C_ssdelta_W.append(TCanvas())
