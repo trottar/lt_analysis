@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 17:23:53 trottar"
+# Time-stamp: "2024-08-29 17:27:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,35 +317,16 @@ def create_polar_plot(hist, title="", marker_color=1, marker_size=0.5, marker_st
         phi = phi_values[i]
         if phi < 0:
             phi += 2 * math.pi
-        phi_converted.append(phi)
+        phi_converted.append(phi*(180/math.pi))
 
     # Create the polar plot
     polar_plot = ROOT.TGraphPolar(n_points, np.array(phi_converted, dtype='float64'), np.array(r_values, dtype='float64'))
     polar_plot.SetMarkerColor(marker_color)
     polar_plot.SetMarkerSize(marker_size)
     polar_plot.SetMarkerStyle(marker_style)
-
-    r_max = max(np.array(r_values, dtype='float64')) * 1.1 # Add 10% margin
     
     # Set titles and axes
     polar_plot.SetTitle(title)
-
-    # Set the range and divisions
-    polar_plot.SetMaxRadial(r_max)
-    
-    # Set custom angular labels
-    for i in range(8):
-        angle = i * math.pi / 4
-        label = f"{angle:.2f}"
-        if i == 0:
-            label = "0"
-        elif i == 4:
-            label = "#pi"
-        elif i == 2:
-            label = "#pi/2"
-        elif i == 6:
-            label = "3#pi/2"
-        polar_plot.SetPolarLabel(i, label)
 
     return polar_plot
 
