@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:41:40 trottar"
+# Time-stamp: "2024-08-29 16:56:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -350,10 +350,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
     # Create the polar plot using the function
     polar_plot = create_polar_plot(histDict["polar_phiq_vs_t_SIMC"])
-
-    polar_plot.SetMarkerColor(1)
-    polar_plot.SetMarkerSize(0.5)
-    polar_plot.SetMarkerStyle(20)
     polar_plots.append(polar_plot)  # Store the plot in the list
 
     # Draw the plot

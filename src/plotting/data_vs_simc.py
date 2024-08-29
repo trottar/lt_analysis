@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:41:20 trottar"
+# Time-stamp: "2024-08-29 16:56:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1152,10 +1152,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     polar_plots_simc = []
 
     for i, hist in enumerate(histlist_copy):
-        polar_plot = create_polar_plot(hist["polar_phiq_vs_t_SIMC"])
-        polar_plot.SetMarkerColor(i+1)
-        polar_plot.SetMarkerSize(0.5)
-        polar_plot.SetMarkerStyle(20)
+        polar_plot = create_polar_plot(hist["polar_phiq_vs_t_SIMC"], marker_color=i+1)
         polar_plots_simc.append(polar_plot)
 
         if i == 0:

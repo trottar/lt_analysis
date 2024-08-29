@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:42:03 trottar"
+# Time-stamp: "2024-08-29 16:55:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1768,10 +1768,6 @@ def rand_sub(phi_setting, inpDict):
 
     # Create the polar plot using the function
     polar_plot = create_polar_plot(histDict["polar_phiq_vs_t_DATA"])
-
-    polar_plot.SetMarkerColor(1)
-    polar_plot.SetMarkerSize(0.5)
-    polar_plot.SetMarkerStyle(20)
     polar_plots.append(polar_plot)  # Store the plot in the list
 
     # Draw the plot
