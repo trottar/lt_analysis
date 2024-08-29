@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 13:55:40 trottar"
+# Time-stamp: "2024-08-29 14:00:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -825,7 +825,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         h_ph_q_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;ph_q", n_bins=50)
         h_ph_q_ssdelta_data.Draw("COLZ")
         C_ssdelta_ph_q[i].cd(2)
-        h_ph_q_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;ph_q", n_bins=50, z_min=1e-12, z_max=h_ph_q_ssdelta.GetMaximum())
+        h_ph_q_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;ph_q", n_bins=50, z_min=1e-12, z_max=h_ph_q_ssdelta_data.GetMaximum())
         h_ph_q_ssdelta_simc.Draw("COLZ")
         C_ssdelta_ph_q[i].Print(outputpdf)
 
@@ -837,7 +837,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         h_ph_q_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;ph_q", n_bins=50)
         h_ph_q_hsdelta_data.Draw("COLZ")
         C_hsdelta_ph_q[i].cd(2)
-        h_ph_q_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q", n_bins=50, z_min=1e-12, z_max=h_ph_q_hsdelta.GetMaximum())
+        h_ph_q_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q", n_bins=50, z_min=1e-12, z_max=h_ph_q_hsdelta_data.GetMaximum())
         h_ph_q_hsdelta_simc.Draw("COLZ")
         C_hsdelta_ph_q[i].Print(outputpdf)
         
