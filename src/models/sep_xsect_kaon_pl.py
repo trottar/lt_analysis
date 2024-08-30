@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 19:27:04 trottar"
+# Time-stamp: "2024-08-29 20:08:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ def import_model(inp_model, arg_str):
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
                 ##
-                f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+                ##f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
                 #f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
                 ##
                 ##                
@@ -51,7 +51,7 @@ def import_model(inp_model, arg_str):
                 ft = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
                 Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
                 ##f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
-                ###f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
+                f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
                 
             except ValueError:
                 f = -1000.0
@@ -87,7 +87,7 @@ def import_model(inp_model, arg_str):
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
                 # RLT (6/04/2024): Testing simplier exp form for L+T
                 ##
-                f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+                ##f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
                 #f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
@@ -95,7 +95,7 @@ def import_model(inp_model, arg_str):
                 #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
                 Qdep_T=(math.exp(-qq**2))/qq
                 ##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
-                ###f=(par[0]*math.exp(-par[1]*(abs(tt)))+par[2]*(abs(tt)))*(Qdep_T**par[3])
+                f=(par[0]*math.exp(-par[1]*(abs(tt)))+par[2]*(abs(tt)))*(Qdep_T**par[3])
                 
             except ValueError:
                 f = -1000.0
@@ -113,14 +113,14 @@ def import_model(inp_model, arg_str):
             try:
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
-                f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+                ##f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
                 #f = (par[0]+par[2]/abs(tt))*math.sin(theta_cm)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
-                ###f=(par[0]/(1+qq))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
+                f=(par[0]/(1+qq))*math.sin(theta_cm)*math.exp(-par[1]*(abs(tt)))
                 #f=(par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
                 
             except ValueError:
@@ -140,14 +140,14 @@ def import_model(inp_model, arg_str):
                 #  RLT (7/11/2024): Moved below for Q2dep func form
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
-                f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+                ##f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
                 ##
                 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
                 #                  that incorporates Q2-dep based of pi FF
                 ##f=(-par[0]/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*(abs(tt)))
-                ###f=(par[0]/(1+qq))*(math.sin(theta_cm)**2)*f_tt*math.exp(-par[1]*(qq))
+                f=(par[0]/(1+qq))*(math.sin(theta_cm)**2)*f_tt*math.exp(-par[1]*(qq))
                 
             except ValueError:
                 f = -1000.0
