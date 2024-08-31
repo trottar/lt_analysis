@@ -190,8 +190,7 @@ c      pause
             r=0.
             e=0.
             if(ymc(ip,it).ne.0.) then
-*     r=(yrd(ip,it))/ymc(ip,it)
-               r=(ymc(ip,it))/yrd(ip,it)               
+               r=(yrd(ip,it))/ymc(ip,it)
 *               r=1.0
 *     Calculate ratio error in quadrature (absolute error)
                e=e+(drd(ip,it))/ymc(ip,it)**2
@@ -199,10 +198,10 @@ c      pause
                e=sqrt(e)
 *     Set ratio to zero if exceeds order of magnitude
 *     This prevents errors in output file
-**               if (r >= 10. .or. r <= 0.1) then
-**                  r=0.0
-**                  e=0.0
-**               endif
+               if (r >= 10. .or. r <= 0.1) then
+                  r=0.0
+                  e=0.0
+               endif
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
