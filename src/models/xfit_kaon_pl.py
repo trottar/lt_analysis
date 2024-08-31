@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-30 16:01:28 trottar"
+# Time-stamp: "2024-08-30 21:25:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,11 +105,7 @@ def fun_Sig_T(x, par):
         #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
         Qdep_T=(math.exp(-qq**2))/qq
         ##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
-        ###f=(par[0]*math.exp(-par[1]*(abs(tt)))+par[2]*(abs(tt)))*(Qdep_T**par[3])
-        f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
-        Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
-        ##f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
-        f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))        
+        f=(par[0]*math.exp(-par[1]*(abs(tt)))+par[2]*(abs(tt)))*(Qdep_T**par[3])
         
     except OverflowError:
         f = -1000.0
