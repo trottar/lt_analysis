@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-02 03:55:21 trottar"
+# Time-stamp: "2024-09-02 13:51:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -858,9 +858,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         try:
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
-            #print("!!!!!!!!!!!!!",(1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc)
-            #yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))*normfac_simc/100 # FIX (/100 is temporary)
-            # FIX: Removed norm_fac because shouldn't normalize non-weighted distribution
+            # No norm_fac, shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
