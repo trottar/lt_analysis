@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-02 00:39:06 trottar"
+# Time-stamp: "2024-09-02 01:31:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -585,9 +585,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
         #print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        sub_val = [val*bin_width_data for val in sub_val]
-        total_count = np.sum(sub_val)
-        print("!!!!!!!!!1",bin_width_data)
+        total_count = np.sum(sub_val)/bin_width_data
         sys.exit(2)
         try:
             yld = total_count # Normalization applied above
@@ -856,8 +854,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Find bin width
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
-        sub_val = [val*bin_width_simc for val in sub_val]
-        total_count = np.sum(sub_val)
+        total_count = np.sum(sub_val)/bin_width_simc
         try:
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
