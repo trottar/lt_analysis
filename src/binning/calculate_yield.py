@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-01 15:53:58 trottar"
+# Time-stamp: "2024-09-01 21:34:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -578,7 +578,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
-        bin_width_data = bin_val_data[1] - bin_val_data[0]
+        # Find bin width
+        bin_width_simc = np.mean(np.diff(bin_val_simc))
         # Scale the lists before subtraction        
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
@@ -849,7 +850,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
         #print("Y_simc = {:.5e}*{:.5e}".format(np.sum(hist_val_simc), normfac_simc))
-        bin_width_simc = bin_val_simc[1] - bin_val_simc[0]
+        # Find bin width
+        bin_width_simc = np.mean(np.diff(bin_val_simc))
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         total_count = np.sum(sub_val) * bin_width_simc
         try:
