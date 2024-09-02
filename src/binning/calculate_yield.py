@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-02 16:12:32 trottar"
+# Time-stamp: "2024-09-02 17:48:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -853,8 +853,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Find bin width
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
-        ##total_count = np.sum(sub_val)/bin_width_simc
-        total_count = np.sum(sub_val)/(bin_width_simc*math.pi)
+        total_count = np.sum(sub_val)/bin_width_simc
         try:
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
