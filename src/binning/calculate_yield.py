@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-01 23:49:51 trottar"
+# Time-stamp: "2024-09-01 23:55:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -585,7 +585,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
         #print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        sub_val = [val*bin_width_simc for val in sub_val]
+        sub_val = [val*bin_width_data for val in sub_val]
         total_count = np.sum(sub_val)
         try:
             yld = total_count # Normalization applied above
