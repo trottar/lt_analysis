@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:21:25 trottar"
+# Time-stamp: "2024-09-02 17:50:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -263,10 +263,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 0, 20)
+        ##fff2.SetParLimits(0, 0, 20)
 
         fff2.SetParameter(1, 1)
-        fff2.SetParLimits(1, 0, 20)
+        ##fff2.SetParLimits(1, 0, 20)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
@@ -309,7 +309,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 2
         fff2.SetParameter(2, 0.0)
-        fff2.SetParLimits(2, 0, 5)
+        ##fff2.SetParLimits(2, 0, 5)
 
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
@@ -370,7 +370,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 3
         fff2.SetParameter(3, 0.0)
-        fff2.SetParLimits(3, 0, 5)
+        ##fff2.SetParLimits(3, 0, 5)
 
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
