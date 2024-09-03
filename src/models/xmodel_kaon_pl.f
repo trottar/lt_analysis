@@ -95,7 +95,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     sigL=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **
-      sigL=(par(1)+par(2)*log(q2))*exp(par(3)*(abs(tm)))
+**      sigL=(par(1)+par(2)*log(q2))*exp(par(3)*(abs(tm)))
 *      sigL=(par(1)*((abs(tm)/q2)-1))*exp(par(2)*(abs(tm)))      
       
 *     RLT (2/15/2024): Removing t dependence from sigT because it seems
@@ -117,7 +117,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **      
-      sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
+**      sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
 *      sigT=(par(5)+par(6)*log(q2))*exp(par(7)*(abs(tm)))            
 
 **
@@ -143,12 +143,12 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
 **      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
-***      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
+      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
 *     sigT=(par(5)/q2)*exp(-par(6)*(q2**2))
       Qdep_T=(exp(-q2**2))/q2
 **      sigT=par(5)*(par(6)+exp(-par(7)*(abs(tm))))*(Qdep_T**par(8))
-***      sigT=(par(5)*exp(-par(6)*(abs(tm)))+par(7)*(abs(tm)))
-***     >     *(Qdep_T**par(8))
+      sigT=(par(5)*exp(-par(6)*(abs(tm)))+par(7)*(abs(tm)))
+     >     *(Qdep_T**par(8))
 ***      sigLT=(par(9)/(1+q2))*sin(thetacm)
 ***     >     *exp(-par(10)*(abs(tm)))
 *      sigLT=(par(9)*exp(par(10)*abs(tm))
