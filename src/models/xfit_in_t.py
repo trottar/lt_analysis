@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-30 21:38:56 trottar"
+# Time-stamp: "2024-09-02 22:46:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -2177,7 +2177,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigT_accept.Draw("ALP")
 
     print("\n")    
-    
+
+    '''
     # 2 params
     #########
     # SigLT #
@@ -2570,8 +2571,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.Draw("ALP")
 
     print("\n")    
+    '''
 
-    '''    
     # 3 params
     #########
     # SigLT #
@@ -2980,10 +2981,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigLT_accept.SetLineColor(ROOT.kBlack)
     graph_sigLT_accept.Draw("ALP")
 
-    print("\n")    
-    '''
-
-    '''
+    print("\n")
+    
     # 1 param
     #########
     # SigTT #
@@ -3350,8 +3349,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
     
     print("\n")    
-    '''    
 
+    '''    
     # 2 params
     #########
     # SigTT #
@@ -3744,6 +3743,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
 
     print("\n")
+    '''
     
     '''
     # 3 params

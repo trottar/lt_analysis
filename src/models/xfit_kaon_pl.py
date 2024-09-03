@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-02 21:01:52 trottar"
+# Time-stamp: "2024-09-02 22:34:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ def fun_Sig_L(x, par):
         #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+        ##f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
         #f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
@@ -59,7 +59,7 @@ def fun_Sig_L(x, par):
         f_tt = abs(tt) / (abs(tt) + mkpl**2)**2 # pole term
         Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
         ##f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
-        ###f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
+        f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
         
     except OverflowError:
         f = -1000.0
@@ -97,7 +97,7 @@ def fun_Sig_T(x, par):
         #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+        ##f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
         #f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
@@ -105,7 +105,7 @@ def fun_Sig_T(x, par):
         #f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
         Qdep_T=(math.exp(-qq**2))/qq
         ##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
-        ###f=(par[0]*math.exp(-par[1]*(abs(tt)))+par[2]*(abs(tt)))*(Qdep_T**par[3])
+        f=(par[0]*math.exp(-par[1]*(abs(tt)))+par[2]*(abs(tt)))*(Qdep_T**par[3])
         
     except OverflowError:
         f = -1000.0

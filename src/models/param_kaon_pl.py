@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-02 21:01:40 trottar"
+# Time-stamp: "2024-09-02 22:33:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,7 +70,7 @@ def iterWeight(arg_str):
         #sigl = p1 * math.exp(-p2*abs(t_gev)) * (1.0 / (1.0 + p3*q2_gev))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        sigl = (p1 + p2 * math.log(q2_gev)) * math.exp(p3 * (abs(t_gev)))
+        ##sigl = (p1 + p2 * math.log(q2_gev)) * math.exp(p3 * (abs(t_gev)))
         #sigl = (p1 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p2 * (abs(t_gev)))
         ##                
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
@@ -78,7 +78,7 @@ def iterWeight(arg_str):
         ft = abs(t_gev) / (abs(t_gev) + mkpl**2)**2 # pole term
         Qdep_L=q2_gev/(1.0+(1.77*q2_gev)+0.12*(q2_gev**2))
         ##sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
-        ###sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
+        sigl=(p1*Qdep_L*ft)*math.exp(-p2*(abs(t_gev)))
 
     except OverflowError:
         sigl = -1000.0
@@ -103,7 +103,7 @@ def iterWeight(arg_str):
         #sigt = p5 * math.exp(-p6*abs(t_gev)) * (1.0 / (1.0 + p7*q2_gev))
         # RLT (6/04/2024): Testing simplier exp form for L+T
         ##
-        sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
+        ##sigt = (p5 * ((abs(t_gev)/q2_gev)-1)) * math.exp(p6 * (abs(t_gev)))
         #sigt = (p5 + p6 * math.log(q2_gev)) * math.exp(p7 * (abs(t_gev)))
         ##
         # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
@@ -111,7 +111,7 @@ def iterWeight(arg_str):
         #sigt=(p5/q2_gev)*math.exp(-p6*(q2_gev**2))
         Qdep_T=(math.exp(-q2_gev**2))/q2_gev
         #sigt=p5*(p6+math.exp(-p7*(abs(t_gev))))*(Qdep_T**p8)
-        ###sigt=(p5*math.exp(-p6*(abs(t_gev)))+p7*(abs(t_gev)))*(Qdep_T**p8)
+        sigt=(p5*math.exp(-p6*(abs(t_gev)))+p7*(abs(t_gev)))*(Qdep_T**p8)
 
     except OverflowError:        
         sigt = -1000.0
