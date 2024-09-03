@@ -36,6 +36,10 @@ c	real*8 efer			!energy of target particle
 	real*8 pkx,pky,pkz		!kaon momentum in lab.
 	real*8 zero
 
+*       RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+*       that incorporates Q2-dep based of pi FF
+	real Qdep_L, Qdep_T
+	
 	real*8 s,s_gev,t,t_gev,Q2_g			!t,s, Q2 in (GeV/c)**2
 	real*8 mtar_gev
 
@@ -412,8 +416,8 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *       1           *exp((fitpar(3)+fitpar(4)*log(Q2_g))*(abs(t_gev)+0.2))
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **
-	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
-     1           *exp(fitpar(3)*(abs(t_gev)))
+**	   sigl=(fitpar(1)+fitpar(2)*log(Q2_g))
+**     1           *exp(fitpar(3)*(abs(t_gev)))
 *       RLT (2/15/2024): Removing t dependence from sigT because it seems
 *                        to be driving poor sep xsects results
 *       RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
@@ -426,8 +430,8 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *	   sigt=fitpar(5)/(1+fitpar(6)*Q2_g)
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **
-	   sigt=(fitpar(5)*((abs(t_gev)/Q2_g)-1))
-     1           *exp(fitpar(6)*(abs(t_gev)))
+**	   sigt=(fitpar(5)*((abs(t_gev)/Q2_g)-1))
+**     1           *exp(fitpar(6)*(abs(t_gev)))
 
 	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
      1           +fitpar(11)/abs(t_gev))*sin(thetacm)
@@ -440,6 +444,28 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 *                        I am only using the one above, for now.	   
 *	   tav=(-0.178+0.315*log(Q2_g))*Q2_g	   
 
+**      
+*     RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+*                      that incorporates Q2-dep based of pi FF
+	   ft=abs(t_gev)/(abs(t_gev)+mkpl**2)**2 ! pole factor
+	   Qdep_L=Q2_g/(1.0+(1.77*Q2_g)+0.12*(Q2_g**2))
+**      sigL=(fitpar(1)*Qdep_L*ft)*exp(-fitpar(2)*(abs(t_gev)))
+	   sigL=(fitpar(1)*Qdep_L*ft)*exp(-fitpar(2)*(abs(t_gev)))
+*     sigT=(fitpar(5)/Q2_g)*exp(-fitpar(6)*(Q2_g**2))
+	   Qdep_T=(exp(-Q2_g**2))/Q2_g
+**      sigT=fitpar(5)*(fitpar(6)+exp(-fitpar(7)*(abs(t_gev))))*(Qdep_T**fitpar(8))
+	   sigT=(fitpar(5)*exp(-fitpar(6)*(abs(t_gev)))+fitpar(7)*(abs(t_gev)))
+     >          *(Qdep_T**fitpar(8))
+***      sigLT=(fitpar(9)/(1+Q2_g))*sin(thetacm)
+***     >     *exp(-fitpar(10)*(abs(t_gev)))
+*      sigLT=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
+*     >     +fitpar(11)/abs(t_gev))*sin(thetacm)
+*      sigTT=(-fitpar(13)/(1+Q2_g))*(sin(thetacm)**2)
+*     >     *exp(-fitpar(14)*(abs(t_gev)))
+***      sigTT=(fitpar(13)/(1+Q2_g))*(sin(thetacm)**2)
+***     >     *ft*exp(-fitpar(14)*(Q2_g))
+
+	   
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
 	  
