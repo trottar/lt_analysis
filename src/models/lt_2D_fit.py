@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-02 19:02:46 trottar"
+# Time-stamp: "2024-09-02 20:25:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -412,6 +412,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
 
+        '''
         #########
         # Fit 6 #
         #########
@@ -444,6 +445,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
+        '''
         
         ####################
         # Last Step, Fit 7 #
