@@ -176,7 +176,7 @@ c      pause
 *     print*, 'param: par_fn=',par_fn
       
       write(par_fn,50) pol
- 50   format('/models/par_',a2)      
+ 50   format('models/par_',a2)      
       print*, 'param: par_fn=',par_fn
       
       do it=1,nt
