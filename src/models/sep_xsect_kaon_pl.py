@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-03 21:34:32 trottar"
+# Time-stamp: "2024-09-04 19:32:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -168,9 +168,9 @@ def import_model(inp_model, arg_str):
     sig_sep = modelDict[inp_model]
 
     # Apply weight factor
-    g = 1 / ((ww**2) - (m_p**2))**2
-    sig_sep = sig_sep*g
-
+    #g = 1 / ((ww**2) - (m_p**2))**2
+    #sig_sep = sig_sep*g
+    
     # Convert from ub/GeV**2 to nb/GeV**2
     sig_sep = sig_sep*1e3
     
