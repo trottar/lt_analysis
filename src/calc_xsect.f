@@ -170,13 +170,8 @@ c      pause
 
 *     Model fit parameters.
 
-*** HERE!!      
-*      write(par_fn,50) pid,pol,nint(q2_set*10),nint(w_set*100)
-*     50   format(a4,'/parameters/par.',a2,'_Q',i2.2,'W',i3.3,'.dat')
-*     print*, 'param: par_fn=',par_fn
-      
-      write(par_fn,50) pol
- 50   format('models/par_',a2)      
+      write(par_fn,50) pid,pol,nint(q2_set*10),nint(w_set*100)
+ 50   format(a4,'/parameters/par.',a2,'_Q',i2.2,'W',i3.3,'.dat')
       print*, 'param: par_fn=',par_fn
       
       do it=1,nt
