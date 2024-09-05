@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-03 21:33:34 trottar"
+# Time-stamp: "2024-09-04 21:58:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ def fun_Sig_L(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")        
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
     
@@ -110,7 +110,7 @@ def fun_Sig_T(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")        
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
 
@@ -137,7 +137,7 @@ def fun_Sig_LT(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")        
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
 
@@ -166,7 +166,7 @@ def fun_Sig_TT(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
 
@@ -202,7 +202,7 @@ def fun2d_Sig_L(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigL, setting to zero for this event...")        
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
     
@@ -245,7 +245,7 @@ def fun2d_Sig_T(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigT, setting to zero for this event...")        
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
 
@@ -271,7 +271,7 @@ def fun2d_Sig_LT(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigLT, setting to zero for this event...")        
-    return f
+    return f/2.0/PI
 
 ###############################################################################################################################################
 
@@ -298,5 +298,5 @@ def fun2d_Sig_TT(x, par):
     except OverflowError:
         f = -1000.0
         #print("WARNING: Overflowerror on sigTT, setting to zero for this event...")
-    return f
+    return f/2.0/PI
 '''
