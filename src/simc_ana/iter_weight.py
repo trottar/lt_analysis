@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-08-28 12:36:03 trottar"
+# Time-stamp: "2024-09-05 10:18:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,7 +333,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
               #.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
           # After 8/28/2024
           inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi+math.pi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
+                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
           
@@ -360,7 +360,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
               #.format(Q2, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
           # After 8/28/2024
           inp_param = '{} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi+math.pi, evt.sigcm, evt.Weight)+' '.join(param_arr)          
+                      .format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)          
 
           iter_lst = iterWeight(inp_param)
           
