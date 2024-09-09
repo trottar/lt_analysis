@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-09 12:04:21 trottar"
+# Time-stamp: "2024-09-09 12:14:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,7 +181,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_SIMC_tmp  = TH1D("H_MM_SIMC_tmp","MM_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
     H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])    
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
@@ -268,7 +267,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_t_SIMC.Fill(-evt.t, evt.iter_weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
           H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
-          H_MM_SIMC_tmp.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
           #H_MM_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
           H_MM_unweighted_SIMC.Fill(evt.missmass)
               
@@ -298,7 +296,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["H_t_SIMC"] =     H_t_SIMC     
     histDict["H_epsilon_SIMC"] =     H_epsilon_SIMC
     histDict["H_MM_SIMC"] =     H_MM_SIMC
-    histDict["H_MM_SIMC_tmp"] =     H_MM_SIMC_tmp
     histDict["H_th_SIMC"] =     H_th_SIMC
     histDict["H_ph_SIMC"] =     H_ph_SIMC
     histDict["H_ph_q_SIMC"] =     H_ph_q_SIMC
@@ -341,8 +338,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
     histDict["H_MM_SIMC"].SetLineColor(1)
     histDict["H_MM_SIMC"].Draw("same, E1")
-    histDict["H_MM_SIMC_tmp"].SetLineColor(2)
-    histDict["H_MM_SIMC_tmp"].Draw("same, E1")
 
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(phi_setting,ParticleType)))
 
