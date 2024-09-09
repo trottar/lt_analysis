@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-09 11:42:49 trottar"
+# Time-stamp: "2024-09-09 11:45:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -269,7 +269,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_MM_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
           #H_MM_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
           H_MM_unweighted_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2))
-          if  np.allclose([evt.missmass, math.sqrt(evt.Em**2-evt.Pm**2)], minima, atol=5.0):
+          if  np.allclose(evt.missmass, math.sqrt(evt.Em**2-evt.Pm**2), atol=5.0):
               print(f"BAD MM: {evt.missmass:.5f} != {math.sqrt(evt.Em**2-evt.Pm**2):.5f}")
               
     ################################################################################################################################################    
