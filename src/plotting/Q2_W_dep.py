@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 01:50:05 trottar"
+# Time-stamp: "2024-09-12 01:50:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -596,7 +596,7 @@ for tmin, tmax in tmin_tmax_pairs:
             errors = errors[non_zero_mask]
 
             # Use x_increment for x-axis values
-            x_values = np.arange(0, len(ratios[non_zero_mask]))
+            x_values = np.arange(0, len(ratios[non_zero_mask])-1)
             
             tolerance = 0.5
             
