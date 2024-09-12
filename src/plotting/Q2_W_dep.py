@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-11 22:47:01 trottar"
+# Time-stamp: "2024-09-11 23:06:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -602,7 +602,7 @@ for tmin, tmax in tmin_tmax_pairs:
             
             if (abs(df['Q2'] - 2.115) < tolerance).any():
                 mask = abs(df['Q2'] - 2.115) < tolerance
-                ax.errorbar(x_values[mask], ratios[mask], yerr=errors, 
+                ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                             marker=markers[0], linestyle='', label='$Q^2$=2.115, W=2.95', 
                             color=colors[0], markeredgecolor=colors[0], 
                             markerfacecolor='none', capsize=2)
@@ -610,27 +610,27 @@ for tmin, tmax in tmin_tmax_pairs:
             if (abs(df['Q2'] - 3.0) < tolerance).any():
                 if (abs(df['W'] - 2.32) < tolerance).any():
                     mask = (abs(df['Q2'] - 3.0) < tolerance) & (abs(df['W'] - 2.32) < tolerance)
-                    ax.errorbar(x_values[mask], ratios[mask], yerr=errors, 
+                    ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                                 marker=markers[1], linestyle='', label='$Q^2$=3.0, W=2.32', 
                                 color=colors[1], markeredgecolor=colors[1], 
                                 markerfacecolor='none', capsize=2)
                 if (abs(df['W'] - 3.14) < tolerance).any():
                     mask = (abs(df['Q2'] - 3.0) < tolerance) & (abs(df['W'] - 3.14) < tolerance)
-                    ax.errorbar(x_values[mask], ratios[mask], yerr=errors, 
+                    ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                                 marker=markers[2], linestyle='', label='$Q^2$=3.0, W=3.14', 
                                 color=colors[2], markeredgecolor=colors[2], 
                                 markerfacecolor='none', capsize=2)                    
 
             if (abs(df['Q2'] - 4.4) < tolerance).any():
                 mask = abs(df['Q2'] - 4.4) < tolerance
-                ax.errorbar(x_values[mask], ratios[mask], yerr=errors, 
+                ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                             marker=markers[3], linestyle='', label='$Q^2$=4.4, W=2.74', 
                             color=colors[3], markeredgecolor=colors[3], 
                             markerfacecolor='none', capsize=2)
 
             if (abs(df['Q2'] - 5.5) < tolerance).any():
                 mask = abs(df['Q2'] - 5.5) < tolerance
-                ax.errorbar(x_values[mask], ratios[mask], yerr=errors, 
+                ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                             marker=markers[4], linestyle='', label='$Q^2$=5.5, W=3.02', 
                             color=colors[4], markeredgecolor=colors[4], 
                             markerfacecolor='none', capsize=2)
