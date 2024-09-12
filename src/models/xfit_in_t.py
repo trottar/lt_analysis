@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 13:48:03 trottar"
+# Time-stamp: "2024-09-12 13:49:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -190,7 +190,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
     
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': []}
@@ -584,7 +584,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -997,7 +997,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -1388,7 +1388,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': [], 'p7': []}
@@ -1799,7 +1799,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
     
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': [], 'p7': [], 'p8': []}
@@ -2226,7 +2226,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': []}
@@ -2628,7 +2628,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
     
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
@@ -3049,7 +3049,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -3424,7 +3424,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': [], 'p14': []}
@@ -3826,7 +3826,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-    max_param_value = 1e6
+    max_param_value = 1e4
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': [], 'p14': [], 'p15': []}
