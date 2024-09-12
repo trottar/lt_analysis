@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-11 21:48:32 trottar"
+# Time-stamp: "2024-09-11 21:50:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -541,25 +541,25 @@ for tmin, tmax in tmin_tmax_pairs:
                 
             if sig == "sigL":
                 # Perform exponential fit
-                popt, _ = curve_fit(sigl_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                popt, _ = curve_fit(sigl_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
                 p1, p2 = popt
                 param_str = f"{p1:.3e}, {p2:.3e}"
                 y_fit = sigl_func((q2_fit, t_fit), p1, p2)
             if sig == "sigT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sigt_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                popt, _ = curve_fit(sigt_func, (df['Q2'], df['t']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
                 p5, p6, p7, p8 = popt
                 param_str = f"{p5:.3e}, {p6:.3e}, {p7:.3e}, {p8:.3e}"
                 y_fit = sigt_func((q2_fit, t_fit), p5, p6, p7, p8)
             if sig == "sigLT":
                 # Perform exponential fit
-                popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
                 p9, p10 = popt
                 param_str = f"{p9:.3e}, {p10:.3e}"
                 y_fit = siglt_func((q2_fit, t_fit, theta_fit), p9, p10)
             if sig == "sigTT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+                popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
                 p13, p14 = popt
                 param_str = f"{p13:.3e}, {p14:.3e}"
                 y_fit = sigtt_func((q2_fit, t_fit, theta_fit), p13, p14)
@@ -663,7 +663,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ax.errorbar(df['Q2'], scaled_sig, yerr=d_scaled_sig, marker=markers[0], linestyle='None', label=cut_str, color=colors[0], markeredgecolor=colors[0], markerfacecolor='none', capsize=2)
 
             # Perform exponential fit
-            popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 10000)
+            popt, _ = curve_fit(exp_func, df['Q2'], scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
 
             # Generate points for smooth curve
             x_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 100)
