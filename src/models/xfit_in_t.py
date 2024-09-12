@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 13:44:16 trottar"
+# Time-stamp: "2024-09-12 13:45:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -190,7 +190,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    max_param_value = 1e10
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': []}
 
@@ -279,9 +280,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigL.SetParameter(0, current_params[0])
                 f_sigL.SetParameter(1, current_params[1])
                 #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigl_0), current_params[0] + abs(current_params[0] * par_sigl_0))
-                f_sigL.SetParLimits(0, -1e12, 1e12)
+                f_sigL.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigl_1), current_params[1] + abs(current_params[1] * par_sigl_1))
-                f_sigL.SetParLimits(1, -1e12, 1e12)
+                f_sigL.SetParLimits(1, -max_param_value, max_param_value)
 
                 g_q2_sigl_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -583,6 +584,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
 
     # Store the parameter values and chi-square values for each iteration
     params_sigL_history = {'p1': [], 'p2': [], 'p3': []}
@@ -678,11 +680,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigL.SetParameter(1, current_params[1])
                 f_sigL.SetParameter(2, current_params[2])
                 #f_sigL.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigl_0), current_params[0] + abs(current_params[0] * par_sigl_0))
-                f_sigL.SetParLimits(0, -1e12, 1e12)
+                f_sigL.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigL.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigl_1), current_params[1] + abs(current_params[1] * par_sigl_1))
-                f_sigL.SetParLimits(1, -1e12, 1e12)
+                f_sigL.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigL.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigl_2), current_params[2] + abs(current_params[2] * par_sigl_2))
-                f_sigL.SetParLimits(2, -1e12, 1e12)
+                f_sigL.SetParLimits(2, -max_param_value, max_param_value)
 
                 g_q2_sigl_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -995,6 +997,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': []}
@@ -1085,9 +1088,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigT.SetParameter(0, current_params[0])
                 f_sigT.SetParameter(1, current_params[1])
                 #f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigt_0), current_params[0] + abs(current_params[0] * par_sigt_0))
-                f_sigT.SetParLimits(0, -1e12, 1e12)
+                f_sigT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigt_1), current_params[1] + abs(current_params[1] * par_sigt_1))
-                f_sigT.SetParLimits(1, -1e12, 1e12)
+                f_sigT.SetParLimits(1, -max_param_value, max_param_value)
 
                 g_q2_sigt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -1385,6 +1388,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
 
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': [], 'p7': []}
@@ -1479,11 +1483,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigT.SetParameter(1, current_params[1])
                 f_sigT.SetParameter(2, current_params[2])
                 #f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigt_0), current_params[0] + abs(current_params[0] * par_sigt_0))
-                f_sigT.SetParLimits(0, -1e12, 1e12)
+                f_sigT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigt_1), current_params[1] + abs(current_params[1] * par_sigt_1))
-                f_sigT.SetParLimits(1, -1e12, 1e12)
+                f_sigT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigt_2), current_params[2] + abs(current_params[2] * par_sigt_2))
-                f_sigT.SetParLimits(2, -1e12, 1e12)
+                f_sigT.SetParLimits(2, -max_param_value, max_param_value)
 
                 g_q2_sigt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -1795,7 +1799,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    max_param_value = 1e10
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigT_history = {'p5': [], 'p6': [], 'p7': [], 'p8': []}
 
@@ -1894,13 +1899,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigT.SetParameter(2, current_params[2])
                 f_sigT.SetParameter(2, current_params[3])
                 #f_sigT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigt_0), current_params[0] + abs(current_params[0] * par_sigt_0))
-                f_sigT.SetParLimits(0, -1e12, 1e12)
+                f_sigT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigt_1), current_params[1] + abs(current_params[1] * par_sigt_1))
-                f_sigT.SetParLimits(1, -1e12, 1e12)
+                f_sigT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigt_2), current_params[2] + abs(current_params[2] * par_sigt_2))
-                f_sigT.SetParLimits(2, -1e12, 1e12)
+                f_sigT.SetParLimits(2, -max_param_value, max_param_value)
                 #f_sigT.SetParLimits(3, current_params[3] - abs(current_params[3] * par_sigt_3), current_params[3] + abs(current_params[3] * par_sigt_3))
-                f_sigT.SetParLimits(3, -1e12, 1e12)
+                f_sigT.SetParLimits(3, -max_param_value, max_param_value)
 
                 g_q2_sigt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -2221,6 +2226,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
 
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': []}
@@ -2312,13 +2318,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigLT.SetParameter(0, current_params[0])
                 f_sigLT.SetParameter(1, current_params[1])
                 #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_siglt_0), current_params[0] + abs(current_params[0] * par_siglt_0))
-                f_sigLT.SetParLimits(0, -1e12, 1e12)
+                f_sigLT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_siglt_1), current_params[1] + abs(current_params[1] * par_siglt_1))
-                f_sigLT.SetParLimits(1, -1e12, 1e12)
+                f_sigLT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(0, -5, 5)
-                f_sigLT.SetParLimits(0, -1e12, 1e12)
+                f_sigLT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(1, -5, 5)
-                f_sigLT.SetParLimits(1, -1e12, 1e12)
+                f_sigLT.SetParLimits(1, -max_param_value, max_param_value)
 
                 g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -2622,7 +2628,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
-
+    max_param_value = 1e10
+    
     # Store the parameter values and chi-square values for each iteration
     params_sigLT_history = {'p9': [], 'p10': [], 'p11': []}
 
@@ -2717,17 +2724,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigLT.SetParameter(1, current_params[1])
                 f_sigLT.SetParameter(2, current_params[2])
                 #f_sigLT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_siglt_0), current_params[0] + abs(current_params[0] * par_siglt_0))
-                f_sigLT.SetParLimits(0, -1e12, 1e12)
+                f_sigLT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_siglt_1), current_params[1] + abs(current_params[1] * par_siglt_1))
-                f_sigLT.SetParLimits(1, -1e12, 1e12)
+                f_sigLT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_siglt_2), current_params[2] + abs(current_params[2] * par_siglt_2))
-                f_sigLT.SetParLimits(2, -1e12, 1e12)
+                f_sigLT.SetParLimits(2, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(0, -5, 5)
-                f_sigLT.SetParLimits(0, -1e12, 1e12)
+                f_sigLT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(1, -5, 5)
-                f_sigLT.SetParLimits(1, -1e12, 1e12)
+                f_sigLT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigLT.SetParLimits(2, -5, 5)
-                f_sigLT.SetParLimits(2, -1e12, 1e12)
+                f_sigLT.SetParLimits(2, -max_param_value, max_param_value)
 
                 g_q2_siglt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -3042,6 +3049,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': []}
@@ -3125,9 +3133,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParNames("p13")
                 f_sigTT.SetParameter(0, current_params)
                 #f_sigTT.SetParLimits(0, current_params - abs(current_params * par_sigtt_0), current_params + abs(current_params * par_sigtt_0))
-                f_sigTT.SetParLimits(0, -1e12, 1e12)
+                f_sigTT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(0, -5, 5)
-                f_sigTT.SetParLimits(0, -1e12, 1e12)
+                f_sigTT.SetParLimits(0, -max_param_value, max_param_value)
 
                 g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -3416,6 +3424,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': [], 'p14': []}
@@ -3507,13 +3516,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParameter(0, current_params[0])
                 f_sigTT.SetParameter(1, current_params[1])
                 #f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
-                f_sigTT.SetParLimits(0, -1e12, 1e12)
+                f_sigTT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigtt_1), current_params[1] + abs(current_params[1] * par_sigtt_1))
-                f_sigTT.SetParLimits(1, -1e12, 1e12)
+                f_sigTT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(0, -5, 5)
-                f_sigTT.SetParLimits(0, -1e12, 1e12)
+                f_sigTT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(1, -5, 5)
-                f_sigTT.SetParLimits(1, -1e12, 1e12)
+                f_sigTT.SetParLimits(1, -max_param_value, max_param_value)
 
                 g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
@@ -3817,6 +3826,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     best_overall_params = None
     best_overall_cost = float('inf')
     total_iteration = 0
+    max_param_value = 1e10
     
     # Store the parameter values and chi-square values for each iteration
     params_sigTT_history = {'p13': [], 'p14': [], 'p15': []}
@@ -3912,17 +3922,17 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 f_sigTT.SetParameter(1, current_params[1])
                 f_sigTT.SetParameter(2, current_params[2])
                 #f_sigTT.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sigtt_0), current_params[0] + abs(current_params[0] * par_sigtt_0))
-                f_sigTT.SetParLimits(0, -1e12, 1e12)
+                f_sigTT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sigtt_1), current_params[1] + abs(current_params[1] * par_sigtt_1))
-                f_sigTT.SetParLimits(1, -1e12, 1e12)
+                f_sigTT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sigtt_2), current_params[2] + abs(current_params[2] * par_sigtt_2))
-                f_sigTT.SetParLimits(2, -1e12, 1e12)
+                f_sigTT.SetParLimits(2, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(0, -5, 5)
-                f_sigTT.SetParLimits(0, -1e12, 1e12)
+                f_sigTT.SetParLimits(0, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(1, -5, 5)
-                f_sigTT.SetParLimits(1, -1e12, 1e12)
+                f_sigTT.SetParLimits(1, -max_param_value, max_param_value)
                 #f_sigTT.SetParLimits(2, -5, 5)
-                f_sigTT.SetParLimits(2, -1e12, 1e12)
+                f_sigTT.SetParLimits(2, -max_param_value, max_param_value)
 
                 g_q2_sigtt_fit = TGraphErrors()
                 for i in range(len(w_vec)):
