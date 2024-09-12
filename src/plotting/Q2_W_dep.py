@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-11 22:09:17 trottar"
+# Time-stamp: "2024-09-11 22:10:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -591,7 +591,7 @@ for tmin, tmax in tmin_tmax_pairs:
             df = merged_dict[f"unsep_file_{eps_val}eps"]
 
             # Use x_increment for x-axis values
-            x_values = np.arange(0, len(df_ratio["ratio"]))
+            x_values = np.arange(0, len(df))
             
             tolerance = 0.5
 
