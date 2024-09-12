@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-11 21:58:28 trottar"
+# Time-stamp: "2024-09-11 22:01:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -579,7 +579,7 @@ for tmin, tmax in tmin_tmax_pairs:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
-        fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+        fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
         for k, eps_val in enumerate(['hi','lo']):
 
