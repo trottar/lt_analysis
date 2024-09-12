@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-11 21:58:20 trottar"
+# Time-stamp: "2024-09-11 21:58:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -586,7 +586,7 @@ for tmin, tmax in tmin_tmax_pairs:
             # Use integer division to get the correct subplot position
             ax = axes[k // 2, k % 2]
             eps_str = "high" if eps_val == "hi" else "low"
-            ax.set_title(f"Ratio {eps_str}", fontsize=24)
+            ax.set_title(f"{eps_str} Ratio", fontsize=24)
             df_ratio = merged_dict[f"aver_{eps_val}eps"]
             df = merged_dict[f"unsep_file_{eps_val}eps"]
 
