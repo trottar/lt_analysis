@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 02:07:28 trottar"
+# Time-stamp: "2024-09-12 16:35:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -90,7 +90,8 @@ settings = {
         'W': '2p32',
         'LOEPS': 0.5736,
         'HIEPS': 0.8791,
-        'inp_dir': "2024September11_H12M56S06" # i=2, 4p4 parameterization
+        #'inp_dir': "2024September11_H12M56S06" # i=2, 4p4 parameterization
+        'inp_dir': "2024September12_H14M27S29" # i=5, 4p4 parameterization
     },    
     'set_3': {
         'Q2': '3p0',
@@ -99,7 +100,8 @@ settings = {
         'HIEPS': 0.6668,
         #'inp_dir': "trial_30/2024July25_H17M19S51" # i=1
         #'inp_dir': "trial_30/2024July26_H08M04S15" # i=12
-        'inp_dir': "2024September11_H16M37S05" # i=2, 4p4 parameterization
+        #'inp_dir': "2024September11_H16M37S05" # i=2, 4p4 parameterization
+        'inp_dir': "2024September12_H15M13S17" # i=5, 4p4 parameterization        
     },    
     'set_4': {
         'Q2': '4p4',
@@ -108,7 +110,8 @@ settings = {
         'HIEPS': 0.7148,
         #'inp_dir': "2024August13_H17M30S09" # i=1
         #'inp_dir': "trial_1/2024August13_H22M17S21" # i=12
-        'inp_dir': "2024September11_H17M50S25" # i=2, 4p4 parameterization
+        #'inp_dir': "2024September11_H17M50S25" # i=2, 4p4 parameterization
+        'inp_dir': "2024September12_H15M58S25" # i=5, 4p4 parameterization        
     },    
     'set_5': {
         'Q2': '5p5',
@@ -117,7 +120,9 @@ settings = {
         'HIEPS': 0.5291,
         #'inp_dir': "trial_14/2024July25_H17M34S49" # i=1
         #'inp_dir': "trial_14/2024July26_H10M45S46" # i=12
-        'inp_dir': "2024September11_H19M05S14" # i=2, 4p4 parameterization
+        #'inp_dir': "2024September11_H19M05S14" # i=2, 4p4 parameterization
+        'inp_dir': "2024September12_H16M13S38" # i=test, 4p4 parameterization        
+        #'inp_dir': "" # i=5, 4p4 parameterization        
     }
 }
 
