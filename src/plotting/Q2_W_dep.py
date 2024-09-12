@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-11 21:54:03 trottar"
+# Time-stamp: "2024-09-11 21:55:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -587,7 +587,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ax = axes[k // 2, k % 2]
             ax.set_title("Ratio", fontsize=24)
             df_ratio = merged_dict[f"aver_{eps_val}eps"]
-            df_kin = merged_dict[f"unsep_file_{eps_val}eps"]
+            df = merged_dict[f"unsep_file_{eps_val}eps"]
 
             tolerance = 0.5
 
