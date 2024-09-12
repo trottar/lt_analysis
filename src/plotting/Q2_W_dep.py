@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 01:40:43 trottar"
+# Time-stamp: "2024-09-12 01:46:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -600,7 +600,7 @@ for tmin, tmax in tmin_tmax_pairs:
             if (abs(df[non_zero_mask]['Q2'] - 2.115) < tolerance).any():
                 mask = abs(df[non_zero_mask]['Q2'] - 2.115) < tolerance
                 # Use x_increment for x-axis values
-                x_values = np.arange(0, len(ratios[non_zero_mask]))                
+                x_values = df[non_zero_mask]["t"]                
                 ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                             marker=markers[0], linestyle='', label='$Q^2$=2.115, W=2.95', 
                             color=colors[0], markeredgecolor=colors[0], 
@@ -610,7 +610,7 @@ for tmin, tmax in tmin_tmax_pairs:
                 if (abs(df[non_zero_mask]['W'] - 2.32) < tolerance).any():
                     mask = (abs(df[non_zero_mask]['Q2'] - 3.0) < tolerance) & (abs(df[non_zero_mask]['W'] - 2.32) < tolerance)
                     # Use x_increment for x-axis values
-                    x_values = np.arange(0, len(ratios[non_zero_mask]))
+                    x_values = df[non_zero_mask]["t"]
                     ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                                 marker=markers[1], linestyle='', label='$Q^2$=3.0, W=2.32', 
                                 color=colors[1], markeredgecolor=colors[1], 
@@ -618,7 +618,7 @@ for tmin, tmax in tmin_tmax_pairs:
                 if (abs(df[non_zero_mask]['W'] - 3.14) < tolerance).any():
                     mask = (abs(df[non_zero_mask]['Q2'] - 3.0) < tolerance) & (abs(df[non_zero_mask]['W'] - 3.14) < tolerance)
                     # Use x_increment for x-axis values
-                    x_values = np.arange(0, len(ratios[non_zero_mask]))                    
+                    x_values = df[non_zero_mask]["t"]                    
                     ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                                 marker=markers[2], linestyle='', label='$Q^2$=3.0, W=3.14', 
                                 color=colors[2], markeredgecolor=colors[2], 
@@ -627,7 +627,7 @@ for tmin, tmax in tmin_tmax_pairs:
             if (abs(df[non_zero_mask]['Q2'] - 4.4) < tolerance).any():
                 mask = abs(df[non_zero_mask]['Q2'] - 4.4) < tolerance
                 # Use x_increment for x-axis values
-                x_values = np.arange(0, len(ratios[non_zero_mask]))                
+                x_values = df[non_zero_mask]["t"]                
                 ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                             marker=markers[3], linestyle='', label='$Q^2$=4.4, W=2.74', 
                             color=colors[3], markeredgecolor=colors[3], 
@@ -636,7 +636,7 @@ for tmin, tmax in tmin_tmax_pairs:
             if (abs(df[non_zero_mask]['Q2'] - 5.5) < tolerance).any():
                 mask = abs(df[non_zero_mask]['Q2'] - 5.5) < tolerance
                 # Use x_increment for x-axis values
-                x_values = np.arange(0, len(ratios[non_zero_mask]))                
+                x_values = df[non_zero_mask]["t"]                
                 ax.errorbar(x_values[mask], ratios[mask], yerr=errors[mask], 
                             marker=markers[4], linestyle='', label='$Q^2$=5.5, W=3.02', 
                             color=colors[4], markeredgecolor=colors[4], 
