@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 02:04:40 trottar"
+# Time-stamp: "2024-09-12 02:07:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -638,8 +638,7 @@ for tmin, tmax in tmin_tmax_pairs:
             ax.set_xlabel('t-$\phi$ bin')
             ax.set_ylabel("Ratio")
             ax.tick_params(axis='x', labelsize=16)
-            ax.tick_params(axis='y', labelsize=16)        
-            #ax.set_xlim(tmin-0.01, tmax+0.01)
+            ax.tick_params(axis='y', labelsize=16)
             ax.legend(fontsize=8)
             # Add grid to subplot
             ax.grid(True, linestyle='--', linewidth=0.5)
