@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 11:09:28 trottar"
+# Time-stamp: "2024-09-11 21:48:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -81,15 +81,16 @@ settings = {
         'W': '2p95',
         'LOEPS': 0.2477,
         'HIEPS': 0.7864,
-        'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
+        #'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
         #'inp_dir': "trial_9/2024July26_H05M28S47" # i=12
+        'inp_dir': "2024September11_H10M39S26" # i=2, 4p4 parameterization
     },
     'set_2': {
         'Q2': '3p0',
         'W': '2p32',
         'LOEPS': 0.5736,
         'HIEPS': 0.8791,
-        'inp_dir': "" # i=1
+        'inp_dir': "2024September11_H12M56S06" # i=2, 4p4 parameterization
     },    
     'set_3': {
         'Q2': '3p0',
@@ -97,7 +98,8 @@ settings = {
         'LOEPS': 0.3935,
         'HIEPS': 0.6668,
         #'inp_dir': "trial_30/2024July25_H17M19S51" # i=1
-        'inp_dir': "trial_30/2024July26_H08M04S15" # i=12
+        #'inp_dir': "trial_30/2024July26_H08M04S15" # i=12
+        'inp_dir': "2024September11_H16M37S05" # i=2, 4p4 parameterization
     },    
     'set_4': {
         'Q2': '4p4',
@@ -105,7 +107,8 @@ settings = {
         'LOEPS': 0.4805,
         'HIEPS': 0.7148,
         #'inp_dir': "2024August13_H17M30S09" # i=1
-        'inp_dir': "trial_1/2024August13_H22M17S21" # i=12
+        #'inp_dir': "trial_1/2024August13_H22M17S21" # i=12
+        'inp_dir': "2024September11_H17M50S25" # i=2, 4p4 parameterization
     },    
     'set_5': {
         'Q2': '5p5',
@@ -113,15 +116,15 @@ settings = {
         'LOEPS': 0.1838,
         'HIEPS': 0.5291,
         #'inp_dir': "trial_14/2024July25_H17M34S49" # i=1
-        'inp_dir': "trial_14/2024July26_H10M45S46" # i=12
+        #'inp_dir': "trial_14/2024July26_H10M45S46" # i=12
+        'inp_dir': "2024September11_H19M05S14" # i=2, 4p4 parameterization
     }
 }
 
 comb_dict = {}
 
 for key, values in settings.items():
-    #if key in ('set_1', 'set_2', 'set_3', 'set_4', 'set_5'):
-    if key in ('set_3'):
+    if key in ('set_1', 'set_2', 'set_3', 'set_4', 'set_5'):
         Q2, W, LOEPS, HIEPS, inp_dir = values.values()
     else:
         continue
@@ -576,6 +579,64 @@ for tmin, tmax in tmin_tmax_pairs:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
+        fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
+
+        for k, eps_val in enumerate(['hi','lo']):
+
+            # Use integer division to get the correct subplot position
+            ax = axes[k // 2, k % 2]
+            ax.set_title("Ratio", fontsize=24)
+            df = merged_dict[f"aver_{eps_val}eps"]
+
+            tolerance = 0.5
+
+            if (abs(df['Q2'] - 2.115) < tolerance).any():
+                mask = abs(df['Q2'] - 2.115) < tolerance
+                ax.errorbar(df.loc[mask, 't'], df["ratio"][mask], yerr=df["dratio"][mask], 
+                            marker=markers[0], linestyle='', label='$Q^2$=2.115, W=2.95', 
+                            color=colors[0], markeredgecolor=colors[0], 
+                            markerfacecolor='none', capsize=2)
+
+            if (abs(df['Q2'] - 3.0) < tolerance).any():
+                if (abs(df['W'] - 2.32) < tolerance).any():
+                    mask = (abs(df['Q2'] - 3.0) < tolerance) & (abs(df['W'] - 2.32) < tolerance)
+                    ax.errorbar(df.loc[mask, 't'], df["ratio"][mask], yerr=df["dratio"][mask], 
+                                marker=markers[1], linestyle='', label='$Q^2$=3.0, W=2.32', 
+                                color=colors[1], markeredgecolor=colors[1], 
+                                markerfacecolor='none', capsize=2)
+                if (abs(df['W'] - 3.14) < tolerance).any():
+                    mask = (abs(df['Q2'] - 3.0) < tolerance) & (abs(df['W'] - 3.14) < tolerance)
+                    ax.errorbar(df.loc[mask, 't'], df["ratio"][mask], yerr=df["dratio"][mask], 
+                                marker=markers[2], linestyle='', label='$Q^2$=3.0, W=3.14', 
+                                color=colors[2], markeredgecolor=colors[2], 
+                                markerfacecolor='none', capsize=2)                    
+
+            if (abs(df['Q2'] - 4.4) < tolerance).any():
+                mask = abs(df['Q2'] - 4.4) < tolerance
+                ax.errorbar(df.loc[mask, 't'], df["ratio"][mask], yerr=df["dratio"][mask], 
+                            marker=markers[3], linestyle='', label='$Q^2$=4.4, W=2.74', 
+                            color=colors[3], markeredgecolor=colors[3], 
+                            markerfacecolor='none', capsize=2)
+
+            if (abs(df['Q2'] - 5.5) < tolerance).any():
+                mask = abs(df['Q2'] - 5.5) < tolerance
+                ax.errorbar(df.loc[mask, 't'], df["ratio"][mask], yerr=df["dratio"][mask], 
+                            marker=markers[4], linestyle='', label='$Q^2$=5.5, W=3.02', 
+                            color=colors[4], markeredgecolor=colors[4], 
+                            markerfacecolor='none', capsize=2)
+
+            ax.set_xlabel('t')
+            ax.set_ylabel("Ratio")
+            ax.tick_params(axis='x', labelsize=16)
+            ax.tick_params(axis='y', labelsize=16)        
+            ax.set_xlim(tmin-0.01, tmax+0.01)
+            ax.legend(fontsize=8)
+            # Add grid to subplot
+            ax.grid(True, linestyle='--', linewidth=0.5)
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        pdf.savefig(fig, bbox_inches='tight')
+        
         fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
         for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
 
