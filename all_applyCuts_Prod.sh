@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-28 20:37:35 trottar"
+# Time-stamp: "2024-09-15 12:43:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,6 +52,10 @@ grab_runs () {
     fi
 }
 
+# Pion only
+Q2="0p4" #0p38
+W="2p20"
+
 # ONGOING
 #Q2="0p5"
 #W="2p40"
@@ -68,18 +72,16 @@ grab_runs () {
 #Q2="4p4"
 #W="2p74"
 # ONGOING
-Q2="5p5"
-W="3p02"
+#Q2="5p5"
+#W="3p02"
 
 KIN="Q${Q2}W${W}"
 
 TARGET=("LH2" "dummy")
 EPS=("high" "low")
-PHISET=("center" "left" "right")
+#PHISET=("center" "left" "right")
 
-#TARGET=("LH2")
-#EPS=("low")
-#PHISET=("center")
+PHISET=("center")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
@@ -125,7 +127,7 @@ for t in "${TARGET[@]}"; do
 			    # Using the test command with -e option
 			    if test -e $rootfile; then
 				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} pion
-				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
+				#./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
 				jcache get $rootfile
