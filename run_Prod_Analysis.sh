@@ -50,6 +50,7 @@ while getopts 'hci:p' flag; do
 	echo "                      Q2=3p0, W=2p32"
 	echo "                      Q2=2p1, W=2p95"
 	echo "                      Q2=0p5, W=2p40"
+	echo "                      Q2=0p4, W=2p20 (Q2 = 0.38, pion only)"	
         exit 0
         ;;
 	c) c_flag='true' ;;
@@ -119,29 +120,29 @@ do
 	EPSILON=$j
 	Q2=$2
 	W=$3
-	echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
-	echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
-	if [[ -z "$2" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+	echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4]"
+	echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20]"
+	if [[ -z "$2" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5|0p4 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid Q2..."
 	    while true; do
 		echo ""
-		read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5] - or press ctrl-c to exit : " Q2
+		read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4] - or press ctrl-c to exit : " Q2
 		case $Q2 in
 		    '');; # If blank, prompt again
-		    '5p5'|'4p4'|'3p0'|'2p1'|'0p5') break;; # If a valid option, break the loop and continue
+		    '5p5'|'4p4'|'3p0'|'2p1'|'0p5'|'0p4') break;; # If a valid option, break the loop and continue
 		esac
 	    done
 	fi
-	if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40|2p20 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid W..."
 	    while true; do
 		echo ""
-		read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40] - or press ctrl-c to exit : " W
+		read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20] - or press ctrl-c to exit : " W
 		case $W in
 		    '');; # If blank, prompt again
-		    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40') break;; # If a valid option, break the loop and continue
+		    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40'|'2p20') break;; # If a valid option, break the loop and continue
 		esac
 	    done
 	fi
@@ -151,29 +152,29 @@ do
 	EPSILON=$j
 	Q2=$1
 	W=$2
-	echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
-	echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
-	if [[ -z "$1" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+	echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4]"
+	echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20]"
+	if [[ -z "$1" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5|0p4 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid Q2..."
 	    while true; do
 		echo ""
-		read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5] - or press ctrl-c to exit : " Q2
+		read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4] - or press ctrl-c to exit : " Q2
 		case $Q2 in
 		    '');; # If blank, prompt again
-		    '5p5'|'4p4'|'3p0'|'2p1'|'0p5') break;; # If a valid option, break the loop and continue
+		    '5p5'|'4p4'|'3p0'|'2p1'|'0p5'|'0p4') break;; # If a valid option, break the loop and continue
 		esac
 	    done
 	fi
-	if [[ -z "$2" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+	if [[ -z "$2" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40|2p20 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	    echo ""
 	    echo "I need a valid W..."
 	    while true; do
 		echo ""
-		read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40] - or press ctrl-c to exit : " W
+		read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20] - or press ctrl-c to exit : " W
 		case $W in
 		    '');; # If blank, prompt again
-		    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40') break;; # If a valid option, break the loop and continue
+		    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40'|'2p20') break;; # If a valid option, break the loop and continue
 		esac
 	    done
 	fi
@@ -459,6 +460,47 @@ do
 		HIEPS=0.6979
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
+
+	    if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
+		if [[ $i = "RIGHT" ]]; then
+		    file_right_dummy="Q0p4W2p20right_${EPSILON}e_dummy"
+		    file_right="Q0p4W2p20right_${EPSILON}e"
+		    echo "Reading in run numbers for right file ${file_right_dummy}..."
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=0p4, W=2p20
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
+		    echo
+		    echo "Reading in run numbers for right file ${file_right}..."
+		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=0p4, W=2p20
+		    echo "Data Run Numbers: [${data_right_tmp[@]}]"
+		    echo
+		elif [[ $i = "LEFT" ]]; then
+		    file_left_dummy="Q0p4W2p20left_${EPSILON}e_dummy"
+		    file_left="Q0p4W2p20left_${EPSILON}e"
+		    echo "Reading in run numbers for left file ${file_left_dummy}..."
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=0p4, W=2p20
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
+		    echo
+		    echo "Reading in run numbers for left file ${file_left}..."
+		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=0p4, W=2p20
+		    echo "Data Run Numbers: [${data_left_tmp[@]}]"
+		    echo
+		elif [[ $i = "CENTER" ]]; then
+		    file_center_dummy="Q0p4W2p20center_${EPSILON}e_dummy"
+		    file_center="Q0p4W2p20center_${EPSILON}e"
+		    echo "Reading in run numbers for center file ${file_center_dummy}..."
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=0p4, W=2p20
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
+		    echo
+		    echo "Reading in run numbers for center file ${file_center}..."
+		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=0p4, W=2p20
+		    echo "Data Run Numbers: [${data_center_tmp[@]}]"
+		    echo
+		fi
+		LOEPS=0.2860
+		HIEPS=0.7810
+		KIN="Q0p4W2p20_${EPSILON}e"
+	    fi
+	    
 	    ##############
 	    ##############
 	    ##############
@@ -654,11 +696,22 @@ done
 # Full spectrum
 #MissMassMin=0.7
 #MissMassMax=1.5
-# MM cut
-MissMassMin=1.08
-MissMassMax=1.16
+# MM cut (kaon)
+#MissMassMin=1.08
+#MissMassMax=1.16
+# MM cut (pion, Vijay)
+MissMassMin=0.91
+MissMassMax=0.98
 
-if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
+
+# Pion Q2 = 0.38, Vijay
+if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
+    # Q2=0p4, W=2p20
+    NumtBins=7
+    NumPhiBins=16
+    TMIN=0.001
+    TMAX=0.050
+elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
     NumtBins=3
     NumPhiBins=7
@@ -1003,6 +1056,46 @@ if [[ $i_flag != "true" ]]; then
 		HIEPS=0.6979
 		KIN="Q0p5W2p40_${EPSILON}e"
 	    fi
+
+	    if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
+		if [[ $i = "RIGHT" ]]; then
+		    file_right_dummy="Q0p4W2p20right_${EPSILON}e_dummy"
+		    file_right="Q0p4W2p20right_${EPSILON}e"
+		    echo "Reading in run numbers for right file ${file_right_dummy}..."
+		    IFS=', ' read -r -a dummy_right_tmp <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=0p4, W=2p20
+		    echo "Dummy Run Numbers: [${dummy_right_tmp[@]}]"
+		    echo
+		    echo "Reading in run numbers for right file ${file_right}..."
+		    IFS=', ' read -r -a data_right_tmp <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=0p4, W=2p20
+		    echo "Data Run Numbers: [${data_right_tmp[@]}]"
+		    echo
+		elif [[ $i = "LEFT" ]]; then
+		    file_left_dummy="Q0p4W2p20left_${EPSILON}e_dummy"
+		    file_left="Q0p4W2p20left_${EPSILON}e"
+		    echo "Reading in run numbers for left file ${file_left_dummy}..."
+		    IFS=', ' read -r -a dummy_left_tmp <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=0p4, W=2p20
+		    echo "Dummy Run Numbers: [${dummy_left_tmp[@]}]"
+		    echo
+		    echo "Reading in run numbers for left file ${file_left}..."
+		    IFS=', ' read -r -a data_left_tmp <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=0p4, W=2p20
+		    echo "Data Run Numbers: [${data_left_tmp[@]}]"
+		    echo
+		elif [[ $i = "CENTER" ]]; then
+		    file_center_dummy="Q0p4W2p20center_${EPSILON}e_dummy"
+		    file_center="Q0p4W2p20center_${EPSILON}e"
+		    echo "Reading in run numbers for center file ${file_center_dummy}..."
+		    IFS=', ' read -r -a dummy_center_tmp <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=0p4, W=2p20
+		    echo "Dummy Run Numbers: [${dummy_center_tmp[@]}]"
+		    echo
+		    echo "Reading in run numbers for center file ${file_center}..."
+		    IFS=', ' read -r -a data_center_tmp <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=0p4, W=2p20
+		    echo "Data Run Numbers: [${data_center_tmp[@]}]"
+		    echo
+		fi
+		LOEPS=0.2860
+		HIEPS=0.7810
+		KIN="Q0p4W2p20_${EPSILON}e"
+	    fi	    
 	    ##############
 	    ##############
 	    ##############
@@ -1738,6 +1831,46 @@ else
 		    HIEPS=0.6979
 		    KIN="Q0p5W2p40_${EPSILON}e"
 		fi
+
+		if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
+		    if [[ $i = "RIGHT" ]]; then
+			file_right_dummy="Q0p4W2p20right_${EPSILON}e_dummy"
+			file_right="Q0p4W2p20right_${EPSILON}e"
+			echo "Reading in run numbers for right file ${file_right_dummy}..."
+			IFS=', ' read -r -a dummy_right <<< "$( grab_runs ${file_right_dummy} )"             # RIGHT, Q2=0p4, W=2p20
+			echo "Dummy Run Numbers: [${dummy_right[@]}]"
+			echo
+			echo "Reading in run numbers for right file ${file_right}..."
+			IFS=', ' read -r -a data_right <<< "$( grab_runs ${file_right} )"		 # RIGHT, Q2=0p4, W=2p20
+			echo "Data Run Numbers: [${data_right[@]}]"
+			echo
+		    elif [[ $i = "LEFT" ]]; then
+			file_left_dummy="Q0p4W2p20left_${EPSILON}e_dummy"
+			file_left="Q0p4W2p20left_${EPSILON}e"
+			echo "Reading in run numbers for left file ${file_left_dummy}..."
+			IFS=', ' read -r -a dummy_left <<< "$( grab_runs ${file_left_dummy} )"             # LEFT, Q2=0p4, W=2p20
+			echo "Dummy Run Numbers: [${dummy_left[@]}]"
+			echo
+			echo "Reading in run numbers for left file ${file_left}..."
+			IFS=', ' read -r -a data_left <<< "$( grab_runs ${file_left} )"		 # LEFT, Q2=0p4, W=2p20
+			echo "Data Run Numbers: [${data_left[@]}]"
+			echo
+		    elif [[ $i = "CENTER" ]]; then
+			file_center_dummy="Q0p4W2p20center_${EPSILON}e_dummy"
+			file_center="Q0p4W2p20center_${EPSILON}e"
+			echo "Reading in run numbers for center file ${file_center_dummy}..."
+			IFS=', ' read -r -a dummy_center <<< "$( grab_runs ${file_center_dummy} )"             # CENTER, Q2=0p4, W=2p20
+			echo "Dummy Run Numbers: [${dummy_center[@]}]"
+			echo
+			echo "Reading in run numbers for center file ${file_center}..."
+			IFS=', ' read -r -a data_center <<< "$( grab_runs ${file_center} )"		 # CENTER, Q2=0p4, W=2p20
+			echo "Data Run Numbers: [${data_center[@]}]"
+			echo
+		    fi
+		    LOEPS=0.2860
+		    HIEPS=0.7810
+		    KIN="Q0p4W2p20_${EPSILON}e"
+		fi		
 		##############
 		##############
 		##############
