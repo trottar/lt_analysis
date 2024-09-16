@@ -79,8 +79,8 @@ DEBUG="False" # Flag for no plot splash
 #DEBUG="True" # Flag for plot splash
 
 if [[ $p_flag != "true" ]]; then
-    ParticleType="kaon"
-    #ParticleType="pion"
+    #ParticleType="kaon"
+    ParticleType="pion"
 else
     echo "Please select a particle type..."
     while true; do
