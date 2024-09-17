@@ -120,23 +120,23 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
 
     Title = ""
-    Q2vsW_cut = TH2D("Q2vsW_cut", labelh, 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_mide_cut = TH2D("Q2vsW_mide_cut",labelm, 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_lowe_cut = TH2D("Q2vsW_lowe_cut", labell, 1000, Q2min, Q2max, 1000, Wmin, Wmax)    
+    Q2vsW_cut = TH2D("Q2vsW_cut", labelh, 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_mide_cut = TH2D("Q2vsW_mide_cut",labelm, 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_lowe_cut = TH2D("Q2vsW_lowe_cut", labell, 400, Q2min, Q2max, 400, Wmin, Wmax)    
 
-    Q2vsW_hi_cut = TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_mi_cut = TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_lo_cut = TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
+    Q2vsW_hi_cut = TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_mi_cut = TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_lo_cut = TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
 
-    W_cut = TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 1000, Wmin, Wmax)
-    Q2_cut = TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 1000, Q2min, Q2max)
-    t_cut = TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 1000, tmin, tmax)
-    t_mi_cut = TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 1000, tmin, tmax)
+    W_cut = TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 400, Wmin, Wmax)
+    Q2_cut = TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 400, Q2min, Q2max)
+    t_cut = TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
+    t_mi_cut = TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
 
-    Q2vsW_lolo_cut = TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_hilo_cut = TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
-    Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 1000, Q2min, Q2max, 1000, Wmin, Wmax)
+    Q2vsW_lolo_cut = TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_hilo_cut = TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
 
     a1 = 0
     b1 = 0
@@ -275,7 +275,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n")
                             lowe_input = False
                             badfile = True
-                            break
+                            #break
                     if (badfile == True):
                         break
                     #for i in range (fbl,lbl):
