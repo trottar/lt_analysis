@@ -117,10 +117,4 @@ InputSIMC_center="Prod_Coin_Q${Q2}W${W}center_${EPSILON}e"
 
 cd ${LTANAPATH}/src/setup
 
-if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_center}.inp" ]]; then
-    echo
-    echo 
-    echo "Running simc analysis for ${InputSIMC_center}..."
-    echo
-    ./run_simc_tree "${InputSIMC_center}" "production"
-fi
+./run_simc_tree "${InputSIMC_center}" "production"
