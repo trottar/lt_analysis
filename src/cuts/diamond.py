@@ -50,6 +50,16 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
+def find_input_file(particle_type: str, filename_override: str, phi_setting: str, epsilon: str) -> Union[str, bool]:
+    """Find the input file for a given epsilon setting."""
+    file_pattern = f"{OUTPATH}/*{particle_type}*{filename_override}*{phi_setting}*.root"
+    matching_files = glob.glob(file_pattern)
+    
+    if not matching_files:
+        return False
+    
+    return min(matching_files, key=len)
+
 def fit_diamond(histogram: TH2D, q2_val: float, q2_min: float, q2_max: float, w_min: float, w_max: float) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
     """Fit the diamond shape to the histogram."""
     min_q = histogram.FindFirstBinAbove(0)
