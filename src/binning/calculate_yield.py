@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 17:12:26 trottar"
+# Time-stamp: "2024-09-17 17:19:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -463,8 +463,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
-                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
-                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                        if ParticleType == "kaon":
+                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
+                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
                         background_fit[0].SetLineColor(3)
                         background_fit[0].Draw("same")
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
