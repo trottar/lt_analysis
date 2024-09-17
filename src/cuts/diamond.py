@@ -51,8 +51,18 @@ print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, R
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
-    Qs = str(Q2Val).replace('.','p')
-    Ws = str(WVal).replace('.','p')
+    ##############
+    # HARD CODED #
+    ##############
+    if Q2Val == "0p4":
+        Qs = 0.385
+        Ws = str(WVal).replace('.','p')
+    else:
+        Qs = str(Q2Val).replace('.','p')
+        Ws = str(WVal).replace('.','p')
+    ##############
+    ##############
+    ##############
     
     FilenameOverride = 'Q'+Qs+'W'+Ws
     
