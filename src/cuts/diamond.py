@@ -216,10 +216,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
             ##############################################################################################################################################
             #Does assume 400 bins for Q2 and W, centered at kinematic values
-            #minQ = Q2_cut.FindFirstBinAbove(0)
-            #maxQ = Q2_cut.FindLastBinAbove(0)
-            minQ = Q2_cut.FindBin(Q2min)
-            maxQ = Q2_cut.FindBin(Q2max)
+            minQ = Q2_cut.FindFirstBinAbove(0)
+            maxQ = Q2_cut.FindLastBinAbove(0))
             #fitrange = int((maxQ-minQ)/8)
             fitrange = int((maxQ-minQ))
             print("fitrange: ",fitrange)
@@ -229,7 +227,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
             #fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
             fitl = Q2vsW_lowe_cut.FindBin(Q2min)-fitrange
-            fitr = Q2vsW_lowe_cut.FindBin(Q2max)+fitrange
+            fitr = Q2vsW_lowe_cut.FindBin(Q2max)
             while (badfit == True):
                 lol.clear()
                 lor.clear()
