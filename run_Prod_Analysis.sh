@@ -1484,55 +1484,31 @@ if [[ $i_flag != "true" ]]; then
 	    echo
 	    echo "Using low epsilon t/phi bins for high epsilon..."
 	fi
-	echo ${KIN}
-	echo ${W}
-	echo ${Q2}
-	echo ${LOEPS}
-	echo ${HIEPS}
-	echo ${OutDATAFilename}
-	echo ${OutDUMMYFilename}
-	echo ${OutFullAnalysisFilename}
-	echo ${TMIN}
-	echo ${TMAX}
-	echo ${MissMassMin}
-	echo ${MissMassMax}
-	echo ${NumtBins}
-	echo ${NumPhiBins}
-	echo "0"
-	echo "${data_left[*]}"
-	echo "${data_center[*]}"
-	echo "0"
-	echo ${TotDataEffChargeValLeft}
-	echo ${TotDataEffChargeValCenter}
-	echo "0"
-	echo ${TotDummyEffChargeValLeft}
-	echo ${TotDummyEffChargeValCenter}
-	echo "0"
-	echo ${TotDataEffChargeErrLeft}
-	echo ${TotDataEffChargeErrCenter}
-	echo "0"
-	echo ${TotDummyEffChargeErrLeft}
-	echo ${TotDummyEffChargeErrCenter}
-	echo "0"
-	echo "${DataEffValLeft[*]}"
-	echo "${DataEffValCenter[*]}"
-	echo "0"
-	echo "${DataEffErrLeft[*]}"
-	echo "${DataEffErrCenter[*]}"
-	echo ${EffData}
-	echo ${ParticleType}
-	echo $j
-	echo "0"
-	echo "${DatapThetaValLeft[*]}"
-	echo "${DatapThetaValCenter[*]}"
-	echo "0"
-	echo "${DataEbeamValLeft[*]}"
-	echo "${DataEbeamValCenter[*]}"
-	echo ${POL}
-	echo ${formatted_date}
-	echo ${DEBUG}	
+	
+#	if [ ${#data_right[@]} -eq 0 ]; then
+#	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" #"${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} #${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" #${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+#	    # Check the exit status of the Python script
+#	    if [ $? -ne 0 ]; then
+#		echo
+#		echo
+#		echo "1 ERROR: Python script failed!"
+#		echo "       See error above..."
+#		exit 1
+#	    fi
+#	else
+#	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} #"${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} #${TotDummyEffChargeValCenter} ${TotDataEffChargeErrRight} ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} ${TotDummyEffChargeErrRight} ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} #"${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" #"${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+#	    # Check the exit status of the Python script
+#	    if [ $? -ne 0 ]; then
+#		echo
+#		echo
+#		echo "1 ERROR: Python script failed!"
+#		echo "       See error above..."
+#		exit 1
+#	    fi
+#	fi	
+
 	if [ ${#data_right[@]} -eq 0 ]; then
-	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" "0" ${TotDataEffChargeValCenter} "0" "0" ${TotDummyEffChargeValCenter} "0" "0" ${TotDataEffChargeErrCenter} "0" "0" ${TotDummyEffChargeErrCenter} "0" "0" "${DataEffValCenter[*]}" "0" "0" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "0" "${DatapThetaValCenter[*]}" "0" "0" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
@@ -1542,7 +1518,7 @@ if [[ $i_flag != "true" ]]; then
 		exit 1
 	    fi
 	else
-	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} ${TotDataEffChargeErrRight} ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} ${TotDummyEffChargeErrRight} ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
+	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" "0" ${TotDataEffChargeValCenter} "0" "0" ${TotDummyEffChargeValCenter} "0" "0" ${TotDataEffChargeErrCenter} "0" "0" ${TotDummyEffChargeErrCenter} "0" "0" "${DataEffValCenter[*]}" "0" "0" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "0" "${DatapThetaValCenter[*]}" "0" "0" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
 		echo
@@ -1552,7 +1528,7 @@ if [[ $i_flag != "true" ]]; then
 		exit 1
 	    fi
 	fi	
-
+	
 	if [ $j = "low" ]; then
 	    echo
 	    echo
