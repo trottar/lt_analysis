@@ -150,6 +150,71 @@ def calculate_fit_parameters(xvl: List[float], xvr: List[float], lol: List[float
 
     return {"a1": a1, "b1": b1, "a2": a2, "b2": b2, "a3": a3, "b3": b3, "a4": a4, "b4": b4}
 
+def apply_diamond_cut(input_file: str, histograms: Dict[str, Union[TH2D, TH1D]], particle_type: str, fit_params: Dict[str, float], epsilon: str, t_max: float) -> None:
+    """Apply diamond cut to the data and fill relevant histograms."""
+    try:
+        with TFile.Open(input_file, "READ") as infile:
+            tree = infile.Get(f"Cut_{particle_type.capitalize()}_Events_prompt_noRF")
+            for event in tree:
+                if (event.W / event.Q2 > fit_params["a1"] + fit_params["b1"] / event.Q2 and
+                    event.W / event.Q2 < fit_params["a2"] + fit_params["b2"] / event.Q2 and
+                    event.W / event.Q2 > fit_params["a3"] + fit_params["b3"] / event.Q2 and
+                    event.W / event.Q2 < fit_params["a4"] + fit_params["b4"] / event.Q2):
+                    
+                    if epsilon == "low":
+                        histograms["Q2vsW_lolo_cut"].Fill(event.Q2, event.W)
+                    elif epsilon == "mid":
+                        if t_max is not False and -event.MandelT < t_max:
+                            histograms["Q2vsW_milo_cut"].Fill(event.Q2, event.W)
+                            histograms["t_mi_cut"].Fill(-event.MandelT)
+                    elif epsilon == "high":
+                        if t_max is not False and -event.MandelT < t_max:
+                            histograms["Q2vsW_hilo_cut"].Fill(event.Q2, event.W)
+                            histograms["t_cut"].Fill(-event.MandelT)
+    except Exception as e:
+        print(f"Error applying diamond cut to file {input_file}: {str(e)}")
+
+def create_canvas(name: str, title: str) -> TCanvas:
+    """Create a ROOT canvas."""
+    return TCanvas(name, title, 100, 0, 1000, 900)
+
+def draw_histograms(histograms: Dict[str, Union[TH2D, TH1D]], q2_min: float, q2_max: float, w_min: float, w_max: float, 
+                    fit_params: Dict[str, float], output_file: str) -> None:
+    """Draw histograms and save to file."""
+    gStyle.SetOptStat(0)
+    gStyle.SetPalette(55)
+
+    c1_kin = create_canvas("c1_kin", "Kinematic Distributions")
+    histograms["Q2vsW_cut"].Draw("colz")
+    c1_kin.Print(f"{output_file}(")
+
+    for hist_name in ["Q2vsW_high_cut", "Q2vsW_mid_cut", "Q2vsW_low_cut"]:
+        if hist_name in histograms:
+            c = create_canvas(f"c_{hist_name}", f"{hist_name} Distribution")
+            histograms[hist_name].GetXaxis().SetRangeUser(q2_min - q2_min * 0.1, q2_max + q2_max * 0.1)
+            histograms[hist_name].GetYaxis().SetRangeUser(w_min - w_min * 0.1, w_max + w_max * 0.1)
+            histograms[hist_name].Draw("colz")
+            c.Print(output_file)
+
+    if "Q2vsW_lolo_cut" in histograms:
+        c_lolo = create_canvas("c_lolo", "Low Epsilon Q2 vs W Distribution (Diamond Cut)")
+        histograms["Q2vsW_lolo_cut"].Draw("colz")
+        
+        # Draw diamond cut lines
+        lines = []
+        for i, (a, b) in enumerate([("a1", "b1"), ("a2", "b2"), ("a3", "b3"), ("a4", "b4")]):
+            x1, x2 = q2_min, q2_max
+            y1, y2 = fit_params[a] * x1 + fit_params[b], fit_params[a] * x2 + fit_params[b]
+            line = TLine(x1, y1, x2, y2)
+            line.SetLineColor(i + 1)
+            line.SetLineWidth(2)
+            lines.append(line)
+            line.Draw()
+
+        c_lolo.Print(output_file)
+
+    c_lolo.Print(f"{output_file})")
+
 def DiamondPlot(particle_type: str, q2_val: float, q2_min: float, q2_max: float, 
                  w_val: float, w_min: float, w_max: float, phi_setting: str, 
                  t_min: float, t_max: float, inp_dict: Dict) -> Dict[str, float]:
