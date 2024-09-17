@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-05 16:18:17 trottar"
+# Time-stamp: "2024-09-17 18:39:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -223,8 +223,10 @@ def compare_simc(hist, inpDict):
       #Fill SIMC events
       if(ALLCUTS):
 
-          # HGCer hole comparison
-          P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
+
+          if ParticleType == "kaon":
+              # HGCer hole comparison
+              P_hgcer_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
 
           # Phase shift to fix polar plots
           #phi_shift = (evt.phipq+math.pi)
