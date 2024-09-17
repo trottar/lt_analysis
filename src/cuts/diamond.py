@@ -269,6 +269,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         else:
                             check4 = True
                         l+=1
+                        print(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(0,1,fbr,lbr))
                         print("!!!!!!!!",l)
                         if (fbl > lbl or fbr > lbr):
                             print(fbl, lbl, fbr, lbr)
