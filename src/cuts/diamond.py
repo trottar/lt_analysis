@@ -54,12 +54,16 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     ##############
     # HARD CODED #
     ##############
-    if Q2Val == "0p4":
-        Qs = 0.385
-        Ws = str(WVal).replace('.','p')
+    if Q2Val == 0.4:
+        Q2Val = 0.385
+        WVal = 2.20
+        Qs = "0p4"
+        Ws = "2p20"
     elif Q2Val == "2p1":
-        Qs = 2.115
-        Ws = str(WVal).replace('.','p')        
+        Q2Val = 2.115
+        WVal = 2.95
+        Qs = "2p1"
+        Ws = "2p95"
     else:
         Qs = str(Q2Val).replace('.','p')
         Ws = str(WVal).replace('.','p')
