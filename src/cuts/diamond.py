@@ -219,7 +219,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             minQ = Q2_cut.FindFirstBinAbove(0)
             maxQ = Q2_cut.FindLastBinAbove(0)
             fitrange = int((maxQ-minQ)/8)
-            #print("fitrange: ",fitrange)
+            print("fitrange: ",fitrange)
             minbin = 1
             badfile = False
             #print (minQ, minQ/400*(Q2max-Q2min)+Q2min,maxQ,maxQ/400*(Q2max-Q2min)+Q2min,fitrange)
