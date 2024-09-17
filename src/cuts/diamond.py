@@ -223,8 +223,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             minbin = 1
             badfile = False
             print("Q2Val Bin Val: ",Q2vsW_lowe_cut.FindBin(Q2Val))
-            fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
-            fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
+            #fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
+            #fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
+            fitl = Q2vsW_lowe_cut.FindBin(Q2min)-fitrange
+            fitr = Q2vsW_lowe_cut.FindBin(Q2max)+fitrange
             while (badfit == True):
                 lol.clear()
                 lor.clear()
@@ -243,7 +245,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     check3 = False
                     check4 = False
                     # Designed to remove outliers from fit, skips over bins that have empty bins on either side when determining histogram width
-                    while (check1 == False or check2 == False or check3 == False):
+                    while (check1 == False or check2 == False or check3 == False or check4 == False):
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
                             GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(0,1,fbl,lbl)+1)==0):
                             fbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(1,1,fbl,lbl)+1
