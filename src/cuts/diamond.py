@@ -60,6 +60,38 @@ def find_input_file(particle_type: str, filename_override: str, phi_setting: str
     
     return min(matching_files, key=len)
 
+
+def create_histograms(q2_min: float, q2_max: float, w_min: float, w_max: float, t_min: float, t_max: float) -> Dict[str, Union[TH2D, TH1D]]:
+    """Create and return necessary histograms."""
+    histograms = {
+        "Q2vsW_cut": TH2D("Q2vsW_cut", "Q2 vs W Distribution", 400, q2_min, q2_max, 400, w_min, w_max),
+        "Q2vsW_high_cut": TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Distribution", 400, q2_min, q2_max, 400, w_min, w_max),
+        "Q2vsW_mid_cut": TH2D("Q2vsW_mid_cut", "Mid Epsilon Q2 vs W Distribution", 400, q2_min, q2_max, 400, w_min, w_max),
+        "Q2vsW_low_cut": TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Distribution", 400, q2_min, q2_max, 400, w_min, w_max),
+        "Q2vsW_lolo_cut": TH2D("Q2vsW_lolo_cut", "Low Epsilon Q2 vs W Distribution (Diamond Cut)", 400, q2_min, q2_max, 400, w_min, w_max),
+        "Q2vsW_milo_cut": TH2D("Q2vsW_milo_cut", "Mid Epsilon Q2 vs W Distribution (Diamond Cut)", 400, q2_min, q2_max, 400, w_min, w_max),
+        "Q2vsW_hilo_cut": TH2D("Q2vsW_hilo_cut", "High Epsilon Q2 vs W Distribution (Diamond Cut)", 400, q2_min, q2_max, 400, w_min, w_max),
+        "W_cut": TH1D("W_cut", "W Distribution", 400, w_min, w_max),
+        "Q2_cut": TH1D("Q2_cut", "Q2 Distribution", 400, q2_min, q2_max),
+        "t_cut": TH1D("t_cut", "-t Distribution", 400, t_min, t_max),
+        "t_mi_cut": TH1D("t_mi_cut", "Mid Epsilon -t Distribution", 400, t_min, t_max),
+    }
+    return histograms
+
+def fill_histograms(input_file: str, histograms: Dict[str, Union[TH2D, TH1D]], epsilon: str, particle_type: str) -> None:
+    """Fill histograms with data from the input file."""
+    try:
+        with TFile.Open(input_file, "READ") as infile:
+            tree = infile.Get(f"Cut_{particle_type.capitalize()}_Events_prompt_noRF")
+            for event in tree:
+                histograms["Q2vsW_cut"].Fill(event.Q2, event.W)
+                histograms[f"Q2vsW_{epsilon}_cut"].Fill(event.Q2, event.W)
+                if epsilon == "low":
+                    histograms["W_cut"].Fill(event.W)
+                    histograms["Q2_cut"].Fill(event.Q2)
+    except Exception as e:
+        print(f"Error processing file {input_file}: {str(e)}")
+
 def fit_diamond(histogram: TH2D, q2_val: float, q2_min: float, q2_max: float, w_min: float, w_max: float) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
     """Fit the diamond shape to the histogram."""
     min_q = histogram.FindFirstBinAbove(0)
