@@ -226,12 +226,12 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
             fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
             while (badfit == True):
-                lol.clear()
-                lor.clear()
-                hil.clear()
-                hir.clear()
-                xvl.clear()
-                xvr.clear()
+                #lol.clear()
+                #lor.clear()
+                #hil.clear()
+                #hir.clear()
+                #xvl.clear()
+                #xvr.clear()
                 for b in range (0,fitrange):
         
                     fbl = 1
@@ -265,11 +265,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         else:
                             check4 = True
                         if (fbl > lbl or fbr > lbr):                     
-                            #print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n")
+                            print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n")
                             lowe_input = False
                             badfile = True
                             #break
-                            continue
                     if (badfile == True):
                         break
                     minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
