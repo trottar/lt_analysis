@@ -46,7 +46,8 @@ while getopts 'h' flag; do
 	echo "                      Q2=3p0, W=3p14"
 	echo "                      Q2=3p0, W=2p32"
 	echo "                      Q2=2p1, W=2p95"
-	echo "                      Q2=0p5, W=2p40"	
+	echo "                      Q2=0p5, W=2p40"
+	echo "                      Q2=0p4, W=2p20 (Q2 = 0.38, pion only)"		
         exit 0
         ;;
         *) print_usage
@@ -59,8 +60,8 @@ Q2=$2
 W=$3
 ParticleType=$4
 echo "Epsilon must be - high - low - Case Sensitive!"
-echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
-echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
+echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4]"
+echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20]"
 if [[ -z "$1" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was provided and that it's one of the valid options
     echo ""
     echo "I need a valid epsilon..."
@@ -73,27 +74,27 @@ if [[ -z "$1" || ! "$EPSILON" =~ high|low ]]; then # Check the 1st argument was 
 	esac
     done
 fi
-if [[ -z "$2" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+if [[ -z "$2" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5|0p4 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
     echo ""
     echo "I need a valid Q2..."
     while true; do
 	echo ""
-	read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5] - or press ctrl-c to exit : " Q2
+	read -p "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4] - or press ctrl-c to exit : " Q2
 	case $Q2 in
 	    '');; # If blank, prompt again
-	    '5p5'|'4p4'|'3p0'|'2p1'|'0p5') break;; # If a valid option, break the loop and continue
+	    '5p5'|'4p4'|'3p0'|'2p1'|'0p5'|'0p4') break;; # If a valid option, break the loop and continue
 	esac
     done
 fi
-if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40|2p20 ]]; then # Check the 3rd argument was provided and that it's one of the valid options
     echo ""
     echo "I need a valid W..."
     while true; do
 	echo ""
-	read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40] - or press ctrl-c to exit : " W
+	read -p "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20] - or press ctrl-c to exit : " W
 	case $W in
 	    '');; # If blank, prompt again
-	    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40') break;; # If a valid option, break the loop and continue
+	    '3p02'|'2p74'|'3p14'|'2p32'|'2p95'|'2p40'|'2p20') break;; # If a valid option, break the loop and continue
 	esac
     done
 fi
