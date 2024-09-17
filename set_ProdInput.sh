@@ -117,10 +117,6 @@ InputSIMC_center="Prod_Coin_Q${Q2}W${W}center_${EPSILON}e"
 
 cd ${LTANAPATH}/src/setup
 
-python3 set_q2_simc.py ${Q2}
-python3 set_w_simc.py ${W}
-python3 set_params_simc.py ${Q2} ${W}
-
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_center}.inp" ]]; then
     echo
     echo 
