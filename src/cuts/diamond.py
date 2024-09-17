@@ -340,7 +340,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 else:
                     print ("\n!!!!! Bad Diamond Fit!! Try Reducing fitrange or Increasing minbin and Retrying !!!!!\n")
                     fitrange -= 5
-                    #minbin -= 1
+                    minbin -= 1
                 #badfit=False
         
         
