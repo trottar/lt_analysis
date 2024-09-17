@@ -196,7 +196,7 @@ def draw_histograms(histograms: Dict[str, Union[TH2D, TH1D]], q2_min: float, q2_
 
     c_lolo.Print(f"{output_file})")
 
-def diamond_plot(particle_type: str, q2_val: float, q2_min: float, q2_max: float, 
+def DiamondPlot(particle_type: str, q2_val: float, q2_min: float, q2_max: float, 
                  w_val: float, w_min: float, w_max: float, phi_setting: str, 
                  t_min: float, t_max: float, inp_dict: Dict) -> Dict[str, float]:
     """Main function for creating diamond plots."""
