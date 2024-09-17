@@ -227,7 +227,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange*2
             #fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
             fitl = Q2vsW_lowe_cut.FindBin(Q2min)-fitrange
-            fitr = Q2vsW_lowe_cut.FindBin(Q2max)-fitrange
+            fitr = Q2vsW_lowe_cut.FindBin(Q2max)+fitrange
             while (badfit == True):
                 lol.clear()
                 lor.clear()
@@ -254,7 +254,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             check1 = True 
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
                             GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(0,1,fbl,lbl)-1)==0):
-                            lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)-1
+                            lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)
                         else:
                             check2 = True
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
@@ -264,7 +264,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             check3 = True
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
                             GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(0,1,fbr,lbr)-1)==0):
-                            lbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(1,1,fbr,lbr)-1
+                            lbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(1,1,fbr,lbr)
                         else:
                             check4 = True
                         if (fbl > lbl or fbr > lbr):
