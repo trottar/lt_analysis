@@ -259,22 +259,22 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     # Designed to remove outliers from fit, skips over bins that have empty bins on either side when determining histogram width
                     while (check1 == False or check2 == False or check3 == False or check4 == False):
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(0,1,fbl,lbl)+1)==0):
+                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(0,1,fbl,lbl))==0):
                             fbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(1,1,fbl,lbl)
                         else: 
                             check1 = True 
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(0,1,fbl,lbl)-1)==0):
+                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(0,1,fbl,lbl))==0):
                             lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)
                         else:
                             check2 = True
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(0,1,fbr,lbr)+1)==0):
+                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(0,1,fbr,lbr))==0):
                             fbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(1,1,fbr,lbr)
                         else:
                             check3 = True
                         if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(0,1,fbr,lbr)-1)==0):
+                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(0,1,fbr,lbr))==0):
                             lbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(1,1,fbr,lbr)
                         else:
                             check4 = True
