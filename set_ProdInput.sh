@@ -121,22 +121,6 @@ python3 set_q2_simc.py ${Q2}
 python3 set_w_simc.py ${W}
 python3 set_params_simc.py ${Q2} ${W}
 
-if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_right}.inp" ]]; then
-    echo
-    echo 
-    echo "Running simc analysis for ${InputSIMC_right}..."
-    echo
-    ./run_simc_tree "${InputSIMC_right}" "production"
-fi
-
-if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_left}.inp" ]]; then
-    echo
-    echo 
-    echo "Running simc analysis for ${InputSIMC_left}..."
-    echo
-    ./run_simc_tree "${InputSIMC_left}" "production"
-fi
-
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_center}.inp" ]]; then
     echo
     echo 
