@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-17 14:38:58 trottar"
+# Time-stamp: "2024-09-17 16:48:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,28 +67,32 @@ def set_val(inpDict):
     h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
     c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
 
-    for c0, p in zip(c0_list, h_momentum_list):
-        if p == 0.889:
-            c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888        
-        elif p == 0.968:
-            c0_dict["Q0p5W2p40_lowe"] = c0
-            c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
-            c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
-        elif p == 2.185:
-            c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
-            c0_dict["Q3p0W2p32_lowe"] = c0
-        elif p == 2.328:
-            c0_dict["Q4p4W2p74_lowe"] = c0
-        elif p == 3.266:
-            c0_dict["Q5p5W3p02_highe"] = c0            
-        elif p == 4.2:
-            c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
-        elif p == 4.712:
-            c0_dict["Q4p4W2p74_highe"] = c0            
-        elif p == 5.292:
-            c0_dict["Q2p1W2p95_highe"] = c0
-        elif p == 6.59:
-            c0_dict["Q3p0W2p32_highe"] = c0
+    if ParticleType == "kaon":
+        for c0, p in zip(c0_list, h_momentum_list):
+            if p == 0.889:
+                c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
+            elif p == 0.968:
+                c0_dict["Q0p5W2p40_lowe"] = c0
+                c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
+                c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
+            elif p == 2.185:
+                c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
+                c0_dict["Q3p0W2p32_lowe"] = c0
+            elif p == 2.328:
+                c0_dict["Q4p4W2p74_lowe"] = c0
+            elif p == 3.266:
+                c0_dict["Q5p5W3p02_highe"] = c0            
+            elif p == 4.2:
+                c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
+            elif p == 4.712:
+                c0_dict["Q4p4W2p74_highe"] = c0            
+            elif p == 5.292:
+                c0_dict["Q2p1W2p95_highe"] = c0
+            elif p == 6.59:
+                c0_dict["Q3p0W2p32_highe"] = c0
+    else:
+        c0_dict["Q0p4W2p20_lowe"] = 1.0
+        c0_dict["Q0p4W2p20_highe"] = 1.0
             
     ##############
     ##############        
