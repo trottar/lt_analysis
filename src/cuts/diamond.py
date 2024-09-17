@@ -72,7 +72,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     for file in glob.glob(OUTPATH+'/*'+ParticleType+'*'+FilenameOverride+'*'+phi_setting+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
-        #print(file)
+        print(file)
         if "high" in file:
             if (len(file) < lenh):
                 highe_input = file
