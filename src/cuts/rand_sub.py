@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 17:22:56 trottar"
+# Time-stamp: "2024-09-17 17:29:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -829,9 +829,11 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
                 P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM)
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM)            
-
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DATA.Fill(evt.MM)            
             
         if(ALLCUTS):
 
@@ -939,6 +941,10 @@ def rand_sub(phi_setting, inpDict):
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY.Fill(evt.MM)
+            
             
         if(ALLCUTS):
 
@@ -1040,6 +1046,9 @@ def rand_sub(phi_setting, inpDict):
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_RAND.Fill(evt.MM)
             
         if(ALLCUTS):
 
@@ -1137,6 +1146,9 @@ def rand_sub(phi_setting, inpDict):
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             
         if(ALLCUTS):
 
