@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 16:48:21 trottar"
+# Time-stamp: "2024-09-17 16:52:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -34,13 +34,14 @@ c0_dict = {}
 # Then, set global variables which is called with arguments
 def set_val(inpDict):
     
-    global W, Q2, EPSSET
+    global W, Q2, EPSSET, ParticleType
     global tmin, tmax
     global a1, b1, a2, b2, a3, b3, a4, b4
     
     W = inpDict["W"] 
     Q2 = inpDict["Q2"] 
     EPSSET = inpDict["EPSSET"]
+    ParticleType = inpDict["ParticleType"]
 
     tmin = float(inpDict["tmin"] )
     tmax = float(inpDict["tmax"] )
