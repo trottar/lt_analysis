@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 16:46:37 trottar"
+# Time-stamp: "2024-09-17 17:22:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,6 +189,7 @@ def rand_sub(phi_setting, inpDict):
     else:
         c0_dict["Q0p4W2p20_lowe"] = 1.0
         c0_dict["Q0p4W2p20_highe"] = 1.0
+        
     ##############
     ##############        
     ##############
@@ -796,8 +797,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DUMMY_RAND"] = TH2D("P_hgcer_nohole_yAtCer_vs_MM_SUB_DUMMY_RAND", "Y vs MM (no hole cut); Y; MM", 50, -30, 30, 50, 0, 2)
 
     # Fit background and subtract
-    if ParticleType == "kaon":        
-        from background_fit import bg_fit
+    from background_fit import bg_fit
         
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1551,59 +1551,58 @@ def rand_sub(phi_setting, inpDict):
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
 
     # Fit background and subtract
-    if ParticleType == "kaon":
-        inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
-        background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
-        # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
-        #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-        #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-        #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-        #MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
-        #CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
-        #MM_vs_beta_DATA.Add(background_fit[0], -1)
-        #MM_vs_H_cer_DATA.Add(background_fit[0], -1)
-        #MM_vs_H_cal_DATA.Add(background_fit[0], -1)
-        #MM_vs_P_cal_DATA.Add(background_fit[0], -1)
-        #MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
-        #MM_vs_P_aero_DATA.Add(background_fit[0], -1)
-        #phiq_vs_t_DATA.Add(background_fit[0], -1)
-        #Q2_vs_W_DATA.Add(background_fit[0], -1)
-        #Q2_vs_t_DATA.Add(background_fit[0], -1)
-        #W_vs_t_DATA.Add(background_fit[0], -1)
-        #EPS_vs_t_DATA.Add(background_fit[0], -1)
-        #MM_vs_t_DATA.Add(background_fit[0], -1)
-        H_ssxfp_DATA.Add(background_fit[0], -1)
-        H_ssyfp_DATA.Add(background_fit[0], -1)
-        H_ssxpfp_DATA.Add(background_fit[0], -1)
-        H_ssypfp_DATA.Add(background_fit[0], -1)
-        H_hsxfp_DATA.Add(background_fit[0], -1)
-        H_hsyfp_DATA.Add(background_fit[0], -1)
-        H_hsxpfp_DATA.Add(background_fit[0], -1)
-        H_hsypfp_DATA.Add(background_fit[0], -1)
-        H_ssxptar_DATA.Add(background_fit[0], -1)
-        H_ssyptar_DATA.Add(background_fit[0], -1)
-        H_hsxptar_DATA.Add(background_fit[0], -1)
-        H_hsyptar_DATA.Add(background_fit[0], -1)
-        H_ssdelta_DATA.Add(background_fit[0], -1)
-        H_hsdelta_DATA.Add(background_fit[0], -1)
-        H_ph_q_DATA.Add(background_fit[0], -1)
-        H_th_q_DATA.Add(background_fit[0], -1)
-        H_ph_recoil_DATA.Add(background_fit[0], -1)
-        H_th_recoil_DATA.Add(background_fit[0], -1)
-        H_Q2_DATA.Add(background_fit[0], -1)
-        H_W_DATA.Add(background_fit[0], -1)
-        H_t_DATA.Add(background_fit[0], -1)
-        H_epsilon_DATA.Add(background_fit[0], -1)
-        H_MM_DATA.Add(background_fit[0], -1)
-        H_pmiss_DATA.Add(background_fit[0], -1)
-        H_emiss_DATA.Add(background_fit[0], -1)
-        H_pmx_DATA.Add(background_fit[0], -1)
-        H_pmy_DATA.Add(background_fit[0], -1)
-        H_pmz_DATA.Add(background_fit[0], -1)
-        H_ct_DATA.Add(background_fit[0], -1)
+    inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
+    background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
+    # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
+    #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
+    #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
+    #CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
+    #MM_vs_beta_DATA.Add(background_fit[0], -1)
+    #MM_vs_H_cer_DATA.Add(background_fit[0], -1)
+    #MM_vs_H_cal_DATA.Add(background_fit[0], -1)
+    #MM_vs_P_cal_DATA.Add(background_fit[0], -1)
+    #MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
+    #MM_vs_P_aero_DATA.Add(background_fit[0], -1)
+    #phiq_vs_t_DATA.Add(background_fit[0], -1)
+    #Q2_vs_W_DATA.Add(background_fit[0], -1)
+    #Q2_vs_t_DATA.Add(background_fit[0], -1)
+    #W_vs_t_DATA.Add(background_fit[0], -1)
+    #EPS_vs_t_DATA.Add(background_fit[0], -1)
+    #MM_vs_t_DATA.Add(background_fit[0], -1)
+    H_ssxfp_DATA.Add(background_fit[0], -1)
+    H_ssyfp_DATA.Add(background_fit[0], -1)
+    H_ssxpfp_DATA.Add(background_fit[0], -1)
+    H_ssypfp_DATA.Add(background_fit[0], -1)
+    H_hsxfp_DATA.Add(background_fit[0], -1)
+    H_hsyfp_DATA.Add(background_fit[0], -1)
+    H_hsxpfp_DATA.Add(background_fit[0], -1)
+    H_hsypfp_DATA.Add(background_fit[0], -1)
+    H_ssxptar_DATA.Add(background_fit[0], -1)
+    H_ssyptar_DATA.Add(background_fit[0], -1)
+    H_hsxptar_DATA.Add(background_fit[0], -1)
+    H_hsyptar_DATA.Add(background_fit[0], -1)
+    H_ssdelta_DATA.Add(background_fit[0], -1)
+    H_hsdelta_DATA.Add(background_fit[0], -1)
+    H_ph_q_DATA.Add(background_fit[0], -1)
+    H_th_q_DATA.Add(background_fit[0], -1)
+    H_ph_recoil_DATA.Add(background_fit[0], -1)
+    H_th_recoil_DATA.Add(background_fit[0], -1)
+    H_Q2_DATA.Add(background_fit[0], -1)
+    H_W_DATA.Add(background_fit[0], -1)
+    H_t_DATA.Add(background_fit[0], -1)
+    H_epsilon_DATA.Add(background_fit[0], -1)
+    H_MM_DATA.Add(background_fit[0], -1)
+    H_pmiss_DATA.Add(background_fit[0], -1)
+    H_emiss_DATA.Add(background_fit[0], -1)
+    H_pmx_DATA.Add(background_fit[0], -1)
+    H_pmy_DATA.Add(background_fit[0], -1)
+    H_pmz_DATA.Add(background_fit[0], -1)
+    H_ct_DATA.Add(background_fit[0], -1)
         
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -1743,24 +1742,23 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_DATA"].Draw("same, E1")
 
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
-
-    if ParticleType == "kaon":
         
-        ###
-        # MM sub plots    
-        CMMsub = TCanvas()
+    ###
+    # MM sub plots    
+    CMMsub = TCanvas()
 
-        histDict["H_MM_nosub_DATA"].SetLineColor(1)
-        histDict["H_MM_nosub_DATA"].SetFillStyle(3001)  # Set fill style to dots
-        histDict["H_MM_nosub_DATA"].SetFillColor(kBlack)  # Set fill color to black
-        #histDict["H_MM_nosub_DATA"].Draw("same, E1")
-        histDict["H_MM_nosub_DATA"].Draw("hist same")
+    histDict["H_MM_nosub_DATA"].SetLineColor(1)
+    histDict["H_MM_nosub_DATA"].SetFillStyle(3001)  # Set fill style to dots
+    histDict["H_MM_nosub_DATA"].SetFillColor(kBlack)  # Set fill color to black
+    #histDict["H_MM_nosub_DATA"].Draw("same, E1")
+    histDict["H_MM_nosub_DATA"].Draw("hist same")
+    if ParticleType == "kaon":        
         histDict["H_MM_nosub_SUB_DATA"].SetLineColor(2)
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
-        background_fit[0].SetLineColor(3)
-        background_fit[0].Draw("same")
+    background_fit[0].SetLineColor(3)
+    background_fit[0].Draw("same")
 
-        CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
     ###
     # t-Phi plots        

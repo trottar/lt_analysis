@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 17:19:13 trottar"
+# Time-stamp: "2024-09-17 17:21:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,8 +153,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         subDict = {}
 
     # Fit background and subtract
-    if ParticleType == "kaon":        
-        from background_fit import bg_fit
+    from background_fit import bg_fit
         
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -436,10 +435,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
             # Fit background and subtract
-            if ParticleType == "kaon":
-                background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
+            background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : remove_negative_bins(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
