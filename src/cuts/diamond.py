@@ -218,8 +218,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             #Does assume 400 bins for Q2 and W, centered at kinematic values
             minQ = Q2_cut.FindFirstBinAbove(0)
             maxQ = Q2_cut.FindLastBinAbove(0)
-            #fitrange = int((maxQ-minQ)/8)
-            fitrange = int((maxQ-minQ)/10)
+            fitrange = int((maxQ-minQ)/8)
             print("fitrange: ",fitrange)
             minbin = 1
             badfile = False
@@ -268,11 +267,11 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         if (fbl > lbl or fbr > lbr):
                             print(fbl, lbl, fbr, lbr)
                             print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n", b, check1, check2, check3, check4)
-                            lowe_input = False
+                            #lowe_input = False
                             #badfile = True
                             #break
                             #sys.exit(2)
-                            continue
+                            lbr += 1                            
                     if (badfile == True):
                         break
                     minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
