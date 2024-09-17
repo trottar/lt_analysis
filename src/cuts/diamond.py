@@ -275,7 +275,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n")
                             lowe_input = False
                             badfile = True
-                            #break
+                            break
                     if (badfile == True):
                         break
                     #for i in range (fbl,lbl):
