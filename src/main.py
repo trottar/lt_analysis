@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 13:32:07 trottar"
+# Time-stamp: "2024-09-17 13:33:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -275,8 +275,11 @@ else:
 ##############
 ##############
 
+print("\n\n")
+print("-"*25)
 print(f"Q2 range: ({inpDict['Q2min']:.3f}, {inpDict['Q2max']:.3f})")
 print(f"W range: ({inpDict['Wmin']:.3f}, {inpDict['Wmax']:.3f})")
+print("-"*25)
 
 # Default starting values no need to change
 inpDict["Epsmin"] = 0.0
