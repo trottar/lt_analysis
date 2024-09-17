@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 16:42:08 trottar"
+# Time-stamp: "2024-09-17 18:35:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -299,7 +299,9 @@ for p in [1,2,3,4]:
         sys.exit(2)
     else:
         print("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))    
-    
+
+print("\n\n")
+        
 if DEBUG:
     # Show plot pdf for each setting
     for phiset in phisetlist:
