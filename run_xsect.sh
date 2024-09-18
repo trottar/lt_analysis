@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 21:58:32 trottar"
+# Time-stamp: "2024-09-17 22:18:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,7 @@ Q2=$1
 W=$2
 echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5- 0p4]"
 echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20]"
-if [[ -z "$1" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5_0p4 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
+if [[ -z "$1" || ! "$Q2" =~ 5p5|4p4|3p0|2p1|0p5|0p4 ]]; then # Check the 2nd argument was provided and that it's one of the valid options
     echo ""
     echo "I need a valid Q2..."
     while true; do
