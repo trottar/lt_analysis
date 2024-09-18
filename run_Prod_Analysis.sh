@@ -702,7 +702,7 @@ done
 #MissMassMax=1.16
 # MM cut (pion, Vijay)
 MissMassMin=0.88
-MissMassMax=0.91
+MissMassMax=0.96
 
 
 # Pion Q2 = 0.38, Vijay
@@ -710,8 +710,6 @@ if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
     # Q2=0p4, W=2p20
     NumtBins=7
     NumPhiBins=16
-    #TMIN=0.001
-    #TMAX=0.050
     TMIN=0.001
     TMAX=0.050
 elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
