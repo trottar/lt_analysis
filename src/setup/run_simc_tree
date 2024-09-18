@@ -27,6 +27,20 @@ SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 cd $SIMCPATH
+source /apps/root/6.22.06/setroot_CUE.bash
+make clean
+make
+./simc << endofinput 2> "${LTANAPATH}/log/$1.log"
+$1
+endofinput
+cd ${SIMCPATH}/util/root_tree
+make clean
+make
+./make_root_tree << endofinput
+$1
+endofinput
+cd ${SIMCPATH}
+mv worksim/$1.root OUTPUTS
 
 REACTION=$2
 echo "Reaction selected: $2" 
