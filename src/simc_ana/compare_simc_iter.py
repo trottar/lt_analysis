@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 18:39:23 trottar"
+# Time-stamp: "2024-09-17 19:36:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,7 +234,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
 
           # Phase shift to fix polar plots
           #phi_shift = (evt.phipq+math.pi)
-          phi_shift = (evt.phipq)          
+          phi_shift = (evt.phipq)
           
           polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), -evt.t)
           
