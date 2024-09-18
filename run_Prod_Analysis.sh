@@ -702,7 +702,7 @@ done
 #MissMassMax=1.16
 # MM cut (pion, Vijay)
 MissMassMin=0.88
-MissMassMax=0.96
+MissMassMax=0.98
 
 
 # Pion Q2 = 0.38, Vijay
