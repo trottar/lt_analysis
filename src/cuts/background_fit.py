@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-06-11 15:50:21 trottar"
+# Time-stamp: "2024-09-17 23:41:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,7 +137,8 @@ def bg_fit(phi_setting, inpDict, hist):
 
     #bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
     # No background fit
-    bg_factor = 0.0
+    #bg_factor = 0.0
+    bg_factor = 20.0
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
