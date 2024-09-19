@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 11:26:07 trottar"
+# Time-stamp: "2024-09-19 11:29:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -248,6 +248,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                         hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):                
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):            
 
@@ -285,6 +290,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):                
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):
 
@@ -322,6 +332,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                         hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):                
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                        hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):
 
@@ -359,6 +374,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                         hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):                
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                        hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):
 
