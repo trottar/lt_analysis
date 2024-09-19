@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 11:51:29 trottar"
+# Time-stamp: "2024-09-19 15:10:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -242,17 +242,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
+
+        if(NOMMCUTS):
+            for j in range(len(t_bins)-1):                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):            
 
@@ -284,17 +281,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
+
+        if(NOMMCUTS):
+            for j in range(len(t_bins)-1):                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                    hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):
 
@@ -326,17 +320,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                        hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                        hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
+
+        if(NOMMCUTS):
+            for j in range(len(t_bins)-1):                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                    hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):
 
@@ -368,17 +359,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                        hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                for j in range(len(t_bins)-1):                
-                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                        hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
+
+        if(NOMMCUTS):
+            for j in range(len(t_bins)-1):                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                    hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
 
         if(ALLCUTS):
 

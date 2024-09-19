@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 11:34:35 trottar"
+# Time-stamp: "2024-09-19 15:09:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -822,8 +822,6 @@ def rand_sub(phi_setting, inpDict):
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                H_MM_nosub_DATA.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -832,8 +830,9 @@ def rand_sub(phi_setting, inpDict):
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                H_MM_nosub_DATA.Fill(evt.MM)            
+            
+        if(NOMMCUTS):
+            H_MM_nosub_DATA.Fill(evt.MM)            
             
         if(ALLCUTS):
 
@@ -931,8 +930,6 @@ def rand_sub(phi_setting, inpDict):
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                H_MM_nosub_DUMMY.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -942,9 +939,9 @@ def rand_sub(phi_setting, inpDict):
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                H_MM_nosub_DUMMY.Fill(evt.MM)
             
+        if(NOMMCUTS):
+            H_MM_nosub_DUMMY.Fill(evt.MM)            
             
         if(ALLCUTS):
 
@@ -1036,8 +1033,6 @@ def rand_sub(phi_setting, inpDict):
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                H_MM_nosub_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -1047,8 +1042,9 @@ def rand_sub(phi_setting, inpDict):
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                H_MM_nosub_RAND.Fill(evt.MM)
+            
+        if(NOMMCUTS):
+            H_MM_nosub_RAND.Fill(evt.MM)
             
         if(ALLCUTS):
 
@@ -1136,8 +1132,6 @@ def rand_sub(phi_setting, inpDict):
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            if(NOMMCUTS):
-                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer)
@@ -1147,8 +1141,9 @@ def rand_sub(phi_setting, inpDict):
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            if(NOMMCUTS):
-                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
+            
+        if(NOMMCUTS):
+            H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             
         if(ALLCUTS):
 
