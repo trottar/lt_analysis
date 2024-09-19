@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 17:32:50 trottar"
+# Time-stamp: "2024-09-18 21:07:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -620,8 +620,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for {} (t-bin={})... ".format(kin_type, i+1))
-                    #sys.exit(2)
-                    average = 0.0
+                    sys.exit(2)
                 ave_hist.append(average)
                 # Calculate the standard deviation of the data points within the bin
                 std_dev = np.std(bin_val_data)
