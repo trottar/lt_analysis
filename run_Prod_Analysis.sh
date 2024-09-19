@@ -701,8 +701,8 @@ done
 #MissMassMin=1.08
 #MissMassMax=1.16
 # MM cut (pion, Vijay)
-MissMassMin=0.91-0.4937 # Kaon mass
-MissMassMax=0.98-0.4937 # Kaon mass
+MissMassMin=0.86 # M_Kaon/10 shifted
+MissMassMax=0.93 # M_Kaon/10 shifted
 
 # Pion Q2 = 0.38, Vijay
 if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
