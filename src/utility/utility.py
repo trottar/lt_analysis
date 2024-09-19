@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 00:15:01 trottar"
+# Time-stamp: "2024-09-19 00:16:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,17 +97,17 @@ def data_to_csv(file_path, column_name, new_value, run_number):
     else:
         # Initialize empty data and fieldnames
         data = []
-        fieldnames = ['Run_Number']
+        fieldnames = ['Run Number']
     
     # Add new column name if it doesn't exist
-    if column_name not in fieldnames and column_name != 'Run_Number':
+    if column_name not in fieldnames and column_name != 'Run Number':
         fieldnames.append(column_name)
     
     # Find or create the row for this run number
-    row = next((row for row in data if row['Run_Number'] == str(run_number)), None)
+    row = next((row for row in data if row['Run Number'] == str(run_number)), None)
     if row is None:
         row = {fn: '' for fn in fieldnames}
-        row['Run_Number'] = str(run_number)
+        row['Run Number'] = str(run_number)
         data.append(row)
     
     # Update the value in the correct column
