@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 11:29:41 trottar"
+# Time-stamp: "2024-09-19 11:34:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,8 +137,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             elif p == 6.59:
                 c0_dict["Q3p0W2p32_highe"] = c0
     else:
-        c0_dict["Q0p4W2p20_lowe"] = 1.0
-        c0_dict["Q0p4W2p20_highe"] = 1.0
+        c0_dict["Q0p4W2p20_lowe"] = 0.0
+        c0_dict["Q0p4W2p20_highe"] = 0.0
             
     ##############
     ##############        
@@ -638,7 +638,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 print("!!!!!!!!!!!",sub_val, weighted_sum , total_count)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
-                    print("Empty binning for {} (t-bin={})... ".format(kin_type, i+1))
+                    print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
                     sys.exit(2)
                 ave_hist.append(average)
                 # Calculate the standard deviation of the data points within the bin
@@ -655,7 +655,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 binned_sub_data[0].append(bin_val_data)
                 binned_sub_data[1].append(sub_val)
             except ZeroDivisionError:
-                print("ERROR: Empty binning for {}... ".format(kin_type))
+                print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
                 sys.exit(2)
             i+=1
 
@@ -900,7 +900,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 total_count = np.sum(sub_val)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
-                    print("ERROR: Empty binning for {}... ".format(kin_type))
+                    print("Empty binning for simc {} (t-bin={})... ".format(kin_type, i+1))
                     sys.exit(2)                
                 ave_hist.append(average)
                 # Calculate the standard deviation of the simc points within the bin
@@ -917,7 +917,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 binned_sub_simc[0].append(bin_val_simc)
                 binned_sub_simc[1].append(sub_val)
             except ZeroDivisionError:
-                print("ERROR: Empty binning for {}... ".format(kin_type))
+                print("Empty binning for simc {} (t-bin={})... ".format(kin_type, i+1))
                 sys.exit(2)
             i+=1
 

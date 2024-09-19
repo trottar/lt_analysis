@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 10:23:21 trottar"
+# Time-stamp: "2024-09-19 11:34:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,8 +187,8 @@ def rand_sub(phi_setting, inpDict):
             elif p == 6.59:
                 c0_dict["Q3p0W2p32_highe"] = c0
     else:
-        c0_dict["Q0p4W2p20_lowe"] = 1.0
-        c0_dict["Q0p4W2p20_highe"] = 1.0
+        c0_dict["Q0p4W2p20_lowe"] = 0.0
+        c0_dict["Q0p4W2p20_highe"] = 0.0
         
     ##############
     ##############        

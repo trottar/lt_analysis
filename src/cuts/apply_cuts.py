@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 16:52:23 trottar"
+# Time-stamp: "2024-09-19 11:32:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,8 +92,8 @@ def set_val(inpDict):
             elif p == 6.59:
                 c0_dict["Q3p0W2p32_highe"] = c0
     else:
-        c0_dict["Q0p4W2p20_lowe"] = 1.0
-        c0_dict["Q0p4W2p20_highe"] = 1.0
+        c0_dict["Q0p4W2p20_lowe"] = 0.0
+        c0_dict["Q0p4W2p20_highe"] = 0.0
             
     ##############
     ##############        

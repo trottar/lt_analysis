@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 10:40:59 trottar"
+# Time-stamp: "2024-09-19 11:34:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -137,8 +137,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             elif p == 6.59:
                 c0_dict["Q3p0W2p32_highe"] = c0
     else:
-        c0_dict["Q0p4W2p20_lowe"] = 1.0
-        c0_dict["Q0p4W2p20_highe"] = 1.0
+        c0_dict["Q0p4W2p20_lowe"] = 0.0
+        c0_dict["Q0p4W2p20_highe"] = 0.0
     
     ##############
     ##############        
