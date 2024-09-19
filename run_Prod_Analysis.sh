@@ -709,7 +709,7 @@ MissMassMax=0.96
 # Pion Q2 = 0.38, Vijay
 if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
     # Q2=0p4, W=2p20
-    NumtBins=7
+    NumtBins=8
     NumPhiBins=16
     TMIN=0.001
     TMAX=0.050
