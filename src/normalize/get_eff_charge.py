@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-07-19 15:45:53 trottar"
+# Time-stamp: "2024-09-19 14:55:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -115,13 +115,13 @@ def get_eff_charge(hist, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_prompt_RF" in line:
+                            if "coin_ek_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
-                            if "coin_epi_cut_prompt_RF" in line:
+                            if "coin_epi_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
-                            if "coin_ep_cut_prompt_RF" in line:
+                            if "coin_ep_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break                                
             else:
@@ -137,13 +137,13 @@ def get_eff_charge(hist, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_prompt_RF" in line:
+                            if "coin_ek_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break                            
-                            if "coin_epi_cut_prompt_RF" in line:
+                            if "coin_epi_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
-                            if "coin_ep_cut_prompt_RF" in line:
+                            if "coin_ep_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break                                
             else:
@@ -159,13 +159,13 @@ def get_eff_charge(hist, inpDict):
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
-                            if "coin_ek_cut_prompt_RF" in line:
+                            if "coin_ek_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break                            
-                            if "coin_epi_cut_prompt_RF" in line:
+                            if "coin_epi_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break
-                            if "coin_ep_cut_prompt_RF" in line:
+                            if "coin_ep_cut_prompt_noRF" in line:
                                 pid_text = next(f_log).replace("[","").replace("]","").replace("{","").replace("}","").replace("'","").replace("&",",").split(",")
                                 break                                
             else:
