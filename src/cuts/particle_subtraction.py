@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 11:34:07 trottar"
+# Time-stamp: "2024-09-19 14:40:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -406,6 +406,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DATA.Fill(evt.MM)            
             
         if(ALLCUTS):
 
@@ -512,6 +515,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY.Fill(evt.MM)
             
         if(ALLCUTS):
 
@@ -618,6 +624,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_RAND.Fill(evt.MM)
             
         if(ALLCUTS):
 
@@ -724,6 +733,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
             
         if(ALLCUTS):
 
@@ -1167,6 +1179,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                         hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1205,6 +1222,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                         hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1243,6 +1265,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                         hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                        hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1281,6 +1308,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                         hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)                                
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                        hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)                                
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1471,6 +1503,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                                hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
             
         if(ALLCUTS):            
             for j in range(len(t_bins)-1):
@@ -1514,6 +1553,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:                
+                                hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1557,6 +1603,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:                
+                                hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1601,6 +1654,13 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            NOMMCUTS = apply_data_sub_cuts(evt)
+            if(NOMMCUTS):
+                for j in range(len(t_bins)-1):
+                    for k in range(len(phi_bins)-1):
+                        if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                            if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                                hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
