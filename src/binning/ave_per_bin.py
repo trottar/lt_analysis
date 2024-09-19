@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 10:59:55 trottar"
+# Time-stamp: "2024-09-19 11:05:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -617,7 +617,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_data)
                 total_count = np.sum(sub_val)
-                print("!!!!!!!!!!!",sub_val, weighted_sum / total_count)
+                print("!!!!!!!!!!!",sub_val, weighted_sum , total_count)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for {} (t-bin={})... ".format(kin_type, i+1))
