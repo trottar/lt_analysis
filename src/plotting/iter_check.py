@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-29 16:31:43 trottar"
+# Time-stamp: "2024-09-25 14:21:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -106,8 +106,15 @@ def plot_iteration(histlist, phisetlist, inpDict):
     # Copy root tree and phi_setting strings to cloned dictionary
     for hist in histlist:
         hist_copy = {}
-        hist_copy["InFile_SIMC"] = hist["InFile_SIMC"]
-        hist_copy["phi_setting"] = hist["phi_setting"]
+        #hist_copy["InFile_SIMC"] = hist["InFile_SIMC"]
+        #hist_copy["phi_setting"] = hist["phi_setting"]
+        for key, val in hist.items():
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
+                # Clone the TObject if it has the 'Clone' method
+                hist_copy[key] = val.Clone()
+            else:
+                # Otherwise, just copy the value
+                hist_copy[key] = val        
         # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
     
