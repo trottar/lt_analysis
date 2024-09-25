@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 13:18:16 trottar"
+# Time-stamp: "2024-09-25 13:51:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email
+from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -597,7 +597,7 @@ for hist in histlist:
                 hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
 
 # Open the ROOT file
-root_file = TFile.Open(foutroot, "UPDATE")
+root_file = open_root_file(foutroot, "UPDATE")
 
 # Check if the file was opened successfully
 if root_file.IsOpen():

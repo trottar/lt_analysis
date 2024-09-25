@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-09-05 10:18:28 trottar"
+# Time-stamp: "2024-09-25 13:53:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -24,7 +24,7 @@ import importlib.util
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import run_fortran
+from utility import open_root_file, run_fortran
 
 ##################################################################################################################################################
 # Importing param model for weight iteration
@@ -80,16 +80,16 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))        
         
-    InFile_SIMC = TFile.Open(simc_root, "READ")
+    InFile_SIMC = open_root_file(simc_root, "READ")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
     if iter_num > 1:
         # Create a new ROOT file for writing
-        new_InFile_SIMC = TFile.Open(simc_root.replace("iter_{}.root".format(iter_num-1),"iter_{}.root".format(iter_num)), "UPDATE")
+        new_InFile_SIMC = open_root_file(simc_root.replace("iter_{}.root".format(iter_num-1),"iter_{}.root".format(iter_num)), "UPDATE")
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
     else:
         # Create a new ROOT file for writing
-        new_InFile_SIMC = TFile.Open(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "UPDATE")
+        new_InFile_SIMC = open_root_file(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "UPDATE")
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
 
     # Grab branches from previous iteration

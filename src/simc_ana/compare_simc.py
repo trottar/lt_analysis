@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 10:23:05 trottar"
+# Time-stamp: "2024-09-25 13:54:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import create_polar_plot
+from utility import open_root_file, create_polar_plot
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -130,7 +130,7 @@ def compare_simc(hist, inpDict):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
         return histDict
 
-    InFile_SIMC = TFile.Open(rootFileSimc, "OPEN")
+    InFile_SIMC = open_root_file(rootFileSimc)
 
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 

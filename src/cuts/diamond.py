@@ -42,6 +42,12 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import open_root_file
+
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
@@ -203,7 +209,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 	###############################################################################################################################################
 
 	# Read stuff from the main event tree
-        infile = TFile.Open(rootName, "READ")
+        infile = open_root_file(rootName, "READ")
 
 	# Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
         Cut_Events_all_noRF_tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))

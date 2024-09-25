@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 16:03:37 trottar"
+# Time-stamp: "2024-09-25 13:54:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,6 +29,12 @@ ltsep package import and pathing definitions
 
 # Import progres bar
 from ltsep import Misc
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import open_root_file
 
 ###############################################################################################################################################
 
@@ -65,7 +71,7 @@ for tree in inp_tree_names.split():
             warning = "WARNING: File {} not found. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)
             continue
-        tempfile = ROOT.TFile.Open(inp_root_file)
+        tempfile = open_root_file(inp_root_file)
         if tempfile == None or not tempfile.IsOpen() or tempfile.TestBit(ROOT.TFile.kRecovered):
             warning = "WARNING: File {} not found or not opened or corrupted. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 13:38:02 trottar"
+# Time-stamp: "2024-09-25 13:46:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_negative_bins, create_polar_plot
+from utility import open_root_file, remove_negative_bins, create_polar_plot
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -145,7 +145,7 @@ def rand_sub(phi_setting, inpDict):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         return histDict
 
-    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
+    InFile_DUMMY = open_root_file(rootFileDummy)
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
     

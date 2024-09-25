@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 15:12:38 trottar"
+# Time-stamp: "2024-09-25 13:50:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,6 +41,12 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import open_root_file
+
 ################################################################################################################################################
 
 def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
@@ -72,7 +78,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
 
-    InFile_DATA = TFile.Open(rootFileData, "OPEN")
+    InFile_DATA = open_root_file(rootFileData)
 
     TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
 
@@ -86,7 +92,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
 
-    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
+    InFile_DUMMY = open_root_file(rootFileDummy)
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
     
@@ -1054,7 +1060,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
 
-    InFile_DATA = TFile.Open(rootFileData, "OPEN")
+    InFile_DATA = open_root_file(rootFileData)
 
     TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
 
@@ -1068,7 +1074,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
 
-    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
+    InFile_DUMMY = open_root_file(rootFileDummy)
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
     
@@ -1370,7 +1376,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
 
-    InFile_DATA = TFile.Open(rootFileData, "OPEN")
+    InFile_DATA = open_root_file(rootFileData)
 
     TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
 
@@ -1384,7 +1390,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
 
-    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")  
+    InFile_DUMMY = open_root_file(rootFileDummy)
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
     

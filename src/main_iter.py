@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-08-12 15:56:35 trottar"
+# Time-stamp: "2024-09-25 13:52:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email
+from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -240,17 +240,17 @@ for hist in histlist:
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
-    InFile_DATA = TFile.Open(rootFileData, "OPEN")
+    InFile_DATA = open_root_file(rootFileData)
     hist["InFile_DATA"]  = InFile_DATA
     
     rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDUMMYFilename"] + "_%s.root" % (hist["phi_setting"])
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
-    InFile_DUMMY = TFile.Open(rootFileDummy, "OPEN")
+    InFile_DUMMY = open_root_file(rootFileDummy)
     hist["InFile_DUMMY"]  = InFile_DUMMY
     
-prev_root_file = TFile.Open(prev_iter_root, "READ")
+prev_root_file = open_root_file(prev_iter_root, "READ")
 # Grab weight from previous iteration
 for hist in histlist:
     hist.update(hist_in_dir(prev_root_file, "{}/data".format(hist["phi_setting"])))
@@ -311,7 +311,7 @@ for hist in histlist:
 EXAMPLE: How to get histograms from previous iteration
 
 # Open the ROOT file, must pass open root file so object exists here and in function
-prev_root_file = TFile.Open(prev_iter_root, "READ")
+prev_root_file = open_root_file(prev_iter_root, "READ")
 # Grab weight from previous iteration
 iter_weight = get_histogram(prev_root_file, "{}/simc".format(hist["phi_setting"]), "H_Weight_SIMC")
 '''
@@ -524,7 +524,7 @@ for hist in histlist:
                     hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
 
 # Open the ROOT file
-root_file = TFile.Open(foutroot, "UPDATE")
+root_file = open_root_file(foutroot, "UPDATE")
 
 # Check if the file was opened successfully
 if root_file.IsOpen():

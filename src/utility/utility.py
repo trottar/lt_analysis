@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 13:45:40 trottar"
+# Time-stamp: "2024-09-25 13:55:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -407,7 +407,7 @@ def is_root_obj(obj):
 # Save histograms to root file
 def hist_to_root(hist, file_name, directory_name):
     # Check if the ROOT file already exists
-    root_file = ROOT.TFile.Open(file_name, "UPDATE")
+    root_file = open_root_file(file_name, "UPDATE")
 
     # Split the directory names
     directories = directory_name.split('/')
@@ -438,7 +438,7 @@ def hist_to_root(hist, file_name, directory_name):
 # Save histograms to root file
 def hist_to_root(hist, file_name, directory_name):
     # Check if the ROOT file already exists
-    root_file = ROOT.TFile.Open(file_name, "UPDATE")
+    root_file = open_root_file(file_name, "UPDATE")
 
     # Split the directory names
     directories = directory_name.split('/')
