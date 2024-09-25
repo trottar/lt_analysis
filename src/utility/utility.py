@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 13:55:48 trottar"
+# Time-stamp: "2024-09-25 13:57:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,8 +74,8 @@ def open_root_file(inp_root_file, option="OPEN"):
     except OSError:
         print(f"ERROR: {inp_root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
         if request_yn_response(string="Running jcache get..."):
-            if "/lustre/" in inp_root_file:
-                jcache get inp_root_file.replace("/lustre/expphy","")
+            # Run the bash command
+            subprocess.call(f"jcache get {inp_root_file}.replace('/lustre/expphy','')", shell=True)            
 
 ################################################################################################################################################
 
