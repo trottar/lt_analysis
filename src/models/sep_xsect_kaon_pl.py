@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-08 08:38:43 trottar"
+# Time-stamp: "2024-09-25 13:20:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,6 +140,7 @@ def import_model(inp_model, arg_str):
                 #  RLT (7/11/2024): Moved below for Q2dep func form
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
+
                 f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
@@ -167,7 +168,8 @@ def import_model(inp_model, arg_str):
     sig_sep = modelDict[inp_model]
 
     # Apply weight factor
-    g = 1 / ((ww**2) - (m_p**2))**2
+    ###g = 1 / ((ww**2) - (m_p**2))**2
+    g = 1 / ((ww**2) - (m_p**2))**5
     sig_sep = sig_sep*g
 
     sig_sep = sig_sep/2.0/math.pi
