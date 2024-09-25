@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 00:16:04 trottar"
+# Time-stamp: "2024-09-25 13:45:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,6 +45,37 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+################################################################################################################################################
+
+def request_yn_response(string=""):
+    while True:
+        response = input("Please enter 'y' or 'n': ").lower()
+        if response == 'y':
+            if string == "":
+                print("You selected Yes.")
+            else:
+                print(string)
+            return True
+        elif response == 'n':
+            if string == "":
+                print("You selected No.")
+            else:
+                print(string)
+            return False
+        else:
+            print("Invalid input. Please enter 'y' for yes or 'n' for no.")
+
+################################################################################################################################################
+
+def open_root_file(inp_root_file, option="OPEN"):
+    try:
+        opened_root_file = TFile.Open(inp_root_file, option)
+    except OSError:
+        print(f"ERROR: {inp_root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
+        if request_yn_response(string="Running jcache get..."):
+            if "/lustre/" in inp_root_file:
+                jcache get inp_root_file.replace("/lustre/expphy","")
 
 ################################################################################################################################################
 

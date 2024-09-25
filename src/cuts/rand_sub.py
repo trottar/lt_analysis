@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 15:09:19 trottar"
+# Time-stamp: "2024-09-25 13:38:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -131,7 +131,7 @@ def rand_sub(phi_setting, inpDict):
         histDict.update({ "phi_setting" : phi_setting})
         return histDict
 
-    InFile_DATA = TFile.Open(rootFileData, "OPEN")
+    InFile_DATA = open_root_file(rootFileData)
 
     TBRANCH_DATA  = InFile_DATA.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
 
