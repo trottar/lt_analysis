@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 14:02:53 trottar"
+# Time-stamp: "2024-09-25 14:13:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,18 +68,20 @@ def request_yn_response(string=""):
 
 ################################################################################################################################################
 
-def open_root_file(inp_root_file, option="OPEN"):
+def open_root_file(root_file, option="OPEN"):
     try:
-        opened_root_file = TFile.Open(inp_root_file, option)
+        opened_root_file = TFile.Open(root_file, option)
+        return opened_root_file
     except OSError:
-        if "cache" in inp_root_file:
-            print(f"ERROR: {inp_root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
+        if "cache" in root_file:
+            print(f"ERROR: {root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
             if request_yn_response(string="Running jcache get..."):
                 # Run the bash command
-                subprocess.call(f"jcache get {inp_root_file}.replace('/lustre/expphy','')", shell=True)
+                subprocess.call(f"jcache get {root_file}.replace('/lustre/expphy','')", shell=True)
                 sys.exit(2)
         else:
-            print(f"ERROR: {inp_root_file} not found.")
+            print(f"ERROR: {root_file} not found.")
+            sys.exit(2)
 
 ################################################################################################################################################
 
