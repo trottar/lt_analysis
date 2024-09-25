@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 14:00:55 trottar"
+# Time-stamp: "2024-09-25 14:02:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -72,11 +72,14 @@ def open_root_file(inp_root_file, option="OPEN"):
     try:
         opened_root_file = TFile.Open(inp_root_file, option)
     except OSError:
-        print(f"ERROR: {inp_root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
-        if request_yn_response(string="Running jcache get..."):
-            # Run the bash command
-            subprocess.call(f"jcache get {inp_root_file}.replace('/lustre/expphy','')", shell=True)
-            sys.exit(2)
+        if "cache" in inp_root_file:
+            print(f"ERROR: {inp_root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
+            if request_yn_response(string="Running jcache get..."):
+                # Run the bash command
+                subprocess.call(f"jcache get {inp_root_file}.replace('/lustre/expphy','')", shell=True)
+                sys.exit(2)
+        else:
+            print(f"ERROR: {inp_root_file} not found.")
 
 ################################################################################################################################################
 
