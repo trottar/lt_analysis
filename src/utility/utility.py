@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 13:57:44 trottar"
+# Time-stamp: "2024-09-25 14:00:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,7 +75,8 @@ def open_root_file(inp_root_file, option="OPEN"):
         print(f"ERROR: {inp_root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
         if request_yn_response(string="Running jcache get..."):
             # Run the bash command
-            subprocess.call(f"jcache get {inp_root_file}.replace('/lustre/expphy','')", shell=True)            
+            subprocess.call(f"jcache get {inp_root_file}.replace('/lustre/expphy','')", shell=True)
+            sys.exit(2)
 
 ################################################################################################################################################
 
@@ -503,7 +504,7 @@ def get_histogram(root_file, directory_name, histogram_name):
 
     if not root_file:
         print("Error: Unable to open file {}.".format(root_file))
-        return None
+        sys.exit(2)
 
     # Split the directory names
     directories = directory_name.split('/')
