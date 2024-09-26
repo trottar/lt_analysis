@@ -299,10 +299,25 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
                         minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
                         maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
+
                         lol.append(minYl)
                         hil.append(maxYl)
                         lor.append(minYr)
                         hir.append(maxYr)
+                    xl = 1.0*(b+fitl)/400*(Q2max-Q2min)+Q2min
+                    xr = 1.0*(b+fitr)/400*(Q2max-Q2min)+Q2min
+                    xvl.append(xl)
+                    xvr.append(xr)
+                if (badfile == True):
+                    break
+        
+                lola = np.array(lol)
+                hila = np.array(hil)
+                lora = np.array(lor)
+                hira = np.array(hir)
+                xla = np.array(xvl)
+                xra = np.array(xvr)
+
                 if phi_setting == "Center":
                     a1, b1 = np.polyfit(xla, lola, 1)
                     a2, b2 = np.polyfit(xla, hila, 1)
