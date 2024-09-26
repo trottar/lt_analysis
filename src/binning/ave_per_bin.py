@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-26 05:47:35 trottar"
+# Time-stamp: "2024-09-26 19:53:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -743,7 +743,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################
         
