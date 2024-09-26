@@ -322,21 +322,11 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 xla = np.array(xvl)
                 xra = np.array(xvr)
 
-                if phi_setting == "Center":
-                    # Perform linear fits for the diamond boundaries
-                    a1, b1 = np.polyfit(xla, lola, 1)  # Bottom-left boundary
-                    a2, b2 = np.polyfit(xla, hila, 1)  # Top-left boundary
-                    a3, b3 = np.polyfit(xra, lora, 1)  # Bottom-right boundary
-                    a4, b4 = np.polyfit(xra, hira, 1)  # Top-right boundary
-                else:
-                    a1 = inpDict["a1"]
-                    b1 = inpDict["b1"]
-                    a2 = inpDict["a2"]
-                    b2 = inpDict["b2"]
-                    a3 = inpDict["a3"]
-                    b3 = inpDict["b3"]
-                    a4 = inpDict["a4"]
-                    b4 = inpDict["b4"]                    
+                # Perform linear fits for the diamond boundaries
+                a1, b1 = np.polyfit(xla, lola, 1)  # Bottom-left boundary
+                a2, b2 = np.polyfit(xla, hila, 1)  # Top-left boundary
+                a3, b3 = np.polyfit(xra, lora, 1)  # Bottom-right boundary
+                a4, b4 = np.polyfit(xra, hira, 1)  # Top-right boundary
                 
                 # Define the function for checking if an event is inside the diamond
                 def is_inside_diamond(event, a1, b1, a2, b2, a3, b3, a4, b4):
