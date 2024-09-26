@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 22:23:23 trottar"
+# Time-stamp: "2024-09-25 22:24:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,7 +96,6 @@ POL = sys.argv[45]
 formatted_date = sys.argv[46]
 inp_debug =  sys.argv[47]
 
-print("!!!!!!!!!!",dummy_charge_left)
 
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
