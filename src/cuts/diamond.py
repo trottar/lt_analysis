@@ -320,6 +320,16 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 xla = np.array(xvl)
                 xra = np.array(xvr)
 
+                # Separate fits for left and right sides
+                left_side_x = xla
+                left_side_y = (lola + hila) / 2  # Use the midpoint of low and high for left side
+                right_side_x = xra
+                right_side_y = (lora + hira) / 2  # Use the midpoint of low and high for right side
+
+                # Fit left and right sides
+                a_left, b_left = np.polyfit(left_side_x, left_side_y, 1)
+                a_right, b_right = np.polyfit(right_side_x, right_side_y, 1)
+                
                 if phi_setting == "Center":
                     a1, b1 = np.polyfit(xla, lola, 1)
                     a2, b2 = np.polyfit(xla, hila, 1)
@@ -347,6 +357,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     if horizontal_cut and left_diagonal_cut and right_diagonal_cut:
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA += 1
+                        
                 if (1.0*(countB-countA)/countB<0.1):
                     badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
