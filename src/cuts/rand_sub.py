@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-26 17:21:41 trottar"
+# Time-stamp: "2024-09-26 17:32:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1037,7 +1037,7 @@ def rand_sub(phi_setting, inpDict):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum
+                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
 
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
