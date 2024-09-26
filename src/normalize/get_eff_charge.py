@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 21:31:09 trottar"
+# Time-stamp: "2024-09-25 22:23:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -198,7 +198,7 @@ def get_eff_charge(hist, inpDict):
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
     # Normalize simc by normfactor/nevents
-    print("!!!!!!!!!!",dummy_charge_left)
+
     dummy_target_corr = 4.8579
     if phi_setting == "Right":
         normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
