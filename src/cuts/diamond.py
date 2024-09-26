@@ -336,9 +336,17 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     b4 = inpDict["b4"]                    
 	            
                 for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
+                    # Check horizontal cuts
+                    horizontal_cut = (event.W > a1 * event.Q2 + b1) and (event.W < a2 * event.Q2 + b2)
+    
+                    # Check diagonal vertical cuts
+                    left_diagonal_cut = event.W > a3 * event.Q2 + b3
+                    right_diagonal_cut = event.W < a4 * event.Q2 + b4
+    
+                    # Apply all cuts
+                    if horizontal_cut and left_diagonal_cut and right_diagonal_cut:
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
-                        countA +=1
+                        countA += 1
                 if (1.0*(countB-countA)/countB<0.1):
                     badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
