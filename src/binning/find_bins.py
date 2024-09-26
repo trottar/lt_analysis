@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 15:50:34 trottar"
+# Time-stamp: "2024-09-25 20:00:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -151,6 +151,7 @@ def find_bins(histlist, inpDict):
 
         # Redefine number of phi-bins
         if num_phi_bins != inpDict["NumPhiBins"]:
+            
             print("Number of phi-bins changed from {} to: {} (threshold = {})".format(inpDict["NumPhiBins"], num_phi_bins, bad_bins_threshold))
             inpDict["NumPhiBins"] = num_phi_bins
             n, bins = np.histogram(H_phi_BinTest, bin_edges)
