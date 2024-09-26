@@ -295,7 +295,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             lowe_input = False
                             badfile = True
                             break
-                            #sys.exit(2)                        
+                            #sys.exit(2)
                     if (badfile == True):
                         break
                     minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
@@ -346,7 +346,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     print ("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
                     fitrange -= 5
                     minbin -= 1
-                #badfit=False                
+                badfit=False
 
         if (lowe_input != False and k>0):
             print("\n\n")
