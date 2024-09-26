@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 15:10:33 trottar"
+# Time-stamp: "2024-09-26 05:47:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -626,7 +626,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
-                    sys.exit(2)
+                    #sys.exit(2)
+                    average = 0.0
                 ave_hist.append(average)
                 # Calculate the standard deviation of the data points within the bin
                 std_dev = np.std(bin_val_data)
@@ -888,7 +889,8 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for simc {} (t-bin={})... ".format(kin_type, i+1))
-                    sys.exit(2)                
+                    #sys.exit(2)
+                    average = 0.0
                 ave_hist.append(average)
                 # Calculate the standard deviation of the simc points within the bin
                 std_dev = np.std(bin_val_simc)
