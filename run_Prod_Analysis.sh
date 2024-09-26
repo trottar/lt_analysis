@@ -1526,7 +1526,7 @@ if [[ $i_flag != "true" ]]; then
 #		echo "       See error above..."
 #		exit 1
 #	    fi
-	fi	
+#	fi	
 	
 	if [ $j = "low" ]; then
 	    echo
