@@ -303,11 +303,11 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             # Utility to fit a line given two points, handling vertical lines
             def fit_line(x1, y1, x2, y2):
                 if x2 == x1:  # Check for vertical line
-                    return float('inf'), x1  # Infinite slope, return x-coordinate for vertical line
+                    return None, x1  # Return None for slope, and x-coordinate for vertical line
                 slope = (y2 - y1) / (x2 - x1)
                 intercept = y1 - slope * x1
                 return slope, intercept
-
+            
             if phi_setting == "Center":
                 # Fit the lines for each boundary of the diamond
                 a1, b1 = fit_line(bl_x, bl_y, tl_x, tl_y)  # Left side
@@ -327,8 +327,31 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             # Count events inside the diamond
             countA = 0
             for event in Cut_Events_all_noRF_tree:
-                if (event.W / event.Q2 > a1 * event.Q2 + b1 and event.W / event.Q2 < a4 * event.Q2 + b4 and
-                    event.W / event.Q2 > a3 * event.Q2 + b3 and event.W / event.Q2 < a2 * event.Q2 + b2):
+                # Check left boundary
+                if a1 is None:  # Left line is vertical
+                    condition1 = (event.W > bl_y)  # y-coordinate for bottom line
+                else:
+                    condition1 = (event.W / event.Q2 > a1 * event.Q2 + b1)
+
+                # Check right boundary
+                if a2 is None:  # Right line is vertical
+                    condition2 = (event.W < tr_y)  # y-coordinate for top line
+                else:
+                    condition2 = (event.W / event.Q2 < a2 * event.Q2 + b2)
+
+                # Check bottom boundary
+                if a3 is None:  # Bottom line is vertical
+                    condition3 = (event.W > bl_y)  # y-coordinate for bottom line
+                else:
+                    condition3 = (event.W / event.Q2 > a3 * event.Q2 + b3)
+
+                # Check top boundary
+                if a4 is None:  # Top line is vertical
+                    condition4 = (event.W < tl_y)  # y-coordinate for top line
+                else:
+                    condition4 = (event.W / event.Q2 < a4 * event.Q2 + b4)
+
+                if condition1 and condition2 and condition3 and condition4:
                     Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                     countA += 1
 
