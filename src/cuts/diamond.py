@@ -289,57 +289,20 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         else:
                             check4 = True
                         l+=1
-                        if (fbl > lbl or fbr > lbr):
+                        if fbl > lbl or fbr > lbr:
                             print(fbl, lbl, fbr, lbr)
-                            print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n", check1, check2, check3, check4)
-                            lowe_input = False
+                            print("WARNING: Bad Fit! Refitting...")
                             badfile = True
                             break
-                            #sys.exit(2)
-                    if (badfile == True):
-                        break
-                    # Corrected calculation for lol (lower bound of left side)
-                    minYl = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1).GetBinCenter(
-                        Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1).FindFirstBinAbove(minbin, 1, fbl, lbl)
-                    )
-                    lol.append(minYl)
-
-                    maxYl = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1).FindLastBinAbove(minbin, 1, fbl, lbl)/400*(Wmax-Wmin)+Wmin
-                    hil.append(maxYl)
-
-                    # Corrected calculation for lor (lower bound of right side)
-                    minYr = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1).GetBinCenter(
-                        Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1).FindFirstBinAbove(minbin, 1, fbr, lbr)
-                    )
-                    lor.append(minYr)
-
-                    maxYr = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1).FindLastBinAbove(minbin, 1, fbr, lbr)/400*(Wmax-Wmin)+Wmin
-                    hir.append(maxYr)
-
-                    xl = 1.0*(b+fitl)/400*(Q2max-Q2min)+Q2min
-                    xr = 1.0*(b+fitr)/400*(Q2max-Q2min)+Q2min
-                    xvl.append(xl)
-                    xvr.append(xr)
-                if (badfile == True):
-                    break
-        
-                lola = np.array(lol)
-                hila = np.array(hil)
-                lora = np.array(lor)
-                hira = np.array(hir)
-                xla = np.array(xvl)
-                xra = np.array(xvr)
-
-                # Separate fits for left and right sides
-                left_side_x = xla
-                left_side_y = (lola + hila) / 2  # Use the midpoint of low and high for left side
-                right_side_x = xra
-                right_side_y = (lora + hira) / 2  # Use the midpoint of low and high for right side
-
-                # Fit left and right sides
-                a_left, b_left = np.polyfit(left_side_x, left_side_y, 1)
-                a_right, b_right = np.polyfit(right_side_x, right_side_y, 1)
-                
+                        # Compute Y ranges as before
+                        minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
+                        maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
+                        minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
+                        maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
+                        lol.append(minYl)
+                        hil.append(maxYl)
+                        lor.append(minYr)
+                        hir.append(maxYr)
                 if phi_setting == "Center":
                     a1, b1 = np.polyfit(xla, lola, 1)
                     a2, b2 = np.polyfit(xla, hila, 1)
@@ -356,18 +319,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     b4 = inpDict["b4"]                    
 	            
                 for event in Cut_Events_all_noRF_tree:
-                    # Check horizontal cuts
-                    horizontal_cut = (event.W > a1 * event.Q2 + b1) and (event.W < a2 * event.Q2 + b2)
-    
-                    # Check diagonal vertical cuts
-                    left_diagonal_cut = event.W > a3 * event.Q2 + b3
-                    right_diagonal_cut = event.W < a4 * event.Q2 + b4
-    
-                    # Apply all cuts
-                    if horizontal_cut and left_diagonal_cut and right_diagonal_cut:
+                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
-                        countA += 1
-                        
+                        countA +=1
                 if (1.0*(countB-countA)/countB<0.1):
                     badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
@@ -375,7 +329,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     print ("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
                     fitrange -= 5
                     minbin -= 1
-                badfit=False
+                #badfit=False                
 
         if (lowe_input != False and k>0):
             print("\n\n")
