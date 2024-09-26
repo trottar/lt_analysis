@@ -261,7 +261,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
             # Initialize variables
             badfit = True
-            fitrange = 40  # example starting value
+            fitrange = 40  # Starting fitting range
             minbin = 1
             badfile = False
 
@@ -272,6 +272,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 hir.clear()
                 xvl.clear()
                 xvr.clear()
+
+                print(f"Attempting fit with fitrange: {fitrange}, minbin: {minbin}")  # Debug statement
 
                 # Loop through the fitting range
                 for b in range(0, fitrange):
@@ -361,6 +363,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                         countA += 1
 
+                print(f"Count A: {countA}")  # Debug statement to see count progress
+
                 if (1.0 * (countB - countA) / countB < 0.1):
                     badfit = False
                     print("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
@@ -368,6 +372,11 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     print("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
                     fitrange -= 5
                     minbin -= 1
+
+                # Safeguard against infinite loop
+                if fitrange <= 0 or minbin < 0:
+                    print("Fit range or minbin too low, exiting.")
+                    break
 
             # Final good fit condition, end of loop
             print("\nFinal Diamond Fit Parameters:")
