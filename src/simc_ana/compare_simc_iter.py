@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 13:55:15 trottar"
+# Time-stamp: "2024-09-26 17:03:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -119,7 +119,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, simc=True)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################
     # Define simc root file trees of interest
