@@ -298,14 +298,24 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             #sys.exit(2)
                     if (badfile == True):
                         break
-                    minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
+                    # Corrected calculation for lol (lower bound of left side)
+                    minYl = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1).GetBinCenter(
+                        Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1).FindFirstBinAbove(minbin, 1, fbl, lbl)
+                    )
                     lol.append(minYl)
-                    maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
+
+                    maxYl = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1).FindLastBinAbove(minbin, 1, fbl, lbl)/400*(Wmax-Wmin)+Wmin
                     hil.append(maxYl)
-                    minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
+
+                    # Corrected calculation for lor (lower bound of right side)
+                    minYr = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1).GetBinCenter(
+                        Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1).FindFirstBinAbove(minbin, 1, fbr, lbr)
+                    )
                     lor.append(minYr)
-                    maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
+
+                    maxYr = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1).FindLastBinAbove(minbin, 1, fbr, lbr)/400*(Wmax-Wmin)+Wmin
                     hir.append(maxYr)
+
                     xl = 1.0*(b+fitl)/400*(Q2max-Q2min)+Q2min
                     xr = 1.0*(b+fitr)/400*(Q2max-Q2min)+Q2min
                     xvl.append(xl)
