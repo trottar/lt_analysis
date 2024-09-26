@@ -293,17 +293,21 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             print(fbl, lbl, fbr, lbr)
                             print("WARNING: Bad Fit! Refitting...")
                             badfile = True
-                            break
-                        # Compute Y ranges as before
-                        minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
-                        maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
-                        minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
-                        maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
+                            
+                        # Similar logic for left bins
+                        minYl = Q2vsW_lowe_cut.ProjectionY("y", b + fitl, b + fitl + 1).FindFirstBinAbove(minbin, 1, fbl, lbl) / 400 * (Wmax - Wmin) + Wmin
+                        maxYl = Q2vsW_lowe_cut.ProjectionY("y", b + fitl, b + fitl + 1).FindLastBinAbove(minbin, 1, fbl, lbl) / 400 * (Wmax - Wmin) + Wmin
 
+                        # Similar logic for right bins
+                        minYr = Q2vsW_lowe_cut.ProjectionY("y", b + fitr, b + fitr + 1).FindFirstBinAbove(minbin, 1, fbr, lbr) / 400 * (Wmax - Wmin) + Wmin
+                        maxYr = Q2vsW_lowe_cut.ProjectionY("y", b + fitr, b + fitr + 1).FindLastBinAbove(minbin, 1, fbr, lbr) / 400 * (Wmax - Wmin) + Wmin
+
+                        # Append to lists
                         lol.append(minYl)
                         hil.append(maxYl)
                         lor.append(minYr)
                         hir.append(maxYr)
+                            
                     xl = 1.0*(b+fitl)/400*(Q2max-Q2min)+Q2min
                     xr = 1.0*(b+fitr)/400*(Q2max-Q2min)+Q2min
                     xvl.append(xl)
