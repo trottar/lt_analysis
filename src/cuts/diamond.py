@@ -300,8 +300,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             br_x, br_y = corners['bottom_right']
             tr_x, tr_y = corners['top_right']
 
-            # Utility to fit a line given two points
+            # Utility to fit a line given two points, handling vertical lines
             def fit_line(x1, y1, x2, y2):
+                if x2 == x1:  # Check for vertical line
+                    return float('inf'), x1  # Infinite slope, return x-coordinate for vertical line
                 slope = (y2 - y1) / (x2 - x1)
                 intercept = y1 - slope * x1
                 return slope, intercept
