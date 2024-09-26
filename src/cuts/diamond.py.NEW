@@ -239,114 +239,152 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
             ##############################################################################################################################################
             #Does assume 400 bins for Q2 and W, centered at kinematic values
+            # Assumptions: 
+            # - Q2_cut and Q2vsW_lowe_cut are properly defined histograms
+            # - Wmin, Wmax, Q2min, Q2max, minbin, Cut_Events_all_noRF_tree, and other variables are defined
+
+            # Define initial parameters
             minQ = Q2_cut.FindFirstBinAbove(0)
             maxQ = Q2_cut.FindLastBinAbove(0)
-            fitrange = int((maxQ-minQ)/10)
-            print("fitrange: ",fitrange)
+            fitrange = int((maxQ - minQ) / 10)
+            print("fitrange: ", fitrange)
             minbin = 1
             badfile = False
-            print("Q2Val Bin Val: ",Q2vsW_lowe_cut.FindBin(Q2Val))
-            fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange
-            fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
-            while (badfit == True):
+
+            # Utility to fit a line given two points, handling vertical lines
+            def fit_line(x1, y1, x2, y2):
+                if x2 == x1:  # Check for vertical line
+                    return None, x1  # Return None for slope, and x-coordinate for vertical line
+                slope = (y2 - y1) / (x2 - x1)
+                intercept = y1 - slope * x1
+                return slope, intercept
+
+            # Initialize variables
+            badfit = True
+            fitrange = 40  # Starting fitting range
+            minbin = 1
+            badfile = False
+
+            while badfit:
                 lol.clear()
                 lor.clear()
                 hil.clear()
                 hir.clear()
                 xvl.clear()
                 xvr.clear()
-                for b in range (0,fitrange):
-        
-                    fbl = 1
-                    lbl = 400
-                    fbr = 1
-                    lbr = 400
-                    check1 = False
-                    check2 = False
-                    check3 = False
-                    check4 = False
-                    l=0
-                    # Designed to remove outliers from fit, skips over bins that have empty bins on either side when determining histogram width
-                    while (check1 == False or check2 == False or check3 == False or check4 == False):
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(0,1,fbl,lbl))==0):
-                            fbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(1,1,fbl,lbl)
-                        else: 
-                            check1 = True 
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(0,1,fbl,lbl))==0):
-                            lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)
-                        else:
-                            check2 = True
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(0,1,fbr,lbr))==0):
-                            fbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(1,1,fbr,lbr)
-                        else:
-                            check3 = True
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(0,1,fbr,lbr))==0):
-                            lbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(1,1,fbr,lbr)
-                        else:
-                            check4 = True
-                        l+=1
-                        if (fbl > lbl or fbr > lbr):
-                            print(fbl, lbl, fbr, lbr)
-                            print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n", check1, check2, check3, check4)
-                            lowe_input = False
-                            badfile = True
-                            break
-                            #sys.exit(2)
-                    if (badfile == True):
-                        break
-                    minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
-                    lol.append(minYl)
-                    maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
-                    hil.append(maxYl)
-                    minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
-                    lor.append(minYr)
-                    maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
-                    hir.append(maxYr)
-                    xl = 1.0*(b+fitl)/400*(Q2max-Q2min)+Q2min
-                    xr = 1.0*(b+fitr)/400*(Q2max-Q2min)+Q2min
-                    xvl.append(xl)
-                    xvr.append(xr)
-                if (badfile == True):
-                    break
-        
-                lola = np.array(lol)
-                hila = np.array(hil)
-                lora = np.array(lor)
-                hira = np.array(hir)
-                xla = np.array(xvl)
-                xra = np.array(xvr)
 
-                if phi_setting == "Center":
-                    a1, b1 = np.polyfit(xla, lola, 1)
-                    a2, b2 = np.polyfit(xla, hila, 1)
-                    a3, b3 = np.polyfit(xra, lora, 1)
-                    a4, b4 = np.polyfit(xra, hira, 1)
-                else:
-                    a1 = inpDict["a1"]
-                    b1 = inpDict["b1"]
-                    a2 = inpDict["a2"]
-                    b2 = inpDict["b2"]
-                    a3 = inpDict["a3"]
-                    b3 = inpDict["b3"]
-                    a4 = inpDict["a4"]
-                    b4 = inpDict["b4"]                    
-	            
+                print(f"Attempting fit with fitrange: {fitrange}, minbin: {minbin}")  # Debug statement
+
+                # Loop through the fitting range
+                for b in range(0, fitrange):
+                    # Initialize for each fit attempt
+                    fbl, lbl, fbr, lbr = 1, 400, 1, 400
+                    check1, check2, check3, check4 = False, False, False, False
+
+                    # Finding bins while checking for vertical lines
+                    while not (check1 and check2 and check3 and check4):
+                        # Check left side
+                        try:
+                            minYl = Q2vsW_lowe_cut.ProjectionY("y", b + fitl, b + fitl + 1).FindFirstBinAbove(minbin, 1, fbl, lbl)
+                            minYl_val = minYl / 400 * (Wmax - Wmin) + Wmin
+                            lol.append(minYl_val)
+                            check1 = True
+                        except ZeroDivisionError:
+                            print(f"Vertical line detected on left side at b={b}. Adjusting fitrange.")
+                            fitrange -= 1
+                            break  # Exit the while loop to re-evaluate
+
+                        # Check right side
+                        try:
+                            minYr = Q2vsW_lowe_cut.ProjectionY("y", b + fitr, b + fitr + 1).FindFirstBinAbove(minbin, 1, fbr, lbr)
+                            minYr_val = minYr / 400 * (Wmax - Wmin) + Wmin
+                            lor.append(minYr_val)
+                            check2 = True
+                        except ZeroDivisionError:
+                            print(f"Vertical line detected on right side at b={b}. Adjusting fitrange.")
+                            fitrange -= 1
+                            break  # Exit the while loop to re-evaluate
+
+                    # Repeat for max values (similar logic)
+                    try:
+                        maxYl = Q2vsW_lowe_cut.ProjectionY("y", b + fitl, b + fitl + 1).FindLastBinAbove(minbin, 1, fbl, lbl)
+                        maxYl_val = maxYl / 400 * (Wmax - Wmin) + Wmin
+                        hil.append(maxYl_val)
+                        check3 = True
+                    except ZeroDivisionError:
+                        print(f"Vertical line detected on left side for max value at b={b}. Adjusting fitrange.")
+                        fitrange -= 1
+                        break
+
+                    try:
+                        maxYr = Q2vsW_lowe_cut.ProjectionY("y", b + fitr, b + fitr + 1).FindLastBinAbove(minbin, 1, fbr, lbr)
+                        maxYr_val = maxYr / 400 * (Wmax - Wmin) + Wmin
+                        hir.append(maxYr_val)
+                        check4 = True
+                    except ZeroDivisionError:
+                        print(f"Vertical line detected on right side for max value at b={b}. Adjusting fitrange.")
+                        fitrange -= 1
+                        break
+
+                # Fit the lines for each boundary of the diamond
+                a1, b1 = fit_line(bl_x, bl_y, tl_x, tl_y)  # Left side
+                a2, b2 = fit_line(br_x, br_y, tr_x, tr_y)  # Right side
+                a3, b3 = fit_line(bl_x, bl_y, br_x, br_y)  # Bottom side
+                a4, b4 = fit_line(tl_x, tl_y, tr_x, tr_y)  # Top side
+
+                # Count events inside the diamond
+                countA = 0
                 for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
+                    # Check left boundary
+                    if a1 is None:  # Left line is vertical
+                        condition1 = (event.W > bl_y)
+                    else:
+                        condition1 = (event.W / event.Q2 > a1 * event.Q2 + b1)
+
+                    # Check right boundary
+                    if a2 is None:  # Right line is vertical
+                        condition2 = (event.W < tr_y)
+                    else:
+                        condition2 = (event.W / event.Q2 < a2 * event.Q2 + b2)
+
+                    # Check bottom boundary
+                    if a3 is None:  # Bottom line is vertical
+                        condition3 = (event.W > bl_y)
+                    else:
+                        condition3 = (event.W / event.Q2 > a3 * event.Q2 + b3)
+
+                    # Check top boundary
+                    if a4 is None:  # Top line is vertical
+                        condition4 = (event.W < tl_y)
+                    else:
+                        condition4 = (event.W / event.Q2 < a4 * event.Q2 + b4)
+
+                    if condition1 and condition2 and condition3 and condition4:
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
-                        countA +=1
-                if (1.0*(countB-countA)/countB<0.1):
-                    badfit=False
-                    print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
+                        countA += 1
+
+                print(f"Count A: {countA}")  # Debug statement to see count progress
+
+                if (1.0 * (countB - countA) / countB < 0.1):
+                    badfit = False
+                    print("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
                 else:
-                    print ("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
+                    print("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
                     fitrange -= 5
                     minbin -= 1
-                #badfit=False                
+
+                # Safeguard against infinite loop
+                if fitrange <= 0 or minbin < 0:
+                    print("Fit range or minbin too low, exiting.")
+                    break
+
+            # Final good fit condition, end of loop
+            print("\nFinal Diamond Fit Parameters:")
+            print(f"Bottom-left boundary: y = {a1}x + {b1}")
+            print(f"Top-left boundary: y = {a2}x + {b2}")
+            print(f"Bottom-right boundary: y = {a3}x + {b3}")
+            print(f"Top-right boundary: y = {a4}x + {b4}")
+
 
         if (lowe_input != False and k>0):
             print("\n\n")
