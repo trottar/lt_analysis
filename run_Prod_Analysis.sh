@@ -732,7 +732,7 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     #NumPhiBins=8
     NumPhiBins=16
     TMIN=0.150
-    TMAX=0.500
+    TMAX=0.450
 elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     # Q2=4p4, W=2p74
     NumtBins=6
@@ -1506,6 +1506,7 @@ if [[ $i_flag != "true" ]]; then
 	    fi
 	fi	
 
+# For pion, center only	
 #	if [ ${#data_right[@]} -eq 0 ]; then
 #	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" #"${data_left[*]}" "${data_center[*]}" "0" "0" ${TotDataEffChargeValCenter} "0" "0" ${TotDummyEffChargeValCenter} "0" "0" ${TotDataEffChargeErrCenter} "0" "0" ${TotDummyEffChargeErrCenter} "0" "0" #"${DataEffValCenter[*]}" "0" "0" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "0" "${DatapThetaValCenter[*]}" "0" "0" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 #	    # Check the exit status of the Python script
