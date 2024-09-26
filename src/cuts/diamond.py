@@ -322,11 +322,21 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 xla = np.array(xvl)
                 xra = np.array(xvr)
 
-                # Perform linear fits for the diamond boundaries
-                a1, b1 = np.polyfit(xla, lola, 1)  # Bottom-left boundary
-                a2, b2 = np.polyfit(xla, hila, 1)  # Top-left boundary
-                a3, b3 = np.polyfit(xra, lora, 1)  # Bottom-right boundary
-                a4, b4 = np.polyfit(xra, hira, 1)  # Top-right boundary
+                if phi_setting == "Center":
+                    # Perform linear fits for the diamond boundaries
+                    a1, b1 = np.polyfit(xla, lola, 1)  # Bottom-left boundary
+                    a2, b2 = np.polyfit(xla, hila, 1)  # Top-left boundary
+                    a3, b3 = np.polyfit(xra, lora, 1)  # Bottom-right boundary
+                    a4, b4 = np.polyfit(xra, hira, 1)  # Top-right boundary
+                else:
+                    a1 = inpDict["a1"]
+                    b1 = inpDict["b1"]
+                    a2 = inpDict["a2"]
+                    b2 = inpDict["b2"]
+                    a3 = inpDict["a3"]
+                    b3 = inpDict["b3"]
+                    a4 = inpDict["a4"]
+                    b4 = inpDict["b4"]                    
                 
                 # Define the function for checking if an event is inside the diamond
                 def is_inside_diamond(event, a1, b1, a2, b2, a3, b3, a4, b4):
@@ -358,34 +368,6 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             print(f"Top-left boundary: y = {a2}x + {b2}")
             print(f"Bottom-right boundary: y = {a3}x + {b3}")
             print(f"Top-right boundary: y = {a4}x + {b4}")
-
-                if phi_setting == "Center":
-                    a1, b1 = np.polyfit(xla, lola, 1)
-                    a2, b2 = np.polyfit(xla, hila, 1)
-                    a3, b3 = np.polyfit(xra, lora, 1)
-                    a4, b4 = np.polyfit(xra, hira, 1)
-                else:
-                    a1 = inpDict["a1"]
-                    b1 = inpDict["b1"]
-                    a2 = inpDict["a2"]
-                    b2 = inpDict["b2"]
-                    a3 = inpDict["a3"]
-                    b3 = inpDict["b3"]
-                    a4 = inpDict["a4"]
-                    b4 = inpDict["b4"]                    
-	            
-                for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
-                        Q2vsW_lolo_cut.Fill(event.Q2, event.W)
-                        countA +=1
-                if (1.0*(countB-countA)/countB<0.1):
-                    badfit=False
-                    print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
-                else:
-                    print ("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
-                    fitrange -= 5
-                    minbin -= 1
-                #badfit=False                
 
         if (lowe_input != False and k>0):
             print("\n\n")
