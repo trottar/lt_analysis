@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-26 19:53:27 trottar"
+# Time-stamp: "2024-09-27 06:43:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -539,6 +539,7 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_se
                 tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))                
             tmp_binned_t_data.append(tmp_hist_data)
 
+            '''
             tmp_hist_data = [[],[]]                
             for i in range(1, H_MM_DATA.GetNbinsX() + 1):        
                 tmp_hist_data[0].append(H_MM_DATA.GetBinCenter(i))
@@ -550,7 +551,20 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_se
                 tmp_hist_dummy[0].append(H_MM_DUMMY.GetBinCenter(i))
                 tmp_hist_dummy[1].append(H_MM_DUMMY.GetBinContent(i))                    
             tmp_binned_hist_dummy.append(tmp_hist_dummy)
+            '''
 
+            tmp_hist_data = [[],[]]                
+            for i in range(1, H_t_DATA.GetNbinsX() + 1):        
+                tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
+                tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))
+            tmp_binned_hist_data.append(tmp_hist_data)
+
+            tmp_hist_dummy = [[],[]]                
+            for i in range(1, H_t_DUMMY.GetNbinsX() + 1):
+                tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
+                tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))                    
+            tmp_binned_hist_dummy.append(tmp_hist_dummy)            
+            
             binned_t_data.append(tmp_binned_t_data[0]) # Save a list of hists where each one is a t-bin
             binned_hist_data.append(tmp_binned_hist_data[0])
             binned_hist_dummy.append(tmp_binned_hist_dummy[0])
@@ -820,11 +834,20 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
                 tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                
             tmp_binned_t_simc.append(tmp_hist_simc)
 
+            '''
             tmp_hist_simc = [[],[]]                
             for i in range(1, H_MM_SIMC.GetNbinsX() + 1):        
                 tmp_hist_simc[0].append(H_MM_SIMC.GetBinCenter(i))
                 tmp_hist_simc[1].append(H_MM_SIMC.GetBinContent(i))                    
             tmp_binned_hist_simc.append(tmp_hist_simc)
+            '''
+
+            tmp_hist_simc = [[],[]]                
+            for i in range(1, H_t_SIMC.GetNbinsX() + 1):        
+                tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
+                tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                    
+            tmp_binned_hist_simc.append(tmp_hist_simc)
+            
 
             binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
             binned_hist_simc.append(tmp_binned_hist_simc[0])
