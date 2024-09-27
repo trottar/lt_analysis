@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-27 06:43:39 trottar"
+# Time-stamp: "2024-09-27 06:44:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -846,8 +846,7 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
             for i in range(1, H_t_SIMC.GetNbinsX() + 1):        
                 tmp_hist_simc[0].append(H_t_SIMC.GetBinCenter(i))
                 tmp_hist_simc[1].append(H_t_SIMC.GetBinContent(i))                    
-            tmp_binned_hist_simc.append(tmp_hist_simc)
-            
+            tmp_binned_hist_simc.append(tmp_hist_simc)            
 
             binned_t_simc.append(tmp_binned_t_simc[0]) # Save a list of hists where each one is a t-bin
             binned_hist_simc.append(tmp_binned_hist_simc[0])
