@@ -21,6 +21,7 @@ from ROOT import TExec
 from ROOT import kBlack, kBlue, kRed
 from array import array
 import pandas as pd
+from scipy.optimize import curve_fit
 import glob
 
 ###############################################################################################################################################
@@ -54,6 +55,44 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 #################################################################################################################################################
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
+
+def diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange):
+    def line(x, a, b):
+        return a * x + b
+
+    lol, hil, lor, hir = [], [], [], []
+    xvl, xvr = [], []
+    
+    fitl = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) - fitrange
+    fitr = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) + fitrange
+    
+    for b in range(fitrange * 2):
+        # Left side
+        proj_l = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1)
+        minYl = proj_l.GetBinCenter(proj_l.FindFirstBinAbove(0))
+        maxYl = proj_l.GetBinCenter(proj_l.FindLastBinAbove(0))
+        lol.append(minYl)
+        hil.append(maxYl)
+        
+        # Right side
+        proj_r = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1)
+        minYr = proj_r.GetBinCenter(proj_r.FindFirstBinAbove(0))
+        maxYr = proj_r.GetBinCenter(proj_r.FindLastBinAbove(0))
+        lor.append(minYr)
+        hir.append(maxYr)
+        
+        xl = Q2vsW_lowe_cut.GetXaxis().GetBinCenter(b+fitl)
+        xr = Q2vsW_lowe_cut.GetXaxis().GetBinCenter(b+fitr)
+        xvl.append(xl)
+        xvr.append(xr)
+
+    # Fit all four sides
+    popt_l_low, _ = curve_fit(line, xvl, lol)
+    popt_l_high, _ = curve_fit(line, xvl, hil)
+    popt_r_low, _ = curve_fit(line, xvr, lor)
+    popt_r_high, _ = curve_fit(line, xvr, hir)
+
+    return popt_l_low, popt_l_high, popt_r_low, popt_r_high
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
@@ -237,117 +276,27 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 Q2_cut.Fill(event.Q2)
                 countB +=1
 
-            ##############################################################################################################################################
-            #Does assume 400 bins for Q2 and W, centered at kinematic values
-            minQ = Q2_cut.FindFirstBinAbove(0)
-            maxQ = Q2_cut.FindLastBinAbove(0)
-            fitrange = int((maxQ-minQ)/10)
-            print("fitrange: ",fitrange)
-            minbin = 1
-            badfile = False
-            print("Q2Val Bin Val: ",Q2vsW_lowe_cut.FindBin(Q2Val))
-            fitl = Q2vsW_lowe_cut.FindBin(Q2Val)-fitrange
-            fitr = Q2vsW_lowe_cut.FindBin(Q2Val)+fitrange
-            while (badfit == True):
-                lol.clear()
-                lor.clear()
-                hil.clear()
-                hir.clear()
-                xvl.clear()
-                xvr.clear()
-                for b in range (0,fitrange):
-        
-                    fbl = 1
-                    lbl = 400
-                    fbr = 1
-                    lbr = 400
-                    check1 = False
-                    check2 = False
-                    check3 = False
-                    check4 = False
-                    l=0
-                    # Designed to remove outliers from fit, skips over bins that have empty bins on either side when determining histogram width
-                    while (check1 == False or check2 == False or check3 == False or check4 == False):
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(0,1,fbl,lbl))==0):
-                            fbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(1,1,fbl,lbl)
-                        else: 
-                            check1 = True 
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(0,1,fbl,lbl))==0):
-                            lbl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(1,1,fbl,lbl)
-                        else:
-                            check2 = True
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(0,1,fbr,lbr))==0):
-                            fbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(1,1,fbr,lbr)
-                        else:
-                            check3 = True
-                        if (Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1). \
-                            GetBinContent(Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(0,1,fbr,lbr))==0):
-                            lbr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(1,1,fbr,lbr)
-                        else:
-                            check4 = True
-                        l+=1
-                        if (fbl > lbl or fbr > lbr):
-                            print(fbl, lbl, fbr, lbr)
-                            print("WARNING: Bad Fit! Refitting...If script hangs for too long, check lowe file or change Q2min/Q2max range! \n", check1, check2, check3, check4)
-                            lowe_input = False
-                            badfile = True
-                            break
-                            #sys.exit(2)
-                    if (badfile == True):
-                        break
-                    minYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindFirstBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
-                    lol.append(minYl)
-                    maxYl = Q2vsW_lowe_cut.ProjectionY("y",b+fitl,b+fitl+1).FindLastBinAbove(minbin,1,fbl,lbl)/400*(Wmax-Wmin)+Wmin
-                    hil.append(maxYl)
-                    minYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindFirstBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
-                    lor.append(minYr)
-                    maxYr = Q2vsW_lowe_cut.ProjectionY("y",b+fitr,b+fitr+1).FindLastBinAbove(minbin,1,fbr,lbr)/400*(Wmax-Wmin)+Wmin
-                    hir.append(maxYr)
-                    xl = 1.0*(b+fitl)/400*(Q2max-Q2min)+Q2min
-                    xr = 1.0*(b+fitr)/400*(Q2max-Q2min)+Q2min
-                    xvl.append(xl)
-                    xvr.append(xr)
-                if (badfile == True):
-                    break
-        
-                lola = np.array(lol)
-                hila = np.array(hil)
-                lora = np.array(lor)
-                hira = np.array(hir)
-                xla = np.array(xvl)
-                xra = np.array(xvr)
+        #Does assume 400 bins for Q2 and W, centered at kinematic values
+        minQ = Q2_cut.FindFirstBinAbove(0)
+        maxQ = Q2_cut.FindLastBinAbove(0)
+        fitrange = int((maxQ-minQ)/10)
+        print("fitrange: ",fitrange)                
+        if (k == 0):  # Low epsilon
+            # Replace the existing diamond fitting code with:
+            fit_results = diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange)
+            a1, b1 = fit_results[0]
+            a2, b2 = fit_results[1]
+            a3, b3 = fit_results[2]
+            a4, b4 = fit_results[3]
 
-                if phi_setting == "Center":
-                    a1, b1 = np.polyfit(xla, lola, 1)
-                    a2, b2 = np.polyfit(xla, hila, 1)
-                    a3, b3 = np.polyfit(xra, lora, 1)
-                    a4, b4 = np.polyfit(xra, hira, 1)
-                else:
-                    a1 = inpDict["a1"]
-                    b1 = inpDict["b1"]
-                    a2 = inpDict["a2"]
-                    b2 = inpDict["b2"]
-                    a3 = inpDict["a3"]
-                    b3 = inpDict["b3"]
-                    a4 = inpDict["a4"]
-                    b4 = inpDict["b4"]                    
-	            
-                for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
-                        Q2vsW_lolo_cut.Fill(event.Q2, event.W)
-                        countA +=1
-                if (1.0*(countB-countA)/countB<0.1):
-                    badfit=False
-                    print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
-                else:
-                    print ("\n!!!!! Bad Diamond Fit!! Adjusting fitrange and minbin !!!!!\n")
-                    fitrange -= 5
-                    minbin -= 1
-                #badfit=False                
-
+            for event in Cut_Events_all_noRF_tree:
+                if (event.W > a1*event.Q2 + b1 and
+                    event.W < a2*event.Q2 + b2 and
+                    event.W > a3*event.Q2 + b3 and
+                    event.W < a4*event.Q2 + b4):
+                    Q2vsW_lolo_cut.Fill(event.Q2, event.W)
+                    countA += 1
+                    
         if (lowe_input != False and k>0):
             print("\n\n")
             if (k==2):
@@ -500,10 +449,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         # xvl.clear()
         # xvr.clear()
         #print (xvl[0], xvl[-1])
-        line1 = TLine(xvl[0],a1*xvl[0]+b1,xvl[-1],a1*xvl[-1]+b1)   
-        line2 = TLine(xvl[0],a2*xvl[0]+b2,xvl[-1],a2*xvl[-1]+b2) 
-        line3 = TLine(xvr[0],a3*xvr[0]+b3,xvr[-1],a3*xvr[-1]+b3) 
-        line4 = TLine(xvr[0],a4*xvr[0]+b4,xvr[-1],a4*xvr[-1]+b4)  
+        line1 = TLine(Q2min, a1*Q2min+b1, Q2max, a1*Q2max+b1)   
+        line2 = TLine(Q2min, a2*Q2min+b2, Q2max, a2*Q2max+b2) 
+        line3 = TLine(Q2min, a3*Q2min+b3, Q2max, a3*Q2max+b3) 
+        line4 = TLine(Q2min, a4*Q2min+b4, Q2max, a4*Q2max+b4)  
         line1.SetLineColor(1)
         line2.SetLineColor(2)
         line3.SetLineColor(3)
