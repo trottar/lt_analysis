@@ -20,6 +20,7 @@ from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphError
 from ROOT import TExec
 from ROOT import kBlack, kBlue, kRed
 from array import array
+from scipy.optimize import curve_fit
 import pandas as pd
 import glob
 
