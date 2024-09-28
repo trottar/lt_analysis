@@ -55,6 +55,44 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
+def diamond_fit(Q2vsW_lowe_cut, Q2min, Q2max, Wmin, Wmax, fitrange):
+    def line(x, a, b):
+        return a * x + b
+
+    lol, hil, lor, hir = [], [], [], []
+    xvl, xvr = [], []
+    
+    fitl = Q2vsW_lowe_cut.FindBin(Q2Val) - fitrange
+    fitr = Q2vsW_lowe_cut.FindBin(Q2Val) + fitrange
+    
+    for b in range(fitrange * 2):
+        # Left side
+        proj_l = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1)
+        minYl = proj_l.GetBinCenter(proj_l.FindFirstBinAbove(0))
+        maxYl = proj_l.GetBinCenter(proj_l.FindLastBinAbove(0))
+        lol.append(minYl)
+        hil.append(maxYl)
+        
+        # Right side
+        proj_r = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1)
+        minYr = proj_r.GetBinCenter(proj_r.FindFirstBinAbove(0))
+        maxYr = proj_r.GetBinCenter(proj_r.FindLastBinAbove(0))
+        lor.append(minYr)
+        hir.append(maxYr)
+        
+        xl = Q2vsW_lowe_cut.GetXaxis().GetBinCenter(b+fitl)
+        xr = Q2vsW_lowe_cut.GetXaxis().GetBinCenter(b+fitr)
+        xvl.append(xl)
+        xvr.append(xr)
+
+    # Fit all four sides
+    popt_l_low, _ = curve_fit(line, xvl, lol)
+    popt_l_high, _ = curve_fit(line, xvl, hil)
+    popt_r_low, _ = curve_fit(line, xvr, lor)
+    popt_r_high, _ = curve_fit(line, xvr, hir)
+
+    return popt_l_low, popt_l_high, popt_r_low, popt_r_high
+
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
     ##############
@@ -321,10 +359,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 xra = np.array(xvr)
 
                 if phi_setting == "Center":
-                    a1, b1 = np.polyfit(xla, lola, 1)
-                    a2, b2 = np.polyfit(xla, hila, 1)
-                    a3, b3 = np.polyfit(xra, lora, 1)
-                    a4, b4 = np.polyfit(xra, hira, 1)
+                    #a1, b1 = np.polyfit(xla, lola, 1)
+                    #a2, b2 = np.polyfit(xla, hila, 1)
+                    #a3, b3 = np.polyfit(xra, lora, 1)
+                    #a4, b4 = np.polyfit(xra, hira, 1)
+                    a1, b1 = diamond_fit(Q2vsW_lowe_cut, Q2min, Q2max, Wmin, Wmax, fitrange)[0]
+                    a2, b2 = diamond_fit(Q2vsW_lowe_cut, Q2min, Q2max, Wmin, Wmax, fitrange)[1]
+                    a3, b3 = diamond_fit(Q2vsW_lowe_cut, Q2min, Q2max, Wmin, Wmax, fitrange)[2]
+                    a4, b4 = diamond_fit(Q2vsW_lowe_cut, Q2min, Q2max, Wmin, Wmax, fitrange)[3]
                 else:
                     a1 = inpDict["a1"]
                     b1 = inpDict["b1"]
@@ -336,9 +378,11 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     b4 = inpDict["b4"]                    
 	            
                 for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
+                    if (event.W > a1*event.Q2 + b1 and
+                        event.W < a2*event.Q2 + b2 and
+                        event.W > a3*event.Q2 + b3 and
+                        event.W < a4*event.Q2 + b4):
                         Q2vsW_lolo_cut.Fill(event.Q2, event.W)
-                        countA +=1
                 if (1.0*(countB-countA)/countB<0.1):
                     badfit=False
                     print ("\n !!!!! Diamond Fit Good (w/in 10%)!!!!!\n")
