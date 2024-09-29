@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-25 14:13:43 trottar"
+# Time-stamp: "2024-09-28 20:34:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -244,6 +244,18 @@ def create_file(file_path):
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
             pass  # Creates an empty file
+
+################################################################################################################################################
+
+# Iterate over all bins and apply the condition to zero out bins with less than 5 events
+def apply_bin_threshold(histogram):
+    n_bins_x = histogram.GetNbinsX()
+    n_bins_y = histogram.GetNbinsY()
+
+    for i in range(1, n_bins_x + 1):  # Bins start from 1 to n_binsX
+        for j in range(1, n_bins_y + 1):  # Bins start from 1 to n_binsY
+            if histogram.GetBinContent(i, j) < 5:
+                histogram.SetBinContent(i, j, 0)  # Zero out the bin content if less than 5 events
         
 ################################################################################################################################################
 

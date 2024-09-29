@@ -47,7 +47,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file
+from utility import open_root_file, apply_bin_threshold
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -257,31 +257,36 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         countB = 0
         countA = 0
         badfit = True
-        
-        if k == 2:  # High
+        if (k==2): # High
+            # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
-                # Find the bin corresponding to the event.Q2 and event.W values
-                bin_idx = Q2vsW_cut.FindBin(event.Q2, event.W)
-                # Check if the bin content is at least 5
-                if Q2vsW_cut.GetBinContent(bin_idx) >= 5:
-                    Q2vsW_cut.Fill(event.Q2, event.W)
-                    Q2vsW_hi_cut.Fill(event.Q2, event.W)
-        elif k == 1:  # Mid
+                Q2vsW_cut.Fill(event.Q2, event.W)
+                Q2vsW_hi_cut.Fill(event.Q2, event.W)
+        elif (k==1): # Mid
+            # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
-                bin_idx = Q2vsW_mide_cut.FindBin(event.Q2, event.W)
-                if Q2vsW_mide_cut.GetBinContent(bin_idx) >= 5:
-                    Q2vsW_mide_cut.Fill(event.Q2, event.W)
-                    Q2vsW_mi_cut.Fill(event.Q2, event.W)
-        elif k == 0:  # Low
+                Q2vsW_mide_cut.Fill(event.Q2, event.W)
+                Q2vsW_mi_cut.Fill(event.Q2, event.W)
+        elif (k==0): # Low
+            # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
-                bin_idx = Q2vsW_lowe_cut.FindBin(event.Q2, event.W)
-                if Q2vsW_lowe_cut.GetBinContent(bin_idx) >= 5:
-                    Q2vsW_lowe_cut.Fill(event.Q2, event.W)
-                    Q2vsW_lo_cut.Fill(event.Q2, event.W)
-                    W_cut.Fill(event.W)
-                    Q2_cut.Fill(event.Q2)
-                    countB += 1
+                Q2vsW_lowe_cut.Fill(event.Q2, event.W)
+                Q2vsW_lo_cut.Fill(event.Q2, event.W)
+                W_cut.Fill(event.W)
+                Q2_cut.Fill(event.Q2)
+                countB +=1
 
+        # Apply the threshold to the histograms
+        if (k==2): # High
+            apply_bin_threshold(Q2vsW_cut)
+            apply_bin_threshold(Q2vsW_hi_cut)
+        elif (k==1): # Mid
+            apply_bin_threshold(Q2vsW_mide_cut)
+            apply_bin_threshold(Q2vsW_mi_cut)
+        elif (k==0): # Low
+            apply_bin_threshold(Q2vsW_lowe_cut)
+            apply_bin_threshold(Q2vsW_lo_cut)
+                
         #Does assume 1000 bins for Q2 and W, centered at kinematic values
         minQ = Q2_cut.FindFirstBinAbove(0)
         maxQ = Q2_cut.FindLastBinAbove(0)
