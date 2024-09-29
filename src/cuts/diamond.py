@@ -278,14 +278,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         # Apply the threshold to the histograms
         if (k==2): # High
-            apply_bin_threshold(Q2vsW_cut, 15)
-            apply_bin_threshold(Q2vsW_hi_cut, 15)
+            apply_bin_threshold(Q2vsW_cut, 20)
+            apply_bin_threshold(Q2vsW_hi_cut, 20)
         elif (k==1): # Mid
-            apply_bin_threshold(Q2vsW_mide_cut, 15)
-            apply_bin_threshold(Q2vsW_mi_cut, 15)
+            apply_bin_threshold(Q2vsW_mide_cut, 20)
+            apply_bin_threshold(Q2vsW_mi_cut, 20)
         elif (k==0): # Low
-            apply_bin_threshold(Q2vsW_lowe_cut, 15)
-            apply_bin_threshold(Q2vsW_lo_cut, 15)
+            apply_bin_threshold(Q2vsW_lowe_cut, 20)
+            apply_bin_threshold(Q2vsW_lo_cut, 20)
                 
         #Does assume 400 bins for Q2 and W, centered at kinematic values
         minQ = Q2_cut.FindFirstBinAbove(0)
