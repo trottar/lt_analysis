@@ -66,7 +66,7 @@ def diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange):
     fitl = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) - fitrange
     fitr = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) + int(fitrange/2)
     
-    for b in range(fitrange):
+    for b in range(fitrange*2):
         # Left side
         proj_l = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1)
         minYl = proj_l.GetBinCenter(proj_l.FindFirstBinAbove(0))
