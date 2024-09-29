@@ -75,10 +75,10 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10):
     print("\nFinding diaomond fits...")
     for b in range(fitrange*2):
         # Progress bar
-        Misc.progressBar(b, fitrange*2, bar_length=25)
+        Misc.progressBar(b, fitrange*2-1, bar_length=25)
         
         # Left side
-        proj_l = Q2vsW_hist.ProjectionY("y", b+fitl, b+fitl+1)
+        proj_l = Q2vsW_hist.ProjectionY("y", b+fitl, b+fitl-1)
         minYl = proj_l.GetBinCenter(proj_l.FindFirstBinAbove(0))
         maxYl = proj_l.GetBinCenter(proj_l.FindLastBinAbove(0))
         lol.append(minYl)
@@ -302,8 +302,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         #Does assume nbins bins for Q2 and W, centered at kinematic values
         minQ = Q2_cut.FindFirstBinAbove(0)
         maxQ = Q2_cut.FindLastBinAbove(0)
-        fitrange = int((maxQ-minQ)/100)
-        #fitrange = int((maxQ-minQ))
+        #fitrange = int((maxQ-minQ)/100)
+        fitrange = int((maxQ-minQ))
         print("fitrange: ",fitrange)                
         if (k == 0):  # Low epsilon
             # Replace the existing diamond fitting code with:
