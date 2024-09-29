@@ -69,7 +69,7 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10):
     lol, hil, lor, hir = [], [], [], []
     xvl, xvr = [], []
     
-    fitl = Q2vsW_hist.GetXaxis().FindBin(Q2Val) - fitrange
+    fitl = Q2vsW_hist.GetXaxis().FindBin(Q2Val) - int(fitrange/2)
     fitr = Q2vsW_hist.GetXaxis().FindBin(Q2Val) + int(fitrange/2)
 
     print("\nFinding diaomond fits...")
