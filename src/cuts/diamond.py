@@ -64,7 +64,7 @@ def diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange):
     xvl, xvr = [], []
     
     fitl = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) - fitrange
-    fitr = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) + fitrange/2
+    fitr = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) + int(fitrange/2)
     
     for b in range(fitrange):
         # Left side
