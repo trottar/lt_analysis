@@ -120,7 +120,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     
     Analysis_Distributions = OUTPATH+"/{}_{}_diamond_{}.pdf".format(phi_setting, ParticleType, FilenameOverride)
 
-    nbins = 100
+    nbins = 5000
     
     lowe_input = False
     mide_input = False
