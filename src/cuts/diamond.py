@@ -82,7 +82,7 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange):
         hir.append(maxYr)
         
         xl = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitl)
-        xr = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitr+1)
+        xr = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitr)
         xvl.append(xl)
         xvr.append(xr)
 
@@ -120,6 +120,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     
     Analysis_Distributions = OUTPATH+"/{}_{}_diamond_{}.pdf".format(phi_setting, ParticleType, FilenameOverride)
 
+    nbins = 1000
+    
     lowe_input = False
     mide_input = False
     highe_input = False
@@ -182,23 +184,23 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
 
     Title = ""
-    Q2vsW_cut = TH2D("Q2vsW_cut", labelh, 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_mide_cut = TH2D("Q2vsW_mide_cut",labelm, 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_lowe_cut = TH2D("Q2vsW_lowe_cut", labell, 400, Q2min, Q2max, 400, Wmin, Wmax)    
+    Q2vsW_cut = TH2D("Q2vsW_cut", labelh, nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_mide_cut = TH2D("Q2vsW_mide_cut",labelm, nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_lowe_cut = TH2D("Q2vsW_lowe_cut", labell, nbins, Q2min, Q2max, nbins, Wmin, Wmax)    
 
-    Q2vsW_hi_cut = TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_mi_cut = TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_lo_cut = TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_hi_cut = TH2D("Q2vsW_high_cut", "High Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_mi_cut = TH2D("Q2vsW_middle_cut","Mid Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_lo_cut = TH2D("Q2vsW_low_cut", "Low Epsilon Q2 vs W Dist for Prompt Events (Prompt Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
 
-    W_cut = TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", 400, Wmin, Wmax)
-    Q2_cut = TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", 400, Q2min, Q2max)
-    t_cut = TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
-    t_mi_cut = TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", 400, tmin, tmax)
+    W_cut = TH1D("W_cut", "High Epsilon W Dist for Prompt Events (Prompt Cut); W", nbins, Wmin, Wmax)
+    Q2_cut = TH1D("Q2_cut", "High Epsilon Q2 Dist for Prompt Events (Prompt  Cut); Q2", nbins, Q2min, Q2max)
+    t_cut = TH1D("t_cut", "High Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", nbins, tmin, tmax)
+    t_mi_cut = TH1D("t_mi_cut", "Mid Epsilon -t Dist for Prompt Events (t-Range  Cut); -t", nbins, tmin, tmax)
 
-    Q2vsW_lolo_cut = TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_hilo_cut = TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
-    Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", 400, Q2min, Q2max, 400, Wmin, Wmax)
+    Q2vsW_lolo_cut = TH2D("Q2vsW_low_lowcut", "Low Epsilon Q2 vs W Dist for Prompt Events (Diamond Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_hilo_cut = TH2D("Q2vsW_high_lowcut", "High Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+    Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
 
     a1 = 0
     b1 = 0
@@ -287,7 +289,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             apply_bin_threshold(Q2vsW_lowe_cut, 30)
             apply_bin_threshold(Q2vsW_lo_cut, 30)
                 
-        #Does assume 400 bins for Q2 and W, centered at kinematic values
+        #Does assume nbins bins for Q2 and W, centered at kinematic values
         minQ = Q2_cut.FindFirstBinAbove(0)
         maxQ = Q2_cut.FindLastBinAbove(0)
         fitrange = int((maxQ-minQ)/100)
@@ -476,8 +478,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         line2.Draw()
         line3.Draw()
         line4.Draw()
-        x1 = 100/400*(Q2max-Q2min)+Q2min
-        x2 = 300/400*(Q2max-Q2min)+Q2min
+        x1 = (nbins*0.25)*(Q2max-Q2min)+Q2min
+        x2 = (nbins*0.75)*(Q2max-Q2min)+Q2min
         line1f = TLine(x1,a1*x1+b1,x2,a1*x2+b1)   
         line2f = TLine(x1,a2*x1+b2,x2,a2*x2+b2) 
         line3f = TLine(x1,a3*x1+b3,x2,a3*x2+b3) 
