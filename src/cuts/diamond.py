@@ -56,33 +56,33 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
-def diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange):
+def diamond_fit(Q2vsW_hist, Q2Val, fitrange):
     def line(x, a, b):
         return a * x + b
 
     lol, hil, lor, hir = [], [], [], []
     xvl, xvr = [], []
     
-    fitl = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) - fitrange
-    fitr = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) + int(fitrange/2)
+    fitl = Q2vsW_hist.GetXaxis().FindBin(Q2Val) - fitrange
+    fitr = Q2vsW_hist.GetXaxis().FindBin(Q2Val) + int(fitrange/2)
     
     for b in range(fitrange*2):
         # Left side
-        proj_l = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1)
+        proj_l = Q2vsW_hist.ProjectionY("y", b+fitl, b+fitl+1)
         minYl = proj_l.GetBinCenter(proj_l.FindFirstBinAbove(0))
         maxYl = proj_l.GetBinCenter(proj_l.FindLastBinAbove(0))
         lol.append(minYl)
         hil.append(maxYl)
         
         # Right side
-        proj_r = Q2vsW_lowe_cut.ProjectionY("y", b+fitr, b+fitr+1)
+        proj_r = Q2vsW_hist.ProjectionY("y", b+fitr, b+fitr+1)
         minYr = proj_r.GetBinCenter(proj_r.FindFirstBinAbove(0))
         maxYr = proj_r.GetBinCenter(proj_r.FindLastBinAbove(0))
         lor.append(minYr)
         hir.append(maxYr)
         
-        xl = Q2vsW_lowe_cut.GetXaxis().GetBinCenter(b+fitl)
-        xr = Q2vsW_lowe_cut.GetXaxis().GetBinCenter(b+fitr)
+        xl = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitl)
+        xr = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitr+1)
         xvl.append(xl)
         xvr.append(xr)
 
