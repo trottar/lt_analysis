@@ -303,7 +303,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         minQ = Q2_cut.FindFirstBinAbove(0)
         maxQ = Q2_cut.FindLastBinAbove(0)
         #fitrange = int((maxQ-minQ)/100)
-        fitrange = int((maxQ-minQ)/5)
+        fitrange = int((maxQ-minQ)/10)
         print("fitrange: ",fitrange)                
         if (k == 0):  # Low epsilon
             # Replace the existing diamond fitting code with:
