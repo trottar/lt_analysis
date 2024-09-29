@@ -58,10 +58,14 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
-def diamond_fit(Q2vsW_hist, Q2Val, fitrange):
+def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10):
     def line(x, a, b):
         return a * x + b
 
+    if fitrange <= 1:
+        print("Fit range too small, setting to default of 10.")
+        fitrange = 10
+    
     lol, hil, lor, hir = [], [], [], []
     xvl, xvr = [], []
     
