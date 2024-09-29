@@ -66,7 +66,6 @@ def diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange):
     fitl = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) - fitrange
     fitr = Q2vsW_lowe_cut.GetXaxis().FindBin(Q2Val) + fitrange
     
-    #for b in range(fitrange * 2):
     for b in range(fitrange):
         # Left side
         proj_l = Q2vsW_lowe_cut.ProjectionY("y", b+fitl, b+fitl+1)
@@ -280,7 +279,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         #Does assume 400 bins for Q2 and W, centered at kinematic values
         minQ = Q2_cut.FindFirstBinAbove(0)
         maxQ = Q2_cut.FindLastBinAbove(0)
-        fitrange = int((maxQ-minQ)/10)
+        fitrange = int((maxQ-minQ))
         print("fitrange: ",fitrange)                
         if (k == 0):  # Low epsilon
             # Replace the existing diamond fitting code with:
