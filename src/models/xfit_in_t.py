@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:59:33 trottar"
+# Time-stamp: "2024-09-29 23:00:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -192,7 +192,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "max_iterations" : max_iterations
     }
     
-    find_fit(sig_fit_dict, inp_dict, par_vec)
+    find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec)
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
