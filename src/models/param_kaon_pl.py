@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 16:28:48 trottar"
+# Time-stamp: "2024-09-30 18:06:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -156,8 +156,8 @@ def iterWeight(arg_str):
     #                  I am only using the one above, for now.    
     # tav = (-0.178 + 0.315 * math.log(q2_gev)) * q2_gev
 
-    wfactor = 1.0 / (s_gev - mtar_gev**2)**2
-    ##wfactor = 1.0 / (s_gev - mtar_gev**2)**5
+    ###wfactor = 1.0 / (s_gev - mtar_gev**2)**2
+    wfactor = 1.0 / (s_gev - mtar_gev**2)**5
     sigl = sigl*wfactor
     sigt = sigt*wfactor
     sigtt = sigtt*wfactor
