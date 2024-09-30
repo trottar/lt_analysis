@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:54:01 trottar"
+# Time-stamp: "2024-09-29 22:54:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -24,7 +24,6 @@ import os, sys
 def find_fit(sig_fit_dict, inp_dict, par_vec):
 
     for key, val in inp_dict.items():
-
         if key == "canvas":
             # Specify canvases
             c1, c2, c4, c3, c5 = val
