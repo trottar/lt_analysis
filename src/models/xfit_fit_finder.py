@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:05:45 trottar"
+# Time-stamp: "2024-09-29 23:06:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -26,6 +26,14 @@ import os, sys
 
 sys.path.append("utility")
 from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search
+
+##################################################################################################################################################
+
+# Define constants
+PI = math.pi
+m_p = 0.93827231
+m_n = 0.93956541
+mkpl = 0.493677
 
 ###############################################################################################################################################
 # Import separated xsects models
