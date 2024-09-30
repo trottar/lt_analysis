@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:41:28 trottar"
+# Time-stamp: "2024-09-29 23:51:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -101,14 +101,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
 
-            graph_sig_p0.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
-
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
+            c1.Update()
+            
             # Record the start time
             start_time = time.time()
 
@@ -369,7 +365,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             c2.cd(it+1).SetLeftMargin(0.12)
             g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
             g_sig_fit.Draw("A*")
-
+            c2.Update()
+            
             g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sig_fit.GetXaxis().CenterTitle()
             g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
@@ -440,7 +437,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit_tot.SetMarkerColor(2)
             g_sig_fit_tot.SetLineColor(2)
             g_sig_fit_tot.Draw("LP")
-
+            c1.Update()
+            
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
             max_sig_y = float('-inf')
@@ -464,24 +462,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graph_sig_p0.SetLineColor(ROOT.kRed)
             graph_sig_p0.Draw("ALP")
-
+            c3.Update()
+            
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
             graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
             graph_sig_chi2.SetLineColor(ROOT.kBlack)
             graph_sig_chi2.Draw("ALP")
-
+            c4.Update()
+            
             # Plot temperature convergence
             c5.cd(it+1).SetLeftMargin(0.12)
             graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graph_sig_temp.SetLineColor(ROOT.kBlack)
             graph_sig_temp.Draw("ALP")
-
+            c5.Update()
+            
             # Plot acceptance probability convergence
             c6.cd(it+1).SetLeftMargin(0.12)
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
+            c6.Update()
             
             print("\n")    
 
@@ -512,15 +514,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
 
-            graph_sig_p0.Clear()
-            graph_sig_p1.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
-
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
+            c1.Update()
+            
             # Record the start time
             start_time = time.time()
 
@@ -797,7 +794,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             c2.cd(it+1).SetLeftMargin(0.12)
             g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
             g_sig_fit.Draw("A*")
-
+            c2.Update()
+            
             g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sig_fit.GetXaxis().CenterTitle()
             g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
@@ -869,7 +867,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit_tot.SetMarkerColor(2)
             g_sig_fit_tot.SetLineColor(2)
             g_sig_fit_tot.Draw("LP")
-
+            c1.Update()
+            
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
             max_sig_y = float('-inf')
@@ -895,24 +894,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p1.SetLineColor(ROOT.kBlue)
             graph_sig_p0.Draw("ALP")
             graph_sig_p1.Draw("LP SAME")
-
+            c3.Update()
+            
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
             graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
             graph_sig_chi2.SetLineColor(ROOT.kBlack)
             graph_sig_chi2.Draw("ALP")
-
+            c4.Update()
+            
             # Plot temperature
             c5.cd(it+1).SetLeftMargin(0.12)
             graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graph_sig_temp.SetLineColor(ROOT.kBlack)
             graph_sig_temp.Draw("ALP")
-
+            c5.Update()
+            
             # Plot acceptance probability
             c6.cd(it+1).SetLeftMargin(0.12)
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
+            c6.Update()
             
             print("\n")    
 
@@ -943,17 +946,11 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
-
-            graph_sig_p0.Clear()
-            graph_sig_p1.Clear()
-            graph_sig_p2.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
             
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
+            c1.Update()
+            
             # Record the start time
             start_time = time.time()
 
@@ -1244,7 +1241,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             c2.cd(it+1).SetLeftMargin(0.12)
             g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
             g_sig_fit.Draw("A*")
-
+            c2.Update()
+            
             g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sig_fit.GetXaxis().CenterTitle()
             g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
@@ -1317,7 +1315,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit_tot.SetMarkerColor(2)
             g_sig_fit_tot.SetLineColor(2)
             g_sig_fit_tot.Draw("LP")
-
+            c1.Update()
+            
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
             max_sig_y = float('-inf')
@@ -1345,24 +1344,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p0.Draw("ALP")
             graph_sig_p1.Draw("LP SAME")
             graph_sig_p2.Draw("LP SAME")
-
+            c3.Update()
+            
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
             graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
             graph_sig_chi2.SetLineColor(ROOT.kBlack)
             graph_sig_chi2.Draw("ALP")
-
+            c4.Update()
+            
             # Plot temperature
             c5.cd(it+1).SetLeftMargin(0.12)
             graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graph_sig_temp.SetLineColor(ROOT.kBlack)
             graph_sig_temp.Draw("ALP")
-
+            c5.Update()
+            
             # Plot acceptance probability
             c6.cd(it+1).SetLeftMargin(0.12)
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
+            c6.Update()
             
             print("\n")    
 
@@ -1394,18 +1397,11 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
-
-            graph_sig_p0.Clear()
-            graph_sig_p1.Clear()
-            graph_sig_p2.Clear()
-            graph_sig_p3.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
             
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
+            c1.Update()
+            
             # Record the start time
             start_time = time.time()
 
@@ -1721,7 +1717,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             c2.cd(it+1).SetLeftMargin(0.12)
             g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
             g_sig_fit.Draw("A*")
-
+            c2.Update()
+            
             g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
             g_sig_fit.GetXaxis().CenterTitle()
             g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
@@ -1795,7 +1792,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit_tot.SetMarkerColor(2)
             g_sig_fit_tot.SetLineColor(2)
             g_sig_fit_tot.Draw("LP")
-
+            c1.Update()
+            
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
             max_sig_y = float('-inf')
@@ -1819,31 +1817,39 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graph_sig_p0.SetLineColor(ROOT.kRed)
             graph_sig_p1.SetLineColor(ROOT.kBlue)
+            graph_sig_p2.SetLineColor(ROOT.kGreen)
+            graph_sig_p3.SetLineColor(ROOT.kPurple)
             graph_sig_p0.Draw("ALP")
             graph_sig_p1.Draw("LP SAME")
-
+            graph_sig_p2.Draw("LP SAME")
+            graph_sig_p3.Draw("LP SAME")
+            c3.Update()
+            
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
             graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
             graph_sig_chi2.SetLineColor(ROOT.kBlack)
             graph_sig_chi2.Draw("ALP")
-
+            c4.Update()
+            
             # Plot temperature convergence
             c5.cd(it+1).SetLeftMargin(0.12)
             graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graph_sig_temp.SetLineColor(ROOT.kBlack)
             graph_sig_temp.Draw("ALP")
-
+            c5.Update()
+            
             # Plot acceptance probability convergence
             c6.cd(it+1).SetLeftMargin(0.12)
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
-
+            c6.Update()
+            
             print("\n")
 
-        c1.Update()            
-        c2.Update()            
+        c1.Update()
+        c2.Update()
         c3.Update()
         c4.Update()
         c5.Update()
