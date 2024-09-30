@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:23:11 trottar"
+# Time-stamp: "2024-09-29 23:29:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -70,6 +70,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     outputpdf = inp_dict["outputpdf"]
     
     for it, (key, val) in enumerate(sig_fit_dict.items()):
+
         sig_name = key
         initial_params = val["params"]
         num_params = len(initial_params)
@@ -1815,6 +1816,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             print("\n")
 
+        c3.Update()
+        c4.Update()
+        c5.Update()
+        c6.Update()            
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
