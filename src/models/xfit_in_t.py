@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:10:27 trottar"
+# Time-stamp: "2024-09-29 23:12:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,7 +178,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "tmax_range" : tmax_range,
         "Q2min_range" : Q2min_range,
         "Q2max_range" : Q2max_range,
-        "iter_num" : iter_num
+        "iter_num" : iter_num,
+        "outputpdf" : outputpdf
         
     }
 

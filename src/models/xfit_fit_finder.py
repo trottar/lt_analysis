@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:09:58 trottar"
+# Time-stamp: "2024-09-29 23:12:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -67,7 +67,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     Q2min_range = inp_dict["Q2min_range"]
     Q2max_range = inp_dict["Q2max_range"]
     iter_num = inp_dict["iter_num"]            
-
+    outputpdf = inp_dict["outputpdf"]
+    
     for key, val in sig_fit_dict.items():
         sig_name = key
         initial_params = val["params"]
