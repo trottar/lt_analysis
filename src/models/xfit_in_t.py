@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:04:58 trottar"
+# Time-stamp: "2024-09-29 23:05:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,7 +187,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     }
     inp_dict = {
 
-        "canvas" : [c1, c2, c3, c4, c5],
+        "canvas" : [c1, c2, c3, c4, c5, c6],
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "tmin_range" : tmin_range,
