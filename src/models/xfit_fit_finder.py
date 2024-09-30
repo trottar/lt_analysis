@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:02:39 trottar"
+# Time-stamp: "2024-09-29 23:05:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -39,10 +39,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     c1, c2, c4, c3, c5 = inp_dict["canvas"]
     nsep, g_vec, w_vec, q2_vec, th_vec = inp_dict["objects"]
     max_iterations = inp_dict["max_iterations"]    
-    tmin_range = inp_dict["tmin"]
-    tmax_range = inp_dict["tmax"]
-    Q2min_range = inp_dict["Q2min"]
-    Q2max_range = inp_dict["Q2max"]
+    tmin_range = inp_dict["tmin_range"]
+    tmax_range = inp_dict["tmax_range"]
+    Q2min_range = inp_dict["Q2min_range"]
+    Q2max_range = inp_dict["Q2max_range"]
     iter_num = inp_dict["iter_num"]            
 
     for key, val in sig_fit_dict.items():
