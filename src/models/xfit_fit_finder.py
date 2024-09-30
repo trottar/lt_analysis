@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:05:37 trottar"
+# Time-stamp: "2024-09-30 00:29:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -43,6 +43,15 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 ##################################################################################################################################################
 
 def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
+
+    # Create lists to store graph objects outside the loop
+    graphs_sig_p0 = []
+    graphs_sig_p1 = []
+    graphs_sig_p2 = []
+    graphs_sig_p3 = []
+    graphs_sig_chi2 = []
+    graphs_sig_temp = []
+    graphs_sig_accept = []
 
     c1 = TCanvas("c1", "c1", 800, 800)
     c1.Divide(2, 2)
@@ -100,6 +109,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graphs_sig_p0.append(graph_sig_p0)
+            graphs_sig_chi2.append(graph_sig_chi2)
+            graphs_sig_temp.append(graph_sig_temp)
+            graphs_sig_accept.append(graph_sig_accept)
 
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -214,10 +227,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         current_errors = f_sig.GetParError(0)
 
                         # Update ROOT TGraphs for plotting
-                        graph_sig_p0.SetPoint(total_iteration, total_iteration, current_params)
-                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graph_sig_temp.SetPoint(total_iteration, total_iteration, temperature)
-                        graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params)
+                        graphs_sig_chi2[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                         # If the new cost is better or accepted by the acceptance probability, update the best parameters
                         if accept_prob > random.random():
@@ -444,7 +457,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_sig_y = float('-inf')
 
             # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graph_sig_p0]:
+            for graph in [graphs_sig_p0[it]]:
                 n_points = graph.GetN()
                 for i in range(n_points):
                     y = graph.GetY()[i]
@@ -454,35 +467,35 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         max_sig_y = y
 
             # Scale the y-axis
-            graph_sig_p0.SetMinimum(min_sig_y * 0.9)
-            graph_sig_p0.SetMaximum(max_sig_y * 1.1)    
+            graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
+            graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)    
 
             # Plot parameter convergence
             c3.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-            graph_sig_p0.SetLineColor(ROOT.kRed)
-            graph_sig_p0.Draw("ALP")
+            graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
+            graphs_sig_p0[it].SetLineColor(ROOT.kRed)
+            graphs_sig_p0[it].Draw("ALP")
             c3.Update()
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
-            graph_sig_chi2.SetLineColor(ROOT.kBlack)
-            graph_sig_chi2.Draw("ALP")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
             
             # Plot temperature convergence
             c5.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-            graph_sig_temp.SetLineColor(ROOT.kBlack)
-            graph_sig_temp.Draw("ALP")
+            graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
+            graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_temp[it].Draw("ALP")
             c5.Update()
             
             # Plot acceptance probability convergence
             c6.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-            graph_sig_accept.SetLineColor(ROOT.kBlack)
-            graph_sig_accept.Draw("ALP")
+            graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
+            graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_accept[it].Draw("ALP")
             c6.Update()
             
             print("\n")    
@@ -513,6 +526,11 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graphs_sig_p0.append(graph_sig_p0)
+            graphs_sig_p1.append(graph_sig_p1)
+            graphs_sig_chi2.append(graph_sig_chi2)
+            graphs_sig_temp.append(graph_sig_temp)
+            graphs_sig_accept.append(graph_sig_accept)
 
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -639,10 +657,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         ]
 
                         # Update ROOT TGraphs for plotting
-                        graph_sig_p0.SetPoint(total_iteration, total_iteration, current_params[0])
-                        graph_sig_p1.SetPoint(total_iteration, total_iteration, current_params[1])
-                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                        graphs_sig_chi2[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                         # If the new cost is better or accepted by the acceptance probability, update the best parameters
                         if accept_prob > random.random():
@@ -685,7 +703,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         # Update the temperature
                         temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                        graph_sig_temp.SetPoint(total_iteration, total_iteration, temperature)
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
 
                         iteration += 1
                         total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -874,7 +892,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_sig_y = float('-inf')
 
             # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graph_sig_p0, graph_sig_p1]:
+            for graph in [graphs_sig_p0[it], graphs_sig_p1[it]]:
                 n_points = graph.GetN()
                 for i in range(n_points):
                     y = graph.GetY()[i]
@@ -884,37 +902,37 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         max_sig_y = y
 
             # Scale the y-axis
-            graph_sig_p0.SetMinimum(min_sig_y * 0.9)
-            graph_sig_p0.SetMaximum(max_sig_y * 1.1)    
+            graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
+            graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)    
 
             # Plot parameter convergence
             c3.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-            graph_sig_p0.SetLineColor(ROOT.kRed)
-            graph_sig_p1.SetLineColor(ROOT.kBlue)
-            graph_sig_p0.Draw("ALP")
-            graph_sig_p1.Draw("LP SAME")
+            graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
+            graphs_sig_p0[it].SetLineColor(ROOT.kRed)
+            graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
+            graphs_sig_p0[it].Draw("ALP")
+            graphs_sig_p1[it].Draw("LP SAME")
             c3.Update()
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
-            graph_sig_chi2.SetLineColor(ROOT.kBlack)
-            graph_sig_chi2.Draw("ALP")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
             
             # Plot temperature
             c5.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-            graph_sig_temp.SetLineColor(ROOT.kBlack)
-            graph_sig_temp.Draw("ALP")
+            graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
+            graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_temp[it].Draw("ALP")
             c5.Update()
             
             # Plot acceptance probability
             c6.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-            graph_sig_accept.SetLineColor(ROOT.kBlack)
-            graph_sig_accept.Draw("ALP")
+            graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
+            graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_accept[it].Draw("ALP")
             c6.Update()
             
             print("\n")    
@@ -946,6 +964,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graphs_sig_p0.append(graph_sig_p0)
+            graphs_sig_p1.append(graph_sig_p1)
+            graphs_sig_p2.append(graph_sig_p2)
+            graphs_sig_chi2.append(graph_sig_chi2)
+            graphs_sig_temp.append(graph_sig_temp)
+            graphs_sig_accept.append(graph_sig_accept)
             
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -1082,12 +1106,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         ]
 
                         # Update ROOT TGraphs for plotting
-                        graph_sig_p0.SetPoint(total_iteration, total_iteration, current_params[0])
-                        graph_sig_p1.SetPoint(total_iteration, total_iteration, current_params[1])
-                        graph_sig_p2.SetPoint(total_iteration, total_iteration, current_params[2])
-                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graph_sig_temp.SetPoint(total_iteration, total_iteration, temperature)
-                        graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                        graphs_sig_chi2[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                         # If the new cost is better or accepted by the acceptance probability, update the best parameters
                         if accept_prob > random.random():
@@ -1322,7 +1346,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_sig_y = float('-inf')
 
             # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graph_sig_p0, graph_sig_p1, graph_sig_p2]:
+            for graph in [graphs_sig_p0[it], graphs_sig_p1[it], graphs_sig_p2[it]]:
                 n_points = graph.GetN()
                 for i in range(n_points):
                     y = graph.GetY()[i]
@@ -1332,39 +1356,39 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         max_sig_y = y
 
             # Scale the y-axis
-            graph_sig_p0.SetMinimum(min_sig_y * 0.9)
-            graph_sig_p0.SetMaximum(max_sig_y * 1.1)    
+            graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
+            graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)    
 
             # Plot parameter convergence
             c3.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-            graph_sig_p0.SetLineColor(ROOT.kRed)
-            graph_sig_p1.SetLineColor(ROOT.kBlue)
-            graph_sig_p2.SetLineColor(ROOT.kGreen)
-            graph_sig_p0.Draw("ALP")
-            graph_sig_p1.Draw("LP SAME")
-            graph_sig_p2.Draw("LP SAME")
+            graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
+            graphs_sig_p0[it].SetLineColor(ROOT.kRed)
+            graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
+            graphs_sig_p2[it].SetLineColor(ROOT.kGreen)
+            graphs_sig_p0[it].Draw("ALP")
+            graphs_sig_p1[it].Draw("LP SAME")
+            graphs_sig_p2[it].Draw("LP SAME")
             c3.Update()
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
-            graph_sig_chi2.SetLineColor(ROOT.kBlack)
-            graph_sig_chi2.Draw("ALP")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
             
             # Plot temperature
             c5.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-            graph_sig_temp.SetLineColor(ROOT.kBlack)
-            graph_sig_temp.Draw("ALP")
+            graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
+            graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_temp[it].Draw("ALP")
             c5.Update()
             
             # Plot acceptance probability
             c6.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-            graph_sig_accept.SetLineColor(ROOT.kBlack)
-            graph_sig_accept.Draw("ALP")
+            graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
+            graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_accept[it].Draw("ALP")
             c6.Update()
             
             print("\n")    
@@ -1397,6 +1421,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graphs_sig_p0.append(graph_sig_p0)
+            graphs_sig_p1.append(graph_sig_p1)
+            graphs_sig_p2.append(graph_sig_p2)
+            graphs_sig_p3.append(graph_sig_p3)
+            graphs_sig_chi2.append(graph_sig_chi2)
+            graphs_sig_temp.append(graph_sig_temp)
+            graphs_sig_accept.append(graph_sig_accept)
             
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -1550,13 +1581,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         ]
 
                         # Update ROOT TGraphs for plotting
-                        graph_sig_p0.SetPoint(total_iteration, total_iteration, current_params[0])
-                        graph_sig_p1.SetPoint(total_iteration, total_iteration, current_params[1])
-                        graph_sig_p2.SetPoint(total_iteration, total_iteration, current_params[2])
-                        graph_sig_p3.SetPoint(total_iteration, total_iteration, current_params[3])
-                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graph_sig_temp.SetPoint(total_iteration, total_iteration, temperature)
-                        graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                        graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, current_params[3])
+                        graphs_sig_chi2[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                         # If the new cost is better or accepted by the acceptance probability, update the best parameters
                         if accept_prob > random.random():
@@ -1799,7 +1830,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_sig_y = float('-inf')
 
             # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graph_sig_p0, graph_sig_p1]:
+            for graph in [graphs_sig_p0[it], graphs_sig_p1[it]]:
                 n_points = graph.GetN()
                 for i in range(n_points):
                     y = graph.GetY()[i]
@@ -1809,41 +1840,41 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         max_sig_y = y
 
             # Scale the y-axis
-            graph_sig_p0.SetMinimum(min_sig_y * 0.9)
-            graph_sig_p0.SetMaximum(max_sig_y * 1.1)    
+            graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
+            graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)    
 
             # Plot parameter convergence
             c3.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-            graph_sig_p0.SetLineColor(ROOT.kRed)
-            graph_sig_p1.SetLineColor(ROOT.kBlue)
-            graph_sig_p2.SetLineColor(ROOT.kGreen)
-            graph_sig_p3.SetLineColor(ROOT.kPink)
-            graph_sig_p0.Draw("ALP")
-            graph_sig_p1.Draw("LP SAME")
-            graph_sig_p2.Draw("LP SAME")
-            graph_sig_p3.Draw("LP SAME")
+            graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
+            graphs_sig_p0[it].SetLineColor(ROOT.kRed)
+            graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
+            graphs_sig_p2[it].SetLineColor(ROOT.kGreen)
+            graphs_sig_p3[it].SetLineColor(ROOT.kPink)
+            graphs_sig_p0[it].Draw("ALP")
+            graphs_sig_p1[it].Draw("LP SAME")
+            graphs_sig_p2[it].Draw("LP SAME")
+            graphs_sig_p3[it].Draw("LP SAME")
             c3.Update()
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
-            graph_sig_chi2.SetLineColor(ROOT.kBlack)
-            graph_sig_chi2.Draw("ALP")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
             
             # Plot temperature convergence
             c5.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-            graph_sig_temp.SetLineColor(ROOT.kBlack)
-            graph_sig_temp.Draw("ALP")
+            graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
+            graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_temp[it].Draw("ALP")
             c5.Update()
             
             # Plot acceptance probability convergence
             c6.cd(it+1).SetLeftMargin(0.12)
-            graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-            graph_sig_accept.SetLineColor(ROOT.kBlack)
-            graph_sig_accept.Draw("ALP")
+            graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
+            graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_accept[it].Draw("ALP")
             c6.Update()
             
             print("\n")
