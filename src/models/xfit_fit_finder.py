@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:39:33 trottar"
+# Time-stamp: "2024-09-30 00:42:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -452,13 +452,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             fit_status = TText()
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-            c1.cd(it+1)
-            g_sig_fit_tot.SetMarkerStyle(26)
-            g_sig_fit_tot.SetMarkerColor(2)
-            g_sig_fit_tot.SetLineColor(2)
-            g_sig_fit_tot.Draw("LP")
-            c1.Update()
             
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
@@ -893,13 +886,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             fit_status = TText()
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-            c1.cd(it+1)
-            g_sig_fit_tot.SetMarkerStyle(26)
-            g_sig_fit_tot.SetMarkerColor(2)
-            g_sig_fit_tot.SetLineColor(2)
-            g_sig_fit_tot.Draw("LP")
-            c1.Update()
             
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
@@ -1352,13 +1338,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             fit_status = TText()
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-            c1.cd(it+1)
-            g_sig_fit_tot.SetMarkerStyle(26)
-            g_sig_fit_tot.SetMarkerColor(2)
-            g_sig_fit_tot.SetLineColor(2)
-            g_sig_fit_tot.Draw("LP")
-            c1.Update()
             
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
@@ -1840,13 +1819,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             fit_status = TText()
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-            c1.cd(it+1)
-            g_sig_fit_tot.SetMarkerStyle(26)
-            g_sig_fit_tot.SetMarkerColor(2)
-            g_sig_fit_tot.SetLineColor(2)
-            g_sig_fit_tot.Draw("LP")
-            c1.Update()
             
             # Calculate the minimum and maximum values from the graphs
             min_sig_y = float('inf')
