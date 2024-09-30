@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:20:15 trottar"
+# Time-stamp: "2024-09-29 23:22:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -100,7 +100,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
 
-            c1.cd(it).SetLeftMargin(0.12)
+            c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
             # Record the start time
@@ -360,7 +360,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv.SetMarkerStyle(25)
             g_sig_prv.Draw("P")
 
-            c2.cd(it).SetLeftMargin(0.12)
+            c2.cd(it+1).SetLeftMargin(0.12)
             g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
             g_sig_fit.Draw("A*")
 
@@ -429,7 +429,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
 
-            c1.cd(it)
+            c1.cd(it+1)
             g_sig_fit_tot.SetMarkerStyle(26)
             g_sig_fit_tot.SetMarkerColor(2)
             g_sig_fit_tot.SetLineColor(2)
@@ -454,25 +454,25 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p0.SetMaximum(max_sig_y * 1.1)    
 
             # Plot parameter convergence
-            c3.cd(it).SetLeftMargin(0.12)
+            c3.cd(it+1).SetLeftMargin(0.12)
             graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graph_sig_p0.SetLineColor(ROOT.kRed)
             graph_sig_p0.Draw("ALP")
 
             # Plot chi-square convergence
-            c4.cd(it).SetLeftMargin(0.12)
+            c4.cd(it+1).SetLeftMargin(0.12)
             graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
             graph_sig_chi2.SetLineColor(ROOT.kBlack)
             graph_sig_chi2.Draw("ALP")
 
             # Plot temperature convergence
-            c5.cd(it).SetLeftMargin(0.12)
+            c5.cd(it+1).SetLeftMargin(0.12)
             graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graph_sig_temp.SetLineColor(ROOT.kBlack)
             graph_sig_temp.Draw("ALP")
 
             # Plot acceptance probability convergence
-            c6.cd(it).SetLeftMargin(0.12)
+            c6.cd(it+1).SetLeftMargin(0.12)
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
@@ -1376,7 +1376,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
 
-            c1.cd(it).SetLeftMargin(0.12)
+            c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
             # Record the start time
@@ -1691,7 +1691,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv.SetMarkerStyle(25)
             g_sig_prv.Draw("P")
 
-            c2.cd(it).SetLeftMargin(0.12)
+            c2.cd(it+1).SetLeftMargin(0.12)
             g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
             g_sig_fit.Draw("A*")
 
@@ -1763,7 +1763,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
 
-            c1.cd(it)
+            c1.cd(it+1)
             g_sig_fit_tot.SetMarkerStyle(26)
             g_sig_fit_tot.SetMarkerColor(2)
             g_sig_fit_tot.SetLineColor(2)
@@ -1788,7 +1788,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p0.SetMaximum(max_sig_y * 1.1)    
 
             # Plot parameter convergence
-            c3.cd(it).SetLeftMargin(0.12)
+            c3.cd(it+1).SetLeftMargin(0.12)
             graph_sig_p0.SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graph_sig_p0.SetLineColor(ROOT.kRed)
             graph_sig_p1.SetLineColor(ROOT.kBlue)
@@ -1796,19 +1796,19 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p1.Draw("LP SAME")
 
             # Plot chi-square convergence
-            c4.cd(it).SetLeftMargin(0.12)
+            c4.cd(it+1).SetLeftMargin(0.12)
             graph_sig_chi2.SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
             graph_sig_chi2.SetLineColor(ROOT.kBlack)
             graph_sig_chi2.Draw("ALP")
 
             # Plot temperature convergence
-            c5.cd(it).SetLeftMargin(0.12)
+            c5.cd(it+1).SetLeftMargin(0.12)
             graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graph_sig_temp.SetLineColor(ROOT.kBlack)
             graph_sig_temp.Draw("ALP")
 
             # Plot acceptance probability convergence
-            c6.cd(it).SetLeftMargin(0.12)
+            c6.cd(it+1).SetLeftMargin(0.12)
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
