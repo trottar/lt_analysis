@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:22:14 trottar"
+# Time-stamp: "2024-09-29 23:23:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1821,4 +1821,5 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     c3.Print(outputpdf)
     c4.Print(outputpdf)
     c5.Print(outputpdf)
-    c6.Print(outputpdf+')')            
+    c6.Print(outputpdf+')')
+    sys.exit(2)
