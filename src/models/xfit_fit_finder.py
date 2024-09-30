@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:55:42 trottar"
+# Time-stamp: "2024-09-29 22:56:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -20,6 +20,14 @@ import math
 import time
 import gc
 import os, sys
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search
+
+##################################################################################################################################################
 
 def find_fit(sig_fit_dict, inp_dict, par_vec):
 
