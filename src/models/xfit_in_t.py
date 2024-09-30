@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 21:17:22 trottar"
+# Time-stamp: "2024-09-29 21:25:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -3811,9 +3811,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     graph_sigTT_accept.Draw("ALP")
 
     print("\n")
-
-
-    '''
+    
+    '''    
     # 3 params
     #########
     # SigTT #
