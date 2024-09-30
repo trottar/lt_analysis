@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:47:20 trottar"
+# Time-stamp: "2024-09-29 22:51:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,20 +179,16 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Find fits for L, T, LT, TT
     sig_fit_dict = {
         "L" : {
-            "num_params" : 2,
-            "params" : l0, l1, l2, l3
+            "params" : [l0, l1]
         },
         "T" : {
-            "num_params" : 3,
-            "params" : t0, t1, t2, t3
+            "params" : [t0, t1, t2]
         },
         "LT" : {
-            "num_params" : 3,
-            "params" : lt0, lt1, lt2, lt3
+            "params" : [lt0, lt1, lt2]
         },
         "TT" : {
-            "num_params" : 4,
-            "params" : tt0, tt1, tt2, tt3
+            "params" : [tt0, tt1, tt2, tt3]
         },        
     }
     inp_dict = {

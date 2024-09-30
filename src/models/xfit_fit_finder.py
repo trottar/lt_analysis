@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:47:02 trottar"
+# Time-stamp: "2024-09-29 22:53:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -33,7 +33,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
 
     for key, val in sig_fit_dict.items():
         sig_name = key
-        num_params = val
+        initial_params = val["params"]
+        num_params = len(initial_params)
 
         if num_params == 1:
 
@@ -78,7 +79,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                 max_unchanged_iterations = 5
 
                 # Initialize adaptive parameter limits
-                par_sig_0 = tt0
+                par_sig_0 = initial_params
                 par_sig_err_0 = 0.0
 
                 # Track the best solution
@@ -113,7 +114,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                             tabu_list.add(current_params)
                         else:
                             # Restart from initial parameters
-                            current_params = tt0
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -202,7 +203,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                                     current_params
                                 ])
                             # Restart from initial parameters
-                            current_params = tt0
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -230,7 +231,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                         #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                         # Adjust parameter limits within a random number
-                        par_sig_0 = tt0
+                        par_sig_0 = initial_params
                         par_sig_err_0 = 0.0
 
                         iteration += 1
@@ -484,8 +485,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                 max_unchanged_iterations = 5
 
                 # Initialize adaptive parameter limits
-                par_sig_0 = l0
-                par_sig_1 = l1
+                par_sig_0 = initial_params[0]
+                par_sig_1 = initial_params[1]
                 par_sig_err_0 = 0.0
                 par_sig_err_1 = 0.0
 
@@ -494,7 +495,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                 best_cost = float('inf')
                 best_errors = [par_sig_err_0, par_sig_err_1]
                 previous_params = best_params[:]
-                num_params = len(best_params)
 
                 # Check for local minima
                 local_minima = []
@@ -524,7 +524,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                             tabu_list.add(tuple(current_params))
                         else:
                             # Restart from initial parameters
-                            current_params = [l0, l1]
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -625,7 +625,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                                 ])
 
                             # Restart from initial parameters
-                            current_params = [l0, l1]
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -655,7 +655,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                         #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                         # Adjust parameter limits within a random number
-                        par_sig_0, par_sig_1 = [l0, l1]
+                        par_sig_0, par_sig_1 = initial_params
                         par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
 
                         iteration += 1
@@ -911,9 +911,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                 max_unchanged_iterations = 5
 
                 # Initialize adaptive parameter limits
-                par_sig_0 = l0
-                par_sig_1 = l1
-                par_sig_2 = l2
+                par_sig_0 = initial_params[0]
+                par_sig_1 = initial_params[0]
+                par_sig_2 = initial_params[0]
                 par_sig_err_0 = 0.0
                 par_sig_err_1 = 0.0
                 par_sig_err_2 = 0.0
@@ -923,7 +923,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                 best_cost = float('inf')
                 best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
                 previous_params = best_params[:]
-                num_params = len(best_params)
 
                 # Check for local minima
                 local_minima = []
@@ -955,7 +954,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                             tabu_list.add(tuple(current_params))
                         else:
                             # Restart from initial parameters
-                            current_params = [l0, l1, l2]
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -1067,7 +1066,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                                 ])
 
                             # Restart from initial parameters
-                            current_params = [l0, l1, l2]
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -1095,7 +1094,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                         #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
                         # Adjust parameter limits within a random number
-                        par_sig_0, par_sig_1, par_sig_2 = [l0, l1, l2]
+                        par_sig_0, par_sig_1, par_sig_2 = initial_params
                         par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
 
                         iteration += 1
@@ -1356,10 +1355,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                 max_unchanged_iterations = 5
 
                 # Initialize adaptive parameter limits
-                par_sig_0 = tt0
-                par_sig_1 = tt1
-                par_sig_2 = tt2
-                par_sig_3 = tt3
+                par_sig_0 = initial_params[0]
+                par_sig_1 = initial_params[1]
+                par_sig_2 = initial_params[2]
+                par_sig_3 = initial_params[3]
                 par_sig_err_0 = 0.0
                 par_sig_err_1 = 0.0
                 par_sig_err_2 = 0.0
@@ -1402,7 +1401,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                             tabu_list.add(tuple(current_params))
                         else:
                             # Restart from initial parameters
-                            current_params = [tt0, tt1, tt2, tt3]
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -1536,7 +1535,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                                     current_params[3]
                                 ])
                                 # Restart from initial parameters
-                            current_params = [tt0, tt1, tt2, tt3]
+                            current_params = initial_params
                             temperature = initial_temperature
                             unchanged_iterations = 0
 
@@ -1563,7 +1562,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
                     except (TypeError or ZeroDivisionError) as e:
                         #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
 
-                        par_sig_0, par_sig_1, par_sig_2, par_sig_3 = [tt0, tt1, tt2, tt3]
+                        par_sig_0, par_sig_1, par_sig_2, par_sig_3 = initial_params
                         par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
 
                         iteration += 1
