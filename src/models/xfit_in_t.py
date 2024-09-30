@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:00:39 trottar"
+# Time-stamp: "2024-09-29 23:00:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -191,7 +191,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations
     }
-    
+
+    # Finding fits for L, T, LT, TT
     find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec)
     
     c1.Print(outputpdf+'(')

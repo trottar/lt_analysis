@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:00:34 trottar"
+# Time-stamp: "2024-09-29 23:02:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -36,14 +36,14 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
-    for key, val in inp_dict.items():
-        if key == "canvas":
-            # Specify canvases
-            c1, c2, c4, c3, c5 = val
-        if key == "objects":
-            nsep, g_vec, w_vec, q2_vec, th_vec = val
-        if key == "max_iterations":
-            max_iterations = val
+    c1, c2, c4, c3, c5 = inp_dict["canvas"]
+    nsep, g_vec, w_vec, q2_vec, th_vec = inp_dict["objects"]
+    max_iterations = inp_dict["max_iterations"]    
+    tmin_range = inp_dict["tmin"]
+    tmax_range = inp_dict["tmax"]
+    Q2min_range = inp_dict["Q2min"]
+    Q2max_range = inp_dict["Q2max"]
+    iter_num = inp_dict["iter_num"]            
 
     for key, val in sig_fit_dict.items():
         sig_name = key
