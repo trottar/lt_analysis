@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:44:22 trottar"
+# Time-stamp: "2024-09-30 00:45:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -114,6 +114,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
+
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
             # Record the start time
             start_time = time.time()
@@ -527,6 +529,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
+
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
             # Record the start time
             start_time = time.time()
@@ -960,7 +964,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
-                        
+            
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            
             # Record the start time
             start_time = time.time()
 
@@ -1411,7 +1417,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
-                        
+            
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            
             # Record the start time
             start_time = time.time()
 
