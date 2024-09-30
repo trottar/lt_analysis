@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:30:57 trottar"
+# Time-stamp: "2024-09-30 00:37:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -45,6 +45,7 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
     # Create lists to store graph objects outside the loop
+    graphs_sig_fit = []
     graphs_sig_p0 = []
     graphs_sig_p1 = []
     graphs_sig_p2 = []
@@ -156,7 +157,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                     g_sig_prv = TGraph()
                     g_sig_fit = TGraphErrors()
-                    g_sig_fit_tot = TGraph()    
+                    g_sig_fit_tot = TGraph()
+
+                    graphs_sig_fit[it].append(g_sig_fit)
 
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
@@ -183,8 +186,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X_fit = g_sig.GetY()[i]
                             sig_X_fit_err = g_sig.GetEY()[i]
 
-                            g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
                             #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -210,9 +213,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                             g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                             sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
-                            g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
+                            graphs_sig_fit[it]_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                         #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
                         f_sig_status = f_sig.GetNDF() != 0
@@ -332,7 +335,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
-            g_sig_fit_tot = TGraph()    
+            g_sig_fit_tot = TGraph()
+
+            graphs_sig_fit[it].append(graphs_sig_fit[it])            
 
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -361,8 +366,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X_fit = g_sig.GetY()[i]
                 sig_X_fit_err = g_sig.GetEY()[i]
 
-                g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
             g_sig.SetTitle(f"Sig {sig_name}")
             g_sig.SetMarkerStyle(5)
@@ -379,27 +384,27 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv.Draw("P")
 
             c2.cd(it+1).SetLeftMargin(0.12)
-            g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
-            g_sig_fit.Draw("A*")
+            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+            graphs_sig_fit[it].Draw("A*")
             c2.Update()
             
-            g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sig_fit.GetXaxis().CenterTitle()
-            g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-            g_sig_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sig_fit.GetYaxis().SetTitleSize(0.035)
-            g_sig_fit.GetYaxis().CenterTitle()
+            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit[it].GetXaxis().CenterTitle()
+            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
+            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit[it].GetYaxis().CenterTitle()
 
             # Set axis limits to ensure everything is shown
-            x_min = min(g_sig_fit.GetX())
-            x_max = max(g_sig_fit.GetX())
-            y_min = min(g_sig_fit.GetY())
-            y_max = max(g_sig_fit.GetY())
+            x_min = min(graphs_sig_fit[it].GetX())
+            x_max = max(graphs_sig_fit[it].GetX())
+            y_min = min(graphs_sig_fit[it].GetY())
+            y_max = max(graphs_sig_fit[it].GetY())
 
             # You can also set a margin to ensure all points are visible
             margin = 0.1
-            g_sig_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -428,7 +433,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             # Set a margin to ensure all points are visible
             margin = 0.1 * (y_max - y_min)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
             g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -437,7 +442,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-            r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
@@ -577,8 +582,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                     g_sig_prv = TGraph()
                     g_sig_fit = TGraphErrors()
-                    g_sig_fit_tot = TGraph()    
-
+                    g_sig_fit_tot = TGraph()
+                    
+                    graphs_sig_fit[it].append(g_sig_fit)
+                    
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
 
@@ -607,8 +614,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X_fit = g_sig.GetY()[i]
                             sig_X_fit_err = g_sig.GetEY()[i]
 
-                            g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
                             #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -637,7 +644,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                         #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
                         f_sig_status = f_sig.GetNDF() != 0
@@ -767,7 +774,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
-            g_sig_fit_tot = TGraph()        
+            g_sig_fit_tot = TGraph()
+
+            graphs_sig_fit[it].append(g_sig_fit)            
 
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -797,8 +806,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X_fit = g_sig.GetY()[i]
                 sig_X_fit_err = g_sig.GetEY()[i]
 
-                g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
             g_sig.SetTitle(f"Sig {sig_name}")
             g_sig.SetMarkerStyle(5)
@@ -815,27 +824,27 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv.Draw("P")
 
             c2.cd(it+1).SetLeftMargin(0.12)
-            g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
-            g_sig_fit.Draw("A*")
+            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+            graphs_sig_fit[it].Draw("A*")
             c2.Update()
             
-            g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sig_fit.GetXaxis().CenterTitle()
-            g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-            g_sig_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sig_fit.GetYaxis().SetTitleSize(0.035)
-            g_sig_fit.GetYaxis().CenterTitle()
+            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit[it].GetXaxis().CenterTitle()
+            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
+            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit[it].GetYaxis().CenterTitle()
 
             # Set axis limits to ensure everything is shown
-            x_min = min(g_sig_fit.GetX())
-            x_max = max(g_sig_fit.GetX())
-            y_min = min(g_sig_fit.GetY())
-            y_max = max(g_sig_fit.GetY())
+            x_min = min(graphs_sig_fit[it].GetX())
+            x_max = max(graphs_sig_fit[it].GetX())
+            y_min = min(graphs_sig_fit[it].GetY())
+            y_max = max(graphs_sig_fit[it].GetY())
 
             # You can also set a margin to ensure all points are visible
             margin = 0.1
-            g_sig_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -865,7 +874,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             # Set a margin to ensure all points are visible
             margin = 0.1 * (y_max - y_min)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
             g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -874,7 +883,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-            r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
@@ -1021,6 +1030,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     g_sig_fit = TGraphErrors()
                     g_sig_fit_tot = TGraph()    
 
+                    graphs_sig_fit[it].append(g_sig_fit)
+                    
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
 
@@ -1051,8 +1062,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X_fit = g_sig.GetY()[i]
                             sig_X_fit_err = g_sig.GetEY()[i]
 
-                            g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
                             #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -1084,7 +1095,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                         #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
                         f_sig_status = f_sig.GetNDF() != 0
@@ -1222,6 +1233,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()        
 
+            graphs_sig_fit[it].append(g_sig_fit)
+            
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
@@ -1251,8 +1264,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X_fit = g_sig.GetY()[i]
                 sig_X_fit_err = g_sig.GetEY()[i]
 
-                g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
             g_sig.SetTitle(f"Sig {sig_name}")
             g_sig.SetMarkerStyle(5)
@@ -1269,27 +1282,27 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv.Draw("P")
 
             c2.cd(it+1).SetLeftMargin(0.12)
-            g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
-            g_sig_fit.Draw("A*")
+            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+            graphs_sig_fit[it].Draw("A*")
             c2.Update()
             
-            g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sig_fit.GetXaxis().CenterTitle()
-            g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-            g_sig_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sig_fit.GetYaxis().SetTitleSize(0.035)
-            g_sig_fit.GetYaxis().CenterTitle()
+            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit[it].GetXaxis().CenterTitle()
+            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
+            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit[it].GetYaxis().CenterTitle()
 
             # Set axis limits to ensure everything is shown
-            x_min = min(g_sig_fit.GetX())
-            x_max = max(g_sig_fit.GetX())
-            y_min = min(g_sig_fit.GetY())
-            y_max = max(g_sig_fit.GetY())
+            x_min = min(graphs_sig_fit[it].GetX())
+            x_max = max(graphs_sig_fit[it].GetX())
+            y_min = min(graphs_sig_fit[it].GetY())
+            y_max = max(graphs_sig_fit[it].GetY())
 
             # You can also set a margin to ensure all points are visible
             margin = 0.1
-            g_sig_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -1320,7 +1333,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             # Set a margin to ensure all points are visible
             margin = 0.1 * (y_max - y_min)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
             g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -1329,7 +1342,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-            r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
@@ -1482,6 +1495,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     g_sig_fit = TGraphErrors()
                     g_sig_fit_tot = TGraph()    
 
+                    graphs_sig_fit[it].append(g_sig_fit)
+                    
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
 
@@ -1512,8 +1527,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X_fit = g_sig.GetY()[i]
                             sig_X_fit_err = g_sig.GetEY()[i]
 
-                            g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
                             #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -1556,7 +1571,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                         #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
                         f_sig_status = f_sig.GetNDF() != 0
@@ -1704,6 +1719,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()    
 
+            graphs_sig_fit[it].append(g_sig_fit)
+            
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
@@ -1734,8 +1751,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X_fit = g_sig.GetY()[i]
                 sig_X_fit_err = g_sig.GetEY()[i]
 
-                g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
             g_sig.SetTitle(f"Sig {sig_name}")
             g_sig.SetMarkerStyle(5)
@@ -1752,27 +1769,27 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv.Draw("P")
 
             c2.cd(it+1).SetLeftMargin(0.12)
-            g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit")
-            g_sig_fit.Draw("A*")
+            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+            graphs_sig_fit[it].Draw("A*")
             c2.Update()
             
-            g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sig_fit.GetXaxis().CenterTitle()
-            g_sig_fit.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
-            g_sig_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sig_fit.GetYaxis().SetTitleSize(0.035)
-            g_sig_fit.GetYaxis().CenterTitle()
+            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit[it].GetXaxis().CenterTitle()
+            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
+            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit[it].GetYaxis().CenterTitle()
 
             # Set axis limits to ensure everything is shown
-            x_min = min(g_sig_fit.GetX())
-            x_max = max(g_sig_fit.GetX())
-            y_min = min(g_sig_fit.GetY())
-            y_max = max(g_sig_fit.GetY())
+            x_min = min(graphs_sig_fit[it].GetX())
+            x_max = max(graphs_sig_fit[it].GetX())
+            y_min = min(graphs_sig_fit[it].GetY())
+            y_max = max(graphs_sig_fit[it].GetY())
 
             # You can also set a margin to ensure all points are visible
             margin = 0.1
-            g_sig_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -1804,7 +1821,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             # Set a margin to ensure all points are visible
             margin = 0.1 * (y_max - y_min)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
             g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
@@ -1813,7 +1830,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-            r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
