@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:51:33 trottar"
+# Time-stamp: "2024-09-29 23:53:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1818,7 +1818,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_p0.SetLineColor(ROOT.kRed)
             graph_sig_p1.SetLineColor(ROOT.kBlue)
             graph_sig_p2.SetLineColor(ROOT.kGreen)
-            graph_sig_p3.SetLineColor(ROOT.kPurple)
+            graph_sig_p3.SetLineColor(ROOT.kPink)
             graph_sig_p0.Draw("ALP")
             graph_sig_p1.Draw("LP SAME")
             graph_sig_p2.Draw("LP SAME")
