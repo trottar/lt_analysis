@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:00:10 trottar"
+# Time-stamp: "2024-09-29 23:00:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -34,7 +34,7 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 ##################################################################################################################################################
 
-def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec):
+def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
     for key, val in inp_dict.items():
         if key == "canvas":
