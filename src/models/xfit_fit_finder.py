@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:33:26 trottar"
+# Time-stamp: "2024-09-29 23:38:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -478,6 +478,11 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
 
+            graph_sig_p0.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
+            
             print("\n")    
 
         elif num_params == 2:
@@ -903,6 +908,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
 
+            graph_sig_p0.Clear()
+            graph_sig_p1.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
+            
             print("\n")    
 
         elif num_params == 3:
@@ -1346,6 +1357,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
 
+            graph_sig_p0.Clear()
+            graph_sig_p1.Clear()
+            graph_sig_p2.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
+            
             print("\n")    
 
         elif num_params == 4:
@@ -1814,7 +1832,22 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
 
+            graph_sig_p0.Clear()
+            graph_sig_p1.Clear()
+            graph_sig_p2.Clear()
+            graph_sig_p3.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
+
             print("\n")
+
+        c1.Update()            
+        c2.Update()            
+        c3.Update()
+        c4.Update()
+        c5.Update()
+        c6.Update()
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
