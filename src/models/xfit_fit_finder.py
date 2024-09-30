@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:38:45 trottar"
+# Time-stamp: "2024-09-30 00:39:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -159,7 +159,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     g_sig_fit = TGraphErrors()
                     g_sig_fit_tot = TGraph()
 
-                    graphs_sig_fit[it].append(g_sig_fit)
+                    graphs_sig_fit.append(g_sig_fit)
 
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
@@ -337,7 +337,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()
 
-            graphs_sig_fit[it].append(graphs_sig_fit[it])            
+            graphs_sig_fit.append(graphs_sig_fit[it])            
 
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -584,7 +584,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     g_sig_fit = TGraphErrors()
                     g_sig_fit_tot = TGraph()
                     
-                    graphs_sig_fit[it].append(g_sig_fit)
+                    graphs_sig_fit.append(g_sig_fit)
                     
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
@@ -776,7 +776,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()
 
-            graphs_sig_fit[it].append(g_sig_fit)            
+            graphs_sig_fit.append(g_sig_fit)            
 
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -1030,7 +1030,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     g_sig_fit = TGraphErrors()
                     g_sig_fit_tot = TGraph()    
 
-                    graphs_sig_fit[it].append(g_sig_fit)
+                    graphs_sig_fit.append(g_sig_fit)
                     
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
@@ -1233,7 +1233,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()        
 
-            graphs_sig_fit[it].append(g_sig_fit)
+            graphs_sig_fit.append(g_sig_fit)
             
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -1495,7 +1495,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     g_sig_fit = TGraphErrors()
                     g_sig_fit_tot = TGraph()    
 
-                    graphs_sig_fit[it].append(g_sig_fit)
+                    graphs_sig_fit.append(g_sig_fit)
                     
                     sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
                     sys.stdout.flush()
@@ -1719,7 +1719,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()    
 
-            graphs_sig_fit[it].append(g_sig_fit)
+            graphs_sig_fit.append(g_sig_fit)
             
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
