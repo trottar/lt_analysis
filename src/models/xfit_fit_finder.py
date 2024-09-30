@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:24:48 trottar"
+# Time-stamp: "2024-09-29 22:28:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -12,7 +12,7 @@
 #
 
 
-def find_fit(sig_name, num_params)
+def find_fit(sig_name, num_params):
     if num_params == 1:
 
         # 1 param
