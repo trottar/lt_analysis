@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 16:24:43 trottar"
+# Time-stamp: "2024-09-30 16:28:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -146,7 +146,7 @@ def iterWeight(arg_str):
         #                  that incorporates Q2-dep based of pi FF
         ##sigtt=(-p13/(1+q2_gev))*(math.sin(thetacm_sim)**2)*math.exp(-p14*abs(t_gev))
         ###sigtt=(p13/(1+q2_gev))*(math.sin(thetacm_sim)**2)*ft*math.exp(-p14*(q2_gev))
-        sigtt = ((-p13 * abs(t_gev) + p14) * (abs(t_gev)**(p15/q2_gev)**(-1)) - p16 * q2_gev) * (math.sin(thetacm_sim)**2)
+        sigtt = ((-p13 * abs(t_gev) + p14) * (abs(t_gev)**(q2_gev/p15)) - p16 * q2_gev) * (math.sin(thetacm_sim)**2)
         
     except OverflowError:
         sigtt = -1000.0
