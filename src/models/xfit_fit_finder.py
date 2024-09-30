@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:38:21 trottar"
+# Time-stamp: "2024-09-29 23:41:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -100,6 +100,11 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+
+            graph_sig_p0.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
 
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -477,11 +482,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
-
-            graph_sig_p0.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
             
             print("\n")    
 
@@ -511,6 +511,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+
+            graph_sig_p0.Clear()
+            graph_sig_p1.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
 
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -907,12 +913,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
-
-            graph_sig_p0.Clear()
-            graph_sig_p1.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
             
             print("\n")    
 
@@ -944,6 +944,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
 
+            graph_sig_p0.Clear()
+            graph_sig_p1.Clear()
+            graph_sig_p2.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
+            
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -1356,13 +1363,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
-
-            graph_sig_p0.Clear()
-            graph_sig_p1.Clear()
-            graph_sig_p2.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
             
             print("\n")    
 
@@ -1395,6 +1395,14 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
 
+            graph_sig_p0.Clear()
+            graph_sig_p1.Clear()
+            graph_sig_p2.Clear()
+            graph_sig_p3.Clear()
+            graph_sig_chi2.Clear()
+            graph_sig_temp.Clear()
+            graph_sig_accept.Clear()
+            
             c1.cd(it+1).SetLeftMargin(0.12)
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -1831,14 +1839,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
-
-            graph_sig_p0.Clear()
-            graph_sig_p1.Clear()
-            graph_sig_p2.Clear()
-            graph_sig_p3.Clear()
-            graph_sig_chi2.Clear()
-            graph_sig_temp.Clear()
-            graph_sig_accept.Clear()
 
             print("\n")
 
