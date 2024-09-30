@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:05:39 trottar"
+# Time-stamp: "2024-09-29 23:09:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,21 +154,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             q2_vec.append(q2)
             th_vec.append(thetacm)
 
-    c1 = TCanvas("c1", "c1", 800, 800)
-    c1.Divide(2, 2)
-
-    c2 = TCanvas("c2", "c2", 800, 800)
-    c2.Divide(2, 2)
-
-    # Create ROOT canvases for additional parameter convergence plots
-    c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
-    c3.Divide(2, 2)
-    c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
-    c4.Divide(2, 2)
-    c5 = TCanvas("c5", "Temperature", 800, 800)
-    c5.Divide(2, 2)
-    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
-    c6.Divide(2, 2)
 
     # Find fits for L, T, LT, TT
     sig_fit_dict = {
@@ -200,13 +185,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Finding fits for L, T, LT, TT
     find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec)
-    
-    c1.Print(outputpdf+'(')
-    c2.Print(outputpdf)
-    c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:

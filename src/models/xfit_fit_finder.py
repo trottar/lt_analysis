@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 23:06:53 trottar"
+# Time-stamp: "2024-09-29 23:09:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -44,7 +44,22 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
-    c1, c2, c4, c3, c5, c6 = inp_dict["canvas"]
+    c1 = TCanvas("c1", "c1", 800, 800)
+    c1.Divide(2, 2)
+
+    c2 = TCanvas("c2", "c2", 800, 800)
+    c2.Divide(2, 2)
+
+    # Create ROOT canvases for additional parameter convergence plots
+    c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
+    c3.Divide(2, 2)
+    c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
+    c4.Divide(2, 2)
+    c5 = TCanvas("c5", "Temperature", 800, 800)
+    c5.Divide(2, 2)
+    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
+    c6.Divide(2, 2)
+    
     nsep, g_vec, w_vec, q2_vec, th_vec = inp_dict["objects"]
     max_iterations = inp_dict["max_iterations"]    
     tmin_range = inp_dict["tmin_range"]
@@ -1799,3 +1814,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             print("\n")
 
+    
+    c1.Print(outputpdf+'(')
+    c2.Print(outputpdf)
+    c3.Print(outputpdf)
+    c4.Print(outputpdf)
+    c5.Print(outputpdf)
+    c6.Print(outputpdf+')')            
