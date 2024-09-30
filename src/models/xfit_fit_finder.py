@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:58:20 trottar"
+# Time-stamp: "2024-09-29 22:59:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -30,7 +30,7 @@ from utility import adaptive_cooling, simulated_annealing, acceptance_probabilit
 ###############################################################################################################################################
 # Import separated xsects models
 
-from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT, set_val
+from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 ##################################################################################################################################################
 
