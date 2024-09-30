@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:00:21 trottar"
+# Time-stamp: "2024-09-30 00:03:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -485,6 +485,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.Draw("ALP")
             c6.Update()
 
+            del g_sig_prv
+            del g_sig_fit
+            del g_sig_fit_tot
+            
             del graph_sig_p0
             del graph_sig_chi2
             del graph_sig_temp
@@ -921,6 +925,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
             c6.Update()
+
+            del g_sig_prv
+            del g_sig_fit
+            del g_sig_fit_tot
 
             del graph_sig_p0
             del graph_sig_p1
@@ -1377,6 +1385,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.SetLineColor(ROOT.kBlack)
             graph_sig_accept.Draw("ALP")
             c6.Update()
+
+            del g_sig_prv
+            del g_sig_fit
+            del g_sig_fit_tot
 
             del graph_sig_p0
             del graph_sig_p1
@@ -1864,6 +1876,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_accept.Draw("ALP")
             c6.Update()
 
+            del g_sig_prv
+            del g_sig_fit
+            del g_sig_fit_tot
+            
             del graph_sig_p0
             del graph_sig_p1
             del graph_sig_p2
