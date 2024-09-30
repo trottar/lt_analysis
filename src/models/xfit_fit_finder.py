@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:56:19 trottar"
+# Time-stamp: "2024-09-29 22:57:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,7 +72,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
             graph_sig_accept = TGraph()
 
             c1.cd(4).SetLeftMargin(0.12)
-            nsep.Draw("sig:t:sig_e", "", "goff")
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
             # Record the start time
             start_time = time.time()
@@ -478,7 +478,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
             graph_sig_accept = TGraph()
 
             c1.cd(1).SetLeftMargin(0.12)
-            nsep.Draw("sig:t:sig_e", "", "goff")
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
             # Record the start time
             start_time = time.time()
@@ -904,7 +904,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
             graph_sig_accept = TGraph()
 
             c1.cd(1).SetLeftMargin(0.12)
-            nsep.Draw("sig:t:sig_e", "", "goff")
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
             # Record the start time
             start_time = time.time()
@@ -1348,7 +1348,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec):
             graph_sig_accept = TGraph()
 
             c1.cd(4).SetLeftMargin(0.12)
-            nsep.Draw("sig:t:sig_e", "", "goff")
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
             # Record the start time
             start_time = time.time()
