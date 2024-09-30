@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:42:07 trottar"
+# Time-stamp: "2024-09-30 00:44:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -53,9 +53,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     graphs_sig_chi2 = []
     graphs_sig_temp = []
     graphs_sig_accept = []
-
-    c1 = TCanvas("c1", "c1", 800, 800)
-    c1.Divide(2, 2)
 
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -117,10 +114,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
-
-            c1.cd(it+1).SetLeftMargin(0.12)
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-            c1.Update()
             
             # Record the start time
             start_time = time.time()
@@ -534,10 +527,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
-
-            c1.cd(it+1).SetLeftMargin(0.12)
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-            c1.Update()
             
             # Record the start time
             start_time = time.time()
@@ -971,11 +960,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
-            
-            c1.cd(it+1).SetLeftMargin(0.12)
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-            c1.Update()
-            
+                        
             # Record the start time
             start_time = time.time()
 
@@ -1426,11 +1411,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
-            
-            c1.cd(it+1).SetLeftMargin(0.12)
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-            c1.Update()
-            
+                        
             # Record the start time
             start_time = time.time()
 
@@ -1874,15 +1855,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             
             print("\n")
 
-        c1.Update()
         c2.Update()
         c3.Update()
         c4.Update()
         c5.Update()
         c6.Update()
     
-    c1.Print(outputpdf+'(')
-    c2.Print(outputpdf)
+    c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
     c4.Print(outputpdf)
     c5.Print(outputpdf)
