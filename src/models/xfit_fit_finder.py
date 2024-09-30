@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:34:48 trottar"
+# Time-stamp: "2024-09-29 22:47:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -21,19 +21,20 @@ import time
 import gc
 import os, sys
 
-def find_fit(sig_fit_dict, canvas_list):
+def find_fit(sig_fit_dict, inp_dict, par_vec):
 
-    # Specify canvases
-    c1 = canvas_list[0]
-    c2 = canvas_list[1]
-    c3 = canvas_list[2]
-    c4 = canvas_list[3]
-    c5 = canvas_list[4]
+    for key, val in inp_dict:
+
+        if key == "canvas":
+            # Specify canvases
+            c1, c2, c4, c3, c5 = val
+        if key == "objects":
+            nsep, g_vec, w_vec, q2_vec, th_vec = val
 
     for key, val in sig_fit_dict.items():
         sig_name = key
         num_params = val
-    
+
         if num_params == 1:
 
             # 1 param

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-29 22:33:18 trottar"
+# Time-stamp: "2024-09-29 22:47:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -178,13 +178,30 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Find fits for L, T, LT, TT
     sig_fit_dict = {
-        "L" : 2,
-        "T" : 4,
-        "LT" : 3,
-        "TT" : 4
+        "L" : {
+            "num_params" : 2,
+            "params" : l0, l1, l2, l3
+        },
+        "T" : {
+            "num_params" : 3,
+            "params" : t0, t1, t2, t3
+        },
+        "LT" : {
+            "num_params" : 3,
+            "params" : lt0, lt1, lt2, lt3
+        },
+        "TT" : {
+            "num_params" : 4,
+            "params" : tt0, tt1, tt2, tt3
+        },        
     }
-    canvas_list = [c1, c2, c3, c4, c5]
-    find_fit(sig_fit_dict, canvas_list)
+    inp_dict = {
+
+        "canvas_list" : [c1, c2, c3, c4, c5],
+        "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec]
+    }
+    
+    find_fit(sig_fit_dict, inp_dict, par_vec)
     
     c1.Print(outputpdf+'(')
     c2.Print(outputpdf)
