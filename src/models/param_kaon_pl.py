@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-01 10:48:33 trottar"
+# Time-stamp: "2024-10-01 16:21:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,7 +138,7 @@ def iterWeight(arg_str):
         #                 xfit_in_t.py script to work. LT/TT are zeros
         #                 Therefore param 12 was also changed to 13
         ##
-        ##sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
+        sigtt = (p13 * q2_gev * math.exp(-q2_gev)) * ft * math.sin(thetacm_sim)**2
         # RLT (4/23/2024): Marco's thesis functional forms
         #sigtt = p13 * math.exp(-p14*abs(t_gev)) * (1.0 / (1.0 + (q2_gev**2)*p15))
         ##
@@ -146,7 +146,7 @@ def iterWeight(arg_str):
         #                  that incorporates Q2-dep based of pi FF
         ##sigtt=(-p13/(1+q2_gev))*(math.sin(thetacm_sim)**2)*math.exp(-p14*abs(t_gev))
         ###sigtt=(p13/(1+q2_gev))*(math.sin(thetacm_sim)**2)*ft*math.exp(-p14*(q2_gev))
-        sigtt = ((-p13 * abs(t_gev) + p14) * (abs(t_gev)**(q2_gev/p15)) - p16 * q2_gev) * (math.sin(thetacm_sim)**2)
+        ####sigtt = ((-p13 * abs(t_gev) + p14) * (abs(t_gev)**(q2_gev/p15)) - p16 * q2_gev) * (math.sin(thetacm_sim)**2)
         
     except OverflowError:
         sigtt = -1000.0
