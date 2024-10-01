@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 18:38:44 trottar"
+# Time-stamp: "2024-10-01 10:01:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -145,8 +145,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
 
             if pol_str == "pl":
-                g = (1 / ((w**2) - (m_p**2))**2)
-                ##g = (1 / ((w**2) - (m_p**2))**5) # HERE!
+                ###g = (1 / ((w**2) - (m_p**2))**2)
+                g = (1 / ((w**2) - (m_p**2))**3) # HERE!
             else:
                 g = (1 / ((w**2) - (m_n**2))**2)
             g_vec.append(g)
