@@ -129,7 +129,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *                     the xfit_in_t.py script to work. LT/TT are zeros
 *                     Therefore param 12 was also changed to 13
 **      
-**      sigTT=(par(13)*q2*exp(-q2))*f_tm*sin(thetacm)**2
+      sigTT=(par(13)*q2*exp(-q2))*f_tm*sin(thetacm)**2
 *     RLT (4/23/2024): Marco's thesis functional forms
 *      sigTT=par(13)*exp(-par(14)*abs(tm))*(1.0/(1.0+(q2**2)*par(15)))
 
@@ -157,13 +157,13 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     >     *exp(-par(14)*(abs(tm)))
 ***      sigTT=(par(13)/(1+q2))*(sin(thetacm)**2)
 ***   >     *f_tm*exp(-par(14)*(q2))
-      sigTT=((-par(13)*abs(tm)+par(14))*(abs(tm)
-     >     **(q2/par(15)))-par(16)*q2)*sin(thetacm)**2
+****      sigTT=((-par(13)*abs(tm)+par(14))*(abs(tm)
+****     >     **(q2/par(15)))-par(16)*q2)*sin(thetacm)**2
       
 c     Correct for W.
-***      g_W=1./(W**2-targ**2)**2  ! W factor
+      g_W=1./(W**2-targ**2)**2  ! W factor
 *     g_W=1./(W**2-targ**2)**2.25       ! W factor, Q2=3.0, W=3.14
-      g_W=1./(W**2-targ**2)**3.0       ! W factor, Q2=3.0, W=2.32
+*      g_W=1./(W**2-targ**2)**2.5       ! W factor, Q2=3.0, W=2.32
       
 
       wfactor=g_W
