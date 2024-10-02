@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-02 01:41:11 trottar"
+# Time-stamp: "2024-10-02 08:09:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,7 +153,7 @@ def fun_Sig_TT(x, par):
     try:
         #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
         ##
-        ##f = (par[0]*qq*math.exp(-qq))*f_tt
+        f = (par[0]*qq*math.exp(-qq))*f_tt
         # RLT (4/23/2024): Marco's thesis functional forms
         #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
         ##
@@ -161,7 +161,7 @@ def fun_Sig_TT(x, par):
         #                  that incorporates Q2-dep based of pi FF
         #f=(-par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
         ###f=(par[0]/(1+qq))*f_tt*math.exp(-par[1]*(qq))
-        f = ((-par[0]*abs(tt)+par[1])*(abs(tt)**(qq/par[2]))-par[3]*qq)
+        ####f = ((-par[0]*abs(tt)+par[1])*(abs(tt)**(qq/par[2]))-par[3]*qq)
         
     except OverflowError:
         f = -1000.0
