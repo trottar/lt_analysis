@@ -326,9 +326,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 for event in Cut_Events_all_noRF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         if (tmax != False):
-                            if(-event.MandelT<1):
-                                Q2vsW_hilo_cut.Fill(event.Q2, event.W)
-                                t_cut.Fill(-event.MandelT)
+                            Q2vsW_hilo_cut.Fill(event.Q2, event.W)
+                            t_cut.Fill(-event.MandelT)
                         else:
                             print("!!!!! Error! tmax not found! Skipping t-range cut !!!!!")
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
@@ -336,9 +335,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 for event in Cut_Events_all_noRF_tree:
                     if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
                         if (tmax != False):
-                            if(-event.MandelT<tmax):
-                                Q2vsW_milo_cut.Fill(event.Q2, event.W)
-                                t_mi_cut.Fill(-event.MandelT)
+                            Q2vsW_milo_cut.Fill(event.Q2, event.W)
+                            t_mi_cut.Fill(-event.MandelT)
                         else:
                             print("!!!!! Error! tmax not found! Skipping t-range cut !!!!!")
                             Q2vsW_milo_cut.Fill(event.Q2, event.W)        
