@@ -163,7 +163,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 c     Correct for W.
 ***      g_W=1./(W**2-targ**2)**2  ! W factor
 *     g_W=1./(W**2-targ**2)**2.25       ! W factor, Q2=3.0, W=3.14
-      g_W=1./(W**2-targ**2)**2.5       ! W factor, Q2=3.0, W=2.32
+      g_W=1./(W**2-targ**2)**3.0       ! W factor, Q2=3.0, W=2.32
       
 
       wfactor=g_W
