@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-30 00:47:06 trottar"
+# Time-stamp: "2024-10-03 14:18:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -60,7 +60,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     # Create ROOT canvases for additional parameter convergence plots
     c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
     c3.Divide(2, 2)
-    c4 = TCanvas("c4", "Chi-Square Convergence", 800, 800)
+    c4 = TCanvas("c4", "Red. Chi-Square Convergence", 800, 800)
     c4.Divide(2, 2)
     c5 = TCanvas("c5", "Temperature", 800, 800)
     c5.Divide(2, 2)
@@ -75,6 +75,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     Q2max_range = inp_dict["Q2max_range"]
     iter_num = inp_dict["iter_num"]            
     outputpdf = inp_dict["outputpdf"]
+
+    num_events = nsep.GetEntries()    
     
     for it, (key, val) in enumerate(sig_fit_dict.items()):
 
@@ -217,8 +219,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                         params_sig_history['p0'].append(current_params)
 
-                        # Calculate the cost (chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()
+                        # Calculate the cost (reduced chi-square value) for the current parameters
+                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -292,7 +294,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
                 # After the while loop, check if this run found a better solution
-                if best_cost < best_overall_cost:
+                if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
                     best_overall_params = best_params
                     best_overall_errors = best_errors
@@ -475,7 +477,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Red. Chi-Square Convergence;Optimization Run;Red. Chi-Square")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
@@ -638,8 +640,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p0'].append(current_params[0])
                         params_sig_history['p1'].append(current_params[1])
 
-                        # Calculate the cost (chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()
+                        # Calculate the cost (reduced chi-square value) for the current parameters
+                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -725,7 +727,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         total_iteration += 1 if iteration % max_iterations == 0 else 0
 
                 # After the while loop, check if this run found a better solution
-                if best_cost < best_overall_cost:
+                if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors
@@ -909,7 +911,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Red. Chi-Square Convergence;Optimization Run;Red. Chi-Square")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
@@ -1081,8 +1083,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p1'].append(current_params[1])
                         params_sig_history['p2'].append(current_params[2])
 
-                        # Calculate the cost (chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()
+                        # Calculate the cost (reduced chi-square value) for the current parameters
+                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1173,7 +1175,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         total_iteration += 1 if iteration % max_iterations == 0 else 0
 
                 # After the while loop, check if this run found a better solution
-                if best_cost < best_overall_cost:
+                if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors
@@ -1361,7 +1363,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Red. Chi-Square Convergence;Optimization Run;Red. Chi-Square")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
             c4.Update()
@@ -1549,8 +1551,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p2'].append(current_params[2])
                         params_sig_history['p3'].append(current_params[3])
 
-                        # Calculate the cost (chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()
+                        # Calculate the cost (reduced chi-square value) for the current parameters
+                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1650,7 +1652,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
                 # After the while loop, check if this run found a better solution
-                if best_cost < best_overall_cost:
+                if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors
@@ -1842,7 +1844,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             
             # Plot chi-square convergence
             c4.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Chi-Square Convergence;Optimization Run;Chi-Square")
+            graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} Red. Chi-Square Convergence;Optimization Run;Red. Chi-Square")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
             c4.Update()

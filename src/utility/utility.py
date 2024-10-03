@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-28 20:35:09 trottar"
+# Time-stamp: "2024-10-03 14:09:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -759,7 +759,7 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1):
 
 def acceptance_probability(old_cost, new_cost, temperature):
     # Calculate the probability of accepting a worse solution
-    if new_cost < old_cost:
+    if abs(new_cost - 1) < abs(old_cost - 1):
         return 1.0
     elif temperature == 0:
         return 0.0

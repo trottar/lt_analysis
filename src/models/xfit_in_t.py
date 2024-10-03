@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-03 02:27:56 trottar"
+# Time-stamp: "2024-10-03 13:56:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -154,7 +154,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             w_vec.append(w)
             q2_vec.append(q2)
             th_vec.append(thetacm)
-
 
     # Find fits for L, T, LT, TT
     sig_fit_dict = {
