@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-03 19:56:55 trottar"
+# Time-stamp: "2024-10-03 22:38:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -92,7 +92,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             #######
 
             print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name}")
+            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
             num_starts = 10  # Number of times to restart the algorithm
@@ -509,7 +509,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             #######
 
             print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name}")
+            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
             num_starts = 10  # Number of times to restart the algorithm
@@ -946,7 +946,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             #######
 
             print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name}")
+            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
             num_starts = 10  # Number of times to restart the algorithm
@@ -1401,7 +1401,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             #######
 
             print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name}")
+            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")    
 
             num_starts = 10  # Number of times to restart the algorithm
