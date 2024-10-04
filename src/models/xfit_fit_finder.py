@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-03 14:18:54 trottar"
+# Time-stamp: "2024-10-03 19:56:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -220,7 +220,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p0'].append(current_params)
 
                         # Calculate the cost (reduced chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        if num_events > num_params:
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        else:
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -641,7 +644,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p1'].append(current_params[1])
 
                         # Calculate the cost (reduced chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        if num_events > num_params:
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        else:
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1084,7 +1090,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p2'].append(current_params[2])
 
                         # Calculate the cost (reduced chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        if num_events > num_params:
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        else:
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1552,7 +1561,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p3'].append(current_params[3])
 
                         # Calculate the cost (reduced chi-square value) for the current parameters
-                        current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        if num_events > num_params:
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                        else:
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
