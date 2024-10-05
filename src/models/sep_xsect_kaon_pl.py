@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-05 01:09:28 trottar"
+# Time-stamp: "2024-10-05 16:35:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,7 +140,7 @@ def import_model(inp_model, arg_str):
                 #  RLT (7/11/2024): Moved below for Q2dep func form
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
-                f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+                ##f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
                 ##
@@ -148,7 +148,7 @@ def import_model(inp_model, arg_str):
                 #                  that incorporates Q2-dep based of pi FF
                 ##f=(-par[0]/(1+qq))*(math.sin(theta_cm)**2)*math.exp(-par[1]*(abs(tt)))
                 ###f=(par[0]/(1+qq))*(math.sin(theta_cm)**2)*f_tt*math.exp(-par[1]*(qq))
-                ####f = ((-par[0]*abs(tt)+par[1])*(abs(tt)**(qq/par[2]))-par[3]*qq)*(math.sin(theta_cm)**2)
+                f = ((-par[0]*abs(tt)+par[1])*(abs(tt)**(qq/par[2]))-par[3]*qq)*(math.sin(theta_cm)**2)
                 
             except ValueError:
                 f = -1000.0
@@ -168,8 +168,8 @@ def import_model(inp_model, arg_str):
     sig_sep = modelDict[inp_model]
 
     # Apply weight factor
-    g = 1 / ((ww**2) - (m_p**2))**2
-    #g = 1 / ((ww**2) - (m_p**2))**2.45 # Q2=5.5,W=3.02
+    #g = 1 / ((ww**2) - (m_p**2))**2
+    g = 1 / ((ww**2) - (m_p**2))**2.45 # Q2=5.5,W=3.02
     #g = 1 / ((ww**2) - (m_p**2))**2.65 # Q2=4.4,W=2.74
     #g = 1 / ((ww**2) - (m_p**2))**2.25 # Q2=3.0,W=3.14
     #g = 1 / ((ww**2) - (m_p**2))**3.4 # Q2=3.0,W=2.32
