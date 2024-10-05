@@ -712,12 +712,12 @@ if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
     TMAX=0.035    
 elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
-    NumtBins=3
-    NumPhiBins=7
-    TMIN=0.150
-    TMAX=0.350
-    #TMIN=0.100
-    #TMAX=0.600
+    NumtBins=6
+    NumPhiBins=12
+    #TMIN=0.150
+    #TMAX=0.350
+    TMIN=0.100
+    TMAX=0.600
     #TMIN=0.150 # Center low
     #TMAX=0.400 # Center low
 elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
