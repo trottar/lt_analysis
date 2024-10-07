@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:14:43 trottar"
+# Time-stamp: "2024-10-07 04:16:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,14 +58,14 @@ test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 max_fortran_line_length = 72
 
 for sig_val in extract_values(test_file_path):
-    print("\n\nUpdating {} with proper sig_L...".format(file_path))
+    print(f"\n\nUpdating {file_path} with proper {sig_val}...")
 
-    # Step 1: Read and extract sig_L from test.txt
-    sigl_str = None  # Initialize variable to hold the sig_L value
+    # Step 1: Read and extract {sig_val} from test.txt
+    sigl_str = None  # Initialize variable to hold the {sig_val} value
     with open(test_file_path, 'r') as test_file:
         for line in test_file:
             if '#' not in line:
-                if ('sig_L=' in line) or ('sig_L =' in line):  # Look for the line that defines sig_L
+                if (f'{sig_val}=' in line) or (f'{sig_val} =' in line):  # Look for the line that defines {sig_val}
                     sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
                     # Convert math to fortran syntax
                     sigl_str = sigl_str.replace(f"math.exp",f"exp")
@@ -74,10 +74,10 @@ for sig_val in extract_values(test_file_path):
                     # Update parameter names to match fortran vectors
                     for par in range(1,16):
                         sigl_str = sigl_str.replace(f"p{par}",f"par({par})")
-                    break  # No need to search further once sig_L is found
+                    break  # No need to search further once {sig_val} is found
 
     if sigl_str is None:
-        print("sig_L not found in test.txt!")
+        print(f"{sig_val} not found in test.txt!")
     else:
         # Step 2: Read the Fortran file and store its contents
         with open(file_path, 'r') as file:
@@ -87,16 +87,16 @@ for sig_val in extract_values(test_file_path):
         # Step 3: Find and replace the specific variable definition in the Fortran file
         for i, line in enumerate(lines):
             if '#' not in line:
-                if 'sig_L=' in line:
+                if f'{sig_val}=' in line:
                     if not SigSet:
                         print(f'''
-                        Changing {line.strip()} to sig_L={sigl_str}
+                        Changing {line.strip()} to {sig_val}={sigl_str}
                         ''')
-                        # Preserve the spaces before 'sig_L'
-                        prefix_spaces = line[:line.find('sig_L=')]
+                        # Preserve the spaces before '{sig_val}'
+                        prefix_spaces = line[:line.find(f'{sig_val}=')]
 
-                        # Construct the new line with sig_L, ensuring we don't exceed the Fortran line length
-                        new_line = f'{prefix_spaces}sig_L={sigl_str}\n'
+                        # Construct the new line with {sig_val}, ensuring we don't exceed the Fortran line length
+                        new_line = f'{prefix_spaces}{sig_val}={sigl_str}\n'
 
                         # Check if the new line exceeds the maximum Fortran line length
                         if len(new_line) > max_fortran_line_length:
@@ -125,4 +125,4 @@ for sig_val in extract_values(test_file_path):
         with open(file_path, 'w') as file:
             file.writelines(lines)
 
-        print(f"Updated sig_L in {file_path}")
+        print(f"Updated {sig_val} in {file_path}")
