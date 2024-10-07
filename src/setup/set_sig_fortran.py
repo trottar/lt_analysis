@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:57:42 trottar"
+# Time-stamp: "2024-10-07 03:59:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,41 +69,42 @@ else:
     with open(file_path, 'r') as file:
         lines = file.readlines()
 
+    SigSet = False
     # Step 3: Find and replace the specific variable definition in the Fortran file
     for i, line in enumerate(lines):
         if '#' not in line:
             if 'sig_L=' in line:
-                print(f'''
-                Changing {line.strip()} to sig_L={sigl_str}
-                ''')
-                # Preserve the spaces before 'sig_L'
-                prefix_spaces = line[:line.find('sig_L=')]
+                if not SigSet:
+                    print(f'''
+                    Changing {line.strip()} to sig_L={sigl_str}
+                    ''')
+                    # Preserve the spaces before 'sig_L'
+                    prefix_spaces = line[:line.find('sig_L=')]
 
-                # Construct the new line with sig_L, ensuring we don't exceed the Fortran line length
-                new_line = f'{prefix_spaces}sig_L={sigl_str}\n'
+                    # Construct the new line with sig_L, ensuring we don't exceed the Fortran line length
+                    new_line = f'{prefix_spaces}sig_L={sigl_str}\n'
 
-                # Check if the new line exceeds the maximum Fortran line length
-                if len(new_line) > max_fortran_line_length:
-                    # Split the line into multiple lines with proper continuation
-                    first_line = new_line[:max_fortran_line_length].rstrip() + "\n"
-                    continuation_lines = []
-                    remaining_line = new_line[max_fortran_line_length:]
+                    # Check if the new line exceeds the maximum Fortran line length
+                    if len(new_line) > max_fortran_line_length:
+                        # Split the line into multiple lines with proper continuation
+                        first_line = new_line[:max_fortran_line_length].rstrip() + "\n"
+                        continuation_lines = []
+                        remaining_line = new_line[max_fortran_line_length:]
 
-                    # Add continuation lines, placing & (or digit) in column 6
-                    while len(remaining_line) > max_fortran_line_length - 6:
-                        continuation_lines.append(f"     &{remaining_line[:max_fortran_line_length - 6]}\n")
-                        remaining_line = remaining_line[max_fortran_line_length - 6:]
+                        # Add continuation lines, placing & (or digit) in column 6
+                        while len(remaining_line) > max_fortran_line_length - 6:
+                            continuation_lines.append(f"     &{remaining_line[:max_fortran_line_length - 6]}\n")
+                            remaining_line = remaining_line[max_fortran_line_length - 6:]
 
-                    # Add the last continuation line
-                    continuation_lines.append(f"     &{remaining_line}")
+                        # Add the last continuation line
+                        continuation_lines.append(f"     &{remaining_line}")
 
-                    # Replace the original line with the properly formatted multi-line version
-                    lines[i] = first_line + ''.join(continuation_lines)
-                else:
-                    # No need for continuation lines if the length is okay
-                    lines[i] = new_line
-        # Only run on first instance
-        break
+                        # Replace the original line with the properly formatted multi-line version
+                        lines[i] = first_line + ''.join(continuation_lines)
+                    else:
+                        # No need for continuation lines if the length is okay
+                        lines[i] = new_line
+                    SigSet = True
 
     # Step 4: Write the modified content back to the Fortran file
     with open(file_path, 'w') as file:
