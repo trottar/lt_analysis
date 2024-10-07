@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:46:39 trottar"
+# Time-stamp: "2024-10-07 02:50:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,12 +23,6 @@ from utility import load_equations
 
 ##################################################################################################################################################
 
-# Define constants
-pi = 3.14159
-mtar_gev = 0.93827231
-mpipl=0.139570
-mkpl=0.493677
-
 def iterWeight(arg_str):
 
     # Split and convert the input string into a list of floats
@@ -36,15 +30,12 @@ def iterWeight(arg_str):
 
     # Extract individual values from the list
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, wtt, *params = args
+
+    ss = ww**2
     
     # Load equations
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
     logging.debug(f"Loaded equations: {equations}")
-
-    q2_gev = qq # Already GeV
-    t_gev = tt  # Already GeV, issue here!!! tt makes no sense
-    ss = ww**2
-    s_gev = ss # Already GeV
 
     ##############
     # HARD CODED #
