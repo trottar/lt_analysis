@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:20:06 trottar"
+# Time-stamp: "2024-10-07 07:49:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -958,7 +958,7 @@ with PdfPages(outputpdf) as pdf:
             for j, row in df.iterrows():
                 print("-"*50)
                 print("Data {} = {:.4e}".format(sig, row[sig]))
-                inp_param = '{} {} {} {} {} '.format(Q2.replace("p","."), W.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
+                inp_param = '{} {} {} {} {} {} '.format(Q2.replace("p","."), W.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
                 model.append(import_model(sig, inp_param))
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
