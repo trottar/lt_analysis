@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:33:36 trottar"
+# Time-stamp: "2024-10-07 02:34:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -846,7 +846,7 @@ def local_search(params, inp_func, num_params):
 
 def load_equations(filename='variables.inp'):
     equations = {}
-    filename=f"{LTANAPATH}/src/models/filename"
+    filename=f"{LTANAPATH}/src/models/{filename}"
     with open(filename, 'r') as f:
         for line in f:
             line = line.strip()
