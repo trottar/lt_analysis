@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 07:29:57 trottar"
+# Time-stamp: "2024-10-07 07:34:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ file_path = f"{LTANAPATH}/src/models/xmodel_{ParticleType}_{pol_str}.f"
 test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 
 # Define max line length for Fortran (fixed-format typically has a limit of 72 characters)
-max_fortran_line_length = 55
+max_fortran_line_length = 65
 
 # Grab all equations in models definition file
 sig_var = [var[0] for var in extract_values(test_file_path)]
@@ -99,7 +99,9 @@ for sig_val in sig_var:
 
         SigSet = False
         # Step 3: Find and replace the specific variable definition in the Fortran file
-        for i, line in enumerate(lines):
+        i = 0
+        while i < len(lines):
+            line = lines[i]
             if '#' not in line:
                 if f'{sig_val}=' in line:
                     if "(" in line.split('=')[0]:
@@ -108,33 +110,37 @@ for sig_val in sig_var:
                         print(f"\tChanging {line.strip()} to {sig_val}={sigl_str}")
                         # Preserve the spaces before '{sig_val}'
                         prefix_spaces = line[:line.find(f'{sig_val}=')]
-
                         # Construct the new line with {sig_val}, ensuring we don't exceed the Fortran line length
                         new_line = f'{prefix_spaces}{sig_val}={sigl_str}\n'
-
                         # Check if the new line exceeds the maximum Fortran line length
                         if len(new_line) > max_fortran_line_length:
                             # Split the line into multiple lines with proper continuation
                             first_line = new_line[:max_fortran_line_length].rstrip() + "\n"
                             continuation_lines = []
                             remaining_line = new_line[max_fortran_line_length:]
-
                             # Add continuation lines, placing & (or digit) in column 6
                             while len(remaining_line) > max_fortran_line_length - 6:
                                 continuation_lines.append(f"     >     {remaining_line[:max_fortran_line_length - 6]}\n")
                                 remaining_line = remaining_line[max_fortran_line_length - 6:]
-
                             # Add the last continuation line
                             continuation_lines.append(f"     >     {remaining_line}")
-
                             # Replace the original line with the properly formatted multi-line version
                             lines[i] = first_line + ''.join(continuation_lines)
                         else:
                             # No need for continuation lines if the length is okay
                             lines[i] = new_line
+
+                        # Delete the next immediate line
+                        if i + 1 < len(lines):
+                            del lines[i + 1]
+
+                        # Add a blank line
+                        lines.insert(i + 1, '\n')
+
                         # Once found, no need to replace anything else
                         SigSet = True
-
+            i += 1
+    
         # Step 4: Write the modified content back to the Fortran file
         with open(file_path, 'w') as file:
             file.writelines(lines)
