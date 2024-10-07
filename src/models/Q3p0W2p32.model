@@ -7,7 +7,7 @@ mkpl=0.493677
 #
 tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 #ftav = (abs(tt) - tav) / tav
-ft = abs(tt) / (abs(tt) + mkpl**2)**2  # pole factor
+#ft = abs(tt) / (abs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
 
