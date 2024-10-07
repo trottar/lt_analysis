@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:37:28 trottar"
+# Time-stamp: "2024-10-07 06:44:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,6 +15,9 @@ from ROOT import TNtuple
 from ROOT import TCanvas
 import math
 import os, sys
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 ################################################################################################################################################
 '''
@@ -37,6 +40,12 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("utility")
+from utility import load_equations
 
 ##################################################################################################################################################
 # Import fit finder function
@@ -78,10 +87,10 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 2
+    #max_iterations = 2
     #max_iterations = 100
     #max_iterations = 500
-    #max_iterations = 1000
+    max_iterations = 1000
     #max_iterations = 5000
     #max_iterations = 10000
     ##############
@@ -139,30 +148,42 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     #if iter_num > 2:
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
+
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
         for line in f:
-            w, w_e, q2, q2_e, tt, tt_e, thetacm, it = map(float, line.strip().split())
+            ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
 
-            if pol_str == "pl":
-                ##############
-                # HARD CODED #
-                ##############
-                #g = (1 / ((w**2) - (m_p**2))**2)
-                #g = (1 / ((w**2) - (m_p**2))**2.45) # Q2=5.5,W=3.02, Q2=2.115, W=2.95
-                #g = (1 / ((w**2) - (m_p**2))**2.65) # HERE!, Q2 = 4.4, W=2.74
-                #g = (1 / ((w**2) - (m_p**2))**2.25) # HERE!, Q2 = 3.0, W=3.14
-                g = (1 / ((w**2) - (m_p**2))**3.4) # HERE!, Q2 = 3.0, W=2.32
-                ##############
-                ##############
-                ##############
-            else:
-                g = (1 / ((w**2) - (m_n**2))**2)
+            # Evaluate equations
+            local_vars = locals()
+            for key, equation in equations.items():
+                if (key != 'sig_T') and (key != 'sig_LT') and (key != 'sig_TT'):
+                    try:
+                        if DEBUG:
+                            logging.debug(f"Evaluating equation for {key}: {equation}")
+                        local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
+                        if DEBUG:
+                            logging.debug(f"Result for {key}: {local_vars[key]}")
+                    except OverflowError:
+                        logging.warning(f"OverflowError for {key}, setting to -1000.0")
+                        local_vars[key] = -1000.0
+                    except Exception as e:
+                        logging.error(f"Error evaluating equation for {key}: {equation}")
+                        logging.error(f"Error message: {str(e)}")
+                        logging.error(f"Local variables: {local_vars}")
+                        raise
+
+            g = local_vars['sig_L']
+            
             g_vec.append(g)
-            w_vec.append(w)
-            q2_vec.append(q2)
-            th_vec.append(thetacm)
+            w_vec.append(ww)
+            q2_vec.append(qq)
+            th_vec.append(theta_cm)
 
     # Find fits for L, T, LT, TT
     sig_fit_dict = {
