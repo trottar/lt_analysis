@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:59:16 trottar"
+# Time-stamp: "2024-10-07 06:03:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,18 +31,13 @@ DEBUG=True
 pol_str = ""
 Q2 = ""
 W = ""
-equations = ""
 
 # Then, set global variables which is called with arguments defined in xfit script
 def set_val(inp_pol_str, inp_Q2, inp_W):
-    global pol_str, Q2, W, equations
+    global pol_str, Q2, W
     pol_str = inp_pol_str
     Q2 = inp_Q2
     W = inp_W
-    # Load equations
-    equations = load_equations(f"Q{Q2}W{W}.model")
-    if DEBUG:    
-        logging.debug(f"Loaded equations: {equations}")
         
 ###############################################################################################################################################
 
@@ -69,6 +64,11 @@ def fun_Sig_L(x, par):
         p4 = par[3]
     except:
         p4 = 0.0
+
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
         
     # Evaluate equations
     local_vars = locals()
@@ -118,6 +118,11 @@ def fun_Sig_T(x, par):
     except:
         p8 = 0.0
 
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
@@ -167,6 +172,11 @@ def fun_Sig_LT(x, par):
     except:
         p12 = 0.0
 
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
@@ -216,6 +226,11 @@ def fun_Sig_TT(x, par):
     except:
         p16 = 0.0
 
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
