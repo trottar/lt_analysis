@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:55:33 trottar"
+# Time-stamp: "2024-10-07 03:57:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -102,6 +102,8 @@ else:
                 else:
                     # No need for continuation lines if the length is okay
                     lines[i] = new_line
+        # Only run on first instance
+        break
 
     # Step 4: Write the modified content back to the Fortran file
     with open(file_path, 'w') as file:
