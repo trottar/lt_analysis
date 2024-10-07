@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:56:16 trottar"
+# Time-stamp: "2024-10-07 04:58:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,7 +60,7 @@ max_fortran_line_length = 65
 # Grab all equations in models definition file
 sig_var = [var[0] for var in extract_values(test_file_path)]
 for sig_val in sig_var:
-    print(f"\n\nUpdating {file_path} with proper {sig_val}...")
+    print(f"Updating {file_path} with proper {sig_val}...")
 
     # Step 1: Read and extract {sig_val} from test.txt
     sigl_str = None  # Initialize variable to hold the {sig_val} value
@@ -104,9 +104,7 @@ for sig_val in sig_var:
                     if "(" in line.split('=')[0]:
                         sigl_str = sigl_str + ')'
                     if not SigSet:
-                        print(f'''
-                        Changing {line.strip()} to {sig_val}={sigl_str}
-                        ''')
+                        print(f"Changing {line.strip()} to {sig_val}={sigl_str}")
                         # Preserve the spaces before '{sig_val}'
                         prefix_spaces = line[:line.find(f'{sig_val}=')]
 
@@ -140,4 +138,4 @@ for sig_val in sig_var:
         with open(file_path, 'w') as file:
             file.writelines(lines)
 
-        print(f"Updated {sig_val} in {file_path}")
+        #print(f"Updated {sig_val} in {file_path}")

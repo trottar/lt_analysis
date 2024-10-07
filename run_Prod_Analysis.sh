@@ -1480,6 +1480,9 @@ if [[ $i_flag != "true" ]]; then
 	fi
 	
 	cd "${LTANAPATH}/src/setup"
+	echo
+	echo "Redefining model cross-section model definitions..."
+	echo
 	python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
 	cd "${LTANAPATH}/src"
 	
@@ -1912,6 +1915,9 @@ else
 	    OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
 	    cd "${LTANAPATH}/src/setup"
+	    echo
+	    echo "Redefining model cross-section model definitions..."
+	    echo
 	    python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
 	    cd "${LTANAPATH}/src"
 
