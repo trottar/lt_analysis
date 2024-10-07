@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:44:55 trottar"
+# Time-stamp: "2024-10-07 05:46:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,6 +23,9 @@ from utility import load_equations
 
 ###############################################################################################################################################
 # Need to grab polarity and Q2 string values from xfit script
+
+# Check output equations
+DEBUG=False
 
 # First, define empty strings
 pol_str = ""
