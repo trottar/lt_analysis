@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:17:08 trottar"
+# Time-stamp: "2024-10-07 03:18:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,6 +25,8 @@ from utility import load_equations
 
 def iterWeight(arg_str):
 
+    DEBUG=False    
+    
     # Split and convert the input string into a list of floats
     args = list(map(float, arg_str.split()))
 
@@ -34,7 +36,8 @@ def iterWeight(arg_str):
     
     # Load equations
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
-    logging.debug(f"Loaded equations: {equations}")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
 
     ##############
     # HARD CODED #
@@ -44,8 +47,6 @@ def iterWeight(arg_str):
     ##############
     ##############
     ##############
-
-    DEBUG=False
     
     # Evaluate equations
     local_vars = locals()
