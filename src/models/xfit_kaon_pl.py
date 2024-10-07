@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:58:03 trottar"
+# Time-stamp: "2024-10-07 05:59:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,8 +49,8 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
-    q2_set = Q2.replace("p",".")
-    w_set = W.replace("p",".")    
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
 
     try:
@@ -97,8 +97,8 @@ def fun_Sig_L(x, par):
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
-    q2_set = Q2.replace("p",".")
-    w_set = W.replace("p",".")    
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     
     try:
@@ -146,8 +146,8 @@ def fun_Sig_T(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
-    q2_set = Q2.replace("p",".")
-    w_set = W.replace("p",".")    
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     
     try:
@@ -195,8 +195,8 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
-    q2_set = Q2.replace("p",".")
-    w_set = W.replace("p",".")    
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
 
     try:
