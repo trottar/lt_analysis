@@ -5,7 +5,7 @@ mpipl=0.139570
 mkpl=0.493677
 
 # Common calculations
-tav = (0.1112 + 0.0066 * math.log(qq)) * qq
+tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 ftav = (abs(tt) - tav) / tav
 ft = abs(tt) / (abs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
