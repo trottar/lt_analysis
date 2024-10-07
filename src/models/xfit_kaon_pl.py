@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:06:46 trottar"
+# Time-stamp: "2024-10-07 09:08:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,21 +29,6 @@ def prepare_equation(eq):
             eq = eq.replace(f"math.{func}", f"np.{func}")
     return eq
 
-prepared_equations = {k: prepare_equation(v) for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')}
-
-def create_sig_L_function():
-    # Combine all equations into a single expression
-    combined_eq = '; '.join([f"{k} = {v}" for k, v in prepared_equations.items()])
-    combined_eq += f"; sig_L"  # Add final computation
-    
-    def sig_L_vectorized(tt, p1, p2, p3, p4):
-        return ne.evaluate(combined_eq, {
-            'tt': tt, 'qq': q2_set, 'ww': w_set,
-            'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4
-        })
-    
-    return sig_L_vectorized
-
 
 ###############################################################################################################################################
 # Need to grab polarity Q2 and W string values from xfit script
@@ -68,7 +53,22 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     equations = load_equations(f"Q{Q2}W{W}.model")
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
+        
+    prepared_equations = {k: prepare_equation(v) for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')}
+        
+    def create_sig_L_function():
+        # Combine all equations into a single expression
+        combined_eq = '; '.join([f"{k} = {v}" for k, v in prepared_equations.items()])
+        combined_eq += f"; sig_L"  # Add final computation
 
+        def sig_L_vectorized(tt, p1, p2, p3, p4):
+            return ne.evaluate(combined_eq, {
+                'tt': tt, 'qq': q2_set, 'ww': w_set,
+                'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4
+            })
+
+        return sig_L_vectorized
+        
     # Create the optimized function
     fun_Sig_L_optimized = create_sig_L_function()
         
