@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:34:12 trottar"
+# Time-stamp: "2024-10-07 02:36:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -843,16 +843,26 @@ def local_search(params, inp_func, num_params):
         return improved_params            
             
 ################################################################################################################################################
+import os
 
 def load_equations(filename='variables.inp'):
     equations = {}
-    filename=f"{LTANAPATH}/src/models/{filename}"
-    with open(filename, 'r') as f:
-        for line in f:
+    full_path = f"{LTANAPATH}/src/models/{filename}"
+    
+    if not os.path.exists(full_path):
+        raise FileNotFoundError(f"The file {full_path} does not exist.")
+    
+    with open(full_path, 'r') as f:
+        for line_num, line in enumerate(f, 1):
             line = line.strip()
             if line and not line.startswith('#'):  # Ignore empty lines and comments
-                key, value = line.split('=', 1)
-                equations[key.strip()] = value.strip()
+                try:
+                    key, value = line.split('=', 1)
+                    equations[key.strip()] = value.strip()
+                except ValueError:
+                    print(f"Warning: Invalid format in line {line_num}: {line}")
+    
+    print(f"Loaded {len(equations)} equations from {full_path}")
     return equations
 
 ################################################################################################################################################
