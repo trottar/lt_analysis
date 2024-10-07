@@ -1,5 +1,5 @@
 # Define constants
-pi = 3.14159
+pi = math.pi
 mtar_gev = 0.93827231
 mpipl=0.139570
 mkpl=0.493677

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:11:56 trottar"
+# Time-stamp: "2024-10-07 03:12:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,7 +61,7 @@ def iterWeight(arg_str):
             logging.error(f"Local variables: {local_vars}")
             raise
         
-    sig_L, sig_T, sig_LT, sig_TT, wfactor = [local_vars[key] for key in ['sig_L', 'sig_T', 'sig_LT', 'sig_TT', 'wfactor']]
+    pi, sig_L, sig_T, sig_LT, sig_TT, wfactor = [local_vars[key] for key in ['pi', 'sig_L', 'sig_T', 'sig_LT', 'sig_TT', 'wfactor']]
     
     sig_L = sig_L*wfactor
     sig_T = sig_T*wfactor
