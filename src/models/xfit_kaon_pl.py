@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 08:55:22 trottar"
+# Time-stamp: "2024-10-07 08:57:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ def fun_Sig_L(x, par):
     local_vars = {'q2_set':q2_set, 'w_set':w_set, 'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
     
     # Add math functions to local_vars
-    math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
-    local_vars.update(math_functions)
+    #math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
+    #local_vars.update(math_functions)
     
     # Evaluate equations
     for key, equation in equations.items():
@@ -70,7 +70,8 @@ def fun_Sig_L(x, par):
             try:
                 if DEBUG:
                     logging.debug(f"Evaluating equation for {key}: {equation}")
-                local_vars[key] = eval(equation, {"__builtins__": None}, local_vars)
+                #local_vars[key] = eval(equation, {"__builtins__": None}, local_vars)
+                local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
                 if DEBUG:
                     logging.debug(f"Result for {key}: {local_vars[key]}")
             except OverflowError:
