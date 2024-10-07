@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:14:49 trottar"
+# Time-stamp: "2024-10-07 03:17:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,9 +51,11 @@ def iterWeight(arg_str):
     local_vars = locals()
     for key, equation in equations.items():
         try:
-            if DEBUG logging.debug(f"Evaluating equation for {key}: {equation}")
+            if DEBUG:
+                logging.debug(f"Evaluating equation for {key}: {equation}")
             local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
-            if DEBUG logging.debug(f"Result for {key}: {local_vars[key]}")
+            if DEBUG:
+                logging.debug(f"Result for {key}: {local_vars[key]}")
         except OverflowError:
             logging.warning(f"OverflowError for {key}, setting to -1000.0")
             local_vars[key] = -1000.0
