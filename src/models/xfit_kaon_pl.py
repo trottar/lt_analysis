@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 08:57:07 trottar"
+# Time-stamp: "2024-10-07 08:59:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,39 +86,32 @@ def fun_Sig_L(x, par):
     return local_vars['sig_L']
 
 ###############################################################################################################################################
-    
+
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = float(q2_set)
-    ww = float(w_set)
+    qq = q2_set
+    ww = w_set
     
-    try:
-        p5 = par[0]
-    except:
-        p5 = 0.0
-    try:
-        p6 = par[1]
-    except:
-        p6 = 0.0        
-    try:
-        p7 = par[2]
-    except:
-        p7 = 0.0
-    try:
-        p8 = par[3]
-    except:
-        p8 = 0.0
-        
+    # Use a list comprehension to get parameters, defaulting to 0.0 if not available
+    p5, p6, p7, p8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    
+    # Create a dictionary for local variables
+    local_vars = {'q2_set':q2_set, 'w_set':w_set, 'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
+    
+    # Add math functions to local_vars
+    #math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
+    #local_vars.update(math_functions)
+    
     # Evaluate equations
-    local_vars = locals()
     for key, equation in equations.items():
-        if (key != 'sig_L') and (key != 'sig_LT') and (key != 'sig_TT'):
+        if key not in ('sig_L', 'sig_LT', 'sig_TT'):
             try:
                 if DEBUG:
                     logging.debug(f"Evaluating equation for {key}: {equation}")
+                #local_vars[key] = eval(equation, {"__builtins__": None}, local_vars)
                 local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
                 if DEBUG:
                     logging.debug(f"Result for {key}: {local_vars[key]}")
@@ -130,49 +123,36 @@ def fun_Sig_T(x, par):
                 logging.error(f"Error message: {str(e)}")
                 logging.error(f"Local variables: {local_vars}")
                 raise
-
-    f = local_vars['sig_T']
-
-    return f
+    
+    return local_vars['sig_T']
 
 ###############################################################################################################################################
 
 # Function for SigLT
-# thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = float(q2_set)
-    ww = float(w_set)
+    qq = q2_set
+    ww = w_set
     
-    try:
-        p9 = par[0]
-    except:
-        p9 = 0.0
-    try:
-        p10 = par[1]
-    except:
-        p10 = 0.0        
-    try:
-        p11 = par[2]
-    except:
-        p11 = 0.0
-    try:
-        p12 = par[3]
-    except:
-        p12 = 0.0
-
-    # Sine term is called in xfit_fit_finder.py, setting to 1
-    theta_cm = math.pi/2
-        
+    # Use a list comprehension to get parameters, defaulting to 0.0 if not available
+    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    
+    # Create a dictionary for local variables
+    local_vars = {'q2_set':q2_set, 'w_set':w_set, 'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
+    
+    # Add math functions to local_vars
+    #math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
+    #local_vars.update(math_functions)
+    
     # Evaluate equations
-    local_vars = locals()
     for key, equation in equations.items():
-        if (key != 'sig_L') and (key != 'sig_T') and (key != 'sig_TT'):
+        if key not in ('sig_L', 'sig_T', 'sig_TT'):
             try:
                 if DEBUG:
                     logging.debug(f"Evaluating equation for {key}: {equation}")
+                #local_vars[key] = eval(equation, {"__builtins__": None}, local_vars)
                 local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
                 if DEBUG:
                     logging.debug(f"Result for {key}: {local_vars[key]}")
@@ -184,49 +164,36 @@ def fun_Sig_LT(x, par):
                 logging.error(f"Error message: {str(e)}")
                 logging.error(f"Local variables: {local_vars}")
                 raise
-
-    f = local_vars['sig_LT']
-
-    return f
+    
+    return local_vars['sig_LT']
 
 ###############################################################################################################################################
 
 # Function for SigTT
-# thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = float(q2_set)
-    ww = float(w_set)
-
-    try:
-        p13 = par[0]
-    except:
-        p13 = 0.0
-    try:
-        p14 = par[1]
-    except:
-        p14 = 0.0        
-    try:
-        p15 = par[2]
-    except:
-        p15 = 0.0
-    try:
-        p16 = par[3]
-    except:
-        p16 = 0.0
-
-    # Sine term is called in xfit_fit_finder.py, setting to 1
-    theta_cm = math.pi/2
-        
+    qq = q2_set
+    ww = w_set
+    
+    # Use a list comprehension to get parameters, defaulting to 0.0 if not available
+    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    
+    # Create a dictionary for local variables
+    local_vars = {'q2_set':q2_set, 'w_set':w_set, 'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
+    
+    # Add math functions to local_vars
+    #math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
+    #local_vars.update(math_functions)
+    
     # Evaluate equations
-    local_vars = locals()
     for key, equation in equations.items():
-        if (key != 'sig_L') and (key != 'sig_T') and (key != 'sig_LT'):
+        if key not in ('sig_L', 'sig_T', 'sig_LT'):
             try:
                 if DEBUG:
                     logging.debug(f"Evaluating equation for {key}: {equation}")
+                #local_vars[key] = eval(equation, {"__builtins__": None}, local_vars)
                 local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
                 if DEBUG:
                     logging.debug(f"Result for {key}: {local_vars[key]}")
@@ -238,9 +205,7 @@ def fun_Sig_TT(x, par):
                 logging.error(f"Error message: {str(e)}")
                 logging.error(f"Local variables: {local_vars}")
                 raise
-
-    f = local_vars['sig_TT']
-
-    return f
+    
+    return local_vars['sig_TT']
 
 ###############################################################################################################################################
