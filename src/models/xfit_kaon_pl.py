@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:07:49 trottar"
+# Time-stamp: "2024-10-07 06:09:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,20 +73,21 @@ def fun_Sig_L(x, par):
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
-        try:
-            if DEBUG:
-                logging.debug(f"Evaluating equation for {key}: {equation}")
-            local_vars = eval(equation, {"__builtins__": None, "math": math}, local_vars)
-            if DEBUG:
-                logging.debug(f"Result for {key}: {local_vars[key]}")
-        except OverflowError:
-            logging.warning(f"OverflowError for {key}, setting to -1000.0")
-            local_vars[key] = -1000.0
-        except Exception as e:
-            logging.error(f"Error evaluating equation for {key}: {equation}")
-            logging.error(f"Error message: {str(e)}")
-            logging.error(f"Local variables: {local_vars}")
-            raise
+        if key == 'sig_L'
+            try:
+                if DEBUG:
+                    logging.debug(f"Evaluating equation for {key}: {equation}")
+                local_vars = eval(equation, {"__builtins__": None, "math": math}, local_vars)
+                if DEBUG:
+                    logging.debug(f"Result for {key}: {local_vars[key]}")
+            except OverflowError:
+                logging.warning(f"OverflowError for {key}, setting to -1000.0")
+                local_vars[key] = -1000.0
+            except Exception as e:
+                logging.error(f"Error evaluating equation for {key}: {equation}")
+                logging.error(f"Error message: {str(e)}")
+                logging.error(f"Local variables: {local_vars}")
+                raise
 
     f = local_vars
 
@@ -119,14 +120,14 @@ def fun_Sig_T(x, par):
         p8 = 0.0
 
     print("!!!!!!!!!",p5,p6,p7,p8)
-    
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
         try:
             if DEBUG:
                 logging.debug(f"Evaluating equation for {key}: {equation}")
-            local_vars = eval(equation, {"__builtins__": None, "math": math}, local_vars)
+            local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
             if DEBUG:
                 logging.debug(f"Result for {key}: {local_vars[key]}")
         except OverflowError:
@@ -138,7 +139,7 @@ def fun_Sig_T(x, par):
             logging.error(f"Local variables: {local_vars}")
             raise
 
-    f = local_vars
+    f = [local_vars[key] for key in ['sig_T']]
 
     return f
 
@@ -168,14 +169,14 @@ def fun_Sig_LT(x, par):
         p12 = par[3]
     except:
         p12 = 0.0
-        
+
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
         try:
             if DEBUG:
                 logging.debug(f"Evaluating equation for {key}: {equation}")
-            local_vars = eval(equation, {"__builtins__": None, "math": math}, local_vars)
+            local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
             if DEBUG:
                 logging.debug(f"Result for {key}: {local_vars[key]}")
         except OverflowError:
@@ -187,7 +188,7 @@ def fun_Sig_LT(x, par):
             logging.error(f"Local variables: {local_vars}")
             raise
 
-    f = local_vars
+    f = [local_vars[key] for key in ['sig_LT']]
 
     return f
 
@@ -224,7 +225,7 @@ def fun_Sig_TT(x, par):
         try:
             if DEBUG:
                 logging.debug(f"Evaluating equation for {key}: {equation}")
-            local_vars = eval(equation, {"__builtins__": None, "math": math}, local_vars)
+            local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
             if DEBUG:
                 logging.debug(f"Result for {key}: {local_vars[key]}")
         except OverflowError:
@@ -236,7 +237,7 @@ def fun_Sig_TT(x, par):
             logging.error(f"Local variables: {local_vars}")
             raise
 
-    f = local_vars
+    f = [local_vars[key] for key in ['sig_TT']]
 
     return f
 
