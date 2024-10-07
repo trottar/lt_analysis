@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:25:49 trottar"
+# Time-stamp: "2024-10-07 04:26:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,29 +58,27 @@ test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 max_fortran_line_length = 72
 
 # Grab all equations in models definition file
-sig_var = extract_values(test_file_path)[0]
+sig_var = extract_values(test_file_path)
+print("!!!!!!!!!!!!!",sig_var)
 for sig_val in sig_var:
     print(f"\n\nUpdating {file_path} with proper {sig_val}...")
 
     # Step 1: Read and extract {sig_val} from test.txt
-    SigSet = False
     sigl_str = None  # Initialize variable to hold the {sig_val} value
     with open(test_file_path, 'r') as test_file:
         for line in test_file:
             if '#' not in line:
                 if (f'{sig_val}=' in line) or (f'{sig_val} =' in line):  # Look for the line that defines {sig_val}
-                    if not SigSet:
-                        sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
-                        # Convert math to fortran syntax
-                        sigl_str = sigl_str.replace(f"math.pi",f"3.14159")
-                        sigl_str = sigl_str.replace(f"math.exp",f"exp")
-                        sigl_str = sigl_str.replace(f"math.log",f"log")
-                        sigl_str = sigl_str.replace(f"math.fabs",f"abs")
-                        # Update parameter names to match fortran vectors
-                        for par in range(1,16):
-                            sigl_str = sigl_str.replace(f"p{par}",f"par({par})")
-                        #break  # No need to search further once {sig_val} is found
-                        SigSet = True
+                    sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
+                    # Convert math to fortran syntax
+                    sigl_str = sigl_str.replace(f"math.pi",f"3.14159")
+                    sigl_str = sigl_str.replace(f"math.exp",f"exp")
+                    sigl_str = sigl_str.replace(f"math.log",f"log")
+                    sigl_str = sigl_str.replace(f"math.fabs",f"abs")
+                    # Update parameter names to match fortran vectors
+                    for par in range(1,16):
+                        sigl_str = sigl_str.replace(f"p{par}",f"par({par})")
+                    break  # No need to search further once {sig_val} is found
 
     if sigl_str is None:
         print(f"{sig_val} not found in {test_file_path}!")
