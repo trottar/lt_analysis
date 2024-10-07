@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:43:42 trottar"
+# Time-stamp: "2024-10-07 03:45:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,7 +67,8 @@ for i, line in enumerate(lines):
         # Preserve the spaces before 'sig_L'
         prefix_spaces = line[:line.find('sig_L=')]
         # Replace the line with the new sig_L value
-        lines[i] = f'{prefix_spaces}sig_L={sigl_str}\n'
+        for par in range(1,16):
+            lines[i] = f'{prefix_spaces}sig_L={sigl_str}\n'.replace("p{par}", "par({par})")
 
 # Step 4: Write the modified content back to the Fortran file
 with open(file_path, 'w') as file:
