@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:49:10 trottar"
+# Time-stamp: "2024-10-07 06:49:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -153,11 +153,11 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     equations = load_equations(f"Q{q2_set}W{w_set}.model")
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
+    
+    ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     # Redefine strings for retrieving equation defintions
     q2_set = q2_set.replace("p",".")
     w_set = w_set.replace("p",".")
-    
-    ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     with open(ave_file_in, 'r') as f:
         for line in f:
             ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
