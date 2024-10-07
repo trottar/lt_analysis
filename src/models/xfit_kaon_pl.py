@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:23:54 trottar"
+# Time-stamp: "2024-10-07 09:26:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,6 +42,7 @@ def prepare_equations(equations, sig_type):
     if sig_type == "sig_TT":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT')]
     eq_list.append(sig_type)
+    print("!!!!!!!!!!",eq_list)
     
     func_str = f"def {sig_type}_optimized(tt, qq, ww, p1, p2, p3, p4):\n"
     func_str += "    " + "\n    ".join(eq_list) + "\n"
@@ -76,19 +77,19 @@ def fun_Sig_T(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    p5, p6, p7, p8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     return fun_Sig_T_optimized(tt, q2_set, w_set, p1, p2, p3, p4)
 
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    p9, p10, p11, p12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     return fun_Sig_LT_optimized(tt, q2_set, w_set, p1, p2, p3, p4)
 
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    p13, p14, p15, p16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     return fun_Sig_TT_optimized(tt, q2_set, w_set, p1, p2, p3, p4)
