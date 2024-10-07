@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:21:54 trottar"
+# Time-stamp: "2024-10-07 09:23:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.DEBUG)
 sys.path.append("utility")
 from utility import load_equations
 
-DEBUG = False
+DEBUG = True
 
 # Global variables
 pol_str = ""
