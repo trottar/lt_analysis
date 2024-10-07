@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:28:48 trottar"
+# Time-stamp: "2024-10-07 06:32:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,7 +90,7 @@ def fun_Sig_L(x, par):
                 logging.error(f"Local variables: {local_vars}")
                 raise
 
-    f = [local_vars[key][0] for key in ['sig_L']]
+    f = local_vars['sig_L']
 
     print("$$$$$$$$$$$$$$$$$$",f)
     
@@ -144,7 +144,7 @@ def fun_Sig_T(x, par):
                 logging.error(f"Local variables: {local_vars}")
                 raise
 
-    f = [local_vars[key][0] for key in ['sig_T']]
+    f = local_vars['sig_T']
 
     return f
 
@@ -195,7 +195,7 @@ def fun_Sig_LT(x, par):
                 logging.error(f"Local variables: {local_vars}")
                 raise
 
-    f = [local_vars[key][0] for key in ['sig_LT']]
+    f = local_vars['sig_LT']
 
     return f
 
@@ -246,7 +246,7 @@ def fun_Sig_TT(x, par):
                 logging.error(f"Local variables: {local_vars}")
                 raise
 
-    f = [local_vars[key][0] for key in ['sig_TT']]
+    f = local_vars['sig_TT']
 
     return f
 
