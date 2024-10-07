@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:32:57 trottar"
+# Time-stamp: "2024-10-07 06:39:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -172,6 +172,9 @@ def fun_Sig_LT(x, par):
     except:
         p12 = 0.0
 
+    # Sine term is called in xfit_fit_finder.py, setting to 1
+    theta_cm = math.pi/2
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
@@ -223,6 +226,9 @@ def fun_Sig_TT(x, par):
     except:
         p16 = 0.0
 
+    # Sine term is called in xfit_fit_finder.py, setting to 1
+    theta_cm = math.pi/2
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
