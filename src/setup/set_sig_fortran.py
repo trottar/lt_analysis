@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:37:53 trottar"
+# Time-stamp: "2024-10-07 04:38:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,8 +87,9 @@ for sig_val in sig_var:
                     if "sig_TT" == sig_val:
                         par_min = 1
                         par_max = 4
-                    for par in range(par_min, par_max):
-                        sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
+                    if par_min:
+                        for par in range(par_min, par_max):
+                            sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
                     break  # No need to search further once {sig_val} is found
 
     if sigl_str is None:
