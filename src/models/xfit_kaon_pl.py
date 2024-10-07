@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:12:31 trottar"
+# Time-stamp: "2024-10-07 09:13:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,7 +11,6 @@
 # Copyright (c) trottar
 #
 import math, sys
-import numexpr as ne
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
