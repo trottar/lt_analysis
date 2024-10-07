@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:57:55 trottar"
+# Time-stamp: "2024-10-07 07:03:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -21,10 +21,30 @@ logging.basicConfig(level=logging.DEBUG)
 sys.path.append("utility")
 from utility import load_equations
 
-##################################################################################################################################################
+###############################################################################################################################################
+# Need to grab polarity Q2 and W string values from xfit script
 
 # Check output equations
 DEBUG=False
+
+# First, define empty strings
+pol_str = ""
+Q2 = ""
+W = ""
+equations = ""
+
+# Then, set global variables which is called with arguments defined in xfit script
+def set_val(inp_pol_str, inp_Q2, inp_W):
+    global pol_str, Q2, W, equations
+    pol_str = inp_pol_str
+    Q2 = inp_Q2
+    W = inp_W
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
+        
+###############################################################################################################################################
 
 def iterWeight(arg_str):
     
@@ -34,12 +54,7 @@ def iterWeight(arg_str):
     # Extract individual values from the list
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
-    
-    # Load equations
-    equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
-    if DEBUG:    
-        logging.debug(f"Loaded equations: {equations}")
-    
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():

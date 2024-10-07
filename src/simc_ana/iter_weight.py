@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-10-07 02:31:25 trottar"
+# Time-stamp: "2024-10-07 07:04:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,7 @@ from utility import open_root_file, run_fortran
 # Importing param model for weight iteration
 
 sys.path.append("models")
-from param_active import iterWeight
+from param_active import set_val, iterWeight
 
 ################################################################################################################################################
 '''
@@ -303,6 +303,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Branch("pend_z_det", pend_z_det_array, "pend_z_det/F")
     new_TBRANCH_SIMC.Branch("pend_x_det", pend_x_det_array, "pend_x_det/F")
     new_TBRANCH_SIMC.Branch("pend_y_det", pend_y_det_array, "pend_y_det/F")
+
+    # Set pol_str, q2_set, w_set for param model script
+    set_val(pol_str, q2_set, w_set)
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
