@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:43:13 trottar"
+# Time-stamp: "2024-10-07 09:46:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -12,15 +12,13 @@
 #
 import math
 import sys
-import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
+################################################################################################################################################
 # Importing utility functions
 sys.path.append("utility")
 from utility import load_equations
 
-DEBUG = True
+################################################################################################################################################
 
 # Global variables
 pol_str = ""
@@ -59,14 +57,14 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     Q2 = inp_Q2
     W = inp_W
     equations = load_equations(f"Q{Q2}W{W}.model")
-    if DEBUG:    
-        logging.debug(f"Loaded equations: {equations}")
 
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
     fun_Sig_T_optimized = prepare_equations(equations, 'sig_T')
     fun_Sig_LT_optimized = prepare_equations(equations, 'sig_LT')
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
 
+################################################################################################################################################
+    
 def fun_Sig_L(x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
