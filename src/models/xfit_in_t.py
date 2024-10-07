@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:44:59 trottar"
+# Time-stamp: "2024-10-07 06:45:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,7 +150,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
 
     # Load equations
-    equations = load_equations(f"Q{Q2}W{W}.model")
+    equations = load_equations(f"Q{q2_set}W{w_set}.model")
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
     
