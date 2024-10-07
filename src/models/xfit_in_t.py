@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:50:50 trottar"
+# Time-stamp: "2024-10-07 06:51:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,12 +57,6 @@ from xfit_fit_finder import find_fit
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ##################################################################################################################################################
-
-# Define constants
-PI = math.pi
-m_p = 0.93827231
-m_n = 0.93956541
-mkpl = 0.493677
 
 DEBUG=False
 #DEBUG=True
@@ -165,7 +159,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Evaluate equations
             local_vars = locals()
             for key, equation in equations.items():
-                if (key == 'wfactor'):
+                if (key == 'wfactor') or (key == 'mtar'):
                     try:
                         if DEBUG:
                             logging.debug(f"Evaluating equation for {key}: {equation}")
