@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:16:37 trottar"
+# Time-stamp: "2024-10-07 04:19:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,7 +57,9 @@ test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 # Define max line length for Fortran (fixed-format typically has a limit of 72 characters)
 max_fortran_line_length = 72
 
-for sig_val in extract_values(test_file_path):
+# Grab all equations in models definition file
+sig_var = extract_values(test_file_path)[0]
+for sig_val in sig_var:
     print(f"\n\nUpdating {file_path} with proper {sig_val}...")
 
     # Step 1: Read and extract {sig_val} from test.txt
@@ -77,7 +79,7 @@ for sig_val in extract_values(test_file_path):
                     break  # No need to search further once {sig_val} is found
 
     if sigl_str is None:
-        print(f"{sig_val} not found in test.txt!")
+        print(f"{sig_val} not found in {test_file_path}!")
     else:
         # Step 2: Read the Fortran file and store its contents
         with open(file_path, 'r') as file:
