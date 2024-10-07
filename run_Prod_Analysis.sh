@@ -1477,22 +1477,22 @@ if [[ $i_flag != "true" ]]; then
 	    #echo "Efficiency Error per Run: [${DummyEffErrCenter[@]}]"
 	    #echo "Theta per Run: [${DummypThetaValCenter[@]}]"
 	    #echo "Beam Energy per Run: [${DummyEbeamValCenter[@]}]"
-	fi
-	
-	cd "${LTANAPATH}/src/setup"
-	echo
-	echo "Redefining model cross-section model definitions..."
-	echo
-	python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
-	cd "${LTANAPATH}/src"
+	fi	
 	
 	if [ $j = "low" ]; then
+	    cd "${LTANAPATH}/src/setup"
+	    echo
+	    echo "Redefining model cross-section model definitions..."
+	    echo
+	    python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
 	    echo
 	    echo "Finding t/phi bins for low epsilon..."
 	else
 	    echo
 	    echo "Using low epsilon t/phi bins for high epsilon..."
 	fi
+
+	cd "${LTANAPATH}/src"
 	
 	if [ ${#data_right[@]} -eq 0 ]; then
 	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
@@ -1914,14 +1914,12 @@ else
 	    OutDUMMYFilename="Analysed_Dummy_${KIN}"
 	    OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
-	    cd "${LTANAPATH}/src/setup"
-	    echo
-	    echo "Redefining model cross-section model definitions..."
-	    echo
-	    python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
-	    cd "${LTANAPATH}/src"
-
 	    if [ $j = "low" ]; then
+		cd "${LTANAPATH}/src/setup"
+		echo
+		echo "Redefining model cross-section model definitions..."
+		echo
+		python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}			
 		echo
 		echo "Finding new simc weight for low epsilon..."
 	    else
@@ -1929,6 +1927,7 @@ else
 		echo "Finding new simc weight for for high epsilon..."
 	    fi
 
+	    cd "${LTANAPATH}/src"	    
 	    python3 main_iter.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins} ${DEBUG}
 
 	    # Check the exit status of the Python script

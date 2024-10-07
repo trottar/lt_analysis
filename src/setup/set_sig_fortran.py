@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:58:45 trottar"
+# Time-stamp: "2024-10-07 05:23:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -104,7 +104,7 @@ for sig_val in sig_var:
                     if "(" in line.split('=')[0]:
                         sigl_str = sigl_str + ')'
                     if not SigSet:
-                        print(f"Changing {line.strip()} to {sig_val}={sigl_str}")
+                        print(f"\tChanging {line.strip()} to {sig_val}={sigl_str}")
                         # Preserve the spaces before '{sig_val}'
                         prefix_spaces = line[:line.find(f'{sig_val}=')]
 
