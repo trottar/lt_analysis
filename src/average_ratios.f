@@ -198,7 +198,7 @@ c      pause
                e=sqrt(e)
 *     Set ratio to zero if exceeds order of magnitude
 *     This prevents errors in output file
-               if (r >= 10. .or. r <= 0.1) then
+               if (r >= 100. .or. r <= 0.01) then
                   r=0.0
                   e=0.0
                endif
