@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:37:59 trottar"
+# Time-stamp: "2024-10-07 02:38:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -11,6 +11,9 @@
 # Copyright (c) trottar
 #
 import math, sys
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 ##################################################################################################################################################
 # Importing utility functions
