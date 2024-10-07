@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:39:56 trottar"
+# Time-stamp: "2024-10-07 04:41:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,16 +76,16 @@ for sig_val in sig_var:
                     sigl_str = sigl_str.replace(f"math.fabs",f"abs")
                     # Update parameter names to match fortran vectors
                     if "sig_L" == sig_val:
-                        for par in range(1,4):
+                        for par in range(1,5):
                             sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
                     if "sig_T" == sig_val:
-                        for par in range(5,8):
+                        for par in range(5,9):
                             sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
                     if "sig_LT" == sig_val:
-                        for par in range(9,12):
+                        for par in range(9,13):
                             sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
                     if "sig_TT" == sig_val:
-                        for par in range(13,16):
+                        for par in range(13,17):
                             sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
                     break  # No need to search further once {sig_val} is found
 
