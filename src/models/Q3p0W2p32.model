@@ -4,27 +4,24 @@ mtar_gev = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
-qq=qq
-tt=tt
-
 #
 tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
-ftav = (abs(tt) - tav) / tav
-ft = abs(tt) / (abs(tt) + mkpl**2)**2  # pole factor
+ftav = (math.abs(tt) - tav) / tav
+ft = math.abs(tt) / (math.abs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
 
 # Longitudinal cross-section
-sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (abs(tt)))
+sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (math.abs(tt)))
 
 # Transverse cross-section
-sig_T = (p5 * math.exp(-p6 * (abs(tt))) + p7 * (abs(tt))) * (Qdep_T**p8)
+sig_T = (p5 * math.exp(-p6 * (math.abs(tt))) + p7 * (math.abs(tt))) * (Qdep_T**p8)
 
 # Longitudinal-Transverse interference term
-sig_LT = (p9 * math.exp(p10 * abs(tt)) + p11 / abs(tt)) * math.sin(theta_cm)
+sig_LT = (p9 * math.exp(p10 * math.abs(tt)) + p11 / math.abs(tt)) * math.sin(theta_cm)
 
 # Transverse-Transverse interference term
-sig_TT = ((-p13 * abs(tt) + p14) * (abs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+sig_TT = ((-p13 * math.abs(tt) + p14) * (math.abs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
 wfactor = 1 / ((ww**2) - (mtar_gev**2))**3.4
