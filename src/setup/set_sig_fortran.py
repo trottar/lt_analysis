@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:31:58 trottar"
+# Time-stamp: "2024-10-07 04:34:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,7 @@ for sig_val in sig_var:
                     sigl_str = sigl_str.replace(f"math.fabs",f"abs")
                     # Update parameter names to match fortran vectors
                     for par in range(1,16):
-                        sigl_str = sigl_str.replace(f"p{par}",f"par({par})")
+                        sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
                     break  # No need to search further once {sig_val} is found
 
     if sigl_str is None:
