@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-12 17:44:21 trottar"
+# Time-stamp: "2024-10-06 19:28:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -83,7 +83,8 @@ settings = {
         'HIEPS': 0.7864,
         #'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
         #'inp_dir': "trial_9/2024July26_H05M28S47" # i=12
-        'inp_dir': "2024September11_H10M39S26" # i=2, 4p4 parameterization
+        #'inp_dir': "2024September11_H10M39S26" # i=2, 4p4 parameterization
+        'inp_dir': "" # i=10, w_fac->(n=2.45)
     },
     'set_2': {
         'Q2': '3p0',
@@ -91,7 +92,8 @@ settings = {
         'LOEPS': 0.5736,
         'HIEPS': 0.8791,
         #'inp_dir': "2024September11_H12M56S06" # i=2, 4p4 parameterization
-        'inp_dir': "2024September12_H14M27S29" # i=5, 4p4 parameterization
+        #'inp_dir': "2024September12_H14M27S29" # i=5, 4p4 parameterization
+        'inp_dir': "" # i=10, w_fac->(n=3.40)
     },    
     'set_3': {
         'Q2': '3p0',
@@ -101,7 +103,8 @@ settings = {
         #'inp_dir': "trial_30/2024July25_H17M19S51" # i=1
         #'inp_dir': "trial_30/2024July26_H08M04S15" # i=12
         #'inp_dir': "2024September11_H16M37S05" # i=2, 4p4 parameterization
-        'inp_dir': "2024September12_H15M13S17" # i=5, 4p4 parameterization        
+        #'inp_dir': "2024September12_H15M13S17" # i=5, 4p4 parameterization
+        'inp_dir': "" # i=10, w_fac->(n=2.25)
     },    
     'set_4': {
         'Q2': '4p4',
@@ -111,7 +114,8 @@ settings = {
         #'inp_dir': "2024August13_H17M30S09" # i=1
         #'inp_dir': "trial_1/2024August13_H22M17S21" # i=12
         #'inp_dir': "2024September11_H17M50S25" # i=2, 4p4 parameterization
-        'inp_dir': "2024September12_H15M58S25" # i=5, 4p4 parameterization        
+        #'inp_dir': "2024September12_H15M58S25" # i=5, 4p4 parameterization
+        'inp_dir': "" # i=10, w_fac->(n=2.65)
     },    
     'set_5': {
         'Q2': '5p5',
@@ -121,7 +125,8 @@ settings = {
         #'inp_dir': "trial_14/2024July25_H17M34S49" # i=1
         #'inp_dir': "trial_14/2024July26_H10M45S46" # i=12
         #'inp_dir': "2024September11_H19M05S14" # i=2, 4p4 parameterization
-        'inp_dir': "2024September12_H16M39S54" # i=5, 4p4 parameterization        
+        #'inp_dir': "2024September12_H16M39S54" # i=5, 4p4 parameterization
+        'inp_dir': "" # i=10, w_fac->(n=2.45)
     }
 }
 
