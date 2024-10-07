@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:55:00 trottar"
+# Time-stamp: "2024-10-07 03:55:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,6 +47,9 @@ CACHEPATH=lt.CACHEPATH
 # Define paths for the Fortran file and the test file
 file_path = f"{LTANAPATH}/src/models/xmodel_{ParticleType}_{pol_str}.f"
 test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
+
+# Define max line length for Fortran (fixed-format typically has a limit of 72 characters)
+max_fortran_line_length = 72
 
 print("\n\nUpdating {} with proper sig_L...".format(file_path))
 
