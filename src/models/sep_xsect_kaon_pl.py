@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 10:14:38 trottar"
+# Time-stamp: "2024-10-07 10:16:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -16,35 +16,7 @@ import math, sys
 # Importing utility functions
 
 sys.path.append("../utility")
-from utility import load_equations
-
-##################################################################################################################################################
-
-def prepare_equations(equations, sig_type):
-    if sig_type == "sig_L":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p1, p2, p3, p4):\n"
-    if sig_type == "sig_T":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p5, p6, p7, p8):\n"
-    if sig_type == "sig_LT":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p9, p10, p11, p12):\n"
-    if sig_type == "sig_TT":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p13, p14, p15, p16):\n"
-    if sig_type == "wfactor":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"        
-    
-    func_str += "    " + "\n    ".join(eq_list) + "\n"
-    func_str += f"    return {sig_type}"
-
-    print("!!!!!!!!!!",func_str)
-    
-    exec_globals = {'__builtins__': None, 'math': math}
-    exec(func_str, exec_globals)
-    return exec_globals[f'{sig_type}_optimized']
+from utility import load_equations, prepare_equations
 
 ##################################################################################################################################################
 
