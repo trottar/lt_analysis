@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:50:41 trottar"
+# Time-stamp: "2024-10-07 03:04:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,9 +29,8 @@ def iterWeight(arg_str):
     args = list(map(float, arg_str.split()))
 
     # Extract individual values from the list
-    q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, wtt, *params = args
-
-    ss = ww**2
+    q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
+    p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
     
     # Load equations
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
@@ -75,11 +74,11 @@ def iterWeight(arg_str):
     sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / pi  # dsig/dtdphicm in microbarns/GeV**2/rad
 
-    wtn = wtt * sig / sig_prev_iter
+    wtn = weight_prev_iter * (sig / sig_prev_iter)
 
     #print("sig",sig)
     #print("sigcm",sig_prev_iter)
     #print("wtn",wtn)
-    #print("wtt",wtt)
+    #print("weight_prev_iter",weight_prev_iter)
     
     return [float(wtn),float(sig)]
