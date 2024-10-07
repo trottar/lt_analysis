@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:53:05 trottar"
+# Time-stamp: "2024-10-07 05:54:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,7 +48,7 @@ def set_val(inp_pol_str, inp_q2_set, inp_w_set):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
-    q2_set = q2_set    
+    print("!!!!!!!!!",q2_set)    
     qq = float(q2_set.replace("p","."))
 
     try:
@@ -95,7 +95,7 @@ def fun_Sig_L(x, par):
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
-    q2_set = q2_set    
+    print("!!!!!!!!!",q2_set)    
     qq = float(q2_set.replace("p","."))
     
     try:
@@ -143,7 +143,7 @@ def fun_Sig_T(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
-    q2_set = q2_set    
+    print("!!!!!!!!!",q2_set)    
     qq = float(q2_set.replace("p","."))
     
     try:
@@ -191,7 +191,7 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
-    q2_set = q2_set    
+    print("!!!!!!!!!",q2_set)    
     qq = float(q2_set.replace("p","."))    
 
     try:
