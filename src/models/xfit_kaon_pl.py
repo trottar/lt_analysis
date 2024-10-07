@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:15:30 trottar"
+# Time-stamp: "2024-10-07 09:15:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -40,7 +40,8 @@ def prepare_equations(equations):
 # Need to grab polarity Q2 and W string values from xfit script
 
 # Check output equations
-DEBUG=False
+#DEBUG=False
+DEBUG=True
 
 # First, define empty strings
 pol_str = ""
