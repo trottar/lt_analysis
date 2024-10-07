@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:09:20 trottar"
+# Time-stamp: "2024-10-07 06:09:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,7 @@ def fun_Sig_L(x, par):
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
-        if key == 'sig_L'
+        if key == 'sig_L':
             try:
                 if DEBUG:
                     logging.debug(f"Evaluating equation for {key}: {equation}")
