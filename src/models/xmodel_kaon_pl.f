@@ -16,7 +16,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
       real w,qq,tt,phi
       real eps_mod,th_mod,x_mod
 
-      real targ,mp,mn,pi
+      real mtar,mp,mn,pi
       real mpipl, mkpl
       parameter (pi=3.14159)
       parameter (mp=.93827231)   !mp
@@ -48,10 +48,10 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
       if(npol_set.lt.0) then
          pol='mn'
-         targ=mn
+         mtar=mn
       else
          pol='pl'
-         targ=mp
+         mtar=mp
       end if
 
       open(57, file=par_fn)
@@ -84,7 +84,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
      >     **(qq/par(15)))-par(16)*qq)*sin(thetacm)**2
       
 c     Correct for W.
-      g_W=1./(W**2-targ**2)**2  ! W factor
+      g_W=1./(W**2-mtar**2)**2  ! W factor
 
       wfactor=g_W
       sig_L=sig_L*wfactor

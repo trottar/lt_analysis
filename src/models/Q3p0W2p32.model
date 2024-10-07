@@ -1,6 +1,6 @@
 # Define constants
 pi = math.pi
-mtar_gev = 0.93827231
+mtar = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
@@ -87,4 +87,4 @@ sig_LT = (p9 * math.exp(p10 * math.fabs(tt)) + p11 / math.fabs(tt)) * math.sin(t
 sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
-wfactor = 1 / ((ww**2) - (mtar_gev**2))**3.4
+wfactor = 1 / ((ww**2) - (mtar**2))**3.4
