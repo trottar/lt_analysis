@@ -70,14 +70,20 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
 *     Model sig_L, sig_T, sig_TT, sig_LT.
 
-      tav=(0.1112 + 0.0066*log(q2_set))*q2_set      
+*** Make sure there is a space after every equation ***
+      
+      tav=(0.1112 + 0.0066*log(q2_set))*q2_set
+      
       ftav=(abs(tt)-tav)/tav
 
       ft=abs(tt)/(abs(tt)+mkpl**2)**2 ! pole factor
+      
       Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
+      
       sig_L=(par(1)*Qdep_L*ft)*exp(-par(2)*(abs(tt)))
       
       Qdep_T=(exp(-qq**2))/qq
+      
       sig_T=(par(5)*exp(-par(6)*(abs(tt)))+par(7)*(abs(tt)))
      >     *(Qdep_T**par(8))
       
