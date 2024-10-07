@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:01:18 trottar"
+# Time-stamp: "2024-10-07 04:02:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,6 +60,7 @@ with open(test_file_path, 'r') as test_file:
         if '#' not in line:
             if ('sig_L=' in line) or ('sig_L =' in line):  # Look for the line that defines sig_L
                 sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
+                print("!!!!!!!!!!!!",sigl_str)
                 for par in range(1,16):
                     if par in sigl_str:
                         sigl_str.replace(f"p{par}","par({par})")
