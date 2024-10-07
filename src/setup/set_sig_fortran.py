@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:30:13 trottar"
+# Time-stamp: "2024-10-07 04:31:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,12 +55,11 @@ file_path = f"{LTANAPATH}/src/models/xmodel_{ParticleType}_{pol_str}.f"
 test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 
 # Define max line length for Fortran (fixed-format typically has a limit of 72 characters)
-max_fortran_line_length = 72
+max_fortran_line_length = 65
 
 # Grab all equations in models definition file
 sig_var = [var[0] for var in extract_values(test_file_path)]
 for sig_val in sig_var:
-    print("!!!!!!!!!!!!!",sig_var, sig_val)
     print(f"\n\nUpdating {file_path} with proper {sig_val}...")
 
     # Step 1: Read and extract {sig_val} from test.txt
@@ -113,11 +112,11 @@ for sig_val in sig_var:
 
                             # Add continuation lines, placing & (or digit) in column 6
                             while len(remaining_line) > max_fortran_line_length - 6:
-                                continuation_lines.append(f"     &{remaining_line[:max_fortran_line_length - 6]}\n")
+                                continuation_lines.append(f"     >     {remaining_line[:max_fortran_line_length - 6]}\n")
                                 remaining_line = remaining_line[max_fortran_line_length - 6:]
 
                             # Add the last continuation line
-                            continuation_lines.append(f"     &{remaining_line}")
+                            continuation_lines.append(f"     >     {remaining_line}")
 
                             # Replace the original line with the properly formatted multi-line version
                             lines[i] = first_line + ''.join(continuation_lines)
