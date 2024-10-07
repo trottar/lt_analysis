@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:13:04 trottar"
+# Time-stamp: "2024-10-07 09:14:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,19 +22,19 @@ sys.path.append("utility")
 from utility import load_equations
 
 # Prepare a single function for all equations
-def prepare_equations():
+def prepare_equations(equations):
     eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')]
     eq_list.append("sig_L")  # Add final computation
     
     # Create a single function that computes all equations
-    func_str = "def compute_all(tt, qq, ww, p1, p2, p3, p4):\n"
+    func_str = "def fun_Sig_L_optimized(tt, qq, ww, p1, p2, p3, p4):\n"
     func_str += "    " + "\n    ".join(eq_list) + "\n"
     func_str += "    return sig_L"
     
     # Use exec to create the function
     exec_globals = {'__builtins__': None, 'math': math}
     exec(func_str, exec_globals)
-    return exec_globals['compute_all']
+    return exec_globals['fun_Sig_L_optimized']
 
 ###############################################################################################################################################
 # Need to grab polarity Q2 and W string values from xfit script
@@ -60,7 +60,7 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
 
-    fun_Sig_L_optimized = prepare_equations()
+    fun_Sig_L_optimized = prepare_equations(equations)
         
 
 ###############################################################################################################################################
