@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:08:42 trottar"
+# Time-stamp: "2024-10-07 09:12:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -22,14 +22,20 @@ logging.basicConfig(level=logging.DEBUG)
 sys.path.append("utility")
 from utility import load_equations
 
-# Prepare equations for numexpr
-def prepare_equation(eq):
-    # Replace Python math functions with numpy equivalents
-    for func in dir(math):
-        if callable(getattr(math, func)) and func in eq:
-            eq = eq.replace(f"math.{func}", f"np.{func}")
-    return eq
-
+# Prepare a single function for all equations
+def prepare_equations():
+    eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')]
+    eq_list.append("sig_L")  # Add final computation
+    
+    # Create a single function that computes all equations
+    func_str = "def compute_all(tt, qq, ww, p1, p2, p3, p4):\n"
+    func_str += "    " + "\n    ".join(eq_list) + "\n"
+    func_str += "    return sig_L"
+    
+    # Use exec to create the function
+    exec_globals = {'__builtins__': None, 'math': math}
+    exec(func_str, exec_globals)
+    return exec_globals['compute_all']
 
 ###############################################################################################################################################
 # Need to grab polarity Q2 and W string values from xfit script
@@ -54,24 +60,8 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     equations = load_equations(f"Q{Q2}W{W}.model")
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
-        
-    prepared_equations = {k: prepare_equation(v) for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')}
-        
-    def create_sig_L_function():
-        # Combine all equations into a single expression
-        combined_eq = '; '.join([f"{k} = {v}" for k, v in prepared_equations.items()])
-        combined_eq += f"; sig_L"  # Add final computation
 
-        def sig_L_vectorized(tt, p1, p2, p3, p4):
-            return ne.evaluate(combined_eq, {
-                'tt': tt, 'qq': q2_set, 'ww': w_set,
-                'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4
-            })
-
-        return sig_L_vectorized
-        
-    # Create the optimized function
-    fun_Sig_L_optimized = create_sig_L_function()
+    fun_Sig_L_optimized = prepare_equations()
         
 
 ###############################################################################################################################################
