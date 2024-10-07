@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:50:01 trottar"
+# Time-stamp: "2024-10-07 03:51:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ print("\n\nUpdating {} with proper sig_L...".format(file_path))
 sigl_str = None  # Initialize variable to hold the sig_L value
 with open(test_file_path, 'r') as test_file:
     for line in test_file:
-        if 'sig_L=' in line:  # Look for the line that defines sig_L
+        if ('sig_L =' in line) or ('sig_L=' in line):  # Look for the line that defines sig_L
             sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
             break  # No need to search further once sig_L is found
 
