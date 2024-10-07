@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 07:58:16 trottar"
+# Time-stamp: "2024-10-07 10:43:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -15,9 +15,6 @@ from ROOT import TNtuple
 from ROOT import TCanvas
 import math
 import os, sys
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 ################################################################################################################################################
 '''
@@ -45,7 +42,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import load_equations
+from utility import load_equations, prepare_equations
 
 ##################################################################################################################################################
 # Import fit finder function
@@ -145,8 +142,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
     # Load equations
     equations = load_equations(f"Q{q2_set}W{w_set}.model")
-    if DEBUG:    
-        logging.debug(f"Loaded equations: {equations}")
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     # Redefine strings for retrieving equation defintions
@@ -156,26 +151,9 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         for line in f:
             ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
 
-            # Evaluate equations
-            local_vars = locals()
-            for key, equation in equations.items():
-                if (key == 'wfactor') or (key == 'mtar'):
-                    try:
-                        if DEBUG:
-                            logging.debug(f"Evaluating equation for {key}: {equation}")
-                        local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
-                        if DEBUG:
-                            logging.debug(f"Result for {key}: {local_vars[key]}")
-                    except OverflowError:
-                        logging.warning(f"OverflowError for {key}, setting to -1000.0")
-                        local_vars[key] = -1000.0
-                    except Exception as e:
-                        logging.error(f"Error evaluating equation for {key}: {equation}")
-                        logging.error(f"Error message: {str(e)}")
-                        logging.error(f"Local variables: {local_vars}")
-                        raise
+            fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
-            g = local_vars['wfactor']
+            g = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
             
             g_vec.append(g)
             w_vec.append(ww)
