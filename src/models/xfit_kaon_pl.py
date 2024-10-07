@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:04:55 trottar"
+# Time-stamp: "2024-10-07 09:06:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -20,29 +20,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 sys.path.append("utility")
 from utility import load_equations
-
-###############################################################################################################################################
-# Need to grab polarity Q2 and W string values from xfit script
-
-# Check output equations
-DEBUG=False
-
-# First, define empty strings
-pol_str = ""
-Q2 = ""
-W = ""
-equations = ""
-
-# Then, set global variables which is called with arguments defined in xfit script
-def set_val(inp_pol_str, inp_Q2, inp_W):
-    global pol_str, Q2, W, equations
-    pol_str = inp_pol_str
-    Q2 = inp_Q2
-    W = inp_W
-    # Load equations
-    equations = load_equations(f"Q{Q2}W{W}.model")
-    if DEBUG:    
-        logging.debug(f"Loaded equations: {equations}")
 
 # Prepare equations for numexpr
 def prepare_equation(eq):
@@ -67,8 +44,34 @@ def create_sig_L_function():
     
     return sig_L_vectorized
 
-# Create the optimized function
-fun_Sig_L_optimized = create_sig_L_function()
+
+###############################################################################################################################################
+# Need to grab polarity Q2 and W string values from xfit script
+
+# Check output equations
+DEBUG=False
+
+# First, define empty strings
+pol_str = ""
+Q2 = ""
+W = ""
+equations = ""
+fun_Sig_L_optimized = ""
+
+# Then, set global variables which is called with arguments defined in xfit script
+def set_val(inp_pol_str, inp_Q2, inp_W):
+    global pol_str, Q2, W, equations, fun_Sig_L_optimized
+    pol_str = inp_pol_str
+    Q2 = inp_Q2
+    W = inp_W
+    # Load equations
+    equations = load_equations(f"Q{Q2}W{W}.model")
+    if DEBUG:    
+        logging.debug(f"Loaded equations: {equations}")
+
+    # Create the optimized function
+    fun_Sig_L_optimized = create_sig_L_function()
+        
 
 ###############################################################################################################################################
 
