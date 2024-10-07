@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 07:47:10 trottar"
+# Time-stamp: "2024-10-07 07:55:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,7 +32,7 @@ def import_model(inp_model, arg_str):
     args = list(map(float, arg_str.split()))
 
     # Extract individual values from the list
-    q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
+    q2_set, w_set, theta_cm, tt, qq, ww, *params = args
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
     # Load equations
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
