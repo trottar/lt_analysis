@@ -4,14 +4,12 @@ mtar_gev = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
-# Common calculations
+#
 tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
-ftav = (abs(tt) - tav) / tav
+#ftav = (abs(tt) - tav) / tav
 ft = abs(tt) / (abs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
-
-# Equations for cross-section calculations
 
 # Longitudinal cross-section
 sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (abs(tt)))
