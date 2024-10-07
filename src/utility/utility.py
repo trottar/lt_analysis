@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:21:45 trottar"
+# Time-stamp: "2024-10-07 04:13:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -864,5 +864,33 @@ def load_equations(filename='variables.inp'):
     
     #print(f"Loaded {len(equations)} equations from {full_path}")
     return equations
+
+################################################################################################################################################
+
+import re
+
+# Function to extract values from the file
+def extract_values(filename):
+    values = []
+
+    # Regular expression to match the pattern 'key=value' or 'key = value'
+    pattern = re.compile(r'(\w+)\s*=\s*([^\s#]+)')
+
+    # Open the file and search for matching patterns
+    with open(filename, 'r') as file:
+        for line in file:
+            # Ignore lines that start with '#'
+            line = line.strip()
+            if line.startswith('#') or not line:
+                continue
+            
+            # Search for key=value pairs
+            match = pattern.search(line)
+            if match:
+                # Append the key and value as a tuple (key, value) to the list
+                key, value = match.groups()
+                values.append((key, value))
+    
+    return values
 
 ################################################################################################################################################

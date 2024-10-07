@@ -40,7 +40,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 *                     the xfit_in_t.py script to work. LT/TT are zeros
       real par(16)
       real p,e
-      real f_tm,g_W,tav,f_tav
+      real ft,g_W,tav,f_tav
 
 *     RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
 *                      that incorporates Q2-dep based of pi FF
@@ -76,9 +76,9 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
       tav=(0.1112 + 0.0066*log(q2_set))*q2_set      
       f_tav=(abs(tm)-tav)/tav
 
-      f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
+      ft=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
-      sig_L=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
+      sig_L=(par(1)*Qdep_L*ft)*exp(-par(2)*(abs(tm)))
       Qdep_T=(exp(-q2**2))/q2
       sig_T=(par(5)*exp(-par(6)*(abs(tm)))+par(7)*(abs(tm)))
      >     *(Qdep_T**par(8))
