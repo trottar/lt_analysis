@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:40:52 trottar"
+# Time-stamp: "2024-10-07 03:43:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,8 +45,8 @@ CACHEPATH=lt.CACHEPATH
 
 ###############################################################################################################################################
 # Define paths for the Fortran file and the test file
-file_path = f"{}/src/models/xmodel_{ParticleType}_{pol_str}.f".format(LTPATH)
-test_file_path = f"{}/src/models/Q{Q2}W{W}.model".format(LTPATH)
+file_path = f"{LTANAPATH}/src/models/xmodel_{ParticleType}_{pol_str}.f"
+test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 
 print("\n\nUpdating {} with proper sig_L...".format(file_path))
 
