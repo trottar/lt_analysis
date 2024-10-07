@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 08:54:01 trottar"
+# Time-stamp: "2024-10-07 08:55:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,6 +49,8 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = q2_set
     ww = w_set
     
@@ -56,7 +58,7 @@ def fun_Sig_L(x, par):
     p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     
     # Create a dictionary for local variables
-    local_vars = {'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
+    local_vars = {'q2_set':q2_set, 'w_set':w_set, 'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
     
     # Add math functions to local_vars
     math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
