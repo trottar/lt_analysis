@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:46:01 trottar"
+# Time-stamp: "2024-10-07 05:47:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,6 +49,8 @@ def set_val(inp_pol_str, inp_q2_set, inp_w_set):
 def fun_Sig_L(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
+
+    print("!!!!!!!!!!!",len(par))
     
     p1, p2, p3, p4 = par
     # Evaluate equations
