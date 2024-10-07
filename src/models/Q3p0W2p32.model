@@ -4,6 +4,9 @@ mtar_gev = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
+qq=qq
+tt=tt
+
 #
 tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 ftav = (abs(tt) - tav) / tav
