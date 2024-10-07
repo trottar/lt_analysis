@@ -4,6 +4,8 @@ mtar_gev = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
+#q2_set=2.115 
+
 #
 tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
@@ -12,15 +14,76 @@ Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
 
 # Longitudinal cross-section
+# RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
+# RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
+#
+#f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)))
+#f = (par[0]+par[1]*math.log(qq)) * math.exp((par[2]+par[3]*math.log(qq)) * (abs(tt)+0.2))
+# RLT (4/23/2024): Marco's thesis functional forms
+#f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
+# RLT (6/04/2024): Testing simplier exp form for L+T
+##
+##f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+#f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+##f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
 sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (math.fabs(tt)))
 
 # Transverse cross-section
+# RLT (2/15/2024): Removing t dependence from sigT because it seems
+#                  to be driving poor sep xsects results
+# RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+# RLT (2/21/2024): Reintroducing t-dependence
+# RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
+#
+#f = par[0]+par[1]*math.log(qq)+(par[2]+par[3]*math.log(qq)) * ftav
+#f = par[0]+par[1]*math.log(qq)
+#f = par[0]*math.log(qq)+par[1]/(qq**2)
+#f = par[0] / (1 + par[1]*qq)
+# RLT (4/20/2024): Adding in t-dependence
+#f = (par[0] / (1 + par[1]*qq)) * ftav
+#f = (par[0] / (1 + par[1]*qq)) * abs(tt)
+# RLT (4/23/2024): Exponential t-dependence
+#f = (par[0] / (1 + par[1]*qq)) * math.exp(par[2]*abs(tt))
+# RLT (4/23/2024): Marco's thesis functional forms
+#f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + par[2]*qq))
+# RLT (6/04/2024): Testing simplier exp form for L+T
+##
+##f = (par[0] * ((abs(tt)/qq)-1)) * math.exp(par[1] * (abs(tt)))
+#f = (par[0]+par[1]*math.log(qq)) * math.exp(par[2] * (abs(tt)))
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+#f=(par[0]/qq)*math.exp(-par[1]*(qq**2))
+##f=par[0]*(par[1]+math.exp(-par[2]*(abs(tt))))*(Qdep_T**par[3])
 sig_T = (p5 * math.exp(-p6 * (math.fabs(tt))) + p7 * (math.fabs(tt))) * (Qdep_T**p8)
 
 # Longitudinal-Transverse interference term
+#print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+##
 sig_LT = (p9 * math.exp(p10 * math.fabs(tt)) + p11 / math.fabs(tt)) * math.sin(theta_cm)
+#f = (par[0]+par[2]/abs(tt))
+# RLT (4/23/2024): Marco's thesis functional forms
+#f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+###f=(par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
+#f=(par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))
 
 # Transverse-Transverse interference term
+#print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+##
+##f = (par[0]*qq*math.exp(-qq))*f_tt
+# RLT (4/23/2024): Marco's thesis functional forms
+#f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+#f=(-par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
+###f=(par[0]/(1+qq))*f_tt*math.exp(-par[1]*(qq))
 sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32

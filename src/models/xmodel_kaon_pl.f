@@ -4,7 +4,7 @@
       subroutine xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
      *     w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
-c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
+c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
       implicit none
 
@@ -29,8 +29,8 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
       integer i, test
 
-      real sig,sigT,sigL,sigLT,sigTT
-      real dsig,dsigT,dsigL,dsigLT,dsigTT
+      real sig,sig_T,sig_L,sig_LT,sig_TT
+      real dsig,dsig_T,dsig_L,dsig_LT,dsig_TT
 
       character*80 par_fn
       character*2 pol
@@ -68,7 +68,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,
      *     thetacm,eps_mod)
 
-*     Model sigL, sigT, sigTT, sigLT.
+*     Model sig_L, sig_T, sig_TT, sig_LT.
 
 * Revised for IT26, 12.11.09
 *      tav=(0.0735+0.028*log(q2_set))*q2_set
@@ -78,7 +78,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (7/11/2024): Moved below for Q2dep func form
 *      f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       
-*     sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+*     sig_L=(par(1)+par(2)*log(q2))*exp((par(3)
 *     >     +par(4)*log(q2))*(abs(tm)-0.2))
 *     RLT (10/12/2023): Removed 0.2 to keep things as simple as possible for
 *                       initial start parameterization
@@ -87,51 +87,51 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *     RLT (3/09/2024): Removing +0.2 term for better parameterization of
 *                      Q2=3.0, W=2.32
 *      
-*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+*      sig_L=(par(1)+par(2)*log(q2))*exp((par(3)
 *     >     +par(4)*log(q2))*(abs(tm)))
-*      sigL=(par(1)+par(2)*log(q2))*exp((par(3)
+*      sig_L=(par(1)+par(2)*log(q2))*exp((par(3)
 *     >     +par(4)*log(q2))*(abs(tm)+0.2))
 *     RLT (4/23/2024): Marco's thesis functional forms
-*     sigL=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
+*     sig_L=par(1)*exp(-par(2)*abs(tm))*(1.0/(1.0+par(3)*q2))
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **
-**      sigL=(par(1)+par(2)*log(q2))*exp(par(3)*(abs(tm)))
-*      sigL=(par(1)*((abs(tm)/q2)-1))*exp(par(2)*(abs(tm)))      
+**      sig_L=(par(1)+par(2)*log(q2))*exp(par(3)*(abs(tm)))
+*      sig_L=(par(1)*((abs(tm)/q2)-1))*exp(par(2)*(abs(tm)))      
       
-*     RLT (2/15/2024): Removing t dependence from sigT because it seems
+*     RLT (2/15/2024): Removing t dependence from sig_T because it seems
 *                        to be driving poor sep xsects results
-*     RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+*     RLT (2/20/2024): Added 1/Q^4 term to dampen sig_T
 *     RLT (2/21/2024): Using global analysis sig T model and params
 *     (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
 *      
-*      sigT=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
-*     sigT=par(5)+par(6)*log(q2)
-*     sigT=par(5)*log(q2)++par(6)/(q2**2)
-*      sigT=par(5)/(1+par(6)*q2)
+*      sig_T=par(5)+par(6)*log(q2)+(par(7)+par(8)*log(q2))*f_tav
+*     sig_T=par(5)+par(6)*log(q2)
+*     sig_T=par(5)*log(q2)++par(6)/(q2**2)
+*      sig_T=par(5)/(1+par(6)*q2)
 *     RLT (4/20/2024): Adding in t-dependence
-*     sigT=(par(5)/(1+par(6)*q2))*f_tav
-*     sigT=(par(5)/(1+par(6)*q2))*abs(tm)
+*     sig_T=(par(5)/(1+par(6)*q2))*f_tav
+*     sig_T=(par(5)/(1+par(6)*q2))*abs(tm)
 *     RLT (4/20/2024): Exponential t-dependence
-*      sigT=(par(5)/(1+par(6)*q2))*exp(par(7)*abs(tm))
+*      sig_T=(par(5)/(1+par(6)*q2))*exp(par(7)*abs(tm))
 *     RLT (4/23/2024): Marco's thesis functional forms
-*     sigT=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))
+*     sig_T=par(5)*exp(-par(6)*abs(tm))*(1.0/(1.0+par(7)*q2))
 *     RLT (6/04/2024): Testing simplier exp form for L+T
 **      
-**      sigT=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
-*      sigT=(par(5)+par(6)*log(q2))*exp(par(7)*(abs(tm)))            
+**      sig_T=(par(5)*((abs(tm)/q2)-1))*exp(par(6)*(abs(tm)))
+*      sig_T=(par(5)+par(6)*log(q2))*exp(par(7)*(abs(tm)))            
 
 **
-      sigLT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
-*     sigLT=(par(9)+par(11)/abs(tm))*sin(thetacm)
+      sig_LT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)
+*     sig_LT=(par(9)+par(11)/abs(tm))*sin(thetacm)
 *     RLT (4/23/2024): Marco's thesis functional forms
-*      sigLT=par(9)*exp(-par(10)*abs(tm))*(1.0/(1.0+(q2**2)*par(11)))
+*      sig_LT=par(9)*exp(-par(10)*abs(tm))*(1.0/(1.0+(q2**2)*par(11)))
 *     RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
 *                     the xfit_in_t.py script to work. LT/TT are zeros
 *                     Therefore param 12 was also changed to 13
 **      
-**      sigTT=(par(13)*q2*exp(-q2))*f_tm*sin(thetacm)**2
+**      sig_TT=(par(13)*q2*exp(-q2))*f_tm*sin(thetacm)**2
 *     RLT (4/23/2024): Marco's thesis functional forms
-*      sigTT=par(13)*exp(-par(14)*abs(tm))*(1.0/(1.0+(q2**2)*par(15)))
+*      sig_TT=par(13)*exp(-par(14)*abs(tm))*(1.0/(1.0+(q2**2)*par(15)))
 
 *     RLT (9/25/2023): There are two tav parameterizations in here.
 *                      I am only using the one above, for now.
@@ -142,22 +142,22 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 *                      that incorporates Q2-dep based of pi FF
       f_tm=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
       Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
-**      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
-      sigL=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
-*     sigT=(par(5)/q2)*exp(-par(6)*(q2**2))
+**      sig_L=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
+      sig_L=(par(1)*Qdep_L*f_tm)*exp(-par(2)*(abs(tm)))
+*     sig_T=(par(5)/q2)*exp(-par(6)*(q2**2))
       Qdep_T=(exp(-q2**2))/q2
-**      sigT=par(5)*(par(6)+exp(-par(7)*(abs(tm))))*(Qdep_T**par(8))
-      sigT=(par(5)*exp(-par(6)*(abs(tm)))+par(7)*(abs(tm)))
+**      sig_T=par(5)*(par(6)+exp(-par(7)*(abs(tm))))*(Qdep_T**par(8))
+      sig_T=(par(5)*exp(-par(6)*(abs(tm)))+par(7)*(abs(tm)))
      >     *(Qdep_T**par(8))
-***      sigLT=(par(9)/(1+q2))*sin(thetacm)
+***      sig_LT=(par(9)/(1+q2))*sin(thetacm)
 ***     >     *exp(-par(10)*(abs(tm)))
-*      sigLT=(par(9)*exp(par(10)*abs(tm))
+*      sig_LT=(par(9)*exp(par(10)*abs(tm))
 *     >     +par(11)/abs(tm))*sin(thetacm)
-*      sigTT=(-par(13)/(1+q2))*(sin(thetacm)**2)
+*      sig_TT=(-par(13)/(1+q2))*(sin(thetacm)**2)
 *     >     *exp(-par(14)*(abs(tm)))
-***      sigTT=(par(13)/(1+q2))*(sin(thetacm)**2)
+***      sig_TT=(par(13)/(1+q2))*(sin(thetacm)**2)
 ***   >     *f_tm*exp(-par(14)*(q2))
-      sigTT=((-par(13)*abs(tm)+par(14))*(abs(tm)
+      sig_TT=((-par(13)*abs(tm)+par(14))*(abs(tm)
      >     **(q2/par(15)))-par(16)*q2)*sin(thetacm)**2
       
 c     Correct for W.
@@ -168,17 +168,17 @@ c     Correct for W.
       g_W=1./(W**2-targ**2)**3.4       ! W factor, Q2=3.0, W=2.32
 
       wfactor=g_W
-      sigL=sigL*wfactor
-      sigT=sigT*wfactor
-      sigTT=sigTT*wfactor
-      sigLT=sigLT*wfactor
+      sig_L=sig_L*wfactor
+      sig_T=sig_T*wfactor
+      sig_TT=sig_TT*wfactor
+      sig_LT=sig_LT*wfactor
 
 ** !! MODEL DEP STUDY !!
-c      sigL=sigL*0.90-0.1
+c      sig_L=sig_L*0.90-0.1
 *     RLT (2/16/2024): Moved the unsep xsect down here so that the weight
 *                      factor is included in calculation
-      sig=sigT+eps_mod*sigL+eps_mod*cos(2.*phi)*sigTT
-     >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sigLT
+      sig=sig_T+eps_mod*sig_L+eps_mod*cos(2.*phi)*sig_TT
+     >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sig_LT
 
       sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
