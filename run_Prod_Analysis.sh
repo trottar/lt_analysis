@@ -1479,8 +1479,10 @@ if [[ $i_flag != "true" ]]; then
 	    #echo "Beam Energy per Run: [${DummyEbeamValCenter[@]}]"
 	fi
 	
+	cd "${LTANAPATH}/src/setup"
+	python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
 	cd "${LTANAPATH}/src"
-
+	
 	if [ $j = "low" ]; then
 	    echo
 	    echo "Finding t/phi bins for low epsilon..."
@@ -1909,6 +1911,8 @@ else
 	    OutDUMMYFilename="Analysed_Dummy_${KIN}"
 	    OutFullAnalysisFilename="FullAnalysis_${KIN}"
 
+	    cd "${LTANAPATH}/src/setup"
+	    python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
 	    cd "${LTANAPATH}/src"
 
 	    if [ $j = "low" ]; then

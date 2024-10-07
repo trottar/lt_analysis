@@ -2,7 +2,7 @@
 * xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
       subroutine xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
-     *     w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
+     *     w,qq,tt,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
@@ -13,7 +13,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
       integer npol_set
       real Eb,q2_set,w_set,eps_set
-      real w,q2,tm,phi
+      real w,qq,tt,phi
       real eps_mod,th_mod,x_mod
 
       real targ,mp,mn,pi
@@ -40,7 +40,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 *                     the xfit_in_t.py script to work. LT/TT are zeros
       real par(16)
       real p,e
-      real ft,g_W,tav,f_tav
+      real ft,g_W,tav,ftav
 
 *     RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
 *                      that incorporates Q2-dep based of pi FF
@@ -65,26 +65,23 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
  9    close(57)      
       
 *     Calculate model thetacm and epsilon at first.
-      call eps_n_theta(pid,npol_set,Eb,w,q2,tm,
+      call eps_n_theta(pid,npol_set,Eb,w,qq,tt,
      *     thetacm,eps_mod)
 
 *     Model sig_L, sig_T, sig_TT, sig_LT.
 
-* Revised for IT26, 12.11.09
-*      tav=(0.0735+0.028*log(q2_set))*q2_set
-*       RLT (10/8/2023): Testing new tav parameterization
       tav=(0.1112 + 0.0066*log(q2_set))*q2_set      
-      f_tav=(abs(tm)-tav)/tav
+      ftav=(abs(tt)-tav)/tav
 
-      ft=abs(tm)/(abs(tm)+mkpl**2)**2 ! pole factor
-      Qdep_L=q2/(1.0+(1.77*q2)+0.12*(q2**2))
-      sig_L=(par(1)*Qdep_L*ft)*exp(-par(2)*(abs(tm)))
-      Qdep_T=(exp(-q2**2))/q2
-      sig_T=(par(5)*exp(-par(6)*(abs(tm)))+par(7)*(abs(tm)))
+      ft=abs(tt)/(abs(tt)+mkpl**2)**2 ! pole factor
+      Qdep_L=qq/(1.0+(1.77*qq)+0.12*(qq**2))
+      sig_L=(par(1)*Qdep_L*ft)*exp(-par(2)*(abs(tt)))
+      Qdep_T=(exp(-qq**2))/qq
+      sig_T=(par(5)*exp(-par(6)*(abs(tt)))+par(7)*(abs(tt)))
      >     *(Qdep_T**par(8))
-      sig_LT=(par(9)*exp(par(10)*abs(tm))+par(11)/abs(tm))*sin(thetacm)      
-      sig_TT=((-par(13)*abs(tm)+par(14))*(abs(tm)
-     >     **(q2/par(15)))-par(16)*q2)*sin(thetacm)**2
+      sig_LT=(par(9)*exp(par(10)*abs(tt))+par(11)/abs(tt))*sin(thetacm)      
+      sig_TT=((-par(13)*abs(tt)+par(14))*(abs(tt)
+     >     **(qq/par(15)))-par(16)*qq)*sin(thetacm)**2
       
 c     Correct for W.
       g_W=1./(W**2-targ**2)**2  ! W factor
