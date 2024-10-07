@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:32:18 trottar"
+# Time-stamp: "2024-10-07 06:32:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -25,7 +25,7 @@ from utility import load_equations
 # Need to grab polarity and Q2 string values from xfit script
 
 # Check output equations
-DEBUG=True
+DEBUG=False
 
 # First, define empty strings
 pol_str = ""
@@ -91,8 +91,6 @@ def fun_Sig_L(x, par):
                 raise
 
     f = local_vars['sig_L']
-
-    print("$$$$$$$$$$$$$$$$$$",f)
     
     return f
 
@@ -122,8 +120,6 @@ def fun_Sig_T(x, par):
         p8 = par[3]
     except:
         p8 = 0.0
-
-    print("!!!!!!!!!",p5,p6,p7,p8)
         
     # Evaluate equations
     local_vars = locals()
