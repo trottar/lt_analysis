@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:51:52 trottar"
+# Time-stamp: "2024-10-07 03:55:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,9 +54,10 @@ print("\n\nUpdating {} with proper sig_L...".format(file_path))
 sigl_str = None  # Initialize variable to hold the sig_L value
 with open(test_file_path, 'r') as test_file:
     for line in test_file:
-        if ('sig_L =' in line) or ('sig_L=' in line):  # Look for the line that defines sig_L
-            sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
-            break  # No need to search further once sig_L is found
+        if '#' not in line:
+            if ('sig_L=' in line) or ('sig_L =' in line):  # Look for the line that defines sig_L
+                sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
+                break  # No need to search further once sig_L is found
 
 if sigl_str is None:
     print("sig_L not found in test.txt!")
@@ -67,14 +68,37 @@ else:
 
     # Step 3: Find and replace the specific variable definition in the Fortran file
     for i, line in enumerate(lines):
-        if 'sig_L=' in line:
-            print(f'''
-            Changing {line.strip()} to sig_L={sigl_str}
-            ''')
-            # Preserve the spaces before 'sig_L'
-            prefix_spaces = line[:line.find('sig_L=')]
-            # Replace the line with the new sig_L value
-            lines[i] = f'{prefix_spaces}sig_L={sigl_str}\n'
+        if '#' not in line:
+            if 'sig_L=' in line:
+                print(f'''
+                Changing {line.strip()} to sig_L={sigl_str}
+                ''')
+                # Preserve the spaces before 'sig_L'
+                prefix_spaces = line[:line.find('sig_L=')]
+
+                # Construct the new line with sig_L, ensuring we don't exceed the Fortran line length
+                new_line = f'{prefix_spaces}sig_L={sigl_str}\n'
+
+                # Check if the new line exceeds the maximum Fortran line length
+                if len(new_line) > max_fortran_line_length:
+                    # Split the line into multiple lines with proper continuation
+                    first_line = new_line[:max_fortran_line_length].rstrip() + "\n"
+                    continuation_lines = []
+                    remaining_line = new_line[max_fortran_line_length:]
+
+                    # Add continuation lines, placing & (or digit) in column 6
+                    while len(remaining_line) > max_fortran_line_length - 6:
+                        continuation_lines.append(f"     &{remaining_line[:max_fortran_line_length - 6]}\n")
+                        remaining_line = remaining_line[max_fortran_line_length - 6:]
+
+                    # Add the last continuation line
+                    continuation_lines.append(f"     &{remaining_line}")
+
+                    # Replace the original line with the properly formatted multi-line version
+                    lines[i] = first_line + ''.join(continuation_lines)
+                else:
+                    # No need for continuation lines if the length is okay
+                    lines[i] = new_line
 
     # Step 4: Write the modified content back to the Fortran file
     with open(file_path, 'w') as file:
