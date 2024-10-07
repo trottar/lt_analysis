@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:30:26 trottar"
+# Time-stamp: "2024-10-07 02:32:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ def import_model(inp_model, arg_str):
     p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
 
     # Load equations
-    equations = load_equations(f"Q{Q2.replace('.','p')}W{W.replace('.','p')}.model")
+    equations = load_equations(f"Q{str(Q2).replace('.','p')}W{str(W).replace('.','p')}.model")
     
     # Evaluate equations defined in src/models
     local_vars = locals()

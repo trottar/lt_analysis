@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:30:33 trottar"
+# Time-stamp: "2024-10-07 02:32:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,7 +35,7 @@ def iterWeight(arg_str):
     q2_set, w_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
     
     # Load equations
-    equations = load_equations(f"Q{q2_set.replace('.','p')}W{w_set.replace('.','p')}.model")
+    equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
 
     q2_gev = q2_sim # Already GeV
     t_gev = t_sim  # Already GeV, issue here!!! t_sim makes no sense
