@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 08:49:00 trottar"
+# Time-stamp: "2024-10-07 08:54:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,17 +32,13 @@ pol_str = ""
 Q2 = ""
 W = ""
 equations = ""
-q2_set = ""
-w_set = ""
 
 # Then, set global variables which is called with arguments defined in xfit script
 def set_val(inp_pol_str, inp_Q2, inp_W):
-    global pol_str, Q2, W, equations, q2_set, w_set
+    global pol_str, Q2, W, equations
     pol_str = inp_pol_str
     Q2 = inp_Q2
     W = inp_W
-    q2_set = float(Q2.replace("p","."))
-    w_set = float(W.replace("p","."))
     # Load equations
     equations = load_equations(f"Q{Q2}W{W}.model")
     if DEBUG:    
@@ -53,34 +49,26 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
-    qq = float(q2_set)
-    ww = float(w_set)
-
-    try:
-        p1 = par[0]
-    except:
-        p1 = 0.0
-    try:
-        p2 = par[1]
-    except:
-        p2 = 0.0        
-    try:
-        p3 = par[2]
-    except:
-        p3 = 0.0
-    try:
-        p4 = par[3]
-    except:
-        p4 = 0.0
-        
+    qq = q2_set
+    ww = w_set
+    
+    # Use a list comprehension to get parameters, defaulting to 0.0 if not available
+    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    
+    # Create a dictionary for local variables
+    local_vars = {'tt': tt, 'qq': qq, 'ww': ww, 'p1': p1, 'p2': p2, 'p3': p3, 'p4': p4}
+    
+    # Add math functions to local_vars
+    math_functions = {name: getattr(math, name) for name in dir(math) if callable(getattr(math, name))}
+    local_vars.update(math_functions)
+    
     # Evaluate equations
-    local_vars = locals()
     for key, equation in equations.items():
-        if (key != 'sig_T') and (key != 'sig_LT') and (key != 'sig_TT'):
+        if key not in ('sig_T', 'sig_LT', 'sig_TT'):
             try:
                 if DEBUG:
                     logging.debug(f"Evaluating equation for {key}: {equation}")
-                local_vars[key] = eval(equation, {"__builtins__": None, "math": math}, local_vars)
+                local_vars[key] = eval(equation, {"__builtins__": None}, local_vars)
                 if DEBUG:
                     logging.debug(f"Result for {key}: {local_vars[key]}")
             except OverflowError:
@@ -91,16 +79,16 @@ def fun_Sig_L(x, par):
                 logging.error(f"Error message: {str(e)}")
                 logging.error(f"Local variables: {local_vars}")
                 raise
-
-    f = local_vars['sig_L']
     
-    return f
+    return local_vars['sig_L']
 
 ###############################################################################################################################################
     
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
     
@@ -150,6 +138,8 @@ def fun_Sig_T(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
     
@@ -202,6 +192,8 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
 
