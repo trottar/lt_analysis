@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-10-07 07:04:41 trottar"
+# Time-stamp: "2024-10-07 07:06:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,8 +60,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     formatted_date  = inpDict["formatted_date"]
     iter_num = inpDict["iter_num"]
     ParticleType  = inpDict["ParticleType"]
-    Q2 = inpDict["Q2"].replace("p",".")
-    W = inpDict["W"].replace("p",".")    
+    q2_set = inpDict["Q2"]
+    Q2 = q2_set.replace("p",".")
+    w_set = inpDict["W"]
+    W = w_set.replace("p",".")
     POL = inpDict["POL"]
     
     if int(POL) == 1:
@@ -305,7 +307,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Branch("pend_y_det", pend_y_det_array, "pend_y_det/F")
 
     # Set pol_str, q2_set, w_set for param model script
-    set_val(pol_str, q2_set, w_set)
+    set_val(pol_str, Q2, W)
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
