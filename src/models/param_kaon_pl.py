@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:38:27 trottar"
+# Time-stamp: "2024-10-07 02:46:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -35,16 +35,16 @@ def iterWeight(arg_str):
     args = list(map(float, arg_str.split()))
 
     # Extract individual values from the list
-    q2_set, w_set, q2_sim, w_sim, t_sim, eps_sim, thetacm_sim, phicm_sim, sigcm_sim, wt_sim, *params = args
+    q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, wtt, *params = args
     
     # Load equations
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
     logging.debug(f"Loaded equations: {equations}")
 
-    q2_gev = q2_sim # Already GeV
-    t_gev = t_sim  # Already GeV, issue here!!! t_sim makes no sense
-    s = w_sim**2
-    s_gev = s # Already GeV
+    q2_gev = qq # Already GeV
+    t_gev = tt  # Already GeV, issue here!!! tt makes no sense
+    ss = ww**2
+    s_gev = ss # Already GeV
 
     ##############
     # HARD CODED #
@@ -78,17 +78,17 @@ def iterWeight(arg_str):
     sigtt = sigtt*wfactor
     siglt = siglt*wfactor
 
-    sig = (sigt + eps_sim * sigl + eps_sim * math.cos(2. * phicm_sim) * sigtt +
-             math.sqrt(2.0 * eps_sim * (1. + eps_sim)) * math.cos(phicm_sim) * siglt)
+    sig = (sigt + eps * sigl + eps * math.cos(2. * phi_cm) * sigtt +
+             math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * siglt)
     
     sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / pi  # dsig/dtdphicm in microbarns/GeV**2/rad
 
-    wtn = wt_sim * sig / sigcm_sim
+    wtn = wtt * sig / sig_prev_iter
 
     #print("sig",sig)
-    #print("sigcm",sigcm_sim)
+    #print("sigcm",sig_prev_iter)
     #print("wtn",wtn)
-    #print("wt_sim",wt_sim)
+    #print("wtt",wtt)
     
     return [float(wtn),float(sig)]
