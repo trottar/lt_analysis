@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:44:02 trottar"
+# Time-stamp: "2024-10-07 05:44:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,10 +30,11 @@ q2_set = ""
 equations = ""
 
 # Then, set global variables which is called with arguments defined in xfit script
-def set_val(inp_pol_str, inp_q2_set):
-    global pol_str, q2_set, equations
+def set_val(inp_pol_str, inp_q2_set, inp_w_set):
+    global pol_str, q2_set, w_set, equations
     pol_str = inp_pol_str
     q2_set = inp_q2_set
+    w_set = inp_w_set
     # Load equations
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
     if DEBUG:    
