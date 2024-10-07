@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 10:09:17 trottar"
+# Time-stamp: "2024-10-07 10:13:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -39,6 +39,8 @@ def prepare_equations(equations, sig_type):
     
     func_str += "    " + "\n    ".join(eq_list) + "\n"
     func_str += f"    return {sig_type}"
+
+    print("!!!!!!!!!!",func_str)
     
     exec_globals = {'__builtins__': None, 'math': math}
     exec(func_str, exec_globals)
@@ -81,6 +83,8 @@ def import_model(inp_model, arg_str):
 
     sig_sep = modelDict[inp_model]
 
+    sig_sep = sig_sep*wfactor
+    
     sig_sep = sig_sep/2.0/math.pi
     
     # Convert from ub/GeV**2 to nb/GeV**2
