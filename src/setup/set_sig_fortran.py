@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:23:04 trottar"
+# Time-stamp: "2024-10-07 05:24:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -60,6 +60,7 @@ max_fortran_line_length = 65
 # Grab all equations in models definition file
 sig_var = [var[0] for var in extract_values(test_file_path)]
 for sig_val in sig_var:
+    print("-"*35)
     print(f"Updating {file_path} with proper {sig_val}...")
 
     # Step 1: Read and extract {sig_val} from test.txt
