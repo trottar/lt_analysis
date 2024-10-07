@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:13:05 trottar"
+# Time-stamp: "2024-10-07 08:41:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,6 +23,7 @@ import shutil
 import signal
 import random
 import math
+import re
 import sys, os, subprocess
 
 ################################################################################################################################################
@@ -843,7 +844,6 @@ def local_search(params, inp_func, num_params):
         return improved_params            
             
 ################################################################################################################################################
-import os
 
 def load_equations(filename='variables.inp'):
     equations = {}
@@ -866,8 +866,6 @@ def load_equations(filename='variables.inp'):
     return equations
 
 ################################################################################################################################################
-
-import re
 
 # Function to extract values from the file
 def extract_values(filename):

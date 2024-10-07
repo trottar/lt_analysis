@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 07:02:47 trottar"
+# Time-stamp: "2024-10-07 08:49:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -32,13 +32,17 @@ pol_str = ""
 Q2 = ""
 W = ""
 equations = ""
+q2_set = ""
+w_set = ""
 
 # Then, set global variables which is called with arguments defined in xfit script
 def set_val(inp_pol_str, inp_Q2, inp_W):
-    global pol_str, Q2, W, equations
+    global pol_str, Q2, W, equations, q2_set, w_set
     pol_str = inp_pol_str
     Q2 = inp_Q2
     W = inp_W
+    q2_set = float(Q2.replace("p","."))
+    w_set = float(W.replace("p","."))
     # Load equations
     equations = load_equations(f"Q{Q2}W{W}.model")
     if DEBUG:    
@@ -49,8 +53,6 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
-    q2_set = float(Q2.replace("p","."))
-    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
 
@@ -99,8 +101,6 @@ def fun_Sig_L(x, par):
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
-    q2_set = float(Q2.replace("p","."))
-    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
     
@@ -150,8 +150,6 @@ def fun_Sig_T(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
-    q2_set = float(Q2.replace("p","."))
-    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
     
@@ -204,8 +202,6 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
-    q2_set = float(Q2.replace("p","."))
-    w_set = float(W.replace("p","."))
     qq = float(q2_set)
     ww = float(w_set)
 
