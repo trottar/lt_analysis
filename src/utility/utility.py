@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 02:36:42 trottar"
+# Time-stamp: "2024-10-07 03:21:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -862,7 +862,7 @@ def load_equations(filename='variables.inp'):
                 except ValueError:
                     print(f"Warning: Invalid format in line {line_num}: {line}")
     
-    print(f"Loaded {len(equations)} equations from {full_path}")
+    #print(f"Loaded {len(equations)} equations from {full_path}")
     return equations
 
 ################################################################################################################################################
