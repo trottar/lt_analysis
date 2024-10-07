@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:43:02 trottar"
+# Time-stamp: "2024-10-07 03:43:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -17,7 +17,7 @@ W = sys.argv[2]
 ParticleType = sys.argv[3]
 POL = sys.argv[4]
 
-if POL == 1:
+if POL == "+1":
     pol_str = "pl"
 else:
     pol_str = "mn"
