@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:49:51 trottar"
+# Time-stamp: "2024-10-07 06:50:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -165,7 +165,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             # Evaluate equations
             local_vars = locals()
             for key, equation in equations.items():
-                if (key != 'sig_T') and (key != 'sig_LT') and (key != 'sig_TT'):
+                if (key == 'wfactor'):
                     try:
                         if DEBUG:
                             logging.debug(f"Evaluating equation for {key}: {equation}")
@@ -181,7 +181,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                         logging.error(f"Local variables: {local_vars}")
                         raise
 
-            g = local_vars['sig_L']
+            g = local_vars['wfactor']
             
             g_vec.append(g)
             w_vec.append(ww)
