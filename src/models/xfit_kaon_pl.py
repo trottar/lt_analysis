@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:47:34 trottar"
+# Time-stamp: "2024-10-07 05:50:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,9 +50,23 @@ def fun_Sig_L(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
 
-    print("!!!!!!!!!!!",par)
-    
-    p1, p2, p3, p4 = par
+    try:
+        p1 = par[0]
+    except:
+        p1 = 0.0
+    try:
+        p2 = par[1]
+    except:
+        p2 = 0.0        
+    try:
+        p3 = par[2]
+    except:
+        p3 = 0.0
+    try:
+        p4 = par[3]
+    except:
+        p4 = 0.0
+        
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
@@ -82,7 +96,23 @@ def fun_Sig_T(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
     
-    p5, p6, p7, p8 = par
+    try:
+        p5 = par[0]
+    except:
+        p5 = 0.0
+    try:
+        p6 = par[1]
+    except:
+        p6 = 0.0        
+    try:
+        p7 = par[2]
+    except:
+        p7 = 0.0
+    try:
+        p8 = par[3]
+    except:
+        p8 = 0.0
+
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
@@ -113,7 +143,23 @@ def fun_Sig_LT(x, par):
     tt = abs(x[0])
     qq = float(q2_set.replace("p","."))
     
-    p9, p10, p11, p12 = par
+    try:
+        p9 = par[0]
+    except:
+        p9 = 0.0
+    try:
+        p10 = par[1]
+    except:
+        p10 = 0.0        
+    try:
+        p11 = par[2]
+    except:
+        p11 = 0.0
+    try:
+        p12 = par[3]
+    except:
+        p12 = 0.0
+
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
@@ -142,9 +188,25 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
-    qq = float(q2_set.replace("p","."))
-    
-    p13, p14, p15, p16 = par
+    qq = float(q2_set.replace("p","."))    
+
+    try:
+        p13 = par[0]
+    except:
+        p13 = 0.0
+    try:
+        p14 = par[1]
+    except:
+        p14 = 0.0        
+    try:
+        p15 = par[2]
+    except:
+        p15 = 0.0
+    try:
+        p16 = par[3]
+    except:
+        p16 = 0.0
+
     # Evaluate equations
     local_vars = locals()
     for key, equation in equations.items():
