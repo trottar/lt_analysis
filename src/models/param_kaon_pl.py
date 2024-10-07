@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 03:10:34 trottar"
+# Time-stamp: "2024-10-07 03:11:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,15 +61,15 @@ def iterWeight(arg_str):
             logging.error(f"Local variables: {local_vars}")
             raise
         
-    sigl, sigt, siglt, sigtt, wfactor = [local_vars[key] for key in ['sigl', 'sigt', 'siglt', 'sigtt', 'wfactor']]
+    sig_L, sig_T, sig_LT, sig_TT, wfactor = [local_vars[key] for key in ['sig_L', 'sig_T', 'sig_LT', 'sig_TT', 'wfactor']]
     
-    sigl = sigl*wfactor
-    sigt = sigt*wfactor
-    sigtt = sigtt*wfactor
-    siglt = siglt*wfactor
+    sig_L = sig_L*wfactor
+    sig_T = sig_T*wfactor
+    sig_TT = sig_TT*wfactor
+    sig_LT = sig_LT*wfactor
 
-    sig = (sigt + eps * sigl + eps * math.cos(2. * phi_cm) * sigtt +
-             math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * siglt)
+    sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
+             math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
     
     sig = sig / 2.0 / pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / pi  # dsig/dtdphicm in microbarns/GeV**2/rad
