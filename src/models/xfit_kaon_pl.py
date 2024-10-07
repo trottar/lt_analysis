@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 05:55:22 trottar"
+# Time-stamp: "2024-10-07 05:57:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -29,17 +29,18 @@ DEBUG=True
 
 # First, define empty strings
 pol_str = ""
-q2_set = ""
+Q2 = ""
+W = ""
 equations = ""
 
 # Then, set global variables which is called with arguments defined in xfit script
-def set_val(inp_pol_str, inp_q2_set, inp_w_set):
-    global pol_str, q2_set, w_set, equations
+def set_val(inp_pol_str, inp_Q2, inp_W):
+    global pol_str, Q2, W, equations
     pol_str = inp_pol_str
-    q2_set = inp_q2_set
-    w_set = inp_w_set
+    Q2 = inp_Q2
+    W = inp_W
     # Load equations
-    equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
+    equations = load_equations(f"Q{Q2}W{W}.model")
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
         
@@ -48,7 +49,7 @@ def set_val(inp_pol_str, inp_q2_set, inp_w_set):
 # Function for SigL
 def fun_Sig_L(x, par):
     tt = abs(x[0])
-    q2_set = q2_set.replace("p",".")    
+    q2_set = Q2.replace("p",".")    
     qq = float(q2_set)
 
     try:
@@ -95,7 +96,7 @@ def fun_Sig_L(x, par):
 # Function for SigT
 def fun_Sig_T(x, par):
     tt = abs(x[0])
-    q2_set = q2_set.replace("p",".")    
+    q2_set = Q2.replace("p",".")    
     qq = float(q2_set)
     
     try:
@@ -143,7 +144,7 @@ def fun_Sig_T(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
-    q2_set = q2_set.replace("p",".")    
+    q2_set = Q2.replace("p",".")    
     qq = float(q2_set)
     
     try:
@@ -191,7 +192,7 @@ def fun_Sig_LT(x, par):
 # thetacm term is defined on function calling
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
-    q2_set = q2_set.replace("p",".")    
+    q2_set = Q2.replace("p",".")    
     qq = float(q2_set)
 
     try:
