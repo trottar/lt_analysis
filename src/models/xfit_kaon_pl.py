@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 06:15:20 trottar"
+# Time-stamp: "2024-10-07 06:16:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,6 +52,7 @@ def fun_Sig_L(x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     qq = float(q2_set)
+    ww = float(w_set)
 
     try:
         p1 = par[0]
@@ -101,6 +102,7 @@ def fun_Sig_T(x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     qq = float(q2_set)
+    ww = float(w_set)
     
     try:
         p5 = par[0]
@@ -153,6 +155,7 @@ def fun_Sig_LT(x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     qq = float(q2_set)
+    ww = float(w_set)
     
     try:
         p9 = par[0]
@@ -203,6 +206,7 @@ def fun_Sig_TT(x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     qq = float(q2_set)
+    ww = float(w_set)
 
     try:
         p13 = par[0]
