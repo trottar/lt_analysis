@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:38:58 trottar"
+# Time-stamp: "2024-10-07 09:43:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,15 +41,13 @@ def prepare_equations(equations, sig_type):
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p5, p6, p7, p8):\n"
     if sig_type == "sig_LT":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p9, p10, p11, p12):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p9, p10, p11, p12):\n"
     if sig_type == "sig_TT":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p13, p14, p15, p16):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p13, p14, p15, p16):\n"
     
     func_str += "    " + "\n    ".join(eq_list) + "\n"
     func_str += f"    return {sig_type}"
-
-    print("!!!!!!!!!!",func_str)
     
     exec_globals = {'__builtins__': None, 'math': math}
     exec(func_str, exec_globals)
@@ -93,8 +91,10 @@ def fun_Sig_LT(x, par):
     w_set = float(W.replace("p","."))
     qq = q2_set
     ww = w_set
+    # Sine term called separately so setting to 1.0
+    theta_cm = math.pi/2
     p9, p10, p11, p12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, p9, p10, p11, p12)
+    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p9, p10, p11, p12)
 
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
@@ -102,5 +102,7 @@ def fun_Sig_TT(x, par):
     w_set = float(W.replace("p","."))
     qq = q2_set
     ww = w_set
+    # Sine term called separately so setting to 1.0
+    theta_cm = math.pi/2
     p13, p14, p15, p16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, p13, p14, p15, p16)
+    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p13, p14, p15, p16)
