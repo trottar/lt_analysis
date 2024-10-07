@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-03 14:09:10 trottar"
+# Time-stamp: "2024-10-07 02:08:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -842,4 +842,16 @@ def local_search(params, inp_func, num_params):
         
         return improved_params            
             
+################################################################################################################################################
+
+def load_equations(filename='variables.inp'):
+    equations = {}
+    with open(filename, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#'):  # Ignore empty lines and comments
+                key, value = line.split('=', 1)
+                equations[key.strip()] = value.strip()
+    return equations
+
 ################################################################################################################################################
