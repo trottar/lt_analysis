@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-10-07 02:24:12 trottar"
+# Time-stamp: "2024-10-07 02:31:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,6 +61,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     iter_num = inpDict["iter_num"]
     ParticleType  = inpDict["ParticleType"]
     Q2 = inpDict["Q2"].replace("p",".")
+    W = inpDict["W"].replace("p",".")    
     POL = inpDict["POL"]
     
     if int(POL) == 1:
