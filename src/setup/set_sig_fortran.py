@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:20:01 trottar"
+# Time-stamp: "2024-10-07 04:22:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,6 +69,8 @@ for sig_val in sig_var:
             if '#' not in line:
                 if (f'{sig_val}=' in line) or (f'{sig_val} =' in line):  # Look for the line that defines {sig_val}
                     sigl_str = line.split('=')[1].strip()  # Extract the value after '=' and strip extra spaces
+                    if "(" in line.split('=')[1]:
+                        sigl_str = sigl_str + ')'
                     # Convert math to fortran syntax
                     sigl_str = sigl_str.replace(f"math.pi",f"3.14159")
                     sigl_str = sigl_str.replace(f"math.exp",f"exp")
