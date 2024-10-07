@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:14:30 trottar"
+# Time-stamp: "2024-10-07 09:15:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,7 @@ def fun_Sig_L(x, par):
     # Use a list comprehension to get parameters, defaulting to 0.0 if not available
     p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
 
-    f = fun_Sig_L_optimized(tt, p1, p2, p3, p4)
+    f = fun_Sig_L_optimized(tt, q2_set, w_set, p1, p2, p3, p4)
 
     return f
 
