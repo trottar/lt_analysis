@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:26:50 trottar"
+# Time-stamp: "2024-10-07 04:27:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,7 +58,7 @@ test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 max_fortran_line_length = 72
 
 # Grab all equations in models definition file
-sig_var = extract_values(test_file_path)
+sig_var = extract_values(test_file_path)[:][0]
 print("!!!!!!!!!!!!!",sig_var)
 for sig_val in sig_var:
     print(f"\n\nUpdating {file_path} with proper {sig_val}...")
