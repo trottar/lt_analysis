@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:30:51 trottar"
+# Time-stamp: "2024-10-07 09:32:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -41,7 +41,6 @@ def prepare_equations(equations, sig_type):
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT')]
     if sig_type == "sig_TT":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT')]
-    eq_list.append(sig_type)
     
     func_str = f"def {sig_type}_optimized(tt, qq, ww, p1, p2, p3, p4):\n"
     func_str += "    " + "\n    ".join(eq_list) + "\n"
