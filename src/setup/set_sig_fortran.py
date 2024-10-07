@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 07:34:21 trottar"
+# Time-stamp: "2024-10-07 07:40:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,7 +55,7 @@ file_path = f"{LTANAPATH}/src/models/xmodel_{ParticleType}_{pol_str}.f"
 test_file_path = f"{LTANAPATH}/src/models/Q{Q2}W{W}.model"
 
 # Define max line length for Fortran (fixed-format typically has a limit of 72 characters)
-max_fortran_line_length = 65
+max_fortran_line_length = 55
 
 # Grab all equations in models definition file
 sig_var = [var[0] for var in extract_values(test_file_path)]
