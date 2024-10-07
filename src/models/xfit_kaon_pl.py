@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 09:26:47 trottar"
+# Time-stamp: "2024-10-07 09:28:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -33,6 +33,7 @@ fun_Sig_LT_optimized = None
 fun_Sig_TT_optimized = None
 
 def prepare_equations(equations, sig_type):
+    print("!!!!!!!!!!",equations)
     if sig_type == "sig_L":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT')]
     if sig_type == "sig_T":
