@@ -84,9 +84,9 @@ sig_TT = (p13*qq*math.exp(-qq))*ft
 #                  that incorporates Q2-dep based of pi FF
 #sig_TT = (-p1/(1+qq))*math.exp(-p1*(math.fabs(tt)))
 ###sig_TT = (p1/(1+qq))*ft*math.exp(-p1*(qq))
-####sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
-#wfactor = 1 / ((ww**2) - (mtar**2))**3.4
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+wfactor = 1 / ((ww**2) - (mtar**2))**3.4
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52) # From linear fit of all Q2
