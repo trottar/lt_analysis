@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 15:11:14 trottar"
+# Time-stamp: "2024-10-08 15:13:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,10 +141,15 @@ for sig_val in sig_var:
                             else:
                                 break  # Stop if the next line isn't a continuation or blank line
 
+                        # Add a blank line only if we added continuation lines
+                        if len(new_line) <= max_fortran_line_length:
+                            lines.insert(i + 1, '\n')
+                            
                         # Once found, no need to replace anything else
                         SigSet = True
             i += 1
-
+            
+    
         # Step 4: Write the modified content back to the Fortran file
         with open(file_path, 'w') as file:
             file.writelines(lines)
