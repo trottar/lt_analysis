@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 15:59:11 trottar"
+# Time-stamp: "2024-10-08 16:02:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -133,7 +133,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 max_unchanged_iterations = 5
 
                 # Initialize adaptive parameter limits
-                par_sig_0 = initial_params
+                par_sig_0 = initial_params[0]
                 par_sig_err_0 = 0.0
 
                 # Track the best solution
