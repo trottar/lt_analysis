@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 15:02:04 trottar"
+# Time-stamp: "2024-10-08 15:09:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -131,20 +131,17 @@ for sig_val in sig_var:
                             # No need for continuation lines if the length is okay
                             lines[i] = new_line
 
-                        # Delete the next immediate line only if we added continuation lines
+                        # Delete the next line if it's a continuation line or blank line
                         if len(new_line) > max_fortran_line_length and i + 1 < len(lines):
-                            del lines[i + 1]
-                            
-                        '''
-                        # Add a blank line only if we added continuation lines
-                        if len(new_line) > max_fortran_line_length:
-                            lines.insert(i + 1, '\n')
-                        '''
-                        
+                            next_line = lines[i + 1].strip()
+                            # Check if the next line is either a continuation line or a blank line
+                            if next_line == '' or next_line.startswith('&') or next_line.startswith('>'):
+                                del lines[i + 1]
+
                         # Once found, no need to replace anything else
                         SigSet = True
             i += 1
-    
+
         # Step 4: Write the modified content back to the Fortran file
         with open(file_path, 'w') as file:
             file.writelines(lines)
