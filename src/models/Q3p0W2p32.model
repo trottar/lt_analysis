@@ -14,79 +14,19 @@ Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
 
 # Longitudinal cross-section
-# RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
-# RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
-#
-#sig_L = (p1+p1*math.log(qq)) * math.exp((p1+p1*math.log(qq)) * (math.fabs(tt)))
-#sig_L = (p1+p1*math.log(qq)) * math.exp((p1+p1*math.log(qq)) * (math.fabs(tt)+0.2))
-# RLT (4/23/2024): Marco's thesis functional forms
-#sig_L = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + p1*qq))
-# RLT (6/04/2024): Testing simplier exp form for L+T
-##
-##sig_L = (p1+p1*math.log(qq)) * math.exp(p1 * (math.fabs(tt)))
-#sig_L = (p1 * ((math.fabs(tt)/qq)-1)) * math.exp(p1 * (math.fabs(tt)))
-##
-# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
-#                  that incorporates Q2-dep based of pi FF
-##sig_L = (p1*Qdep_L*ft)*math.exp(-p1*(math.fabs(tt)))
 sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (math.fabs(tt)))
 
 # Transverse cross-section
-# RLT (2/15/2024): Removing t dependence from sigT because it seems
-#                  to be driving poor sep xsects results
-# RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
-# RLT (2/21/2024): Reintroducing t-dependence
-# RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
-#
-#sig_T = p1+p1*math.log(qq)+(p1+p1*math.log(qq)) * ftav
-#sig_T = p1+p1*math.log(qq)
-#sig_T = p1*math.log(qq)+p1/(qq**2)
-#sig_T = p1 / (1 + p1*qq)
-# RLT (4/20/2024): Adding in t-dependence
-#sig_T = (p1 / (1 + p1*qq)) * ftav
-#sig_T = (p1 / (1 + p1*qq)) * math.fabs(tt)
-# RLT (4/23/2024): Exponential t-dependence
-#sig_T = (p1 / (1 + p1*qq)) * math.exp(p1*math.fabs(tt))
-# RLT (4/23/2024): Marco's thesis functional forms
-#sig_T = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + p1*qq))
-# RLT (6/04/2024): Testing simplier exp form for L+T
-##
-##sig_T = (p1 * ((math.fabs(tt)/qq)-1)) * math.exp(p1 * (math.fabs(tt)))
-#sig_T = (p1+p1*math.log(qq)) * math.exp(p1 * (math.fabs(tt)))
-##
-# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
-#                  that incorporates Q2-dep based of pi FF
-#sig_T = (p1/qq)*math.exp(-p1*(qq**2))
-##sig_T = p1*(p1+math.exp(-p1*(math.fabs(tt))))*(Qdep_T**p1)
 sig_T = (p5 * math.exp(-p6 * (math.fabs(tt))) + p7 * (math.fabs(tt))) * (Qdep_T**p8)
 
 # Longitudinal-Transverse interference term
-#print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-##
 sig_LT = (p9 * math.exp(p10 * math.fabs(tt)) + p11 / math.fabs(tt)) * math.sin(theta_cm)
-#sig_LT = (p1+p1/math.fabs(tt))
-# RLT (4/23/2024): Marco's thesis functional forms
-#sig_LT = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + (qq**2)*p1))
-##
-# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
-#                  that incorporates Q2-dep based of pi FF
-###sig_LT = (p1/(1+qq))*math.exp(-p1*(math.fabs(tt)))
-#sig_LT = (p1*math.exp(p1*math.fabs(tt))+p1/math.fabs(tt))
 
 # Transverse-Transverse interference term
-#print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
-##
-sig_TT = (p13*qq*math.exp(-qq))*ft
-# RLT (4/23/2024): Marco's thesis functional forms
-#sig_TT = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + (qq**2)*p1))
-##
-# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
-#                  that incorporates Q2-dep based of pi FF
-#sig_TT = (-p1/(1+qq))*math.exp(-p1*(math.fabs(tt)))
-###sig_TT = (p1/(1+qq))*ft*math.exp(-p1*(qq))
-sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+sig_TT = (p13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+####sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
-#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
-wfactor = 1 / ((ww**2) - (mtar**2))**3.4
+wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**3.4
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52) # From linear fit of all Q2
