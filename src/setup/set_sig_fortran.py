@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 15:13:00 trottar"
+# Time-stamp: "2024-10-08 17:12:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,7 +108,7 @@ for sig_val in sig_var:
                     if "(" in line.split('=')[0]:
                         sigl_str = sigl_str + ')'
                     if not SigSet:
-                        print(f"\tChanging {line.strip()} to {sig_val}={sigl_str}")
+                        print(f"\tChanging \n\t{line.strip()} \n\t\t\t to \n\t{sig_val}={sigl_str}")
                         # Preserve the spaces before '{sig_val}'
                         prefix_spaces = line[:line.find(f'{sig_val}=')]
                         # Construct the new line with {sig_val}, ensuring we don't exceed the Fortran line length

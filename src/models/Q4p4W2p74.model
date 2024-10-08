@@ -4,8 +4,6 @@ mtar = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
 
-#q2_set=2.115 
-
 #
 tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
@@ -28,7 +26,7 @@ sig_TT = (p13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
 wfactor = 1 / ((ww**2) - (mtar**2))**2.0
-#wfactor = 1 / ((ww**2) - (mtar**2))**3.4
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.65
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52) # From linear fit of all Q2
 
 ################################################################################
