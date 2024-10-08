@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 15:09:32 trottar"
+# Time-stamp: "2024-10-08 15:11:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -113,6 +113,7 @@ for sig_val in sig_var:
                         prefix_spaces = line[:line.find(f'{sig_val}=')]
                         # Construct the new line with {sig_val}, ensuring we don't exceed the Fortran line length
                         new_line = f'{prefix_spaces}{sig_val}={sigl_str}\n'
+
                         # Check if the new line exceeds the maximum Fortran line length
                         if len(new_line) > max_fortran_line_length:
                             # Split the line into multiple lines with proper continuation
@@ -131,12 +132,14 @@ for sig_val in sig_var:
                             # No need for continuation lines if the length is okay
                             lines[i] = new_line
 
-                        # Delete the next line if it's a continuation line or blank line
-                        if len(new_line) > max_fortran_line_length and i + 1 < len(lines):
+                        # Check the next line for being a continuation line or blank line
+                        while i + 1 < len(lines):
                             next_line = lines[i + 1].strip()
-                            # Check if the next line is either a continuation line or a blank line
+                            # If the next line is either a blank line or starts with continuation symbols
                             if next_line == '' or next_line.startswith('&') or next_line.startswith('>'):
                                 del lines[i + 1]
+                            else:
+                                break  # Stop if the next line isn't a continuation or blank line
 
                         # Once found, no need to replace anything else
                         SigSet = True
