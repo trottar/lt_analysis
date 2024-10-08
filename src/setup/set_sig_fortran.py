@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 12:56:21 trottar"
+# Time-stamp: "2024-10-08 15:02:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -134,11 +134,13 @@ for sig_val in sig_var:
                         # Delete the next immediate line only if we added continuation lines
                         if len(new_line) > max_fortran_line_length and i + 1 < len(lines):
                             del lines[i + 1]
-
+                            
+                        '''
                         # Add a blank line only if we added continuation lines
                         if len(new_line) > max_fortran_line_length:
                             lines.insert(i + 1, '\n')
-
+                        '''
+                        
                         # Once found, no need to replace anything else
                         SigSet = True
             i += 1
