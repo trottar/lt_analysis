@@ -28,7 +28,7 @@ Qdep_T = (math.exp(-qq**2)) / qq
 ##
 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
 #                  that incorporates Q2-dep based of pi FF
-##f=(par[0]*Qdep_L*f_tt)*math.exp(-par[1]*(abs(tt)))
+##f=(par[0]*Qdep_L*ft)*math.exp(-par[1]*(abs(tt)))
 sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (math.fabs(tt)))
 
 # Transverse cross-section
@@ -76,15 +76,15 @@ sig_LT = (p9 * math.exp(p10 * math.fabs(tt)) + p11 / math.fabs(tt)) * math.sin(t
 # Transverse-Transverse interference term
 #print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
 ##
-##f = (par[0]*qq*math.exp(-qq))*f_tt
+sig_TT = (p13*qq*math.exp(-qq))*ft
 # RLT (4/23/2024): Marco's thesis functional forms
 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
 ##
 # RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
 #                  that incorporates Q2-dep based of pi FF
 #f=(-par[0]/(1+qq))*math.exp(-par[1]*(abs(tt)))
-###f=(par[0]/(1+qq))*f_tt*math.exp(-par[1]*(qq))
-sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+###f=(par[0]/(1+qq))*ft*math.exp(-par[1]*(qq))
+####sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
 wfactor = 1 / ((ww**2) - (mtar**2))**3.4
