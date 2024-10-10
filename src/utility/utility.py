@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 10:16:10 trottar"
+# Time-stamp: "2024-10-10 18:27:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -918,3 +918,25 @@ def prepare_equations(equations, sig_type):
     return exec_globals[f'{sig_type}_optimized']
 
 ##################################################################################################################################################
+
+def select_valid_parameter(sig_name, elements):
+    
+    sig_dict = {
+        "L" : [ f"p{v}" for v in range(1,5)],
+        "T" : [ f"p{v}" for v in range(5,9)],
+        "LT" : [ f"p{v}" for v in range(9,13)],
+        "TT" : [ f"p{v}" for v in range(13,17)]
+    }
+    
+    valid_params = [ f"{s}" for s, e in zip(sig_dict[sig_name], elements) if e != 0.0]
+    
+    while True:
+        # Prompt user for input
+        user_input = input("\n\nPlease enter parameter to fit for this iteration ({', '.join(map(str, valid_params))}):")
+        # Check if input is within the valid range and the element is not zero
+        if user_input in valid_params:
+            return elements[user_input]
+        else:
+            print("ERROR: Invalid parameter! Please select one of the following...{', '.join(map(str, valid_params))}")
+
+##################################################################################################################################################            

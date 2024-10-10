@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-10 07:00:52 trottar"
+# Time-stamp: "2024-10-10 18:02:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -447,7 +447,7 @@ for hist in histlist:
 if EPSSET == "high":
     check_bins(histlist, inpDict)
 
-print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+print(f"\n{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
 ##############################

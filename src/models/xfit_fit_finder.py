@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 16:07:01 trottar"
+# Time-stamp: "2024-10-10 18:28:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -25,7 +25,7 @@ import os, sys
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter
 
 ##################################################################################################################################################
 
@@ -83,6 +83,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         sig_name = key
         initial_params = [p for p in val["params"] if p != 0.0] # Check for only used parameters
         num_params = len(initial_params)
+
+        if (num_events - num_params) <= 0.0:            
+            print(f"WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than the number of data points ({num_events})! Fitting one parameter at a time...{user_input}")
+            # Prompts selection of specific parameter to fit for this iteration
+            initial_params = select_valid_parameter(sig_name, val["params"])
+            num_params = len(initial_params)
 
         if num_params == 1:
 
