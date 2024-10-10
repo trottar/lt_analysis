@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:51:44 trottar"
+# Time-stamp: "2024-10-10 07:00:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -402,6 +402,9 @@ print("\n\n")
 sys.path.append("binning")
 from find_bins import find_bins, check_bins
 
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
@@ -443,7 +446,10 @@ for hist in histlist:
 
 if EPSSET == "high":
     check_bins(histlist, inpDict)
-    
+
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+
 ##############################
 # Step 5 of the lt_analysis: #
 ##############################

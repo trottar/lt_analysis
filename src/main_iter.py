@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 04:51:49 trottar"
+# Time-stamp: "2024-10-10 07:01:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -259,6 +259,9 @@ for hist in histlist:
 sys.path.append("binning")
 from find_bins import check_bins
 
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+
 try:
     output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -290,12 +293,15 @@ except FileNotFoundError:
     print("{} not found...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
 except IOError:
     print("Error reading {}...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
-    
+
 for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
 
 check_bins(histlist, inpDict)
+
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
+print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
 phisetlist = []
 for hist in histlist:
