@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-10 18:28:38 trottar"
+# Time-stamp: "2024-10-10 18:30:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -85,7 +85,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         num_params = len(initial_params)
 
         if (num_events - num_params) <= 0.0:            
-            print(f"WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than the number of data points ({num_events})! Fitting one parameter at a time...{user_input}")
+            print(f"WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than the number of data points ({num_events})! Fitting one parameter at a time...")
             # Prompts selection of specific parameter to fit for this iteration
             initial_params = select_valid_parameter(sig_name, val["params"])
             num_params = len(initial_params)
