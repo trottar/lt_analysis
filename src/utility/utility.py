@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-10 18:31:43 trottar"
+# Time-stamp: "2024-10-10 18:32:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -935,7 +935,7 @@ def select_valid_parameter(sig_name, elements):
         user_input = input(f"\n\nPlease enter parameter to fit for this iteration ({', '.join(map(str, valid_params))}):")
         # Check if input is within the valid range and the element is not zero
         if user_input in valid_params:
-            return elements[user_input]
+            return valid_params[user_input]
         else:
             print(f"ERROR: Invalid parameter! Please select one of the following...{', '.join(map(str, valid_params))}")
 
