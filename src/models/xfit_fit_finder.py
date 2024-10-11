@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 05:23:11 trottar"
+# Time-stamp: "2024-10-11 05:25:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -77,11 +77,11 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     outputpdf = inp_dict["outputpdf"]
 
     num_events = nsep.GetEntries()    
-
-    # Check if (# of parameters > # of data points) and keeps track of remaining parameters
-    original_params = ""
     
     for it, (key, val) in enumerate(sig_fit_dict.items()):
+
+        # Check if (# of parameters > # of data points) and keeps track of remaining parameters
+        original_params = ""
 
         sig_name = key
         initial_params = [p for p in val["params"] if p != 0.0] # Check for only used parameters
