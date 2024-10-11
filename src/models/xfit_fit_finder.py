@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 04:35:12 trottar"
+# Time-stamp: "2024-10-11 04:36:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -92,7 +92,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Prompts selection of specific parameter to fit for this iteration
             initial_params = select_valid_parameter(sig_name, val["params"])
             print(initial_params, val["params"])
-            original_params = val["params"].remove(initial_params)
+            original_params = val["params"].remove(initial_params[0])
             num_params = len(initial_params)
 
         if num_params == 1:
