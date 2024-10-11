@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-10 18:41:01 trottar"
+# Time-stamp: "2024-10-11 04:33:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -77,6 +77,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     outputpdf = inp_dict["outputpdf"]
 
     num_events = nsep.GetEntries()    
+
+    # Check if (# of parameters > # of data points) and keeps track of remaining parameters
+    original_params = ""
     
     for it, (key, val) in enumerate(sig_fit_dict.items()):
 
@@ -88,6 +91,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than the number of data points ({num_events})! Fitting one parameter at a time...")
             # Prompts selection of specific parameter to fit for this iteration
             initial_params = select_valid_parameter(sig_name, val["params"])
+            original_params = val["params"].remove(initial_params)
             num_params = len(initial_params)
 
         if num_params == 1:
@@ -317,8 +321,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_duration = end_time - start_time
             print("The loop took {:.2f} seconds.".format(total_duration))
 
-            best_overall_params = [best_overall_params]
-            best_overall_errors = [best_overall_errors]
+            if original_params == "":
+                best_overall_params = [best_overall_params]
+                best_overall_errors = [best_overall_errors]
+            else:
+                best_overall_params = [best_overall_params] + [p for p in original_params]
+                best_overall_errors = [best_overall_errors] + [best_overall_errors for _ in range(3)]
 
             while len(best_overall_params) < 4:
                 best_overall_params.append(0.0)
