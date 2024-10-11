@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 04:38:45 trottar"
+# Time-stamp: "2024-10-11 04:42:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -95,7 +95,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             val["params"].remove(initial_params[0])
             original_params = val["params"]
             num_params = len(initial_params)
-            print(initial_params, val["params"], original_params)
+
         if num_params == 1:
 
             # 1 param
