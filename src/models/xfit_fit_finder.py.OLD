@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 20:31:26 trottar"
+# Time-stamp: "2024-10-11 05:25:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -86,6 +86,14 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         sig_name = key
         initial_params = [p for p in val["params"] if p != 0.0] # Check for only used parameters
         num_params = len(initial_params)
+
+        if (num_events - num_params) <= 0.0:            
+            print(f"WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Fitting one parameter at a time...")
+            # Prompts selection of specific parameter to fit for this iteration
+            initial_params = select_valid_parameter(sig_name, val["params"])
+            # Remove used parameter, but keep track of unused for further iterations
+            original_params = [p for p in val["params"] if p != initial_params[0]]
+            num_params = len(initial_params)
 
         if num_params == 1:
 
@@ -226,15 +234,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                                current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
-                            
+                            current_cost = f_sig.GetChisquare()
+
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
@@ -661,14 +662,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1114,14 +1108,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1592,14 +1579,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
+                            current_cost = f_sig.GetChisquare()
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
