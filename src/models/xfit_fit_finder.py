@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 21:04:02 trottar"
+# Time-stamp: "2024-10-12 03:09:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -68,7 +68,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     c6.Divide(2, 2)
     
     nsep, g_vec, w_vec, q2_vec, th_vec = inp_dict["objects"]
-    max_iterations = inp_dict["max_iterations"]    
+    max_iterations = inp_dict["max_iterations"]
+    num_optimizations = inp_dict["num_optimizations"]
     tmin_range = inp_dict["tmin_range"]
     tmax_range = inp_dict["tmax_range"]
     Q2min_range = inp_dict["Q2min_range"]
@@ -101,7 +102,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
-            num_starts = 10  # Number of times to restart the algorithm
+            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -131,8 +132,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_starts):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            for start in range(num_optimizations):
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 iteration = 0
 
@@ -541,7 +542,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
-            num_starts = 10  # Number of times to restart the algorithm
+            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -572,8 +573,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_starts):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            for start in range(num_optimizations):
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 iteration = 0
 
@@ -1000,7 +1001,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
-            num_starts = 10  # Number of times to restart the algorithm
+            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -1032,8 +1033,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_starts):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            for start in range(num_optimizations):
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 iteration = 0
 
@@ -1477,7 +1478,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")    
 
-            num_starts = 10  # Number of times to restart the algorithm
+            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -1510,8 +1511,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_starts):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_starts))    
+            for start in range(num_optimizations):
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 iteration = 0
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 15:39:54 trottar"
+# Time-stamp: "2024-10-12 03:10:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,16 +81,20 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     #max_iterations = 2
     #max_iterations = 100
     #max_iterations = 500
-    max_iterations = 1000
+    #max_iterations = 1000
     #max_iterations = 5000
-    #max_iterations = 10000
+    max_iterations = 10000
+
+
+    num_optimizations = 10
+    #num_optimizations = 100
     ##############
     ##############
     ##############
     
-    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations)
+    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations, num_optimizations)
     
-def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations):
+def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations, num_optimizations):
 
     # Set pol_str, q2_set, w_set for xfit_active script
     set_val(pol_str, q2_set, w_set)
@@ -183,6 +187,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
 
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
+        "num_optimizations" : num_optimizations,
         "tmin_range" : tmin_range,
         "tmax_range" : tmax_range,
         "Q2min_range" : Q2min_range,
