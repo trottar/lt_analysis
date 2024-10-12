@@ -748,12 +748,10 @@ elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     #TMAX=0.550
 elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     # Q2=5p5, W=3p02
-    NumtBins=3
+    NumtBins=3 # bad_bins_threshold = 200
     NumPhiBins=8
     TMIN=0.400
     TMAX=0.950
-    #TMIN=0.500
-    #TMAX=0.850
 else
     # For testing
     NumtBins=1
