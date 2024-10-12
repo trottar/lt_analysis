@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 21:01:15 trottar"
+# Time-stamp: "2024-10-11 21:02:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -88,7 +88,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         num_params = len(initial_params)
 
         if num_events > num_params:
-            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")
+            print(f"WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")
         
         if num_params == 1:
 
