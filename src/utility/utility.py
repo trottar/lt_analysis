@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 20:19:49 trottar"
+# Time-stamp: "2024-10-11 20:33:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -842,55 +842,7 @@ def local_search(params, inp_func, num_params):
         func.Delete()
         
         return improved_params            
-
-################################################################################################################################################
-    
-# Add these new functions for the Bayesian approach
-def log_prior(theta):
-    if np.all((theta > -1e4) & (theta < 1e4)):
-        return 0.0
-    return -np.inf
-
-def log_likelihood(theta, x, y, yerr, sig_name):
-    if sig_name == "L":
-        model = fun_Sig_L(x, *theta)
-    elif sig_name == "T":
-        model = fun_Sig_T(x, *theta)
-    elif sig_name == "LT":
-        model = fun_Sig_LT(x, *theta)
-    elif sig_name == "TT":
-        model = fun_Sig_TT(x, *theta)
-    return -0.5 * np.sum(((y - model) / yerr) ** 2)
-
-def log_probability(theta, x, y, yerr, sig_name):
-    lp = log_prior(theta)
-    if not np.isfinite(lp):
-        return -np.inf
-    return lp + log_likelihood(theta, x, y, yerr, sig_name)
-
-################################################################################################################################################
-
-def bayesian_fit(nsep, sig_name, initial_params):
-    x = np.array([nsep.GetV2()[i] for i in range(nsep.GetSelectedRows())])
-    y = np.array([nsep.GetV1()[i] for i in range(nsep.GetSelectedRows())])
-    yerr = np.array([nsep.GetV3()[i] for i in range(nsep.GetSelectedRows())])
-
-    ndim = len(initial_params)
-    nwalkers = 32
-    initial_state = initial_params + 1e-4 * np.random.randn(nwalkers, ndim)
-    
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, args=(x, y, yerr, sig_name))
-    sampler.run_mcmc(initial_state, 10000, progress=True)
-    
-    samples = sampler.get_chain(discard=100, thin=15, flat=True)
-    best_params = np.median(samples, axis=0)
-    param_errors = np.std(samples, axis=0)
-    
-    # Calculate Bayesian Information Criterion (BIC)
-    bic = -2 * log_likelihood(best_params, x, y, yerr, sig_name) + ndim * np.log(len(x))
-    
-    return best_params, param_errors, bic
-
+            
 ################################################################################################################################################
 
 def load_equations(filename='variables.inp'):
@@ -989,4 +941,3 @@ def select_valid_parameter(sig_name, elements):
             print(f"ERROR: Invalid parameter! Please select one of the following...{', '.join(map(str, valid_params))}")
 
 ##################################################################################################################################################            
-

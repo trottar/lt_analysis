@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 20:31:26 trottar"
+# Time-stamp: "2024-10-11 20:48:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -104,6 +104,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_iteration = 0
             max_param_value = 1e4
 
+            # Regularization strength (used when num_events > num_params)
+            lambda_reg = 0.01  # Adjust this value as needed
+            
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': []}
 
@@ -225,18 +228,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
+                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
                                 expected = f_sig.Eval(g_sig.GetX()[i])
                                 residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
                                 residuals.append(residual)
-                                current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
-                            
-                        # Acceptance probability
-                        accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            # Mean Squared Error (MSE)
+                            mse = np.mean(np.square(residuals))
+                            # L2 regularization term
+                            l2_reg = sum(p**2 for p in current_params)
+                            # Regularized cost function
+                            current_cost = mse + lambda_reg * l2_reg
+                            # Effective degrees of freedom
+                            effective_dof = max(num_events - num_params, 1)
+                            # Adjusted cost (similar to reduced chi-squared)
+                            adjusted_cost = current_cost / effective_dof
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
 
                         current_params = f_sig.GetParameter(0)
 
@@ -532,6 +545,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_iteration = 0
             max_param_value = 1e4
 
+            # Regularization strength (used when num_events > num_params)
+            lambda_reg = 0.01  # Adjust this value as needed
+
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': []}
 
@@ -660,15 +676,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
+                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
                                 expected = f_sig.Eval(g_sig.GetX()[i])
                                 residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
                                 residuals.append(residual)
-                            current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
+                            # Mean Squared Error (MSE)
+                            mse = np.mean(np.square(residuals))
+                            # L2 regularization term
+                            l2_reg = sum(p**2 for p in current_params)
+                            # Regularized cost function
+                            current_cost = mse + lambda_reg * l2_reg
+                            # Effective degrees of freedom
+                            effective_dof = max(num_events - num_params, 1)
+                            # Adjusted cost (similar to reduced chi-squared)
+                            adjusted_cost = current_cost / effective_dof
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -976,6 +1005,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_iteration = 0
             max_param_value = 1e4
 
+            # Regularization strength (used when num_events > num_params)
+            lambda_reg = 0.01  # Adjust this value as needed
+
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': []}
 
@@ -1113,15 +1145,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
+                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
                                 expected = f_sig.Eval(g_sig.GetX()[i])
                                 residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
                                 residuals.append(residual)
-                            current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
+                            # Mean Squared Error (MSE)
+                            mse = np.mean(np.square(residuals))
+                            # L2 regularization term
+                            l2_reg = sum(p**2 for p in current_params)
+                            # Regularized cost function
+                            current_cost = mse + lambda_reg * l2_reg
+                            # Effective degrees of freedom
+                            effective_dof = max(num_events - num_params, 1)
+                            # Adjusted cost (similar to reduced chi-squared)
+                            adjusted_cost = current_cost / effective_dof
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
@@ -1438,6 +1483,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_iteration = 0
             max_param_value = 1e4
 
+            # Regularization strength (used when num_events > num_params)
+            lambda_reg = 0.01  # Adjust this value as needed
+
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': [], 'p3': []}
 
@@ -1591,15 +1639,28 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            # Alternative fit quality measure when num_events <= num_params
+                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
                                 expected = f_sig.Eval(g_sig.GetX()[i])
                                 residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
                                 residuals.append(residual)
-                            current_cost = np.mean(np.abs(residuals))  # Mean absolute normalized residual
+                            # Mean Squared Error (MSE)
+                            mse = np.mean(np.square(residuals))
+                            # L2 regularization term
+                            l2_reg = sum(p**2 for p in current_params)
+                            # Regularized cost function
+                            current_cost = mse + lambda_reg * l2_reg
+                            # Effective degrees of freedom
+                            effective_dof = max(num_events - num_params, 1)
+                            # Adjusted cost (similar to reduced chi-squared)
+                            adjusted_cost = current_cost / effective_dof
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
 
                         # Acceptance probability
                         accept_prob = acceptance_probability(best_cost, current_cost, temperature)
