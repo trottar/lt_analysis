@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-12 03:16:55 trottar"
+# Time-stamp: "2024-10-12 03:30:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,6 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     max_iterations = 1000
 
     # Number of times to run the algorithm
-    #num_optimizations = 10
     num_optimizations = 100
     ##############
     ##############
@@ -139,7 +138,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     #if iter_num > 2:
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
 
-    # Load equations
+    # Load equations from model of given setting
     equations = load_equations(f"Q{q2_set}W{w_set}.model")
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
@@ -150,8 +149,10 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         for line in f:
             ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
 
+            # Grab functional form from model input file
             fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
+            # Calculate wfactor
             g = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
             
             g_vec.append(g)
