@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 20:48:43 trottar"
+# Time-stamp: "2024-10-11 21:01:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -87,6 +87,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         initial_params = [p for p in val["params"] if p != 0.0] # Check for only used parameters
         num_params = len(initial_params)
 
+        if num_events > num_params:
+            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")
+        
         if num_params == 1:
 
             # 1 param
@@ -225,13 +228,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                         params_sig_history['p0'].append(current_params)
 
-                        # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
+                            # Calculate the cost (reduced chi-square value) for the current parameters                            
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
@@ -673,13 +675,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p0'].append(current_params[0])
                         params_sig_history['p1'].append(current_params[1])
 
-                        # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
+                            # Calculate the cost (reduced chi-square value) for the current parameters                            
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
@@ -1142,13 +1143,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p1'].append(current_params[1])
                         params_sig_history['p2'].append(current_params[2])
 
-                        # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
+                            # Calculate the cost (reduced chi-square value) for the current parameters                            
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
@@ -1636,13 +1636,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         params_sig_history['p2'].append(current_params[2])
                         params_sig_history['p3'].append(current_params[3])
 
-                        # Calculate the cost (reduced chi-square value) for the current parameters
                         if num_events > num_params:
+                            # Calculate the cost (reduced chi-square value) for the current parameters                            
                             current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            print("WARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for finding quality of fit...")                            
                             residuals = []
                             for i in range(num_events):
                                 observed = g_sig.GetY()[i]
