@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-12 03:09:13 trottar"
+# Time-stamp: "2024-10-12 03:17:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -102,7 +102,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
-            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -542,7 +541,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
-            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -1001,7 +999,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")
 
-            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
@@ -1478,7 +1475,6 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print("/*--------------------------------------------------*/")    
 
-            num_optimizations = 10  # Number of times to restart the algorithm
             best_overall_params = None
             best_overall_cost = float('inf')
             total_iteration = 0
