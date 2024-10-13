@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 01:59:19 trottar"
+# Time-stamp: "2024-10-13 02:02:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -376,10 +376,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             par_err_vec.append(best_overall_errors[0])
             par_err_vec.append(best_overall_errors[0])
 
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
 
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
@@ -846,10 +846,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             par_err_vec.append(best_overall_errors[0])
             par_err_vec.append(best_overall_errors[0])
 
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
 
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
@@ -1334,10 +1334,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             par_err_vec.append(best_overall_errors[0])
             par_err_vec.append(best_overall_errors[0])
 
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
 
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
@@ -1851,10 +1851,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             par_err_vec.append(best_overall_errors[0])
             par_err_vec.append(best_overall_errors[0])
 
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
-            par_chi2_vec.append(best_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
+            par_chi2_vec.append(best_overall_cost)
 
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
