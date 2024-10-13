@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 16:30:30 trottar"
+# Time-stamp: "2024-10-13 16:31:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -86,7 +86,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         num_params, initial_params, equation_str = inp_dict["initial_params"](sig_name, val["params"])
 
         # Checks initial parameters and replaces zeros to avoid errors
-        initial_params = [v if abs(v) > 0.0 else 1e-5 for v in initial_params]            
+        initial_params = [v if abs(v) > 0.0 else 1e-5 for v in initial_params]
+
+        # String list of initial parameters
+        param_str = ', '.join(initial_params)
 
         if num_events <= num_params:
             print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regression methods for determining quality of fit...")
@@ -103,8 +106,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             print("\n/*--------------------------------------------------*/")
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-            param_str = ', '.join(initial_params)
-            print(f"{param_str}")
+            print(f"Initial Paramters: ({param_str})")
             print(f"{equation_str}")
             print("/*--------------------------------------------------*/")
 
@@ -560,6 +562,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             print("\n/*--------------------------------------------------*/")
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+            print(f"Initial Paramters: ({param_str})")
+            print(f"{equation_str}")            
             print("/*--------------------------------------------------*/")
 
             best_overall_params = None
@@ -1034,6 +1038,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             print("\n/*--------------------------------------------------*/")
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+            print(f"Initial Paramters: ({param_str})")
+            print(f"{equation_str}")            
             print("/*--------------------------------------------------*/")
 
             best_overall_params = None
@@ -1526,6 +1532,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
             print("\n/*--------------------------------------------------*/")
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+            print(f"Initial Paramters: ({param_str})")
+            print(f"{equation_str}")            
             print("/*--------------------------------------------------*/")    
 
             best_overall_params = None
