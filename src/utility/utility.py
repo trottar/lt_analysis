@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 14:17:02 trottar"
+# Time-stamp: "2024-10-13 16:29:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -932,31 +932,31 @@ def get_num_var(equations, sig_type, param_vals):
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
-        return num_params, new_param_lst            
+        return num_params, new_param_lst, eq_str
     if sig_type == "T":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
-        return num_params, new_param_lst            
+        return num_params, new_param_lst, eq_str
     if sig_type == "LT":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
-        return num_params, new_param_lst            
+        return num_params, new_param_lst, eq_str
     if sig_type == "TT":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
-        return num_params, new_param_lst            
+        return num_params, new_param_lst, eq_str
     if sig_type == "wfactor":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])        
-        return num_params, new_param_lst
+        return num_params, new_param_lst, eq_str
     else:
         print("ERROR: Invalid function request!")
         sys.exit(2)
