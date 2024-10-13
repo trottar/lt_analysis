@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:47:00 trottar"
+# Time-stamp: "2024-10-13 14:00:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,6 +179,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
             "params" : [tt0, tt1, tt2, tt3]
         },        
     }
+    
     inp_dict = {
 
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
@@ -190,8 +191,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "Q2min_range" : Q2min_range,
         "Q2max_range" : Q2max_range,
         "iter_num" : iter_num,
-        "outputpdf" : outputpdf
-        
+        "outputpdf" : outputpdf        
     }
 
     # Finding fits for L, T, LT, TT
