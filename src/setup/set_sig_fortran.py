@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 23:52:50 trottar"
+# Time-stamp: "2024-10-13 13:41:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,16 +79,16 @@ for sig_val in sig_var:
                     # Update parameter names to match fortran vectors
                     if "sig_L" == sig_val:
                         for par in range(1,5):
-                            sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
+                            sigl_str = sigl_str.replace(f"par{par:d}",f"par({par:d})")
                     if "sig_T" == sig_val:
                         for par in range(5,9):
-                            sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
+                            sigl_str = sigl_str.replace(f"par{par:d}",f"par({par:d})")
                     if "sig_LT" == sig_val:
                         for par in range(9,13):
-                            sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
+                            sigl_str = sigl_str.replace(f"par{par:d}",f"par({par:d})")
                     if "sig_TT" == sig_val:
                         for par in range(13,17):
-                            sigl_str = sigl_str.replace(f"p{par:d}",f"par({par:d})")
+                            sigl_str = sigl_str.replace(f"par{par:d}",f"par({par:d})")
                     break  # No need to search further once {sig_val} is found
 
     if sigl_str is None:

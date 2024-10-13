@@ -12,17 +12,17 @@ Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
 
 # Longitudinal cross-section
-sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (math.fabs(tt)))
+sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 
 # Transverse cross-section
-sig_T = (p5 * math.exp(-p6 * (math.fabs(tt))) + p7 * (math.fabs(tt))) * (Qdep_T**p8)
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 
 # Longitudinal-Transverse interference term
-sig_LT = (p9 * math.exp(p10 * math.fabs(tt)) + p11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 
 # Transverse-Transverse interference term
-sig_TT = (p13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
-####sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+####sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=3.14
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-12 03:28:32 trottar"
+# Time-stamp: "2024-10-13 13:40:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,7 @@ def import_model(inp_model, arg_str):
 
     # Extract individual values from the list
     q2_set, w_set, theta_cm, tt, qq, ww, *params = args
-    p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16 = params
+    par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
     # Load equations from model input file of given setting
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
 
@@ -42,10 +42,10 @@ def import_model(inp_model, arg_str):
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
     # Calculate SigL, SigT, SigLT, SigTT
-    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, p1, p2, p3, p4)
-    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, p5, p6, p7, p8)
-    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p9, p10, p11, p12)
-    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p13, p14, p15, p16)
+    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
+    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
+    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
+    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
         
     modelDict = {

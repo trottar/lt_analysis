@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-12 03:24:53 trottar"
+# Time-stamp: "2024-10-13 13:41:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,9 +53,9 @@ def fun_Sig_L(x, par):
     w_set = float(W.replace("p","."))
     qq = q2_set
     ww = w_set
-    p1, p2, p3, p4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigL
-    return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, p1, p2, p3, p4)
+    return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
 
 def fun_Sig_T(x, par):
     tt = abs(x[0])
@@ -63,9 +63,9 @@ def fun_Sig_T(x, par):
     w_set = float(W.replace("p","."))
     qq = q2_set
     ww = w_set
-    p5, p6, p7, p8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    par5, par6, par7, par8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigT
-    return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, p5, p6, p7, p8)
+    return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
 
 def fun_Sig_LT(x, par):
     tt = abs(x[0])
@@ -75,9 +75,9 @@ def fun_Sig_LT(x, par):
     ww = w_set
     # Sine term called separately so setting to 1.0
     theta_cm = math.pi/2
-    p9, p10, p11, p12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigLT
-    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p9, p10, p11, p12)
+    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
 def fun_Sig_TT(x, par):
     tt = abs(x[0])
@@ -87,6 +87,6 @@ def fun_Sig_TT(x, par):
     ww = w_set
     # Sine term called separately so setting to 1.0
     theta_cm = math.pi/2
-    p13, p14, p15, p16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigTT
-    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p13, p14, p15, p16)
+    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)

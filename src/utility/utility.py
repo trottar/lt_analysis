@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-11 20:33:39 trottar"
+# Time-stamp: "2024-10-13 13:43:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -896,16 +896,16 @@ def extract_values(filename):
 def prepare_equations(equations, sig_type):
     if sig_type == "sig_L":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p1, p2, p3, p4):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4):\n"
     if sig_type == "sig_T":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, p5, p6, p7, p8):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8):\n"
     if sig_type == "sig_LT":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p9, p10, p11, p12):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
     if sig_type == "sig_TT":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p13, p14, p15, p16):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
     if sig_type == "wfactor":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"        
@@ -917,6 +917,29 @@ def prepare_equations(equations, sig_type):
     exec(func_str, exec_globals)
     return exec_globals[f'{sig_type}_optimized']
 
+##################################################################################################################################################
+
+def get_num_var(equations, sig_type, param_vals):
+    if sig_type == "sig_L":
+        new_param_lst = []
+        eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')])
+        num_params = eq_str.count('par')
+        for i in range(num_params):
+            new_param_lst.append(param_vals[i])
+
+        return num_params, new_param_lst
+            
+    if sig_type == "sig_T":
+        eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')])
+    if sig_type == "sig_LT":
+        eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')])
+    if sig_type == "sig_TT":
+        eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')])
+    if sig_type == "wfactor":
+        eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')])
+
+
+        
 ##################################################################################################################################################
 
 def select_valid_parameter(sig_name, elements):
