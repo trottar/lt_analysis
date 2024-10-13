@@ -25,7 +25,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # Transverse-Transverse interference term
 ##sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 #sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
-sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - qq) * (math.sin(theta_cm)**2)
+sig_TT = ((-par13 * math.fabs(tt) + 1.0) * (math.fabs(tt)**(qq/par14)) - par15 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=2.115, W=2.95
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0
