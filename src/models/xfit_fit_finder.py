@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:52:13 trottar"
+# Time-stamp: "2024-10-13 13:57:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -88,6 +88,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         #initial_params = [p for p in val["params"] if p != 0.0] # Check for only used parameters
         #num_params = len(initial_params)
         num_params, initial_params = inp_dict["initial_params"](sig_name, val["params"])
+
+        print("!!!!!!!!!!",num_params, initial_params)
 
         if num_events <= num_params:
             print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regression methods for determining quality of fit...")

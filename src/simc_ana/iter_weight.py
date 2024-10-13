@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-10-07 07:07:18 trottar"
+# Time-stamp: "2024-10-13 13:56:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,7 +78,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     with open(param_file, 'r') as f:
         for i, line in enumerate(f):
             columns = line.split()
-            param_arr.append(str(columns[0]))    
+            param_arr.append(str(columns[0]))
 
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))        
