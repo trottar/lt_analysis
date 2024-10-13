@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-12 03:17:16 trottar"
+# Time-stamp: "2024-10-12 22:28:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -108,8 +108,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
-            lambda_reg = 0.01  # Adjust this value as needed
-            
+            # Initialize adaptive regularization parameters
+            lambda_reg = 0.01  # Initial regularization strength
+            lambda_decay = 0.99  # Decay factor for lambda
+            lambda_min = 1e-6  # Minimum lambda value
+            cost_history = []            
+        
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': []}
 
@@ -250,6 +254,16 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             effective_dof = max(num_events - num_params, 1)
                             # Adjusted cost (similar to reduced chi-squared)
                             adjusted_cost = current_cost / effective_dof
+                            # Store cost history
+                            cost_history.append(adjusted_cost)
+                            # Adaptive regularization
+                            if len(cost_history) > 1:
+                                if adjusted_cost < cost_history[-2]:
+                                    # If cost is decreasing, reduce regularization
+                                    lambda_reg = max(lambda_reg * lambda_decay, lambda_min)
+                                else:
+                                    # If cost is increasing, increase regularization
+                                    lambda_reg = lambda_reg / lambda_decay                            
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
 
@@ -547,8 +561,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
-            lambda_reg = 0.01  # Adjust this value as needed
-
+            # Initialize adaptive regularization parameters
+            lambda_reg = 0.01  # Initial regularization strength
+            lambda_decay = 0.99  # Decay factor for lambda
+            lambda_min = 1e-6  # Minimum lambda value
+            cost_history = []            
+        
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': []}
 
@@ -696,11 +714,18 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             effective_dof = max(num_events - num_params, 1)
                             # Adjusted cost (similar to reduced chi-squared)
                             adjusted_cost = current_cost / effective_dof
+                            # Store cost history
+                            cost_history.append(adjusted_cost)
+                            # Adaptive regularization
+                            if len(cost_history) > 1:
+                                if adjusted_cost < cost_history[-2]:
+                                    # If cost is decreasing, reduce regularization
+                                    lambda_reg = max(lambda_reg * lambda_decay, lambda_min)
+                                else:
+                                    # If cost is increasing, increase regularization
+                                    lambda_reg = lambda_reg / lambda_decay                            
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
-
-                        # Acceptance probability
-                        accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                         current_params = [
                             f_sig.GetParameter(0),
@@ -1005,8 +1030,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
-            lambda_reg = 0.01  # Adjust this value as needed
-
+            # Initialize adaptive regularization parameters
+            lambda_reg = 0.01  # Initial regularization strength
+            lambda_decay = 0.99  # Decay factor for lambda
+            lambda_min = 1e-6  # Minimum lambda value
+            cost_history = []            
+        
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': []}
 
@@ -1163,11 +1192,18 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             effective_dof = max(num_events - num_params, 1)
                             # Adjusted cost (similar to reduced chi-squared)
                             adjusted_cost = current_cost / effective_dof
+                            # Store cost history
+                            cost_history.append(adjusted_cost)
+                            # Adaptive regularization
+                            if len(cost_history) > 1:
+                                if adjusted_cost < cost_history[-2]:
+                                    # If cost is decreasing, reduce regularization
+                                    lambda_reg = max(lambda_reg * lambda_decay, lambda_min)
+                                else:
+                                    # If cost is increasing, increase regularization
+                                    lambda_reg = lambda_reg / lambda_decay                            
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
-
-                        # Acceptance probability
-                        accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                         current_params = [
                             f_sig.GetParameter(0),
@@ -1481,8 +1517,12 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
-            lambda_reg = 0.01  # Adjust this value as needed
-
+            # Initialize adaptive regularization parameters
+            lambda_reg = 0.01  # Initial regularization strength
+            lambda_decay = 0.99  # Decay factor for lambda
+            lambda_min = 1e-6  # Minimum lambda value
+            cost_history = []            
+        
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': [], 'p3': []}
 
@@ -1655,11 +1695,18 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             effective_dof = max(num_events - num_params, 1)
                             # Adjusted cost (similar to reduced chi-squared)
                             adjusted_cost = current_cost / effective_dof
+                            # Store cost history
+                            cost_history.append(adjusted_cost)
+                            # Adaptive regularization
+                            if len(cost_history) > 1:
+                                if adjusted_cost < cost_history[-2]:
+                                    # If cost is decreasing, reduce regularization
+                                    lambda_reg = max(lambda_reg * lambda_decay, lambda_min)
+                                else:
+                                    # If cost is increasing, increase regularization
+                                    lambda_reg = lambda_reg / lambda_decay                            
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)                            
-
-                        # Acceptance probability
-                        accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                         current_params = [
                             f_sig.GetParameter(0),
