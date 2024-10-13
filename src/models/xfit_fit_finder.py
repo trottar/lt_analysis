@@ -1,9 +1,9 @@
-#! /usr/bin/python
+g#! /usr/bin/python
 
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 00:12:16 trottar"
+# Time-stamp: "2024-10-13 01:43:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -529,6 +529,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
+            converge_status = TText()
+            converge_status.SetTextSize(0.04)
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
             c4.Update()
             
             # Plot temperature convergence
@@ -998,6 +1001,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
+            converge_status = TText()
+            converge_status.SetTextSize(0.04)
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
             c4.Update()
             
             # Plot temperature
@@ -1485,6 +1491,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
+            converge_status = TText()
+            converge_status.SetTextSize(0.04)
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
             c4.Update()
             
             # Plot temperature
@@ -2001,6 +2010,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_chi2[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_chi2[it].SetLineColor(ROOT.kBlack)
             graphs_sig_chi2[it].Draw("ALP")
+            converge_status = TText()
+            converge_status.SetTextSize(0.04)
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
             c4.Update()
             
             # Plot temperature convergence
