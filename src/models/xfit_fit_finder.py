@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 01:44:38 trottar"
+# Time-stamp: "2024-10-13 01:59:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -269,7 +269,9 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                 else:
                                     # If cost is increasing or stagnant, increase regularization
                                     lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
-                                    
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
+                            
                         current_params = f_sig.GetParameter(0)
 
                         current_errors = f_sig.GetParError(0)
@@ -732,6 +734,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                 else:
                                     # If cost is increasing or stagnant, increase regularization
                                     lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
                             
                         current_params = [
                             f_sig.GetParameter(0),
@@ -1213,6 +1217,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                 else:
                                     # If cost is increasing or stagnant, increase regularization
                                     lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
                             
                         current_params = [
                             f_sig.GetParameter(0),
@@ -1719,6 +1725,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                 else:
                                     # If cost is increasing or stagnant, increase regularization
                                     lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
                             
                         current_params = [
                             f_sig.GetParameter(0),
