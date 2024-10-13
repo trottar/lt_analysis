@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 02:09:41 trottar"
+# Time-stamp: "2024-10-13 02:19:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -89,10 +89,10 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         num_params = len(initial_params)
 
         if num_events <= num_params:
-            print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using alternative methods for determining quality of fit...")
-            fit_convergence_type = "Red. Chi-Square"
+            print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regression methods for determining quality of fit...")
+            fit_convergence_type = "Adapt. Reg." # Adaptive Regularization            
         else:
-            fit_convergence_type = "Adapt. Reg." # Adaptive Regularization
+            fit_convergence_type = "Red. Chi-Square"
             
         if num_params == 1:
 
@@ -533,7 +533,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
             c4.Update()
             
             # Plot temperature convergence
@@ -1007,7 +1007,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
             c4.Update()
             
             # Plot temperature
@@ -1499,7 +1499,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
             c4.Update()
             
             # Plot temperature
@@ -2020,7 +2020,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_cost:.3f}")
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
             c4.Update()
             
             # Plot temperature convergence
