@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 16:43:31 trottar"
+# Time-stamp: "2024-10-13 17:23:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -919,12 +919,12 @@ def prepare_equations(equations, sig_type):
 
 ##################################################################################################################################################
 
-def get_num_var_wrapper(equations):
+def find_params_wrapper(equations):
     def tmp_func(sig_type, param_vals, eqns=equations):
-        return get_num_var(eqns, sig_type, param_vals)
+        return find_params(eqns, sig_type, param_vals)
     return tmp_func
         
-def get_num_var(equations, sig_type, param_vals):
+def find_params(equations, sig_type, param_vals):
     new_param_lst = []
     num_params = 0.0
     if sig_type == "L":
