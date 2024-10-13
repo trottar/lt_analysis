@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 14:02:57 trottar"
+# Time-stamp: "2024-10-13 14:05:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -925,6 +925,7 @@ def get_num_var_wrapper(equations):
     return tmp_func
         
 def get_num_var(equations, sig_type, param_vals):
+    print("!!!!!!!!!",sig_type, param_vals)
     new_param_lst = []
     num_params = 0.0
     if sig_type == "sig_L":
