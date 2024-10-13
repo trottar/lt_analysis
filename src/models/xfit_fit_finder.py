@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 16:50:30 trottar"
+# Time-stamp: "2024-10-13 17:08:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -368,7 +368,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     best_overall_params.append(0.0)
                     best_overall_errors.append(0.0)
             except TypeError:
-                print("ERROR: Fit failed! Check input model file for typos...")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             par_vec.append(best_overall_params[0])
@@ -844,7 +844,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     best_overall_params.append(0.0)
                     best_overall_errors.append(0.0)
             except TypeError:
-                print("ERROR: Fit failed! Check input model file for typos...")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
                 
             par_vec.append(best_overall_params[0])
@@ -1338,7 +1338,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     best_overall_params.append(0.0)
                     best_overall_errors.append(0.0)
             except TypeError:
-                print("ERROR: Fit failed! Check input model file for typos...")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
                 
             par_vec.append(best_overall_params[0])
@@ -1861,7 +1861,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     best_overall_params.append(0.0)
                     best_overall_errors.append(0.0)
             except TypeError:
-                print("ERROR: Fit failed! Check input model file for typos...")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             par_vec.append(best_overall_params[0])
