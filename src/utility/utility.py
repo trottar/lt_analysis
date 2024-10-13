@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:43:34 trottar"
+# Time-stamp: "2024-10-13 13:51:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -919,25 +919,40 @@ def prepare_equations(equations, sig_type):
 
 ##################################################################################################################################################
 
-def get_num_var(equations, sig_type, param_vals):
+def get_num_var_wrapper(equations):
+    def tmp_func(sig_type, param_vals, eqns=equations):
+        return get_num_var(sig_type, param_vals, eqns)
+    return tmp_func
+        
+def get_num_var(sig_type, param_vals, equations):
+    new_param_lst = []
+    num_params = 0.0
     if sig_type == "sig_L":
-        new_param_lst = []
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
-
-        return num_params, new_param_lst
-            
     if sig_type == "sig_T":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')])
+        num_params = eq_str.count('par')
+        for i in range(num_params):
+            new_param_lst.append(param_vals[i])
     if sig_type == "sig_LT":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')])
+        num_params = eq_str.count('par')
+        for i in range(num_params):
+            new_param_lst.append(param_vals[i])
     if sig_type == "sig_TT":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')])
+        num_params = eq_str.count('par')
+        for i in range(num_params):
+            new_param_lst.append(param_vals[i])
     if sig_type == "wfactor":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')])
-
+        num_params = eq_str.count('par')
+        for i in range(num_params):
+            new_param_lst.append(param_vals[i])        
+    return num_params, new_param_lst
 
         
 ##################################################################################################################################################

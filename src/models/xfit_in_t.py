@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:45:49 trottar"
+# Time-stamp: "2024-10-13 13:47:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import load_equations, prepare_equations, get_num_var
+from utility import load_equations, prepare_equations, get_num_var_wrapper
 
 ##################################################################################################################################################
 # Import fit finder function
@@ -184,7 +184,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
-        "initial_params" : get_num_var,
+        "initial_params" : get_num_var_wrapper(equations),
         "tmin_range" : tmin_range,
         "tmax_range" : tmax_range,
         "Q2min_range" : Q2min_range,
