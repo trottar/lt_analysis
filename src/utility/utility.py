@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 14:05:20 trottar"
+# Time-stamp: "2024-10-13 14:05:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -928,25 +928,25 @@ def get_num_var(equations, sig_type, param_vals):
     print("!!!!!!!!!",sig_type, param_vals)
     new_param_lst = []
     num_params = 0.0
-    if sig_type == "sig_L":
+    if sig_type == "L":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
         return num_params, new_param_lst            
-    if sig_type == "sig_T":
+    if sig_type == "T":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
         return num_params, new_param_lst            
-    if sig_type == "sig_LT":
+    if sig_type == "LT":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
         return num_params, new_param_lst            
-    if sig_type == "sig_TT":
+    if sig_type == "TT":
         eq_str = ''.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
