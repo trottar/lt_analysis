@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 02:19:32 trottar"
+# Time-stamp: "2024-10-13 12:02:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -113,8 +113,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda
-            lambda_decrease = 0.95  # Factor to decrease lambda
+            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
+            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
@@ -571,8 +571,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda
-            lambda_decrease = 0.95  # Factor to decrease lambda
+            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
+            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
@@ -1045,8 +1045,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda
-            lambda_decrease = 0.95  # Factor to decrease lambda
+            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
+            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
@@ -1537,8 +1537,8 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda
-            lambda_decrease = 0.95  # Factor to decrease lambda
+            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
+            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
