@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 16:31:42 trottar"
+# Time-stamp: "2024-10-13 16:36:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -89,7 +89,7 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
         initial_params = [v if abs(v) > 0.0 else 1e-5 for v in initial_params]
 
         # String list of initial parameters
-        param_str = ', '.join(initial_params)
+        param_str = ', '.join(str(param) for param in initial_params)
 
         if num_events <= num_params:
             print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regression methods for determining quality of fit...")
