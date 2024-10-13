@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 16:36:29 trottar"
+# Time-stamp: "2024-10-13 16:50:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -363,9 +363,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_params = [best_overall_params]
             best_overall_errors = [best_overall_errors]
 
-            while len(best_overall_params) < 4:
-                best_overall_params.append(0.0)
-                best_overall_errors.append(0.0)
+            try:            
+                while len(best_overall_params) < 4:
+                    best_overall_params.append(0.0)
+                    best_overall_errors.append(0.0)
+            except TypeError:
+                print("ERROR: Fit failed! Check input model file for typos...")
+                sys.exit(2)
 
             par_vec.append(best_overall_params[0])
             par_vec.append(best_overall_params[1])
@@ -835,10 +839,14 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_duration = end_time - start_time
             print("The loop took {:.2f} seconds.".format(total_duration))
 
-            while len(best_overall_params) < 4:
-                best_overall_params.append(0.0)
-                best_overall_errors.append(0.0)
-
+            try:            
+                while len(best_overall_params) < 4:
+                    best_overall_params.append(0.0)
+                    best_overall_errors.append(0.0)
+            except TypeError:
+                print("ERROR: Fit failed! Check input model file for typos...")
+                sys.exit(2)
+                
             par_vec.append(best_overall_params[0])
             par_vec.append(best_overall_params[1])
             par_vec.append(best_overall_params[2])
@@ -1325,10 +1333,14 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_duration = end_time - start_time
             print("The loop took {:.2f} seconds.".format(total_duration))
 
-            while len(best_overall_params) < 4:
-                best_overall_params.append(0.0)
-                best_overall_errors.append(0.0)
-
+            try:            
+                while len(best_overall_params) < 4:
+                    best_overall_params.append(0.0)
+                    best_overall_errors.append(0.0)
+            except TypeError:
+                print("ERROR: Fit failed! Check input model file for typos...")
+                sys.exit(2)
+                
             par_vec.append(best_overall_params[0])
             par_vec.append(best_overall_params[1])
             par_vec.append(best_overall_params[2])
@@ -1844,9 +1856,13 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             total_duration = end_time - start_time
             print("The loop took {:.2f} seconds.".format(total_duration))
 
-            while len(best_overall_params) < 4:
-                best_overall_params.append(0.0)
-                best_overall_errors.append(0.0)
+            try:            
+                while len(best_overall_params) < 4:
+                    best_overall_params.append(0.0)
+                    best_overall_errors.append(0.0)
+            except TypeError:
+                print("ERROR: Fit failed! Check input model file for typos...")
+                sys.exit(2)
 
             par_vec.append(best_overall_params[0])
             par_vec.append(best_overall_params[1])
