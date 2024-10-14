@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 17:54:54 trottar"
+# Time-stamp: "2024-10-14 17:56:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -114,7 +114,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
         param_str = ', '.join(str(param) for param in initial_params)
 
         if num_events <= num_params:
-            print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using Akaike Information Criterion (AIC) methods for determining quality of fit...")
+            print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regularization methods for determining quality of fit...")
             fit_convergence_type = "Adapt. Reg." # Adaptive Regularization            
         else:
             fit_convergence_type = "Red. Chi-Square"
@@ -272,6 +272,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define lambda values to try (in log space for better exploration)
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
@@ -747,6 +749,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define lambda values to try (in log space for better exploration)
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
@@ -1244,6 +1248,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define lambda values to try (in log space for better exploration)
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
@@ -1766,6 +1772,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define lambda values to try (in log space for better exploration)
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
