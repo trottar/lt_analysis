@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:41:29 trottar"
+# Time-stamp: "2024-10-14 16:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -293,8 +293,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Store cost history
                             cost_history.append(current_cost)
                             # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            
                         current_params = f_sig.GetParameter(0)
 
                         current_errors = f_sig.GetParError(0)
@@ -754,9 +754,9 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             current_cost = best_cost_iteration
                             # Store cost history
                             cost_history.append(current_cost)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-
+                            # Acceptance probability    # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            
                         current_params = [
                             f_sig.GetParameter(0),
                             f_sig.GetParameter(1)
@@ -1238,9 +1238,9 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             current_cost = best_cost_iteration
                             # Store cost history
                             cost_history.append(current_cost)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-
+                            # Acceptance probability    # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            
                         current_params = [
                             f_sig.GetParameter(0),
                             f_sig.GetParameter(1),
@@ -1749,9 +1749,9 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             current_cost = best_cost_iteration
                             # Store cost history
                             cost_history.append(current_cost)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-
+                            # Acceptance probability    # Acceptance probability
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            
                         current_params = [
                             f_sig.GetParameter(0),
                             f_sig.GetParameter(1),
