@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 22:35:37 trottar"
+# Time-stamp: "2024-10-13 22:36:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -83,7 +83,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
     # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
     sig_fit_dict = {
-        key: {"params": fit_params[key]}
+        key: fit_params[key]
         for key, values in chi2_sets.items()
         if not within_tolerance(values)
     }
