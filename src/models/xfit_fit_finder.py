@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 21:46:42 trottar"
+# Time-stamp: "2024-10-13 21:48:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,7 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 ##################################################################################################################################################
 
-def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
+def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = []
@@ -79,6 +79,7 @@ def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     
     err_sets = inp_dict["err_sets"]
     chi2_sets = inp_dict["chi2_sets"]
+    fit_params = inp_dict["fit_params"]
 
     # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
     sig_fit_dict = {

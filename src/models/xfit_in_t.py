@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 21:36:17 trottar"
+# Time-stamp: "2024-10-13 21:49:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -139,7 +139,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
 
-    #if iter_num > 2:
+    # Read in parameters, errors, chi2 of previous iteration
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
     errl0, errl1, errl2, errl3, errt0, errt1, errt2, errt3, errlt0, errlt1, errlt2, errlt3, errtt0, errtt1, errtt2, errtt3 = prv_err_vec[:16]
     chi2l0, chi2l1, chi2l2, chi2l3, chi2t0, chi2t1, chi2t2, chi2t3, chi2lt0, chi2lt1, chi2lt2, chi2lt3, chi2tt0, chi2tt1, chi2tt2, chi2tt3 = prv_chi2_vec[:16]
@@ -195,7 +195,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     }
     
     inp_dict = {
-
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
@@ -206,12 +205,13 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "Q2max_range" : Q2max_range,
         "iter_num" : iter_num,
         "outputpdf" : outputpdf,
+        "fit_params" : fit_params,
         "err_sets" : err_sets,
         "chi2_sets" : chi2_sets
     }
 
     # Finding fits for L, T, LT, TT
-    find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec)
+    find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
