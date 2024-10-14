@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 22:18:54 trottar"
+# Time-stamp: "2024-10-13 22:27:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -387,28 +387,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig.SetParNames("p0")
                 f_sig.FixParameter(0, best_overall_params[0])
                 best_overall_errors = f_sig.GetParError(0)
-                if num_events > num_params:
-                    # Calculate the cost (reduced chi-square value) for the current parameters                            
-                    best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                else:
-                    residuals = []
-                    for i in range(num_events):
-                        observed = g_sig.GetY()[i]
-                        expected = f_sig.Eval(g_sig.GetX()[i])
-                        residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                        residuals.append(residual)
-                    # Mean Squared Error (MSE)
-                    mse = np.mean(np.square(residuals))
-                    # L2 regularization term
-                    l2_reg = sum(p**2 for p in current_params)
-                    # Regularized cost function
-                    current_cost = mse + lambda_reg * l2_reg
-                    # Effective degrees of freedom
-                    effective_dof = max(num_events - num_params, 1)
-                    # Adjusted cost (similar to reduced chi-squared)
-                    adjusted_cost = current_cost / effective_dof
-                    best_overall_cost = adjusted_cost                                
-                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Chi-squared
+                print(f"Sig {sig_name} is already a good fit (Chi-squared: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
@@ -907,29 +887,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig.FixParameter(0, best_overall_params[0])
                 f_sig.FixParameter(1, best_overall_params[1])                
                 best_overall_errors = [f_sig.GetParError(0), f_sig.GetParError(1)]
-                best_overall_errors = f_sig.GetParError(0)
-                if num_events > num_params:
-                    # Calculate the cost (reduced chi-square value) for the current parameters                            
-                    best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                else:
-                    residuals = []
-                    for i in range(num_events):
-                        observed = g_sig.GetY()[i]
-                        expected = f_sig.Eval(g_sig.GetX()[i])
-                        residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                        residuals.append(residual)
-                    # Mean Squared Error (MSE)
-                    mse = np.mean(np.square(residuals))
-                    # L2 regularization term
-                    l2_reg = sum(p**2 for p in current_params)
-                    # Regularized cost function
-                    current_cost = mse + lambda_reg * l2_reg
-                    # Effective degrees of freedom
-                    effective_dof = max(num_events - num_params, 1)
-                    # Adjusted cost (similar to reduced chi-squared)
-                    adjusted_cost = current_cost / effective_dof
-                    best_overall_cost = adjusted_cost
-                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Chi-squared
+                print(f"Sig {sig_name} is already a good fit (Chi-squared: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
@@ -1444,29 +1403,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig.FixParameter(1, best_overall_params[1])
                 f_sig.FixParameter(2, best_overall_params[2])
                 best_overall_errors = [f_sig.GetParError(0), f_sig.GetParError(1), f_sig.GetParError(2)]
-                best_overall_errors = f_sig.GetParError(0)
-                if num_events > num_params:
-                    # Calculate the cost (reduced chi-square value) for the current parameters                            
-                    best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                else:
-                    residuals = []
-                    for i in range(num_events):
-                        observed = g_sig.GetY()[i]
-                        expected = f_sig.Eval(g_sig.GetX()[i])
-                        residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                        residuals.append(residual)
-                    # Mean Squared Error (MSE)
-                    mse = np.mean(np.square(residuals))
-                    # L2 regularization term
-                    l2_reg = sum(p**2 for p in current_params)
-                    # Regularized cost function
-                    current_cost = mse + lambda_reg * l2_reg
-                    # Effective degrees of freedom
-                    effective_dof = max(num_events - num_params, 1)
-                    # Adjusted cost (similar to reduced chi-squared)
-                    adjusted_cost = current_cost / effective_dof
-                    best_overall_cost = adjusted_cost
-                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Chi-squared
+                print(f"Sig {sig_name} is already a good fit (Chi-squared: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
@@ -2012,29 +1950,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig.FixParameter(2, best_overall_params[2])
                 f_sig.FixParameter(3, best_overall_params[3])
                 best_overall_errors = [f_sig.GetParError(0), f_sig.GetParError(1), f_sig.GetParError(2), f_sig.GetParError(3)]
-                best_overall_errors = f_sig.GetParError(0)
-                if num_events > num_params:
-                    # Calculate the cost (reduced chi-square value) for the current parameters                            
-                    best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                else:
-                    residuals = []
-                    for i in range(num_events):
-                        observed = g_sig.GetY()[i]
-                        expected = f_sig.Eval(g_sig.GetX()[i])
-                        residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                        residuals.append(residual)
-                    # Mean Squared Error (MSE)
-                    mse = np.mean(np.square(residuals))
-                    # L2 regularization term
-                    l2_reg = sum(p**2 for p in current_params)
-                    # Regularized cost function
-                    current_cost = mse + lambda_reg * l2_reg
-                    # Effective degrees of freedom
-                    effective_dof = max(num_events - num_params, 1)
-                    # Adjusted cost (similar to reduced chi-squared)
-                    adjusted_cost = current_cost / effective_dof
-                    best_overall_cost = adjusted_cost
-                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Chi-squared
+                print(f"Sig {sig_name} is already a good fit (Chi-squared: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
