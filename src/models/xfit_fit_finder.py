@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:44:15 trottar"
+# Time-stamp: "2024-10-14 16:45:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1730,6 +1730,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             best_cost_iteration = float('inf')
                             best_lambda = lambda_reg
                             for lambda_try in lambda_values:
+                                print("GRGE")
                                 residuals = []
                                 for i in range(num_events):
                                     observed = g_sig.GetY()[i]
