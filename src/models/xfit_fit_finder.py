@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 22:14:09 trottar"
+# Time-stamp: "2024-10-13 22:15:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -386,7 +386,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
                 f_sig.SetParNames("p0")
                 f_sig.FixParameter(0, best_overall_params[0])
-                best_overall_errors =  = f_sig.GetParError(0)
+                best_overall_errors = f_sig.GetParError(0)
                 best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                 print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
