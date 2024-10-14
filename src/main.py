@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 15:37:38 trottar"
+# Time-stamp: "2024-10-14 17:24:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -276,6 +276,11 @@ inpDict["Epsmax"] = 1.0
 
 phisetlist = ["Center","Left","Right"]
 #phisetlist = ["Center"]
+
+# Add root file with cut data and dummy
+for d in ["Dummy", "Data"]:
+    for phiset in phisetlist:
+        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{}")
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
@@ -602,7 +607,7 @@ if root_file.IsOpen():
     print("\nThe root file {} has been successfully closed.".format(foutroot))
 else:
     print("\nError: Unable to close the root file {}.".format(foutroot))
-        
+    
 # Add root file with data histograms        
 output_file_lst.append(foutroot)
 
