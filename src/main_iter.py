@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 12:34:48 trottar"
+# Time-stamp: "2024-10-14 15:37:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,7 +211,7 @@ inpDict["iter_num"] = iter_num
 shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
 
 # Save input model
-output_file_lst.append('{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
+output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
 
 if EPSSET == "low":
 #if EPSSET == "low":
