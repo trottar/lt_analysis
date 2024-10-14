@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 22:36:14 trottar"
+# Time-stamp: "2024-10-13 22:37:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -81,9 +81,10 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
     chi2_sets = inp_dict["chi2_sets"]
     fit_params = inp_dict["fit_params"]
 
+    '''
     # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
     sig_fit_dict = {
-        key: fit_params[key]
+        key: {"params": fit_params[key]}
         for key, values in chi2_sets.items()
         if not within_tolerance(values)
     }
@@ -95,10 +96,11 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
     # Create a boolean dictionary to indicate which keys are still present in sig_fit_dict
     presence_dict = {key: key in sig_fit_dict for key in fit_params}
-        
+    '''
+    
     num_events = nsep.GetEntries()    
     
-    for it, (key, val) in enumerate(sig_fit_dict.items()):
+    for it, (key, val) in enumerate(fit_params.items()):
 
         sig_name = key
         # Grab parameters used by functional forms
