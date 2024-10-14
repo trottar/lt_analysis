@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:52:47 trottar"
+# Time-stamp: "2024-10-14 17:37:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -266,7 +266,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                         if num_events > num_params:
                             # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare() # Chi-squared
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
@@ -283,7 +283,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                                 mse = np.mean(np.square(residuals))
                                 l2_reg = sum(p**2 for p in [current_params])
-                                current_cost_try = mse + lambda_try * l2_reg
+                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
+                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
@@ -728,7 +729,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                         if num_events > num_params:
                             # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare() # Chi-squared
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
@@ -745,7 +746,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                                 mse = np.mean(np.square(residuals))
                                 l2_reg = sum(p**2 for p in current_params)
-                                current_cost_try = mse + lambda_try * l2_reg
+                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
+                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
@@ -1212,7 +1214,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                         if num_events > num_params:
                             # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare() # Chi-squared
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
@@ -1229,7 +1231,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                                 mse = np.mean(np.square(residuals))
                                 l2_reg = sum(p**2 for p in current_params)
-                                current_cost_try = mse + lambda_try * l2_reg
+                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
+                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
@@ -1721,7 +1724,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
                         if num_events > num_params:
                             # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare() # Chi-squared
+                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
@@ -1737,7 +1740,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                     residuals.append(residual)                                
                                 mse = np.mean(np.square(residuals))
                                 l2_reg = sum(p**2 for p in current_params)
-                                current_cost_try = mse + lambda_try * l2_reg
+                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
+                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
