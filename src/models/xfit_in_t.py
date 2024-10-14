@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:41:15 trottar"
+# Time-stamp: "2024-10-14 16:53:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,8 +81,7 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     max_iterations = 1000
 
     # Number of times to run the algorithm
-    num_optimizations = 2
-    #num_optimizations = 100
+    num_optimizations = 100
     ##############
     ##############
     ##############
