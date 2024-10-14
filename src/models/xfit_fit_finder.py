@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:50:33 trottar"
+# Time-stamp: "2024-10-14 16:51:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -744,7 +744,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                     residuals.append(residual)
 
                                 mse = np.mean(np.square(residuals))
-                                l2_reg = sum(p**2 for p in [current_params])
+                                l2_reg = sum(p**2 for p in current_params)
                                 current_cost_try = mse + lambda_try * l2_reg
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
@@ -1228,7 +1228,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                     residuals.append(residual)
 
                                 mse = np.mean(np.square(residuals))
-                                l2_reg = sum(p**2 for p in [current_params])
+                                l2_reg = sum(p**2 for p in current_params)
                                 current_cost_try = mse + lambda_try * l2_reg
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
@@ -1738,8 +1738,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                     residuals.append(residual)                                
                                 mse = np.mean(np.square(residuals))
                                 print(f"{lambda_try}")
-                                print(p**2 for p in [current_params])
-                                l2_reg = sum(p**2 for p in [current_params])
+                                print(p**2 for p in current_params)
+                                l2_reg = sum(p**2 for p in current_params)
                                 current_cost_try = mse + lambda_try * l2_reg
                                 print("!!!!!!", current_cost_try, best_cost_iteration)
                                 if current_cost_try < best_cost_iteration:
