@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 17:56:40 trottar"
+# Time-stamp: "2024-10-14 17:58:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -274,6 +274,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         else:
                             # Define lambda values to try (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')  # Initialize to a large value
+                            best_lambda = lambda_reg  # Start with initial lambda                            
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
@@ -751,6 +753,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         else:
                             # Define lambda values to try (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')  # Initialize to a large value
+                            best_lambda = lambda_reg  # Start with initial lambda                            
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
@@ -1250,6 +1254,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         else:
                             # Define lambda values to try (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')  # Initialize to a large value
+                            best_lambda = lambda_reg  # Start with initial lambda                            
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
@@ -1774,6 +1780,8 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         else:
                             # Define lambda values to try (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')  # Initialize to a large value
+                            best_lambda = lambda_reg  # Start with initial lambda                            
                             # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
                                 residuals = []  # Store residuals for this lambda value
