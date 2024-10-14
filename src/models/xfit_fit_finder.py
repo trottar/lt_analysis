@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 21:48:16 trottar"
+# Time-stamp: "2024-10-13 22:00:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -102,7 +102,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
         sig_name = key
         # Grab parameters used by functional forms
-        num_params, initial_params, equation_str = inp_dict["initial_params"](sig_name, val["params"])
+        num_params, initial_params, equation_str = inp_dict["initial_params"](sig_name, val)
 
         # Checks initial parameters and replaces zeros to avoid errors
         initial_params = [v if abs(v) > 0.0 else 1e-5 for v in initial_params]
