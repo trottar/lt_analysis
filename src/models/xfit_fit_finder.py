@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 21:37:11 trottar"
+# Time-stamp: "2024-10-13 21:39:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -370,12 +370,12 @@ def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_cost = best_cost
                         best_overall_params = best_params
                         best_overall_errors = best_errors
-            else:
-                print(f"Sig {sig_name} is already a good fit! Skipping...")
+            else:                
                 best_overall_cost = chi2_sets[sig_name]
                 best_overall_params = fit_params[sig_name]
                 best_overall_errors = err_sets[sig_name]
-                        
+                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
+                
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
@@ -856,11 +856,11 @@ def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_cost = best_cost
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors
-            else:
-                print(f"Sig {sig_name} is already a good fit! Skipping...")
+            else:                
                 best_overall_cost = chi2_sets[sig_name]
                 best_overall_params = fit_params[sig_name]
                 best_overall_errors = err_sets[sig_name]
+                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
@@ -1357,11 +1357,11 @@ def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_cost = best_cost
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors
-            else:
-                print(f"Sig {sig_name} is already a good fit! Skipping...")
+            else:                
                 best_overall_cost = chi2_sets[sig_name]
                 best_overall_params = fit_params[sig_name]
                 best_overall_errors = err_sets[sig_name]
+                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
@@ -1887,11 +1887,11 @@ def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_cost = best_cost
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors
-            else:
-                print(f"Sig {sig_name} is already a good fit! Skipping...")
+            else:                
                 best_overall_cost = chi2_sets[sig_name]
                 best_overall_params = fit_params[sig_name]
                 best_overall_errors = err_sets[sig_name]
+                print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
