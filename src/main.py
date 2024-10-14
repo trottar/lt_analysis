@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-10 22:09:52 trottar"
+# Time-stamp: "2024-10-14 12:24:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -635,6 +635,9 @@ create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 
 # Copy initial parameterization to specific particle type directory
 shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
+
+# Save input model
+output_file_lst.append('{}/src/models/Q{}W{}.model'.format(LTANAPATH, pol_str, Q2, W))
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***

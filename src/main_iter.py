@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-10 23:38:13 trottar"
+# Time-stamp: "2024-10-14 12:24:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -206,6 +206,9 @@ histlist = prev_iter_combineDict["histlist"]
 inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
+
+# Save input model
+output_file_lst.append('{}/src/models/Q{}W{}.model'.format(LTANAPATH, pol_str, Q2, W))
 
 if EPSSET == "low":
 #if EPSSET == "low":
