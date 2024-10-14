@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 22:00:17 trottar"
+# Time-stamp: "2024-10-13 22:14:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -370,10 +370,24 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_cost = best_cost
                         best_overall_params = best_params
                         best_overall_errors = best_errors
-            else:                
-                best_overall_cost = chi2_sets[sig_name]
+            else:
                 best_overall_params = fit_params[sig_name]
-                best_overall_errors = err_sets[sig_name]
+                if sig_name == "L":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                elif sig_name == "T":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                elif sig_name == "LT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                elif sig_name == "TT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                f_sig.SetParNames("p0")
+                f_sig.FixParameter(0, best_overall_params[0])
+                best_overall_errors =  = f_sig.GetParError(0)
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                 print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
@@ -855,10 +869,25 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_cost = best_cost
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors
-            else:                
-                best_overall_cost = chi2_sets[sig_name]
+            else:
                 best_overall_params = fit_params[sig_name]
-                best_overall_errors = err_sets[sig_name]
+                if sig_name == "L":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                elif sig_name == "T":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                elif sig_name == "LT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                elif sig_name == "TT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig.SetParNames("p0", "p1")
+                f_sig.FixParameter(0, best_overall_params[0])
+                f_sig.FixParameter(1, best_overall_params[1])                
+                best_overall_errors =  = [f_sig.GetParError(0), f_sig.GetParError(1)]
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                 print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
@@ -1356,9 +1385,25 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors
             else:                
-                best_overall_cost = chi2_sets[sig_name]
-                best_overall_params = fit_params[sig_name]
-                best_overall_errors = err_sets[sig_name]
+                best_overall_params = fit_params[sig_name]                
+                if sig_name == "L":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                elif sig_name == "T":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                elif sig_name == "LT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                elif sig_name == "TT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                f_sig.SetParNames("p0", "p1", "p2")
+                f_sig.FixParameter(0, best_overall_params[0])
+                f_sig.FixParameter(1, best_overall_params[1])
+                f_sig.FixParameter(2, best_overall_params[2])
+                best_overall_errors =  = [f_sig.GetParError(0), f_sig.GetParError(1), f_sig.GetParError(2)]
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                 print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
@@ -1886,9 +1931,26 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors
             else:                
-                best_overall_cost = chi2_sets[sig_name]
                 best_overall_params = fit_params[sig_name]
-                best_overall_errors = err_sets[sig_name]
+                if sig_name == "L":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                elif sig_name == "T":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                elif sig_name == "LT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                elif sig_name == "TT":
+                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig.SetParNames("p0", "p1", "p2", "p3")
+                f_sig.FixParameter(0, best_overall_params[0])
+                f_sig.FixParameter(1, best_overall_params[1])
+                f_sig.FixParameter(2, best_overall_params[2])
+                f_sig.FixParameter(3, best_overall_params[3])
+                best_overall_errors =  = [f_sig.GetParError(0), f_sig.GetParError(1), f_sig.GetParError(2), f_sig.GetParError(3)]
+                best_overall_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
                 print(f"Sig {sig_name} is already a good fit (Best cost: {best_overall_cost})! Skipping...")
                 
             print("\nBest overall solution: {0}".format(best_overall_params))
