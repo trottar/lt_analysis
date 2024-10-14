@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 17:23:12 trottar"
+# Time-stamp: "2024-10-13 21:37:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -842,7 +842,13 @@ def local_search(params, inp_func, num_params):
         func.Delete()
         
         return improved_params            
-            
+
+################################################################################################################################################
+    
+# Check if all values are within 1e-3 of 1
+def within_tolerance(values, target=1.0, tol=1e-3):
+    return all(abs(val - target) <= tol for val in values)
+    
 ################################################################################################################################################
 
 def load_equations(filename='variables.inp'):

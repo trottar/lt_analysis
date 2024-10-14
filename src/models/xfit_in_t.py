@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 21:32:46 trottar"
+# Time-stamp: "2024-10-13 21:36:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,10 +169,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Revert changes for rest of script
     q2_set = q2_set.replace(".","p")
     w_set = w_set.replace(".","p")
-
-    # Helper function to check if all values are within 1e-3 of 1
-    def within_tolerance(values, target=1.0, tol=1e-3):
-        return all(abs(val - target) <= tol for val in values)
 
     # Err sets to evaluate
     err_sets = {
