@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:45:48 trottar"
+# Time-stamp: "2024-10-14 16:46:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1730,14 +1730,13 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             best_cost_iteration = float('inf')
                             best_lambda = lambda_reg
                             for lambda_try in lambda_values:
-                                print("GRGE")
                                 residuals = []
                                 for i in range(num_events):
                                     observed = g_sig.GetY()[i]
                                     expected = f_sig.Eval(g_sig.GetX()[i])
                                     residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
                                     residuals.append(residual)
-
+                                print("GRGE")
                                 mse = np.mean(np.square(residuals))
                                 l2_reg = sum(p**2 for p in [current_params])
                                 current_cost_try = mse + lambda_try * l2_reg
