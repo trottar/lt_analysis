@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 22:33:21 trottar"
+# Time-stamp: "2024-10-13 22:35:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -98,7 +98,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
         
     num_events = nsep.GetEntries()    
     
-    for it, (key, val) in enumerate(fit_params.items()):
+    for it, (key, val) in enumerate(sig_fit_dict.items()):
 
         sig_name = key
         # Grab parameters used by functional forms
