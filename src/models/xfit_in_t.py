@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 21:08:42 trottar"
+# Time-stamp: "2024-10-13 21:32:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -174,6 +174,14 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     def within_tolerance(values, target=1.0, tol=1e-3):
         return all(abs(val - target) <= tol for val in values)
 
+    # Err sets to evaluate
+    err_sets = {
+        "L": [errl0, errl1, errl2, errl3],
+        "T": [errt0, errt1, errt2, errt3],
+        "LT": [errlt0, errlt1, errlt2, errlt3],
+        "TT": [errtt0, errtt1, errtt2, errtt3],
+    }
+    
     # Chi2 sets to evaluate
     chi2_sets = {
         "L": [chi2l0, chi2l1, chi2l2, chi2l3],
@@ -202,6 +210,7 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "Q2max_range" : Q2max_range,
         "iter_num" : iter_num,
         "outputpdf" : outputpdf,
+        "err_sets" : err_sets,
         "chi2_sets" : chi2_sets
     }
 
