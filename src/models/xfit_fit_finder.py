@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 12:47:44 trottar"
+# Time-stamp: "2024-10-14 15:49:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -270,32 +270,28 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')
+                            best_lambda = lambda_reg
+                            for lambda_try in lambda_values:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+
+                                mse = np.mean(np.square(residuals))
+                                l2_reg = sum(p**2 for p in [current_params])
+                                current_cost_try = mse + lambda_try * l2_reg
+                                if current_cost_try < best_cost_iteration:
+                                    best_cost_iteration = current_cost_try
+                                    best_lambda = lambda_try
+                            # Use the best lambda found for this iteration
+                            lambda_reg = best_lambda
+                            current_cost = best_cost_iteration
                             # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            cost_history.append(current_cost)
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
 
@@ -736,32 +732,28 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')
+                            best_lambda = lambda_reg
+                            for lambda_try in lambda_values:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+
+                                mse = np.mean(np.square(residuals))
+                                l2_reg = sum(p**2 for p in [current_params])
+                                current_cost_try = mse + lambda_try * l2_reg
+                                if current_cost_try < best_cost_iteration:
+                                    best_cost_iteration = current_cost_try
+                                    best_lambda = lambda_try
+                            # Use the best lambda found for this iteration
+                            lambda_reg = best_lambda
+                            current_cost = best_cost_iteration
                             # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            cost_history.append(current_cost)
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
 
@@ -1224,32 +1216,28 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')
+                            best_lambda = lambda_reg
+                            for lambda_try in lambda_values:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+
+                                mse = np.mean(np.square(residuals))
+                                l2_reg = sum(p**2 for p in [current_params])
+                                current_cost_try = mse + lambda_try * l2_reg
+                                if current_cost_try < best_cost_iteration:
+                                    best_cost_iteration = current_cost_try
+                                    best_lambda = lambda_try
+                            # Use the best lambda found for this iteration
+                            lambda_reg = best_lambda
+                            current_cost = best_cost_iteration
                             # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            cost_history.append(current_cost)
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
 
@@ -1737,32 +1725,28 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
+                            lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            best_cost_iteration = float('inf')
+                            best_lambda = lambda_reg
+                            for lambda_try in lambda_values:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+
+                                mse = np.mean(np.square(residuals))
+                                l2_reg = sum(p**2 for p in [current_params])
+                                current_cost_try = mse + lambda_try * l2_reg
+                                if current_cost_try < best_cost_iteration:
+                                    best_cost_iteration = current_cost_try
+                                    best_lambda = lambda_try
+                            # Use the best lambda found for this iteration
+                            lambda_reg = best_lambda
+                            current_cost = best_cost_iteration
                             # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                            cost_history.append(current_cost)
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
 
