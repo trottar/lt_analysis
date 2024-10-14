@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 17:24:21 trottar"
+# Time-stamp: "2024-10-14 17:25:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -317,7 +317,7 @@ for hist in histlist:
 # Add root file with cut data and dummy
 for d in ["Dummy", "Data"]:
     for phiset in phisetlist:
-        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{}")
+        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{phiset}")
     
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))

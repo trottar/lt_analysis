@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 17:24:02 trottar"
+# Time-stamp: "2024-10-14 17:25:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -280,7 +280,7 @@ phisetlist = ["Center","Left","Right"]
 # Add root file with cut data and dummy
 for d in ["Dummy", "Data"]:
     for phiset in phisetlist:
-        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{}")
+        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{phiset}")
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
