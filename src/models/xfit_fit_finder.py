@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 15:57:54 trottar"
+# Time-stamp: "2024-10-14 16:41:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1726,6 +1726,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+                            print("$$$$$$$",lambda_values)
                             best_cost_iteration = float('inf')
                             best_lambda = lambda_reg
                             for lambda_try in lambda_values:
