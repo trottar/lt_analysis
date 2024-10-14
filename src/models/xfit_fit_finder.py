@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 16:46:45 trottar"
+# Time-stamp: "2024-10-14 16:48:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1735,10 +1735,10 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                                     observed = g_sig.GetY()[i]
                                     expected = f_sig.Eval(g_sig.GetX()[i])
                                     residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                    residuals.append(residual)
-                                print("GRGE")
+                                    residuals.append(residual)                                
                                 mse = np.mean(np.square(residuals))
                                 l2_reg = sum(p**2 for p in [current_params])
+                                print("GRGE")
                                 current_cost_try = mse + lambda_try * l2_reg
                                 print("!!!!!!", current_cost_try, best_cost_iteration)
                                 if current_cost_try < best_cost_iteration:
