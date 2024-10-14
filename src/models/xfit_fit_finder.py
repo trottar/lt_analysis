@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 17:08:07 trottar"
+# Time-stamp: "2024-10-13 21:28:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,7 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 ##################################################################################################################################################
 
-def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
+def find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = []
@@ -76,7 +76,25 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
     Q2max_range = inp_dict["Q2max_range"]
     iter_num = inp_dict["iter_num"]            
     outputpdf = inp_dict["outputpdf"]
+    
+    err_sets = inp_dict["err_sets"]
+    chi2_sets = inp_dict["chi2_sets"]
 
+    # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
+    sig_fit_dict = {
+        key: {"params": fit_params[key]}
+        for key, values in chi2_sets.items()
+        if not within_tolerance(values)
+    }
+
+    # Safely handle the case where sig_fit_dict is empty
+    if not sig_fit_dict:
+        print("ERROR: All fits are within 1e-3 of untity!")
+        sys.exit(2)
+
+    # Create a boolean dictionary to indicate which keys are still present in sig_fit_dict
+    presence_dict = {key: key in sig_fit_dict for key in fit_params}
+        
     num_events = nsep.GetEntries()    
     
     for it, (key, val) in enumerate(sig_fit_dict.items()):
@@ -145,212 +163,219 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+            # Check if initial parameters already had a good fit
+            if presence_dict[sig_name]:
+                for start in range(num_optimizations):
+                    print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
+                    iteration = 0
 
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
 
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_err_0 = 0.0
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_err_0 = 0.0
 
-                # Track the best solution
-                best_params = par_sig_0
-                best_cost = float('inf')
-                previous_params = best_params
-                best_errors = par_sig_err_0
+                    # Track the best solution
+                    best_params = par_sig_0
+                    best_cost = float('inf')
+                    previous_params = best_params
+                    best_errors = par_sig_err_0
 
-                # Check for local minima
-                local_minima = []
-                local_iterations = 0
-                tabu_list = set()
+                    # Check for local minima
+                    local_minima = []
+                    local_iterations = 0
+                    tabu_list = set()
 
-                # Local search
-                local_search_interval = 25
+                    # Local search
+                    local_search_interval = 25
 
-                while iteration <= max_iterations:
+                    while iteration <= max_iterations:
 
-                    g_sig_prv = TGraph()
-                    g_sig_fit = TGraphErrors()
-                    g_sig_fit_tot = TGraph()
+                        g_sig_prv = TGraph()
+                        g_sig_fit = TGraphErrors()
+                        g_sig_fit_tot = TGraph()
 
-                    graphs_sig_fit.append(g_sig_fit)
+                        graphs_sig_fit.append(g_sig_fit)
 
-                    sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                    sys.stdout.flush()
+                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+                        sys.stdout.flush()
 
-                    try:
-                        # Perturb parameters
-                        current_params = simulated_annealing(par_sig_0, temperature)
+                        try:
+                            # Perturb parameters
+                            current_params = simulated_annealing(par_sig_0, temperature)
 
-                        # Insert tabu list check here
-                        if current_params not in tabu_list:
-                            tabu_list.add(current_params)
-                        else:
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
-
-                        g_sig = TGraphErrors()
-                        for i in range(nsep.GetSelectedRows()):
-                            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                        for i in range(len(w_vec)):
-                            sig_X_fit = g_sig.GetY()[i]
-                            sig_X_fit_err = g_sig.GetEY()[i]
-
-                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                        if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
-                        elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
-                        elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
-                        elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
-                        f_sig.SetParNames("p0")
-                        f_sig.SetParameter(0, current_params)
-                        #f_sig.SetParLimits(0, current_params - abs(current_params * par_sig_0), current_params + abs(current_params * par_sig_0))
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(0, -5, 5)
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-
-                        g_q2_sig_fit = TGraphErrors()
-                        for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
-                            sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
-                            g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
-
-                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                        #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                        f_sig_status = f_sig.GetNDF() != 0
-
-                        params_sig_history['p0'].append(current_params)
-
-                        if num_events > num_params:
-                            # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                        else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
-                            # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-                            
-                        current_params = f_sig.GetParameter(0)
-
-                        current_errors = f_sig.GetParError(0)
-
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params)
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
-                        # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                        if accept_prob > random.random():
-                            best_params = current_params
-                            best_cost = current_cost
-                            best_errors = current_errors
-
-                        if iteration % local_search_interval == 0:
-                            current_params = local_search(current_params, f_sig, num_params)
-                            par_sig_0 = current_params
-
-                        # Check if current parameters haven't changed for the past N iterations
-                        if len(params_sig_history['p0']) >= max_unchanged_iterations:
-                            if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0):
-                                unchanged_iterations += 1
+                            # Insert tabu list check here
+                            if current_params not in tabu_list:
+                                tabu_list.add(current_params)
                             else:
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
                                 unchanged_iterations = 0
 
-                        # Adjust the cooling rate if parameters haven't changed for N iterations
-                        if unchanged_iterations >= max_unchanged_iterations:
-                            if not any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):                    
-                                local_minima.append([
-                                    current_params
-                                ])
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                            g_sig = TGraphErrors()
+                            for i in range(nsep.GetSelectedRows()):
+                                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
-                        previous_params = current_params                
+                            for i in range(len(w_vec)):
+                                sig_X_fit = g_sig.GetY()[i]
+                                sig_X_fit_err = g_sig.GetEY()[i]
 
-                        # Update parameters with the best found so far
-                        par_sig_0 = best_params
-                        par_sig_err_0 = best_errors
+                                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-                        # Update the temperature
-                        temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                            if sig_name == "L":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            elif sig_name == "T":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            elif sig_name == "LT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            elif sig_name == "TT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig.SetParNames("p0")
+                            f_sig.SetParameter(0, current_params)
+                            #f_sig.SetParLimits(0, current_params - abs(current_params * par_sig_0), current_params + abs(current_params * par_sig_0))
+                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(0, -5, 5)
+                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
 
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0
+                            g_q2_sig_fit = TGraphErrors()
+                            for i in range(len(w_vec)):
+                                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+                                g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        # Check if current_params are close to any local minimum
-                        if any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):
-                            #print("WARNING: Parameters p0={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
+                            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                            current_params = adjust_params(best_params)
-                            par_sig_0 = current_params
+                            #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
+                            f_sig_status = f_sig.GetNDF() != 0
+
+                            params_sig_history['p0'].append(current_params)
+
+                            if num_events > num_params:
+                                # Calculate the cost (reduced chi-square value) for the current parameters                            
+                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            else:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+                                # Mean Squared Error (MSE)
+                                mse = np.mean(np.square(residuals))
+                                # L2 regularization term
+                                l2_reg = sum(p**2 for p in current_params)
+                                # Regularized cost function
+                                current_cost = mse + lambda_reg * l2_reg
+                                # Effective degrees of freedom
+                                effective_dof = max(num_events - num_params, 1)
+                                # Adjusted cost (similar to reduced chi-squared)
+                                adjusted_cost = current_cost / effective_dof
+                                # Store cost history
+                                cost_history.append(adjusted_cost)
+                                # Adaptive regularization
+                                if len(cost_history) > 1:
+                                    if adjusted_cost < cost_history[-2]:
+                                        # If cost is decreasing, slightly decrease regularization
+                                        lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
+                                    else:
+                                        # If cost is increasing or stagnant, increase regularization
+                                        lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
+
+                            current_params = f_sig.GetParameter(0)
+
+                            current_errors = f_sig.GetParError(0)
+
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params)
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+
+                            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+                            if accept_prob > random.random():
+                                best_params = current_params
+                                best_cost = current_cost
+                                best_errors = current_errors
+
+                            if iteration % local_search_interval == 0:
+                                current_params = local_search(current_params, f_sig, num_params)
+                                par_sig_0 = current_params
+
+                            # Check if current parameters haven't changed for the past N iterations
+                            if len(params_sig_history['p0']) >= max_unchanged_iterations:
+                                if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0):
+                                    unchanged_iterations += 1
+                                else:
+                                    unchanged_iterations = 0
+
+                            # Adjust the cooling rate if parameters haven't changed for N iterations
+                            if unchanged_iterations >= max_unchanged_iterations:
+                                if not any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):                    
+                                    local_minima.append([
+                                        current_params
+                                    ])
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
+
+                            previous_params = current_params                
+
+                            # Update parameters with the best found so far
+                            par_sig_0 = best_params
+                            par_sig_err_0 = best_errors
+
+                            # Update the temperature
+                            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0
+
+                            # Check if current_params are close to any local minimum
+                            if any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):
+                                #print("WARNING: Parameters p0={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
+
+                                current_params = adjust_params(best_params)
+                                par_sig_0 = current_params
+                                par_sig_err_0 = 0.0
+
+                        except (TypeError or ZeroDivisionError) as e:
+                            #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+
+                            # Adjust parameter limits within a random number
+                            par_sig_0 = initial_params
                             par_sig_err_0 = 0.0
 
-                    except (TypeError or ZeroDivisionError) as e:
-                        #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
-                        # Adjust parameter limits within a random number
-                        par_sig_0 = initial_params
-                        par_sig_err_0 = 0.0
-
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0                
-
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_params = best_params
-                    best_overall_errors = best_errors
-
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_params = best_params
+                        best_overall_errors = best_errors
+            else:
+                print(f"Sig {sig_name} is already a good fit! Skipping...")
+                best_overall_cost = chi2_sets[sig_name]
+                best_overall_params = fit_params[sig_name]
+                best_overall_errors = err_sets[sig_name]
+                        
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
@@ -606,230 +631,237 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+            # Check if initial parameters already had a good fit
+            if presence_dict[sig_name]:
+                for start in range(num_optimizations):
+                    print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
+                    iteration = 0
 
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
 
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_1 = initial_params[1]
-                par_sig_err_0 = 0.0
-                par_sig_err_1 = 0.0
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_1 = initial_params[1]
+                    par_sig_err_0 = 0.0
+                    par_sig_err_1 = 0.0
 
-                # Track the best solution
-                best_params = [par_sig_0, par_sig_1]
-                best_cost = float('inf')
-                best_errors = [par_sig_err_0, par_sig_err_1]
-                previous_params = best_params[:]
+                    # Track the best solution
+                    best_params = [par_sig_0, par_sig_1]
+                    best_cost = float('inf')
+                    best_errors = [par_sig_err_0, par_sig_err_1]
+                    previous_params = best_params[:]
 
-                # Check for local minima
-                local_minima = []
-                tabu_list = set()
+                    # Check for local minima
+                    local_minima = []
+                    tabu_list = set()
 
-                # Local search
-                local_search_interval = 25
+                    # Local search
+                    local_search_interval = 25
 
-                while iteration <= max_iterations:
+                    while iteration <= max_iterations:
 
-                    g_sig_prv = TGraph()
-                    g_sig_fit = TGraphErrors()
-                    g_sig_fit_tot = TGraph()
-                    
-                    graphs_sig_fit.append(g_sig_fit)
-                    
-                    sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                    sys.stdout.flush()
+                        g_sig_prv = TGraph()
+                        g_sig_fit = TGraphErrors()
+                        g_sig_fit_tot = TGraph()
 
-                    try:
-                        # Perturb parameters
-                        current_params = [
-                            simulated_annealing(par_sig_0, temperature),
-                            simulated_annealing(par_sig_1, temperature)
-                        ]
+                        graphs_sig_fit.append(g_sig_fit)
 
-                        # Insert tabu list check here
-                        if tuple(current_params) not in tabu_list:
-                            tabu_list.add(tuple(current_params))
-                        else:
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+                        sys.stdout.flush()
 
-                        g_sig = TGraphErrors()
-                        for i in range(nsep.GetSelectedRows()):
-                            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+                        try:
+                            # Perturb parameters
+                            current_params = [
+                                simulated_annealing(par_sig_0, temperature),
+                                simulated_annealing(par_sig_1, temperature)
+                            ]
 
-                        for i in range(len(w_vec)):
-                            sig_X_fit = g_sig.GetY()[i]
-                            sig_X_fit_err = g_sig.GetEY()[i]
-
-                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                        if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
-                        elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
-                        elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
-                        elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
-                        f_sig.SetParNames("p0", "p1")
-                        f_sig.SetParameter(0, current_params[0])
-                        f_sig.SetParameter(1, current_params[1])
-                        #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
-                        f_sig.SetParLimits(1, -max_param_value, max_param_value)
-
-                        g_q2_sig_fit = TGraphErrors()
-                        for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
-                            sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
-                            g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
-
-                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                        #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                        f_sig_status = f_sig.GetNDF() != 0
-
-                        params_sig_history['p0'].append(current_params[0])
-                        params_sig_history['p1'].append(current_params[1])
-
-                        if num_events > num_params:
-                            # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                        else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
-                            # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-                            
-                        current_params = [
-                            f_sig.GetParameter(0),
-                            f_sig.GetParameter(1)
-                        ]
-
-                        current_errors = [
-                            f_sig.GetParError(0),
-                            f_sig.GetParError(1)
-                        ]
-
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
-                        # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                        if accept_prob > random.random():
-                            best_params = current_params
-                            best_cost = current_cost
-                            best_errors = current_errors
-
-                        if iteration % local_search_interval == 0:
-                            current_params = local_search(current_params, f_sig, num_params)
-                            par_sig_0, par_sig_1 = current_params
-
-                        # Check if current parameters haven't changed for the past N iterations
-                        if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
-                           len(params_sig_history['p1']) >= max_unchanged_iterations:
-                            if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
-                               np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0):
-                                unchanged_iterations += 1        
+                            # Insert tabu list check here
+                            if tuple(current_params) not in tabu_list:
+                                tabu_list.add(tuple(current_params))
                             else:
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
                                 unchanged_iterations = 0
 
-                        # Adjust the cooling rate if parameters haven't changed for N iterations
-                        if unchanged_iterations >= max_unchanged_iterations:
-                            if not any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):                    
-                                local_minima.append([
-                                    current_params[0],
-                                    current_params[1]
-                                ])
+                            g_sig = TGraphErrors()
+                            for i in range(nsep.GetSelectedRows()):
+                                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                            for i in range(len(w_vec)):
+                                sig_X_fit = g_sig.GetY()[i]
+                                sig_X_fit_err = g_sig.GetEY()[i]
 
-                        previous_params = current_params[:]
+                                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-                        # Update parameters with the best found so far
-                        par_sig_0, par_sig_1 = best_params
-                        par_sig_err_0, par_sig_err_1 = best_errors
+                            if sig_name == "L":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            elif sig_name == "T":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            elif sig_name == "LT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            elif sig_name == "TT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig.SetParNames("p0", "p1")
+                            f_sig.SetParameter(0, current_params[0])
+                            f_sig.SetParameter(1, current_params[1])
+                            #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
+                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
+                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
 
-                        # Update the temperature
-                        temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                            g_q2_sig_fit = TGraphErrors()
+                            for i in range(len(w_vec)):
+                                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
+                                g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0
+                            #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
+                            f_sig_status = f_sig.GetNDF() != 0
 
-                        # Check if current_params are close to any local minimum
-                        if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
-                            #print("WARNING: Parameters p0={:.3e}, p1={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
+                            params_sig_history['p0'].append(current_params[0])
+                            params_sig_history['p1'].append(current_params[1])
 
-                            current_params = adjust_params(best_params)
-                            par_sig_0, par_sig_1 = current_params
+                            if num_events > num_params:
+                                # Calculate the cost (reduced chi-square value) for the current parameters                            
+                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            else:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+                                # Mean Squared Error (MSE)
+                                mse = np.mean(np.square(residuals))
+                                # L2 regularization term
+                                l2_reg = sum(p**2 for p in current_params)
+                                # Regularized cost function
+                                current_cost = mse + lambda_reg * l2_reg
+                                # Effective degrees of freedom
+                                effective_dof = max(num_events - num_params, 1)
+                                # Adjusted cost (similar to reduced chi-squared)
+                                adjusted_cost = current_cost / effective_dof
+                                # Store cost history
+                                cost_history.append(adjusted_cost)
+                                # Adaptive regularization
+                                if len(cost_history) > 1:
+                                    if adjusted_cost < cost_history[-2]:
+                                        # If cost is decreasing, slightly decrease regularization
+                                        lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
+                                    else:
+                                        # If cost is increasing or stagnant, increase regularization
+                                        lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
+
+                            current_params = [
+                                f_sig.GetParameter(0),
+                                f_sig.GetParameter(1)
+                            ]
+
+                            current_errors = [
+                                f_sig.GetParError(0),
+                                f_sig.GetParError(1)
+                            ]
+
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+
+                            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+                            if accept_prob > random.random():
+                                best_params = current_params
+                                best_cost = current_cost
+                                best_errors = current_errors
+
+                            if iteration % local_search_interval == 0:
+                                current_params = local_search(current_params, f_sig, num_params)
+                                par_sig_0, par_sig_1 = current_params
+
+                            # Check if current parameters haven't changed for the past N iterations
+                            if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
+                               len(params_sig_history['p1']) >= max_unchanged_iterations:
+                                if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
+                                   np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0):
+                                    unchanged_iterations += 1        
+                                else:
+                                    unchanged_iterations = 0
+
+                            # Adjust the cooling rate if parameters haven't changed for N iterations
+                            if unchanged_iterations >= max_unchanged_iterations:
+                                if not any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):                    
+                                    local_minima.append([
+                                        current_params[0],
+                                        current_params[1]
+                                    ])
+
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
+
+                            previous_params = current_params[:]
+
+                            # Update parameters with the best found so far
+                            par_sig_0, par_sig_1 = best_params
+                            par_sig_err_0, par_sig_err_1 = best_errors
+
+                            # Update the temperature
+                            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0
+
+                            # Check if current_params are close to any local minimum
+                            if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
+                                #print("WARNING: Parameters p0={:.3e}, p1={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
+
+                                current_params = adjust_params(best_params)
+                                par_sig_0, par_sig_1 = current_params
+                                par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
+
+                        except (TypeError or ZeroDivisionError) as e:
+                            #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+
+                            # Adjust parameter limits within a random number
+                            par_sig_0, par_sig_1 = initial_params
                             par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
 
-                    except (TypeError or ZeroDivisionError) as e:
-                        #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0
 
-                        # Adjust parameter limits within a random number
-                        par_sig_0, par_sig_1 = initial_params
-                        par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
-
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_params = best_params[:]
-                    best_overall_errors = best_errors
-
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors
+            else:
+                print(f"Sig {sig_name} is already a good fit! Skipping...")
+                best_overall_cost = chi2_sets[sig_name]
+                best_overall_params = fit_params[sig_name]
+                best_overall_errors = err_sets[sig_name]
+                
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
@@ -1087,243 +1119,250 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+            # Check if initial parameters already had a good fit
+            if presence_dict[sig_name]:            
+                for start in range(num_optimizations):
+                    print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
+                    iteration = 0
 
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
 
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_1 = initial_params[0]
-                par_sig_2 = initial_params[0]
-                par_sig_err_0 = 0.0
-                par_sig_err_1 = 0.0
-                par_sig_err_2 = 0.0
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_1 = initial_params[0]
+                    par_sig_2 = initial_params[0]
+                    par_sig_err_0 = 0.0
+                    par_sig_err_1 = 0.0
+                    par_sig_err_2 = 0.0
 
-                # Track the best solution
-                best_params = [par_sig_0, par_sig_1, par_sig_2]
-                best_cost = float('inf')
-                best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
-                previous_params = best_params[:]
+                    # Track the best solution
+                    best_params = [par_sig_0, par_sig_1, par_sig_2]
+                    best_cost = float('inf')
+                    best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
+                    previous_params = best_params[:]
 
-                # Check for local minima
-                local_minima = []
-                tabu_list = set()
+                    # Check for local minima
+                    local_minima = []
+                    tabu_list = set()
 
-                # Local search
-                local_search_interval = 25
+                    # Local search
+                    local_search_interval = 25
 
-                while iteration <= max_iterations:
+                    while iteration <= max_iterations:
 
-                    g_sig_prv = TGraph()
-                    g_sig_fit = TGraphErrors()
-                    g_sig_fit_tot = TGraph()    
+                        g_sig_prv = TGraph()
+                        g_sig_fit = TGraphErrors()
+                        g_sig_fit_tot = TGraph()    
 
-                    graphs_sig_fit.append(g_sig_fit)
-                    
-                    sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                    sys.stdout.flush()
+                        graphs_sig_fit.append(g_sig_fit)
 
-                    try:
+                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+                        sys.stdout.flush()
 
-                        # Perturb parameters
-                        current_params = [
-                            simulated_annealing(par_sig_0, temperature),
-                            simulated_annealing(par_sig_1, temperature),
-                            simulated_annealing(par_sig_2, temperature)
-                        ]
+                        try:
 
-                        # Insert tabu list check here
-                        if tuple(current_params) not in tabu_list:
-                            tabu_list.add(tuple(current_params))
-                        else:
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                            # Perturb parameters
+                            current_params = [
+                                simulated_annealing(par_sig_0, temperature),
+                                simulated_annealing(par_sig_1, temperature),
+                                simulated_annealing(par_sig_2, temperature)
+                            ]
 
-                        g_sig = TGraphErrors()
-                        for i in range(nsep.GetSelectedRows()):
-                            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                        for i in range(len(w_vec)):
-                            sig_X_fit = g_sig.GetY()[i]
-                            sig_X_fit_err = g_sig.GetEY()[i]
-
-                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                        if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
-                        elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
-                        elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
-                        elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
-                        f_sig.SetParNames("p0", "p1", "p2")
-                        f_sig.SetParameter(0, current_params[0])
-                        f_sig.SetParameter(1, current_params[1])
-                        f_sig.SetParameter(2, current_params[2])
-                        #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
-                        f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sig_2), current_params[2] + abs(current_params[2] * par_sig_2))
-                        f_sig.SetParLimits(2, -max_param_value, max_param_value)
-
-                        g_q2_sig_fit = TGraphErrors()
-                        for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
-                            sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
-                            g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
-
-                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                        #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                        f_sig_status = f_sig.GetNDF() != 0
-
-                        params_sig_history['p0'].append(current_params[0])
-                        params_sig_history['p1'].append(current_params[1])
-                        params_sig_history['p2'].append(current_params[2])
-
-                        if num_events > num_params:
-                            # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                        else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
-                            # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-                            
-                        current_params = [
-                            f_sig.GetParameter(0),
-                            f_sig.GetParameter(1),
-                            f_sig.GetParameter(2)
-                        ]
-
-                        current_errors = [
-                            f_sig.GetParError(0),
-                            f_sig.GetParError(1),
-                            f_sig.GetParError(2)
-                        ]
-
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
-                        # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                        if accept_prob > random.random():
-                            best_params = current_params
-                            best_cost = current_cost
-                            best_errors = current_errors
-
-                        if iteration % local_search_interval == 0:
-                            current_params = local_search(current_params, f_sig, num_params)
-                            par_sig_0, par_sig_1, par_sig_2 = current_params
-
-                        # Check if current parameters haven't changed for the past N iterations
-                        if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
-                           len(params_sig_history['p1']) >= max_unchanged_iterations  and \
-                           len(params_sig_history['p2']) >= max_unchanged_iterations:
-                            if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
-                               np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0) and \
-                               np.allclose(round(params_sig_history['p2'][-2], 3), round(params_sig_history['p2'][-1], 3), atol=5.0):
-                                unchanged_iterations += 1
+                            # Insert tabu list check here
+                            if tuple(current_params) not in tabu_list:
+                                tabu_list.add(tuple(current_params))
                             else:
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
                                 unchanged_iterations = 0
 
-                        # Adjust the cooling rate if parameters haven't changed for N iterations
-                        if unchanged_iterations >= max_unchanged_iterations:
-                            if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                                local_minima.append([
-                                    current_params[0],
-                                    current_params[1],
-                                    current_params[2]
-                                ])
+                            g_sig = TGraphErrors()
+                            for i in range(nsep.GetSelectedRows()):
+                                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                            for i in range(len(w_vec)):
+                                sig_X_fit = g_sig.GetY()[i]
+                                sig_X_fit_err = g_sig.GetEY()[i]
 
-                        previous_params = current_params[:]
+                                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-                        # Update parameters with the best found so far
-                        par_sig_0, par_sig_1, par_sig_2 = best_params
-                        par_sig_err_0, par_sig_err_1, par_sig_err_2 = best_errors
+                            if sig_name == "L":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            elif sig_name == "T":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            elif sig_name == "LT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            elif sig_name == "TT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig.SetParNames("p0", "p1", "p2")
+                            f_sig.SetParameter(0, current_params[0])
+                            f_sig.SetParameter(1, current_params[1])
+                            f_sig.SetParameter(2, current_params[2])
+                            #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
+                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
+                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sig_2), current_params[2] + abs(current_params[2] * par_sig_2))
+                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
 
-                        # Update the temperature
-                        temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                            g_q2_sig_fit = TGraphErrors()
+                            for i in range(len(w_vec)):
+                                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])
+                                g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0
+                            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                        # Check if current_params are close to any local minimum
-                        if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                            #print("WARNING: Parameters p0={:.3e}, p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+                            #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
+                            f_sig_status = f_sig.GetNDF() != 0
 
-                            current_params = adjust_params(best_params)
-                            par_sig_0, par_sig_1, par_sig_2 = current_params
+                            params_sig_history['p0'].append(current_params[0])
+                            params_sig_history['p1'].append(current_params[1])
+                            params_sig_history['p2'].append(current_params[2])
+
+                            if num_events > num_params:
+                                # Calculate the cost (reduced chi-square value) for the current parameters                            
+                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            else:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+                                # Mean Squared Error (MSE)
+                                mse = np.mean(np.square(residuals))
+                                # L2 regularization term
+                                l2_reg = sum(p**2 for p in current_params)
+                                # Regularized cost function
+                                current_cost = mse + lambda_reg * l2_reg
+                                # Effective degrees of freedom
+                                effective_dof = max(num_events - num_params, 1)
+                                # Adjusted cost (similar to reduced chi-squared)
+                                adjusted_cost = current_cost / effective_dof
+                                # Store cost history
+                                cost_history.append(adjusted_cost)
+                                # Adaptive regularization
+                                if len(cost_history) > 1:
+                                    if adjusted_cost < cost_history[-2]:
+                                        # If cost is decreasing, slightly decrease regularization
+                                        lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
+                                    else:
+                                        # If cost is increasing or stagnant, increase regularization
+                                        lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
+
+                            current_params = [
+                                f_sig.GetParameter(0),
+                                f_sig.GetParameter(1),
+                                f_sig.GetParameter(2)
+                            ]
+
+                            current_errors = [
+                                f_sig.GetParError(0),
+                                f_sig.GetParError(1),
+                                f_sig.GetParError(2)
+                            ]
+
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+
+                            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+                            if accept_prob > random.random():
+                                best_params = current_params
+                                best_cost = current_cost
+                                best_errors = current_errors
+
+                            if iteration % local_search_interval == 0:
+                                current_params = local_search(current_params, f_sig, num_params)
+                                par_sig_0, par_sig_1, par_sig_2 = current_params
+
+                            # Check if current parameters haven't changed for the past N iterations
+                            if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
+                               len(params_sig_history['p1']) >= max_unchanged_iterations  and \
+                               len(params_sig_history['p2']) >= max_unchanged_iterations:
+                                if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
+                                   np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0) and \
+                                   np.allclose(round(params_sig_history['p2'][-2], 3), round(params_sig_history['p2'][-1], 3), atol=5.0):
+                                    unchanged_iterations += 1
+                                else:
+                                    unchanged_iterations = 0
+
+                            # Adjust the cooling rate if parameters haven't changed for N iterations
+                            if unchanged_iterations >= max_unchanged_iterations:
+                                if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
+                                    local_minima.append([
+                                        current_params[0],
+                                        current_params[1],
+                                        current_params[2]
+                                    ])
+
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
+
+                            previous_params = current_params[:]
+
+                            # Update parameters with the best found so far
+                            par_sig_0, par_sig_1, par_sig_2 = best_params
+                            par_sig_err_0, par_sig_err_1, par_sig_err_2 = best_errors
+
+                            # Update the temperature
+                            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0
+
+                            # Check if current_params are close to any local minimum
+                            if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
+                                #print("WARNING: Parameters p0={:.3e}, p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+
+                                current_params = adjust_params(best_params)
+                                par_sig_0, par_sig_1, par_sig_2 = current_params
+                                par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+
+                        except (TypeError or ZeroDivisionError) as e:
+                            #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+
+                            # Adjust parameter limits within a random number
+                            par_sig_0, par_sig_1, par_sig_2 = initial_params
                             par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
 
-                    except (TypeError or ZeroDivisionError) as e:
-                        #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0
 
-                        # Adjust parameter limits within a random number
-                        par_sig_0, par_sig_1, par_sig_2 = initial_params
-                        par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
-
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_params = best_params[:]
-                    best_overall_errors = best_errors
-
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors
+            else:
+                print(f"Sig {sig_name} is already a good fit! Skipping...")
+                best_overall_cost = chi2_sets[sig_name]
+                best_overall_params = fit_params[sig_name]
+                best_overall_errors = err_sets[sig_name]
+                
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
@@ -1586,267 +1625,274 @@ def find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec):
             # Record the start time
             start_time = time.time()
 
-            for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+            # Check if initial parameters already had a good fit
+            if presence_dict[sig_name]:
+                for start in range(num_optimizations):
+                    print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
+                    iteration = 0
 
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
 
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_1 = initial_params[1]
-                par_sig_2 = initial_params[2]
-                par_sig_3 = initial_params[3]
-                par_sig_err_0 = 0.0
-                par_sig_err_1 = 0.0
-                par_sig_err_2 = 0.0
-                par_sig_err_3 = 0.0
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_1 = initial_params[1]
+                    par_sig_2 = initial_params[2]
+                    par_sig_3 = initial_params[3]
+                    par_sig_err_0 = 0.0
+                    par_sig_err_1 = 0.0
+                    par_sig_err_2 = 0.0
+                    par_sig_err_3 = 0.0
 
-                # Track the best solution
-                best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
-                best_cost = float('inf')
-                previous_params = best_params[:]
-                best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
+                    # Track the best solution
+                    best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
+                    best_cost = float('inf')
+                    previous_params = best_params[:]
+                    best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
 
-                # Check for local minima
-                local_minima = []
-                local_iterations = 0
-                tabu_list = set()
+                    # Check for local minima
+                    local_minima = []
+                    local_iterations = 0
+                    tabu_list = set()
 
-                # Local search
-                local_search_interval = 25
+                    # Local search
+                    local_search_interval = 25
 
-                while iteration <= max_iterations:
+                    while iteration <= max_iterations:
 
-                    g_sig_prv = TGraph()
-                    g_sig_fit = TGraphErrors()
-                    g_sig_fit_tot = TGraph()    
+                        g_sig_prv = TGraph()
+                        g_sig_fit = TGraphErrors()
+                        g_sig_fit_tot = TGraph()    
 
-                    graphs_sig_fit.append(g_sig_fit)
-                    
-                    sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                    sys.stdout.flush()
+                        graphs_sig_fit.append(g_sig_fit)
 
-                    try:
-                        # Perturb parameters
-                        current_params = [
-                            simulated_annealing(par_sig_0, temperature),
-                            simulated_annealing(par_sig_1, temperature),
-                            simulated_annealing(par_sig_2, temperature),
-                            simulated_annealing(par_sig_3, temperature),
-                        ]
+                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
+                        sys.stdout.flush()
 
-                        # Insert tabu list check here
-                        if tuple(current_params) not in tabu_list:
-                            tabu_list.add(tuple(current_params))
-                        else:
-                            # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                        try:
+                            # Perturb parameters
+                            current_params = [
+                                simulated_annealing(par_sig_0, temperature),
+                                simulated_annealing(par_sig_1, temperature),
+                                simulated_annealing(par_sig_2, temperature),
+                                simulated_annealing(par_sig_3, temperature),
+                            ]
 
-                        g_sig = TGraphErrors()
-                        for i in range(nsep.GetSelectedRows()):
-                            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                        for i in range(len(w_vec)):
-                            sig_X_fit = g_sig.GetY()[i]
-                            sig_X_fit_err = g_sig.GetEY()[i]
-
-                            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                        if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
-                        elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
-                        elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
-                        elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
-                        f_sig.SetParNames("p0", "p1", "p2", "p3")
-                        f_sig.SetParameter(0, current_params[0])
-                        f_sig.SetParameter(1, current_params[1])
-                        f_sig.SetParameter(2, current_params[2])
-                        f_sig.SetParameter(3, current_params[3])
-                        #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
-                        f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sig_2), current_params[2] + abs(current_params[2] * par_sig_2))
-                        f_sig.SetParLimits(2, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(3, current_params[3] - abs(current_params[3] * par_sig_3), current_params[3] + abs(current_params[3] * par_sig_3))
-                        f_sig.SetParLimits(3, -max_param_value, max_param_value)                
-                        #f_sig.SetParLimits(0, -5, 5)
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, -5, 5)
-                        f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(2, -5, 5)
-                        f_sig.SetParLimits(2, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(3, -5, 5)
-                        f_sig.SetParLimits(3, -max_param_value, max_param_value)                
-
-                        g_q2_sig_fit = TGraphErrors()
-                        for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
-                            sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
-                            g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
-
-                        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                        #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                        f_sig_status = f_sig.GetNDF() != 0
-
-                        params_sig_history['p0'].append(current_params[0])
-                        params_sig_history['p1'].append(current_params[1])
-                        params_sig_history['p2'].append(current_params[2])
-                        params_sig_history['p3'].append(current_params[3])
-
-                        if num_events > num_params:
-                            # Calculate the cost (reduced chi-square value) for the current parameters                            
-                            current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                        else:
-                            residuals = []
-                            for i in range(num_events):
-                                observed = g_sig.GetY()[i]
-                                expected = f_sig.Eval(g_sig.GetX()[i])
-                                residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                residuals.append(residual)
-                            # Mean Squared Error (MSE)
-                            mse = np.mean(np.square(residuals))
-                            # L2 regularization term
-                            l2_reg = sum(p**2 for p in current_params)
-                            # Regularized cost function
-                            current_cost = mse + lambda_reg * l2_reg
-                            # Effective degrees of freedom
-                            effective_dof = max(num_events - num_params, 1)
-                            # Adjusted cost (similar to reduced chi-squared)
-                            adjusted_cost = current_cost / effective_dof
-                            # Store cost history
-                            cost_history.append(adjusted_cost)
-                            # Adaptive regularization
-                            if len(cost_history) > 1:
-                                if adjusted_cost < cost_history[-2]:
-                                    # If cost is decreasing, slightly decrease regularization
-                                    lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
-                                else:
-                                    # If cost is increasing or stagnant, increase regularization
-                                    lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
-                            
-                        current_params = [
-                            f_sig.GetParameter(0),
-                            f_sig.GetParameter(1),
-                            f_sig.GetParameter(2),
-                            f_sig.GetParameter(3)
-                        ]
-
-                        current_errors = [
-                            f_sig.GetParError(0),
-                            f_sig.GetParError(1),
-                            f_sig.GetParError(2),
-                            f_sig.GetParError(3)
-                        ]
-
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
-                        graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, current_params[3])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
-                        # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                        if accept_prob > random.random():
-                            best_params = current_params
-                            best_cost = current_cost
-                            best_errors = current_errors
-
-                        # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                        if accept_prob > random.random():
-                            best_params = current_params
-                            best_cost = current_cost
-
-                        if iteration % local_search_interval == 0:
-                            current_params = local_search(current_params, f_sig, num_params)
-                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
-
-                        # Check if current parameters haven't changed for the past N iterations
-                        if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
-                           len(params_sig_history['p1']) >= max_unchanged_iterations  and \
-                           len(params_sig_history['p2']) >= max_unchanged_iterations  and \
-                           len(params_sig_history['p3']) >= max_unchanged_iterations:
-                            if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
-                               np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0) and \
-                               np.allclose(round(params_sig_history['p2'][-2], 3), round(params_sig_history['p2'][-1], 3), atol=5.0) and \
-                               np.allclose(round(params_sig_history['p3'][-2], 3), round(params_sig_history['p3'][-1], 3), atol=5.0):
-                                unchanged_iterations += 1
+                            # Insert tabu list check here
+                            if tuple(current_params) not in tabu_list:
+                                tabu_list.add(tuple(current_params))
                             else:
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
                                 unchanged_iterations = 0
 
-                        # Adjust the cooling rate if parameters haven't changed for N iterations
-                        if unchanged_iterations >= max_unchanged_iterations:
-                            if not any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):                    
-                                local_minima.append([
-                                    current_params[0],
-                                    current_params[1],
-                                    current_params[2],
-                                    current_params[3]
-                                ])
-                                # Restart from initial parameters
-                            current_params = initial_params
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
+                            g_sig = TGraphErrors()
+                            for i in range(nsep.GetSelectedRows()):
+                                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
-                        previous_params = current_params[:]                
+                            for i in range(len(w_vec)):
+                                sig_X_fit = g_sig.GetY()[i]
+                                sig_X_fit_err = g_sig.GetEY()[i]
 
-                        # Update parameters with the best found so far
-                        par_sig_0, par_sig_1, par_sig_2, par_sig_3 = best_params
-                        par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = best_errors
+                                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-                        # Update the temperature
-                        temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                            if sig_name == "L":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            elif sig_name == "T":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            elif sig_name == "LT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            elif sig_name == "TT":
+                                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig.SetParNames("p0", "p1", "p2", "p3")
+                            f_sig.SetParameter(0, current_params[0])
+                            f_sig.SetParameter(1, current_params[1])
+                            f_sig.SetParameter(2, current_params[2])
+                            f_sig.SetParameter(3, current_params[3])
+                            #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
+                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
+                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sig_2), current_params[2] + abs(current_params[2] * par_sig_2))
+                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(3, current_params[3] - abs(current_params[3] * par_sig_3), current_params[3] + abs(current_params[3] * par_sig_3))
+                            f_sig.SetParLimits(3, -max_param_value, max_param_value)                
+                            #f_sig.SetParLimits(0, -5, 5)
+                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(1, -5, 5)
+                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(2, -5, 5)
+                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
+                            #f_sig.SetParLimits(3, -5, 5)
+                            f_sig.SetParLimits(3, -max_param_value, max_param_value)                
 
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0
+                            g_q2_sig_fit = TGraphErrors()
+                            for i in range(len(w_vec)):
+                                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])
+                                g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
-                        # Check if current_params are close to any local minimum
-                        if any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):
-                            #print("WARNING: Parameters p0={:.3e}, p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+                            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                            current_params = adjust_params(best_params)
-                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
+                            #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
+                            f_sig_status = f_sig.GetNDF() != 0
+
+                            params_sig_history['p0'].append(current_params[0])
+                            params_sig_history['p1'].append(current_params[1])
+                            params_sig_history['p2'].append(current_params[2])
+                            params_sig_history['p3'].append(current_params[3])
+
+                            if num_events > num_params:
+                                # Calculate the cost (reduced chi-square value) for the current parameters                            
+                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            else:
+                                residuals = []
+                                for i in range(num_events):
+                                    observed = g_sig.GetY()[i]
+                                    expected = f_sig.Eval(g_sig.GetX()[i])
+                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    residuals.append(residual)
+                                # Mean Squared Error (MSE)
+                                mse = np.mean(np.square(residuals))
+                                # L2 regularization term
+                                l2_reg = sum(p**2 for p in current_params)
+                                # Regularized cost function
+                                current_cost = mse + lambda_reg * l2_reg
+                                # Effective degrees of freedom
+                                effective_dof = max(num_events - num_params, 1)
+                                # Adjusted cost (similar to reduced chi-squared)
+                                adjusted_cost = current_cost / effective_dof
+                                # Store cost history
+                                cost_history.append(adjusted_cost)
+                                # Adaptive regularization
+                                if len(cost_history) > 1:
+                                    if adjusted_cost < cost_history[-2]:
+                                        # If cost is decreasing, slightly decrease regularization
+                                        lambda_reg = max(lambda_reg * lambda_decrease, lambda_min)
+                                    else:
+                                        # If cost is increasing or stagnant, increase regularization
+                                        lambda_reg = min(lambda_reg * lambda_increase, lambda_max)
+                                # Acceptance probability
+                                accept_prob = acceptance_probability(best_cost, adjusted_cost, temperature)
+
+                            current_params = [
+                                f_sig.GetParameter(0),
+                                f_sig.GetParameter(1),
+                                f_sig.GetParameter(2),
+                                f_sig.GetParameter(3)
+                            ]
+
+                            current_errors = [
+                                f_sig.GetParError(0),
+                                f_sig.GetParError(1),
+                                f_sig.GetParError(2),
+                                f_sig.GetParError(3)
+                            ]
+
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                            graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, current_params[3])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+
+                            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+                            if accept_prob > random.random():
+                                best_params = current_params
+                                best_cost = current_cost
+                                best_errors = current_errors
+
+                            # If the new cost is better or accepted by the acceptance probability, update the best parameters
+                            if accept_prob > random.random():
+                                best_params = current_params
+                                best_cost = current_cost
+
+                            if iteration % local_search_interval == 0:
+                                current_params = local_search(current_params, f_sig, num_params)
+                                par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
+
+                            # Check if current parameters haven't changed for the past N iterations
+                            if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
+                               len(params_sig_history['p1']) >= max_unchanged_iterations  and \
+                               len(params_sig_history['p2']) >= max_unchanged_iterations  and \
+                               len(params_sig_history['p3']) >= max_unchanged_iterations:
+                                if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
+                                   np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0) and \
+                                   np.allclose(round(params_sig_history['p2'][-2], 3), round(params_sig_history['p2'][-1], 3), atol=5.0) and \
+                                   np.allclose(round(params_sig_history['p3'][-2], 3), round(params_sig_history['p3'][-1], 3), atol=5.0):
+                                    unchanged_iterations += 1
+                                else:
+                                    unchanged_iterations = 0
+
+                            # Adjust the cooling rate if parameters haven't changed for N iterations
+                            if unchanged_iterations >= max_unchanged_iterations:
+                                if not any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):                    
+                                    local_minima.append([
+                                        current_params[0],
+                                        current_params[1],
+                                        current_params[2],
+                                        current_params[3]
+                                    ])
+                                    # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
+
+                            previous_params = current_params[:]                
+
+                            # Update parameters with the best found so far
+                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = best_params
+                            par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = best_errors
+
+                            # Update the temperature
+                            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0
+
+                            # Check if current_params are close to any local minimum
+                            if any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):
+                                #print("WARNING: Parameters p0={:.3e}, p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
+
+                                current_params = adjust_params(best_params)
+                                par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
+                                par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
+
+                        except (TypeError or ZeroDivisionError) as e:
+                            #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+
+                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = initial_params
                             par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
 
-                    except (TypeError or ZeroDivisionError) as e:
-                        #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
+                            iteration += 1
+                            total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
-                        par_sig_0, par_sig_1, par_sig_2, par_sig_3 = initial_params
-                        par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
-
-                        iteration += 1
-                        total_iteration += 1 if iteration % max_iterations == 0 else 0                
-
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_params = best_params[:]
-                    best_overall_errors = best_errors
-
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors
+            else:
+                print(f"Sig {sig_name} is already a good fit! Skipping...")
+                best_overall_cost = chi2_sets[sig_name]
+                best_overall_params = fit_params[sig_name]
+                best_overall_errors = err_sets[sig_name]
+                
             print("\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 20:52:36 trottar"
+# Time-stamp: "2024-10-13 21:08:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -189,14 +189,6 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "LT": [lt0, lt1, lt2, lt3],
         "TT": [tt0, tt1, tt2, tt3],
     }
-
-    # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
-    sig_fit_dict = {
-        key: {"params": fit_params[key]}
-        for key, values in chi2_sets.items()
-        if not within_tolerance(values)
-    }
-    
     
     inp_dict = {
 
@@ -209,11 +201,12 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "Q2min_range" : Q2min_range,
         "Q2max_range" : Q2max_range,
         "iter_num" : iter_num,
-        "outputpdf" : outputpdf        
+        "outputpdf" : outputpdf,
+        "chi2_sets" : chi2_sets
     }
 
     # Finding fits for L, T, LT, TT
-    find_fit(sig_fit_dict, inp_dict, par_vec, par_err_vec, par_chi2_vec)
+    find_fit(fit_params, inp_dict, par_vec, par_err_vec, par_chi2_vec)
     
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
