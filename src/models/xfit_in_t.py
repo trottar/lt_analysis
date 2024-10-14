@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 17:23:29 trottar"
+# Time-stamp: "2024-10-13 20:52:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -96,6 +96,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     outputpdf  = "{}/{}_xfit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
     
     prv_par_vec = []
+    prv_err_vec = []
+    prv_chi2_vec = []
     g_vec = []
     w_vec = []
     q2_vec = []
@@ -132,11 +134,15 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
                 par, par_err, indx, chi2 = map(float, data)
                 print("  {} {} {} {}".format(par, par_err, indx, chi2))
                 prv_par_vec.append(par)
+                prv_err_vec.append(par_err)
+                prv_chi2_vec.append(chi2)
     except FileNotFoundError:
         print("File {} not found.".format(para_file_in))
 
     #if iter_num > 2:
     l0, l1, l2, l3, t0, t1, t2, t3, lt0, lt1, lt2, lt3, tt0, tt1, tt2, tt3 = prv_par_vec[:16]
+    errl0, errl1, errl2, errl3, errt0, errt1, errt2, errt3, errlt0, errlt1, errlt2, errlt3, errtt0, errtt1, errtt2, errtt3 = prv_err_vec[:16]
+    chi2l0, chi2l1, chi2l2, chi2l3, chi2t0, chi2t1, chi2t2, chi2t3, chi2lt0, chi2lt1, chi2lt2, chi2lt3, chi2tt0, chi2tt1, chi2tt2, chi2tt3 = prv_chi2_vec[:16]
 
     # Load equations from model of given setting
     equations = load_equations(f"Q{q2_set}W{w_set}.model")
@@ -163,22 +169,34 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
     # Revert changes for rest of script
     q2_set = q2_set.replace(".","p")
     w_set = w_set.replace(".","p")
-            
-    # Find fits for L, T, LT, TT
-    sig_fit_dict = {
-        "L" : {
-            "params" : [l0, l1, l2, l3]
-        },
-        "T" : {
-            "params" : [t0, t1, t2, t3]
-        },
-        "LT" : {
-            "params" : [lt0, lt1, lt2, lt3]
-        },
-        "TT" : {
-            "params" : [tt0, tt1, tt2, tt3]
-        },        
+
+    # Helper function to check if all values are within 1e-3 of 1
+    def within_tolerance(values, target=1.0, tol=1e-3):
+        return all(abs(val - target) <= tol for val in values)
+
+    # Chi2 sets to evaluate
+    chi2_sets = {
+        "L": [chi2l0, chi2l1, chi2l2, chi2l3],
+        "T": [chi2t0, chi2t1, chi2t2, chi2t3],
+        "LT": [chi2lt0, chi2lt1, chi2lt2, chi2lt3],
+        "TT": [chi2tt0, chi2tt1, chi2tt2, chi2tt3],
     }
+
+    # Find fits for L, T, LT, TT
+    fit_params = {
+        "L": [l0, l1, l2, l3],
+        "T": [t0, t1, t2, t3],
+        "LT": [lt0, lt1, lt2, lt3],
+        "TT": [tt0, tt1, tt2, tt3],
+    }
+
+    # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
+    sig_fit_dict = {
+        key: {"params": fit_params[key]}
+        for key, values in chi2_sets.items()
+        if not within_tolerance(values)
+    }
+    
     
     inp_dict = {
 
