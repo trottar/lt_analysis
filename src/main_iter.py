@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 12:30:25 trottar"
+# Time-stamp: "2024-10-14 12:34:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -208,10 +208,10 @@ inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
 
 # Copy input model to specific particle type directory
-shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, pol_str, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, pol_str, Q2, W))
+shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
 
 # Save input model
-output_file_lst.append('{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, pol_str, Q2, W))
+output_file_lst.append('{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
 
 if EPSSET == "low":
 #if EPSSET == "low":
