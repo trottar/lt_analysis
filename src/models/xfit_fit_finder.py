@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 17:37:26 trottar"
+# Time-stamp: "2024-10-14 17:49:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -114,7 +114,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
         param_str = ', '.join(str(param) for param in initial_params)
 
         if num_events <= num_params:
-            print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regression methods for determining quality of fit...")
+            print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using Akaike Information Criterion (AIC) methods for determining quality of fit...")
             fit_convergence_type = "Adapt. Reg." # Adaptive Regularization            
         else:
             fit_convergence_type = "Red. Chi-Square"
@@ -145,6 +145,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
+            tolerance = 1e-6  # Early stopping tolerance
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': []}
@@ -270,31 +271,45 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define range for lambda values (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                            best_cost_iteration = float('inf')
-                            best_lambda = lambda_reg
+                            best_cost_iteration = float('inf')  # Initialize to a large number
+                            best_lambda = lambda_reg  # Start with an initial lambda guess
+                            # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
-                                residuals = []
+                                residuals = []  # Store residuals for this lambda value
+                                # Loop over all events and compute residuals
                                 for i in range(num_events):
-                                    observed = g_sig.GetY()[i]
-                                    expected = f_sig.Eval(g_sig.GetX()[i])
-                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    observed = g_sig.GetY()[i]  # Observed value
+                                    expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
+                                    # Calculate residual (normalized if error available)
+                                    if g_sig.GetEY()[i] != 0:
+                                        residual = (observed - expected) / g_sig.GetEY()[i]
+                                    else:
+                                        residual = observed - expected
                                     residuals.append(residual)
-
+                                # Calculate the mean squared error (MSE) from the residuals
                                 mse = np.mean(np.square(residuals))
-                                l2_reg = sum(p**2 for p in [current_params])
-                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
-                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
+                                # L2 regularization term (sum of squared parameters)
+                                l2_reg = sum(p**2 for p in current_params)
+                                # Compute AIC: N * ln(MSE + lambda * L2) + 2 * p
+                                current_cost_try = num_events * np.log(mse + lambda_try * l2_reg) + 2 * num_params
+                                # Check if this lambda value gives a better cost
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
-                            # Use the best lambda found for this iteration
+                                    best_params = current_params.copy()  # Save parameters for this lambda
+                                # Optional: Early stopping if improvement is smaller than tolerance
+                                if abs(current_cost_try - best_cost_iteration) < tolerance:
+                                    break
+                            # Use the best lambda and corresponding parameters found
                             lambda_reg = best_lambda
-                            current_cost = best_cost_iteration
-                            # Store cost history
+                            current_params = best_params  # Update model parameters
+                            current_cost = best_cost_iteration  # Final cost for this iteration
+                            # Store the cost history for analysis
                             cost_history.append(current_cost)
-                            # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            # Calculate acceptance probability for simulated annealing (or similar algorithm)
+                            accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
                             
                         current_params = f_sig.GetParameter(0)
 
@@ -601,6 +616,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
+            tolerance = 1e-6  # Early stopping tolerance
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': []}
@@ -733,31 +749,45 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define range for lambda values (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                            best_cost_iteration = float('inf')
-                            best_lambda = lambda_reg
+                            best_cost_iteration = float('inf')  # Initialize to a large number
+                            best_lambda = lambda_reg  # Start with an initial lambda guess
+                            # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
-                                residuals = []
+                                residuals = []  # Store residuals for this lambda value
+                                # Loop over all events and compute residuals
                                 for i in range(num_events):
-                                    observed = g_sig.GetY()[i]
-                                    expected = f_sig.Eval(g_sig.GetX()[i])
-                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    observed = g_sig.GetY()[i]  # Observed value
+                                    expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
+                                    # Calculate residual (normalized if error available)
+                                    if g_sig.GetEY()[i] != 0:
+                                        residual = (observed - expected) / g_sig.GetEY()[i]
+                                    else:
+                                        residual = observed - expected
                                     residuals.append(residual)
-
+                                # Calculate the mean squared error (MSE) from the residuals
                                 mse = np.mean(np.square(residuals))
+                                # L2 regularization term (sum of squared parameters)
                                 l2_reg = sum(p**2 for p in current_params)
-                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
-                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
+                                # Compute AIC: N * ln(MSE + lambda * L2) + 2 * p
+                                current_cost_try = num_events * np.log(mse + lambda_try * l2_reg) + 2 * num_params
+                                # Check if this lambda value gives a better cost
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
-                            # Use the best lambda found for this iteration
+                                    best_params = current_params.copy()  # Save parameters for this lambda
+                                # Optional: Early stopping if improvement is smaller than tolerance
+                                if abs(current_cost_try - best_cost_iteration) < tolerance:
+                                    break
+                            # Use the best lambda and corresponding parameters found
                             lambda_reg = best_lambda
-                            current_cost = best_cost_iteration
-                            # Store cost history
+                            current_params = best_params  # Update model parameters
+                            current_cost = best_cost_iteration  # Final cost for this iteration
+                            # Store the cost history for analysis
                             cost_history.append(current_cost)
-                            # Acceptance probability    # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            # Calculate acceptance probability for simulated annealing (or similar algorithm)
+                            accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
                             
                         current_params = [
                             f_sig.GetParameter(0),
@@ -1077,6 +1107,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
+            tolerance = 1e-6  # Early stopping tolerance
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': []}
@@ -1218,31 +1249,45 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define range for lambda values (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                            best_cost_iteration = float('inf')
-                            best_lambda = lambda_reg
+                            best_cost_iteration = float('inf')  # Initialize to a large number
+                            best_lambda = lambda_reg  # Start with an initial lambda guess
+                            # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
-                                residuals = []
+                                residuals = []  # Store residuals for this lambda value
+                                # Loop over all events and compute residuals
                                 for i in range(num_events):
-                                    observed = g_sig.GetY()[i]
-                                    expected = f_sig.Eval(g_sig.GetX()[i])
-                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
+                                    observed = g_sig.GetY()[i]  # Observed value
+                                    expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
+                                    # Calculate residual (normalized if error available)
+                                    if g_sig.GetEY()[i] != 0:
+                                        residual = (observed - expected) / g_sig.GetEY()[i]
+                                    else:
+                                        residual = observed - expected
                                     residuals.append(residual)
-
+                                # Calculate the mean squared error (MSE) from the residuals
                                 mse = np.mean(np.square(residuals))
+                                # L2 regularization term (sum of squared parameters)
                                 l2_reg = sum(p**2 for p in current_params)
-                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
-                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
+                                # Compute AIC: N * ln(MSE + lambda * L2) + 2 * p
+                                current_cost_try = num_events * np.log(mse + lambda_try * l2_reg) + 2 * num_params
+                                # Check if this lambda value gives a better cost
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
-                            # Use the best lambda found for this iteration
+                                    best_params = current_params.copy()  # Save parameters for this lambda
+                                # Optional: Early stopping if improvement is smaller than tolerance
+                                if abs(current_cost_try - best_cost_iteration) < tolerance:
+                                    break
+                            # Use the best lambda and corresponding parameters found
                             lambda_reg = best_lambda
-                            current_cost = best_cost_iteration
-                            # Store cost history
+                            current_params = best_params  # Update model parameters
+                            current_cost = best_cost_iteration  # Final cost for this iteration
+                            # Store the cost history for analysis
                             cost_history.append(current_cost)
-                            # Acceptance probability    # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            # Calculate acceptance probability for simulated annealing (or similar algorithm)
+                            accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
                             
                         current_params = [
                             f_sig.GetParameter(0),
@@ -1571,6 +1616,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
             lambda_min = 1e-6  # Minimum lambda value
             lambda_max = 1.0  # Maximum lambda value
             cost_history = []
+            tolerance = 1e-6  # Early stopping tolerance
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': [], 'p3': []}
@@ -1728,30 +1774,45 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             # Acceptance probability
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
                         else:
+                            # Define range for lambda values (in log space for better exploration)
                             lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                            best_cost_iteration = float('inf')
-                            best_lambda = lambda_reg
+                            best_cost_iteration = float('inf')  # Initialize to a large number
+                            best_lambda = lambda_reg  # Start with an initial lambda guess                        
+                            # Adaptive search for the best lambda
                             for lambda_try in lambda_values:
-                                residuals = []
+                                residuals = []  # Store residuals for this lambda value
+                                # Loop over all events and compute residuals
                                 for i in range(num_events):
-                                    observed = g_sig.GetY()[i]
-                                    expected = f_sig.Eval(g_sig.GetX()[i])
-                                    residual = (observed - expected) / g_sig.GetEY()[i] if g_sig.GetEY()[i] != 0 else (observed - expected)
-                                    residuals.append(residual)                                
+                                    observed = g_sig.GetY()[i]  # Observed value
+                                    expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
+                                    # Calculate residual (normalized if error available)
+                                    if g_sig.GetEY()[i] != 0:
+                                        residual = (observed - expected) / g_sig.GetEY()[i]
+                                    else:
+                                        residual = observed - expected
+                                    residuals.append(residual)
+                                # Calculate the mean squared error (MSE) from the residuals
                                 mse = np.mean(np.square(residuals))
+                                # L2 regularization term (sum of squared parameters)
                                 l2_reg = sum(p**2 for p in current_params)
-                                # Calculate the equivalent of reduced chi-squared for adaptive regularization
-                                current_cost_try = (mse + lambda_try * l2_reg) / (num_events + num_params)
+                                # Compute AIC: N * ln(MSE + lambda * L2) + 2 * p
+                                current_cost_try = num_events * np.log(mse + lambda_try * l2_reg) + 2 * num_params
+                                # Check if this lambda value gives a better cost
                                 if current_cost_try < best_cost_iteration:
                                     best_cost_iteration = current_cost_try
                                     best_lambda = lambda_try
-                            # Use the best lambda found for this iteration
+                                    best_params = current_params.copy()  # Save parameters for this lambda
+                                # Optional: Early stopping if improvement is smaller than tolerance
+                                if abs(current_cost_try - best_cost_iteration) < tolerance:
+                                    break
+                            # Use the best lambda and corresponding parameters found
                             lambda_reg = best_lambda
-                            current_cost = best_cost_iteration
-                            # Store cost history
+                            current_params = best_params  # Update model parameters
+                            current_cost = best_cost_iteration  # Final cost for this iteration
+                            # Store the cost history for analysis
                             cost_history.append(current_cost)
-                            # Acceptance probability    # Acceptance probability
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            # Calculate acceptance probability for simulated annealing (or similar algorithm)
+                            accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
                             
                         current_params = [
                             f_sig.GetParameter(0),
