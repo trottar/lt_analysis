@@ -22,18 +22,21 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 
 # Transverse cross-section
 sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+##sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T)
 
 # Longitudinal-Transverse interference term
 sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 
 # Transverse-Transverse interference term
-sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
-####sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
+####sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+#sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
+sig_TT = ((-par13 * math.fabs(tt) + 1.0) * (math.fabs(tt)**(qq/par14)) - par15 * qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=2.32
 #wfactor = 1.0 / ((ww**2) - (mtar**2))**2.0
-wfactor = 1.0 / ((ww**2) - (mtar**2))**3.4
-#wfactor = 1.0 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52) # From linear fit of all Q2
+#wfactor = 1.0 / ((ww**2) - (mtar**2))**3.4
+# From linear fit of all Q2	
+wfactor = 1.0 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 
 ################################################################################
 # Previous iterations
