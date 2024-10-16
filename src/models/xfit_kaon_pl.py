@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 13:48:27 trottar"
+# Time-stamp: "2024-10-16 13:57:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,11 +47,12 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 
 ################################################################################################################################################
 
-def fun_Sig_L_wrapper(q2, w, theta=math.pi/2):
-    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
-    return tmp_func(qq, ww, theta_cm, x, par)
+def fun_Sig_L_wrapper(q2, w):
+    def tmp_func(x, par, qq=q2, ww=w):
+        return fun_Sig_L(qq, ww, x, par)
+    return tmp_func(qq, ww, x, par)
 
-def fun_Sig_L(qq, ww, theta_cm, x, par):
+def fun_Sig_L(qq, ww, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
@@ -59,11 +60,12 @@ def fun_Sig_L(qq, ww, theta_cm, x, par):
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
 
-def fun_Sig_T_wrapper(q2, w, theta=math.pi/2):
-    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
-    return tmp_func(qq, ww, theta_cm, x, par)
+def fun_Sig_T_wrapper(q2, w):
+    def tmp_func(x, par, qq=q2, ww=w):
+        return fun_Sig_T(qq, ww, x, par)
+    return tmp_func(qq, ww, x, par)
 
-def fun_Sig_T(qq, ww, theta_cm, x, par):
+def fun_Sig_T(qq, ww, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
@@ -72,7 +74,8 @@ def fun_Sig_T(qq, ww, theta_cm, x, par):
     return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
 
 def fun_Sig_LT_wrapper(q2, w, theta=math.pi/2):
-    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
+    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_LT(qq, ww, theta_cm, x, par)
     return tmp_func(qq, ww, theta_cm, x, par)
 
 def fun_Sig_LT(qq, ww, theta_cm, x, par):
@@ -84,7 +87,8 @@ def fun_Sig_LT(qq, ww, theta_cm, x, par):
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
 def fun_Sig_TT_wrapper(q2, w, theta=math.pi/2):
-    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
+    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_TT(qq, ww, theta_cm, x, par)
     return tmp_func(qq, ww, theta_cm, x, par)
 
 def fun_Sig_TT(qq, ww, theta_cm, x, par):
