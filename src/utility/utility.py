@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 13:51:41 trottar"
+# Time-stamp: "2024-10-16 17:22:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -924,7 +924,7 @@ def prepare_equations(equations, sig_type):
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
     if sig_type == "wfactor":
         eq_list = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"        
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
     
     func_str += "    " + "\n    ".join(eq_list) + "\n"
     func_str += f"    return {sig_type}"
@@ -971,7 +971,7 @@ def find_params(equations, sig_type, param_vals):
         eq_str = '\n'.join([f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')])
         num_params = eq_str.count('par')
         for i in range(num_params):
-            new_param_lst.append(param_vals[i])        
+            new_param_lst.append(param_vals[i])
         return num_params, new_param_lst, eq_str.split(f"sig_{sig_type}")[1].replace("=", f"sig_{sig_type} = ").strip()
     else:
         print("ERROR: Invalid function request!")
