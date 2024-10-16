@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 02:45:26 trottar"
+# Time-stamp: "2024-10-16 02:46:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,8 @@ from xfit_active import set_val
 
 ###############################################################################################################################################
 
-def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
+# dir_iter = closest_date
+def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     tmin_range = inpDict["tmin"]
     tmax_range = inpDict["tmax"]
@@ -93,10 +94,6 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     ##############
     ##############
     ##############
-    
-    single_setting(ParticleType, pol_str, closest_date, Q2, W, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations, num_optimizations, sine_exp_LT, sine_exp_TT)
-    
-def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, tmax_range, Q2min_range, Q2max_range, iter_num, max_iterations, num_optimizations, sine_exp_LT, sine_exp_TT):
 
     # Set pol_str, q2_set, w_set for xfit_active script
     set_val(pol_str, q2_set, w_set)
