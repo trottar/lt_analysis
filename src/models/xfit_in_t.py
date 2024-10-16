@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 02:42:02 trottar"
+# Time-stamp: "2024-10-16 02:43:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,9 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
     num_optimizations = 10
 
     # Sine exponent of LT, TT
+    #sine_exp_LT = 0.0 # Off
     sine_exp_LT = 1.0
+    #sine_exp_TT = 0.0 # Off
     sine_exp_TT = 1.0 # Trial 34
     #sine_TT = 2.0
     #sine_TT = 3.0 # Trial 35
