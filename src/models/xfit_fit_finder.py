@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-15 22:02:12 trottar"
+# Time-stamp: "2024-10-16 00:41:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -259,7 +259,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":                            
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             else:
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -455,7 +455,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
@@ -539,7 +539,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -752,7 +752,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":                            
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             else:
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -959,7 +959,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
@@ -1044,7 +1044,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -1267,7 +1267,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":                            
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             else:
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -1481,7 +1481,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
@@ -1567,7 +1567,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -1807,7 +1807,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":                            
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                             else:
                                 sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
@@ -2033,7 +2033,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
@@ -2120,7 +2120,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":                
                     sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**2) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)) * (g_vec[i])                                
                 else:
                     sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
