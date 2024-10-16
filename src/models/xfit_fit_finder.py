@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 02:47:29 trottar"
+# Time-stamp: "2024-10-16 13:53:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -25,7 +25,7 @@ import os, sys
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, within_tolerance
+from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, within_tolerance, get_central_value
 
 ##################################################################################################################################################
 
@@ -38,7 +38,7 @@ mkpl = 0.493677
 ###############################################################################################################################################
 # Import separated xsects models
 
-from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
+from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
 
 ##################################################################################################################################################
 
@@ -83,6 +83,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     chi2_sets = inpDict["chi2_sets"]
     fit_params = inpDict["fit_params"]
 
+    # Using central bin value to determine best fit
+    q2_center_val = get_central_value(q2_vec)
+    w_center_val = get_central_value(w_vec)
+    th_center_val = get_central_value(th_vec)
+    fun_Sig_L = fun_Sig_L_wrapper(q2_center_val, w_center_val)
+    fun_Sig_T = fun_Sig_T_wrapper(q2_center_val, w_center_val)
+    fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val, th_center_val)
+    fun_Sig_TT = fun_Sig_TT_wrapper(q2_center_val, w_center_val, th_center_val)
+    
     '''
     # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
     sig_fit_dict = {

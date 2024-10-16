@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:41:16 trottar"
+# Time-stamp: "2024-10-16 13:48:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -46,47 +46,51 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
 
 ################################################################################################################################################
-    
-def fun_Sig_L(x, par):
+
+def fun_Sig_L_wrapper(q2, w, theta=math.pi/2):
+    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
+    return tmp_func(qq, ww, theta_cm, x, par)
+
+def fun_Sig_L(qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = q2_set
-    ww = w_set
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
 
-def fun_Sig_T(x, par):
+def fun_Sig_T_wrapper(q2, w, theta=math.pi/2):
+    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
+    return tmp_func(qq, ww, theta_cm, x, par)
+
+def fun_Sig_T(qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = q2_set
-    ww = w_set
     par5, par6, par7, par8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigT
     return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
 
-def fun_Sig_LT(x, par):
+def fun_Sig_LT_wrapper(q2, w, theta=math.pi/2):
+    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
+    return tmp_func(qq, ww, theta_cm, x, par)
+
+def fun_Sig_LT(qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = q2_set
-    ww = w_set
-    # Sine term called separately so setting to 1.0
-    theta_cm = math.pi/2
     par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigLT
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
-def fun_Sig_TT(x, par):
+def fun_Sig_TT_wrapper(q2, w, theta=math.pi/2):
+    def tmp_func(x, par, qq=q2, ww=w, theta_cm=theta)
+    return tmp_func(qq, ww, theta_cm, x, par)
+
+def fun_Sig_TT(qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    qq = q2_set
-    ww = w_set
-    # Sine term called separately so setting to 1.0
-    theta_cm = math.pi/2
     par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigTT
-    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
+    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
