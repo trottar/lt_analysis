@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 13:59:26 trottar"
+# Time-stamp: "2024-10-16 17:18:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -87,6 +87,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     q2_center_val = get_central_value(q2_vec)
     w_center_val = get_central_value(w_vec)
     th_center_val = get_central_value(th_vec)
+    print("!!!!!!!!!!", q2_center_val, w_center_val, th_center_val)
     fun_Sig_L = fun_Sig_L_wrapper(q2_center_val, w_center_val)
     fun_Sig_T = fun_Sig_T_wrapper(q2_center_val, w_center_val)
     fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val, th_center_val)
