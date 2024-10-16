@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 13:58:29 trottar"
+# Time-stamp: "2024-10-16 14:01:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,4 +97,4 @@ def fun_Sig_TT(qq, ww, theta_cm, x, par):
     w_set = float(W.replace("p","."))
     par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Calculate SigTT
-    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
+    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
