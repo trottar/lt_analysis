@@ -34,9 +34,10 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 #sig_TT = ((par13/math.fabs(tt) + par14) * math.exp(-par15*math.fabs(tt)) * par16 * (qq * math.exp(-qq))) * (math.sin(theta_cm)**2)
 # Trial 32
 # Marco's thesis
-sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+# Trial 33
 # Vijay's thesis
-#sig_TT = (par13/math.fabs(tt)**3 * math.exp(par14*math.fabs(tt)) + par15/math.fabs(tt)) * (math.sin(theta_cm)**2)
+sig_TT = (par13/math.fabs(tt)**3 * math.exp(par14*math.fabs(tt)) + par15/math.fabs(tt)) * (math.sin(theta_cm)**2)
 # Combination with inverse parabola w/ Q2-dep
 #sig_TT = 
        
