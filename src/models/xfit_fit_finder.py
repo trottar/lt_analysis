@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 02:42:35 trottar"
+# Time-stamp: "2024-10-16 02:47:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,7 @@ from xfit_active import fun_Sig_L, fun_Sig_T, fun_Sig_LT, fun_Sig_TT
 
 ##################################################################################################################################################
 
-def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
+def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = []
@@ -67,21 +67,21 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
     c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
     c6.Divide(2, 2)
     
-    nsep, g_vec, w_vec, q2_vec, th_vec = inp_dict["objects"]
-    max_iterations = inp_dict["max_iterations"]
-    num_optimizations = inp_dict["num_optimizations"]
+    nsep, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
+    max_iterations = inpDict["max_iterations"]
+    num_optimizations = inpDict["num_optimizations"]
     sine_exp_LT = inpDict["sine_exp_LT"]
     sine_exp_TT = inpDict["sine_exp_TT"]
-    tmin_range = inp_dict["tmin_range"]
-    tmax_range = inp_dict["tmax_range"]
-    Q2min_range = inp_dict["Q2min_range"]
-    Q2max_range = inp_dict["Q2max_range"]
-    iter_num = inp_dict["iter_num"]            
-    outputpdf = inp_dict["outputpdf"]
+    tmin_range = inpDict["tmin_range"]
+    tmax_range = inpDict["tmax_range"]
+    Q2min_range = inpDict["Q2min_range"]
+    Q2max_range = inpDict["Q2max_range"]
+    iter_num = inpDict["iter_num"]            
+    outputpdf = inpDict["outputpdf"]
     
-    err_sets = inp_dict["err_sets"]
-    chi2_sets = inp_dict["chi2_sets"]
-    fit_params = inp_dict["fit_params"]
+    err_sets = inpDict["err_sets"]
+    chi2_sets = inpDict["chi2_sets"]
+    fit_params = inpDict["fit_params"]
 
     '''
     # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
@@ -106,7 +106,7 @@ def find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec):
 
         sig_name = key
         # Grab parameters used by functional forms
-        num_params, initial_params, equation_str = inp_dict["initial_params"](sig_name, val)
+        num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
         # Checks initial parameters and replaces zeros to avoid errors
         #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
