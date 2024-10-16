@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-14 18:10:51 trottar"
+# Time-stamp: "2024-10-16 02:42:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,6 +82,12 @@ def x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict):
 
     # Number of times to run the algorithm
     num_optimizations = 10
+
+    # Sine exponent of LT, TT
+    sine_exp_LT = 1.0
+    sine_exp_TT = 1.0 # Trial 34
+    #sine_TT = 2.0
+    #sine_TT = 3.0 # Trial 35
     ##############
     ##############
     ##############
@@ -198,6 +204,8 @@ def single_setting(ParticleType, pol_str, dir_iter, q2_set, w_set, tmin_range, t
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
+        "sine_exp_LT" : sine_exp_LT,
+        "sine_exp_TT" : sine_exp_TT,
         "initial_params" : find_params_wrapper(equations),
         "tmin_range" : tmin_range,
         "tmax_range" : tmax_range,
