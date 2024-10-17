@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-16 17:26:26 trottar"
+# Time-stamp: "2024-10-17 17:02:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -329,7 +329,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
                             
                         current_params = f_sig.GetParameter(0)
-
                         current_errors = f_sig.GetParError(0)
 
                         # Update ROOT TGraphs for plotting
