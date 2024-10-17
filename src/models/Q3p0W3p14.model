@@ -35,7 +35,8 @@ sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.25
 # From linear fit of all Q2
-#wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52) 
+#wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52) # From linear fit of all Q2
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*w**2 - 5.97*w + 12.68) # From quadratic fit of all Q2
 
 ################################################################################
 # Previous iterations
