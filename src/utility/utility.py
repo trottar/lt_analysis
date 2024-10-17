@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-17 17:26:58 trottar"
+# Time-stamp: "2024-10-17 17:29:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -927,7 +927,8 @@ def prepare_equations(equations, sig_type):
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
 
     print("!!!!!!!!!",sig_type, eq_list)
-    if any(sig_type not in e for e in eq_list):
+    mismatches = list(filter(lambda e: sig_type not in e, eq_list))
+    if mismatches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
         
