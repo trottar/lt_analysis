@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-17 17:18:07 trottar"
+# Time-stamp: "2024-10-17 17:18:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -932,10 +932,10 @@ def prepare_equations(equations, sig_type):
     exec_globals = {'__builtins__': None, 'math': math}
     try:
         exec(func_str, exec_globals)
+        return exec_globals[f'{sig_type}_optimized']
     except TypeError:
         print("ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
-    return exec_globals[f'{sig_type}_optimized']
 
 ##################################################################################################################################################
 
