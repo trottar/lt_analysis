@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-08 10:30:33 trottar"
+# Time-stamp: "2024-10-17 17:40:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -84,7 +84,7 @@ settings = {
         #'inp_dir': "trial_9/2024July25_H17M05S03" # i=1
         #'inp_dir': "trial_9/2024July26_H05M28S47" # i=12
         #'inp_dir': "2024September11_H10M39S26" # i=2, 4p4 parameterization
-        'inp_dir': "2024October06_H20M35S32" # i=10, w_fac->(n=2.45)
+        'inp_dir': "2024October12_H03M42S23" # i=10, w_fac->(n=2.45)
     },
     'set_2': {
         'Q2': '3p0',
@@ -93,7 +93,7 @@ settings = {
         'HIEPS': 0.8791,
         #'inp_dir': "2024September11_H12M56S06" # i=2, 4p4 parameterization
         #'inp_dir': "2024September12_H14M27S29" # i=5, 4p4 parameterization
-        'inp_dir': "" # i=10, w_fac->(n=3.40)
+        'inp_dir': "2024October12_H08M08S16" # i=10, w_fac->(n=3.40)
     },    
     'set_3': {
         'Q2': '3p0',
@@ -104,7 +104,7 @@ settings = {
         #'inp_dir': "trial_30/2024July26_H08M04S15" # i=12
         #'inp_dir': "2024September11_H16M37S05" # i=2, 4p4 parameterization
         #'inp_dir': "2024September12_H15M13S17" # i=5, 4p4 parameterization
-        'inp_dir': "2024October01_H21M16S10" # i=10, w_fac->(n=2.25)
+        'inp_dir': "trial_32/2024October15_H20M22S46" # i=10, w_fac->(n=2.25)
     },    
     'set_4': {
         'Q2': '4p4',
@@ -115,7 +115,7 @@ settings = {
         #'inp_dir': "trial_1/2024August13_H22M17S21" # i=12
         #'inp_dir': "2024September11_H17M50S25" # i=2, 4p4 parameterization
         #'inp_dir': "2024September12_H15M58S25" # i=5, 4p4 parameterization
-        'inp_dir': "2024October04_H04M13S48" # i=10, w_fac->(n=2.65)
+        'inp_dir': "2024October12_H00M05S21" # i=10, w_fac->(n=2.65)
     },    
     'set_5': {
         'Q2': '5p5',
@@ -126,14 +126,15 @@ settings = {
         #'inp_dir': "trial_14/2024July26_H10M45S46" # i=12
         #'inp_dir': "2024September11_H19M05S14" # i=2, 4p4 parameterization
         #'inp_dir': "2024September12_H16M39S54" # i=5, 4p4 parameterization
-        'inp_dir': "2024October05_H01M05S14" # i=10, w_fac->(n=2.45)
+        'inp_dir': "" # i=10, w_fac->(n=2.45)
     }
 }
 
 comb_dict = {}
 
 for key, values in settings.items():
-    if key in ('set_1', 'set_2', 'set_3', 'set_4', 'set_5'):
+    #if key in ('set_1', 'set_2', 'set_3', 'set_4', 'set_5'):
+    if key in ('set_1', 'set_2', 'set_3', 'set_4'):
         Q2, W, LOEPS, HIEPS, inp_dir = values.values()
     else:
         continue

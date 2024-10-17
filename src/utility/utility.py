@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-17 17:32:29 trottar"
+# Time-stamp: "2024-10-17 17:33:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -926,9 +926,7 @@ def prepare_equations(equations, sig_type):
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
 
-    print("!!!!!!!!!",sig_type, eq_lst)
     matches = list(filter(lambda e: sig_type in e, eq_lst))
-    print(matches)
     if not matches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
