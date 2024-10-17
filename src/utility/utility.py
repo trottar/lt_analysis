@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-17 17:30:08 trottar"
+# Time-stamp: "2024-10-17 17:30:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -911,28 +911,29 @@ def extract_values(filename):
 
 def prepare_equations(equations, sig_type):
     if sig_type == "sig_L":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
+        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4):\n"
     if sig_type == "sig_T":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
+        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8):\n"
     if sig_type == "sig_LT":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
+        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
     if sig_type == "sig_TT":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
+        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
     if sig_type == "wfactor":
-        eq_list = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
+        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
 
-    print("!!!!!!!!!",sig_type, eq_list)
-    mismatches = list(filter(lambda e: sig_type in e, eq_list))
+    print("!!!!!!!!!",sig_type, eq_lst)
+    mismatches = list(filter(lambda e: sig_type in e, eq_lst))
+    print(mismatches)
     if mismatches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
         
-    func_str += "    " + "\n    ".join(eq_list) + "\n"
+    func_str += "    " + "\n    ".join(eq_lst) + "\n"
     func_str += f"    return {sig_type}"
     
     exec_globals = {'__builtins__': None, 'math': math}
