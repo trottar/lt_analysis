@@ -29,8 +29,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # Marco's thesis
-#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
-sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 
 # Weight factor for Q2=3.0, W=3.14
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 12:33:15 trottar"
+# Time-stamp: "2024-10-18 13:17:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -87,9 +87,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # Sine exponent (sin(theta* PI / 180)**sine_exp_LT/TT) of LT, TT
     #sine_exp_LT = 0.0 # Off
     sine_exp_LT = 1.0 # Default
-    #sine_exp_TT = 0.0 # Off
+    sine_exp_TT = 0.0 # Off
     #sine_exp_TT = 1.0
-    sine_exp_TT = 2.0 # Default
+    #sine_exp_TT = 2.0 # Default
     #sine_exp_TT = 3.0 # Trial 35
     ##############
     ##############
