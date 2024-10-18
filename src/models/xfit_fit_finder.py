@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-17 17:02:07 trottar"
+# Time-stamp: "2024-10-18 03:21:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -66,7 +66,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     c5.Divide(2, 2)
     c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
     c6.Divide(2, 2)
-    
+
+    q2_set = inpDict["q2_set"]
+    w_set = inpDict["w_set"]
     nsep, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
@@ -84,6 +86,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     fit_params = inpDict["fit_params"]
 
     # Using central bin value to determine best fit
+    '''
     q2_center_val = get_central_value(q2_vec)
     w_center_val = get_central_value(w_vec)
     th_center_val = get_central_value(th_vec)
@@ -91,7 +94,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     fun_Sig_T = fun_Sig_T_wrapper(q2_center_val, w_center_val)
     fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val) # Sine terms defined in xfit_in_t.py
     fun_Sig_TT = fun_Sig_TT_wrapper(q2_center_val, w_center_val) # Sine terms defined in xfit_in_t.py
-    
+    '''
+    fun_Sig_L = fun_Sig_L_wrapper(q2_set, w_set)
+    fun_Sig_T = fun_Sig_T_wrapper(q2_set, w_set)
+    fun_Sig_LT = fun_Sig_LT_wrapper(q2_set, w_set) # Sine terms defined in xfit_in_t.py
+    fun_Sig_TT = fun_Sig_TT_wrapper(q2_set, w_set) # Sine terms defined in xfit_in_t.py
+
     '''
     # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
     sig_fit_dict = {

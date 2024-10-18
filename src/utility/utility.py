@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 02:39:48 trottar"
+# Time-stamp: "2024-10-18 02:54:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,9 +70,6 @@ def request_yn_response(string=""):
 ################################################################################################################################################
 
 def open_root_file(root_file, option="OPEN"):
-    opened_root_file = TFile.Open(root_file, option)
-    return opened_root_file
-'''
     try:
         opened_root_file = TFile.Open(root_file, option)
         return opened_root_file
@@ -86,7 +83,7 @@ def open_root_file(root_file, option="OPEN"):
         else:
             print(f"ERROR: {root_file} not found.")
             sys.exit(2)
-'''
+
 ################################################################################################################################################
 
 # Checks if run number if found in analysed root files
