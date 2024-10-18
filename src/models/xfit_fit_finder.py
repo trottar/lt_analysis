@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 03:21:18 trottar"
+# Time-stamp: "2024-10-18 03:32:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -95,6 +95,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val) # Sine terms defined in xfit_in_t.py
     fun_Sig_TT = fun_Sig_TT_wrapper(q2_center_val, w_center_val) # Sine terms defined in xfit_in_t.py
     '''
+    print("!!!!!!!!!!!!",q2_set, w_set)
     fun_Sig_L = fun_Sig_L_wrapper(q2_set, w_set)
     fun_Sig_T = fun_Sig_T_wrapper(q2_set, w_set)
     fun_Sig_LT = fun_Sig_LT_wrapper(q2_set, w_set) # Sine terms defined in xfit_in_t.py
