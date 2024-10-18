@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 03:32:14 trottar"
+# Time-stamp: "2024-10-18 03:35:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -95,7 +95,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val) # Sine terms defined in xfit_in_t.py
     fun_Sig_TT = fun_Sig_TT_wrapper(q2_center_val, w_center_val) # Sine terms defined in xfit_in_t.py
     '''
-    print("!!!!!!!!!!!!",q2_set, w_set)
+
     fun_Sig_L = fun_Sig_L_wrapper(q2_set, w_set)
     fun_Sig_T = fun_Sig_T_wrapper(q2_set, w_set)
     fun_Sig_LT = fun_Sig_LT_wrapper(q2_set, w_set) # Sine terms defined in xfit_in_t.py
@@ -254,17 +254,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
                         elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
                         elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
                         elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
                         f_sig.SetParNames("p0")
                         f_sig.SetParameter(0, current_params)
                         #f_sig.SetParLimits(0, current_params - abs(current_params * par_sig_0), current_params + abs(current_params * par_sig_0))
@@ -451,17 +451,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(graphs_sig_fit[it])            
 
             if sig_name == "L":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig_pre.SetParNames("p0")
             f_sig_pre.FixParameter(0, best_overall_params[0])
 
@@ -523,17 +523,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig.SetParNames("p0")
             f_sig.FixParameter(0, best_overall_params[0])
 
@@ -745,17 +745,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
                         elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
                         elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
                         elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
                         f_sig.SetParNames("p0", "p1")
                         f_sig.SetParameter(0, current_params[0])
                         f_sig.SetParameter(1, current_params[1])
@@ -954,17 +954,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(g_sig_fit)            
 
             if sig_name == "L":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
             f_sig_pre.SetParNames("p0", "p1")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
@@ -1027,17 +1027,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
             f_sig.SetParNames("p0", "p1")
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
@@ -1257,17 +1257,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
                         elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
                         elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
                         elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
                         f_sig.SetParNames("p0", "p1", "p2")
                         f_sig.SetParameter(0, current_params[0])
                         f_sig.SetParameter(1, current_params[1])
@@ -1475,17 +1475,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(g_sig_fit)
             
             if sig_name == "L":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig_pre.SetParNames("p0", "p1", "p2")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
@@ -1549,17 +1549,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig.SetParNames("p0", "p1", "p2")
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
@@ -1786,17 +1786,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                         if sig_name == "L":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
                         elif sig_name == "T":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
                         elif sig_name == "LT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
                         elif sig_name == "TT":
-                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
                         f_sig.SetParNames("p0", "p1", "p2", "p3")
                         f_sig.SetParameter(0, current_params[0])
                         f_sig.SetParameter(1, current_params[1])
@@ -2026,17 +2026,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(g_sig_fit)
             
             if sig_name == "L":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
             f_sig_pre.SetParNames("p0", "p1", "p2", "p3")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
@@ -2101,17 +2101,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
             f_sig.SetParNames("p0", "p1", "p2", "p3")
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
