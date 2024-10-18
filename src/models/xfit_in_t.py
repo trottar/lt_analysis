@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 03:20:41 trottar"
+# Time-stamp: "2024-10-18 03:30:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,8 +200,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     }
     
     inp_dict = {
-        "q2_set" : q2_set,
-        "w_set" : w_set,
+        "q2_set" : q2_set.replace("p","."),
+        "w_set" : w_set.replace("p","."),
         "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
