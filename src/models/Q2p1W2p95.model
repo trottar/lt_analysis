@@ -24,21 +24,22 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 
 # Transverse cross-section
 sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-##sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T)
+###sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T)
 
 # Longitudinal-Transverse interference term
 sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 
 # Transverse-Transverse interference term
-####sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
-#sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
-sig_TT = ((-par13 * math.fabs(tt) + 1.0) * (math.fabs(tt)**(qq/par14)) - par15 * qq) * (math.sin(theta_cm)**2)
+# Marco's thesis
+sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 
 # Weight factor for Q2=2.115, W=2.95
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.45
 # From linear fit of all Q2
-wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
+#wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
+# From quadratic fit of all Q2	
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 
 ################################################################################
 # Previous iterations
@@ -115,3 +116,23 @@ wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 #sig_TT = (-p1/(1+qq))*math.exp(-p1*(math.fabs(tt))) * (math.sin(theta_cm)**2)
 ###sig_TT = (p1/(1+qq))*ft*math.exp(-p1*(qq)) * (math.sin(theta_cm)**2)
 ####sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+
+# From 10/17/2024
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+#sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+###sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
+# Trial 31
+#sig_TT = ((par13/math.fabs(tt) + par14) * math.exp(-par15*math.fabs(tt)) * par16 * (qq * math.exp(-qq))) * (math.sin(theta_cm)**2)
+# Trial 32
+# Marco's thesis
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+# Trial 33	
+# Vijay's thesis
+#sig_TT = (par13/math.fabs(tt)**3 * math.exp(par14*math.fabs(tt)) + par15/math.fabs(tt)) * (math.sin(theta_cm)**2)
+# Trial 34
+# Combination with inverse parabola w/ Q2-dep
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**2)
+# Trial 35
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**3)
+# Trial 36
+#sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
