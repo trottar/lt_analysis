@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-20 08:55:40 trottar"
+# Time-stamp: "2024-10-20 08:55:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2112,7 +2112,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             elif sig_name == "TT":
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
-            f_sig.SetParNames("p0", "p1", "p2", "p3")
+                f_sig.SetParNames("p0", "p1", "p2", "p3")
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
             f_sig.FixParameter(2, best_overall_params[2])
