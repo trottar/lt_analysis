@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-21 10:00:18 trottar"
+# Time-stamp: "2024-10-21 10:11:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -43,16 +43,6 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 ##################################################################################################################################################
 
 def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
-
-    # Create lists to store graph objects outside the loop
-    graphs_sig_fit = []
-    graphs_sig_p0 = []
-    graphs_sig_p1 = []
-    graphs_sig_p2 = []
-    graphs_sig_p3 = []
-    graphs_sig_converge = []
-    graphs_sig_temp = []
-    graphs_sig_accept = []
 
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -122,6 +112,16 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     
     for it, (key, val) in enumerate(fit_params.items()):
 
+        # Create lists to store graph objects outside the loop
+        graphs_sig_fit = []
+        graphs_sig_p0 = []
+        graphs_sig_p1 = []
+        graphs_sig_p2 = []
+        graphs_sig_p3 = []
+        graphs_sig_converge = []
+        graphs_sig_temp = []
+        graphs_sig_accept = []        
+        
         sig_name = key
         # Grab parameters used by functional forms
         num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
@@ -267,9 +267,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
                         f_sig.SetParNames("p0")
                         f_sig.SetParameter(0, current_params)
-                        #f_sig.SetParLimits(0, current_params - abs(current_params * par_sig_0), current_params + abs(current_params * par_sig_0))
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(0, -5, 5)
                         f_sig.SetParLimits(0, -max_param_value, max_param_value)
 
                         g_q2_sig_fit = TGraphErrors()
@@ -464,8 +461,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig_pre.SetParNames("p0")
             f_sig_pre.FixParameter(0, best_overall_params[0])
-
-            print("!!!!!!!!!!!",f_sig_pre.GetChisquare(), (num_events-num_params))
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -538,8 +533,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig.SetParNames("p0")
             f_sig.FixParameter(0, best_overall_params[0])
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -570,6 +563,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
+            
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
             f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
@@ -763,9 +758,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParNames("p0", "p1")
                         f_sig.SetParameter(0, current_params[0])
                         f_sig.SetParameter(1, current_params[1])
-                        #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
                         f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
                         f_sig.SetParLimits(1, -max_param_value, max_param_value)
 
                         g_q2_sig_fit = TGraphErrors()
@@ -972,8 +965,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig_pre.SetParNames("p0", "p1")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
-
-            print("!!!!!!!!!!!",f_sig_pre.GetChisquare(), (num_events-num_params))
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -1048,8 +1039,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
-            
+        
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -1079,6 +1069,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
+            
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
             f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
@@ -1280,11 +1272,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParameter(0, current_params[0])
                         f_sig.SetParameter(1, current_params[1])
                         f_sig.SetParameter(2, current_params[2])
-                        #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
                         f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
                         f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sig_2), current_params[2] + abs(current_params[2] * par_sig_2))
                         f_sig.SetParLimits(2, -max_param_value, max_param_value)
 
                         g_q2_sig_fit = TGraphErrors()
@@ -1498,8 +1487,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
             f_sig_pre.FixParameter(2, best_overall_params[2])
-
-            print("!!!!!!!!!!!",f_sig_pre.GetChisquare(), (num_events-num_params))
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -1575,8 +1562,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(1, best_overall_params[1])
             f_sig.FixParameter(2, best_overall_params[2])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
-            
+        
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -1606,6 +1592,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
+            
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
             f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
@@ -1814,21 +1802,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParameter(1, current_params[1])
                         f_sig.SetParameter(2, current_params[2])
                         f_sig.SetParameter(3, current_params[3])
-                        #f_sig.SetParLimits(0, current_params[0] - abs(current_params[0] * par_sig_0), current_params[0] + abs(current_params[0] * par_sig_0))
                         f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, current_params[1] - abs(current_params[1] * par_sig_1), current_params[1] + abs(current_params[1] * par_sig_1))
                         f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(2, current_params[2] - abs(current_params[2] * par_sig_2), current_params[2] + abs(current_params[2] * par_sig_2))
                         f_sig.SetParLimits(2, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(3, current_params[3] - abs(current_params[3] * par_sig_3), current_params[3] + abs(current_params[3] * par_sig_3))
-                        f_sig.SetParLimits(3, -max_param_value, max_param_value)                
-                        #f_sig.SetParLimits(0, -5, 5)
-                        f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(1, -5, 5)
-                        f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(2, -5, 5)
-                        f_sig.SetParLimits(2, -max_param_value, max_param_value)
-                        #f_sig.SetParLimits(3, -5, 5)
                         f_sig.SetParLimits(3, -max_param_value, max_param_value)                
 
                         g_q2_sig_fit = TGraphErrors()
@@ -2054,8 +2030,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig_pre.FixParameter(1, best_overall_params[1])
             f_sig_pre.FixParameter(2, best_overall_params[2])
             f_sig_pre.FixParameter(3, best_overall_params[3])
-
-            print("!!!!!!!!!!!",f_sig_pre.GetChisquare(), (num_events-num_params))
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -2132,8 +2106,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(2, best_overall_params[2])
             f_sig.FixParameter(3, best_overall_params[3])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
-            
+        
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -2163,6 +2136,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
+            
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
             f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
@@ -2176,7 +2151,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             max_sig_y = float('-inf')
 
             # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graphs_sig_p0[it], graphs_sig_p1[it]]:
+            for graph in [graphs_sig_p0[it], graphs_sig_p1[it], graphs_sig_p2[it], graphs_sig_p3[it]]:
                 n_points = graph.GetN()
                 for i in range(n_points):
                     y = graph.GetY()[i]
