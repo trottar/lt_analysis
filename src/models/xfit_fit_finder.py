@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-21 09:55:00 trottar"
+# Time-stamp: "2024-10-21 09:57:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -464,8 +464,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig_pre.SetParNames("p0")
             f_sig_pre.FixParameter(0, best_overall_params[0])
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -539,7 +537,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.SetParNames("p0")
             f_sig.FixParameter(0, best_overall_params[0])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -972,8 +970,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig_pre.SetParNames("p0", "p1")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -1048,7 +1044,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -1498,8 +1494,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
             f_sig_pre.FixParameter(2, best_overall_params[2])
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -1575,7 +1569,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(1, best_overall_params[1])
             f_sig.FixParameter(2, best_overall_params[2])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -2054,8 +2048,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig_pre.FixParameter(1, best_overall_params[1])
             f_sig_pre.FixParameter(2, best_overall_params[2])
             f_sig_pre.FixParameter(3, best_overall_params[3])
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
             
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
@@ -2132,7 +2124,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(2, best_overall_params[2])
             f_sig.FixParameter(3, best_overall_params[3])
 
-            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
