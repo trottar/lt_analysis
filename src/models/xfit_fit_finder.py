@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-21 10:15:01 trottar"
+# Time-stamp: "2024-10-21 10:30:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -269,16 +269,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParameter(0, current_params)
                         f_sig.SetParLimits(0, -max_param_value, max_param_value)
 
-                        g_q2_sig_fit = TGraphErrors()
                         for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                             if sig_name == "LT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                             else:
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
                         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -444,8 +441,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_prv = TGraph()
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()
-
-            graphs_sig_fit.append(graphs_sig_fit[it])            
+            
+            graphs_sig_fit.append(g_sig_fit)
 
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -469,11 +466,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             for i in range(len(w_vec)):
                 if sig_name == "LT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]))                                 
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
 
                 sig_X_fit = g_sig.GetY()[i]
@@ -548,22 +545,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             margin = 0.1 * (y_max - y_min)
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-            g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
-                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                 if sig_name == "LT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
@@ -608,14 +600,14 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
             c4.Update()
             
-            # Plot temperature convergence
+            # Plot temperature
             c5.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
             graphs_sig_temp[it].Draw("ALP")
             c5.Update()
             
-            # Plot acceptance probability convergence
+            # Plot acceptance probability
             c6.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
@@ -761,16 +753,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParLimits(0, -max_param_value, max_param_value)
                         f_sig.SetParLimits(1, -max_param_value, max_param_value)
 
-                        g_q2_sig_fit = TGraphErrors()
                         for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                             if sig_name == "LT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                             else:
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
                         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -947,7 +936,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             g_sig_fit = TGraphErrors()
             g_sig_fit_tot = TGraph()
 
-            graphs_sig_fit.append(g_sig_fit)            
+            graphs_sig_fit.append(g_sig_fit)
 
             if sig_name == "L":
                 #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
@@ -972,11 +961,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             for i in range(len(w_vec)):
                 if sig_name == "LT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]))                                 
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
 
                 sig_X_fit = g_sig.GetY()[i]
@@ -1053,22 +1042,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             margin = 0.1 * (y_max - y_min)
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-            g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
-                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                 if sig_name == "LT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
@@ -1275,16 +1259,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParLimits(1, -max_param_value, max_param_value)
                         f_sig.SetParLimits(2, -max_param_value, max_param_value)
 
-                        g_q2_sig_fit = TGraphErrors()
                         for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                             if sig_name == "LT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                             else:
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
                         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -1494,11 +1475,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             for i in range(len(w_vec)):
                 if sig_name == "LT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]))                                 
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
 
                 sig_X_fit = g_sig.GetY()[i]
@@ -1576,22 +1557,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             margin = 0.1 * (y_max - y_min)
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-            g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
-                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                 if sig_name == "LT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
@@ -1806,16 +1782,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         f_sig.SetParLimits(2, -max_param_value, max_param_value)
                         f_sig.SetParLimits(3, -max_param_value, max_param_value)                
 
-                        g_q2_sig_fit = TGraphErrors()
                         for i in range(len(w_vec)):
-                            g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                            g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                             if sig_name == "LT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                             if sig_name == "TT":                            
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                             else:
-                                sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                                sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                             g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
                         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -2037,11 +2010,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             for i in range(len(w_vec)):
                 if sig_name == "LT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X_pre = (f_sig_pre.Eval(g_sig.GetX()[i]))                                 
                 g_sig_prv.SetPoint(i, g_sig.GetX()[i], sig_X_pre)
 
                 sig_X_fit = g_sig.GetY()[i]
@@ -2120,22 +2093,17 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             margin = 0.1 * (y_max - y_min)
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-            g_q2_sig_fit = TGraphErrors()
             for i in range(len(w_vec)):
-                g_q2_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                g_q2_sig_fit.SetPointError(i, 0.0, sig_X_fit_err)
                 if sig_name == "LT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_LT)                                 
                 if sig_name == "TT":                
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]) * math.sin(th_vec[i] * PI / 180)**sine_exp_TT)                                 
                 else:
-                    sig_X = (f_sig.Eval(g_sig.GetX()[i])) * (g_vec[i])                                
+                    sig_X = (f_sig.Eval(g_sig.GetX()[i]))                                 
                 g_sig_fit_tot.SetPoint(i, g_sig.GetX()[i], sig_X)
 
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
-
-            print("!!!!!!!!!!!",f_sig.GetChisquare(), (num_events-num_params))
             
             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
             f_sig_status = f_sig.GetNDF() != 0
@@ -2186,14 +2154,14 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
             c4.Update()
             
-            # Plot temperature convergence
+            # Plot temperature
             c5.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
             graphs_sig_temp[it].Draw("ALP")
             c5.Update()
             
-            # Plot acceptance probability convergence
+            # Plot acceptance probability
             c6.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
