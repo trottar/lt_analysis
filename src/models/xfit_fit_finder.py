@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-21 10:11:22 trottar"
+# Time-stamp: "2024-10-21 10:15:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -43,6 +43,16 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 ##################################################################################################################################################
 
 def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
+
+    # Create lists to store graph objects outside the loop
+    graphs_sig_fit = []
+    graphs_sig_p0 = []
+    graphs_sig_p1 = []
+    graphs_sig_p2 = []
+    graphs_sig_p3 = []
+    graphs_sig_converge = []
+    graphs_sig_temp = []
+    graphs_sig_accept = []
 
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -112,16 +122,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     
     for it, (key, val) in enumerate(fit_params.items()):
 
-        # Create lists to store graph objects outside the loop
-        graphs_sig_fit = []
-        graphs_sig_p0 = []
-        graphs_sig_p1 = []
-        graphs_sig_p2 = []
-        graphs_sig_p3 = []
-        graphs_sig_converge = []
-        graphs_sig_temp = []
-        graphs_sig_accept = []        
-        
         sig_name = key
         # Grab parameters used by functional forms
         num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
@@ -841,6 +841,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                         # If the new cost is better or accepted by the acceptance probability, update the best parameters
@@ -883,8 +884,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         # Update the temperature
                         temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
 
                         iteration += 1
                         total_iteration += 1 if iteration % max_iterations == 0 else 0
