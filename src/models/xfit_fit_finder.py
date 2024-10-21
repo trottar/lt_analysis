@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-20 08:55:45 trottar"
+# Time-stamp: "2024-10-21 09:55:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -451,20 +451,22 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(graphs_sig_fit[it])            
 
             if sig_name == "L":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig_pre.SetParNames("p0")
             f_sig_pre.FixParameter(0, best_overall_params[0])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -537,6 +539,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.SetParNames("p0")
             f_sig.FixParameter(0, best_overall_params[0])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -954,21 +958,23 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(g_sig_fit)            
 
             if sig_name == "L":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
             f_sig_pre.SetParNames("p0", "p1")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -1042,6 +1048,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -1475,22 +1483,24 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(g_sig_fit)
             
             if sig_name == "L":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig_pre.SetParNames("p0", "p1", "p2")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
             f_sig_pre.FixParameter(2, best_overall_params[2])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -1565,6 +1575,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(1, best_overall_params[1])
             f_sig.FixParameter(2, best_overall_params[2])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -2026,23 +2038,25 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit.append(g_sig_fit)
             
             if sig_name == "L":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
-                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                #f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                f_sig_pre = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
             f_sig_pre.SetParNames("p0", "p1", "p2", "p3")
             f_sig_pre.FixParameter(0, best_overall_params[0])
             f_sig_pre.FixParameter(1, best_overall_params[1])
             f_sig_pre.FixParameter(2, best_overall_params[2])
             f_sig_pre.FixParameter(3, best_overall_params[3])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -2118,6 +2132,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(2, best_overall_params[2])
             f_sig.FixParameter(3, best_overall_params[3])
 
+            print("!!!!!!!!!!!",f_sig.GetChisquare()/(num_events-num_params)) # Divided by DoF for red. chi-squared
+            
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
