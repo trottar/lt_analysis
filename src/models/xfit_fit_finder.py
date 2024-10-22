@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:12:39 trottar"
+# Time-stamp: "2024-10-22 08:18:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -184,42 +184,42 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
-
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
-
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_err_0 = 0.0
-
-                # Track the best solution
-                best_params = par_sig_0
-                best_cost = float('inf')
-                previous_params = best_params
-                best_errors = par_sig_err_0
-
-                # Check for local minima
-                local_minima = []
-                local_iterations = 0
-                tabu_list = set()
-
-                # Local search
-                local_search_interval = 25
-
                 for i in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                
+                    iteration = 0
+
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
+
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_err_0 = 0.0
+
+                    # Track the best solution
+                    best_params = par_sig_0
+                    best_cost = float('inf')
+                    previous_params = best_params
+                    best_errors = par_sig_err_0
+
+                    # Check for local minima
+                    local_minima = []
+                    local_iterations = 0
+                    tabu_list = set()
+
+                    # Local search
+                    local_search_interval = 25
                     
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+
                     while iteration <= max_iterations:
                         
-                        fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                        fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-
                         g_sig_fit = TGraphErrors()
 
                         graphs_sig_fit.append(g_sig_fit)
@@ -612,43 +612,43 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
-
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
-
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_1 = initial_params[1]
-                par_sig_err_0 = 0.0
-                par_sig_err_1 = 0.0
-
-                # Track the best solution
-                best_params = [par_sig_0, par_sig_1]
-                best_cost = float('inf')
-                best_errors = [par_sig_err_0, par_sig_err_1]
-                previous_params = best_params[:]
-
-                # Check for local minima
-                local_minima = []
-                tabu_list = set()
-
-                # Local search
-                local_search_interval = 25
-
                 for i in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                
+                    iteration = 0
+
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
+
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_1 = initial_params[1]
+                    par_sig_err_0 = 0.0
+                    par_sig_err_1 = 0.0
+
+                    # Track the best solution
+                    best_params = [par_sig_0, par_sig_1]
+                    best_cost = float('inf')
+                    best_errors = [par_sig_err_0, par_sig_err_1]
+                    previous_params = best_params[:]
+
+                    # Check for local minima
+                    local_minima = []
+                    tabu_list = set()
+
+                    # Local search
+                    local_search_interval = 25
+
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
                     
                     while iteration <= max_iterations:
-                        
-                        fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                        fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    
+                                            
                         g_sig_fit = TGraphErrors()
 
                         graphs_sig_fit.append(g_sig_fit)
@@ -1060,45 +1060,45 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
-
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
-
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_1 = initial_params[1]
-                par_sig_2 = initial_params[2]
-                par_sig_err_0 = 0.0
-                par_sig_err_1 = 0.0
-                par_sig_err_2 = 0.0
-
-                # Track the best solution
-                best_params = [par_sig_0, par_sig_1, par_sig_2]
-                best_cost = float('inf')
-                best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
-                previous_params = best_params[:]
-
-                # Check for local minima
-                local_minima = []
-                tabu_list = set()
-
-                # Local search
-                local_search_interval = 25
-
                 for i in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                
+                    iteration = 0
+
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
+
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_1 = initial_params[1]
+                    par_sig_2 = initial_params[2]
+                    par_sig_err_0 = 0.0
+                    par_sig_err_1 = 0.0
+                    par_sig_err_2 = 0.0
+
+                    # Track the best solution
+                    best_params = [par_sig_0, par_sig_1, par_sig_2]
+                    best_cost = float('inf')
+                    best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
+                    previous_params = best_params[:]
+
+                    # Check for local minima
+                    local_minima = []
+                    tabu_list = set()
+
+                    # Local search
+                    local_search_interval = 25
+
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
                     
                     while iteration <= max_iterations:
-                        
-                        fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                        fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    
+                                            
                         g_sig_fit = TGraphErrors()
 
                         graphs_sig_fit.append(g_sig_fit)
@@ -1525,48 +1525,48 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                iteration = 0
-
-                initial_temperature = 1.0
-                temperature = initial_temperature
-                unchanged_iterations = 0
-                max_unchanged_iterations = 5
-
-                # Initialize adaptive parameter limits
-                par_sig_0 = initial_params[0]
-                par_sig_1 = initial_params[1]
-                par_sig_2 = initial_params[2]
-                par_sig_3 = initial_params[3]
-                par_sig_err_0 = 0.0
-                par_sig_err_1 = 0.0
-                par_sig_err_2 = 0.0
-                par_sig_err_3 = 0.0
-
-                # Track the best solution
-                best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
-                best_cost = float('inf')
-                best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
-                previous_params = best_params[:]
-
-                # Check for local minima
-                local_minima = []
-                local_iterations = 0
-                tabu_list = set()
-
-                # Local search
-                local_search_interval = 25
-
                 for i in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                
+                    iteration = 0
+
+                    initial_temperature = 1.0
+                    temperature = initial_temperature
+                    unchanged_iterations = 0
+                    max_unchanged_iterations = 5
+
+                    # Initialize adaptive parameter limits
+                    par_sig_0 = initial_params[0]
+                    par_sig_1 = initial_params[1]
+                    par_sig_2 = initial_params[2]
+                    par_sig_3 = initial_params[3]
+                    par_sig_err_0 = 0.0
+                    par_sig_err_1 = 0.0
+                    par_sig_err_2 = 0.0
+                    par_sig_err_3 = 0.0
+
+                    # Track the best solution
+                    best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
+                    best_cost = float('inf')
+                    best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
+                    previous_params = best_params[:]
+
+                    # Check for local minima
+                    local_minima = []
+                    local_iterations = 0
+                    tabu_list = set()
+
+                    # Local search
+                    local_search_interval = 25
+
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
                     
                     while iteration <= max_iterations:
-                        
-                        fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                        fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                        fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    
+                                            
                         g_sig_fit = TGraphErrors()
 
                         graphs_sig_fit.append(g_sig_fit)
