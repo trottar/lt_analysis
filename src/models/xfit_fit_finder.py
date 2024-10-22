@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:22:19 trottar"
+# Time-stamp: "2024-10-22 08:23:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -182,7 +182,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 for i in range(len(w_vec)):
 
@@ -610,7 +610,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 for i in range(len(w_vec)):
 
@@ -1058,7 +1058,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 for i in range(len(w_vec)):
 
@@ -1523,7 +1523,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 for i in range(len(w_vec)):
 
