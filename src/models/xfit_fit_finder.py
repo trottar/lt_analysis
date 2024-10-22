@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:47:26 trottar"
+# Time-stamp: "2024-10-22 08:56:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -325,6 +325,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             current_params = f_sig.GetParameter(0)
                             current_errors = f_sig.GetParError(0)
+                            current_bin = b
 
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params)
@@ -336,7 +337,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
-                                best_bin = b
+                                best_bin = current_bin
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -776,6 +777,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig.GetParError(1)
                             ]
 
+                            current_bin = b
+                            
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                             graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
@@ -787,7 +790,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
-                                best_bin = b
+                                best_bin = current_bin
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -1241,6 +1244,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig.GetParError(2)
                             ]
 
+                            current_bin = b
+                            
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                             graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1253,7 +1258,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
-                                best_bin = b
+                                best_bin = current_bin
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -1722,6 +1727,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig.GetParError(3)
                             ]
 
+                            current_bin = b
+                            
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                             graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1735,7 +1742,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
-                                best_bin = b
+                                best_bin = current_bin
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
