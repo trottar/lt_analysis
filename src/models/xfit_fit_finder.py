@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:39:27 trottar"
+# Time-stamp: "2024-10-22 08:47:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -203,6 +203,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Track the best solution
                     best_params = par_sig_0
                     best_cost = float('inf')
+                    best_bin = None
                     previous_params = best_params
                     best_errors = par_sig_err_0
 
@@ -335,6 +336,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
+                                best_bin = b
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -391,7 +393,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = b
+                    best_overall_bin = best_bin
                     best_overall_params = best_params
                     best_overall_errors = best_errors
                 
@@ -639,6 +641,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Track the best solution
                     best_params = [par_sig_0, par_sig_1]
                     best_cost = float('inf')
+                    best_bin = None
                     best_errors = [par_sig_err_0, par_sig_err_1]
                     previous_params = best_params[:]
 
@@ -784,6 +787,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
+                                best_bin = b
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -844,7 +848,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = b
+                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
@@ -1095,6 +1099,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Track the best solution
                     best_params = [par_sig_0, par_sig_1, par_sig_2]
                     best_cost = float('inf')
+                    best_bin = None
                     best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
                     previous_params = best_params[:]
 
@@ -1248,6 +1253,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
+                                best_bin = b
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -1311,7 +1317,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = b
+                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
@@ -1568,6 +1574,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Track the best solution
                     best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
                     best_cost = float('inf')
+                    best_bin = None
                     best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
                     previous_params = best_params[:]
 
@@ -1728,6 +1735,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if accept_prob > random.random():
                                 best_params = current_params
                                 best_cost = current_cost
+                                best_bin = b
                                 best_errors = current_errors
 
                             if iteration % local_search_interval == 0:
@@ -1793,7 +1801,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = b
+                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
