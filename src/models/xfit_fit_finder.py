@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:59:13 trottar"
+# Time-stamp: "2024-10-22 09:07:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -391,15 +391,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_bin = best_bin
-                    best_overall_params = best_params
-                    best_overall_errors = best_errors
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_bin = best_bin
+                        best_overall_params = best_params
+                        best_overall_errors = best_errors
                 
-            print("\n\nBest overall solution: {0}".format(best_overall_params))
-            print("Best overall cost: {0}".format(best_overall_cost))
+            print(f"\n\nBest overall solution: {best_overall_params}")
+            print(f"Best overall cost: {best_overall_cost}")
             print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
             # Record the end time
@@ -849,15 +849,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_bin = best_bin
-                    best_overall_params = best_params[:]
-                    best_overall_errors = best_errors[:]
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_bin = best_bin
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors[:]
                 
-            print("\n\nBest overall solution: {0}".format(best_overall_params))
-            print("Best overall cost: {0}".format(best_overall_cost))
+            print(f"\n\nBest overall solution: {best_overall_params}")
+            print(f"Best overall cost: {best_overall_cost}")
             print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
             # Record the end time
@@ -1321,15 +1321,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_bin = best_bin
-                    best_overall_params = best_params[:]
-                    best_overall_errors = best_errors[:]
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_bin = best_bin
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors[:]
                 
-            print("\n\nBest overall solution: {0}".format(best_overall_params))
-            print("Best overall cost: {0}".format(best_overall_cost))
+            print(f"\n\nBest overall solution: {best_overall_params}")
+            print(f"Best overall cost: {best_overall_cost}")
             print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
             # Record the end time
@@ -1808,15 +1808,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
-                # After the while loop, check if this run found a better solution
-                if abs(best_cost - 1) < abs(best_overall_cost - 1):
-                    best_overall_cost = best_cost
-                    best_overall_bin = best_bin
-                    best_overall_params = best_params[:]
-                    best_overall_errors = best_errors[:]
+                    # After the while loop, check if this run found a better solution
+                    if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = best_cost
+                        best_overall_bin = best_bin
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors[:]
                 
-            print("\n\nBest overall solution: {0}".format(best_overall_params))
-            print("Best overall cost: {0}".format(best_overall_cost))
+            print(f"\n\nBest overall solution: {best_overall_params}")
+            print(f"Best overall cost: {best_overall_cost}")
             print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
             # Record the end time
