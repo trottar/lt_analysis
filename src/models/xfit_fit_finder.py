@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 03:03:16 trottar"
+# Time-stamp: "2024-10-22 03:22:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -248,7 +248,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":
                                 sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                            if sig_name == "TT":                
+                            elif sig_name == "TT":
                                 sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                             else:
@@ -447,7 +447,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":
                     sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                if sig_name == "TT":                
+                elif sig_name == "TT":
                     sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                 else:
@@ -685,7 +685,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":
                                 sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                            if sig_name == "TT":                
+                            elif sig_name == "TT":
                                 sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                             else:
@@ -896,7 +896,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":
                     sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                if sig_name == "TT":                
+                elif sig_name == "TT":
                     sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                 else:
@@ -1142,7 +1142,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":
                                 sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                            if sig_name == "TT":                
+                            elif sig_name == "TT":
                                 sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                             else:
@@ -1362,7 +1362,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":
                     sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                if sig_name == "TT":                
+                elif sig_name == "TT":
                     sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                 else:
@@ -1615,7 +1615,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             if sig_name == "LT":
                                 sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                            if sig_name == "TT":                
+                            elif sig_name == "TT":
                                 sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                                 sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                             else:
@@ -1843,7 +1843,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 if sig_name == "LT":
                     sig_X_fit = (g_sig.GetY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i]) / (math.sin(th_vec[i] * PI / 180)**sine_exp_LT * (g_vec[i]))
-                if sig_name == "TT":                
+                if sig_name == "TT":
                     sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i]))
                     sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI / 180)**sine_exp_TT * (g_vec[i])
                 else:
