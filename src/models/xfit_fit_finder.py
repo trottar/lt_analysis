@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:56:34 trottar"
+# Time-stamp: "2024-10-22 08:57:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -400,6 +400,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
+            print("Best overall bin: {0}".format(best_overall_bin))
 
             # Record the end time
             end_time = time.time()
@@ -857,6 +858,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
+            print("Best overall bin: {0}".format(best_overall_bin))
 
             # Record the end time
             end_time = time.time()
@@ -1328,6 +1330,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
+            print("Best overall bin: {0}".format(best_overall_bin))
 
             # Record the end time
             end_time = time.time()
@@ -1814,6 +1817,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
+            print("Best overall bin: {0}".format(best_overall_bin))
 
             # Record the end time
             end_time = time.time()
