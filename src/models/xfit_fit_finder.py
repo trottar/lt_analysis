@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 09:07:42 trottar"
+# Time-stamp: "2024-10-22 09:17:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -400,7 +400,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
@@ -858,7 +858,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
@@ -1330,7 +1330,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
@@ -1817,7 +1817,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
