@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:08:17 trottar"
+# Time-stamp: "2024-10-22 08:12:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -209,9 +209,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Local search
                 local_search_interval = 25
 
-                while iteration <= max_iterations:
+                for i in range(len(w_vec)):
 
-                    for i in range(len(w_vec)):
+                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    
+                    while iteration <= max_iterations:
+                        
                         fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
@@ -635,9 +638,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Local search
                 local_search_interval = 25
 
-                while iteration <= max_iterations:
+                for i in range(len(w_vec)):
 
-                    for i in range(len(w_vec)):
+                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    
+                    while iteration <= max_iterations:
+                        
                         fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
@@ -1082,9 +1088,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Local search
                 local_search_interval = 25
 
-                while iteration <= max_iterations:
+                for i in range(len(w_vec)):
 
-                    for i in range(len(w_vec)):
+                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    
+                    while iteration <= max_iterations:
+                        
                         fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
@@ -1547,9 +1556,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Local search
                 local_search_interval = 25
 
-                while iteration <= max_iterations:
+                for i in range(len(w_vec)):
 
-                    for i in range(len(w_vec)):
+                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    
+                    while iteration <= max_iterations:
+                        
                         fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
                         fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
