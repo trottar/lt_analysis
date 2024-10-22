@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:18:02 trottar"
+# Time-stamp: "2024-10-22 08:22:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -186,7 +186,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for i in range(len(w_vec)):
 
-                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
                 
                     iteration = 0
 
@@ -614,7 +614,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for i in range(len(w_vec)):
 
-                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
                 
                     iteration = 0
 
@@ -1062,7 +1062,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for i in range(len(w_vec)):
 
-                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
                 
                     iteration = 0
 
@@ -1527,7 +1527,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for i in range(len(w_vec)):
 
-                    print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
                 
                     iteration = 0
 
