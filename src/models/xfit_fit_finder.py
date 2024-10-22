@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 08:23:17 trottar"
+# Time-stamp: "2024-10-22 08:39:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -146,6 +146,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
+            best_overall_bin = None
             total_iteration = 0
             max_param_value = 1e4
 
@@ -184,9 +185,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                for i in range(len(w_vec)):
+                for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -213,10 +214,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Local search
                     local_search_interval = 25
                     
-                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
 
                     while iteration <= max_iterations:
                         
@@ -390,10 +391,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
+                    best_overall_bin = b
                     best_overall_params = best_params
                     best_overall_errors = best_errors
                 
-            print("\nBest overall solution: {0}".format(best_overall_params))
+            print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
             # Record the end time
@@ -467,15 +469,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
+                fun_Sig_L = fun_Sig_L_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
+                fun_Sig_T = fun_Sig_T_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
+                fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
+                fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig.SetParNames("p0")
@@ -573,6 +579,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
+            best_overall_bin = None
             total_iteration = 0
             max_param_value = 1e4
 
@@ -612,9 +619,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                for i in range(len(w_vec)):
+                for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -642,10 +649,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Local search
                     local_search_interval = 25
 
-                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
                     
                     while iteration <= max_iterations:
                                             
@@ -837,10 +844,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
+                    best_overall_bin = b
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
-            print("\nBest overall solution: {0}".format(best_overall_params))
+            print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
             # Record the end time
@@ -911,17 +919,21 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
+                fun_Sig_L = fun_Sig_L_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
+                fun_Sig_T = fun_Sig_T_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
+                fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
+                fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig.SetParNames("p0", "p1")
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
@@ -1020,6 +1032,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
+            best_overall_bin = None
             total_iteration = 0
             max_param_value = 1e4
 
@@ -1060,9 +1073,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                for i in range(len(w_vec)):
+                for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -1092,10 +1105,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Local search
                     local_search_interval = 25
 
-                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
                     
                     while iteration <= max_iterations:
                                             
@@ -1298,10 +1311,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
+                    best_overall_bin = b
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
-            print("\nBest overall solution: {0}".format(best_overall_params))
+            print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
             # Record the end time
@@ -1372,15 +1386,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
+                fun_Sig_L = fun_Sig_L_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
+                fun_Sig_T = fun_Sig_T_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
+                fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
+                fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
             f_sig.SetParNames("p0", "p1", "p2")
@@ -1484,6 +1502,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
+            best_overall_bin = None
             total_iteration = 0
             max_param_value = 1e4
 
@@ -1525,9 +1544,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             for start in range(num_optimizations):
                 print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
-                for i in range(len(w_vec)):
+                for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the central bin values...\n Q2={q2_vec[i]:.3f}, W={w_vec[i]:.3f}, theta={th_vec[i]:.3f}")
+                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -1560,10 +1579,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     # Local search
                     local_search_interval = 25
 
-                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[i], w_vec[i])
-                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
-                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[i], w_vec[i], th_vec[i])
+                    fun_Sig_L = fun_Sig_L_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_T = fun_Sig_T_wrapper(q2_vec[b], w_vec[b])
+                    fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[b], w_vec[b], th_vec[b])
                     
                     while iteration <= max_iterations:
                                             
@@ -1774,10 +1793,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
+                    best_overall_bin = b
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
-            print("\nBest overall solution: {0}".format(best_overall_params))
+            print("\n\nBest overall solution: {0}".format(best_overall_params))
             print("Best overall cost: {0}".format(best_overall_cost))
 
             # Record the end time
@@ -1848,18 +1868,22 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
+                fun_Sig_L = fun_Sig_L_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 2.0, num_params)
             elif sig_name == "T":
+                fun_Sig_T = fun_Sig_T_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 2.0, num_params)
             elif sig_name == "LT":
+                fun_Sig_LT = fun_Sig_LT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 2.0, num_params)
             elif sig_name == "TT":
+                fun_Sig_TT = fun_Sig_TT_wrapper(q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)    
-                f_sig.SetParNames("p0", "p1", "p2", "p3")
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 2.0, num_params)
+            f_sig.SetParNames("p0", "p1", "p2", "p3")
             f_sig.FixParameter(0, best_overall_params[0])
             f_sig.FixParameter(1, best_overall_params[1])
             f_sig.FixParameter(2, best_overall_params[2])
