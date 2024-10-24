@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 10:02:48 trottar"
+# Time-stamp: "2024-10-24 10:04:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,8 +82,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     max_iterations = 1000
 
     # Number of times to run the algorithm
-    #num_optimizations = 10
-    num_optimizations = 50
+    num_optimizations = 10
 
     # Sine exponential term for LT/TT
     sine_exp_LT = 1.0 # Default, 10/23/2024
