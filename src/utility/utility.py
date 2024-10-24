@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:35:19 trottar"
+# Time-stamp: "2024-10-24 09:36:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -968,7 +968,7 @@ def get_central_value(lst):
 
 # Define a function for the dancing man animation
 def dancing_man(iteration, progress_message, sleep_duration):
-    # Define the frames for the dancing guy
+    # Define the frames for the dancing man
     frames = [
         r""" 
          o
@@ -985,17 +985,23 @@ def dancing_man(iteration, progress_message, sleep_duration):
     # Clear the previous line before printing the new state
     sys.stdout.write("\r" + ' ' * (len(progress_message) + 10))  # Clear space for message and man
     sys.stdout.write("\r" + progress_message)  # Print progress message
-    sys.stdout.flush()
 
     # Print the dancing man frame based on the current iteration
     dancing_frame = frames[iteration % len(frames)]
-    print(dancing_frame, end='', flush=True)  # Print without a new line
+    
+    # Prepare the full output line
+    full_output = f"{progress_message} {dancing_frame.strip()}"
+    
+    # Print the full output without a new line
+    sys.stdout.write("\r" + full_output)
+    sys.stdout.flush()
 
     # Delay for animation effect inside the function
     time.sleep(sleep_duration)
 
     # Clear the dancing man line before the next iteration
-    sys.stdout.write("\r" + ' ' * len(dancing_frame) + "\r")  # Clear the dancing man line
+    sys.stdout.write("\r" + ' ' * len(full_output) + "\r")  # Clear the full output line
+    sys.stdout.flush()
 
 ################################################################################################################################################
 
