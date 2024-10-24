@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:37:39 trottar"
+# Time-stamp: "2024-10-24 09:39:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -966,8 +966,9 @@ def get_central_value(lst):
 
 ##################################################################################################################################################
 
+
 # Define a function for the dancing man animation
-def dancing_man(iteration, progress_message, sleep_duration):
+def dancing_man(iteration, progress_message):
     # Define the frames for the dancing man
     frames = [
         r""" 
@@ -982,11 +983,8 @@ def dancing_man(iteration, progress_message, sleep_duration):
         """
     ]
 
-    # Calculate the length of the progress message
-    message_length = len(progress_message)
-    
     # Clear the previous line before printing the new state
-    sys.stdout.write("\r" + ' ' * (message_length + 10))  # Clear space for message and man
+    sys.stdout.write("\r" + ' ' * (len(progress_message) + 10))  # Clear space for message and man
     sys.stdout.write("\r" + progress_message)  # Print progress message
     sys.stdout.flush()
 
@@ -995,11 +993,11 @@ def dancing_man(iteration, progress_message, sleep_duration):
     sys.stdout.write("\r" + progress_message + dancing_frame)  # Print progress message and dancing man
     sys.stdout.flush()  # Ensure it is printed immediately
 
-    # Delay for animation effect inside the function
-    time.sleep(sleep_duration)
+    # Delay for animation effect
+    time.sleep(0.5)
 
     # Clear the dancing man line before the next iteration
-    sys.stdout.write("\r" + ' ' * (message_length + len(dancing_frame)))  # Clear the line
+    sys.stdout.write("\r" + ' ' * (len(progress_message) + len(dancing_frame)))  # Clear the line
     sys.stdout.flush()  # Ensure the clear is immediate
 
 ################################################################################################################################################
