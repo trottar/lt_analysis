@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:44:44 trottar"
+# Time-stamp: "2024-10-24 09:45:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -963,23 +963,6 @@ def get_central_value(lst):
     else:  # Even-sized list
         mid1, mid2 = n // 2 - 1, n // 2
         return (lst[mid1] + lst[mid2]) / 2
-
-##################################################################################################################################################
-
-def dancing_man(iteration, progress_message):
-    # Define the frames for the dancing man (all on one line)
-    frames = [
-        "  o  /|\  / \  ",  # First frame
-        "  o  \|/  / \  "   # Second frame
-    ]
-    
-    # Create the dancing man frame based on the current iteration
-    dancing_frame = frames[iteration % len(frames)]
-    
-    # Print the progress message and dancing man on the same line
-    sys.stdout.write(f"\r{progress_message} {dancing_frame}")
-    sys.stdout.flush()
-    #time.sleep(0.5)
 
 ################################################################################################################################################
 
