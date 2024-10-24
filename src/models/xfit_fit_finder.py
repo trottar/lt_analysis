@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 10:05:13 trottar"
+# Time-stamp: "2024-10-24 11:47:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -347,6 +347,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params
                         best_overall_errors = best_errors
+                        print(f"Current best cost: {best_overall_cost}")
 
             try:
                 print(f"\n\nBest overall solution: {best_overall_params}")
@@ -777,7 +778,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors[:]
-
+                        print(f"Current best cost: {best_overall_cost}")
+                        
             try:
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {best_overall_cost}")
@@ -1221,7 +1223,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors[:]
-
+                        print(f"Current best cost: {best_overall_cost}")
+                        
             try:
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {best_overall_cost}")
@@ -1680,7 +1683,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors[:]
-                
+                        print(f"Current best cost: {best_overall_cost}")
+                        
             try:
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {best_overall_cost}")
