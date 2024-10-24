@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:30:33 trottar"
+# Time-stamp: "2024-10-24 09:32:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -982,14 +982,12 @@ def dancing_man(iteration, progress_message, sleep_duration):
         """
     ]
 
-    # Clear the console
-    os.system('cls' if os.name == 'nt' else 'clear')
+    # Print the progress message with carriage return to overwrite
+    sys.stdout.write("\r" + progress_message)
+    sys.stdout.flush()
 
-    # Print the progress message
-    print(progress_message)
-
-    # Print the dancing man frame
-    dancing_frame = frames[0] if (iteration % 2 == 0) else frames[1]
+    # Print the dancing man frame based on the current iteration
+    dancing_frame = frames[iteration % len(frames)]
     print(dancing_frame)
 
     # Delay for animation effect inside the function
