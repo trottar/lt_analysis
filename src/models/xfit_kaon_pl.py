@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:55:50 trottar"
+# Time-stamp: "2024-10-24 10:09:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,14 @@ import sys
 # Importing utility functions
 sys.path.append("utility")
 from utility import load_equations, prepare_equations
+
+################################################################################################################################################
+
+# Define constants
+PI = math.pi
+m_p = 0.93827231
+m_n = 0.93956541
+mkpl = 0.493677
 
 ################################################################################################################################################
 
@@ -74,7 +82,7 @@ def fun_Sig_T(g, qq, ww, x, par):
     # Calculate SigT
     return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
 
-def fun_Sig_LT_wrapper(wfactor, q2, w, theta=math.pi/2):
+def fun_Sig_LT_wrapper(wfactor, q2, w, theta=PI/2):
     theta_rad = (theta)*(PI/180)
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta_rad):
         return fun_Sig_LT(g, qq, ww, theta_cm, x, par)
@@ -88,7 +96,7 @@ def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     # Calculate SigLT
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
-def fun_Sig_TT_wrapper(wfactor, q2, w, theta=math.pi/2):
+def fun_Sig_TT_wrapper(wfactor, q2, w, theta=PI/2):
     theta_rad = (theta)*(PI/180)
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta_rad):
         return fun_Sig_TT(g, qq, ww, theta_cm, x, par)
