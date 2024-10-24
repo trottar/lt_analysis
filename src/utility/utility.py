@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:44:15 trottar"
+# Time-stamp: "2024-10-24 09:44:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -979,7 +979,7 @@ def dancing_man(iteration, progress_message):
     # Print the progress message and dancing man on the same line
     sys.stdout.write(f"\r{progress_message} {dancing_frame}")
     sys.stdout.flush()
-    time.sleep(0.5)
+    #time.sleep(0.5)
 
 ################################################################################################################################################
 
