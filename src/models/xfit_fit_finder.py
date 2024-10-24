@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:20:20 trottar"
+# Time-stamp: "2024-10-24 09:25:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -206,7 +206,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Print the progress message and the dancing man on the same line
-                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1})\n{2}".format(
                             iteration, max_iterations, dancing_man(iteration, 0.5)))
                         sys.stdout.flush()                        
 
@@ -619,7 +619,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Print the progress message and the dancing man on the same line
-                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1})\n{2}".format(
                             iteration, max_iterations, dancing_man(iteration, 0.5)))
                         sys.stdout.flush()                        
 
@@ -1054,7 +1054,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Print the progress message and the dancing man on the same line
-                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1})\n{2}".format(
                             iteration, max_iterations, dancing_man(iteration, 0.5)))
                         sys.stdout.flush()                        
 
@@ -1507,7 +1507,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Print the progress message and the dancing man on the same line
-                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1})\n{2}".format(
                             iteration, max_iterations, dancing_man(iteration, 0.5)))
                         sys.stdout.flush()                        
 
