@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 12:04:14 trottar"
+# Time-stamp: "2024-10-24 12:05:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -351,8 +351,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             cost_history.append(current_cost)
 
                             # 5. Update parameters for next iteration
-                            par_sig_0, par_sig_1, par_sig_2 = current_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+                            par_sig_0 = current_params
+                            par_sig_err_0 = 0.0
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -797,8 +797,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             cost_history.append(current_cost)
 
                             # 5. Update parameters for next iteration
-                            par_sig_0, par_sig_1, par_sig_2 = current_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+                            par_sig_0, par_sig_1 = current_params
+                            par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1732,8 +1732,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             cost_history.append(current_cost)
 
                             # 5. Update parameters for next iteration
-                            par_sig_0, par_sig_1, par_sig_2 = current_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
+                            par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
