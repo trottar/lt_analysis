@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:41:12 trottar"
+# Time-stamp: "2024-10-24 09:43:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -966,30 +966,19 @@ def get_central_value(lst):
 
 ##################################################################################################################################################
 
-# Define a function for the dancing man animation
 def dancing_man(iteration, progress_message):
-    # Define the frames for the dancing man
+    # Define the frames for the dancing man (removed extra newlines)
     frames = [
-        r""" 
-         o
-        /|\
-        / \
-        """,
-        r""" 
-         o
-        \|/
-        / \
-        """
+        " o \n/|\\\n/ \\ ",  # First frame
+        " o \n\\|/\n/ \\ "   # Second frame
     ]
-
+    
     # Create the dancing man frame based on the current iteration
     dancing_frame = frames[iteration % len(frames)]
-
+    
     # Print the progress message and dancing man on the same line
     sys.stdout.write(f"\r{progress_message} {dancing_frame}")
-    sys.stdout.flush()  # Ensure it is printed immediately
-
-    # Delay for animation effect
+    sys.stdout.flush()
     time.sleep(0.5)
 
 ################################################################################################################################################
