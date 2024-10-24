@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:29:08 trottar"
+# Time-stamp: "2024-10-24 09:30:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -206,7 +206,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Call the dancing_man function with the current progress message and sleep duration
-                        dancing_man(f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
+                        dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
                         
                         try:
                             # Perturb parameters
@@ -617,7 +617,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Call the dancing_man function with the current progress message and sleep duration
-                        dancing_man(f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
+                        dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
 
                         try:
                             # Perturb parameters
@@ -1050,7 +1050,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Call the dancing_man function with the current progress message and sleep duration
-                        dancing_man(f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
+                        dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
 
                         try:
 
@@ -1501,7 +1501,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         graphs_sig_fit.append(g_sig_fit)
 
                         # Call the dancing_man function with the current progress message and sleep duration
-                        dancing_man(f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
+                        dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})", 0.5)
 
                         try:
                             # Perturb parameters

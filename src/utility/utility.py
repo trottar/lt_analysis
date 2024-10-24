@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:28:07 trottar"
+# Time-stamp: "2024-10-24 09:30:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -967,7 +967,7 @@ def get_central_value(lst):
 ##################################################################################################################################################
 
 # Define a function for the dancing man animation
-def dancing_man(progress_message, sleep_duration):
+def dancing_man(iteration, progress_message, sleep_duration):
     # Define the frames for the dancing guy with proper line breaks
     frames = [
         r""" 
