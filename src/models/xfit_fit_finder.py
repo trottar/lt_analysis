@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:40:29 trottar"
+# Time-stamp: "2024-10-24 09:41:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -207,6 +207,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         # Call the dancing_man function with the current progress message and sleep duration
                         dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})")
+                        # Clear the line after completion
+                        sys.stdout.write("\r" + ' ' * 50)  # Clear the line
+                        sys.stdout.flush()                        
                         
                         try:
                             # Perturb parameters
@@ -618,6 +621,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         # Call the dancing_man function with the current progress message and sleep duration
                         dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})")
+                        # Clear the line after completion
+                        sys.stdout.write("\r" + ' ' * 50)  # Clear the line
+                        sys.stdout.flush()                        
 
                         try:
                             # Perturb parameters
@@ -1051,6 +1057,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         # Call the dancing_man function with the current progress message and sleep duration
                         dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})")
+                        # Clear the line after completion
+                        sys.stdout.write("\r" + ' ' * 50)  # Clear the line
+                        sys.stdout.flush()                        
 
                         try:
 
@@ -1502,6 +1511,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         # Call the dancing_man function with the current progress message and sleep duration
                         dancing_man(iteration, f"Searching for best parameters...({iteration}/{max_iterations})")
+                        # Clear the line after completion
+                        sys.stdout.write("\r" + ' ' * 50)  # Clear the line
+                        sys.stdout.flush()                        
 
                         try:
                             # Perturb parameters
