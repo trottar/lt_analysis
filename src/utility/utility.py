@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:32:54 trottar"
+# Time-stamp: "2024-10-24 09:34:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -968,7 +968,7 @@ def get_central_value(lst):
 
 # Define a function for the dancing man animation
 def dancing_man(iteration, progress_message, sleep_duration):
-    # Define the frames for the dancing guy with proper line breaks
+    # Define the frames for the dancing guy
     frames = [
         r""" 
          o
@@ -982,17 +982,20 @@ def dancing_man(iteration, progress_message, sleep_duration):
         """
     ]
 
-    # Print the progress message with carriage return to overwrite
-    sys.stdout.write("\r" + progress_message)
+    # Print the progress message
+    sys.stdout.write("\r" + progress_message)  # Use carriage return to overwrite the message
     sys.stdout.flush()
 
     # Print the dancing man frame based on the current iteration
     dancing_frame = frames[iteration % len(frames)]
-    print(dancing_frame)
+    print(dancing_frame, end='', flush=True)  # Print without new line
 
     # Delay for animation effect inside the function
     time.sleep(sleep_duration)
-    
+
+    # Clear the dancing man line before the next iteration
+    sys.stdout.write("\r" + ' ' * len(dancing_frame) + "\r")  # Clear the dancing man line
+
 ################################################################################################################################################
 
 def load_equations(filename='variables.inp'):
