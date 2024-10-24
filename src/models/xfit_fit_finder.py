@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 08:25:14 trottar"
+# Time-stamp: "2024-10-24 08:27:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -347,7 +347,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
                 
             # Record the end time
@@ -767,7 +767,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             # Record the end time
@@ -1201,7 +1201,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             # Record the end time
@@ -1650,7 +1650,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             # Record the end time
