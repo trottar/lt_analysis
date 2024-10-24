@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 12:06:44 trottar"
+# Time-stamp: "2024-10-24 12:08:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -334,7 +334,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 par_sig_err_0 = 0.0
 
                         except (TypeError or ZeroDivisionError) as e:
-                            print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
+                            #print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
                             # 1. Generate safe parameter values
                             current_params = [
                                 max(min(p + random.uniform(-0.1, 0.1), max_param_value), -max_param_value) 
@@ -780,7 +780,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
 
                         except (TypeError or ZeroDivisionError) as e:
-                            print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
+                            #print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
                             # 1. Generate safe parameter values
                             current_params = [
                                 max(min(p + random.uniform(-0.1, 0.1), max_param_value), -max_param_value) 
@@ -1240,7 +1240,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
 
                         except (TypeError or ZeroDivisionError) as e:
-                            print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
+                            #print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
                             # 1. Generate safe parameter values
                             current_params = [
                                 max(min(p + random.uniform(-0.1, 0.1), max_param_value), -max_param_value) 
@@ -1715,7 +1715,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
 
                         except (TypeError or ZeroDivisionError) as e:
-                            print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
+                            #print(f"{iteration} | WARNING: {e}, Adjusting parameter limits and retrying...")
                             # 1. Generate safe parameter values
                             current_params = [
                                 max(min(p + random.uniform(-0.1, 0.1), max_param_value), -max_param_value) 
