@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:43:20 trottar"
+# Time-stamp: "2024-10-24 09:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -967,10 +967,10 @@ def get_central_value(lst):
 ##################################################################################################################################################
 
 def dancing_man(iteration, progress_message):
-    # Define the frames for the dancing man (removed extra newlines)
+    # Define the frames for the dancing man (all on one line)
     frames = [
-        " o \n/|\\\n/ \\ ",  # First frame
-        " o \n\\|/\n/ \\ "   # Second frame
+        "  o  /|\  / \  ",  # First frame
+        "  o  \|/  / \  "   # Second frame
     ]
     
     # Create the dancing man frame based on the current iteration
