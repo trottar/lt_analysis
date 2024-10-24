@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-22 09:28:12 trottar"
+# Time-stamp: "2024-10-24 03:50:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -25,7 +25,7 @@ import os, sys
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, within_tolerance, get_central_value
+from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value
 
 ##################################################################################################################################################
 
@@ -72,6 +72,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     nsep, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
+    sine_exp_LT = inpDict["sine_exp_LT"]
+    sine_exp_TT = inpDict["sine_exp_TT"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
@@ -92,23 +94,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     #fun_Sig_T = fun_Sig_T_wrapper(q2_center_val, w_center_val)
     #fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val, th_center_val)
     #fun_Sig_TT = fun_Sig_TT_wrapper(q2_center_val, w_center_val, th_center_val)
-    
-    '''
-    # Build the final dictionary excluding good fits from previous iteration (within tolerance of 1e-3)
-    sig_fit_dict = {
-        key: {"params": fit_params[key]}
-        for key, values in chi2_sets.items()
-        if not within_tolerance(values)
-    }
-
-    # Safely handle the case where sig_fit_dict is empty
-    if not sig_fit_dict:
-        print("ERROR: All fits are within 1e-3 of untity!")
-        sys.exit(2)
-
-    # Create a boolean dictionary to indicate which keys are still present in sig_fit_dict
-    presence_dict = {key: key in sig_fit_dict for key in fit_params}
-    '''
     
     num_events = nsep.GetEntries()    
     
@@ -153,13 +138,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
-            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
-            lambda_min = 1e-6  # Minimum lambda value
-            lambda_max = 1.0  # Maximum lambda value
             cost_history = []
-            tolerance = 1e-6  # Early stopping tolerance
-            alpha = 0.1  # Small constant to penalize model complexity            
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': []}
@@ -243,9 +222,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                                if sig_name == "LT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                if sig_name == "TT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                else:
+                                    sig_X_fit = (g_sig.GetY()[i])
+                                    sig_X_fit_err = (g_sig.GetEY()[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -276,52 +261,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             params_sig_history['p0'].append(current_params)
 
-                            if num_events > num_params:
-                                # Calculate the cost (reduced chi-square value) for the current parameters                            
-                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                                # Acceptance probability
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                            else:
-                                # Define lambda values to try (in log space for better exploration)
-                                lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                                best_cost_iteration = float('inf')  # Initialize to a large value
-                                best_lambda = lambda_reg  # Start with initial lambda                            
-                                # Adaptive search for the best lambda
-                                for lambda_try in lambda_values:
-                                    residuals = []  # Store residuals for this lambda value
-                                    # Loop through each data point (event)
-                                    for i in range(num_events):
-                                        observed = g_sig.GetY()[i]  # Observed value
-                                        expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
-                                        # Compute residuals (normalized by error if available)
-                                        if g_sig.GetEY()[i] != 0:
-                                            residual = (observed - expected) / g_sig.GetEY()[i]
-                                        else:
-                                            residual = observed - expected
-                                        residuals.append(residual)
-                                    # Calculate the mean squared error (MSE)
-                                    mse = np.mean(np.square(residuals))
-                                    # Compute L2 regularization term (sum of parameter squares)
-                                    l2_reg = sum(p**2 for p in current_params)
-                                    # Generalized reduced chi-squared formula
-                                    current_cost_try = (mse + lambda_try * l2_reg) / (num_events + alpha * num_params)
-                                    # Check if this lambda gives the best cost so far
-                                    if current_cost_try < best_cost_iteration:
-                                        best_cost_iteration = current_cost_try
-                                        best_lambda = lambda_try
-                                        best_params = current_params.copy()  # Save parameters for this lambda
-                                    # Optional: Early stopping if the improvement is small
-                                    if abs(current_cost_try - best_cost_iteration) < tolerance:
-                                        break
-                                # Use the best lambda and parameters found
-                                lambda_reg = best_lambda
-                                current_params = best_params  # Update model parameters
-                                current_cost = best_cost_iteration  # Final cost for this iteration
-                                # Store cost history for analysis
-                                cost_history.append(current_cost)
-                                # Calculate acceptance probability for simulated annealing (if applicable)
-                                accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
-
+                            # Calculate cost with consistent regularization
+                            current_cost, lambda_reg = calculate_cost(
+                                f_sig, g_sig, current_params,
+                                num_events, num_params, lambda_reg
+                            )
+                            # Store cost for history
+                            cost_history.append(current_cost)            
+                            # Adapt regularization strength based on history
+                            if len(cost_history) >= 2:
+                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)
+                            # Update acceptance probability for simulated annealing
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+            
                             current_params = f_sig.GetParameter(0)
                             current_errors = f_sig.GetParError(0)
                             current_bin = b
@@ -443,9 +395,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                if sig_name == "LT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                if sig_name == "TT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                else:
+                    sig_X_fit = (g_sig.GetY()[i])
+                    sig_X_fit_err = (g_sig.GetEY()[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -589,13 +547,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
-            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
-            lambda_min = 1e-6  # Minimum lambda value
-            lambda_max = 1.0  # Maximum lambda value
             cost_history = []
-            tolerance = 1e-6  # Early stopping tolerance
-            alpha = 0.1  # Small constant to penalize model complexity            
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': []}
@@ -684,9 +636,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                                if sig_name == "LT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                if sig_name == "TT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                else:
+                                    sig_X_fit = (g_sig.GetY()[i])
+                                    sig_X_fit_err = (g_sig.GetEY()[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -720,51 +678,18 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             params_sig_history['p0'].append(current_params[0])
                             params_sig_history['p1'].append(current_params[1])
 
-                            if num_events > num_params:
-                                # Calculate the cost (reduced chi-square value) for the current parameters                            
-                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                                # Acceptance probability
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                            else:
-                                # Define lambda values to try (in log space for better exploration)
-                                lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                                best_cost_iteration = float('inf')  # Initialize to a large value
-                                best_lambda = lambda_reg  # Start with initial lambda                            
-                                # Adaptive search for the best lambda
-                                for lambda_try in lambda_values:
-                                    residuals = []  # Store residuals for this lambda value
-                                    # Loop through each data point (event)
-                                    for i in range(num_events):
-                                        observed = g_sig.GetY()[i]  # Observed value
-                                        expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
-                                        # Compute residuals (normalized by error if available)
-                                        if g_sig.GetEY()[i] != 0:
-                                            residual = (observed - expected) / g_sig.GetEY()[i]
-                                        else:
-                                            residual = observed - expected
-                                        residuals.append(residual)
-                                    # Calculate the mean squared error (MSE)
-                                    mse = np.mean(np.square(residuals))
-                                    # Compute L2 regularization term (sum of parameter squares)
-                                    l2_reg = sum(p**2 for p in current_params)
-                                    # Generalized reduced chi-squared formula
-                                    current_cost_try = (mse + lambda_try * l2_reg) / (num_events + alpha * num_params)
-                                    # Check if this lambda gives the best cost so far
-                                    if current_cost_try < best_cost_iteration:
-                                        best_cost_iteration = current_cost_try
-                                        best_lambda = lambda_try
-                                        best_params = current_params.copy()  # Save parameters for this lambda
-                                    # Optional: Early stopping if the improvement is small
-                                    if abs(current_cost_try - best_cost_iteration) < tolerance:
-                                        break
-                                # Use the best lambda and parameters found
-                                lambda_reg = best_lambda
-                                current_params = best_params  # Update model parameters
-                                current_cost = best_cost_iteration  # Final cost for this iteration
-                                # Store cost history for analysis
-                                cost_history.append(current_cost)
-                                # Calculate acceptance probability for simulated annealing (if applicable)
-                                accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
+                            # Calculate cost with consistent regularization
+                            current_cost, lambda_reg = calculate_cost(
+                                f_sig, g_sig, current_params,
+                                num_events, num_params, lambda_reg
+                            )
+                            # Store cost for history
+                            cost_history.append(current_cost)            
+                            # Adapt regularization strength based on history
+                            if len(cost_history) >= 2:
+                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)            
+                            # Update acceptance probability for simulated annealing
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                             current_params = [
                                 f_sig.GetParameter(0),
@@ -897,9 +822,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                if sig_name == "LT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                if sig_name == "TT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                else:
+                    sig_X_fit = (g_sig.GetY()[i])
+                    sig_X_fit_err = (g_sig.GetEY()[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1046,13 +977,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
-            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
-            lambda_min = 1e-6  # Minimum lambda value
-            lambda_max = 1.0  # Maximum lambda value
             cost_history = []
-            tolerance = 1e-6  # Early stopping tolerance
-            alpha = 0.1  # Small constant to penalize model complexity            
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': []}
@@ -1146,9 +1071,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                                if sig_name == "LT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                if sig_name == "TT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                else:
+                                    sig_X_fit = (g_sig.GetY()[i])
+                                    sig_X_fit_err = (g_sig.GetEY()[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1185,51 +1116,18 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             params_sig_history['p1'].append(current_params[1])
                             params_sig_history['p2'].append(current_params[2])
 
-                            if num_events > num_params:
-                                # Calculate the cost (reduced chi-square value) for the current parameters                            
-                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                                # Acceptance probability
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                            else:
-                                # Define lambda values to try (in log space for better exploration)
-                                lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                                best_cost_iteration = float('inf')  # Initialize to a large value
-                                best_lambda = lambda_reg  # Start with initial lambda                            
-                                # Adaptive search for the best lambda
-                                for lambda_try in lambda_values:
-                                    residuals = []  # Store residuals for this lambda value
-                                    # Loop through each data point (event)
-                                    for i in range(num_events):
-                                        observed = g_sig.GetY()[i]  # Observed value
-                                        expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
-                                        # Compute residuals (normalized by error if available)
-                                        if g_sig.GetEY()[i] != 0:
-                                            residual = (observed - expected) / g_sig.GetEY()[i]
-                                        else:
-                                            residual = observed - expected
-                                        residuals.append(residual)
-                                    # Calculate the mean squared error (MSE)
-                                    mse = np.mean(np.square(residuals))
-                                    # Compute L2 regularization term (sum of parameter squares)
-                                    l2_reg = sum(p**2 for p in current_params)
-                                    # Generalized reduced chi-squared formula
-                                    current_cost_try = (mse + lambda_try * l2_reg) / (num_events + alpha * num_params)
-                                    # Check if this lambda gives the best cost so far
-                                    if current_cost_try < best_cost_iteration:
-                                        best_cost_iteration = current_cost_try
-                                        best_lambda = lambda_try
-                                        best_params = current_params.copy()  # Save parameters for this lambda
-                                    # Optional: Early stopping if the improvement is small
-                                    if abs(current_cost_try - best_cost_iteration) < tolerance:
-                                        break
-                                # Use the best lambda and parameters found
-                                lambda_reg = best_lambda
-                                current_params = best_params  # Update model parameters
-                                current_cost = best_cost_iteration  # Final cost for this iteration
-                                # Store cost history for analysis
-                                cost_history.append(current_cost)
-                                # Calculate acceptance probability for simulated annealing (if applicable)
-                                accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
+                            # Calculate cost with consistent regularization
+                            current_cost, lambda_reg = calculate_cost(
+                                f_sig, g_sig, current_params,
+                                num_events, num_params, lambda_reg
+                            )
+                            # Store cost for history
+                            cost_history.append(current_cost)            
+                            # Adapt regularization strength based on history
+                            if len(cost_history) >= 2:
+                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)            
+                            # Update acceptance probability for simulated annealing
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                             current_params = [
                                 f_sig.GetParameter(0),
@@ -1368,9 +1266,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                if sig_name == "LT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                if sig_name == "TT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                else:
+                    sig_X_fit = (g_sig.GetY()[i])
+                    sig_X_fit_err = (g_sig.GetEY()[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1520,13 +1424,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
             lambda_reg = 0.01  # Initial regularization strength
-            lambda_increase = 1.05  # Factor to increase lambda (+ 5%)
-            lambda_decrease = 0.95  # Factor to decrease lambda (- 5%)
-            lambda_min = 1e-6  # Minimum lambda value
-            lambda_max = 1.0  # Maximum lambda value
             cost_history = []
-            tolerance = 1e-6  # Early stopping tolerance
-            alpha = 0.1  # Small constant to penalize model complexity            
             
             # Store the parameter values and chi-square values for each iteration
             params_sig_history = {'p0': [], 'p1': [], 'p2': [], 'p3': []}
@@ -1624,9 +1522,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                                if sig_name == "LT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                                if sig_name == "TT":
+                                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                                else:
+                                    sig_X_fit = (g_sig.GetY()[i])
+                                    sig_X_fit_err = (g_sig.GetEY()[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1666,51 +1570,18 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             params_sig_history['p2'].append(current_params[2])
                             params_sig_history['p3'].append(current_params[3])
 
-                            if num_events > num_params:
-                                # Calculate the cost (reduced chi-square value) for the current parameters                            
-                                current_cost = f_sig.GetChisquare()/(num_events-num_params) # Divided by DoF for red. chi-squared
-                                # Acceptance probability
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-                            else:
-                                # Define lambda values to try (in log space for better exploration)
-                                lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
-                                best_cost_iteration = float('inf')  # Initialize to a large value
-                                best_lambda = lambda_reg  # Start with initial lambda                            
-                                # Adaptive search for the best lambda
-                                for lambda_try in lambda_values:
-                                    residuals = []  # Store residuals for this lambda value
-                                    # Loop through each data point (event)
-                                    for i in range(num_events):
-                                        observed = g_sig.GetY()[i]  # Observed value
-                                        expected = f_sig.Eval(g_sig.GetX()[i])  # Model prediction
-                                        # Compute residuals (normalized by error if available)
-                                        if g_sig.GetEY()[i] != 0:
-                                            residual = (observed - expected) / g_sig.GetEY()[i]
-                                        else:
-                                            residual = observed - expected
-                                        residuals.append(residual)
-                                    # Calculate the mean squared error (MSE)
-                                    mse = np.mean(np.square(residuals))
-                                    # Compute L2 regularization term (sum of parameter squares)
-                                    l2_reg = sum(p**2 for p in current_params)
-                                    # Generalized reduced chi-squared formula
-                                    current_cost_try = (mse + lambda_try * l2_reg) / (num_events + alpha * num_params)
-                                    # Check if this lambda gives the best cost so far
-                                    if current_cost_try < best_cost_iteration:
-                                        best_cost_iteration = current_cost_try
-                                        best_lambda = lambda_try
-                                        best_params = current_params.copy()  # Save parameters for this lambda
-                                    # Optional: Early stopping if the improvement is small
-                                    if abs(current_cost_try - best_cost_iteration) < tolerance:
-                                        break
-                                # Use the best lambda and parameters found
-                                lambda_reg = best_lambda
-                                current_params = best_params  # Update model parameters
-                                current_cost = best_cost_iteration  # Final cost for this iteration
-                                # Store cost history for analysis
-                                cost_history.append(current_cost)
-                                # Calculate acceptance probability for simulated annealing (if applicable)
-                                accept_prob = acceptance_probability(current_cost, best_cost_iteration, temperature)
+                            # Calculate cost with consistent regularization
+                            current_cost, lambda_reg = calculate_cost(
+                                f_sig, g_sig, current_params,
+                                num_events, num_params, lambda_reg
+                            )
+                            # Store cost for history
+                            cost_history.append(current_cost)            
+                            # Adapt regularization strength based on history
+                            if len(cost_history) >= 2:
+                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)            
+                            # Update acceptance probability for simulated annealing
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                             current_params = [
                                 f_sig.GetParameter(0),
@@ -1854,9 +1725,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])
-
+                if sig_name == "LT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_LT) # Divide out sine term from data since fits are only a function of |t|
+                if sig_name == "TT":
+                    sig_X_fit = (g_sig.GetY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                    sig_X_fit_err = (g_sig.GetEY()[i] / math.sin(th_vec[i] * PI/180)**sine_exp_TT) # Divide out sine term from data since fits are only a function of |t|
+                else:
+                    sig_X_fit = (g_sig.GetY()[i])
+                    sig_X_fit_err = (g_sig.GetEY()[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 

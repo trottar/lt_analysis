@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 02:54:05 trottar"
+# Time-stamp: "2024-10-24 03:53:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,8 +48,16 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
-
 def request_yn_response(string=""):
+    """
+    Request a yes/no response from user with customizable output message.
+    
+    Args:
+        string: Optional custom message to display instead of default yes/no confirmation
+        
+    Returns:
+        bool: True for 'y', False for 'n'
+    """
     while True:
         response = input("Please enter 'y' or 'n': ").lower()
         if response == 'y':
@@ -68,16 +76,30 @@ def request_yn_response(string=""):
             print("Invalid input. Please enter 'y' for yes or 'n' for no.")
 
 ################################################################################################################################################
-
+            
 def open_root_file(root_file, option="OPEN"):
+    """
+    Safely open a ROOT file with error handling and cache retrieval.
+    
+    Args:
+        root_file: Path to ROOT file
+        option: File opening mode (default: "OPEN")
+        
+    Returns:
+        TFile: Opened ROOT file object
+        
+    Raises:
+        SystemExit: If file not found and cannot be retrieved
+    """
     try:
         opened_root_file = TFile.Open(root_file, option)
         return opened_root_file
     except OSError:
+        # Handle cached files separately
         if "cache" in root_file:
             print(f"ERROR: {root_file} not found. It may have been removed from cache, would you like to request retrieval from silo? (y/n)")
             if request_yn_response(string="Running jcache get..."):
-                # Run the bash command
+                # Attempt to retrieve file from cache
                 subprocess.call(f"jcache get {root_file}.replace('/lustre/expphy','')", shell=True)
                 sys.exit(2)
         else:
@@ -85,78 +107,68 @@ def open_root_file(root_file, option="OPEN"):
             sys.exit(2)
 
 ################################################################################################################################################
-
-# Checks if run number if found in analysed root files
+            
 def check_runs_in_effcharge(run, ParticleType, OUTPATH):
-
+    """
+    Check if a specific run number exists in analyzed ROOT files.
+    
+    Args:
+        run: Run number to check
+        ParticleType: Type of particle data
+        OUTPATH: Directory path for ROOT files
+        
+    Returns:
+        bool: True if run exists, False otherwise
+    """
     if run != 0:
         root_file_path = "%s/%s_%s_-1_Raw_Data.root" % (OUTPATH, ParticleType, run)
-        if not os.path.exists(root_file_path):
-            return False
-        else:
-            return True
-    else:
-        return False
-
-################################################################################################################################################
-    
-# Checks if run number if found in analysed root files
-def check_runs_in_main(OUTPATH, phiset, inpDict):
-
-    ParticleType = inpDict["ParticleType"]
-    runs = inpDict["runNum{}".format(phiset)].split(' ')
-    efficiencies = inpDict["InData_efficiency_{}".format(phiset.lower())].split(' ')
-    for run, eff in zip(runs, efficiencies):
-        if int(run) != 0:
-            root_file_path = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, run, -1)
-            if not os.path.exists(root_file_path):
-                print("\n\nRun number {} not found in {}\n\t Removing...".format(run, root_file_path))
-                runs.remove(run)
-                efficiencies.remove(eff)
-                inpDict["runNum{}".format(phiset)] = ' '.join(map(str, runs))
-                inpDict["InData_efficiency_{}".format(phiset.lower())] = ' '.join(map(str, efficiencies))
-        else:
-            print("No {} phi setting found...".format(phiset.lower()))
-            
-    return inpDict    
+        return os.path.exists(root_file_path)
+    return False
 
 ################################################################################################################################################
 
 def data_to_csv(file_path, column_name, new_value, run_number):
+    """
+    Update or create a CSV file with run data, adding or modifying columns as needed.
+    
+    Args:
+        file_path: Path to CSV file
+        column_name: Name of column to update
+        new_value: Value to insert
+        run_number: Run number identifier
+    """
     # Check if file exists
     file_exists = os.path.isfile(file_path)
     
     if file_exists:
-        # Read existing data
+        # Read existing data into memory
         with open(file_path, 'r', newline='') as file:
             reader = csv.DictReader(file)
             data = list(reader)
             fieldnames = reader.fieldnames
     else:
-        # Initialize empty data and fieldnames
+        # Initialize new file structure
         data = []
         fieldnames = ['Run Number']
     
-    # Add new column name if it doesn't exist
+    # Add new column if it doesn't exist
     if column_name not in fieldnames and column_name != 'Run Number':
         fieldnames.append(column_name)
     
-    # Find or create the row for this run number
+    # Find or create row for this run number
     row = next((row for row in data if row['Run Number'] == str(run_number)), None)
     if row is None:
         row = {fn: '' for fn in fieldnames}
         row['Run Number'] = str(run_number)
         data.append(row)
     
-    # Update the value in the correct column
+    # Update value and write back to file
     row[column_name] = new_value
-    
-    # Write updated data back to file
     with open(file_path, 'w', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(data)
-
+        
 ################################################################################################################################################
 
 def show_pdf_with_evince(file_path):
@@ -844,10 +856,102 @@ def local_search(params, inp_func, num_params):
         return improved_params            
 
 ################################################################################################################################################
+
+def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
+    """
+    Calculate cost (modified reduced chi-square) with consistent regularization.
     
-# Check if all values are within 1e-3 of 1
-def within_tolerance(values, target=1.0, tol=1e-3):
-    return all(abs(val - target) <= tol for val in values)
+    Args:
+        f_sig: ROOT TF1 fit function
+        g_sig: ROOT TGraphErrors with data points
+        current_params: List of current parameter values
+        num_events: Number of data points
+        num_params: Number of fit parameters
+        lambda_reg: Regularization strength
+    
+    Returns:
+        tuple: (cost, best_lambda) where cost is the modified reduced chi-square
+        and best_lambda is the optimal regularization parameter
+    """
+    # Calculate basic chi-square from the fit
+    chi_square = f_sig.GetChisquare()
+    
+    # Calculate L2 regularization term
+    l2_reg = sum(p**2 for p in current_params)
+    
+    # Initialize variables for adaptive regularization
+    lambda_min = 1e-6
+    lambda_max = 1.0
+    alpha = 0.1  # Complexity penalty factor
+    best_cost = float('inf')
+    best_lambda = lambda_reg
+    
+    if num_events <= num_params:
+        # For underdetermined case, search for optimal lambda
+        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+        
+        for lambda_try in lambda_values:
+            # Calculate residuals for each point
+            residuals = []
+            for i in range(num_events):
+                observed = g_sig.GetY()[i]
+                expected = f_sig.Eval(g_sig.GetX()[i])
+                error = g_sig.GetEY()[i]
+                
+                # Normalize residual by error if available
+                if error != 0:
+                    residual = (observed - expected) / error
+                else:
+                    residual = observed - expected
+                residuals.append(residual)
+            
+            # Calculate mean squared error
+            mse = np.mean(np.square(residuals))
+            
+            # Modified cost function for underdetermined case
+            current_cost = (mse + lambda_try * l2_reg) / (num_events + alpha * num_params)
+            
+            # Update best lambda if this cost is better
+            if current_cost < best_cost:
+                best_cost = current_cost
+                best_lambda = lambda_try
+    else:
+        # For overdetermined case, use standard reduced chi-square with small regularization
+        best_cost = (chi_square + lambda_reg * l2_reg) / (num_events - num_params)
+        best_lambda = lambda_reg
+    
+    return best_cost, best_lambda
+
+################################################################################################################################################
+
+def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4):
+    """
+    Adapt regularization strength based on cost history.
+    
+    Args:
+        cost_history: List of previous costs
+        lambda_reg: Current regularization parameter
+        min_improvement: Minimum relative improvement to continue reducing lambda
+        
+    Returns:
+        float: Updated lambda value
+    """
+    if len(cost_history) < 2:
+        return lambda_reg
+        
+    # Calculate relative improvement
+    improvement = (cost_history[-2] - cost_history[-1]) / cost_history[-2]
+    
+    # Adjust lambda based on improvement
+    if improvement > min_improvement:
+        # Cost is still improving significantly, reduce regularization
+        return max(lambda_reg * 0.95, 1e-6)
+    elif improvement < 0:
+        # Cost is getting worse, increase regularization
+        return min(lambda_reg * 1.05, 1.0)
+    else:
+        # Cost improvement is small, keep current lambda
+        return lambda_reg
 
 ################################################################################################################################################
 
