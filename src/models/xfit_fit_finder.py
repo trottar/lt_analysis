@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 04:14:12 trottar"
+# Time-stamp: "2024-10-24 04:29:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -69,7 +69,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
-    nsep, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
+    nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
     sine_exp_LT = inpDict["sine_exp_LT"]
@@ -166,7 +166,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -351,7 +351,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
@@ -576,7 +576,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -781,7 +781,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
@@ -1007,7 +1007,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -1225,7 +1225,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()
@@ -1455,7 +1455,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                 for b in range(len(w_vec)):
 
-                    print(f"Determining best fit off the bin values...\n Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 
                     iteration = 0
 
@@ -1684,7 +1684,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 
             print(f"\n\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
             # Record the end time
             end_time = time.time()

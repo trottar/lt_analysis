@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 03:13:26 trottar"
+# Time-stamp: "2024-10-24 04:27:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,6 +100,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     prv_par_vec = []
     prv_err_vec = []
     prv_chi2_vec = []
+    t_vec = []
     g_vec = []
     w_vec = []
     q2_vec = []
@@ -162,7 +163,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
             # Calculate wfactor
             g = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
-            
+
+            t_vec.append(tt)
             g_vec.append(g)
             w_vec.append(ww)
             q2_vec.append(qq)
@@ -199,7 +201,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     inp_dict = {
         "q2_set" : q2_set.replace("p","."),
         "w_set" : w_set.replace("p","."),
-        "objects" : [nsep, g_vec, w_vec, q2_vec, th_vec],
+        "objects" : [nsep, t_vec, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
         "sine_exp_LT" : sine_exp_LT,
