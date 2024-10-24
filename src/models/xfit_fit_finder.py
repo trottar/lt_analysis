@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 10:04:29 trottar"
+# Time-stamp: "2024-10-24 10:05:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -136,7 +136,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e6
+            max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -545,7 +545,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e6
+            max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -975,7 +975,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e6
+            max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -1422,7 +1422,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e6
+            max_param_value = 1e4
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
