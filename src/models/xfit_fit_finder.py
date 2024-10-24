@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 07:47:25 trottar"
+# Time-stamp: "2024-10-24 07:53:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -348,11 +348,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params
                         best_overall_errors = best_errors
-                
-            print(f"\n\nBest overall solution: {best_overall_params}")
-            print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
 
+            try:
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost}")
+                print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            except TypeError:
+                print("ERROR: Invalid solution {best_overall_params}!")
+                sys.exit(2)
+                
             # Record the end time
             end_time = time.time()
             # Calculate the total duration
@@ -778,10 +782,14 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors[:]
-                
-            print(f"\n\nBest overall solution: {best_overall_params}")
-            print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+
+            try:
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost}")
+                print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            except TypeError:
+                print("ERROR: Invalid solution {best_overall_params}!")
+                sys.exit(2)
 
             # Record the end time
             end_time = time.time()
@@ -1222,10 +1230,14 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_bin = best_bin
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors[:]
-                
-            print(f"\n\nBest overall solution: {best_overall_params}")
-            print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+
+            try:
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost}")
+                print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            except TypeError:
+                print("ERROR: Invalid solution {best_overall_params}!")
+                sys.exit(2)
 
             # Record the end time
             end_time = time.time()
@@ -1682,9 +1694,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         best_overall_params = best_params[:]
                         best_overall_errors = best_errors[:]
                 
-            print(f"\n\nBest overall solution: {best_overall_params}")
-            print(f"Best overall cost: {best_overall_cost}")
-            print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            try:
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost}")
+                print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
+            except TypeError:
+                print("ERROR: Invalid solution {best_overall_params}!")
+                sys.exit(2)
 
             # Record the end time
             end_time = time.time()
