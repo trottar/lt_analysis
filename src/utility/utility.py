@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:23:00 trottar"
+# Time-stamp: "2024-10-24 09:23:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -970,8 +970,16 @@ def get_central_value(lst):
 def dancing_man(iteration, sleep_duration):
     # Define the frames for the dancing guy
     frames = [
-        r" o\n/|\\\n/ \\",
-        r" o\n\|/\n/ \\"
+        r"""
+         o
+        /|\
+        / \
+        """,
+        r"""
+         o
+        \|/
+        / \
+        """
     ]
     
     # Select the dancing frame based on the current iteration
