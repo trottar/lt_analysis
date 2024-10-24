@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 12:11:38 trottar"
+# Time-stamp: "2024-10-24 12:13:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -918,7 +918,10 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
                 best_lambda = lambda_try
     else:
         # For overdetermined case, use standard reduced chi-square with small regularization
-        best_cost = (chi_square + lambda_reg * l2_reg) / (num_events - num_params)
+        #best_cost = (chi_square + lambda_reg * l2_reg) / (num_events - num_params)
+
+        # Normal red. chi-squared
+        best_cost = (chi_square) / (num_events - num_params)
         print("\n\n!!!!!!!!!!!",(chi_square + lambda_reg * l2_reg) / (num_events - num_params), (chi_square) / (num_events - num_params))
         best_lambda = lambda_reg
     
