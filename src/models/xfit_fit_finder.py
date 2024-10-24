@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 11:52:06 trottar"
+# Time-stamp: "2024-10-24 12:00:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -264,6 +264,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig, g_sig, current_params,
                                 num_events, num_params, lambda_reg
                             )
+                            print("\n\n$$$$$$$$$$$$$",current_cost, lambda_reg)
                             # Store cost for history
                             cost_history.append(current_cost)            
                             # Adapt regularization strength based on history
@@ -340,7 +341,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
-                    print("!!!!!!!!", best_cost)
+
                     # After the while loop, check if this run found a better solution
                     if abs(best_cost - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = best_cost
@@ -681,6 +682,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig, g_sig, current_params,
                                 num_events, num_params, lambda_reg
                             )
+                            print("\n\n$$$$$$$$$$$$$",current_cost, lambda_reg)
                             # Store cost for history
                             cost_history.append(current_cost)            
                             # Adapt regularization strength based on history
@@ -770,7 +772,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
-                    print("!!!!!!!!", best_cost)
+
                     # After the while loop, check if this run found a better solution
                     if abs(best_cost - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = best_cost
@@ -1119,6 +1121,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig, g_sig, current_params,
                                 num_events, num_params, lambda_reg
                             )
+                            print("\n\n$$$$$$$$$$$$$",current_cost, lambda_reg)
                             # Store cost for history
                             cost_history.append(current_cost)            
                             # Adapt regularization strength based on history
@@ -1214,7 +1217,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
-                    print("!!!!!!!!", best_cost)
+
                     # After the while loop, check if this run found a better solution
                     if abs(best_cost - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = best_cost
@@ -1573,6 +1576,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig, g_sig, current_params,
                                 num_events, num_params, lambda_reg
                             )
+                            print("\n\n$$$$$$$$$$$$$",current_cost, lambda_reg)
                             # Store cost for history
                             cost_history.append(current_cost)            
                             # Adapt regularization strength based on history
@@ -1673,7 +1677,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
-                    print("!!!!!!!!", best_cost)
+
                     # After the while loop, check if this run found a better solution
                     if abs(best_cost - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = best_cost
