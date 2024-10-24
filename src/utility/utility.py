@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 09:23:43 trottar"
+# Time-stamp: "2024-10-24 09:28:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -967,28 +967,33 @@ def get_central_value(lst):
 ##################################################################################################################################################
 
 # Define a function for the dancing man animation
-def dancing_man(iteration, sleep_duration):
-    # Define the frames for the dancing guy
+def dancing_man(progress_message, sleep_duration):
+    # Define the frames for the dancing guy with proper line breaks
     frames = [
-        r"""
+        r""" 
          o
         /|\
         / \
         """,
-        r"""
+        r""" 
          o
         \|/
         / \
         """
     ]
-    
-    # Select the dancing frame based on the current iteration
-    dancing_frame = frames[iteration % len(frames)]
-    
+
+    # Clear the console
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+    # Print the progress message
+    print(progress_message)
+
+    # Print the dancing man frame
+    dancing_frame = frames[0] if (iteration % 2 == 0) else frames[1]
+    print(dancing_frame)
+
     # Delay for animation effect inside the function
     time.sleep(sleep_duration)
-    
-    return dancing_frame
     
 ################################################################################################################################################
 
