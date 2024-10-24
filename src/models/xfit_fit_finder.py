@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 08:48:59 trottar"
+# Time-stamp: "2024-10-24 09:20:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -25,7 +25,7 @@ import os, sys
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value
+from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value, dancing_man
 
 ##################################################################################################################################################
 
@@ -53,6 +53,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     graphs_sig_converge = []
     graphs_sig_temp = []
     graphs_sig_accept = []
+    graphs_sig_bin = []
 
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -66,6 +67,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     c5.Divide(2, 2)
     c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
     c6.Divide(2, 2)
+    c7 = TCanvas("c7", "Best Bin Number", 800, 800)
+    c7.Divide(2, 2)    
 
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -148,6 +151,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graph_sig_bin = TGraph()
             graphs_sig_p0.append(graph_sig_p0)
             graphs_sig_p1.append(0.0)
             graphs_sig_p2.append(0.0)
@@ -155,6 +159,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
+            graphs_sig_bin.append(graph_sig_bin)
 
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
@@ -200,8 +205,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         graphs_sig_fit.append(g_sig_fit)
 
-                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                        sys.stdout.flush()
+                        # Print the progress message and the dancing man on the same line
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                            iteration, max_iterations, dancing_man(iteration, 0.5)))
+                        sys.stdout.flush()                        
 
                         try:
                             # Perturb parameters
@@ -276,6 +283,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                            graphs_sig_bin[it].SetPoint(total_iteration, total_iteration, b+1)
 
                             # If the new cost is better or accepted by the acceptance probability, update the best parameters
                             if accept_prob > random.random():
@@ -512,6 +520,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
             c6.Update()
+
+            # Plot best bin
+            c7.cd(it+1).SetLeftMargin(0.12)
+            graphs_sig_bin[it].SetTitle(f"Sig {sig_name} Bin Convergence;Optimization Run;Bin Number")
+            graphs_sig_bin[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_bin[it].Draw("ALP")
+            c7.Update()
             
             print("\n")    
 
@@ -548,6 +563,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graph_sig_bin = TGraph()
             graphs_sig_p0.append(graph_sig_p0)
             graphs_sig_p1.append(graph_sig_p1)
             graphs_sig_p2.append(0.0)
@@ -555,6 +571,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
+            graphs_sig_bin.append(graph_sig_bin)
 
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
@@ -601,8 +618,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         graphs_sig_fit.append(g_sig_fit)
 
-                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                        sys.stdout.flush()
+                        # Print the progress message and the dancing man on the same line
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                            iteration, max_iterations, dancing_man(iteration, 0.5)))
+                        sys.stdout.flush()                        
 
                         try:
                             # Perturb parameters
@@ -692,6 +711,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                            graphs_sig_bin[it].SetPoint(total_iteration, total_iteration, b+1)
 
                             # If the new cost is better or accepted by the acceptance probability, update the best parameters
                             if accept_prob > random.random():
@@ -932,6 +952,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
             c6.Update()
+
+            # Plot best bin
+            c7.cd(it+1).SetLeftMargin(0.12)
+            graphs_sig_bin[it].SetTitle(f"Sig {sig_name} Bin Convergence;Optimization Run;Bin Number")
+            graphs_sig_bin[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_bin[it].Draw("ALP")
+            c7.Update()
             
             print("\n")    
 
@@ -969,6 +996,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graph_sig_bin = TGraph()
             graphs_sig_p0.append(graph_sig_p0)
             graphs_sig_p1.append(graph_sig_p1)
             graphs_sig_p2.append(graph_sig_p2)
@@ -976,6 +1004,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
+            graphs_sig_bin.append(graph_sig_bin)
             
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
@@ -1024,8 +1053,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         graphs_sig_fit.append(g_sig_fit)
 
-                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                        sys.stdout.flush()
+                        # Print the progress message and the dancing man on the same line
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                            iteration, max_iterations, dancing_man(iteration, 0.5)))
+                        sys.stdout.flush()                        
 
                         try:
 
@@ -1123,6 +1154,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                            graphs_sig_bin[it].SetPoint(total_iteration, total_iteration, b+1)
 
                             # If the new cost is better or accepted by the acceptance probability, update the best parameters
                             if accept_prob > random.random():
@@ -1369,6 +1401,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
             c6.Update()
+
+            # Plot best bin
+            c7.cd(it+1).SetLeftMargin(0.12)
+            graphs_sig_bin[it].SetTitle(f"Sig {sig_name} Bin Convergence;Optimization Run;Bin Number")
+            graphs_sig_bin[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_bin[it].Draw("ALP")
+            c7.Update()
             
             print("\n")    
 
@@ -1407,6 +1446,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graph_sig_chi2 = TGraph()
             graph_sig_temp = TGraph()
             graph_sig_accept = TGraph()
+            graph_sig_bin = TGraph()
             graphs_sig_p0.append(graph_sig_p0)
             graphs_sig_p1.append(graph_sig_p1)
             graphs_sig_p2.append(graph_sig_p2)
@@ -1414,6 +1454,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_converge.append(graph_sig_chi2)
             graphs_sig_temp.append(graph_sig_temp)
             graphs_sig_accept.append(graph_sig_accept)
+            graphs_sig_bin.append(graph_sig_bin)
             
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
@@ -1465,8 +1506,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         graphs_sig_fit.append(g_sig_fit)
 
-                        sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                        sys.stdout.flush()
+                        # Print the progress message and the dancing man on the same line
+                        sys.stdout.write("\rSearching for best parameters...({0}/{1}) {2}".format(
+                            iteration, max_iterations, dancing_man(iteration, 0.5)))
+                        sys.stdout.flush()                        
 
                         try:
                             # Perturb parameters
@@ -1570,6 +1613,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                            graphs_sig_bin[it].SetPoint(total_iteration, total_iteration, b+1)
 
                             # If the new cost is better or accepted by the acceptance probability, update the best parameters
                             if accept_prob > random.random():
@@ -1821,6 +1865,13 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
             c6.Update()
+
+            # Plot best bin
+            c7.cd(it+1).SetLeftMargin(0.12)
+            graphs_sig_bin[it].SetTitle(f"Sig {sig_name} Bin Convergence;Optimization Run;Bin Number")
+            graphs_sig_bin[it].SetLineColor(ROOT.kBlack)
+            graphs_sig_bin[it].Draw("ALP")
+            c7.Update()
             
             print("\n")
 
@@ -1829,9 +1880,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
         c4.Update()
         c5.Update()
         c6.Update()
+        c7.Update()
     
     c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
     c4.Print(outputpdf)
     c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
+    c6.Print(outputpdf)
+    c7.Print(outputpdf+')')

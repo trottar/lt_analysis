@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 03:53:18 trottar"
+# Time-stamp: "2024-10-24 09:18:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -23,6 +23,7 @@ import shutil
 import signal
 import random
 import math
+import time
 import re
 import sys, os, subprocess
 
@@ -963,6 +964,24 @@ def get_central_value(lst):
         mid1, mid2 = n // 2 - 1, n // 2
         return (lst[mid1] + lst[mid2]) / 2
 
+##################################################################################################################################################
+
+# Define a function for the dancing man animation
+def dancing_man(iteration, sleep_duration):
+    # Define the frames for the dancing guy
+    frames = [
+        r" o /|\ / \ ",
+        r" o \|/ / \ "
+    ]
+    
+    # Select the dancing frame based on the current iteration
+    dancing_frame = frames[iteration % len(frames)]
+    
+    # Delay for animation effect inside the function
+    time.sleep(sleep_duration)
+    
+    return dancing_frame
+    
 ################################################################################################################################################
 
 def load_equations(filename='variables.inp'):
