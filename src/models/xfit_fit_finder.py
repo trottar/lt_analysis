@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-25 10:02:15 trottar"
+# Time-stamp: "2024-10-25 10:03:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -335,7 +335,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Ensure parameters stay within bounds
                             recovery_params = [
-                                max(min(p, max_param_value), -max_param_value) 
+                                max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
 
@@ -350,7 +350,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Increase temperature slightly to encourage exploration
                             temperature = min(temperature * 1.2, initial_temperature)
     
-                            max_param_bounds = max_param_bounds/2                            
+                            #max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
@@ -775,7 +775,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Ensure parameters stay within bounds
                             recovery_params = [
-                                max(min(p, max_param_value), -max_param_value) 
+                                max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
 
@@ -790,7 +790,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Increase temperature slightly to encourage exploration
                             temperature = min(temperature * 1.2, initial_temperature)
     
-                            max_param_bounds = max_param_bounds/2                            
+                            #max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -1229,7 +1229,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Ensure parameters stay within bounds
                             recovery_params = [
-                                max(min(p, max_param_value), -max_param_value) 
+                                max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
 
@@ -1244,7 +1244,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Increase temperature slightly to encourage exploration
                             temperature = min(temperature * 1.2, initial_temperature)
     
-                            max_param_bounds = max_param_bounds/2                            
+                            #max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -1698,7 +1698,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Ensure parameters stay within bounds
                             recovery_params = [
-                                max(min(p, max_param_value), -max_param_value) 
+                                max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
 
@@ -1713,7 +1713,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Increase temperature slightly to encourage exploration
                             temperature = min(temperature * 1.2, initial_temperature)
     
-                            max_param_bounds = max_param_bounds/2                            
+                            #max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
