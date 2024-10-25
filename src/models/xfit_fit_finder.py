@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-25 08:58:38 trottar"
+# Time-stamp: "2024-10-25 09:05:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -44,6 +44,16 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
+    # Create lists to store graph objects outside the loop
+    graphs_sig_fit = []
+    graphs_sig_p0 = []
+    graphs_sig_p1 = []
+    graphs_sig_p2 = []
+    graphs_sig_p3 = []
+    graphs_sig_converge = []
+    graphs_sig_temp = []
+    graphs_sig_accept = []
+    
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
@@ -88,16 +98,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     num_events = nsep.GetEntries()    
     
     for it, (key, val) in enumerate(fit_params.items()):
-
-        # Create lists to store graph objects outside the loop
-        graphs_sig_fit = []
-        graphs_sig_p0 = []
-        graphs_sig_p1 = []
-        graphs_sig_p2 = []
-        graphs_sig_p3 = []
-        graphs_sig_converge = []
-        graphs_sig_temp = []
-        graphs_sig_accept = []
         
         sig_name = key
         # Grab parameters used by functional forms
