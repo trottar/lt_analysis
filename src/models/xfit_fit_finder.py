@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-25 09:05:19 trottar"
+# Time-stamp: "2024-10-25 09:10:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,8 +72,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
-    sine_exp_LT = inpDict["sine_exp_LT"]
-    sine_exp_TT = inpDict["sine_exp_TT"]
+    initial_param_bounds = inpDict["initial_param_bounds"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
@@ -133,7 +132,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -239,7 +238,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig = TF1(f"sig_{sig_name}", fun_Sig, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0")
                             f_sig.SetParameter(0, current_params)
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -325,7 +324,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Adjust parameter limits within a random number
                             par_sig_0 = initial_params
                             par_sig_err_0 = 0.0
-
+                            
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
@@ -520,7 +520,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -632,8 +632,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.SetParNames("p0", "p1")
                             f_sig.SetParameter(0, current_params[0])
                             f_sig.SetParameter(1, current_params[1])
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -733,7 +733,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Adjust parameter limits within a random number
                             par_sig_0, par_sig_1 = initial_params
                             par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
-
+                            
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -928,7 +929,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -1046,9 +1047,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.SetParameter(0, current_params[0])
                             f_sig.SetParameter(1, current_params[1])
                             f_sig.SetParameter(2, current_params[2])
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1155,7 +1156,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Adjust parameter limits within a random number
                             par_sig_0, par_sig_1, par_sig_2 = initial_params
                             par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
-
+                            
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -1353,7 +1355,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -1476,10 +1478,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.SetParameter(1, current_params[1])
                             f_sig.SetParameter(2, current_params[2])
                             f_sig.SetParameter(3, current_params[3])
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(3, -max_param_value, max_param_value)                
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)                
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1592,7 +1594,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Adjust parameter limits within a random number
                             par_sig_0, par_sig_1, par_sig_2, par_sig_3 = initial_params
                             par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
-
+                            
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 

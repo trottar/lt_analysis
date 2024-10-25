@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 08:13:10 trottar"
+# Time-stamp: "2024-10-25 09:11:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,10 +84,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # Number of times to run the algorithm
     num_optimizations = 10
 
-    # Sine exponential term for LT/TT
-    sine_exp_LT = 1.0 # Default, 10/23/2024
-    sine_exp_TT = 0.0 # 10/23/2024
-    #sine_exp_TT = 2.0 # Default
+    # Initial max/min bounds of finding parameter values
+    initial_param_bounds = 1e6
     ##############
     ##############
     ##############
@@ -204,8 +202,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "objects" : [nsep, t_vec, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
-        "sine_exp_LT" : sine_exp_LT,
-        "sine_exp_TT" : sine_exp_TT,
+        "initial_param_bounds" : initial_param_bounds,
         "initial_params" : find_params_wrapper(equations),
         "tmin_range" : tmin_range,
         "tmax_range" : tmax_range,
