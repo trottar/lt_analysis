@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-25 09:55:07 trottar"
+# Time-stamp: "2024-10-25 10:02:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -327,10 +327,29 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0 = initial_params
-                            par_sig_err_0 = 0.0
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_value), -max_param_value) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
                             max_param_bounds = max_param_bounds/2                            
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
@@ -748,10 +767,29 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0, par_sig_1 = initial_params
-                            par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_value), -max_param_value) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
                             max_param_bounds = max_param_bounds/2                            
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1183,10 +1221,29 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0, par_sig_1, par_sig_2 = initial_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_value), -max_param_value) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
                             max_param_bounds = max_param_bounds/2                            
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1633,10 +1690,29 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = initial_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_value), -max_param_value) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
                             max_param_bounds = max_param_bounds/2                            
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
