@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-25 09:35:46 trottar"
+# Time-stamp: "2024-10-25 09:36:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -73,8 +73,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
     initial_param_bounds = inpDict["initial_param_bounds"]
-    sine_exp_LT = inpDict["sine_exp_LT"]
-    sine_exp_TT = inpDict["sine_exp_TT"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
