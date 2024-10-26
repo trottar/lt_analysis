@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:40:04 trottar"
+# Time-stamp: "2024-10-26 06:22:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,15 +69,15 @@ def iterWeight(arg_str):
     sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
     
-    sig_L = sig_L*wfactor
-    sig_T = sig_T*wfactor
-    sig_TT = sig_TT*wfactor
-    sig_LT = sig_LT*wfactor
+    ##sig_L = sig_L*wfactor
+    ##sig_T = sig_T*wfactor
+    ##sig_TT = sig_TT*wfactor
+    ##sig_LT = sig_LT*wfactor
 
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
     
-    sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+    ##sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / math.pi  # dsig/dtdphicm in microbarns/GeV**2/rad
 
     wtn = weight_prev_iter * (sig / sig_prev_iter)
