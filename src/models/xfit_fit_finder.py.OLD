@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 07:58:38 trottar"
+# Time-stamp: "2024-10-26 03:37:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -53,7 +53,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     graphs_sig_converge = []
     graphs_sig_temp = []
     graphs_sig_accept = []
-
+    
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
 
@@ -72,8 +72,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
-    sine_exp_LT = inpDict["sine_exp_LT"]
-    sine_exp_TT = inpDict["sine_exp_TT"]
+    initial_param_bounds = inpDict["initial_param_bounds"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
@@ -98,7 +97,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     num_events = nsep.GetEntries()    
     
     for it, (key, val) in enumerate(fit_params.items()):
-
+        
         sig_name = key
         # Grab parameters used by functional forms
         num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
@@ -133,7 +132,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -222,15 +221,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                if sig_name == "LT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                if sig_name == "TT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                else:
-                                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -252,7 +244,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0")
                             f_sig.SetParameter(0, current_params)
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -335,10 +327,30 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0 = initial_params
-                            par_sig_err_0 = 0.0
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
@@ -354,7 +366,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
                 
             # Record the end time
@@ -399,15 +411,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                if sig_name == "LT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                if sig_name == "TT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                else:
-                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -434,19 +439,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
             elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
             elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
             elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0")
@@ -546,7 +551,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -640,15 +645,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                if sig_name == "LT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                if sig_name == "TT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                else:
-                                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -671,8 +669,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.SetParNames("p0", "p1")
                             f_sig.SetParameter(0, current_params[0])
                             f_sig.SetParameter(1, current_params[1])
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -769,10 +767,30 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0, par_sig_1 = initial_params
-                            par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -788,7 +806,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             # Record the end time
@@ -830,15 +848,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                if sig_name == "LT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                if sig_name == "TT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                else:
-                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -865,19 +876,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
             elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
             elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
             elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0", "p1")
@@ -980,7 +991,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -1079,15 +1090,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                if sig_name == "LT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                if sig_name == "TT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                else:
-                                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1111,9 +1115,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.SetParameter(0, current_params[0])
                             f_sig.SetParameter(1, current_params[1])
                             f_sig.SetParameter(2, current_params[2])
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1217,10 +1221,30 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0, par_sig_1, par_sig_2 = initial_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -1236,7 +1260,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             # Record the end time
@@ -1278,15 +1302,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                if sig_name == "LT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                if sig_name == "TT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                else:
-                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1313,19 +1330,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
             elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
             elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
             elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0", "p1", "p2")
@@ -1431,7 +1448,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             best_overall_cost = float('inf')
             best_overall_bin = None
             total_iteration = 0
-            max_param_value = 1e4
+            max_param_bounds = initial_param_bounds
 
             # Regularization strength (used when num_events > num_params)
             # Initialize adaptive regularization parameters
@@ -1534,15 +1551,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                if sig_name == "LT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                                if sig_name == "TT":
-                                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                                else:
-                                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1567,10 +1577,10 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.SetParameter(1, current_params[1])
                             f_sig.SetParameter(2, current_params[2])
                             f_sig.SetParameter(3, current_params[3])
-                            f_sig.SetParLimits(0, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(1, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(2, -max_param_value, max_param_value)
-                            f_sig.SetParLimits(3, -max_param_value, max_param_value)                
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)                
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1680,10 +1690,30 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Adjust parameter limits within a random number
-                            par_sig_0, par_sig_1, par_sig_2, par_sig_3 = initial_params
-                            par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
+
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
+
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
+                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+
+                            # Increase temperature slightly to encourage exploration
+                            temperature = min(temperature * 1.2, initial_temperature)
+    
+                            max_param_bounds = max_param_bounds/2
                             iteration += 1
                             total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
@@ -1699,7 +1729,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 print(f"Best overall cost: {best_overall_cost}")
                 print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
-                print("ERROR: Invalid solution {best_overall_params}!")
+                print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
             # Record the end time
@@ -1741,15 +1771,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                if sig_name == "LT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_LT) * (g_vec[i])
-                if sig_name == "TT":
-                    sig_X_fit = (g_sig.GetY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i] * math.sin(th_vec[i] * PI/180)**sine_exp_TT) * (g_vec[i])
-                else:
-                    sig_X_fit = (g_sig.GetY()[i]) * (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i]) * (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1776,19 +1799,19 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
             if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
             elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin])
+                fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
             elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
             elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0", "p1", "p2", "p3")
