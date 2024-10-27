@@ -31,7 +31,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # Marco's thesis
 #sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 #
-sig_TT = (par13 * math.exp(-par14*math.fabs(tt)) - (par15 * math.fabs(tt)**2)) * 1.0/(1.0 + (qq/par16)**2)
+sig_TT = (par13 * math.exp(-par14*math.fabs(tt)) - (par15 * math.fabs(tt)**3)) * 1.0/(1.0 + (qq/par16)**2)
 
 # Weight factor for Q2=3.0, W=3.14
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0
