@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 03:50:02 trottar"
+# Time-stamp: "2024-10-28 05:05:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -410,7 +410,6 @@ for hist in histlist:
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
             iter_weight(new_param_file, new_simc_root, inpDict, hist["phi_setting"])
-            #os.rename(new_simc_root.replace(".root","_iter.root"),new_simc_root)
             if iter_num > 1:
                 # SIMC file with weight from last iteration
                 new_simc_root = new_simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
@@ -428,7 +427,8 @@ if DEBUG:
         show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
-            
+
+print("\n\n")
 sys.path.append("plotting")
 from iter_check import plot_iteration
 
