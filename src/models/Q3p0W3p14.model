@@ -5,7 +5,7 @@
 ################################################################################
 
 # Define constants
-pi = math.pi
+PI = math.pi
 mtar = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
@@ -25,7 +25,7 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T)
 
 # Longitudinal-Transverse interference term
-sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm * PI / 180)
 
 # Transverse-Transverse interference term
 # Marco's thesis
