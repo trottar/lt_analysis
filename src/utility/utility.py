@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-24 03:53:18 trottar"
+# Time-stamp: "2024-10-28 08:47:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -940,8 +940,11 @@ def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4):
         return lambda_reg
         
     # Calculate relative improvement
-    improvement = (cost_history[-2] - cost_history[-1]) / cost_history[-2]
-    
+    try:
+        improvement = (cost_history[-2] - cost_history[-1]) / cost_history[-2]
+    except ZeroDivisionError:
+        improvement = 0.0
+        
     # Adjust lambda based on improvement
     if improvement > min_improvement:
         # Cost is still improving significantly, reduce regularization
