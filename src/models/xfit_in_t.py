@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-28 03:55:30 trottar"
+# Time-stamp: "2024-10-28 03:57:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,8 +216,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "chi2_sets" : chi2_sets
     }
 
-    # Finding fits for L, T, LT, TT
-    find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
+    # Don't find new fits if debugging
+    if not DEBUG:
+        # Finding fits for L, T, LT, TT
+        find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
 
     # Check for really small or large parameters and set to zero
     for p,e in zip(par_vec, par_err_vec):
@@ -225,7 +227,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             p = 0.0
         if e < 1e-9 or e > 1e9:
             e = 0.0
-    
+
+    # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
             print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
