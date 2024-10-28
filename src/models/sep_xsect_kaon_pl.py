@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-13 13:40:27 trottar"
+# Time-stamp: "2024-10-28 07:01:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,8 +61,8 @@ def import_model(inp_model, arg_str):
     
     sig_sep = sig_sep/2.0/math.pi
     
-    # Convert from ub/GeV**2 to nb/GeV**2
-    sig_sep = sig_sep*1e3
+    # Convert from nb/GeV**2 to ub/GeV**2
+    sig_sep = sig_sep/1e3
     
     print("Model {} = {:.4e}".format(inp_model, sig_sep))
     
