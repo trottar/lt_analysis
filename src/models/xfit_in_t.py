@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-28 03:57:23 trottar"
+# Time-stamp: "2024-10-28 04:23:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -221,7 +221,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         # Finding fits for L, T, LT, TT
         find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
 
-    # Check for really small or large parameters and set to zero
+    # Check for very small or large parameters and set to zero
     for p,e in zip(par_vec, par_err_vec):
         if p < 1e-9 or p > 1e9:
             p = 0.0
