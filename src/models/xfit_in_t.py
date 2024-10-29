@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 08:52:05 trottar"
+# Time-stamp: "2024-10-29 09:27:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,7 +90,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     initial_param_bounds = 1e6
 
     # Threshold on how bad red. chi2 can be
-    chi2_threshold = 2.5
+    chi2_threshold = 3.5
     ##############
     ##############
     ##############
@@ -195,10 +195,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Find fits for L, T, LT, TT
     fit_params = {
+        "TT": [tt0, tt1, tt2, tt3],        
         "L": [l0, l1, l2, l3],
         "T": [t0, t1, t2, t3],
         "LT": [lt0, lt1, lt2, lt3],
-        "TT": [tt0, tt1, tt2, tt3],
     }
     
     inp_dict = {
@@ -234,7 +234,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Check that all red. chi2 are reasonable
     bad_chi2 = False
-    for i, chi2 in enumerate(par_chi2_vec):
+    for i in range(len(par_vec)):
+        chi2 = par_chi2_vec[i % 4]
         if chi2 > chi2_threshold:
             sig_name, initial_params  = list(fit_params.items())[i % 4]
             _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
