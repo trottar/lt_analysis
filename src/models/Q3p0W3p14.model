@@ -12,7 +12,8 @@ mkpl=0.493677
 
 #
 #tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
-tav = (0.057 + 0.011 * math.log(q2_set)) * q2_set
+# Determined from (tmin, Q2) = [(0.15, 2.115), (0.175, 3.0), (0.35, 4.4), (0.40, 5.5)]
+tav = (0.06215 + 0.00151 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
