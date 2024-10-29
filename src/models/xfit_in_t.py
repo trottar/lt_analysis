@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 05:33:00 trottar"
+# Time-stamp: "2024-10-29 05:50:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,11 +79,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 1000
+    max_iterations = 10000
     #max_iterations = 5000
 
     # Number of times to run the algorithm
-    num_optimizations = 10
+    num_optimizations = 2
+    #num_optimizations = 10
 
     # Initial max/min bounds of finding parameter values
     initial_param_bounds = 1e6
@@ -230,11 +231,15 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Check that all red. chi2 are reasonable
     chi2_threshold = 2.5
+    bad_chi2 = False
     for i, chi2 in enumerate(par_chi2_vec):
         if chi2 > chi2_threshold:
-            _, _, equation_str = find_params_wrapper(equations)
-            print("ERROR: Reduced Chi-Squared of {chi2} found, which is above the threshold of {chi2_threshold}.\nIncrease fit iterations or adjust functional form {equation_str}...")
-            
+            sig_name = list(fit_params.keys())[i]
+            _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
+            print("WARNING: Reduced Chi-Squared of {chi2} found, which is above the threshold of {chi2_threshold}.\nIncrease fit iterations or adjust functional form {equation_str}...")
+            bad_chi2 = True
+    if bad_chi2:
+        sys.exit(2)
             
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
