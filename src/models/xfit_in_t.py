@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 05:55:10 trottar"
+# Time-stamp: "2024-10-29 05:56:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,9 +234,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     bad_chi2 = False
     for i, chi2 in enumerate(par_chi2_vec):
         if chi2 > chi2_threshold:
-            sig_name, initial_params  = list(fit_params.items())[i]
+            sig_name, initial_params  = list(fit_params.items())[i % 4]
             _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
-            print("WARNING: Reduced Chi-Squared of {chi2} found, which is above the threshold of {chi2_threshold}.\nIncrease fit iterations or adjust functional form {equation_str}...")
+            print(f"WARNING: Reduced Chi-Squared of {chi2} found, which is above the threshold of {chi2_threshold}.\nIncrease fit iterations or adjust functional form {equation_str}...")
             bad_chi2 = True
     if bad_chi2:
         sys.exit(2)
