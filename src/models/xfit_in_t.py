@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 04:03:03 trottar"
+# Time-stamp: "2024-10-29 05:33:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -221,13 +221,21 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         # Finding fits for L, T, LT, TT
         find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
 
-    # Check for very small or large parameters and set to zero
+    # Check for very small parameters and set to zero
     for i in range(len(par_vec)):
-        if par_vec[i] < 1e-9 or par_vec[i] > 1e9:
+        if par_vec[i] < 1e-9:
             par_vec[i] = 0.0
-        if par_err_vec[i] < 1e-9 or par_err_vec[i] > 1e9:
+        if par_err_vec[i] < 1e-9:
             par_err_vec[i] = 0.0
 
+    # Check that all red. chi2 are reasonable
+    chi2_threshold = 2.5
+    for i, chi2 in enumerate(par_chi2_vec):
+        if chi2 > chi2_threshold:
+            _, _, equation_str = find_params_wrapper(equations)
+            print("ERROR: Reduced Chi-Squared of {chi2} found, which is above the threshold of {chi2_threshold}.\nIncrease fit iterations or adjust functional form {equation_str}...")
+            
+            
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
