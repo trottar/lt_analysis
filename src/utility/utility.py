@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-28 08:47:20 trottar"
+# Time-stamp: "2024-10-29 03:50:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -875,10 +875,18 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
     """
     # Calculate basic chi-square from the fit
     chi_square = f_sig.GetChisquare()
-    
-    # Calculate L2 regularization term
-    l2_reg = sum(p**2 for p in current_params)
-    
+
+    try:
+        # Calculate L2 regularization term
+        l2_reg = sum(p**2 for p in current_params)
+    except OverflowError:
+        # Check for very small or large parameters and set to zero
+        for i in range(len(current_params)):
+            if current_params[i] < 1e-9 or current_params[i] > 1e9:
+                current_params[i] = 0.0
+        # Calculate L2 regularization term
+        l2_reg = sum(p**2 for p in current_params)
+        
     # Initialize variables for adaptive regularization
     lambda_min = 1e-6
     lambda_max = 1.0
