@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 05:51:30 trottar"
+# Time-stamp: "2024-10-29 05:55:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,7 +79,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 1000
+    max_iterations = 100
     #max_iterations = 5000
 
     # Number of times to run the algorithm
@@ -234,7 +234,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     bad_chi2 = False
     for i, chi2 in enumerate(par_chi2_vec):
         if chi2 > chi2_threshold:
-            sig_name = list(fit_params.keys())[i]
+            sig_name, initial_params  = list(fit_params.items())[i]
             _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
             print("WARNING: Reduced Chi-Squared of {chi2} found, which is above the threshold of {chi2_threshold}.\nIncrease fit iterations or adjust functional form {equation_str}...")
             bad_chi2 = True
