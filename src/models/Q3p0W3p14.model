@@ -36,8 +36,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 #sig_TT = (par13 * math.exp(-par14*math.fabs(tt)) - (math.fabs(tt)**qq)) * 1.0/(1.0 + (qq/par15)**2)
 # Custom
 #sig_TT = (math.fabs(tt) * math.exp(-par13*math.fabs(tt))) * ((par14 * math.fabs(tt)**2) - 1.0) * 1.0/(1.0 + (qq/par15)**2)
-#sig_TT = (par13 * math.fabs(tt)) * ((par14 * math.fabs(tt)**2) - 1.0) * 1.0/(1.0 + (qq/par15)**2)
-sig_TT = (par13 * math.fabs(tt)) * ((par14 * math.fabs(tt)**2) - 1.0)
+sig_TT = (math.fabs(tt) * math.exp(-par13*math.fabs(tt))) * ((par14 * math.fabs(tt)**2) - 1.0)
 
 # Weight factor for Q2=3.0, W=3.14
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0
