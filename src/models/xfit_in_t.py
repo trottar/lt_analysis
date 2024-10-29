@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 05:59:55 trottar"
+# Time-stamp: "2024-10-29 07:14:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,15 +79,18 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    #max_iterations = 1000
-    max_iterations = 5000
+    max_iterations = 1000
+    #max_iterations = 5000
 
     # Number of times to run the algorithm
-    #num_optimizations = 10
-    num_optimizations = 50
+    num_optimizations = 10
+    #num_optimizations = 50
 
     # Initial max/min bounds of finding parameter values
     initial_param_bounds = 1e6
+
+    # Threshold on how bad red. chi2 can be
+    chi2_threshold = 20.5
     ##############
     ##############
     ##############
@@ -230,7 +233,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             par_err_vec[i] = 0.0
 
     # Check that all red. chi2 are reasonable
-    chi2_threshold = 2.5
     bad_chi2 = False
     for i, chi2 in enumerate(par_chi2_vec):
         if chi2 > chi2_threshold:
