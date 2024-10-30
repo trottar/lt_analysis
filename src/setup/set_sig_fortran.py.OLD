@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 05:03:20 trottar"
+# Time-stamp: "2024-10-13 13:41:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,7 +47,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append(f"{LTANAPATH}/src/utility")
-from utility import extract_values, format_long_line
+from utility import extract_values
 
 ###############################################################################################################################################
 # Define paths for the Fortran file and the test file
@@ -94,7 +94,6 @@ for sig_val in sig_var:
     if sigl_str is None:
         print(f"{sig_val} not found in {test_file_path}!")
     else:
-
         # Step 2: Read the Fortran file and store its contents
         with open(file_path, 'r') as file:
             lines = file.readlines()
@@ -109,14 +108,10 @@ for sig_val in sig_var:
                     if "(" in line.split('=')[0]:
                         sigl_str = sigl_str + ')'
                     if not SigSet:
-                        # Format the original and new lines for print output
-                        original_line = format_long_line(line.strip(), max_fortran_line_length - 6)
-                        new_line_for_print = format_long_line(f"{sig_val}={sigl_str}", max_fortran_line_length - 6)
-                        print(f"\tChanging \n\n{original_line} \n\n\t to \n\n{new_line_for_print}")
-
+                        print(f"\tChanging \n\n\t{line.strip()} \n\n\t to \n\n\t{sig_val}={sigl_str}")
                         # Preserve the spaces before '{sig_val}'
                         prefix_spaces = line[:line.find(f'{sig_val}=')]
-                        # Construct the new line with {sig_val}
+                        # Construct the new line with {sig_val}, ensuring we don't exceed the Fortran line length
                         new_line = f'{prefix_spaces}{sig_val}={sigl_str}\n'
 
                         # Check if the new line exceeds the maximum Fortran line length
@@ -125,15 +120,12 @@ for sig_val in sig_var:
                             first_line = new_line[:max_fortran_line_length].rstrip() + "\n"
                             continuation_lines = []
                             remaining_line = new_line[max_fortran_line_length:]
-
                             # Add continuation lines, placing & (or digit) in column 6
                             while len(remaining_line) > max_fortran_line_length - 6:
                                 continuation_lines.append(f"     >     {remaining_line[:max_fortran_line_length - 6]}\n")
                                 remaining_line = remaining_line[max_fortran_line_length - 6:]
-
                             # Add the last continuation line
                             continuation_lines.append(f"     >     {remaining_line}")
-
                             # Replace the original line with the properly formatted multi-line version
                             lines[i] = first_line + ''.join(continuation_lines)
                         else:
@@ -152,13 +144,14 @@ for sig_val in sig_var:
                         # Add a blank line only if we added continuation lines
                         if len(new_line) <= max_fortran_line_length:
                             lines.insert(i + 1, '\n')
-
+                            
                         # Once found, no need to replace anything else
                         SigSet = True
             i += 1
-
+            
+    
         # Step 4: Write the modified content back to the Fortran file
         with open(file_path, 'w') as file:
             file.writelines(lines)
-    
+
         #print(f"Updated {sig_val} in {file_path}")
