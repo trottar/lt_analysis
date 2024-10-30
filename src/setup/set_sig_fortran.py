@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 05:03:20 trottar"
+# Time-stamp: "2024-10-30 05:07:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -47,7 +47,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append(f"{LTANAPATH}/src/utility")
-from utility import extract_values, format_long_line
+from utility import extract_values
 
 ###############################################################################################################################################
 # Define paths for the Fortran file and the test file
@@ -94,7 +94,6 @@ for sig_val in sig_var:
     if sigl_str is None:
         print(f"{sig_val} not found in {test_file_path}!")
     else:
-
         # Step 2: Read the Fortran file and store its contents
         with open(file_path, 'r') as file:
             lines = file.readlines()
@@ -109,10 +108,16 @@ for sig_val in sig_var:
                     if "(" in line.split('=')[0]:
                         sigl_str = sigl_str + ')'
                     if not SigSet:
-                        # Format the original and new lines for print output
-                        original_line = format_long_line(line.strip(), max_fortran_line_length - 6)
-                        new_line_for_print = format_long_line(f"{sig_val}={sigl_str}", max_fortran_line_length - 6)
-                        print(f"\tChanging \n\n{original_line} \n\n\t to \n\n{new_line_for_print}")
+                        # Get the complete original equation by combining continuation lines
+                        original_equation = line.strip()
+                        next_idx = i + 1
+                        while next_idx < len(lines) and (lines[next_idx].strip().startswith('&') or 
+                                                       lines[next_idx].strip().startswith('>')):
+                            original_equation += ' ' + lines[next_idx].strip().lstrip('&>').strip()
+                            next_idx += 1
+
+                        # Print the original and new equations
+                        print(f"\tChanging \n\n\t{original_equation} \n\n\t to \n\n\t{sig_val}={sigl_str}")
 
                         # Preserve the spaces before '{sig_val}'
                         prefix_spaces = line[:line.find(f'{sig_val}=')]

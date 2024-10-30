@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 05:02:43 trottar"
+# Time-stamp: "2024-10-30 05:07:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,31 +124,6 @@ def check_runs_in_effcharge(run, ParticleType, OUTPATH):
         root_file_path = "%s/%s_%s_-1_Raw_Data.root" % (OUTPATH, ParticleType, run)
         return os.path.exists(root_file_path)
     return False
-
-################################################################################################################################################
-
-def format_long_line(text, max_length):
-    """Format a long line into multiple lines with proper indentation."""
-    if len(text) <= max_length:
-        return text
-    
-    lines = []
-    current_line = text
-    base_indent = "\t"  # Base indentation for all lines
-    
-    while len(current_line) > max_length:
-        # Find the last space before max_length
-        split_point = current_line[:max_length].rfind(' ')
-        if split_point == -1:  # If no space found, force split at max_length
-            split_point = max_length
-        
-        lines.append(f"{base_indent}{current_line[:split_point]}")
-        current_line = current_line[split_point:].lstrip()
-    
-    if current_line:  # Add any remaining text
-        lines.append(f"{base_indent}{current_line}")
-    
-    return " \n".join(lines)
 
 ################################################################################################################################################
 
