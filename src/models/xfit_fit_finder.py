@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 09:33:25 trottar"
+# Time-stamp: "2024-10-30 09:35:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -356,8 +356,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     if abs(best_cost - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = best_cost
                         best_overall_bin = best_bin
-                        best_overall_params = best_params
-                        best_overall_errors = best_errors
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors[:]
 
             try:
                 print(f"\n\nBest overall solution: {best_overall_params}")
@@ -372,9 +372,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             # Calculate the total duration
             total_duration = end_time - start_time
             print("The loop took {:.2f} seconds.".format(total_duration))
-
-            best_overall_params = [best_overall_params]
-            best_overall_errors = [best_overall_errors]
 
             try:            
                 while len(best_overall_params) < 4:
