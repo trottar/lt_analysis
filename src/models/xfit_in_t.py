@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 06:58:24 trottar"
+# Time-stamp: "2024-10-30 08:30:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,8 +55,8 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ##################################################################################################################################################
 
-DEBUG=False
-#DEBUG=True
+#DEBUG=False
+DEBUG=True
 
 ###############################################################################################################################################
 # Import separated xsects models
