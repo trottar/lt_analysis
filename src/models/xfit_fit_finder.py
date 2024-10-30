@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 09:19:20 trottar"
+# Time-stamp: "2024-10-30 09:33:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -177,11 +177,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     par_sig_err_0 = 0.0
 
                     # Track the best solution
-                    best_params = par_sig_0
+                    best_params = [par_sig_0]
                     best_cost = float('inf')
                     best_bin = None
-                    previous_params = best_params
-                    best_errors = par_sig_err_0
+                    best_errors = [par_sig_err_0]
+                    previous_params = best_params[:]
 
                     # Check for local minima
                     local_minima = []
@@ -202,11 +202,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         try:
                             # Perturb parameters
-                            current_params = simulated_annealing(par_sig_0, temperature)
+                            current_params = [simulated_annealing(par_sig_0, temperature)]
 
                             # Insert tabu list check here
-                            if current_params not in tabu_list:
-                                tabu_list.add(current_params)
+                            if tuple(current_params) not in tabu_list:
+                                tabu_list.add(tuple(current_params))
                             else:
                                 # Restart from initial parameters
                                 current_params = initial_params
@@ -241,7 +241,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0")
-                            f_sig.SetParameter(0, current_params)
+                            f_sig.SetParameter(0, current_params[0])
                             f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -249,7 +249,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
                             f_sig_status = f_sig.GetNDF() != 0
 
-                            params_sig_history['p0'].append(current_params)
+                            params_sig_history['p0'].append(current_params[0])
 
                             # Calculate cost with consistent regularization
                             current_cost, lambda_reg = calculate_cost(
@@ -264,12 +264,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Update acceptance probability for simulated annealing
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
             
-                            current_params = f_sig.GetParameter(0)
-                            current_errors = f_sig.GetParError(0)
+                            current_params = [f_sig.GetParameter(0)]
+                            current_errors = [f_sig.GetParError(0)]
                             current_bin = b
 
                             # Update ROOT TGraphs for plotting
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params)
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
@@ -294,16 +294,16 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Adjust the cooling rate if parameters haven't changed for N iterations
                             if unchanged_iterations >= max_unchanged_iterations:
-                                if not any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):                    
+                                if not any(np.allclose([current_params[0]], minima, atol=5.0) for minima in local_minima):                    
                                     local_minima.append([
-                                        current_params
+                                        current_params[0]
                                     ])
                                 # Restart from initial parameters
                                 current_params = initial_params
                                 temperature = initial_temperature
                                 unchanged_iterations = 0
 
-                            previous_params = current_params                
+                            previous_params = current_params[:]
 
                             # Update parameters with the best found so far
                             par_sig_0 = best_params
@@ -321,26 +321,30 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                                 current_params = adjust_params(best_params)
                                 par_sig_0 = current_params
-                                par_sig_err_0 = 0.0
+                                par_sig_err_0 = [0.0]
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Generate a recovery parameter based on a single float value, adding random fluctuation
-                            recovery_param = (
-                                best_params + random.uniform(-0.1 * abs(best_params), 0.1 * abs(best_params))
-                                if best_params != float('inf') else initial_param
-                            )
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
-                            # Ensure the parameter stays within bounds
-                            recovery_param = max(min(recovery_param, max_param_bounds), -max_param_bounds)
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
 
-                            # Set the function parameter to the adjusted recovery value
-                            f_sig.SetParameter(0, recovery_param)
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
 
-                            # Keep the previous best if best_cost is finite; otherwise, set an alternative cost
-                            current_param = recovery_param
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
                             current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-                            
+
                             # Increase temperature slightly to encourage exploration
                             temperature = min(temperature * 1.2, initial_temperature)
     
