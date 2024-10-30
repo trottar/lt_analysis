@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 08:39:35 trottar"
+# Time-stamp: "2024-10-30 09:35:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -177,11 +177,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     par_sig_err_0 = 0.0
 
                     # Track the best solution
-                    best_params = par_sig_0
+                    best_params = [par_sig_0]
                     best_cost = float('inf')
                     best_bin = None
-                    previous_params = best_params
-                    best_errors = par_sig_err_0
+                    best_errors = [par_sig_err_0]
+                    previous_params = best_params[:]
 
                     # Check for local minima
                     local_minima = []
@@ -202,11 +202,11 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         try:
                             # Perturb parameters
-                            current_params = simulated_annealing(par_sig_0, temperature)
+                            current_params = [simulated_annealing(par_sig_0, temperature)]
 
                             # Insert tabu list check here
-                            if current_params not in tabu_list:
-                                tabu_list.add(current_params)
+                            if tuple(current_params) not in tabu_list:
+                                tabu_list.add(tuple(current_params))
                             else:
                                 # Restart from initial parameters
                                 current_params = initial_params
@@ -241,7 +241,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0")
-                            f_sig.SetParameter(0, current_params)
+                            f_sig.SetParameter(0, current_params[0])
                             f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -249,7 +249,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
                             f_sig_status = f_sig.GetNDF() != 0
 
-                            params_sig_history['p0'].append(current_params)
+                            params_sig_history['p0'].append(current_params[0])
 
                             # Calculate cost with consistent regularization
                             current_cost, lambda_reg = calculate_cost(
@@ -264,12 +264,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             # Update acceptance probability for simulated annealing
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
             
-                            current_params = f_sig.GetParameter(0)
-                            current_errors = f_sig.GetParError(0)
+                            current_params = [f_sig.GetParameter(0)]
+                            current_errors = [f_sig.GetParError(0)]
                             current_bin = b
 
                             # Update ROOT TGraphs for plotting
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params)
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
@@ -294,16 +294,16 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Adjust the cooling rate if parameters haven't changed for N iterations
                             if unchanged_iterations >= max_unchanged_iterations:
-                                if not any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):                    
+                                if not any(np.allclose([current_params[0]], minima, atol=5.0) for minima in local_minima):                    
                                     local_minima.append([
-                                        current_params
+                                        current_params[0]
                                     ])
                                 # Restart from initial parameters
                                 current_params = initial_params
                                 temperature = initial_temperature
                                 unchanged_iterations = 0
 
-                            previous_params = current_params                
+                            previous_params = current_params[:]
 
                             # Update parameters with the best found so far
                             par_sig_0 = best_params
@@ -321,7 +321,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                                 current_params = adjust_params(best_params)
                                 par_sig_0 = current_params
-                                par_sig_err_0 = 0.0
+                                par_sig_err_0 = [0.0]
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -356,8 +356,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                     if abs(best_cost - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = best_cost
                         best_overall_bin = best_bin
-                        best_overall_params = best_params
-                        best_overall_errors = best_errors
+                        best_overall_params = best_params[:]
+                        best_overall_errors = best_errors[:]
 
             try:
                 print(f"\n\nBest overall solution: {best_overall_params}")
@@ -372,9 +372,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             # Calculate the total duration
             total_duration = end_time - start_time
             print("The loop took {:.2f} seconds.".format(total_duration))
-
-            best_overall_params = [best_overall_params]
-            best_overall_errors = [best_overall_errors]
 
             try:            
                 while len(best_overall_params) < 4:
