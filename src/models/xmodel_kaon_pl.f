@@ -103,7 +103,7 @@ c     Correct for W.
       sig=sig_T+eps_mod*sig_L+eps_mod*cos(2.*phi)*sig_TT
      >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sig_LT
 
-**      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
+      sig=sig/2./pi/1.d+06      !dsig/dtdphicm in microbarns/MeV**2/rad
 *     sig=sig/2./pi      !dsig/dtdphicm in microbarns/GeV**2/rad      
 
       x_mod=sig
