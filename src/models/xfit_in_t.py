@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 04:40:27 trottar"
+# Time-stamp: "2024-10-30 05:12:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -177,22 +177,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     q2_set = q2_set.replace(".","p")
     w_set = w_set.replace(".","p")
 
-    # Err sets to evaluate
-    err_sets = {
-        "L": [errl0, errl1, errl2, errl3],
-        "T": [errt0, errt1, errt2, errt3],
-        "LT": [errlt0, errlt1, errlt2, errlt3],
-        "TT": [errtt0, errtt1, errtt2, errtt3],
-    }
-    
-    # Chi2 sets to evaluate
-    chi2_sets = {
-        "L": [chi2l0, chi2l1, chi2l2, chi2l3],
-        "T": [chi2t0, chi2t1, chi2t2, chi2t3],
-        "LT": [chi2lt0, chi2lt1, chi2lt2, chi2lt3],
-        "TT": [chi2tt0, chi2tt1, chi2tt2, chi2tt3],
-    }
-
     # Find fits for L, T, LT, TT
     fit_params = {
         "L": [l0, l1, l2, l3],
@@ -216,8 +200,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "iter_num" : iter_num,
         "outputpdf" : outputpdf,
         "fit_params" : fit_params,
-        "err_sets" : err_sets,
-        "chi2_sets" : chi2_sets
     }
 
     # Don't find new fits if debugging
