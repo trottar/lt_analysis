@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 08:48:29 trottar"
+# Time-stamp: "2024-10-30 08:48:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,7 +70,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     Q2max_range = inpDict["Q2max"]
 
     iter_num = inpDict["iter_num"]
-
 
     if iter_num > 1:
         DEBUG=False
