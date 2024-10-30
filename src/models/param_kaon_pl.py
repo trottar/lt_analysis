@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-28 11:13:33 trottar"
+# Time-stamp: "2024-10-30 06:07:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -55,6 +55,9 @@ def iterWeight(arg_str):
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
 
+    # Convert degrees to radians
+    theta_cm = math.pi/180
+    
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
     fun_Sig_T_optimized = prepare_equations(equations, 'sig_T')

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-28 08:41:40 trottar"
+# Time-stamp: "2024-10-30 06:08:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -31,6 +31,10 @@ def import_model(inp_model, arg_str):
     # Extract individual values from the list
     q2_set, w_set, theta_cm, tt, qq, ww, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
+
+    # Convert degrees to radians
+    theta_cm = math.pi/180    
+    
     # Load equations from model input file of given setting
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
 
