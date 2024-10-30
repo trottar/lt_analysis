@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 06:08:51 trottar"
+# Time-stamp: "2024-10-30 07:09:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,7 +59,7 @@ def fun_Sig_L(g, qq, ww, x, par):
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Convert degrees to radians
-    theta_cm = math.pi/180    
+    theta_cm = theta_cm * math.pi/180    
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
 
@@ -74,7 +74,7 @@ def fun_Sig_T(g, qq, ww, x, par):
     w_set = float(W.replace("p","."))
     par5, par6, par7, par8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Convert degrees to radians
-    theta_cm = math.pi/180    
+    theta_cm = theta_cm * math.pi/180    
     # Calculate SigT
     return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
 
@@ -89,7 +89,7 @@ def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     w_set = float(W.replace("p","."))
     par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Convert degrees to radians
-    theta_cm = math.pi/180    
+    theta_cm = theta_cm * math.pi/180    
     # Calculate SigLT
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
@@ -104,6 +104,6 @@ def fun_Sig_TT(g, qq, ww, theta_cm, x, par):
     w_set = float(W.replace("p","."))
     par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Convert degrees to radians
-    theta_cm = math.pi/180    
+    theta_cm = theta_cm * math.pi/180    
     # Calculate SigTT
     return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
