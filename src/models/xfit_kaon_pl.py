@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 07:14:01 trottar"
+# Time-stamp: "2024-10-30 07:14:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,7 +74,7 @@ def fun_Sig_T(g, qq, ww, x, par):
     # Calculate SigT
     return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
 
-def fun_Sig_LT_wrapper(wfactor, q2, w, theta=90):
+def fun_Sig_LT_wrapper(wfactor, q2, w, theta):
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
         return fun_Sig_LT(g, qq, ww, theta_cm, x, par)
     return tmp_func
@@ -89,7 +89,7 @@ def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     # Calculate SigLT
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
-def fun_Sig_TT_wrapper(wfactor, q2, w, theta=90):
+def fun_Sig_TT_wrapper(wfactor, q2, w, theta):
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
         return fun_Sig_TT(g, qq, ww, theta_cm, x, par)
     return tmp_func
