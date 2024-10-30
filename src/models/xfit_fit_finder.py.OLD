@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 09:16:43 trottar"
+# Time-stamp: "2024-10-30 08:39:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -325,22 +325,26 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         except (TypeError or ZeroDivisionError) as e:
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                            # Generate a recovery parameter based on a single float value, adding random fluctuation
-                            recovery_param = (
-                                best_param + random.uniform(-0.1 * abs(best_param), 0.1 * abs(best_param))
-                                if best_param != float('inf') else initial_param
-                            )
+                            # Generate safer parameter values within reasonable bounds
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
+                            ]
 
-                            # Ensure the parameter stays within bounds
-                            recovery_param = max(min(recovery_param, max_param_bounds), -max_param_bounds)
+                            # Ensure parameters stay within bounds
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
 
-                            # Set the function parameter to the adjusted recovery value
-                            f_sig.SetParameter(0, recovery_param)
+                            # Reset function parameters
+                            for i, param in enumerate(recovery_params):
+                                f_sig.SetParameter(i, param)
 
-                            # Keep the previous best if best_cost is finite; otherwise, set an alternative cost
-                            current_param = recovery_param
+                            # Don't update best_cost to inf, keep previous best
+                            current_params = recovery_params
                             current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-                            
+
                             # Increase temperature slightly to encourage exploration
                             temperature = min(temperature * 1.2, initial_temperature)
     
