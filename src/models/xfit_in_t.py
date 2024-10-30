@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 04:10:35 trottar"
+# Time-stamp: "2024-10-30 04:24:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -197,8 +197,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     fit_params = {
         "L": [l0, l1, l2, l3],
         "T": [t0, t1, t2, t3],
-        "TT": [tt0, tt1, tt2, tt3],
         "LT": [lt0, lt1, lt2, lt3],
+        "TT": [tt0, tt1, tt2, tt3],
     }
     
     inp_dict = {
@@ -227,9 +227,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Check for very small parameters and set to zero
     for i in range(len(par_vec)):
-        if par_vec[i] < 1e-9:
+        if abs(par_vec[i]) < 1e-9:
             par_vec[i] = 0.0
-        if par_err_vec[i] < 1e-9:
+        if abs(par_err_vec[i]) < 1e-9:
             par_err_vec[i] = 0.0
 
     # Check that all red. chi2 are reasonable
