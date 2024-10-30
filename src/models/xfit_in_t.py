@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 08:30:40 trottar"
+# Time-stamp: "2024-10-30 08:48:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -53,10 +53,6 @@ from xfit_fit_finder import find_fit
 # Suppressing the terminal splash of Print()
 ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
-##################################################################################################################################################
-
-#DEBUG=False
-DEBUG=True
 
 ###############################################################################################################################################
 # Import separated xsects models
@@ -74,6 +70,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     Q2max_range = inpDict["Q2max"]
 
     iter_num = inpDict["iter_num"]
+
+
+    if iter_num > 1:
+        DEBUG=False
+    else:
+        DEBUG=True
     
     ##############
     # HARD CODED #
