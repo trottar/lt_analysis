@@ -11,9 +11,9 @@ mpipl=0.139570
 mkpl=0.493677
 
 #
-tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
+#tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 # Determined from (tmin, Q2) = [(0.145, 2.115), (0.17, 3.0), (0.3, 4.4), (0.35, 5.5)]
-#tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
+tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
@@ -33,20 +33,20 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # Marco's thesis
-sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's
 #sig_TT = (par13 * math.exp(-par14*math.fabs(tt)) - (math.fabs(tt)**qq)) * 1.0/(1.0 + (qq/par15)**2)
 # Custom
 #sig_TT = (math.fabs(tt) * math.exp(-par13*math.fabs(tt))) * ((par14 * math.fabs(tt)**2) - 1.0) * 1.0/(1.0 + (qq/par15)**2)
-#sig_TT = (math.exp(-par13*(math.fabs(tt)-tav)) - math.exp(-par14*(math.fabs(tt)-tav))) * 1.0/(1.0 + (qq/par15)**2)
+sig_TT = (math.exp(-par13*(math.fabs(tt)-tav)) - math.exp(-par14*(math.fabs(tt)-tav))) * 1.0/(1.0 + (qq/par15)**2)
 
 # Weight factor for Q2=3.0, W=3.14
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.25
 # From linear fit of all Q2
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 # From quadratic fit of all Q2	
-#wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 
 ################################################################################
 # Previous iterations
