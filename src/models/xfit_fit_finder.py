@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 09:16:43 trottar"
+# Time-stamp: "2024-10-30 09:19:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -327,8 +327,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
                             # Generate a recovery parameter based on a single float value, adding random fluctuation
                             recovery_param = (
-                                best_param + random.uniform(-0.1 * abs(best_param), 0.1 * abs(best_param))
-                                if best_param != float('inf') else initial_param
+                                best_params + random.uniform(-0.1 * abs(best_params), 0.1 * abs(best_params))
+                                if best_params != float('inf') else initial_param
                             )
 
                             # Ensure the parameter stays within bounds
