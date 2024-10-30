@@ -217,10 +217,10 @@ c angle check
             endif
 
 *     Set extreme ratio values to zero
-            if (r.gt.10.0.or.r.le.0.1) then
-               r=0.0
-               dr=0.0
-            endif
+*            if (r.gt.10.0.or.r.le.0.1) then
+*               r=0.0
+*               dr=0.0
+*            endif
             
 *     Convert from ub/MeV^2 to ub/GeV^2
             x_mod=x_mod*1.d+06
