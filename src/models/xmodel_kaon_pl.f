@@ -71,7 +71,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 *     Model sig_L, sig_T, sig_TT, sig_LT.
 
 *     Input model file converts to radians, so input theta should be deg
-      theta_cm=theta_cm*180./3.14159
+*      theta_cm=theta_cm*180./3.14159
 
 *** Make sure there is a space after every equation ***
       

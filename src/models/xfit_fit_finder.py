@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-29 08:51:57 trottar"
+# Time-stamp: "2024-10-30 04:43:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -221,8 +221,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -411,8 +411,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -645,8 +645,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -848,8 +848,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1090,8 +1090,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1302,8 +1302,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1551,8 +1551,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
                             for i in range(len(w_vec)):
-                                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
@@ -1771,8 +1771,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
             for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                sig_X_fit = (g_sig.GetY()[i]) / (g_vec[i])
+                sig_X_fit_err = (g_sig.GetEY()[i]) / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 

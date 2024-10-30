@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 04:24:39 trottar"
+# Time-stamp: "2024-10-30 04:40:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -222,14 +222,14 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Don't find new fits if debugging
     if not DEBUG:
-        # Finding fits for L, T, LT, TT
+        # Find optimized fits for L, T, LT, TT
         find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
 
     # Check for very small parameters and set to zero
     for i in range(len(par_vec)):
-        if abs(par_vec[i]) < 1e-9:
+        if abs(par_vec[i]) < 1e-15:
             par_vec[i] = 0.0
-        if abs(par_err_vec[i]) < 1e-9:
+        if abs(par_err_vec[i]) < 1e-15:
             par_err_vec[i] = 0.0
 
     # Check that all red. chi2 are reasonable
