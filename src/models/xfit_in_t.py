@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-31 05:48:51 trottar"
+# Time-stamp: "2024-10-31 06:07:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -42,7 +42,7 @@ CACHEPATH=lt.CACHEPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import load_equations, prepare_equations, find_params_wrapper
+from utility import load_equations, prepare_equations, find_params_wrapper, check_chi_squared_values
 
 ##################################################################################################################################################
 # Import fit finder function
@@ -210,40 +210,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         # Find optimized fits for L, T, LT, TT
         find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
 
-    # Check for very small parameters and set to zero
-    for i in range(len(par_vec)):
-        if abs(par_vec[i]) < 1e-15:
-            par_vec[i] = 0.0
-        if abs(par_err_vec[i]) < 1e-15:
-            par_err_vec[i] = 0.0
-
-    # Check if any chi2 values exceed the threshold
-    unique_bad_chi2_count = 0  # Counter for bad chi-squared warnings
-
-    # Since every 4 elements are the same, we only need to check the first 4 unique values
-    for i in range(4):
-        chi2 = par_chi2_vec[i]
-        if chi2 > chi2_threshold:
-            # Access signal name and parameters based on index
-            sig_name, initial_params = list(fit_params.items())[i]
-
-            # Extract equation string from the wrapper
-            _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
-
-            print(
-                f"\nWARNING: Reduced Chi-Squared of {chi2:.5f} found, "
-                f"which is above the threshold of {chi2_threshold}.\n\t"
-                f"Increase fit iterations or adjust functional form of...{equation_str}"
-            )
-
-            unique_bad_chi2_count += 1
-            if unique_bad_chi2_count >= 4:  # Limit to 4 warnings
-                break
-
-    # Exit if any bad chi2 values were found
-    if unique_bad_chi2_count > 0:
+    if check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
         sys.exit(2)
-            
+
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:

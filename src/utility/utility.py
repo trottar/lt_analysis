@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 06:06:14 trottar"
+# Time-stamp: "2024-10-31 06:08:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -974,6 +974,57 @@ def get_central_value(lst):
         mid1, mid2 = n // 2 - 1, n // 2
         return (lst[mid1] + lst[mid2]) / 2
 
+################################################################################################################################################
+    
+def check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
+    """
+    Check chi-squared values where every 4 elements are identical.
+    Only prints warning once per unique chi-squared value above threshold.
+    
+    Args:
+        par_chi2_vec (list): List of chi-squared values where every 4 elements are identical
+        chi2_threshold (float): Threshold value for acceptable chi-squared
+        fit_params (dict): Dictionary of fit parameters
+        equations: Function to find parameter wrapper
+    
+    Returns:
+        bool: True if any chi-squared values exceed threshold, False otherwise
+    """
+    # Verify input length is multiple of 4
+    if len(par_chi2_vec) % 4 != 0:
+        raise ValueError("Input vector length must be multiple of 4")
+        
+    unique_bad_chi2_count = 0
+    checked_values = set()  # Track unique chi-squared values we've already warned about
+    
+    # Only need to check every 4th value since they repeat
+    for i in range(0, len(par_chi2_vec), 4):
+        chi2 = par_chi2_vec[i]
+        
+        # Skip if we've already warned about this chi2 value
+        if chi2 in checked_values:
+            continue
+            
+        if chi2 > chi2_threshold:
+            # Get corresponding signal name and parameters
+            sig_name, initial_params = list(fit_params.items())[i // 4]
+            # Extract equation string from wrapper
+            _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
+            
+            print(
+                f"\nWARNING: Reduced Chi-Squared of {chi2:.5f} found, "
+                f"which is above the threshold of {chi2_threshold}.\n\t"
+                f"Increase fit iterations or adjust functional form of...{equation_str}"
+            )
+            
+            checked_values.add(chi2)
+            unique_bad_chi2_count += 1
+            
+            if unique_bad_chi2_count >= 4:  # Limit to 4 unique warnings
+                break
+                
+    return unique_bad_chi2_count > 0
+    
 ################################################################################################################################################
 
 def load_equations(filename='variables.inp'):
