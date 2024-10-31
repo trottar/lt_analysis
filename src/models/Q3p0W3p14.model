@@ -23,7 +23,7 @@ Qdep_T = (math.exp(-qq**2)) / qq
 # Longitudinal cross-section
 # 0th iteration, 10/10/2024
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
-sig_L = (par1 * Qdep_L * ft) * (math.exp((ftav)))
+sig_L = (par1 * Qdep_L * ft) * (math.exp(-par2 * (math.fabs(tt)-tav)))
 
 # Transverse cross-section
 # 0th iteration, 10/10/2024
