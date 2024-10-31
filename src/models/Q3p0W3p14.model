@@ -12,9 +12,9 @@ mpipl=0.139570
 mkpl=0.493677
 
 #
-tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
+#tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 # Determined from (tmin, Q2) = [(0.145, 2.115), (0.17, 3.0), (0.3, 4.4), (0.35, 5.5)]
-#tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
+tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
@@ -23,7 +23,7 @@ Qdep_T = (math.exp(-qq**2)) / qq
 # Longitudinal cross-section
 # 0th iteration, 10/10/2024
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
-sig_L = (par1 * Qdep_L * ft) * math.exp(par2 * (math.fabs(tt)))
+sig_L = (par1 * Qdep_L) * (math.exp(-par2 * (math.fabs(tt) - ft)) - math.exp(-par3 * (math.fabs(tt) - ft)))
 
 # Transverse cross-section
 # 0th iteration, 10/10/2024
