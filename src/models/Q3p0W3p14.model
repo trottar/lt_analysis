@@ -17,7 +17,8 @@ tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 #tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
-Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+#Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+Qdep_L = qq / (1.0 + (1.77 * qq))
 Qdep_T = (math.exp(-qq**2)) / qq
 
 # Longitudinal cross-section
