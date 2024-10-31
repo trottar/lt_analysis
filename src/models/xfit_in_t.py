@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-31 05:19:39 trottar"
+# Time-stamp: "2024-10-31 05:48:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -218,12 +218,14 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             par_err_vec[i] = 0.0
 
     # Check if any chi2 values exceed the threshold
-    bad_chi2_count = 0  # Count the number of bad chi-squared values
+    unique_bad_chi2_count = 0  # Counter for bad chi-squared warnings
 
-    for i, chi2 in enumerate(par_chi2_vec):
+    # Since every 4 elements are the same, we only need to check the first 4 unique values
+    for i in range(4):
+        chi2 = par_chi2_vec[i]
         if chi2 > chi2_threshold:
             # Access signal name and parameters based on index
-            sig_name, initial_params = list(fit_params.items())[i % len(fit_params)]
+            sig_name, initial_params = list(fit_params.items())[i]
 
             # Extract equation string from the wrapper
             _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
@@ -234,12 +236,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                 f"Increase fit iterations or adjust functional form of...{equation_str}"
             )
 
-            bad_chi2_count += 1
-            if bad_chi2_count > 4:  # Limit warning messages
+            unique_bad_chi2_count += 1
+            if unique_bad_chi2_count >= 4:  # Limit to 4 warnings
                 break
 
     # Exit if any bad chi2 values were found
-    if bad_chi2_count > 0:
+    if unique_bad_chi2_count > 0:
         sys.exit(2)
             
     # Check if parameter values changed and print changes to terminal
