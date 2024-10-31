@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-31 04:57:13 trottar"
+# Time-stamp: "2024-10-31 05:19:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,16 +217,29 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         if abs(par_err_vec[i]) < 1e-15:
             par_err_vec[i] = 0.0
 
-    # Check that all red. chi2 are reasonable
-    bad_chi2 = []
-    for i in range(len(par_vec)):
-        chi2 = par_chi2_vec[i % 4]
-        if chi2 > chi2_threshold and len(bad_chi2) <= 4:
-            sig_name, initial_params  = list(fit_params.items())[i % 4]
+    # Check if any chi2 values exceed the threshold
+    bad_chi2_count = 0  # Count the number of bad chi-squared values
+
+    for i, chi2 in enumerate(par_chi2_vec):
+        if chi2 > chi2_threshold:
+            # Access signal name and parameters based on index
+            sig_name, initial_params = list(fit_params.items())[i % len(fit_params)]
+
+            # Extract equation string from the wrapper
             _, _, equation_str = find_params_wrapper(equations)(sig_name, initial_params)
-            print(f"\nWARNING: Reduced Chi-Squared of {chi2:.5f} found, which is above the threshold of {chi2_threshold}.\n\t Increase fit iterations or adjust functional form of...{equation_str}")
-            bad_chi2.append(True)
-    if len(bad_chi2) > 0.0:
+
+            print(
+                f"\nWARNING: Reduced Chi-Squared of {chi2:.5f} found, "
+                f"which is above the threshold of {chi2_threshold}.\n\t"
+                f"Increase fit iterations or adjust functional form of...{equation_str}"
+            )
+
+            bad_chi2_count += 1
+            if bad_chi2_count > 4:  # Limit warning messages
+                break
+
+    # Exit if any bad chi2 values were found
+    if bad_chi2_count > 0:
         sys.exit(2)
             
     # Check if parameter values changed and print changes to terminal
