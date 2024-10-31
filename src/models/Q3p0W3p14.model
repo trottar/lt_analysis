@@ -38,9 +38,9 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # 0th iteration, 10/10/2024
-sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+#sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 # Marco's thesis
-#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's
 #sig_TT = (par13 * math.exp(-par14*math.fabs(tt)) - (math.fabs(tt)**qq)) * 1.0/(1.0 + (qq/par15)**2)
 # Custom
