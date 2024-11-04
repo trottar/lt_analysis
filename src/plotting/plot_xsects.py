@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-07 07:54:26 trottar"
+# Time-stamp: "2024-11-04 09:08:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -367,6 +367,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(-185, 185)
+        ax.set_ylim(0.2, 1.8)
         ax.legend(fontsize=14)
 
         # Add grid
