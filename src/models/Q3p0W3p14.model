@@ -41,9 +41,9 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # 0th iteration, 10/10/2024
 #sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 # Marco's thesis (chi2 < 4.5)
-sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's
-#sig_TT = (par13 * math.exp(-par14*math.fabs(tt)) - (math.fabs(tt)**qq)) * 1.0/(1.0 + (qq/par15)**2)
+sig_TT = par13 * math.exp(-par14*math.fabs(tt)+tav) * 1.0/(1.0 + (qq/par15)**2)
 # Custom
 #sig_TT = (math.fabs(tt) * math.exp(-par13*math.fabs(tt))) * ((par14 * math.fabs(tt)**2) - 1.0) * 1.0/(1.0 + (qq/par15)**2)
 #sig_TT = (math.exp(-par13*(math.fabs(tt)-tav)) - math.exp(-par14*(math.fabs(tt)-tav))) * 1.0/(1.0 + (qq/par15)**2)
