@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-05 13:40:03 trottar"
+# Time-stamp: "2024-11-05 17:00:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -713,7 +713,7 @@ def remove_bad_bins(histogram):
             histogram.SetBinContent(i, 0)
             histogram.SetBinError(i, 0)  # Set the error to zero for negative bins
     return histogram
-            
+
 ################################################################################################################################################        
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
