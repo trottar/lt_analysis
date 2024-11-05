@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-05 07:43:21 trottar"
+# Time-stamp: "2024-11-05 09:22:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, create_polar_plot, remove_negative_bins
+from utility import open_root_file, create_polar_plot, remove_bad_bins
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -277,39 +277,39 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["InFile_SIMC"] = InFile_SIMC
     histDict["simc_normfactor"] = simc_normfactor
     histDict["simc_nevents"] = simc_nevents
-    histDict["H_Weight_SIMC"] =     remove_negative_bins(H_Weight_SIMC)
-    histDict["H_iWeight_SIMC"] =     remove_negative_bins(H_iWeight_SIMC)
-    histDict["H_hsdelta_SIMC"] =     remove_negative_bins(H_hsdelta_SIMC)
-    histDict["H_hsxptar_SIMC"] =     remove_negative_bins(H_hsxptar_SIMC)
-    histDict["H_hsyptar_SIMC"] =     remove_negative_bins(H_hsyptar_SIMC)
-    histDict["H_ssxfp_SIMC"] =     remove_negative_bins(H_ssxfp_SIMC)
-    histDict["H_ssyfp_SIMC"] =     remove_negative_bins(H_ssyfp_SIMC)
-    histDict["H_ssxpfp_SIMC"] =     remove_negative_bins(H_ssxpfp_SIMC)
-    histDict["H_ssypfp_SIMC"] =     remove_negative_bins(H_ssypfp_SIMC)
-    histDict["H_hsxfp_SIMC"] =     remove_negative_bins(H_hsxfp_SIMC)
-    histDict["H_hsyfp_SIMC"] =     remove_negative_bins(H_hsyfp_SIMC)
-    histDict["H_hsxpfp_SIMC"] =     remove_negative_bins(H_hsxpfp_SIMC)
-    histDict["H_hsypfp_SIMC"] =     remove_negative_bins(H_hsypfp_SIMC)
-    histDict["H_ssdelta_SIMC"] =     remove_negative_bins(H_ssdelta_SIMC)
-    histDict["H_ssxptar_SIMC"] =     remove_negative_bins(H_ssxptar_SIMC)
-    histDict["H_ssyptar_SIMC"] =     remove_negative_bins(H_ssyptar_SIMC)
-    histDict["H_q_SIMC"] =     remove_negative_bins(H_q_SIMC)
-    histDict["H_Q2_SIMC"] =     remove_negative_bins(H_Q2_SIMC)
-    histDict["H_t_SIMC"] =     remove_negative_bins(H_t_SIMC)
-    histDict["H_epsilon_SIMC"] =     remove_negative_bins(H_epsilon_SIMC)
-    histDict["H_MM_SIMC"] =     remove_negative_bins(H_MM_SIMC)
-    histDict["H_th_SIMC"] =     remove_negative_bins(H_th_SIMC)
-    histDict["H_ph_SIMC"] =     remove_negative_bins(H_ph_SIMC)
-    histDict["H_ph_q_SIMC"] =     remove_negative_bins(H_ph_q_SIMC)
-    histDict["H_th_q_SIMC"] =     remove_negative_bins(H_th_q_SIMC)
-    histDict["H_ph_recoil_SIMC"] =     remove_negative_bins(H_ph_recoil_SIMC)
-    histDict["H_th_recoil_SIMC"] =     remove_negative_bins(H_th_recoil_SIMC)
-    histDict["H_pmiss_SIMC"] =     remove_negative_bins(H_pmiss_SIMC)
-    histDict["H_emiss_SIMC"] =     remove_negative_bins(H_emiss_SIMC)
-    histDict["H_pmx_SIMC"] =     remove_negative_bins(H_pmx_SIMC)
-    histDict["H_pmy_SIMC"] =     remove_negative_bins(H_pmy_SIMC)
-    histDict["H_pmz_SIMC"] =     remove_negative_bins(H_pmz_SIMC)
-    histDict["H_W_SIMC"] =     remove_negative_bins(H_W_SIMC)
+    histDict["H_Weight_SIMC"] =     remove_bad_bins(H_Weight_SIMC)
+    histDict["H_iWeight_SIMC"] =     remove_bad_bins(H_iWeight_SIMC)
+    histDict["H_hsdelta_SIMC"] =     remove_bad_bins(H_hsdelta_SIMC)
+    histDict["H_hsxptar_SIMC"] =     remove_bad_bins(H_hsxptar_SIMC)
+    histDict["H_hsyptar_SIMC"] =     remove_bad_bins(H_hsyptar_SIMC)
+    histDict["H_ssxfp_SIMC"] =     remove_bad_bins(H_ssxfp_SIMC)
+    histDict["H_ssyfp_SIMC"] =     remove_bad_bins(H_ssyfp_SIMC)
+    histDict["H_ssxpfp_SIMC"] =     remove_bad_bins(H_ssxpfp_SIMC)
+    histDict["H_ssypfp_SIMC"] =     remove_bad_bins(H_ssypfp_SIMC)
+    histDict["H_hsxfp_SIMC"] =     remove_bad_bins(H_hsxfp_SIMC)
+    histDict["H_hsyfp_SIMC"] =     remove_bad_bins(H_hsyfp_SIMC)
+    histDict["H_hsxpfp_SIMC"] =     remove_bad_bins(H_hsxpfp_SIMC)
+    histDict["H_hsypfp_SIMC"] =     remove_bad_bins(H_hsypfp_SIMC)
+    histDict["H_ssdelta_SIMC"] =     remove_bad_bins(H_ssdelta_SIMC)
+    histDict["H_ssxptar_SIMC"] =     remove_bad_bins(H_ssxptar_SIMC)
+    histDict["H_ssyptar_SIMC"] =     remove_bad_bins(H_ssyptar_SIMC)
+    histDict["H_q_SIMC"] =     remove_bad_bins(H_q_SIMC)
+    histDict["H_Q2_SIMC"] =     remove_bad_bins(H_Q2_SIMC)
+    histDict["H_t_SIMC"] =     remove_bad_bins(H_t_SIMC)
+    histDict["H_epsilon_SIMC"] =     remove_bad_bins(H_epsilon_SIMC)
+    histDict["H_MM_SIMC"] =     remove_bad_bins(H_MM_SIMC)
+    histDict["H_th_SIMC"] =     remove_bad_bins(H_th_SIMC)
+    histDict["H_ph_SIMC"] =     remove_bad_bins(H_ph_SIMC)
+    histDict["H_ph_q_SIMC"] =     remove_bad_bins(H_ph_q_SIMC)
+    histDict["H_th_q_SIMC"] =     remove_bad_bins(H_th_q_SIMC)
+    histDict["H_ph_recoil_SIMC"] =     remove_bad_bins(H_ph_recoil_SIMC)
+    histDict["H_th_recoil_SIMC"] =     remove_bad_bins(H_th_recoil_SIMC)
+    histDict["H_pmiss_SIMC"] =     remove_bad_bins(H_pmiss_SIMC)
+    histDict["H_emiss_SIMC"] =     remove_bad_bins(H_emiss_SIMC)
+    histDict["H_pmx_SIMC"] =     remove_bad_bins(H_pmx_SIMC)
+    histDict["H_pmy_SIMC"] =     remove_bad_bins(H_pmy_SIMC)
+    histDict["H_pmz_SIMC"] =     remove_bad_bins(H_pmz_SIMC)
+    histDict["H_W_SIMC"] =     remove_bad_bins(H_W_SIMC)
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
     histDict["NumEvts_MM_SIMC"] = int(H_MM_SIMC.Integral())
     histDict["NumEvts_MM_unweighted_SIMC"] = int(H_MM_unweighted_SIMC.Integral())
