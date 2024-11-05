@@ -50,13 +50,13 @@ sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=3.14
 # 0th iteration, 10/10/2024
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 # Q2=3.0, W=3.14
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.25
 # From linear fit of all Q2
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 # From quadratic fit of all Q2	
-##wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 
 ################################################################################
 # Previous iterations
