@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-31 04:32:13 trottar"
+# Time-stamp: "2024-11-05 12:40:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1596,7 +1596,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             cost_history.append(current_cost)            
                             # Adapt regularization strength based on history
                             if len(cost_history) >= 2:
-                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)            
+                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)
                             # Update acceptance probability for simulated annealing
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
