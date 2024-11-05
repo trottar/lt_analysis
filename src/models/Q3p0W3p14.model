@@ -44,7 +44,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 #sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's thesis
 #sig_TT = par13 * math.fabs(tt) * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
-sig_TT = par13 * ((math.fabs(tt)/qq)**par14) * math.exp(-par15*math.fabs(tt)) * 1.0/(1.0 + (qq/par16)**2)
+sig_TT = par13 * (math.fabs(tt)**(par14/qq)) * math.exp(-par15*math.fabs(tt)) * 1.0/(1.0 + (qq/par16)**2)
 # Custom
 #sig_TT = (par13 * math.exp(par14 * math.fabs(tt)) + par15 / math.fabs(tt))
 
