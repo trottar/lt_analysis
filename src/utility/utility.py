@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-05 04:25:05 trottar"
+# Time-stamp: "2024-11-05 04:29:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -711,7 +711,7 @@ def remove_negative_bins(histogram):
         content = histogram.GetBinContent(i)
         if content < 0.0:
             histogram.SetBinContent(i, 0)
-            histogram.SetBinError(i, 0)  # Set the error to zero for negative bins
+            histogram.SetBinError(i, 0)
 
     return histogram
             
