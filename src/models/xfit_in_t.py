@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-04 10:36:04 trottar"
+# Time-stamp: "2024-11-05 03:52:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,11 +182,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Find fits for L, T, LT, TT
     fit_params = {
-        "TT": [tt0, tt1, tt2, tt3],
         "L": [l0, l1, l2, l3],
         "T": [t0, t1, t2, t3],
         "LT": [lt0, lt1, lt2, lt3],
-        #"TT": [tt0, tt1, tt2, tt3],
+        "TT": [tt0, tt1, tt2, tt3],
     }
     
     inp_dict = {
