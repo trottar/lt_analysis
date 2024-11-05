@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-26 19:53:18 trottar"
+# Time-stamp: "2024-11-05 09:37:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_negative_bins, get_centroid
+from utility import remove_bad_bins, get_centroid
 
 ##################################################################################################################################################
 
@@ -453,16 +453,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)
             
         processed_dict["t_bin{}".format(j+1)] = {
-            "H_Q2_DATA" : remove_negative_bins(hist_bin_dict["H_Q2_DATA_{}".format(j)]),
-            "H_W_DATA" : remove_negative_bins(hist_bin_dict["H_W_DATA_{}".format(j)]),
-            "H_t_DATA" : remove_negative_bins(hist_bin_dict["H_t_DATA_{}".format(j)]),
-            "H_epsilon_DATA" : remove_negative_bins(hist_bin_dict["H_epsilon_DATA_{}".format(j)]),
-            "H_MM_DATA" : remove_negative_bins(hist_bin_dict["H_MM_DATA_{}".format(j)]),
-            "H_Q2_DUMMY" : remove_negative_bins(hist_bin_dict["H_Q2_DUMMY_{}".format(j)]),
-            "H_W_DUMMY" : remove_negative_bins(hist_bin_dict["H_W_DUMMY_{}".format(j)]),
-            "H_t_DUMMY" : remove_negative_bins(hist_bin_dict["H_t_DUMMY_{}".format(j)]),
-            "H_epsilon_DUMMY" : remove_negative_bins(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]),
-            "H_MM_DUMMY" : remove_negative_bins(hist_bin_dict["H_MM_DUMMY_{}".format(j)]),
+            "H_Q2_DATA" : remove_bad_bins(hist_bin_dict["H_Q2_DATA_{}".format(j)]),
+            "H_W_DATA" : remove_bad_bins(hist_bin_dict["H_W_DATA_{}".format(j)]),
+            "H_t_DATA" : remove_bad_bins(hist_bin_dict["H_t_DATA_{}".format(j)]),
+            "H_epsilon_DATA" : remove_bad_bins(hist_bin_dict["H_epsilon_DATA_{}".format(j)]),
+            "H_MM_DATA" : remove_bad_bins(hist_bin_dict["H_MM_DATA_{}".format(j)]),
+            "H_Q2_DUMMY" : remove_bad_bins(hist_bin_dict["H_Q2_DUMMY_{}".format(j)]),
+            "H_W_DUMMY" : remove_bad_bins(hist_bin_dict["H_W_DUMMY_{}".format(j)]),
+            "H_t_DUMMY" : remove_bad_bins(hist_bin_dict["H_t_DUMMY_{}".format(j)]),
+            "H_epsilon_DUMMY" : remove_bad_bins(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]),
+            "H_MM_DUMMY" : remove_bad_bins(hist_bin_dict["H_MM_DUMMY_{}".format(j)]),
         }
 
         # Sort dictionary keys alphabetically

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-27 18:16:24 trottar"
+# Time-stamp: "2024-11-05 09:38:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import is_hist, remove_negative_bins
+from utility import is_hist, remove_bad_bins
 
 ##################################################################################################################################################
 
@@ -448,10 +448,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
-                "H_MM_DATA" : remove_negative_bins(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
-                "H_t_DATA" : remove_negative_bins(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)]),
-                "H_MM_DUMMY" : remove_negative_bins(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]),
-                "H_t_DUMMY" : remove_negative_bins(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]),
+                "H_MM_DATA" : remove_bad_bins(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
+                "H_t_DATA" : remove_bad_bins(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)]),
+                "H_MM_DUMMY" : remove_bad_bins(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]),
+                "H_t_DUMMY" : remove_bad_bins(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]),
             }
 
             # Sort dictionary keys alphabetically
