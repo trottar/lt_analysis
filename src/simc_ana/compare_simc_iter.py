@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-06 05:29:08 trottar"
+# Time-stamp: "2024-11-06 09:27:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -315,7 +315,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted_SIMC.Integral()
 
     if histDict["NumEvts_MM_SIMC"] == 0.0:
-        print(f"ERROR: Empty results for {phi_setting} setting. Try adjusting functional forms of input model file...")
+        print(f"\n\nERROR: Empty results for {phi_setting} setting. Try adjusting functional forms of input model file...")
         sys.exit(2)
         
     ################################################################################################################################################
