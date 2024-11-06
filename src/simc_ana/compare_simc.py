@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-06 09:27:46 trottar"
+# Time-stamp: "2024-11-06 10:33:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -306,8 +306,8 @@ def compare_simc(hist, inpDict):
     histDict["H_pmz_SIMC"] =     remove_bad_bins(H_pmz_SIMC)
     histDict["H_W_SIMC"] =     remove_bad_bins(H_W_SIMC)
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
-    histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral()
-    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted_SIMC.Integral()
+    histDict["NumEvts_MM_SIMC"] = remove_bad_bins(H_MM_SIMC).Integral()
+    histDict["NumEvts_MM_unweighted_SIMC"] = remove_bad_bins(H_MM_unweighted_SIMC).Integral()
 
     if histDict["NumEvts_MM_SIMC"] == 0.0:
         print(f"\n\nERROR: Empty results for {phi_setting} setting. Try adjusting functional forms of input model file...")
