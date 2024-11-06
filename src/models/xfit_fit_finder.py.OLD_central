@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-06 06:29:14 trottar"
+# Time-stamp: "2024-11-06 06:31:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -129,7 +129,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
-            best_overall_bin = None
             total_iteration = 0
             max_param_bounds = initial_param_bounds
 
@@ -176,7 +175,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Track the best solution
                 best_params = [par_sig_0]
                 best_cost = float('inf')
-                best_bin = None
                 best_errors = [par_sig_err_0]
                 previous_params = best_params[:]
 
@@ -259,7 +257,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                         current_params = [f_sig.GetParameter(0)]
                         current_errors = [f_sig.GetParError(0)]
-                        current_bin = b
 
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
@@ -271,7 +268,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         if accept_prob > random.random():
                             best_params = current_params
                             best_cost = current_cost
-                            best_bin = current_bin
                             best_errors = current_errors
 
                         if iteration % local_search_interval == 0:
@@ -348,7 +344,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
 
@@ -532,7 +527,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
-            best_overall_bin = None
             total_iteration = 0
             max_param_bounds = initial_param_bounds
 
@@ -582,7 +576,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Track the best solution
                 best_params = [par_sig_0, par_sig_1]
                 best_cost = float('inf')
-                best_bin = None
                 best_errors = [par_sig_err_0, par_sig_err_1]
                 previous_params = best_params[:]
 
@@ -678,8 +671,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.GetParError(1)
                         ]
 
-                        current_bin = b
-
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
@@ -691,7 +682,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         if accept_prob > random.random():
                             best_params = current_params
                             best_cost = current_cost
-                            best_bin = current_bin
                             best_errors = current_errors
 
                         if iteration % local_search_interval == 0:
@@ -772,7 +762,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
 
@@ -959,7 +948,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
-            best_overall_bin = None
             total_iteration = 0
             max_param_bounds = initial_param_bounds
 
@@ -1012,7 +1000,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Track the best solution
                 best_params = [par_sig_0, par_sig_1, par_sig_2]
                 best_cost = float('inf')
-                best_bin = None
                 best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
                 previous_params = best_params[:]
 
@@ -1115,8 +1102,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.GetParError(2)
                         ]
 
-                        current_bin = b
-
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1129,7 +1114,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         if accept_prob > random.random():
                             best_params = current_params
                             best_cost = current_cost
-                            best_bin = current_bin
                             best_errors = current_errors
 
                         if iteration % local_search_interval == 0:
@@ -1213,7 +1197,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
 
@@ -1403,7 +1386,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             best_overall_params = None
             best_overall_cost = float('inf')
-            best_overall_bin = None
             total_iteration = 0
             max_param_bounds = initial_param_bounds
 
@@ -1459,7 +1441,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # Track the best solution
                 best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
                 best_cost = float('inf')
-                best_bin = None
                 best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
                 previous_params = best_params[:]
 
@@ -1568,8 +1549,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                             f_sig.GetParError(3)
                         ]
 
-                        current_bin = b
-
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
@@ -1583,7 +1562,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         if accept_prob > random.random():
                             best_params = current_params
                             best_cost = current_cost
-                            best_bin = current_bin
                             best_errors = current_errors
 
                         if iteration % local_search_interval == 0:
@@ -1669,7 +1647,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 # After the while loop, check if this run found a better solution
                 if abs(best_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = best_cost
-                    best_overall_bin = best_bin
                     best_overall_params = best_params[:]
                     best_overall_errors = best_errors[:]
                 
