@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-05 09:22:03 trottar"
+# Time-stamp: "2024-11-06 04:55:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -311,8 +311,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["H_pmz_SIMC"] =     remove_bad_bins(H_pmz_SIMC)
     histDict["H_W_SIMC"] =     remove_bad_bins(H_W_SIMC)
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
-    histDict["NumEvts_MM_SIMC"] = int(H_MM_SIMC.Integral())
-    histDict["NumEvts_MM_unweighted_SIMC"] = int(H_MM_unweighted_SIMC.Integral())
+    histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral()
+    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted_SIMC.Integral()
         
     ################################################################################################################################################
 

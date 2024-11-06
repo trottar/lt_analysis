@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-05 09:22:00 trottar"
+# Time-stamp: "2024-11-06 04:55:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -179,8 +179,7 @@ def compare_simc(hist, inpDict):
     H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
-    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, -math.pi, math.pi
-    )
+    H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
     H_th_q_SIMC  = TH1D("H_th_q_SIMC","Theta Detected (th_xq)", 100, -0.2, 0.2)
     H_ph_recoil_SIMC  = TH1D("H_ph_recoil_SIMC","Phi Recoil (ph_bq)", 100, -10.0, 10.0)
     H_th_recoil_SIMC  = TH1D("H_th_recoil_SIMC","Theta Recoil (th_bq)", 100, -10.0, 10.0)
@@ -307,8 +306,8 @@ def compare_simc(hist, inpDict):
     histDict["H_pmz_SIMC"] =     remove_bad_bins(H_pmz_SIMC)
     histDict["H_W_SIMC"] =     remove_bad_bins(H_W_SIMC)
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
-    histDict["NumEvts_MM_SIMC"] = int(H_MM_SIMC.Integral())
-    histDict["NumEvts_MM_unweighted_SIMC"] = int(H_MM_unweighted_SIMC.Integral())
+    histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral()
+    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted_SIMC.Integral()
           
     ################################################################################################################################################
 
