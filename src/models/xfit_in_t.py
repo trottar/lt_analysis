@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-08 12:12:34 trottar"
+# Time-stamp: "2024-11-08 12:53:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -75,7 +75,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         DEBUG=False
     else:
         DEBUG=True
-    
+
+    DEBUG=False
+        
     ##############
     # HARD CODED #
     ##############
