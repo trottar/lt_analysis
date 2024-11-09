@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-08 13:01:47 trottar"
+# Time-stamp: "2024-11-09 10:12:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -92,9 +92,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     initial_param_bounds = 1e6
 
     # Threshold on how bad red. chi2 can be
-    chi2_threshold = 6.0
+    #chi2_threshold = 6.0
     #chi2_threshold = 10.0
-    #chi2_threshold = 600.0
+    chi2_threshold = 600.0
     ##############
     ##############
     ##############
