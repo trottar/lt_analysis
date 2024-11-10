@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-08 13:32:39 trottar"
+# Time-stamp: "2024-11-10 17:06:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -705,7 +705,7 @@ def notify_email(email_address):
 
 ################################################################################################################################################
 
-def remove_bad_bins(histogram, error_max=0.10):
+def remove_bad_bins(histogram, error_max=0.25):
     nbins = histogram.GetNbinsX()
     for i in range(1, nbins + 1):
         content = histogram.GetBinContent(i)
