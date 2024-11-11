@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-18 03:50:09 trottar"
+# Time-stamp: "2024-11-10 22:20:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,11 +277,6 @@ inpDict["Epsmax"] = 1.0
 phisetlist = ["Center","Left","Right"]
 #phisetlist = ["Center"]
 
-# Add root file with cut data and dummy
-for d in ["Dummy", "Data"]:
-    for phiset in phisetlist:
-        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{phiset}.root")
-
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
@@ -378,6 +373,11 @@ if DEBUG:
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
 
+# Add root file with cut data and dummy
+for d in ["Dummy", "Data"]:
+    for phiset in phisetlist:
+        output_file_lst.append(f"{OUTPATH}/{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e_{phiset}.root")
+    
 # SIMC
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
