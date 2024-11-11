@@ -215,17 +215,11 @@ c angle check
                write(6,*)' Angle error ',th_mod,th_cm
                stop
             endif
-
-*     Set extreme ratio values to zero
-*            if (r.gt.10.0.or.r.le.0.1) then
-*               r=0.0
-*               dr=0.0
-*            endif
             
 *     Convert from ub/MeV^2 to ub/GeV^2
-**            x_mod=x_mod*1.d+06
+            x_mod=x_mod*1.d+06
 *     Convert from ub/GeV^2 to nb/GeV^2
-**            x_mod=x_mod*1.d+03
+            x_mod=x_mod*1.d+03
             x_real=x_mod*r
 *     Calculate xsect error (absolute error)
 *     Cross section error is same percent as ratio
