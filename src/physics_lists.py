@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-04-15 01:39:23 trottar"
+# Time-stamp: "2024-11-11 10:49:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,6 +150,10 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
     
     for i,phiset in enumerate(phisetlist):
         data_key_tuples = list(aveDict["binned_DATA"][phiset]['t'])
+        if any(value == 0 for value in data_key_tuples):
+            zero_indices = [index for index, value in enumerate(data_key_tuples) if value == 0]
+            print(f"ERROR: Zeros found for average kinematic values at t={data_key_tuples[zero_indices]}! Try different binning scheme or adjust t-range...")
+            sys.exit(2)
         for data_key_tuple in data_key_tuples:
             # Access the nested dictionary using the tuple key
             data_nested_dict = aveDict["binned_DATA"][phiset]
