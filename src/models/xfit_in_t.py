@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-13 11:37:20 trottar"
+# Time-stamp: "2024-11-13 11:49:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -85,16 +85,16 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     #max_iterations = 5000
 
     # Number of times to run the algorithm
-    num_optimizations = 10
-    #num_optimizations = 50
+    #num_optimizations = 10
+    num_optimizations = 50
 
     # Initial max/min bounds of finding parameter values
     initial_param_bounds = 1e6
 
     # Threshold on how bad red. chi2 can be
-    chi2_threshold = 1.0
+    #chi2_threshold = 1.0
     #chi2_threshold = 6.0
-    #chi2_threshold = 10.0
+    chi2_threshold = 10.0
     #chi2_threshold = 600.0
     ##############
     ##############
@@ -184,10 +184,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Find fits for L, T, LT, TT
     fit_params = {
-        #"L": [l0, l1, l2, l3],
+        "L": [l0, l1, l2, l3],
         "T": [t0, t1, t2, t3],
-        #"LT": [lt0, lt1, lt2, lt3],
-        #"TT": [tt0, tt1, tt2, tt3],
+        "LT": [lt0, lt1, lt2, lt3],
+        "TT": [tt0, tt1, tt2, tt3],
     }
     
     inp_dict = {

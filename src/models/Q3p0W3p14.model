@@ -28,7 +28,7 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 # Transverse cross-section
 # 0th iteration, 10/10/2024
 sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-# red. chi2 < 3.5
+# red. chi2 < 3.5	       
 #sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 
 # Longitudinal-Transverse interference term
@@ -43,8 +43,6 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # Modified Marco's thesis
 ##sig_TT = par13 * (math.fabs(tt)**(par14)) * math.exp(-par15*math.fabs(tt)) * 1.0/(1.0 + (qq/par16)**2)
 # Power-law decay
-# (chi2 < 8.0)
-#sig_TT =  2 + (par13 / math.fabs(tt)**(par14)) * 1.0/(1.0 + (qq/par15)**2)
 sig_TT =  par13 + (par14 / math.fabs(tt)**(par15)) * 1.0/(1.0 + (qq/par16)**2)
 
 # Weight factor for Q2=3.0, W=3.14
