@@ -53,15 +53,14 @@ sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs
 #sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=3.14
-# 0th iteration, 2024November12_H23M15S30
 # 2nd iteration, r~0.6
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 # Q2=3.0, W=3.14
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.25
 # From linear fit of all Q2
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 # From quadratic fit of all Q2
-# 3rd iteration, r~
+# 0th iteration, 2024November12_H23M15S30
 wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 
 ################################################################################
