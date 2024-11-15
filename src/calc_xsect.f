@@ -225,17 +225,18 @@ c angle check
 *     Cross section error is same percent as ratio
             dx_real=x_mod*dr
                         
-*     Check for NaN values and large values
-            if (isnan(x_real) .or. x_real > 1.0e6) x_real = 0.0
-            if (isnan(dx_real) .or. dx_real > 1.0e6) dx_real = -1000.0
-            if (isnan(x_mod) .or. x_mod > 1.0e6) x_mod = 0.0
-            if (isnan(eps_mod) .or. eps_mod > 1.0e6) eps_mod = 0.0
-            if (isnan(th_mod) .or. th_mod > 1.0e6) th_mod = 0.0
-            if (isnan(phi) .or. phi > 1.0e6) phi = 0.0
-            if (isnan(tt) .or. tt > 1.0e6) tt = 0.0
-            if (isnan(tm) .or. tm > 1.0e6) tm = 0.0
-            if (isnan(w) .or. w > 1.0e6) w = 0.0
-            if (isnan(q2) .or. q2 > 1.0e6) q2 = 0.0
+
+*     Check for NaN values
+            if (isnan(x_real)) x_real = 0.0
+            if (isnan(dx_real)) dx_real = -1000.0
+            if (isnan(x_mod)) x_mod = 0.0
+            if (isnan(eps_mod)) eps_mod = 0.0
+            if (isnan(th_mod)) th_mod = 0.0
+            if (isnan(phi)) phi = 0.0
+            if (isnan(tt)) tt = 0.0
+            if (isnan(tm)) tm = 0.0
+            if (isnan(w)) w = 0.0
+            if (isnan(q2)) q2 = 0.0
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
