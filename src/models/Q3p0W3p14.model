@@ -50,7 +50,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 #sig_TT =  (1.0 + (par13 / math.fabs(tt)**(par14))) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**2)
 # 2nd iteration, (chi2<2.5)
 #sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
-#
+# 2nd iteration, (chi2<2.0)
 sig_TT =   par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=3.0, W=3.14
