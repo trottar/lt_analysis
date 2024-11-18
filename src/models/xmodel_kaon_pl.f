@@ -100,10 +100,17 @@ c     Correct for W.
       sig_TT=sig_TT*wfactor
       sig_LT=sig_LT*wfactor
 
+      print *,"--------------"
       WRITE(*,*) 'sig_L=', sig_L
       WRITE(*,*) 'sig_T=', sig_T
       WRITE(*,*) 'sig_LT=', sig_LT
       WRITE(*,*) 'sig_TT=', sig_TT
+      print *,"--------------"
+
+      if (isnan(sig_L)) sig_L = 0.0
+      if (isnan(sig_T)) sig_T = 0.0
+      if (isnan(sig_LT)) sig_LT = 0.0
+      if (isnan(sig_TT)) sig_TT = 0.0
       
       sig=sig_T+eps_mod*sig_L+eps_mod*cos(2.*phi)*sig_TT
      >     +sqrt(2.0*eps_mod*(1.+eps_mod))*cos(phi)*sig_LT

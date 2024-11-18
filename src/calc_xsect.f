@@ -206,6 +206,17 @@ c      pause
 *            end if
             
             read(51,*) r,dr
+
+            print *,""
+            print *,"--------------"
+            WRITE(*,*) 'phi (deg): ', phi*180./3.14159
+            print *,"--------------"
+            print *,'it',it
+            print *,'nt',nt            
+            print *,'ip',ip
+            print *,'nphi',nphi
+            print *,'ratio',r
+            print *,'dratio',dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
      *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
@@ -242,16 +253,6 @@ c angle check
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
  40         format(3G15.5,f8.5,2f7.2,4f8.5)
 
-            print *,""
-            print *,"--------------"
-            WRITE(*,*) 'phi (deg): ', phi*180./3.14159
-            print *,"--------------"
-            print *,'it',it
-            print *,'nt',nt            
-            print *,'ip',ip
-            print *,'nphi',nphi
-            print *,'ratio',r
-            print *,'dratio',dr
             print *,"--------------"            
             print *,"xmodel inputs"
             print *,"--------------"
