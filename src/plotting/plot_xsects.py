@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-04 10:23:20 trottar"
+# Time-stamp: "2024-11-19 00:59:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -367,7 +367,7 @@ with PdfPages(outputpdf) as pdf:
         ax.tick_params(axis='x', labelsize=16)
         ax.tick_params(axis='y', labelsize=16)        
         ax.set_xlim(-185, 185)
-        ax.set_ylim(0.2, 1.8)
+        #ax.set_ylim(0.2, 1.8)
         ax.legend(fontsize=14)
 
         # Add grid
@@ -415,7 +415,7 @@ with PdfPages(outputpdf) as pdf:
     ax.set_ylabel('Ratio', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=16)
-    ax.set_ylim(0.2, 1.8)
+    #ax.set_ylim(0.2, 1.8)
     ax.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Set integer ticks on x-axis
