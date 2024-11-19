@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 02:16:40 trottar"
+# Time-stamp: "2024-11-19 09:56:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -191,7 +191,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
             # HARD CODED #
             ##############
 
-            adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+            adj_missmass = math.sqrt(abs(evt.Em**2-evt.Pm**2))
 
             ##############
             ##############        
