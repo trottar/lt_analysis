@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 02:17:13 trottar"
+# Time-stamp: "2024-11-19 02:26:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,7 +210,7 @@ def compare_simc(hist, inpDict):
       # HARD CODED #
       ##############
 
-      adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+      adj_missmass = math.sqrt(abs(evt.Em**2-evt.Pm**2))
 
       ##############
       ##############        

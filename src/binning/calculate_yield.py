@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 02:15:44 trottar"
+# Time-stamp: "2024-11-19 02:25:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,7 +216,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
 
         ##############
         ##############        
@@ -265,7 +265,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
 
         ##############
         ##############        
@@ -314,7 +314,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
 
         ##############
         ##############        
@@ -363,7 +363,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
 
         ##############
         ##############        
@@ -747,7 +747,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
         # HARD CODED #
         ##############
 
-        adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+        adj_missmass = math.sqrt(abs(evt.Em**2-evt.Pm**2))
 
         ##############
         ##############        
