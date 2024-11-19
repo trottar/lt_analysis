@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-05 09:38:20 trottar"
+# Time-stamp: "2024-11-19 02:15:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,6 +216,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -238,7 +240,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
         
         if(ALLCUTS):
 
@@ -249,7 +251,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
 
     print("\nBinning dummy...")
     for i,evt in enumerate(TBRANCH_DUMMY):
@@ -262,6 +264,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         ##############
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
 
         ##############
         ##############        
@@ -285,7 +289,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
-                            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
 
@@ -296,7 +300,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
 
     print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
@@ -309,6 +313,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         ##############
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
 
         ##############
         ##############        
@@ -332,7 +338,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
-                            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
 
@@ -343,7 +349,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
     print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -356,6 +362,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         ##############
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
 
         ##############
         ##############        
@@ -379,7 +387,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
-                            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
 
@@ -390,7 +398,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -735,6 +743,16 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
         # Progress bar
         Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
+        ##############
+        # HARD CODED #
+        ##############
+
+        adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+
+        ##############
+        ##############        
+        ##############        
+        
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
         else:
@@ -754,11 +772,11 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             if iteration:                                
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
-                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.iter_weight)
+                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
                             else:
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.Weight)
-                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass, evt.Weight)
-                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(evt.missmass)
+                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.Weight)
+                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):

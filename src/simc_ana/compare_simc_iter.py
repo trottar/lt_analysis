@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-06 10:34:34 trottar"
+# Time-stamp: "2024-11-19 02:17:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,6 +211,16 @@ def compare_simc(rootFileSimc, hist, inpDict):
       # Progress bar
       Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
+      ##############
+      # HARD CODED #
+      ##############
+
+      adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+
+      ##############
+      ##############        
+      ##############        
+
       if ParticleType == "kaon":
           
           ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
@@ -268,9 +278,9 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_W_SIMC.Fill(evt.W, evt.iter_weight)
           H_t_SIMC.Fill(-evt.t, evt.iter_weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
-          H_MM_SIMC.Fill(evt.missmass, evt.iter_weight)
+          H_MM_SIMC.Fill(adj_missmass, evt.iter_weight)
           #H_MM_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
-          H_MM_unweighted_SIMC.Fill(evt.missmass)
+          H_MM_unweighted_SIMC.Fill(adj_missmass)
               
     ################################################################################################################################################    
 

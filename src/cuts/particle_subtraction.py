@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-26 17:23:36 trottar"
+# Time-stamp: "2024-11-19 02:10:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -394,6 +394,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -405,41 +407,41 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
-            H_MM_nosub_DATA.Fill(evt.MM)            
+            H_MM_nosub_DATA.Fill(adj_MM)            
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+          P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+          P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
           # Phase shift to right setting
           #phi_shift = (evt.ph_q+math.pi)
           phi_shift = (evt.ph_q)          
           
-          MM_vs_CoinTime_DATA.Fill(evt.MM, evt.CTime_ROC1)
+          MM_vs_CoinTime_DATA.Fill(adj_MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DATA.Fill(evt.MM,evt.P_gtr_beta)
-          MM_vs_H_cer_DATA.Fill(evt.MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_DATA.Fill(evt.MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DATA.Fill(evt.MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DATA.Fill(evt.MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DATA.Fill(evt.MM,evt.P_aero_npeSum)
+          MM_vs_beta_DATA.Fill(adj_MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DATA.Fill(adj_MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DATA.Fill(adj_MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DATA.Fill(adj_MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_DATA.Fill(adj_MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DATA.Fill(adj_MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DATA.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
           Q2_vs_t_DATA.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DATA.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DATA.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DATA.Fill(evt.MM, -evt.MandelT)
+          MM_vs_t_DATA.Fill(adj_MM, -evt.MandelT)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
 
@@ -475,8 +477,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_t_DATA.Fill(-evt.MandelT)
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
-          H_MM_DATA.Fill(evt.MM)
-          #H_MM_DATA.Fill(pow(evt.MM, 2))  
+          H_MM_DATA.Fill(adj_MM)
+          #H_MM_DATA.Fill(pow(adj_MM, 2))  
           #H_MM_DATA.Fill(evt.Mrecoil)
           
           H_cal_etottracknorm_DATA.Fill(evt.H_cal_etottracknorm)
@@ -501,6 +503,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -512,41 +516,41 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
-            H_MM_nosub_DUMMY.Fill(evt.MM)
+            H_MM_nosub_DUMMY.Fill(adj_MM)
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+          P_hgcer_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+          P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
           # Phase shift to right setting
           #phi_shift = (evt.ph_q+math.pi)
           phi_shift = (evt.ph_q)          
           
-          MM_vs_CoinTime_DUMMY.Fill(evt.MM, evt.CTime_ROC1)
+          MM_vs_CoinTime_DUMMY.Fill(adj_MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DUMMY.Fill(evt.MM,evt.P_gtr_beta)
-          MM_vs_H_cer_DUMMY.Fill(evt.MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_DUMMY.Fill(evt.MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DUMMY.Fill(evt.MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DUMMY.Fill(evt.MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DUMMY.Fill(evt.MM,evt.P_aero_npeSum)
+          MM_vs_beta_DUMMY.Fill(adj_MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DUMMY.Fill(adj_MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DUMMY.Fill(adj_MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DUMMY.Fill(adj_MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_DUMMY.Fill(adj_MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DUMMY.Fill(adj_MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
           Q2_vs_t_DUMMY.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DUMMY.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DUMMY.Fill(evt.MM, -evt.MandelT)
+          MM_vs_t_DUMMY.Fill(adj_MM, -evt.MandelT)
           
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -582,8 +586,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_t_DUMMY.Fill(-evt.MandelT)
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
-          H_MM_DUMMY.Fill(evt.MM)
-          #H_MM_DUMMY.Fill(pow(evt.MM, 2))  
+          H_MM_DUMMY.Fill(adj_MM)
+          #H_MM_DUMMY.Fill(pow(adj_MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
           
           H_cal_etottracknorm_DUMMY.Fill(evt.H_cal_etottracknorm)
@@ -607,7 +611,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
+        
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -619,41 +625,41 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
-            H_MM_nosub_RAND.Fill(evt.MM)
+            H_MM_nosub_RAND.Fill(adj_MM)
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+          P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+          P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
           # Phase shift to right setting
           #phi_shift = (evt.ph_q+math.pi)
           phi_shift = (evt.ph_q)          
           
-          MM_vs_CoinTime_RAND.Fill(evt.MM, evt.CTime_ROC1)
+          MM_vs_CoinTime_RAND.Fill(adj_MM, evt.CTime_ROC1)
           CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_RAND.Fill(evt.MM,evt.P_gtr_beta)
-          MM_vs_H_cer_RAND.Fill(evt.MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_RAND.Fill(evt.MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_RAND.Fill(evt.MM,evt.P_aero_npeSum)
+          MM_vs_beta_RAND.Fill(adj_MM,evt.P_gtr_beta)
+          MM_vs_H_cer_RAND.Fill(adj_MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_RAND.Fill(adj_MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_RAND.Fill(adj_MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_RAND.Fill(adj_MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_RAND.Fill(adj_MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_RAND.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
           Q2_vs_t_RAND.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_RAND.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_RAND.Fill(evt.MM, -evt.MandelT)
+          MM_vs_t_RAND.Fill(adj_MM, -evt.MandelT)
           
           H_ct_RAND.Fill(evt.CTime_ROC1)
 
@@ -689,8 +695,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_t_RAND.Fill(-evt.MandelT)
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
-          H_MM_RAND.Fill(evt.MM)
-          #H_MM_RAND.Fill(pow(evt.MM, 2))  
+          H_MM_RAND.Fill(adj_MM)
+          #H_MM_RAND.Fill(pow(adj_MM, 2))  
           #H_MM_RAND.Fill(evt.Mrecoil)
           
           H_cal_etottracknorm_RAND.Fill(evt.H_cal_etottracknorm)
@@ -715,6 +721,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -726,41 +734,41 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+                P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
             
             if(NOMMCUTS):
-                H_MM_nosub_DUMMY_RAND.Fill(evt.MM)
+                H_MM_nosub_DUMMY_RAND.Fill(adj_MM)
             
         if(ALLCUTS):
 
           # HGCer hole comparison
           P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,evt.MM, evt.P_hgcer_npeSum)
+          P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
+          P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
           # Phase shift to right setting
           #phi_shift = (evt.ph_q+math.pi)
           phi_shift = (evt.ph_q)          
           
-          MM_vs_CoinTime_DUMMY_RAND.Fill(evt.MM, evt.CTime_ROC1)
+          MM_vs_CoinTime_DUMMY_RAND.Fill(adj_MM, evt.CTime_ROC1)
           CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DUMMY_RAND.Fill(evt.MM,evt.P_gtr_beta)
-          MM_vs_H_cer_DUMMY_RAND.Fill(evt.MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_DUMMY_RAND.Fill(evt.MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DUMMY_RAND.Fill(evt.MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DUMMY_RAND.Fill(evt.MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DUMMY_RAND.Fill(evt.MM,evt.P_aero_npeSum)
+          MM_vs_beta_DUMMY_RAND.Fill(adj_MM,evt.P_gtr_beta)
+          MM_vs_H_cer_DUMMY_RAND.Fill(adj_MM,evt.H_cer_npeSum)
+          MM_vs_H_cal_DUMMY_RAND.Fill(adj_MM,evt.H_cal_etottracknorm)
+          MM_vs_P_cal_DUMMY_RAND.Fill(adj_MM,evt.P_cal_etottracknorm)
+          MM_vs_P_hgcer_DUMMY_RAND.Fill(adj_MM,evt.P_hgcer_npeSum)
+          MM_vs_P_aero_DUMMY_RAND.Fill(adj_MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
           phiq_vs_t_DUMMY_RAND.Fill(phi_shift, -evt.MandelT)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
           Q2_vs_t_DUMMY_RAND.Fill(evt.Q2, -evt.MandelT)
           W_vs_t_DUMMY_RAND.Fill(evt.W, -evt.MandelT)
           EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DUMMY_RAND.Fill(evt.MM, -evt.MandelT)
+          MM_vs_t_DUMMY_RAND.Fill(adj_MM, -evt.MandelT)
           
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)
 
@@ -796,8 +804,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
           H_t_DUMMY_RAND.Fill(-evt.MandelT)
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(evt.MM)
-          #H_MM_DUMMY_RAND.Fill(pow(evt.MM, 2))
+          H_MM_DUMMY_RAND.Fill(adj_MM)
+          #H_MM_DUMMY_RAND.Fill(pow(adj_MM, 2))
           #H_MM_DUMMY_RAND.Fill(evt.Mrecoil)
           
           H_cal_etottracknorm_DUMMY_RAND.Fill(evt.H_cal_etottracknorm)
@@ -1164,6 +1172,8 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -1178,7 +1188,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
+                    hist_dict["H_MM_nosub_DATA_{}".format(j)].Fill(adj_MM)            
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1187,7 +1197,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                     hist_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
                     hist_dict["H_W_DATA_{}".format(j)].Fill(evt.W)
                     hist_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
-                    hist_dict["H_MM_DATA_{}".format(j)].Fill(evt.MM)
+                    hist_dict["H_MM_DATA_{}".format(j)].Fill(adj_MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1204,6 +1214,8 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -1218,7 +1230,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)
+                    hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(adj_MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1227,7 +1239,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                     hist_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
                     hist_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)
                     hist_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
-                    hist_dict["H_MM_DUMMY_{}".format(j)].Fill(evt.MM)
+                    hist_dict["H_MM_DUMMY_{}".format(j)].Fill(adj_MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1244,6 +1256,8 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -1258,7 +1272,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)
+                    hist_dict["H_MM_nosub_RAND_{}".format(j)].Fill(adj_MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1267,7 +1281,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                     hist_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
                     hist_dict["H_W_RAND_{}".format(j)].Fill(evt.W)
                     hist_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
-                    hist_dict["H_MM_RAND_{}".format(j)].Fill(evt.MM)
+                    hist_dict["H_MM_RAND_{}".format(j)].Fill(adj_MM)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1284,6 +1298,8 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -1298,7 +1314,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                    hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)                                
+                    hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)                                
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1307,7 +1323,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
                     hist_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
                     hist_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)
                     hist_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
-                    hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
+                    hist_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
                   
     for j in range(len(t_bins)-1):
 
@@ -1470,6 +1486,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+        
         ##############
         ##############        
         ##############
@@ -1490,7 +1508,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
-                            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
             
         if(ALLCUTS):            
             for j in range(len(t_bins)-1):
@@ -1498,7 +1516,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1515,6 +1533,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -1535,7 +1555,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:                
-                            hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1543,7 +1563,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1560,6 +1580,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -1580,7 +1602,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:                
-                            hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1588,7 +1610,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             hist_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
@@ -1604,6 +1626,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         ##############
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
 
         ##############
         ##############        
@@ -1626,7 +1650,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
-                            hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
             
         if(ALLCUTS):
             for j in range(len(t_bins)-1):
@@ -1634,7 +1658,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
-                            hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.MM)
+                            hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):

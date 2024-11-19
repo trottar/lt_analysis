@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-11 10:43:41 trottar"
+# Time-stamp: "2024-11-19 02:13:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -235,6 +235,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -249,7 +251,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                    hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(evt.MM)            
+                    hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(adj_MM)            
 
         if(ALLCUTS):            
 
@@ -260,7 +262,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DATA_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_DATA_{}".format(j)].Fill(evt.MM)
+                    hist_bin_dict["H_MM_DATA_{}".format(j)].Fill(adj_MM)
 
     print("\nBinning dummy...")
     for i,evt in enumerate(TBRANCH_DUMMY):
@@ -274,6 +276,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -288,7 +292,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                    hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(evt.MM)            
+                    hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(adj_MM)            
 
         if(ALLCUTS):
 
@@ -299,7 +303,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_DUMMY_{}".format(j)].Fill(evt.MM)                    
+                    hist_bin_dict["H_MM_DUMMY_{}".format(j)].Fill(adj_MM)                    
                     
     print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
@@ -313,6 +317,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -327,7 +333,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                    hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(evt.MM)            
+                    hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(adj_MM)            
 
         if(ALLCUTS):
 
@@ -338,7 +344,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_RAND_{}".format(j)].Fill(evt.MM)
+                    hist_bin_dict["H_MM_RAND_{}".format(j)].Fill(adj_MM)
                     
     print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -352,6 +358,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
+        adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
+
         ##############
         ##############        
         ##############
@@ -366,7 +374,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
-                    hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(evt.MM)            
+                    hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)            
 
         if(ALLCUTS):
 
@@ -377,7 +385,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(evt.MM)
+                    hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
                     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):

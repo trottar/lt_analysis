@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-19 11:32:59 trottar"
+# Time-stamp: "2024-11-19 02:16:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,6 +108,8 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
     ##############
 
     adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+    adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
     
     ##############
     ##############        
@@ -124,7 +126,7 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     t_RANGE =  (tmin<-evt.MandelT) & (-evt.MandelT<tmax)
 
-    MMCUT =  (mm_min<evt.MM) & (evt.MM<mm_max)
+    MMCUT =  (mm_min<adj_MM) & (adj_MM<mm_max)
     
     ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
 
@@ -140,6 +142,8 @@ def apply_data_sub_cuts(evt):
     ##############
 
     adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+
+    adj_MM = math.sqrt(evt.emiss**2-evt.pmiss**2)
     
     ##############
     ##############        
@@ -165,6 +169,16 @@ def apply_data_sub_cuts(evt):
 
 def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
+    ##############
+    # HARD CODED #
+    ##############
+
+    adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+
+    ##############
+    ##############        
+    ##############        
+    
     # Define the acceptance cuts  
     SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
     HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
@@ -173,7 +187,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     t_RANGE =  (tmin<-evt.t) & (-evt.t<tmax)
 
-    MMCUT =  (mm_min<evt.missmass) & (evt.missmass<mm_max)
+    MMCUT =  (mm_min<adj_missmass) & (adj_missmass<mm_max)
       
     ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
     

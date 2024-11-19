@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-28 04:57:56 trottar"
+# Time-stamp: "2024-11-19 02:16:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -187,6 +187,16 @@ def plot_iteration(histlist, phisetlist, inpDict):
             # Progress bar
             Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
+            ##############
+            # HARD CODED #
+            ##############
+
+            adj_missmass = math.sqrt(evt.Em**2-evt.Pm**2)
+
+            ##############
+            ##############        
+            ##############        
+
             if ParticleType == "kaon":                
                 ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
             else:
@@ -229,7 +239,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
                 hist["H_t_SIMC"].Fill(-evt.t, evt.iter_weight)
                 hist["H_epsilon_SIMC"].Fill(evt.epsilon, evt.iter_weight)
                 #hist["H_MM_SIMC"].Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.iter_weight)
-                hist["H_MM_SIMC"].Fill(evt.missmass, evt.iter_weight)
+                hist["H_MM_SIMC"].Fill(adj_missmass, evt.iter_weight)
 
                 hist["H_Weight_SIMC_OLD"].Fill(evt.Weight)
 
@@ -261,7 +271,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
                 hist["H_t_SIMC_OLD"].Fill(-evt.t, evt.Weight)
                 hist["H_epsilon_SIMC_OLD"].Fill(evt.epsilon, evt.Weight)
                 #hist["H_MM_SIMC_OLD"].Fill(np.sqrt(abs(pow(evt.Em, 2) - pow(evt.Pm, 2))), evt.Weight)
-                hist["H_MM_SIMC_OLD"].Fill(evt.missmass, evt.Weight)
+                hist["H_MM_SIMC_OLD"].Fill(adj_missmass, evt.Weight)
                 
     CWeight = TCanvas()
     CWeight.Divide(2,2)
