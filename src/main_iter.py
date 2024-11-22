@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-22 00:28:05 trottar"
+# Time-stamp: "2024-11-22 00:41:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -141,10 +141,11 @@ print("\n\tIteration number", iter_num)
 print("="*50)
 print("\n\n")
 
+
+prev_iter_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, closest_date)
+prev_iter_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, closest_date)
 if EPSSET == "low":
     # Save this as the directory to grab further information
-    prev_iter_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, closest_date)
-    prev_iter_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, closest_date)
     print("\nCopying {} to {}".format(prev_iter_dir_cache, prev_iter_dir))
     shutil.copytree(prev_iter_dir_cache, prev_iter_dir, symlinks=False, ignore=None, dirs_exist_ok=False)
 
