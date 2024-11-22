@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-10 22:20:06 trottar"
+# Time-stamp: "2024-11-21 23:49:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,6 +182,8 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
+TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
+
 foutroot = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
 foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
@@ -203,9 +205,9 @@ if os.path.exists(f_path):
     os.remove(f_path)
 
 # Create a new directory for each iteration in cache
-new_dir = "{}/{}/{}/Q{}W{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W)
+new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
 create_dir(new_dir)
-new_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
+new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
     
 ##############################
@@ -742,7 +744,7 @@ if EPSSET == "high":
 '''
 
 # Create a new directory for each iteration in cache
-new_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
+new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
 if EPSSET == "high":

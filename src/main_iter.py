@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-10 22:20:31 trottar"
+# Time-stamp: "2024-11-21 23:50:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,6 +100,8 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
+TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
+
 foutroot = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
 foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
@@ -140,7 +142,7 @@ print("="*50)
 print("\n\n")
 
 # Save this as the directory to grab further information
-prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH,USER,ParticleType.lower(),Q2,W,closest_date)
+prev_iter_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, closest_date)
 
 if not os.path.exists(prev_iter_dir):
     print("\n\n\tERROR: {} does not exist...".format(prev_iter_dir))
@@ -367,7 +369,7 @@ print("\n\n")
 
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration***
-new_dir = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
+new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
 # ***Moved from main.py location below because needed for weight iteration***

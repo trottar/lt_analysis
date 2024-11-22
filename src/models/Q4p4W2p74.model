@@ -28,9 +28,9 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 # Transverse cross-section
 # 0th iteration, 
 # 2nd iteration, 
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 # 
-sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 
 # Longitudinal-Transverse interference term
 # 0th iteration, 
@@ -39,7 +39,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # 0th iteration, 
-#sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 # Marco's thesis
 #sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's thesis
@@ -50,7 +50,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 #sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
 # 2nd iteration, 
 #sig_TT =   par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
-sig_TT =   par13 * math.fabs(tt) + par14 * (math.exp(-par15 * (math.fabs(tt)**2)) / ((1.0 + math.fabs(tt))**(par16))) * qq * math.exp(-qq)
+#sig_TT =   par13 * math.fabs(tt) + par14 * (math.exp(-par15 * (math.fabs(tt)**2)) / ((1.0 + math.fabs(tt))**(par16))) * qq * math.exp(-qq)
 
 # Weight factor for Q2=4.4, W=2.74
 # 0th iteration, 
