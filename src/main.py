@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-22 11:50:57 trottar"
+# Time-stamp: "2024-11-22 14:03:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -827,8 +827,21 @@ for hist in histlist:
 if EPSSET == "high":
     print("\n\n\nWould you like to save iteration to cache?")
     if request_yn_response(string=f"Updating {new_dir_cache} with {new_dir}..."):
-        files = os.listdir(new_dir+'/')
-        f_str = " ".join(map(lambda file: f"{new_dir}/{file}", files))
+        # List the contents of new_dir
+        files = os.listdir(new_dir + '/')
+        # Split into directories and files
+        directories = [f for f in files if os.path.isdir(os.path.join(new_dir, f))]
+        only_files = [f for f in files if not os.path.isdir(os.path.join(new_dir, f))]
+        # Collect all files recursively from directories of directories
+        all_files = []
+        for directory in directories:
+            directory_path = os.path.join(new_dir, directory)
+            for subdir, _, subfiles in os.walk(directory_path):
+                for file in subfiles:
+                    all_files.append(os.path.join(subdir, file))
+        # Combine the files and top-level files into f_str
+        all_files.extend([os.path.join(new_dir, file) for file in only_files])
+        f_str = " ".join(all_files)
         print(f_str)
         # Attempt to retrieve file from cache
         #subprocess.call(f"jput -r {new_dir} {new_dir_cache} {f_str}", shell=True) # HERE!!!!!!
