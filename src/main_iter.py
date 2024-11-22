@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-22 00:41:37 trottar"
+# Time-stamp: "2024-11-22 11:51:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -741,9 +741,13 @@ for hist in histlist:
 '''
 
 if EPSSET == "high":
-    if request_yn_response(string="Would you like to save iteration to cache?"):
+    print("\n\n\nWould you like to save iteration to cache?")
+    if request_yn_response(string=f"Updating {new_dir_cache} with {new_dir}..."):
+        files = os.listdir(new_dir+'/')
+        f_str = " ".join(map(lambda file: f"{new_dir}/{file}", files))
+        print(f_str)
         # Attempt to retrieve file from cache
-        subprocess.call(f"jput -r {new_dir} {new_dir_cache}", shell=True)
+        #subprocess.call(f"jput -r {new_dir} {new_dir_cache} {f_str}", shell=True) # HERE!!!!!!
     else:
         print("Cache not updated! Exiting without saving...")
         sys.exit(2)
