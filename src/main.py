@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-21 23:49:57 trottar"
+# Time-stamp: "2024-11-22 00:17:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email
+from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email, request_yn_response
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -207,6 +207,7 @@ if os.path.exists(f_path):
 # Create a new directory for each iteration in cache
 new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
 create_dir(new_dir)
+new_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
     
@@ -762,15 +763,6 @@ if EPSSET == "high":
                 output_file_lst.append(f_simc_hist)                
 
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-# Check if the file exists
-if os.path.exists(f_path):
-    # If it exists, update it with the string
-    with open(f_path, 'a') as file:
-        file.write('\n'+formatted_date)
-else:
-    # If not, create it and fill it with the string
-    with open(f_path, 'x') as file:
-        file.write(formatted_date)
 
 # Get the total number of lines in the file
 with open(f_path, 'r') as file:
@@ -820,7 +812,7 @@ for f in output_file_lst:
         f_new = new_dir
         print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
         shutil.copy(LTANAPATH+"/src/"+f, f_new)
-               
+    
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
 with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
@@ -830,4 +822,25 @@ with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,format
 for hist in histlist:
     key_str = ', '.join(hist.keys())
     print("{} keys: {}".format(hist["phi_setting"],key_str))
-'''
+'''    
+
+if EPSSET == "high":
+    if request_yn_response(string="Would you like to save iteration to cache?"):
+        # Attempt to retrieve file from cache
+        subprocess.call(f"jput -r {new_dir} {new_dir_cache}", shell=True)
+    else:
+        print("Cache not updated! Exiting without saving...")
+        sys.exit(2)
+
+    # Update iteration file of dates
+    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_path):
+        # If it exists, update it with the string
+        with open(f_path, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_path, 'x') as file:
+            file.write(formatted_date)
+

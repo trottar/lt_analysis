@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-21 23:59:21 trottar"
+# Time-stamp: "2024-11-22 00:17:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email
+from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email, request_yn_response
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -146,7 +146,6 @@ prev_iter_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.
 prev_iter_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, closest_date)
 print("\nCopying {} to {}".format(prev_iter_dir_cache, prev_iter_dir))
 shutil.copytree(prev_iter_dir_cache, prev_iter_dir, symlinks=False, ignore=None, dirs_exist_ok=False)
-
 
 if not os.path.exists(prev_iter_dir):
     print("\n\n\tERROR: {} does not exist...".format(prev_iter_dir))
@@ -373,6 +372,7 @@ print("\n\n")
 
 # Create a new directory for each iteration in cache
 # ***Moved up in procedure vs main.py since required for weight iteration***
+new_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
@@ -683,16 +683,6 @@ if EPSSET == "high":
 
 if EPSSET == "high":
 
-    # Check if the file exists
-    if os.path.exists(f_iter):
-        # If it exists, update it with the string
-        with open(f_iter, 'a') as file:
-            file.write('\n'+formatted_date)
-    else:
-        # If not, create it and fill it with the string
-        with open(f_iter, 'x') as file:
-            file.write(formatted_date)
-
     f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(iter_num))
     shutil.copy(f_iter,f_iter_new)
 
@@ -747,3 +737,24 @@ for hist in histlist:
     key_str = ', '.join(hist.keys())
     print("{} keys: {}".format(hist["phi_setting"],key_str))
 '''
+
+if EPSSET == "high":
+    if request_yn_response(string="Would you like to save iteration to cache?"):
+        # Attempt to retrieve file from cache
+        subprocess.call(f"jput -r {new_dir} {new_dir_cache}", shell=True)
+    else:
+        print("Cache not updated! Exiting without saving...")
+        sys.exit(2)
+
+    # Update iteration file of dates
+    f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_iter):
+        # If it exists, update it with the string
+        with open(f_iter, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_iter, 'x') as file:
+            file.write(formatted_date)
+
