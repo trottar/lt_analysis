@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-22 18:13:56 trottar"
+# Time-stamp: "2024-11-22 20:01:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -762,7 +762,7 @@ if EPSSET == "high":
             jput_str += f"{f} {new_dir_cache} "
         print(jput_str)
         # Attempt to retrieve file from cache
-        #subprocess.call(f"jput -m {jput_str}", shell=True) # HERE!!!!!!
+        subprocess.call(f"jput -m {jput_str}", shell=True) # HERE!!!!!!
     else:
         print("Cache not updated! Exiting without saving...")
         sys.exit(2)
