@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-22 20:01:46 trottar"
+# Time-stamp: "2024-11-22 21:03:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -757,12 +757,9 @@ if EPSSET == "high":
                     all_files.append(os.path.join(subdir, file))
         # Combine the files and top-level files into f_str
         all_files.extend([os.path.join(new_dir, file) for file in only_files])
-        jput_str = ""
-        for f in all_files:
-            jput_str += f"{f} {new_dir_cache} "
-        print(jput_str)
+        print(all_files)
         # Attempt to retrieve file from cache
-        subprocess.call(f"jput -m {jput_str}", shell=True) # HERE!!!!!!
+        subprocess.call(f"jput {f_str} {new_dir_cache}", shell=True) # HERE!!!!!!
     else:
         print("Cache not updated! Exiting without saving...")
         sys.exit(2)
