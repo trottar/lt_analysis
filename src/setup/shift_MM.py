@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:59:42 trottar"
+# Time-stamp: "2024-11-24 16:09:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -236,7 +236,7 @@ for tree_name in trees:
         continue
 
     # Apply the shift and update the tree with the new shifted masses
-    apply_shift_to_tree(tree, "MM", shift)
+    apply_shift_to_tree(tree, "MM_shift", shift)
     print(f"Applied shift to {tree_name}")
 
 # Write the changes to the file and close it
