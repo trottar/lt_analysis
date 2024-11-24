@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 16:16:48 trottar"
+# Time-stamp: "2024-11-24 17:35:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -11,7 +11,7 @@
 # Copyright (c) trottar
 #
 import ROOT
-from ROOT import TFile, TH1F, TCanvas, TLine, kRed, kGreen
+from ROOT import TFile, TTree, TH1F, TCanvas, TLine, kRed, kGreen
 from ROOT import gStyle
 from array import array
 import os, sys
@@ -204,11 +204,15 @@ canvas.Print(f"{pdf_filename}]")
 # Clean up
 file.Close()
 
+print("\n\n")
+
 # Function to apply mass shift and create a new branch for the shifted values
-def apply_shift_to_tree(tree, branch_name, shift):
+def apply_shift_to_tree(tree_name, tree, branch_name, shift):
     # Create a new branch to hold the shifted values
+    new_tree = TTree(tree_name)
     MM_shift = array('f', [0.0])  # Create a temporary array for the shifted MM
-    tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Create the new branch in the tree
+    tree.SetBranchAddress("MM", branch_name)
+    new_tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Create the new branch in the tree
     
     # Loop over the tree and apply the shift
     for i, event in enumerate(tree):
@@ -218,7 +222,9 @@ def apply_shift_to_tree(tree, branch_name, shift):
         shifted_mass = original_mass + shift  # Apply the shift
         MM_shift[0] = shifted_mass  # Set the shifted value in the new array
         
-        tree.Fill()  # Write the updated event (with new MM_shift) back to the tree
+        new_tree.Fill()  # Write the updated event (with new MM_shift) back to the tree
+
+    new_tree.Write(tree_name,ROOT.TObject.kOverwrite)
 
 # Open the ROOT file in UPDATE mode
 file = TFile.Open(filename, "UPDATE")
@@ -232,7 +238,7 @@ for tree_name in trees:
 
     # Apply the shift and create the MM_shift branch in the tree
     print(f"Applying shift to {tree_name} as MM_shift branch")
-    apply_shift_to_tree(tree, "MM", shift)
+    apply_shift_to_tree(tree_name, tree, "MM", shift)
 
 # Write the changes to the file and close it
 file.Write()  # Save all changes to the ROOT file
