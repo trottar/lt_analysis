@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 02:25:19 trottar"
+# Time-stamp: "2024-11-24 13:45:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -320,8 +320,8 @@ def rand_sub(phi_setting, inpDict):
     H_W_DATA  = TH1D("H_W_DATA","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
     H_t_DATA       = TH1D("H_t_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-    H_MM_DATA  = TH1D("H_MM_DATA","MM_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_nosub_DATA  = TH1D("H_MM_nosub_DATA","MM_nosub_{K}", 100, 0.7, 1.5)
+    H_MM_DATA  = TH1D("H_MM_DATA","MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_nosub_DATA  = TH1D("H_MM_nosub_DATA","MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 100, -0.1, 0.1)
     H_ph_DATA  = TH1D("H_ph_DATA","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -359,8 +359,8 @@ def rand_sub(phi_setting, inpDict):
     H_W_DUMMY  = TH1D("H_W_DUMMY","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
     H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])  
     H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-    H_MM_DUMMY  = TH1D("H_MM_DUMMY","MM_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_nosub_DUMMY  = TH1D("H_MM_nosub_DUMMY","MM_nosub_{K}", 100, 0.7, 1.5)
+    H_MM_DUMMY  = TH1D("H_MM_DUMMY","MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_nosub_DUMMY  = TH1D("H_MM_nosub_DUMMY","MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 100, -0.1, 0.1)
     H_ph_DUMMY  = TH1D("H_ph_DUMMY","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -393,8 +393,8 @@ def rand_sub(phi_setting, inpDict):
     H_W_RAND  = TH1D("H_W_RAND","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
     H_t_RAND       = TH1D("H_t_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-    H_MM_RAND  = TH1D("H_MM_RAND","MM_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_nosub_RAND  = TH1D("H_MM_nosub_RAND","MM_nosub_{K}", 100, 0.7, 1.5)
+    H_MM_RAND  = TH1D("H_MM_RAND","MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_nosub_RAND  = TH1D("H_MM_nosub_RAND","MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 100, -0.1, 0.1)
     H_ph_RAND  = TH1D("H_ph_RAND","Y' tar", 100, -0.1, 0.1)
     H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -427,8 +427,8 @@ def rand_sub(phi_setting, inpDict):
     H_W_DUMMY_RAND  = TH1D("H_W_DUMMY_RAND","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
     H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-    H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND","MM_{K}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_nosub_DUMMY_RAND  = TH1D("H_MM_nosub_DUMMY_RAND","MM_nosub_{K}", 100, 0.7, 1.5)
+    H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND","MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_nosub_DUMMY_RAND  = TH1D("H_MM_nosub_DUMMY_RAND","MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
     H_ph_DUMMY_RAND  = TH1D("H_ph_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)

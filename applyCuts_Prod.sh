@@ -479,6 +479,7 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     fi
 fi    
 
+cd "${LTANAPATH}/src/setup"
 
 if [[ $p_flag = "true" ]]; then
 
@@ -497,7 +498,6 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
 	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
@@ -507,7 +507,8 @@ if [[ $p_flag = "true" ]]; then
 	    rm "$out_f_file"
 	fi
 	rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production"
 	echo
     fi
 
@@ -521,7 +522,6 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing left data ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
 	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
@@ -531,7 +531,8 @@ if [[ $p_flag = "true" ]]; then
 	    rm "$out_f_file"
 	fi
 	rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production"
     fi
 
     # Checks that array isn't empty
@@ -544,7 +545,6 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing center data ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	cd "${LTANAPATH}/src/setup"
 	# Check if file already exists and delete if so
 	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
@@ -554,7 +554,8 @@ if [[ $p_flag = "true" ]]; then
 	    rm "$out_f_file"
 	fi
 	rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production"
     fi
 
 else
@@ -576,7 +577,6 @@ else
 	    echo "Analysing right data ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
-	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
 	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
@@ -586,7 +586,8 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
+	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	    echo
 	fi
 
@@ -600,7 +601,6 @@ else
 	    echo "Analysing left data ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
-	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
 	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
@@ -610,7 +610,8 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
+	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	fi
 
 	# Checks that array isn't empty
@@ -623,7 +624,6 @@ else
 	    echo "Analysing center data ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
-	    cd "${LTANAPATH}/src/setup"
 	    # Check if file already exists and delete if so
 	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
@@ -633,8 +633,8 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
-	    
+	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 shift_MM.py	     "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	fi
     done
 fi
