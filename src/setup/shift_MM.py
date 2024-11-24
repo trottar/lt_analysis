@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 14:47:03 trottar"
+# Time-stamp: "2024-11-24 14:48:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -21,17 +21,15 @@ ParticleType = sys.argv[2]
 ROOTPrefix = sys.argv[3]
 MaxEvent = "-1"
 
-################################################################################################################################################
-'''
-ltsep package import and pathing definitions
-'''
+###############################################################################################################################################
+# ltsep package import and pathing definitions
 
 # Import package for cuts
 from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
-    
-lt=Root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts)
+
+lt=Root(os.path.realpath(__file__),"Plot_LTSep")
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding
@@ -41,11 +39,7 @@ UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
-
-proc_root = lt.setup_ana()
-c = proc_root[0] # Cut object
-tree = proc_root[1] # Dictionary of branches
-strDict = proc_root[2] # Dictionary of cuts as strings
+CACHEPATH=lt.CACHEPATH
 
 #################################################################################################################################################################
 
