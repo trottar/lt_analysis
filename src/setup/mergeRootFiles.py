@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 14:57:46 trottar"
+# Time-stamp: "2024-11-24 14:58:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -67,7 +67,6 @@ for tree in inp_tree_names.split():
         else:
             Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
         inp_root_file = root_path + particle + "_" + str(n) + inp_file_name + ".root"
-        print("!!!!!!",inp_root_file)
         if not os.path.isfile(inp_root_file):
             warning = "WARNING: File {} not found. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)

@@ -634,7 +634,7 @@ else
 	    fi
 	    rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log	    
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
-	    python3 shift_MM.py	     "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
+	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	fi
     done
 fi
