@@ -504,7 +504,7 @@ if [[ $p_flag = "true" ]]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
 	    echo
-	    rm "$out_f_file"
+	    #rm "$out_f_file"
 	fi
 	#rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
 	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -528,7 +528,7 @@ if [[ $p_flag = "true" ]]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
 	    echo
-	    rm "$out_f_file"
+	    #rm "$out_f_file"
 	fi
 	#rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
 	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -551,7 +551,7 @@ if [[ $p_flag = "true" ]]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
 	    echo
-	    rm "$out_f_file"
+	    #rm "$out_f_file"
 	fi
 	#rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
 	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
@@ -583,7 +583,7 @@ else
 		echo "$out_f_file already exists. Removing..."
 		echo
 		echo
-		rm "$out_f_file"
+		#rm "$out_f_file"
 	    fi
 	    #rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log	    
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
@@ -607,7 +607,7 @@ else
 		echo "$out_f_file already exists. Removing..."
 		echo
 		echo
-		rm "$out_f_file"
+		#rm "$out_f_file"
 	    fi
 	    #rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
@@ -630,7 +630,7 @@ else
 		echo "$out_f_file already exists. Removing..."
 		echo
 		echo
-		rm "$out_f_file"
+		#rm "$out_f_file"
 	    fi
 	    #rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log	    
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 14:52:17 trottar"
+# Time-stamp: "2024-11-24 15:10:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -54,20 +54,19 @@ trees = [f"Uncut_{ParticleType}_Events", \
          f"Cut_{ParticleType}_Events_all_noRF", f"Cut_{ParticleType}_Events_prompt_noRF", f"Cut_{ParticleType}_Events_rand_noRF", \
          f"Cut_{ParticleType}_Events_all_RF", f"Cut_{ParticleType}_Events_prompt_RF", f"Cut_{ParticleType}_Events_rand_RF"]
 
-# Parameters
-trees = [f"Uncut_{ParticleType}_Events",
-         f"Cut_{ParticleType}_Events_all_noRF", f"Cut_{ParticleType}_Events_prompt_noRF", f"Cut_{ParticleType}_Events_rand_noRF",
-         f"Cut_{ParticleType}_Events_all_RF", f"Cut_{ParticleType}_Events_prompt_RF", f"Cut_{ParticleType}_Events_rand_RF"]
-
 if ParticleType == "kaon":
+    MM_str = "lambda"
     MM_true = 1.1156  # Lambda peak
     MM_min = 1.1
     MM_max = 1.2
 else:
+    MM_str = "proton"
     MM_true = 0.938  # Proton peak
     MM_min = 0.8
     MM_max = 1.0
 
+print(f"\n\nShifting missing mass to {MM_str} peak of {MM_true} for file {filename}...")
+    
 # Open ROOT file
 file = ROOT.TFile.Open(filename)
 
@@ -105,7 +104,7 @@ for tree_name in trees:
         continue
 
     shifted_masses = shift_mass(tree, "MM", shift)
-    print(f"Applied shift to {tree_name}, first 5 shifted masses: {shifted_masses[:5]}")
+    print(f"Applied shift to {tree_name}")
 
 # Clean up
 file.Close()
