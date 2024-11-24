@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:30:13 trottar"
+# Time-stamp: "2024-11-24 15:31:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -11,6 +11,7 @@
 # Copyright (c) trottar
 #
 import ROOT
+from ROOT import TFile, TH1F, kRed
 import os, sys
 
 ##################################################################################################################################################
@@ -67,7 +68,7 @@ MM_max = MM_true+0.05
 print(f"\n\nShifting missing mass to {MM_str} peak of {MM_true} for file {filename}...")
     
 # Open ROOT file
-file = ROOT.TFile.Open(filename)
+file = TFile.Open(filename)
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, x_min, x_max):
@@ -135,7 +136,7 @@ print(f"\nFitting MM_{ParticleType[0].upper()} of tree {reference_tree_name}..."
 reference_tree = file.Get(reference_tree_name)
 
 # Define histogram for fitting
-hist = ROOT.TH1F("hist", f"MM_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adjust binning/range as needed
+hist = TH1F("hist", f"MM_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adjust binning/range as needed
 reference_tree.Draw("MM>>hist")
 
 # Fit the histogram to find the peak
