@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:31:30 trottar"
+# Time-stamp: "2024-11-24 15:37:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -11,7 +11,7 @@
 # Copyright (c) trottar
 #
 import ROOT
-from ROOT import TFile, TH1F, kRed
+from ROOT import TFile, TH1F, kRed, TCanvas, TLine
 import os, sys
 
 ##################################################################################################################################################
@@ -30,17 +30,17 @@ from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
 
-lt=Root(os.path.realpath(__file__),"Plot_LTSep")
+lt = Root(os.path.realpath(__file__), "Plot_LTSep")
 
 # Add this to all files for more dynamic pathing
-USER=lt.USER # Grab user info for file finding
-HOST=lt.HOST
-REPLAYPATH=lt.REPLAYPATH
-UTILPATH=lt.UTILPATH
-LTANAPATH=lt.LTANAPATH
-ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
-CACHEPATH=lt.CACHEPATH
+USER = lt.USER  # Grab user info for file finding
+HOST = lt.HOST
+REPLAYPATH = lt.REPLAYPATH
+UTILPATH = lt.UTILPATH
+LTANAPATH = lt.LTANAPATH
+ANATYPE = lt.ANATYPE
+OUTPATH = lt.OUTPATH
+CACHEPATH = lt.CACHEPATH
 
 #################################################################################################################################################################
 
@@ -51,8 +51,8 @@ if not os.path.exists(filename):
     print(f"Error: File '{filename}' does not exist.")
     sys.exit(1)  # Exit the script with an error code
 
-trees = [f"Uncut_{ParticleType.capitalize()}_Events", \
-         f"Cut_{ParticleType.capitalize()}_Events_all_noRF", f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF", f"Cut_{ParticleType.capitalize()}_Events_rand_noRF", \
+trees = [f"Uncut_{ParticleType.capitalize()}_Events",
+         f"Cut_{ParticleType.capitalize()}_Events_all_noRF", f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF", f"Cut_{ParticleType.capitalize()}_Events_rand_noRF",
          f"Cut_{ParticleType.capitalize()}_Events_all_RF", f"Cut_{ParticleType.capitalize()}_Events_prompt_RF", f"Cut_{ParticleType.capitalize()}_Events_rand_RF"]
 
 if ParticleType == "kaon":
@@ -62,23 +62,26 @@ else:
     MM_str = "proton"
     MM_true = 0.938  # Proton peak
 
-MM_min = MM_true-0.05
-MM_max = MM_true+0.05
-    
+MM_min = MM_true - 0.05
+MM_max = MM_true + 0.05
+
 print(f"\n\nShifting missing mass to {MM_str} peak of {MM_true} for file {filename}...")
-    
+
+# Suppress canvas splash
+ROOT.gROOT.SetBatch(True)
+
 # Open ROOT file
 file = TFile.Open(filename)
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, x_min, x_max):
 
-    print(hist.GetName(),"-"*25)
-    
+    print(hist.GetName(), "-" * 25)
+
     # Find the corresponding bin numbers
     bin_min = hist.GetXaxis().FindBin(x_min)
     bin_max = hist.GetXaxis().FindBin(x_max)
-    
+
     # Find the maximum value within the specified range
     max_bin = bin_min
     max_value = hist.GetBinContent(max_bin)
@@ -87,13 +90,8 @@ def fit_gaussian(hist, x_min, x_max):
             max_bin = i
             max_value = hist.GetBinContent(i)
 
-    # Print the results
-    print("max_bin", max_bin)
-    print("max_value", max_value)
-    print("bin_center",hist.GetBinCenter(max_bin))
-    
-    half_max = max_value*0.75
-    
+    half_max = max_value * 0.75
+
     # Find left and right bins closest to half-max value
     left_bin = max_bin
     right_bin = max_bin
@@ -102,23 +100,21 @@ def fit_gaussian(hist, x_min, x_max):
     while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
         right_bin += 1
 
-    #min_range = hist.GetBinCenter(max_bin-100)
-    #max_range = hist.GetBinCenter(max_bin+100)
-
     min_range = hist.GetBinCenter(left_bin)
-    print("min_range",min_range)
     max_range = hist.GetBinCenter(right_bin)
-    print("max_range",max_range)
-    print("-"*25)
+
+    print("min_range", min_range)
+    print("max_range", max_range)
+    print("-" * 25)
 
     hist.Fit("gaus", "Q", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
-    
+
     fit_func.SetLineColor(kRed)
-    
+
     mean = fit_func.GetParameter(1)
     mean_err = fit_func.GetParError(1)
-    
+
     return [mean, mean_err]
 
 # Function to apply mass shift
@@ -140,11 +136,26 @@ hist = TH1F("hist", f"MM_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adjust bi
 reference_tree.Draw("MM>>hist")
 
 # Fit the histogram to find the peak
-peak_position = fit_gaussian(hist, MM_min, MM_max)[0] # Grab Mean for shift
+peak_position = fit_gaussian(hist, MM_min, MM_max)[0]  # Grab Mean for shift
 
 # Calculate the shift
 shift = MM_true - peak_position
 print(f"Calculated shift: {shift:.4f}")
+
+# Create a canvas for plotting
+canvas = TCanvas("canvas", "Fit and Shift", 800, 600)
+
+# Save plots to PDF
+pdf_filename = f"{OUTPATH}/{ParticleType}_{runNum}_Fit_Shift.pdf"
+canvas.Print(f"{pdf_filename}[")
+
+# Plot the fit for the reference tree
+hist.Draw()
+line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
+line.SetLineColor(ROOT.kBlue)
+line.SetLineStyle(2)
+line.Draw("same")
+canvas.Print(pdf_filename)
 
 # Apply the shift to all trees
 for tree_name in trees:
@@ -154,7 +165,17 @@ for tree_name in trees:
         continue
 
     shifted_masses = shift_mass(tree, "MM", shift)
-    print(f"Applied shift to {tree_name}")
+
+    # Plot shifted histogram
+    hist_shifted = TH1F(f"hist_shifted_{tree_name}", f"MM_{ParticleType[0].upper()} Shifted", 200, 0.7, 1.5)
+    for mass in shifted_masses:
+        hist_shifted.Fill(mass)
+
+    hist_shifted.Draw()
+    line.Draw("same")
+    canvas.Print(pdf_filename)
+
+canvas.Print(f"{pdf_filename}]")
 
 # Clean up
 file.Close()
