@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 17:49:58 trottar"
+# Time-stamp: "2024-11-24 18:55:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -209,15 +209,14 @@ print("\n\n")
 # Function to apply mass shift and create a new branch for the shifted values
 def apply_shift_to_tree(tree, shift):
     # Create a new branch to hold the shifted values
-    MM = array('f', [0.0])  # Create a temporary array for the shifted MM
     MM_shift = array('f', [0.0])  # Create a temporary array for the shifted MM
-    tree.SetBranchAddress("MM", MM)
     tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Create the new branch in the tree
     
     # Loop over the tree and apply the shift
     for i, event in enumerate(tree):
         # Progress bar
         Misc.progressBar(i, tree.GetEntries(),bar_length=25)
+        tree.GetEntry(i)
         #original_mass = getattr(event, "MM")  # Get the original MM value
         original_mass = event.MM  # Get the original MM value
         shifted_mass = original_mass + shift  # Apply the shift
