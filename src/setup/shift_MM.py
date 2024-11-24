@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:28:15 trottar"
+# Time-stamp: "2024-11-24 15:30:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -50,9 +50,9 @@ if not os.path.exists(filename):
     print(f"Error: File '{filename}' does not exist.")
     sys.exit(1)  # Exit the script with an error code
 
-trees = [f"Uncut_{ParticleType.upper()}_Events", \
-         f"Cut_{ParticleType.upper()}_Events_all_noRF", f"Cut_{ParticleType.upper()}_Events_prompt_noRF", f"Cut_{ParticleType.upper()}_Events_rand_noRF", \
-         f"Cut_{ParticleType.upper()}_Events_all_RF", f"Cut_{ParticleType.upper()}_Events_prompt_RF", f"Cut_{ParticleType.upper()}_Events_rand_RF"]
+trees = [f"Uncut_{ParticleType.capitalize()}_Events", \
+         f"Cut_{ParticleType.capitalize()}_Events_all_noRF", f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF", f"Cut_{ParticleType.capitalize()}_Events_rand_noRF", \
+         f"Cut_{ParticleType.capitalize()}_Events_all_RF", f"Cut_{ParticleType.capitalize()}_Events_prompt_RF", f"Cut_{ParticleType.capitalize()}_Events_rand_RF"]
 
 if ParticleType == "kaon":
     MM_str = "lambda"
@@ -130,7 +130,7 @@ def shift_mass(tree, branch_name, shift):
     return new_values
 
 # Fit the peak for the reference tree
-reference_tree_name = f"Cut_{ParticleType.upper()}_Events_prompt_noRF"
+reference_tree_name = f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF"
 print(f"\nFitting MM_{ParticleType[0].upper()} of tree {reference_tree_name}...")
 reference_tree = file.Get(reference_tree_name)
 
