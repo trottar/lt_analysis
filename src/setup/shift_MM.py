@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 16:16:09 trottar"
+# Time-stamp: "2024-11-24 16:16:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -231,8 +231,8 @@ for tree_name in trees:
         continue
 
     # Apply the shift and create the MM_shift branch in the tree
+    print(f"Applying shift to {tree_name} as MM_shift branch")
     apply_shift_to_tree(tree, "MM", shift)
-    print(f"Applied shift to {tree_name} and created MM_shift branch")
 
 # Write the changes to the file and close it
 file.Write()  # Save all changes to the ROOT file
