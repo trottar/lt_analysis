@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:55:44 trottar"
+# Time-stamp: "2024-11-24 15:59:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,6 +13,7 @@
 import ROOT
 from ROOT import TFile, TH1F, TCanvas, TLine, kRed, kGreen
 from ROOT import gStyle
+from array import array
 import os, sys
 
 ##################################################################################################################################################
@@ -201,4 +202,43 @@ for tree_name in trees:
 canvas.Print(f"{pdf_filename}]")
 
 # Clean up
+file.Close()
+
+# Function to apply mass shift and update the tree in place
+def apply_shift_to_tree(tree, branch_name, shift):
+    # Get the original branch
+    branch = tree.GetBranch(branch_name)
+    if not branch:
+        print(f"Branch '{branch_name}' not found!")
+        return
+
+    # Create a temporary array to hold the shifted values
+    new_mass = array('f', [0.0])
+    
+    # Set the branch address to the new array
+    branch.SetAddress(new_mass)
+
+    # Loop over the tree and apply the shift
+    for event in tree:
+        original_mass = getattr(event, branch_name)
+        shifted_mass = original_mass + shift
+        new_mass[0] = shifted_mass
+        branch.Fill()  # Update the tree with the shifted mass
+
+# Open the ROOT file in UPDATE mode
+file = TFile.Open(filename, "UPDATE")
+
+# Apply the shift to all trees
+for tree_name in trees:
+    tree = file.Get(tree_name)
+    if not tree:
+        print(f"Tree {tree_name} not found!")
+        continue
+
+    # Apply the shift and update the tree with the new shifted masses
+    apply_shift_to_tree(tree, "MM", shift)
+    print(f"Applied shift to {tree_name}")
+
+# Write the changes to the file and close it
+file.Write()
 file.Close()
