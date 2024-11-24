@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 17:47:04 trottar"
+# Time-stamp: "2024-11-24 17:49:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -218,7 +218,8 @@ def apply_shift_to_tree(tree, shift):
     for i, event in enumerate(tree):
         # Progress bar
         Misc.progressBar(i, tree.GetEntries(),bar_length=25)
-        original_mass = getattr(event, "MM")  # Get the original MM value
+        #original_mass = getattr(event, "MM")  # Get the original MM value
+        original_mass = event.MM  # Get the original MM value
         shifted_mass = original_mass + shift  # Apply the shift
         MM_shift[0] = shifted_mass  # Set the shifted value in the new array
         
