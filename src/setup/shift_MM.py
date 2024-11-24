@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:44:43 trottar"
+# Time-stamp: "2024-11-24 15:47:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -150,7 +150,11 @@ pdf_filename = f"{OUTPATH}/{ParticleType}_{runNum}_MM_Shift.pdf"
 canvas.Print(f"{pdf_filename}[")
 
 # Plot the fit for the reference tree
-hist.Draw("HIST")  # "HIST" option suppresses the stats box
+hist.Draw()  # Draw the histogram
+hist.GetListOfFunctions().FindObject("stats").SetOptStat(0)  # Disable stats box explicitly
+hist.Fit("gaus", "Q", "", MM_min, MM_max)  # Perform and display the fit
+
+# Draw the vertical line at MM_true
 line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
 line.SetLineColor(ROOT.kBlue)
 line.SetLineStyle(2)
@@ -164,8 +168,10 @@ text.AddText(f"MM_true: {MM_true:.4f}")
 text.AddText(f"Fit Mean: {peak_position:.4f}")
 text.AddText(f"Shift: {shift:.4f}")
 text.SetTextSize(0.03)
+text.SetTextAlign(13)  # Align text to the top-left within the box
 text.Draw("same")
 
+# Save the plot to the PDF
 canvas.Print(pdf_filename)
 
 # Apply the shift to all trees
