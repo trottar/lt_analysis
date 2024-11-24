@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:53:18 trottar"
+# Time-stamp: "2024-11-24 15:55:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -160,6 +160,7 @@ hist.Draw("E1")  # Draw the histogram
 line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
 line.SetLineColor(kGreen)
 line.SetLineStyle(2)
+line.SetLineWidth(3)
 line.Draw("same")
 
 # Add a breakdown of MM_true, fit mean, and shift value
@@ -175,6 +176,9 @@ text.Draw("same")
 
 # Save the plot to the PDF
 canvas.Print(pdf_filename)
+
+# Enable the stats box globally
+gStyle.SetOptStat(1)
 
 # Apply the shift to all trees
 for tree_name in trees:
