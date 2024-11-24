@@ -507,7 +507,7 @@ if [[ $p_flag = "true" ]]; then
 	    rm "$out_f_file"
 	fi
 	rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
-	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production"
 	echo
     fi
@@ -531,7 +531,7 @@ if [[ $p_flag = "true" ]]; then
 	    rm "$out_f_file"
 	fi
 	rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
-	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production"
     fi
 
@@ -554,7 +554,7 @@ if [[ $p_flag = "true" ]]; then
 	    rm "$out_f_file"
 	fi
 	rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log	
-	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${ParticleType}_${RUNNUM}.log
 	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production"
     fi
 
@@ -586,7 +586,7 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log	    
-	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_Analysed_Prod_${i}_${RUNNUM}.log
 	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	    echo
 	fi
@@ -610,7 +610,7 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
-	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_Analysed_Prod_${i}_${RUNNUM}.log
 	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	fi
 
@@ -633,7 +633,7 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log	    
-	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_Analysed_Prod_${i}_${RUNNUM}.log
 	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production"
 	fi
     done
