@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:20:52 trottar"
+# Time-stamp: "2024-11-24 15:28:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -69,6 +69,57 @@ print(f"\n\nShifting missing mass to {MM_str} peak of {MM_true} for file {filena
 # Open ROOT file
 file = ROOT.TFile.Open(filename)
 
+# Define a function for fitting a Gaussian with dynamically determined FWHM range
+def fit_gaussian(hist, x_min, x_max):
+
+    print(hist.GetName(),"-"*25)
+    
+    # Find the corresponding bin numbers
+    bin_min = hist.GetXaxis().FindBin(x_min)
+    bin_max = hist.GetXaxis().FindBin(x_max)
+    
+    # Find the maximum value within the specified range
+    max_bin = bin_min
+    max_value = hist.GetBinContent(max_bin)
+    for i in range(bin_min, bin_max):
+        if hist.GetBinContent(i) > max_value:
+            max_bin = i
+            max_value = hist.GetBinContent(i)
+
+    # Print the results
+    print("max_bin", max_bin)
+    print("max_value", max_value)
+    print("bin_center",hist.GetBinCenter(max_bin))
+    
+    half_max = max_value*0.75
+    
+    # Find left and right bins closest to half-max value
+    left_bin = max_bin
+    right_bin = max_bin
+    while hist.GetBinContent(left_bin) > half_max and left_bin > 1:
+        left_bin -= 1
+    while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
+        right_bin += 1
+
+    #min_range = hist.GetBinCenter(max_bin-100)
+    #max_range = hist.GetBinCenter(max_bin+100)
+
+    min_range = hist.GetBinCenter(left_bin)
+    print("min_range",min_range)
+    max_range = hist.GetBinCenter(right_bin)
+    print("max_range",max_range)
+    print("-"*25)
+
+    hist.Fit("gaus", "Q", "", min_range, max_range)
+    fit_func = hist.GetFunction('gaus')
+    
+    fit_func.SetLineColor(kRed)
+    
+    mean = fit_func.GetParameter(1)
+    mean_err = fit_func.GetParError(1)
+    
+    return [mean, mean_err]
+
 # Function to apply mass shift
 def shift_mass(tree, branch_name, shift):
     new_values = []
@@ -80,7 +131,7 @@ def shift_mass(tree, branch_name, shift):
 
 # Fit the peak for the reference tree
 reference_tree_name = f"Cut_{ParticleType.upper()}_Events_prompt_noRF"
-print(f"Fitting MM_{ParticleType[0].upper()} peak for {reference_tree_name}...")
+print(f"\nFitting MM_{ParticleType[0].upper()} of tree {reference_tree_name}...")
 reference_tree = file.Get(reference_tree_name)
 
 # Define histogram for fitting
@@ -88,9 +139,7 @@ hist = ROOT.TH1F("hist", f"MM_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adju
 reference_tree.Draw("MM>>hist")
 
 # Fit the histogram to find the peak
-gaus = ROOT.TF1("gaus", "gaus", MM_min, MM_max)  # Adjust range if necessary
-hist.Fit(gaus, "Q")
-peak_position = gaus.GetParameter(1)  # Extract the mean of the Gaussian fit
+peak_position = fit_gaussian(hist, MM_min, MM_max)[0] # Grab Mean for shift
 
 # Calculate the shift
 shift = MM_true - peak_position
