@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:10:31 trottar"
+# Time-stamp: "2024-11-24 15:18:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -50,21 +50,20 @@ if not os.path.exists(filename):
     print(f"Error: File '{filename}' does not exist.")
     sys.exit(1)  # Exit the script with an error code
 
-trees = [f"Uncut_{ParticleType}_Events", \
-         f"Cut_{ParticleType}_Events_all_noRF", f"Cut_{ParticleType}_Events_prompt_noRF", f"Cut_{ParticleType}_Events_rand_noRF", \
-         f"Cut_{ParticleType}_Events_all_RF", f"Cut_{ParticleType}_Events_prompt_RF", f"Cut_{ParticleType}_Events_rand_RF"]
+trees = [f"Uncut_{ParticleType.upper()}_Events", \
+         f"Cut_{ParticleType.upper()}_Events_all_noRF", f"Cut_{ParticleType.upper()}_Events_prompt_noRF", f"Cut_{ParticleType.upper()}_Events_rand_noRF", \
+         f"Cut_{ParticleType.upper()}_Events_all_RF", f"Cut_{ParticleType.upper()}_Events_prompt_RF", f"Cut_{ParticleType.upper()}_Events_rand_RF"]
 
 if ParticleType == "kaon":
     MM_str = "lambda"
     MM_true = 1.1156  # Lambda peak
-    MM_min = 1.1
-    MM_max = 1.2
 else:
     MM_str = "proton"
     MM_true = 0.938  # Proton peak
-    MM_min = 0.8
-    MM_max = 1.0
 
+MM_min = MM_true-0.05
+MM_max = MM_true+0.05
+    
 print(f"\n\nShifting missing mass to {MM_str} peak of {MM_true} for file {filename}...")
     
 # Open ROOT file
@@ -80,15 +79,15 @@ def shift_mass(tree, branch_name, shift):
     return new_values
 
 # Fit the peak for the reference tree
-reference_tree_name = f"Cut_{ParticleType}_Events_prompt_noRF"
+reference_tree_name = f"Cut_{ParticleType.upper()}_Events_prompt_noRF"
 reference_tree = file.Get(reference_tree_name)
 
 # Define histogram for fitting
-hist = ROOT.TH1F("hist", f"MM_{ParticleType[0].upper()}", 200, MM_min, MM_max)  # Adjust binning/range as needed
+hist = ROOT.TH1F("hist", f"MM_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adjust binning/range as needed
 reference_tree.Draw("MM>>hist")
 
 # Fit the histogram to find the peak
-gaus = ROOT.TF1("gaus", "gaus", 1.0, 1.3)  # Adjust range if necessary
+gaus = ROOT.TF1("gaus", "gaus", MM_min, MM_max)  # Adjust range if necessary
 hist.Fit(gaus, "Q")
 peak_position = gaus.GetParameter(1)  # Extract the mean of the Gaussian fit
 
