@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:37:46 trottar"
+# Time-stamp: "2024-11-24 15:44:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -76,7 +76,7 @@ file = TFile.Open(filename)
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, x_min, x_max):
 
-    print(hist.GetName(), "-" * 25)
+    print("-" * 25)
 
     # Find the corresponding bin numbers
     bin_min = hist.GetXaxis().FindBin(x_min)
@@ -103,8 +103,8 @@ def fit_gaussian(hist, x_min, x_max):
     min_range = hist.GetBinCenter(left_bin)
     max_range = hist.GetBinCenter(right_bin)
 
-    print("min_range", min_range)
-    print("max_range", max_range)
+    print(f"min_range: {min_range:.4f}")
+    print(f"max_range: {max_range:.4f}")
     print("-" * 25)
 
     hist.Fit("gaus", "Q", "", min_range, max_range)
@@ -140,21 +140,32 @@ peak_position = fit_gaussian(hist, MM_min, MM_max)[0]  # Grab Mean for shift
 
 # Calculate the shift
 shift = MM_true - peak_position
-print(f"Calculated shift: {shift:.4f}")
+print(f"Calculated shift: {shift:.4f}\n\n")
 
 # Create a canvas for plotting
 canvas = TCanvas("canvas", "Fit and Shift", 800, 600)
 
 # Save plots to PDF
-pdf_filename = f"{OUTPATH}/{ParticleType}_{runNum}_Fit_Shift.pdf"
+pdf_filename = f"{OUTPATH}/{ParticleType}_{runNum}_MM_Shift.pdf"
 canvas.Print(f"{pdf_filename}[")
 
 # Plot the fit for the reference tree
-hist.Draw()
+hist.Draw("HIST")  # "HIST" option suppresses the stats box
 line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
 line.SetLineColor(ROOT.kBlue)
 line.SetLineStyle(2)
 line.Draw("same")
+
+# Add a breakdown of MM_true, fit mean, and shift value
+text = ROOT.TPaveText(0.6, 0.7, 0.9, 0.9, "NDC")  # Define the text box in normalized device coordinates
+text.SetFillColor(0)  # Transparent background
+text.SetBorderSize(1)  # Thin border
+text.AddText(f"MM_true: {MM_true:.4f}")
+text.AddText(f"Fit Mean: {peak_position:.4f}")
+text.AddText(f"Shift: {shift:.4f}")
+text.SetTextSize(0.03)
+text.Draw("same")
+
 canvas.Print(pdf_filename)
 
 # Apply the shift to all trees
