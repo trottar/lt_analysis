@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:18:56 trottar"
+# Time-stamp: "2024-11-24 15:20:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -80,6 +80,7 @@ def shift_mass(tree, branch_name, shift):
 
 # Fit the peak for the reference tree
 reference_tree_name = f"Cut_{ParticleType.upper()}_Events_prompt_noRF"
+print(f"Fitting MM_{ParticleType[0].upper()} peak for {reference_tree_name}...")
 reference_tree = file.Get(reference_tree_name)
 
 # Define histogram for fitting
