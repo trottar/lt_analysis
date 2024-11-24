@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 16:10:23 trottar"
+# Time-stamp: "2024-11-24 16:14:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -204,26 +204,19 @@ canvas.Print(f"{pdf_filename}]")
 # Clean up
 file.Close()
 
-# Function to apply mass shift and update the tree in place
+# Function to apply mass shift and create a new branch for the shifted values
 def apply_shift_to_tree(tree, branch_name, shift):
-    # Get the original branch
-    branch = tree.GetBranch(branch_name)
-    if not branch:
-        print(f"Branch '{branch_name}' not found!")
-        return
-
-    # Create a temporary array to hold the shifted values
-    new_mass = array('f', [0.0])
+    # Create a new branch to hold the shifted values
+    MM_shift = array('f', [0.0])  # Create a temporary array for the shifted MM
+    tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Create the new branch in the tree
     
-    # Set the branch address to the new array
-    branch.SetAddress(new_mass)
-
     # Loop over the tree and apply the shift
     for event in tree:
-        original_mass = getattr(event, branch_name)
-        shifted_mass = original_mass + shift
-        new_mass[0] = shifted_mass
-        branch.Fill()  # Update the tree with the shifted mass
+        original_mass = getattr(event, branch_name)  # Get the original MM value
+        shifted_mass = original_mass + shift  # Apply the shift
+        MM_shift[0] = shifted_mass  # Set the shifted value in the new array
+        
+        tree.Fill()  # Write the updated event (with new MM_shift) back to the tree
 
 # Open the ROOT file in UPDATE mode
 file = TFile.Open(filename, "UPDATE")
@@ -235,10 +228,10 @@ for tree_name in trees:
         print(f"Tree {tree_name} not found!")
         continue
 
-    # Apply the shift and update the tree with the new shifted masses
+    # Apply the shift and create the MM_shift branch in the tree
     apply_shift_to_tree(tree, "MM", shift)
-    print(f"Applied shift to {tree_name}")
+    print(f"Applied shift to {tree_name} and created MM_shift branch")
 
 # Write the changes to the file and close it
-file.Write()
+file.Write()  # Save all changes to the ROOT file
 file.Close()
