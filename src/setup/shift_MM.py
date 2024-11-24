@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:52:18 trottar"
+# Time-stamp: "2024-11-24 15:53:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -11,7 +11,7 @@
 # Copyright (c) trottar
 #
 import ROOT
-from ROOT import TFile, TH1F, kRed, TCanvas, TLine
+from ROOT import TFile, TH1F, TCanvas, TLine, kRed, kGreen
 from ROOT import gStyle
 import os, sys
 
@@ -158,7 +158,7 @@ hist.Draw("E1")  # Draw the histogram
 
 # Draw the vertical line at MM_true
 line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
-line.SetLineColor(ROOT.kBlue)
+line.SetLineColor(kGreen)
 line.SetLineStyle(2)
 line.Draw("same")
 
