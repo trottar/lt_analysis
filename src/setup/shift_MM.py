@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 14:48:01 trottar"
+# Time-stamp: "2024-11-24 14:52:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -44,6 +44,11 @@ CACHEPATH=lt.CACHEPATH
 #################################################################################################################################################################
 
 filename = f"{OUTPATH}/{ParticleType}_{runNum}_{MaxEvent}_Raw_Data.root"
+
+# Check if the file exists
+if not os.path.exists(filename):
+    print(f"Error: File '{filename}' does not exist.")
+    sys.exit(1)  # Exit the script with an error code
 
 trees = [f"Uncut_{ParticleType}_Events", \
          f"Cut_{ParticleType}_Events_all_noRF", f"Cut_{ParticleType}_Events_prompt_noRF", f"Cut_{ParticleType}_Events_rand_noRF", \
