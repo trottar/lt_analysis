@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:48:45 trottar"
+# Time-stamp: "2024-11-24 15:52:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -154,8 +154,7 @@ canvas.Print(f"{pdf_filename}[")
 gStyle.SetOptStat(0)
 
 # Draw the histogram and fit
-hist.Draw()  # Draw the histogram
-hist.Fit("gaus", "Q", "", MM_min, MM_max)  # Perform and display the Gaussian fit
+hist.Draw("E1")  # Draw the histogram
 
 # Draw the vertical line at MM_true
 line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
