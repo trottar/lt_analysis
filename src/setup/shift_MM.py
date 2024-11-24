@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 15:47:33 trottar"
+# Time-stamp: "2024-11-24 15:48:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -12,6 +12,7 @@
 #
 import ROOT
 from ROOT import TFile, TH1F, kRed, TCanvas, TLine
+from ROOT import gStyle
 import os, sys
 
 ##################################################################################################################################################
@@ -149,10 +150,12 @@ canvas = TCanvas("canvas", "Fit and Shift", 800, 600)
 pdf_filename = f"{OUTPATH}/{ParticleType}_{runNum}_MM_Shift.pdf"
 canvas.Print(f"{pdf_filename}[")
 
-# Plot the fit for the reference tree
+# Disable the stats box globally
+gStyle.SetOptStat(0)
+
+# Draw the histogram and fit
 hist.Draw()  # Draw the histogram
-hist.GetListOfFunctions().FindObject("stats").SetOptStat(0)  # Disable stats box explicitly
-hist.Fit("gaus", "Q", "", MM_min, MM_max)  # Perform and display the fit
+hist.Fit("gaus", "Q", "", MM_min, MM_max)  # Perform and display the Gaussian fit
 
 # Draw the vertical line at MM_true
 line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
