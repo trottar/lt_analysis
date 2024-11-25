@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 18:55:46 trottar"
+# Time-stamp: "2024-11-24 19:42:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -222,7 +222,7 @@ def apply_shift_to_tree(tree, shift):
         shifted_mass = original_mass + shift  # Apply the shift
         MM_shift[0] = shifted_mass  # Set the shifted value in the new array
         
-        tree.Fill()  # Write the updated event (with new MM_shift) back to the tree
+    tree.Fill()  # Write the updated event (with new MM_shift) back to the tree
 
 # Open the ROOT file in UPDATE mode
 file = TFile.Open(filename, "UPDATE")
