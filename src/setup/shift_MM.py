@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 19:52:05 trottar"
+# Time-stamp: "2024-11-24 19:54:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -206,24 +206,28 @@ file.Close()
 
 print("\n\n")
 
+from ROOT import TFile, TTree
+from array import array
+
 # Function to apply mass shift and create a new branch for the shifted values
 def apply_shift_to_tree(tree, shift):
     # Create a new branch to hold the shifted values
-    MM_shift = array('f', [0.0])  # Create a temporary array for the shifted MM
-    tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Create the new branch in the tree
+    MM_shift = array('f', [0.0])  # Temporary array for the shifted MM
+    new_tree = tree.CloneTree(0)  # Clone the structure of the tree without entries
+    new_tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Add the new branch
     
     # Loop over the tree and apply the shift
     for i, event in enumerate(tree):
         # Progress bar
-        Misc.progressBar(i, tree.GetEntries(),bar_length=25)
-        tree.GetEntry(i)
-        #original_mass = getattr(event, "MM")  # Get the original MM value
-        original_mass = event.MM  # Get the original MM value
+        Misc.progressBar(i, tree.GetEntries(), bar_length=25)
+        # Retrieve the original MM value
+        original_mass = event.MM  # Assuming the branch "MM" exists
         shifted_mass = original_mass + shift  # Apply the shift
-        print("!!!!!!!", original_mass, shift, shifted_mass)
-        MM_shift[0] = shifted_mass  # Set the shifted value in the new array
+        MM_shift[0] = shifted_mass  # Assign the shifted value
         
-        tree.Fill(MM_shift[0])  # Write the updated event (with new MM_shift) back to the tree
+        new_tree.Fill()  # Add this event to the new tree
+
+    return new_tree  # Return the updated tree
 
 # Open the ROOT file in UPDATE mode
 file = TFile.Open(filename, "UPDATE")
@@ -235,10 +239,9 @@ for tree_name in trees:
         print(f"Tree {tree_name} not found!")
         continue
 
-    # Apply the shift and create the MM_shift branch in the tree
     print(f"Applying shift to {tree_name} as MM_shift branch")
-    apply_shift_to_tree(tree, shift)
+    new_tree = apply_shift_to_tree(tree, shift)  # Create the new tree
+    new_tree.Write(tree_name, TTree.kOverwrite)  # Overwrite the old tree with the new one
 
 # Write the changes to the file and close it
-file.Write()  # Save all changes to the ROOT file
 file.Close()
