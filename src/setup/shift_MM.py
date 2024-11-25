@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 19:50:09 trottar"
+# Time-stamp: "2024-11-24 19:50:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -225,7 +225,6 @@ def apply_shift_to_tree(tree, shift):
         #original_mass = getattr(event, "MM")  # Get the original MM value
         original_mass = event.MM  # Get the original MM value
         shifted_mass = original_mass + shift  # Apply the shift
-        print("!!!!!!!", original_mass, shift, shifted_mass)
         MM_shift_values[i] = shifted_mass  # Set the shifted value in the new array
 
     # Convert numpy array to ROOT-compatible format
