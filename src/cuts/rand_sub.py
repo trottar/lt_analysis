@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 13:45:35 trottar"
+# Time-stamp: "2024-11-24 20:46:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -814,7 +814,7 @@ def rand_sub(phi_setting, inpDict):
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -924,7 +924,7 @@ def rand_sub(phi_setting, inpDict):
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1029,7 +1029,7 @@ def rand_sub(phi_setting, inpDict):
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1130,7 +1130,7 @@ def rand_sub(phi_setting, inpDict):
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        

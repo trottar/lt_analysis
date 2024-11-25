@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 02:25:54 trottar"
+# Time-stamp: "2024-11-24 20:47:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -235,7 +235,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        
@@ -276,7 +276,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        
@@ -317,7 +317,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        
@@ -358,7 +358,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        

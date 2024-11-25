@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 02:25:08 trottar"
+# Time-stamp: "2024-11-24 20:48:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -394,7 +394,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -503,7 +503,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -612,7 +612,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
         
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -721,7 +721,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1172,7 +1172,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1214,7 +1214,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1256,7 +1256,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1298,7 +1298,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1486,7 +1486,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
         
         ##############
         ##############        
@@ -1533,7 +1533,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        
@@ -1580,7 +1580,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        
@@ -1627,7 +1627,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = math.sqrt(abs(evt.emiss**2-evt.pmiss**2))
+        adj_MM = evt.MM_shift
 
         ##############
         ##############        

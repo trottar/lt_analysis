@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 20:07:58 trottar"
+# Time-stamp: "2024-11-24 20:46:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -122,8 +122,8 @@ def fit_gaussian(hist, x_min, x_max):
 # Function to apply mass shift
 def shift_mass(tree, branch_name, shift):
     new_values = []
-    for event in tree:
-        original_mass = getattr(event, branch_name)
+    for evt in tree:
+        original_mass = getattr(evt, branch_name)
         shifted_mass = original_mass + shift
         new_values.append(shifted_mass)
     return new_values
@@ -214,11 +214,11 @@ def apply_shift_to_tree(tree, shift):
     new_tree.Branch("MM_shift", MM_shift, "MM_shift/F")  # Add the new branch
     
     # Loop over the tree and apply the shift
-    for i, event in enumerate(tree):
+    for i, evt in enumerate(tree):
         # Progress bar
         Misc.progressBar(i, tree.GetEntries(), bar_length=25)
         # Retrieve the original MM value
-        original_mass = event.MM  # Assuming the branch "MM" exists
+        original_mass = evt.MM  # Assuming the branch "MM" exists
         shifted_mass = original_mass + shift  # Apply the shift
         MM_shift[0] = shifted_mass  # Assign the shifted value
         
