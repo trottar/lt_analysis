@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 19:54:37 trottar"
+# Time-stamp: "2024-11-24 20:07:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -205,9 +205,6 @@ canvas.Print(f"{pdf_filename}]")
 file.Close()
 
 print("\n\n")
-
-from ROOT import TFile, TTree
-from array import array
 
 # Function to apply mass shift and create a new branch for the shifted values
 def apply_shift_to_tree(tree, shift):
