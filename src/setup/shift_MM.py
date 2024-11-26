@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 17:56:46 trottar"
+# Time-stamp: "2024-11-26 17:58:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -232,7 +232,7 @@ for data_type in ["data", "simc"]:
             # Progress bar
             Misc.progressBar(i, tree.GetEntries(), bar_length=25)
             # Retrieve the original MM value
-            if data_type = "simc":
+            if data_type == "simc":
                 original_mass = evt.missmass  # Assuming the branch "missmass" exists
             else:
                 original_mass = evt.MM  # Assuming the branch "MM" exists
