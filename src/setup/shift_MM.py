@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 18:04:41 trottar"
+# Time-stamp: "2024-11-26 18:18:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -50,7 +50,7 @@ CACHEPATH = lt.CACHEPATH
 
 for data_type in ["data", "simc"]:
     
-    print("\n\Finding MM shift for {data_type}...")
+    print(f"\n\nFinding MM shift for {data_type}...")
     
     if data_type == "simc":
         simc_str = kinematics.replace('_',f'{phiset}_')
