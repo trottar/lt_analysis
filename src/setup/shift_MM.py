@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 18:23:37 trottar"
+# Time-stamp: "2024-11-26 18:24:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -58,6 +58,7 @@ for data_type in ["data", "simc"]:
         trees = [f"h10"]
         reference_tree_name = f"h10"
         mass_var_name = "missmass"
+        pdf_filename = f"{OUTPATH}/{phiset.capitalize()}_{ParticleType}_{data_type}_MM_Shift_{kinematics}.pdf"
     else:
         filename = f"{OUTPATH}/{ParticleType}_{runNum}_{MaxEvent}_Raw_Data.root"
         trees = [f"Uncut_{ParticleType.capitalize()}_Events",
@@ -65,6 +66,7 @@ for data_type in ["data", "simc"]:
                  f"Cut_{ParticleType.capitalize()}_Events_all_RF", f"Cut_{ParticleType.capitalize()}_Events_prompt_RF", f"Cut_{ParticleType.capitalize()}_Events_rand_RF"]
         reference_tree_name = f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF"
         mass_var_name = "MM"
+        pdf_filename = f"{OUTPATH}/{phiset.capitalize()}_{ParticleType}_{runNum}_{data_type}_MM_Shift_{kinematics}.pdf"
 
     # Check if the file exists
     if not os.path.exists(filename):
@@ -168,8 +170,7 @@ for data_type in ["data", "simc"]:
     # Create a canvas for plotting
     canvas = TCanvas("canvas", "Fit and Shift", 800, 600)
 
-    # Save plots to PDF
-    pdf_filename = f"{OUTPATH}/{phiset.capitalize()}_{ParticleType}_{runNum}_{data_type}_MM_Shift_{kinematics}.pdf"
+    # Save plots to PDF    
     canvas.Print(f"{pdf_filename}[")
 
     # Disable the stats box globally
