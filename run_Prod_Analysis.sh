@@ -524,24 +524,24 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#dummy_right_tmp[@]} -ne 0 ]; then
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		echo
-		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root exists already, deleting..."
-		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root"
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDUMMYFilename}.root"
 	    fi
 	    echo
 	    echo "Combining right ${ParticleType} dummy..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Right" "${dummy_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Right.err"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "Right_${ParticleType}_${OutDUMMYFilename}" "${dummy_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Right_${ParticleType}_${OutDUMMYFilename}.err"
 	    echo
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Right.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		for i in "${dummy_right_tmp[@]}"
 		do       
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    else
-			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Right.err"
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/Right_${ParticleType}_${OutDUMMYFilename}.err"
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 		    fi
 		done	 
@@ -551,24 +551,24 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#data_right_tmp[@]} -ne 0 ]; then
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDATAFilename}.root" ]; then
 		echo
-		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root exists already, deleting..."
-		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root"
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDATAFilename}.root"
 	    fi
 	    echo
 	    echo "Combining right ${ParticleType} data..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Right" "${data_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Right.err"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "Right_${ParticleType}_${OutDATAFilename}" "${data_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Right_${ParticleType}_${OutDATAFilename}.err"
 	    echo
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Right.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Right_${ParticleType}_${OutDATAFilename}.root" ]; then
 		for i in "${data_right_tmp[@]}"
 		do       
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    else
-			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Right.err"
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/Right_${ParticleType}_${OutDATAFilename}.err"
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 		    fi
 		done	 
@@ -578,24 +578,24 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#dummy_left_tmp[@]} -ne 0 ]; then
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		echo
-		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root exists already, deleting..."
-		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root"
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDUMMYFilename}.root"
 	    fi
 	    echo
 	    echo "Combining left ${ParticleType} dummy..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Left" "${dummy_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Left.err"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "Left_${ParticleType}_${OutDUMMYFilename}" "${dummy_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Left_${ParticleType}_${OutDUMMYFilename}.err"
 	    echo
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Left.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		for i in "${dummy_left_tmp[@]}"
 		do       
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    else
-			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Left.err"
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/Left_${ParticleType}_${OutDUMMYFilename}.err"
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 		    fi
 		done	 
@@ -605,24 +605,24 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#data_left_tmp[@]} -ne 0 ]; then
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDATAFilename}.root" ]; then
 		echo
-		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root exists already, deleting..."
-		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root"
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDATAFilename}.root"
 	    fi
 	    echo
 	    echo "Combining left ${ParticleType} data..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Left" "${data_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Left.err"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "Left_${ParticleType}_${OutDATAFilename}" "${data_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Left_${ParticleType}_${OutDATAFilename}.err"
 	    echo
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Left.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Left_${ParticleType}_${OutDATAFilename}.root" ]; then
 		for i in "${data_left_tmp[@]}"
 		do       
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    else
-			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Left.err"
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/Left_${ParticleType}_${OutDATAFilename}.err"
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 		    fi
 		done	 
@@ -632,24 +632,24 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#dummy_center_tmp[@]} -ne 0 ]; then
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		echo
-		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root exists already, deleting..."
-		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root"
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDUMMYFilename}.root"
 	    fi
 	    echo
 	    echo "Combining center ${ParticleType} dummy..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDUMMYFilename}_Center" "${dummy_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Center.err"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "Center_${ParticleType}_${OutDUMMYFilename}" "${dummy_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Center_${ParticleType}_${OutDUMMYFilename}.err"
 	    echo
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDUMMYFilename}_Center.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		for i in "${dummy_center_tmp[@]}"
 		do       
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    else
-			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDUMMYFilename}_Center.err"
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/Center_${ParticleType}_${OutDUMMYFilename}.err"
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 		    fi
 		done	 
@@ -659,24 +659,24 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#data_center_tmp[@]} -ne 0 ]; then
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDATAFilename}.root" ]; then
 		echo
-		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root exists already, deleting..."
-		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${OutDATAFilename}_Center.root"
+		echo "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
+		rm -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDATAFilename}.root"
 	    fi
 	    echo
 	    echo "Combining center ${ParticleType} data..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "${ParticleType}_${OutDATAFilename}_Center" "${data_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Center.err"
+	    python3 mergeRootFiles.py "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/" "_-1_Raw_Data" "${TreeNames}" "Center_${ParticleType}_${OutDATAFilename}" "${data_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Center_${ParticleType}_${OutDATAFilename}.err"
 	    echo
-	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${OutDATAFilename}_Center.root" ]; then
+	    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/Center_${ParticleType}_${OutDATAFilename}.root" ]; then
 		for i in "${data_center_tmp[@]}"
 		do       
 		    if [ -f "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
 			cd "${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT"
 		    else
-			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/${ParticleType}_${OutDATAFilename}_Center.err"
+			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >> "${LTANAPATH}/log/Center_${ParticleType}_${OutDATAFilename}.err"
 			echo "WARNING: ${ParticleType}_${i}_Raw_Data.root does not exist!" >&2 # Redirect to stderr
 		    fi
 		done	 
