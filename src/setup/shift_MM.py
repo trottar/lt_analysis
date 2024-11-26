@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 18:24:58 trottar"
+# Time-stamp: "2024-11-26 18:26:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -91,7 +91,11 @@ for data_type in ["data", "simc"]:
     # Open ROOT file
     file = TFile.Open(filename)
 
-    branches = tree.GetListOfBranches()
+    # Fit the peak for the reference tree
+    print(f"\nFitting M_{ParticleType[0].upper()} of tree {reference_tree_name}...")
+    reference_tree = file.Get(reference_tree_name)
+
+    branches = reference_tree.GetListOfBranches()
     branch_names = [branch.GetName() for branch in branches]
 
     branch_to_check = f"{mass_var_name}_shift"  # Check if shift already exists for file
@@ -151,11 +155,7 @@ for data_type in ["data", "simc"]:
             shifted_mass = original_mass + shift
             new_values.append(shifted_mass)
         return new_values
-
-    # Fit the peak for the reference tree
-    print(f"\nFitting M_{ParticleType[0].upper()} of tree {reference_tree_name}...")
-    reference_tree = file.Get(reference_tree_name)
-
+    
     # Define histogram for fitting
     hist = TH1F("hist", f"M_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adjust binning/range as needed
     reference_tree.Draw(f"{mass_var_name}>>hist")
