@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 17:58:23 trottar"
+# Time-stamp: "2024-11-26 18:04:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -24,7 +24,7 @@ ParticleType = sys.argv[2]
 ROOTPrefix = sys.argv[3]
 MaxEvent = "-1"
 kinematics = sys.argv[4]
-phiset = sys.argv[5].lower()
+phiset = sys.argv[5]
 
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
@@ -53,7 +53,7 @@ for data_type in ["data", "simc"]:
     print("\n\Finding MM shift for {data_type}...")
     
     if data_type == "simc":
-        simc_str = f"{kinematics.replace('_','phiset_')}"
+        simc_str = kinematics.replace('_',f'{phiset}_')
         filename = f"{OUTPATH}/Prod_Coin_{simc_str}.root"
         trees = [f"h10"]
         reference_tree_name = f"h10"
