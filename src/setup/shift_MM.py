@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 18:18:42 trottar"
+# Time-stamp: "2024-11-26 18:23:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -71,7 +71,6 @@ for data_type in ["data", "simc"]:
         print(f"Error: File '{filename}' does not exist.")
         sys.exit(1)  # Exit the script with an error code
 
-
     if ParticleType == "kaon":
         MM_str = "lambda"
         MM_true = 1.1156  # Lambda peak
@@ -90,6 +89,14 @@ for data_type in ["data", "simc"]:
     # Open ROOT file
     file = TFile.Open(filename)
 
+    branches = tree.GetListOfBranches()
+    branch_names = [branch.GetName() for branch in branches]
+
+    branch_to_check = f"{mass_var_name}_shift"  # Check if shift already exists for file
+    if branch_to_check in branch_names:
+        print(f"\n\nBranch '{branch_to_check}' is in the file already.")
+        continue
+    
     # Define a function for fitting a Gaussian with dynamically determined FWHM range
     def fit_gaussian(hist, x_min, x_max):
 
