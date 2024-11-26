@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-01-22 14:57:55 trottar"
+# Time-stamp: "2024-11-26 16:29:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -267,13 +267,8 @@ def main():
     data.update(COIN_Data)
     data_keys = list(data.keys()) # Create a list of all the keys in all dicts added above, each is an array of data
 
-    if ParticleType == "kaon":
-        term_search = "Kaon"
-    if ParticleType == "pion":
-        term_search = "Pion"
-    if ParticleType == "proton":
-        term_search = "Proton"
-
+    term_search = ParticleType.capitalize()
+    
     out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
         
     print("\n\nSaving data to new root files...")
