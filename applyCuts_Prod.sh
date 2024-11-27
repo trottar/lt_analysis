@@ -479,6 +479,12 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     fi
 fi    
 
+if [[ $TargetType = "dummy" ]]; then
+    DataType="dummy"
+else
+    DataType="data"
+fi
+
 cd "${LTANAPATH}/src/setup"
 
 if [[ $p_flag = "true" ]]; then
@@ -491,11 +497,11 @@ if [[ $p_flag = "true" ]]; then
     # The analysis script (Analysed_Prod.py) will create a new root file per run number
     if [ ${PHIVAL} = "right" ]; then
 	echo
-	echo "Analysing right data..."
+	echo "Analysing right ${DataType}..."
 	echo
 	echo
 	echo "------------------------------------------------------"
-	echo "Analysing right data ${ParticleType} run ${RUNNUM}..."
+	echo "Analysing right ${DataType} ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
 	# Check if file already exists and delete if so
@@ -515,11 +521,11 @@ if [[ $p_flag = "true" ]]; then
     # Checks that array isn't empty
     if [ ${PHIVAL} = "left" ]; then
 	echo
-	echo "Analysing left data..."
+	echo "Analysing left ${DataType}..."
 	echo
 	echo
 	echo "------------------------------------------------------"
-	echo "Analysing left data ${ParticleType} run ${RUNNUM}..."
+	echo "Analysing left ${DataType} ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
 	# Check if file already exists and delete if so
@@ -538,11 +544,11 @@ if [[ $p_flag = "true" ]]; then
     # Checks that array isn't empty
     if [ ${PHIVAL} = "center" ]; then
 	echo
-	echo "Analysing center data..."
+	echo "Analysing center ${DataType}..."
 	echo
 	echo
 	echo "------------------------------------------------------"
-	echo "Analysing center data ${ParticleType} run ${RUNNUM}..."
+	echo "Analysing center ${DataType} ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
 	# Check if file already exists and delete if so
@@ -570,11 +576,11 @@ else
 	# The analysis script (Analysed_Prod.py) will create a new root file per run number
 	if [ ${PHIVAL} = "right" ]; then
 	    echo
-	    echo "Analysing right data..."
+	    echo "Analysing right ${DataType}..."
 	    echo
 	    echo
 	    echo "------------------------------------------------------"
-	    echo "Analysing right data ${i} run ${RUNNUM}..."
+	    echo "Analysing right ${DataType} ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
 	    # Check if file already exists and delete if so
@@ -594,11 +600,11 @@ else
 	# Checks that array isn't empty
 	if [ ${PHIVAL} = "left" ]; then
 	    echo
-	    echo "Analysing left data..."
+	    echo "Analysing left ${DataType}..."
 	    echo
 	    echo
 	    echo "------------------------------------------------------"
-	    echo "Analysing left data ${i} run ${RUNNUM}..."
+	    echo "Analysing left ${DataType} ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
 	    # Check if file already exists and delete if so
@@ -617,11 +623,11 @@ else
 	# Checks that array isn't empty
 	if [ ${PHIVAL} = "center" ]; then
 	    echo
-	    echo "Analysing center data..."
+	    echo "Analysing center ${DataType}..."
 	    echo
 	    echo
 	    echo "------------------------------------------------------"
-	    echo "Analysing center data ${i} run ${RUNNUM}..."
+	    echo "Analysing center ${DataType} ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
 	    # Check if file already exists and delete if so
