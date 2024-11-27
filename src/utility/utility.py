@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-11 18:22:00 trottar"
+# Time-stamp: "2024-11-27 11:39:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -76,7 +76,28 @@ def request_yn_response(string=""):
             print("Invalid input. Please enter 'y' for yes or 'n' for no.")
 
 ################################################################################################################################################
-            
+
+def process_lines(string, file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Identify lines containing string
+    string_lines = [i for i, line in enumerate(lines) if string in line]
+
+    # If more than one line with string exists, mark all but the last for removal
+    if len(string_lines) > 1:
+        to_remove = set(string_lines[:-1])  # All except the last string line
+    else:
+        to_remove = set()
+
+    # Write back the filtered lines
+    with open(file_path, 'w') as file:
+        for i, line in enumerate(lines):
+            if i not in to_remove:
+                file.write(line)
+                
+################################################################################################################################################
+                
 def open_root_file(root_file, option="OPEN"):
     """
     Safely open a ROOT file with error handling and cache retrieval.

@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-27 11:37:23 trottar"
+# Time-stamp: "2024-11-27 11:39:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -34,7 +34,7 @@ from ltsep import Misc
 # Importing utility functions
 
 sys.path.append("../utility")
-from utility import open_root_file
+from utility import open_root_file, process_lines
 
 ###############################################################################################################################################
 
@@ -110,21 +110,3 @@ outfile.Close()
 for n in arr_run_nums:
     process_lines(n, err_fout)
 
-def process_lines(runNum, file_path):
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-
-    # Identify lines containing run number
-    run_lines = [i for i, line in enumerate(lines) if runNum in line]
-
-    # If more than one line with run number exists, mark all but the last for removal
-    if len(run_lines) > 1:
-        to_remove = set(run_lines[:-1])  # All except the last run number line
-    else:
-        to_remove = set()
-
-    # Write back the filtered lines
-    with open(file_path, 'w') as file:
-        for i, line in enumerate(lines):
-            if i not in to_remove:
-                file.write(line)
