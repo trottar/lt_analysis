@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-27 11:36:46 trottar"
+# Time-stamp: "2024-11-27 11:37:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,7 +108,7 @@ outfile.Close()
 
 # Remove superfluous statements in error file
 for n in arr_run_nums:
-    process_lines(n)
+    process_lines(n, err_fout)
 
 def process_lines(runNum, file_path):
     with open(file_path, 'r') as file:
@@ -116,7 +116,6 @@ def process_lines(runNum, file_path):
 
     # Identify lines containing run number
     run_lines = [i for i, line in enumerate(lines) if runNum in line]
-    run_lines = [print(i) for i, line in enumerate(lines) if runNum in line]
 
     # If more than one line with run number exists, mark all but the last for removal
     if len(run_lines) > 1:
