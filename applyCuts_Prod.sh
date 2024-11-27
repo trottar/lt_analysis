@@ -587,7 +587,7 @@ else
 	    fi
 	    rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log
-	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}"
+	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    echo
 	fi
 
@@ -611,7 +611,7 @@ else
 	    fi
 	    rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
-	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}"
+	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
 
 	# Checks that array isn't empty
@@ -634,7 +634,7 @@ else
 	    fi
 	    rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
-	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}"
+	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
     done
 fi

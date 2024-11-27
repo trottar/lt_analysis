@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-26 18:26:53 trottar"
+# Time-stamp: "2024-11-27 10:57:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -25,6 +25,7 @@ ROOTPrefix = sys.argv[3]
 MaxEvent = "-1"
 kinematics = sys.argv[4]
 phiset = sys.argv[5]
+target =  sys.argv[6]
 
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
@@ -60,6 +61,7 @@ for data_type in ["data", "simc"]:
         mass_var_name = "missmass"
         pdf_filename = f"{OUTPATH}/{phiset.capitalize()}_{ParticleType}_{data_type}_MM_Shift_{kinematics}.pdf"
     else:
+        data_type = "data" if target == "lh2" else "dummy"
         filename = f"{OUTPATH}/{ParticleType}_{runNum}_{MaxEvent}_Raw_Data.root"
         trees = [f"Uncut_{ParticleType.capitalize()}_Events",
                  f"Cut_{ParticleType.capitalize()}_Events_all_noRF", f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF", f"Cut_{ParticleType.capitalize()}_Events_rand_noRF",
