@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-27 11:39:25 trottar"
+# Time-stamp: "2024-11-27 11:40:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -108,5 +108,5 @@ outfile.Close()
 
 # Remove superfluous statements in error file
 for n in arr_run_nums:
-    process_lines(n, err_fout)
+    process_lines(str(n), err_fout)
 
