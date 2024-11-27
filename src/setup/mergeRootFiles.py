@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 14:58:58 trottar"
+# Time-stamp: "2024-11-27 11:27:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -105,3 +105,26 @@ for tree in inp_tree_names.split():
         continue
     
 outfile.Close()
+
+# Remove superfluous statements in error file
+for n in arr_run_nums:
+    process_lines(n)
+
+def process_lines(runNum, file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    # Identify lines containing "fun"
+    fun_lines = [i for i, line in enumerate(lines) if runNum in line]
+
+    # If more than one line with "fun" exists, mark all but the last for removal
+    if len(fun_lines) > 1:
+        to_remove = set(fun_lines[:-1])  # All except the last "fun" line
+    else:
+        to_remove = set()
+
+    # Write back the filtered lines
+    with open(file_path, 'w') as file:
+        for i, line in enumerate(lines):
+            if i not in to_remove:
+                file.write(line)
