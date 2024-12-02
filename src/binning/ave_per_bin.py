@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 20:47:46 trottar"
+# Time-stamp: "2024-12-02 06:07:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -235,7 +235,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM_shift
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        
@@ -276,7 +280,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM_shift
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        
@@ -317,7 +325,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM_shift
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        
@@ -358,7 +370,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM_shift
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        

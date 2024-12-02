@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:47:14 trottar"
+# Time-stamp: "2024-12-02 06:08:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -210,7 +210,11 @@ def compare_simc(hist, inpDict):
       # HARD CODED #
       ##############
 
-      adj_missmass = evt.missmass_shift
+      # Check if variable shift branch exists
+      try:
+          adj_missmass = evt.missmass_shift
+      except AttributeError:
+          adj_missmass = evt.missmass
 
       ##############
       ##############        

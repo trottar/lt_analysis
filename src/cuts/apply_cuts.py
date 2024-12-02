@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:56:55 trottar"
+# Time-stamp: "2024-12-02 06:05:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,7 +110,11 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-    adj_MM = evt.MM_shift
+    # Check if variable shift branch exists
+    try:
+        adj_MM = evt.MM_shift
+    except AttributeError:
+        adj_MM = evt.MM
     
     ##############
     ##############        
@@ -172,7 +176,11 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     # HARD CODED #
     ##############
 
-    adj_missmass = evt.missmass_shift
+    # Check if variable shift branch exists
+    try:
+        adj_missmass = evt.missmass_shift
+    except AttributeError:
+        adj_missmass = evt.missmass
 
     ##############
     ##############        

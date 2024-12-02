@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:01:08 trottar"
+# Time-stamp: "2024-12-02 06:08:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -394,7 +394,11 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -503,7 +507,11 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -612,7 +620,11 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
         
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -721,7 +733,11 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -1172,7 +1188,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -1214,7 +1234,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -1256,7 +1280,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -1298,7 +1326,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -1399,7 +1431,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
-    # Defin of interest
+    # Define dummy root file trees of interest
 
     rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileDummy):
@@ -1486,7 +1518,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
         
         ##############
         ##############        
@@ -1497,10 +1533,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1533,7 +1569,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        
@@ -1544,10 +1584,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1580,7 +1620,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        
@@ -1591,10 +1635,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1627,7 +1671,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        adj_MM = evt.MM
+        # Check if variable shift branch exists
+        try:
+            adj_MM = evt.MM_shift
+        except AttributeError:
+            adj_MM = evt.MM
 
         ##############
         ##############        
@@ -1639,10 +1687,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
