@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:07:45 trottar"
+# Time-stamp: "2024-12-02 06:30:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -835,7 +835,7 @@ def rand_sub(phi_setting, inpDict):
             NOMMCUTS = apply_data_sub_cuts(evt)
             
         if(NOMMCUTS):
-            H_MM_nosub_DATA.Fill(adj_MM)            
+            H_MM_nosub_DATA.Fill(adj_MM)
             
         if(ALLCUTS):
 
@@ -910,6 +910,8 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
 
+          MM_offset_DATA = evt.MM_shift-evt.MM
+          
     ################################################################################################################################################
     # Fill dummy histograms for various trees called above
 
@@ -1019,6 +1021,8 @@ def rand_sub(phi_setting, inpDict):
           #H_MM_DUMMY.Fill(pow(adj_MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
 
+          MM_offset_DUMMY = evt.MM_shift-evt.MM
+          
     ###################################################################################################################################################    
     # Fill random histograms for various trees called above
 
@@ -1124,6 +1128,8 @@ def rand_sub(phi_setting, inpDict):
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(adj_MM)
 
+          MM_offset_RAND = evt.MM_shift-evt.MM
+          
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
 
@@ -1229,6 +1235,8 @@ def rand_sub(phi_setting, inpDict):
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(adj_MM)
 
+          MM_offset_DUMMY_RAND = evt.MM_shift-evt.MM
+          
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge
@@ -1459,6 +1467,10 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
+        subDict["MM_offset_DATA"] = MM_offset_DATA
+        subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
+        subDict["MM_offset_RAND"] = MM_offset_RAND
+        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND        
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
         try:

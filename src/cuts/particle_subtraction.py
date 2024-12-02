@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:08:09 trottar"
+# Time-stamp: "2024-12-02 06:30:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,6 +64,11 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
+
+    MM_offset_DATA = subDict["MM_offset_DATA"]
+    MM_offset_DUMMY = subDict["MM_offset_DUMMY"]
+    MM_offset_RAND = subDict["MM_offset_RAND"]
+    MM_offset_DUMMY_RAND = subDict["MM_offset_DUMMY_RAND"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -398,7 +403,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -511,7 +516,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DUMMY
         
         ##############
         ##############        
@@ -624,7 +629,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_RAND
         
         ##############
         ##############        
@@ -737,7 +742,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DUMMY_RAND
         
         ##############
         ##############        
