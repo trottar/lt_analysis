@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 20:46:54 trottar"
+# Time-stamp: "2024-12-02 05:18:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,7 +125,7 @@ def rand_sub(phi_setting, inpDict):
     ################################################################################################################################################
     # Define data root file trees of interest
 
-    rootFileData = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+    rootFileData = f"{OUTPATH}/{phi_setting}_{ParticleType}_{InDATAFilename}.root"
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         histDict.update({ "phi_setting" : phi_setting})
@@ -140,7 +140,7 @@ def rand_sub(phi_setting, inpDict):
     ################################################################################################################################################
     # Define dummy root file trees of interest
 
-    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    rootFileDummy = f"{OUTPATH}/{phi_setting}_{ParticleType}_{InDUMMYFilename}.root"
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         return histDict
