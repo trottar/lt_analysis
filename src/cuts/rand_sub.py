@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:30:43 trottar"
+# Time-stamp: "2024-12-02 12:59:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1470,7 +1470,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["MM_offset_DATA"] = MM_offset_DATA
         subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
         subDict["MM_offset_RAND"] = MM_offset_RAND
-        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND        
+        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
         try:

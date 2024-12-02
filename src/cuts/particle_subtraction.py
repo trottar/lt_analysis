@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:30:27 trottar"
+# Time-stamp: "2024-12-02 12:53:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1075,6 +1075,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
+
+    MM_offset_DATA = subDict["MM_offset_DATA"]
+    MM_offset_DUMMY = subDict["MM_offset_DUMMY"]
+    MM_offset_RAND = subDict["MM_offset_RAND"]
+    MM_offset_DUMMY_RAND = subDict["MM_offset_DUMMY_RAND"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1084,7 +1089,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     ################################################################################################################################################
     # Define data root file trees of interest
 
-    rootFileData = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+    rootFileData = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root"
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
@@ -1098,7 +1103,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     ################################################################################################################################################
     # Defin of interest
 
-    rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    rootFileDummy = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root"
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
@@ -1197,7 +1202,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -1243,7 +1248,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DUMMY
         
         ##############
         ##############        
@@ -1289,7 +1294,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_RAND
         
         ##############
         ##############        
@@ -1335,7 +1340,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DUMMY_RAND
         
         ##############
         ##############        
@@ -1415,6 +1420,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
+
+    MM_offset_DATA = subDict["MM_offset_DATA"]
+    MM_offset_DUMMY = subDict["MM_offset_DUMMY"]
+    MM_offset_RAND = subDict["MM_offset_RAND"]
+    MM_offset_DUMMY_RAND = subDict["MM_offset_DUMMY_RAND"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1424,7 +1434,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     ################################################################################################################################################
     # Define data root file trees of interest
 
-    rootFileData = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+    rootFileData = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root"
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
@@ -1438,7 +1448,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     ################################################################################################################################################
     # Define dummy root file trees of interest
 
-    rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    rootFileDummy = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root"
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
@@ -1527,7 +1537,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -1578,7 +1588,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DUMMY
 
         ##############
         ##############        
@@ -1629,7 +1639,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_RAND
 
         ##############
         ##############        
@@ -1680,7 +1690,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM
+            adj_MM = evt.MM + MM_offset_DUMMY_RAND
 
         ##############
         ##############        
