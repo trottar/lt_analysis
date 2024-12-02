@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 20:48:34 trottar"
+# Time-stamp: "2024-12-02 05:48:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -174,7 +174,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     # HARD CODED #
     ##############
 
-    adj_missmass = math.sqrt(abs(evt.Em**2-evt.Pm**2))
+    adj_missmass = evt.missmass_shift
 
     ##############
     ##############        
