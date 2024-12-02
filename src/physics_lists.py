@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 14:33:09 trottar"
+# Time-stamp: "2024-12-02 17:42:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -354,7 +354,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         if phiset == "Right":
             runNums = np.array([int(x) for x in runNumRight.split(' ')])
             for i, run in enumerate(runNums):
-                pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
+                pid_log = f"{LTANAPATH}/log/{phiset}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
                 if os.path.exists(pid_log):
                     thpq_right = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValRight[i]))))
                     ebeam_right = float(EbeamValRight[i])
@@ -365,7 +365,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         if phiset == "Left":
             runNums = np.array([int(x) for x in runNumLeft.split(' ')])
             for i, run in enumerate(runNums):
-                pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
+                pid_log = f"{LTANAPATH}/log/{phiset}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
                 if os.path.exists(pid_log):
                     thpq_left = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValLeft[i]))))
                     ebeam_left = float(EbeamValLeft[i])
@@ -376,7 +376,7 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
         if phiset == "Center":
             runNums = np.array([int(x) for x in runNumCenter.split(' ')])
             for i, run in enumerate(runNums):
-                pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
+                pid_log = f"{LTANAPATH}/log/{phiset}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
                 if os.path.exists(pid_log):
                     thpq_center = float("{:.3f}".format(abs(float(pThetaValCenter[i])-float(pThetaValCenter[i]))))
                     ebeam_center = float(EbeamValCenter[i])
