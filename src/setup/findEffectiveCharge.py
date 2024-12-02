@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-01 22:44:17 trottar"
+# Time-stamp: "2024-12-01 22:46:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,7 +66,7 @@ ebeam_val_lst = ""
 pTheta_val_lst = ""
 
 for runNum in RUNLIST:
-    print(runNum,efficiency_table,foutcsv,"efficiency")
+    print("!!!!!!!!!",runNum,efficiency_table,foutcsv,"efficiency")
     if ParticleType == "heep":
 
             efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
