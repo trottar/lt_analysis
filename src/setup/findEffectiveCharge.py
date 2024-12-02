@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-01 22:46:00 trottar"
+# Time-stamp: "2024-12-01 22:48:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,7 +66,7 @@ ebeam_val_lst = ""
 pTheta_val_lst = ""
 
 for runNum in RUNLIST:
-    print("!!!!!!!!!",runNum,efficiency_table,foutcsv,"efficiency")
+    
     if ParticleType == "heep":
 
             efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
@@ -89,7 +89,7 @@ for runNum in RUNLIST:
     
         # Check if run number exists in analysed root files
         if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ANATYPE)):
-
+            print("!!!!!!!!!",runNum,efficiency_table,foutcsv,"efficiency")
             efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
             efficiency_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency_err")
             eff_charge = getEfficiencyValue(runNum,efficiency_table,foutcsv,"eff_charge")
