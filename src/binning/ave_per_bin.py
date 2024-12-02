@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 12:58:48 trottar"
+# Time-stamp: "2024-12-02 13:49:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -400,6 +400,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
                     MM_offset_DUMMY_RAND = evt.MM_shift-evt.MM
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":
+        subDict["nWindows"] = nWindows
+        subDict["phi_setting"] = phi_setting
+        subDict["MM_offset_DATA"] = MM_offset_DATA
+        subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
+        subDict["MM_offset_RAND"] = MM_offset_RAND
+        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
+        particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)
                     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -434,13 +444,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
-            subDict["nWindows"] = nWindows
-            subDict["phi_setting"] = phi_setting
-            subDict["MM_offset_DATA"] = MM_offset_DATA
-            subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
-            subDict["MM_offset_RAND"] = MM_offset_RAND
-            subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
-            particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)
             
             try:
                 ##############

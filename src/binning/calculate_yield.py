@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 12:56:39 trottar"
+# Time-stamp: "2024-12-02 13:48:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -413,6 +413,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             MM_offset_DUMMY_RAND = evt.MM_shift-evt.MM
+
+    # Pion subtraction by scaling pion background to peak size
+    if ParticleType == "kaon":
+        subDict["nWindows"] = nWindows
+        subDict["phi_setting"] = phi_setting
+        subDict["MM_offset_DATA"] = MM_offset_DATA
+        subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
+        subDict["MM_offset_RAND"] = MM_offset_RAND
+        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
+        particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
                             
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -436,13 +446,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
-                subDict["nWindows"] = nWindows
-                subDict["phi_setting"] = phi_setting
-                subDict["MM_offset_DATA"] = MM_offset_DATA
-                subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
-                subDict["MM_offset_RAND"] = MM_offset_RAND
-                subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
-                particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
                 
                 try:
                     ##############
