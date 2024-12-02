@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 18:26:59 trottar"
+# Time-stamp: "2024-12-02 18:31:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,10 +200,9 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-if EPSSET == "low":
-    # Check if the file exists
-    if os.path.exists(f_path):
-        os.remove(f_path)
+# Check if the file exists
+if os.path.exists(f_path):
+    os.remove(f_path)
 
 # Create a new directory for each iteration in cache
 new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
@@ -763,13 +762,7 @@ if EPSSET == "high":
             if os.path.exists(f_simc_hist):
                 output_file_lst.append(f_simc_hist)                
 
-f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-
-# Get the total number of lines in the file
-with open(f_path, 'r') as file:
-    total_lines = len(file.readlines())
-
-f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(total_lines-1))
+f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_0") # Zeroth iteration
 print("\nCopying {} to {}".format(f_path,f_path_new))
 shutil.copy(f_path,f_path_new)
 
