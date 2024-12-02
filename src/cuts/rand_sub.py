@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:18:58 trottar"
+# Time-stamp: "2024-12-02 05:25:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -201,7 +201,7 @@ def rand_sub(phi_setting, inpDict):
         runNums= runNumRight
         for run in runNumRight.split(' '):
             runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{runNum}_{OutFilename}.log"
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -217,7 +217,7 @@ def rand_sub(phi_setting, inpDict):
         runNums= runNumLeft
         for run in runNumLeft.split(' '):
             runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{runNum}_{OutFilename}.log"
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -232,7 +232,7 @@ def rand_sub(phi_setting, inpDict):
         runNums= runNumCenter
         for run in runNumCenter.split(' '):
             runNum = run
-            pid_log = "%s/log/%s_Analysed_Prod_%s_%s.log" % (LTANAPATH,phi_setting,ParticleType,runNum)
+            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{runNum}_{OutFilename}.log"
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
