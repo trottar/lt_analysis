@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-22 15:23:13 trottar"
+# Time-stamp: "2024-12-02 18:26:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,9 +200,10 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-# Check if the file exists
-if os.path.exists(f_path):
-    os.remove(f_path)
+if EPSSET == "low":
+    # Check if the file exists
+    if os.path.exists(f_path):
+        os.remove(f_path)
 
 # Create a new directory for each iteration in cache
 new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
