@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-01 22:40:27 trottar"
+# Time-stamp: "2024-12-01 22:44:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,9 +64,9 @@ eff_charge_lst = ""
 eff_charge_err_lst = ""
 ebeam_val_lst = ""
 pTheta_val_lst = ""
-print(runNum,efficiency_table,foutcsv,"efficiency")
-for runNum in RUNLIST:
 
+for runNum in RUNLIST:
+    print(runNum,efficiency_table,foutcsv,"efficiency")
     if ParticleType == "heep":
 
             efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
