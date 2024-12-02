@@ -291,7 +291,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         ##############
         # HARD CODED #
         ##############
-        if Q2Val == 3.0 and WVal=3.14:
+        if Q2Val == 3.0 and WVal == 3.14:
             event_threshold = 15 # Q2=3.0,W=3.14
         else:
             event_threshold = 5 # Q2=2.115,W=2.95 | Q2=3.0,W=2.32 | Q2=4.4,W=2.74
