@@ -143,7 +143,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     if(phi_setting == '0'): phi_setting = ""
     print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",phi_setting)
     #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+phi_setting+'*Analysed_Data.root',recursive = True):
-    for file in glob.glob(OUTPATH+'/*'+ParticleType+'*'+FilenameOverride+'*'+phi_setting+'*.root'):
+    for file in glob.glob(OUTPATH+'/*'+phi_setting+'*'+ParticleType+'*'+FilenameOverride+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
         #print(file)
