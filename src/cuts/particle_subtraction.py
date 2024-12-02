@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-24 20:48:10 trottar"
+# Time-stamp: "2024-12-02 05:41:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     ################################################################################################################################################
     # Define data root file trees of interest
 
-    rootFileData = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDATAFilename + "_%s.root" % (phi_setting)
+    rootFileData = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root"
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
@@ -87,7 +87,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     ################################################################################################################################################
     # Define dummy root file trees of interest
 
-    rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
+    rootFileDummy = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root"
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
