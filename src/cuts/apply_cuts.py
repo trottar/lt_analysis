@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:52:25 trottar"
+# Time-stamp: "2024-12-02 05:56:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -143,8 +143,6 @@ def apply_data_sub_cuts(evt):
     ##############
 
     adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-    adj_MM = evt.MM
     
     ##############
     ##############        

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:47:04 trottar"
+# Time-stamp: "2024-12-02 06:01:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -401,8 +401,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOHOLECUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -410,7 +410,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -510,8 +510,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOHOLECUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -519,7 +519,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -619,8 +619,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOHOLECUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -628,7 +628,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -728,8 +728,8 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOHOLECUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
@@ -737,7 +737,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
                 P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
             
             if(NOMMCUTS):
@@ -1057,7 +1057,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_sub_cuts, apply_data_sub_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -1075,7 +1075,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
-    # Define dummy root file trees of interest
+    # Defin of interest
 
     rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileDummy):
@@ -1179,10 +1179,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1221,10 +1221,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1263,10 +1263,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1305,10 +1305,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1381,7 +1381,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_sub_cuts, apply_data_sub_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -1399,7 +1399,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
 
     ################################################################################################################################################
-    # Define dummy root file trees of interest
+    # Defin of interest
 
     rootFileDummy = OUTPATH + "/" + "{}".format(SubtractedParticle) + "_" + InDUMMYFilename + "_%s.root" % (phi_setting)
     if not os.path.isfile(rootFileDummy):
@@ -1497,10 +1497,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1544,10 +1544,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1591,10 +1591,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
@@ -1639,10 +1639,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
             NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+            ALLCUTS = apply_data_sub_cuts(evt)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
         if(NOMMCUTS):
