@@ -72,7 +72,7 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10):
     fitl = Q2vsW_hist.GetXaxis().FindBin(Q2Val) - int(fitrange*5)
     fitr = Q2vsW_hist.GetXaxis().FindBin(Q2Val) + int(fitrange)
 
-    print("\nFinding diaomond fits...")
+    print("\nFinding diamond fits...")
     for b in range(fitrange*2):
         # Progress bar
         Misc.progressBar(b, fitrange*2-1, bar_length=25)
@@ -142,7 +142,6 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     lenl = 10000
     if(phi_setting == '0'): phi_setting = ""
     print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",phi_setting)
-    #    for file in glob.glob(OUTPATH+'/**/'+FilenameOverride+'*'+phi_setting+'*Analysed_Data.root',recursive = True):
     for file in glob.glob(OUTPATH+'/*'+phi_setting+'*'+ParticleType+'*'+FilenameOverride+'*.root'):
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
