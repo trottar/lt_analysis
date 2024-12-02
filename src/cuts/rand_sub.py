@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:25:14 trottar"
+# Time-stamp: "2024-12-02 05:30:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,8 +200,7 @@ def rand_sub(phi_setting, inpDict):
     if phi_setting == "Right":
         runNums= runNumRight
         for run in runNumRight.split(' '):
-            runNum = run
-            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{runNum}_{OutFilename}.log"
+            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -216,8 +215,7 @@ def rand_sub(phi_setting, inpDict):
     if phi_setting == "Left":
         runNums= runNumLeft
         for run in runNumLeft.split(' '):
-            runNum = run
-            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{runNum}_{OutFilename}.log"
+            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
@@ -231,8 +229,7 @@ def rand_sub(phi_setting, inpDict):
     if phi_setting == "Center":
         runNums= runNumCenter
         for run in runNumCenter.split(' '):
-            runNum = run
-            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{runNum}_{OutFilename}.log"
+            pid_log = f"{LTANAPATH}/log/{phi_setting}_{ParticleType}_{run}_{OutFilename.replace('FullAnalysis_','')}.log"
             if os.path.exists(pid_log):
                     with open(pid_log, 'r') as f_log:
                         for line in f_log:
