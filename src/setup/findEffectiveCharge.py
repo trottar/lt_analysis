@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-01 22:49:22 trottar"
+# Time-stamp: "2024-12-01 23:00:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,7 +64,7 @@ eff_charge_lst = ""
 eff_charge_err_lst = ""
 ebeam_val_lst = ""
 pTheta_val_lst = ""
-print("!!!!!!!!!",efficiency_table,foutcsv,"efficiency")
+
 for runNum in RUNLIST:
     
     if ParticleType == "heep":

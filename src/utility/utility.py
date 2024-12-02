@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-01 22:52:02 trottar"
+# Time-stamp: "2024-12-01 23:00:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -171,7 +171,7 @@ def data_to_csv(file_path, column_name, new_value, run_number):
         # Initialize new file structure
         data = []
         fieldnames = ['Run Number']
-    print(column_name, fieldnames)
+
     # Add new column if it doesn't exist
     if column_name not in fieldnames and column_name != 'Run Number':
         fieldnames.append(column_name)
