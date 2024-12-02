@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 12:53:19 trottar"
+# Time-stamp: "2024-12-02 13:22:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1083,7 +1083,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_sub_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -1428,7 +1428,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_sub_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
