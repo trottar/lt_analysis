@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 05:30:28 trottar"
+# Time-stamp: "2024-12-02 05:32:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -271,7 +271,7 @@ def rand_sub(phi_setting, inpDict):
             line = line.partition('#')[0] # Treat anything after a # as a comment and ignore it
             line = line.rstrip()
             array = line.split(",") # Convert line into an array, anything after a comma is a new entry 
-            if(int(runNum) in range (int(array[0]), int(array[1])+1)): # Check if run number for file is within any of the ranges specified in the cut file
+            if(int(run) in range (int(array[0]), int(array[1])+1)): # Check if run number for file is within any of the ranges specified in the cut file
                 TempPar += 2 # If run number is in range, set to non -1 value
                 BunchSpacing = float(array[2])
                 CoinOffset = float(array[3]) # Coin offset value
