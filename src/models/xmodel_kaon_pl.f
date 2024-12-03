@@ -48,11 +48,12 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
       if(npol_set.lt.0) then
          pol='mn'
-         mtar=mn
       else
          pol='pl'
-         mtar=mp
       end if
+
+*     Dynamically updated
+      mtar=mp
 
       open(57, file=par_fn)
       do while (.true.)
