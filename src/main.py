@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 20:59:42 trottar"
+# Time-stamp: "2024-12-03 00:33:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -762,6 +762,18 @@ if EPSSET == "high":
             if os.path.exists(f_simc_hist):
                 output_file_lst.append(f_simc_hist)                
 
+    # Update iteration file of dates
+    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_path):
+        # If it exists, update it with the string
+        with open(f_path, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_path, 'x') as file:
+            file.write(formatted_date)
+                
     f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_0") # Zeroth iteration
     print("\nCopying {} to {}".format(f_path,f_path_new))
     shutil.copy(f_path,f_path_new)
@@ -841,16 +853,4 @@ if EPSSET == "high":
     else:
         print("Cache not updated! Exiting without saving...")
         sys.exit(2)
-
-    # Update iteration file of dates
-    f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-    # Check if the file exists
-    if os.path.exists(f_path):
-        # If it exists, update it with the string
-        with open(f_path, 'a') as file:
-            file.write('\n'+formatted_date)
-    else:
-        # If not, create it and fill it with the string
-        with open(f_path, 'x') as file:
-            file.write(formatted_date)
 
