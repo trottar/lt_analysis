@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-03 12:24:49 trottar"
+# Time-stamp: "2024-12-03 12:41:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1007,6 +1007,8 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
 
 def grab_ave_data(histlist, inpDict):
 
+    OutFilename = inpDict["OutFilename"]    
+    
     NumtBins = inpDict["NumtBins"]
     W = inpDict["W"]
     Q2 = inpDict["Q2"]
