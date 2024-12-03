@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-03 10:19:25 trottar"
+# Time-stamp: "2024-12-03 10:20:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -140,7 +140,6 @@ with open(f_iter, 'r') as file:
 print("\n\tIteration number", iter_num)
 print("="*50)
 print("\n\n")
-
 
 prev_iter_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, closest_date)
 prev_iter_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, closest_date)

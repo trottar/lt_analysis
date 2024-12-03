@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 00:58:34 trottar"
+# Time-stamp: "2024-12-03 10:33:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -37,6 +37,8 @@ LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
+
+TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -136,7 +138,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     '''
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(CACHEPATH, USER, ParticleType, q2_set, w_set, dir_iter, \
+    para_file_in =  "{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(TEMP_CACHEPATH, USER, ParticleType, q2_set, w_set, dir_iter, \
                                                                              pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     print("Reading {}...".format(para_file_in))
     try:
