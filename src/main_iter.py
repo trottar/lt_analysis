@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-03 10:20:24 trottar"
+# Time-stamp: "2024-12-03 10:53:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,14 +250,14 @@ new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, Part
 # Grab combined root files for data and dummy.
 # Then save to dictionary
 for hist in histlist:
-    rootFileData = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDATAFilename"] + "_%s.root" % (hist["phi_setting"])
+    rootFileData = f"{OUTPATH}/{hist['phi_setting']}_{ParticleType}_{inpDict['InDATAFilename']}.root"
     if not os.path.isfile(rootFileData):
         print("\n\nERROR: No data file found called {}\n\n".format(rootFileData))
         sys.exit(2)
     InFile_DATA = open_root_file(rootFileData)
     hist["InFile_DATA"]  = InFile_DATA
     
-    rootFileDummy = OUTPATH + "/" + "{}".format(ParticleType) + "_" + inpDict["InDUMMYFilename"] + "_%s.root" % (hist["phi_setting"])
+    rootFileDummy = f"{OUTPATH}/{hist['phi_setting']}_{ParticleType}_{inpDict['InDUMMYFilename']}.root"
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         sys.exit(2)
