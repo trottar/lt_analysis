@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-03 10:33:31 trottar"
+# Time-stamp: "2024-12-03 10:41:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -138,8 +138,11 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     '''
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(TEMP_CACHEPATH, USER, ParticleType, q2_set, w_set, dir_iter, \
-                                                                             pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    #para_file_in =  "{}/{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(TEMP_CACHEPATH, USER, ParticleType, q2_set, w_set, dir_iter, \
+    #                                                                         pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    para_file_in =  "{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set, dir_iter, \
+                                                                            pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    
     print("Reading {}...".format(para_file_in))
     try:
         with open(para_file_in, 'r') as f:
