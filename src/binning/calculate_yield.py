@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 13:48:32 trottar"
+# Time-stamp: "2024-12-03 11:14:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -996,6 +996,8 @@ def find_yield_simc(histlist, inpDict, iteration=False):
 
 def grab_yield_data(histlist, phisetlist, inpDict):
 
+    OutFilename = inpDict["OutFilename"]
+    
     Ws = inpDict["W"]
     Qs = inpDict["Q2"]
     Q2 = float(Qs.replace("p","."))
