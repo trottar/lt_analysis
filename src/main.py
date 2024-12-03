@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 18:31:34 trottar"
+# Time-stamp: "2024-12-02 19:51:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -762,9 +762,9 @@ if EPSSET == "high":
             if os.path.exists(f_simc_hist):
                 output_file_lst.append(f_simc_hist)                
 
-f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_0") # Zeroth iteration
-print("\nCopying {} to {}".format(f_path,f_path_new))
-shutil.copy(f_path,f_path_new)
+    f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_0") # Zeroth iteration
+    print("\nCopying {} to {}".format(f_path,f_path_new))
+    shutil.copy(f_path,f_path_new)
 
 for f in output_file_lst:
     if OUTPATH in f:
