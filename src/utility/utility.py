@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-03 23:29:34 trottar"
+# Time-stamp: "2024-12-04 01:55:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -738,10 +738,11 @@ def remove_bad_bins(histogram, error_max=10.00):
         '''
         if content < 0.0:
             histogram.SetBinContent(i, 0)
+        '''
         if error > error_max * content:
             histogram.SetBinContent(i, 0)
             histogram.SetBinError(i, error_max)
-            
+        '''
     return histogram
             
 ################################################################################################################################################        
