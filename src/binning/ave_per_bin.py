@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-04 17:09:18 trottar"
+# Time-stamp: "2024-12-04 18:17:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -459,7 +459,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                                          Integral(\
                                                   subDict["H_MM_nosub_SUB_DATA_{}".format(j)].FindBin(pi_mm_min), \
                                                   subDict["H_MM_nosub_SUB_DATA_{}".format(j)].FindBin(pi_mm_max))
-                scale_factor = scale_factor * 0.25                
+                #scale_factor = scale_factor * 0.25
+                scale_factor = 0.0
                 ##############
                 ##############
                 ##############                
