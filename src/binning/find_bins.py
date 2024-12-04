@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-12 12:13:57 trottar"
+# Time-stamp: "2024-12-04 02:23:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,6 +36,8 @@ ltsep package import and pathing definitions
 
 # Import package for cuts
 from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
 
 lt=Root(os.path.realpath(__file__),"Plot_LTSep")
 
@@ -209,7 +211,10 @@ def find_bins(histlist, inpDict):
                         bin_edges[i] -= tolerance / 2
 
                     # Perform iterations to adjust bin edges
-                    for _ in range(max_iterations):
+                    for it in range(max_iterations):
+
+                        Misc.progressBar(it, max_iterations, bar_length=25)
+                        
                         # Calculate the number of events in each bin
                         counts, _ = np.histogram(x, bins=bin_edges)
 
@@ -253,7 +258,7 @@ def find_bins(histlist, inpDict):
         # The bins are determined by an iterative algorithm (see function above)
         #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
         try:
-            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=50)
+            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=10000)
             n, bins = np.histogram(H_t_BinTest, bin_edges)
         except ValueError:
             print("ERROR: Unavoidable empty bins. Tighten t-range or adjust number of t-bins...")
