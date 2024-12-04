@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-04 12:20:24 trottar"
+# Time-stamp: "2024-12-04 12:53:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -451,7 +451,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     ##############
                     # HARD CODED #
                     ##############
-                    pi_mm_min = 0.90 + MM_offset_DATA
+                    pi_mm_min = 0.89 + MM_offset_DATA
                     pi_mm_max = 0.94 + MM_offset_DATA
                     scale_factor = \
                                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]\
@@ -462,6 +462,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                                     .Integral(\
                                               subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(pi_mm_min),\
                                               subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(pi_mm_max))
+                    scale_factor = scale_factor * 0.95
                     ##############
                     ##############
                     ##############
