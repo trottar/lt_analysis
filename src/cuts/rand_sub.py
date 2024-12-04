@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-04 16:47:17 trottar"
+# Time-stamp: "2024-12-04 17:09:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1478,7 +1478,7 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
             pi_mm_min = 0.89 + MM_offset_DATA
-            pi_mm_max = 0.93 + MM_offset_DATA
+            pi_mm_max = 0.97 + MM_offset_DATA
             scale_factor = H_MM_nosub_DATA.Integral(H_MM_nosub_DATA.FindBin(pi_mm_min), H_MM_nosub_DATA.FindBin(pi_mm_max))/subDict["H_MM_nosub_SUB_DATA"]\
                                     .Integral(subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min), subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max))
             scale_factor = scale_factor * 0.25
