@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 07:34:30 trottar"
+# Time-stamp: "2024-12-05 17:11:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -182,6 +182,7 @@ def find_bins(histlist, inpDict):
         ##############
         ##############
 
+        '''
         # Tolerance is determined by the number of sigfigs for |-t|
         def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=10):
             # Account for bin range
@@ -252,6 +253,95 @@ def find_bins(histlist, inpDict):
                 counts, _ = np.histogram(x, bins=bin_edges)
                 
             return np.array(bin_edges)
+        '''
+        
+        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=10, edge_bias=2.0):
+            """
+            Adaptive binning function with edge-biased bin movement.
+
+            Parameters:
+            - x: Input data array
+            - nbin: Initial number of bins
+            - tolerance: Tolerance for bin edge adjustments
+            - max_iterations: Maximum iterations for bin edge adjustment
+            - edge_bias: Controls the non-linear scaling of bin edge movements
+                         Higher values make edge bins move more aggressively
+                         Default is 2.0, meaning quadratic scaling
+
+            Returns:
+            - Adjusted bin edges array
+            """
+            # Account for bin range
+            nbin += 1
+            npt = len(x)  # Total number of data points
+            n_per_bin = npt // nbin  # Calculate the number of events per bin
+            tmin, tmax = np.min(x), np.max(x)  # Min and max of input data
+
+            # Initialize bin edges 
+            bin_edges = np.linspace(tmin, tmax, num=nbin)
+
+            # Calculate the number of events in each bin
+            counts, _ = np.histogram(x, bins=bin_edges)
+
+            # Threshold for minimum events per bin (you may want to define this earlier in your code)
+            bad_bins_threshold = n_per_bin // 2  # Example threshold
+
+            def calculate_edge_scaling(index, total_bins):
+                """
+                Calculate a non-linear scaling factor for bin edge movement.
+                Bins closer to the edges move more aggressively.
+
+                Parameters:
+                - index: Current bin edge index
+                - total_bins: Total number of bins
+                - edge_bias: Controls the non-linear scaling
+
+                Returns:
+                - Scaling factor for bin edge movement
+                """
+                # Normalize index to range [0, 1]
+                normalized_index = index / (total_bins - 1)
+
+                # Use non-linear scaling - quadratic or higher order based on edge_bias
+                # Closer to edges (0 or 1), scaling is more aggressive
+                scaling = (1 - abs(2 * normalized_index - 1)) ** edge_bias
+
+                return scaling
+
+            iteration = 0
+            while np.any(counts < bad_bins_threshold) and iteration < max_iterations:
+                # Create a copy of bin edges to modify
+                new_bin_edges = bin_edges.copy()
+
+                # Adjust bin edges
+                for i in range(1, len(bin_edges) - 1):
+                    # Calculate scaling factor for this bin edge
+                    edge_scaling = calculate_edge_scaling(i, len(bin_edges))
+
+                    if counts[i - 1] < bad_bins_threshold:
+                        # Increase bin edge with scaled movement
+                        new_bin_edges[i] += tolerance * edge_scaling
+                    elif counts[i] < bad_bins_threshold:
+                        # Decrease bin edge with scaled movement
+                        new_bin_edges[i] -= tolerance * edge_scaling
+
+                # Update bin edges
+                bin_edges = new_bin_edges
+
+                # Recalculate counts
+                counts, _ = np.histogram(x, bins=bin_edges)
+
+                iteration += 1
+
+                # Progress tracking (optional)
+                print(f"Iteration {iteration}: Bin counts = {counts}")
+
+            # Handle case where minimum events cannot be achieved
+            if np.any(counts < bad_bins_threshold):
+                print(f"WARNING: Could not achieve minimum {bad_bins_threshold} events in all bins after {max_iterations} iterations.")
+                print("Returned bin edges may not meet the event count requirement.")
+
+            return bin_edges
         
         print("\nFinding t bins...")
         # Histogram takes the array data set and the bins as input
