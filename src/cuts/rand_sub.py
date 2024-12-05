@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 05:14:52 trottar"
+# Time-stamp: "2024-12-05 05:25:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1494,14 +1494,9 @@ def rand_sub(phi_setting, inpDict):
             # Scale to proper number of events with MM cut
             scale_factor = (
                 pion_scale_factor *
-                H_MM_DATA.Integral(
-                    H_MM_DATA.FindBin(mm_min), 
-                    H_MM_DATA.FindBin(mm_max)
-                ) /
-                H_MM_nosub_DATA.Integral(
-                    H_MM_nosub_DATA.FindBin(mm_min), 
-                    H_MM_nosub_DATA.FindBin(mm_max)
-                )                
+                H_MM_DATA.Integral()
+                /
+                H_MM_nosub_DATA.Integral()                
             )
             '''
             scale_factor = (
