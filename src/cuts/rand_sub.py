@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 06:03:08 trottar"
+# Time-stamp: "2024-12-05 06:52:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1490,7 +1490,7 @@ def rand_sub(phi_setting, inpDict):
                     subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min), 
                     subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max)
                 )
-            )
+            ) * 0.85
         ##############
         ##############
         ##############

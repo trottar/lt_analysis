@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 06:03:32 trottar"
+# Time-stamp: "2024-12-05 06:54:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -453,16 +453,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     ##############
                     pi_mm_min = 0.90 + MM_offset_DATA
                     pi_mm_max = 0.94 + MM_offset_DATA
-                    scale_factor = \
-                                   hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]\
-                                   .Integral(\
-                                             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].FindBin(pi_mm_min),\
-                                             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].FindBin(pi_mm_max))\
-                                    /subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)]\
-                                    .Integral(\
-                                              subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(pi_mm_min),\
-                                              subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(pi_mm_max))
-                    scale_factor = scale_factor * 0.95
+                    scale_factor = (
+                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Integral(
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].FindBin(pi_mm_min),
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].FindBin(pi_mm_max)
+                        )/
+                        subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Integral(
+                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(pi_mm_min),
+                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].FindBin(pi_mm_max))
+                    ) * 0.85
                     ##############
                     ##############
                     ##############
