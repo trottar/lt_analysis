@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:09:37 trottar"
+# Time-stamp: "2024-12-05 02:54:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -135,7 +135,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_W_SIMC"] = TH1D("H_W_SIMC","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         hist["H_t_SIMC"] = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
         hist["H_epsilon_SIMC"] = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-        hist["H_MM_SIMC"] = TH1D("H_MM_SIMC","MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
+        hist["H_MM_SIMC"] = TH1D("H_MM_SIMC",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
         hist["H_th_SIMC"] = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
         hist["H_ph_SIMC"] = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
         hist["H_ph_q_SIMC"] = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)
@@ -168,7 +168,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
         hist["H_W_SIMC_OLD"] = TH1D("H_W_SIMC_OLD","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         hist["H_t_SIMC_OLD"] = TH1D("H_t_SIMC_OLD","-t", 100, inpDict["tmin"], inpDict["tmax"])
         hist["H_epsilon_SIMC_OLD"] = TH1D("H_epsilon_SIMC_OLD","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-        hist["H_MM_SIMC_OLD"] = TH1D("H_MM_SIMC_OLD","MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
+        hist["H_MM_SIMC_OLD"] = TH1D("H_MM_SIMC_OLD",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
         hist["H_th_SIMC_OLD"] = TH1D("H_th_SIMC_OLD","X' tar", 100, -0.1, 0.1)
         hist["H_ph_SIMC_OLD"] = TH1D("H_ph_SIMC_OLD","Y' tar", 100, -0.1, 0.1)
         hist["H_ph_q_SIMC_OLD"] = TH1D("H_ph_q_SIMC_OLD","Phi Detected (ph_xq)", 100, 0.0, 2*math.pi)

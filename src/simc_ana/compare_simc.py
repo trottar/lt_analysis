@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-02 06:08:59 trottar"
+# Time-stamp: "2024-12-05 02:53:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -175,7 +175,7 @@ def compare_simc(hist, inpDict):
     H_W_SIMC  = TH1D("H_W_SIMC","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-    H_MM_SIMC  = TH1D("H_MM_SIMC","MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_SIMC  = TH1D("H_MM_SIMC",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
     H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
