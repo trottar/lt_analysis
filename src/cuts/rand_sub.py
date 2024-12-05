@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 03:49:00 trottar"
+# Time-stamp: "2024-12-05 04:00:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1484,9 +1484,9 @@ def rand_sub(phi_setting, inpDict):
                                           .Integral(subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min),\
                                                     subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max))
             # Scale to proper number of events with MM cut
-            scale_factor = H_MM_DATA.Integral(H_MM_DATA.FindBin(mm_min), H_MM_DATA.FindBin(mm_max))/(pion_scale_factor * subDict["H_MM_SUB_DATA"]\
+            scale_factor = pion_scale_factor * H_MM_DATA.Integral(H_MM_DATA.FindBin(mm_min), H_MM_DATA.FindBin(mm_max))/subDict["H_MM_SUB_DATA"]\
                                           .Integral(subDict["H_MM_SUB_DATA"].FindBin(mm_min),\
-                                                    subDict["H_MM_SUB_DATA"].FindBin(mm_max)))
+                                                    subDict["H_MM_SUB_DATA"].FindBin(mm_max))
         ##############
         ##############
         ##############
@@ -1538,7 +1538,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_t_SUB_DATA"].Scale(scale_factor)
         subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
         subDict["H_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["H_MM_nosub_SUB_DATA"].Scale(scale_factor)
+        subDict["H_MM_nosub_SUB_DATA"].Scale(pion_scale_factor)
         subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
         subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
         subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
