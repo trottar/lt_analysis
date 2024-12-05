@@ -32,7 +32,7 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 # 2nd iteration, (chi2<2.0)
 ###sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 # chi2 < 3.5	       
-sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#rsig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 
 # Longitudinal-Transverse interference term
 # 0th iteration, 2024November12_H23M15S30 
@@ -41,7 +41,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # 0th iteration, 2024November12_H23M15S30
-##sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 # Marco's thesis (chi2 < 4.5)
 #sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's thesis
@@ -49,7 +49,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # Power-law decay
 #sig_TT =  (1.0 + (par13 / math.fabs(tt)**(par14))) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**2)
 # 2nd iteration, (chi2<2.5)
-sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
+#sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
 # 2nd iteration, (chi2<2.0)
 ###sig_TT =   par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * qq * math.exp(-qq) * (math.sin(theta_cm)**2)
 #sig_TT =   par13 * math.fabs(tt) + par14 * (math.exp(-par15 * (math.fabs(tt)**2)) / ((1.0 + math.fabs(tt))**(par16))) * qq * math.exp(-qq)
