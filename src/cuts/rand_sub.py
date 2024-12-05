@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 05:38:32 trottar"
+# Time-stamp: "2024-12-05 05:50:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -330,7 +330,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DATA  = TH1D("H_pmx_DATA","pmx", 100, -10.0, 10.0)
     H_pmy_DATA  = TH1D("H_pmy_DATA","pmy ", 100, -10.0, 10.0)
     H_pmz_DATA  = TH1D("H_pmz_DATA","pmz", 100, -10.0, 10.0)
-    H_ct_DATA = TH1D("H_ct_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+    H_ct_DATA = TH1D("H_ct_DATA", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
     H_cal_etottracknorm_DATA = TH1D("H_cal_etottracknorm_DATA", "HMS Cal etottracknorm", 100, 0.2, 1.8)
     H_cer_npeSum_DATA = TH1D("H_cer_npeSum_DATA", "HMS Cer Npe Sum", 100, 0, 30)
     P_cal_etottracknorm_DATA = TH1D("P_cal_etottracknorm_DATA", "SHMS Cal etottracknorm", 100, 0, 1)
@@ -369,7 +369,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY  = TH1D("H_pmx_DUMMY","pmx", 100, -10.0, 10.0)
     H_pmy_DUMMY  = TH1D("H_pmy_DUMMY","pmy ", 100, -10.0, 10.0)
     H_pmz_DUMMY  = TH1D("H_pmz_DUMMY","pmz", 100, -10.0, 10.0)
-    H_ct_DUMMY = TH1D("H_ct_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+    H_ct_DUMMY = TH1D("H_ct_DUMMY", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
 
     H_hsdelta_RAND  = TH1D("H_hsdelta_RAND","HMS Delta", 100, -20.0, 20.0)
     H_hsxptar_RAND  = TH1D("H_hsxptar_RAND","HMS xptar", 100, -0.1, 0.1)
@@ -403,7 +403,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_RAND  = TH1D("H_pmx_RAND","pmx", 100, -10.0, 10.0)
     H_pmy_RAND  = TH1D("H_pmy_RAND","pmy ", 100, -10.0, 10.0)
     H_pmz_RAND  = TH1D("H_pmz_RAND","pmz", 100, -10.0, 10.0)
-    H_ct_RAND = TH1D("H_ct_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+    H_ct_RAND = TH1D("H_ct_RAND", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
 
     H_hsdelta_DUMMY_RAND  = TH1D("H_hsdelta_DUMMY_RAND","HMS Delta", 100, -20.0, 20.0)
     H_hsxptar_DUMMY_RAND  = TH1D("H_hsxptar_DUMMY_RAND","HMS xptar", 100, -0.1, 0.1)
@@ -437,7 +437,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmx_DUMMY_RAND  = TH1D("H_pmx_DUMMY_RAND","pmx", 100, -10.0, 10.0)
     H_pmy_DUMMY_RAND  = TH1D("H_pmy_DUMMY_RAND","pmy ", 100, -10.0, 10.0)
     H_pmz_DUMMY_RAND  = TH1D("H_pmz_DUMMY_RAND","pmz", 100, -10.0, 10.0)
-    H_ct_DUMMY_RAND = TH1D("H_ct_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+    H_ct_DUMMY_RAND = TH1D("H_ct_DUMMY_RAND", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
 
     ################################################################################################################################################
     # 2D histograms
@@ -572,8 +572,8 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_W_SUB_DATA"]  = TH1D("H_W_SUB_DATA","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DATA"]  = TH1D("H_epsilon_SUB_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-        subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DATA"]  = TH1D("H_MM_nosub_SUB_DATA",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_nosub_SUB_DATA"]  = TH1D("H_MM_nosub_SUB_DATA",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
         subDict["H_th_SUB_DATA"]  = TH1D("H_th_SUB_DATA","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DATA"]  = TH1D("H_ph_SUB_DATA","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DATA"]  = TH1D("H_ph_q_SUB_DATA","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -585,7 +585,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_pmx_SUB_DATA"]  = TH1D("H_pmx_SUB_DATA","pmx", 100, -10.0, 10.0)
         subDict["H_pmy_SUB_DATA"]  = TH1D("H_pmy_SUB_DATA","pmy ", 100, -10.0, 10.0)
         subDict["H_pmz_SUB_DATA"]  = TH1D("H_pmz_SUB_DATA","pmz", 100, -10.0, 10.0)
-        subDict["H_ct_SUB_DATA"] = TH1D("H_ct_SUB_DATA", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+        subDict["H_ct_SUB_DATA"] = TH1D("H_ct_SUB_DATA", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
         subDict["H_cal_etottracknorm_SUB_DATA"] = TH1D("H_cal_etottracknorm_SUB_DATA", "HMS Cal etottracknorm", 100, 0.2, 1.8)
         subDict["H_cer_npeSum_SUB_DATA"] = TH1D("H_cer_npeSum_SUB_DATA", "HMS Cer Npe Sum", 100, 0, 30)
         subDict["P_cal_etottracknorm_SUB_DATA"] = TH1D("P_cal_etottracknorm_SUB_DATA", "SHMS Cal etottracknorm", 100, 0, 1)
@@ -611,8 +611,8 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_W_SUB_RAND"]  = TH1D("H_W_SUB_RAND","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_RAND"]  = TH1D("H_epsilon_SUB_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-        subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_RAND"]  = TH1D("H_MM_nosub_SUB_RAND",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_nosub_SUB_RAND"]  = TH1D("H_MM_nosub_SUB_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
         subDict["H_th_SUB_RAND"]  = TH1D("H_th_SUB_RAND","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_RAND"]  = TH1D("H_ph_SUB_RAND","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_RAND"]  = TH1D("H_ph_q_SUB_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -624,7 +624,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_pmx_SUB_RAND"]  = TH1D("H_pmx_SUB_RAND","pmx", 100, -10.0, 10.0)
         subDict["H_pmy_SUB_RAND"]  = TH1D("H_pmy_SUB_RAND","pmy ", 100, -10.0, 10.0)
         subDict["H_pmz_SUB_RAND"]  = TH1D("H_pmz_SUB_RAND","pmz", 100, -10.0, 10.0)
-        subDict["H_ct_SUB_RAND"] = TH1D("H_ct_SUB_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+        subDict["H_ct_SUB_RAND"] = TH1D("H_ct_SUB_RAND", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
         subDict["H_cal_etottracknorm_SUB_RAND"] = TH1D("H_cal_etottracknorm_SUB_RAND", "HMS Cal etottracknorm", 100, 0.2, 1.8)
         subDict["H_cer_npeSum_SUB_RAND"] = TH1D("H_cer_npeSum_SUB_RAND", "HMS Cer Npe Sum", 100, 0, 30)
         subDict["P_cal_etottracknorm_SUB_RAND"] = TH1D("P_cal_etottracknorm_SUB_RAND", "SHMS Cal etottracknorm", 100, 0, 1)
@@ -650,8 +650,8 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_W_SUB_DUMMY"]  = TH1D("H_W_SUB_DUMMY","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DUMMY"]  = TH1D("H_epsilon_SUB_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-        subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DUMMY"]  = TH1D("H_MM_nosub_SUB_DUMMY",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_nosub_SUB_DUMMY"]  = TH1D("H_MM_nosub_SUB_DUMMY",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
         subDict["H_th_SUB_DUMMY"]  = TH1D("H_th_SUB_DUMMY","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DUMMY"]  = TH1D("H_ph_SUB_DUMMY","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DUMMY"]  = TH1D("H_ph_q_SUB_DUMMY","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -663,7 +663,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_pmx_SUB_DUMMY"]  = TH1D("H_pmx_SUB_DUMMY","pmx", 100, -10.0, 10.0)
         subDict["H_pmy_SUB_DUMMY"]  = TH1D("H_pmy_SUB_DUMMY","pmy ", 100, -10.0, 10.0)
         subDict["H_pmz_SUB_DUMMY"]  = TH1D("H_pmz_SUB_DUMMY","pmz", 100, -10.0, 10.0)
-        subDict["H_ct_SUB_DUMMY"] = TH1D("H_ct_SUB_DUMMY", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+        subDict["H_ct_SUB_DUMMY"] = TH1D("H_ct_SUB_DUMMY", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
         subDict["H_cal_etottracknorm_SUB_DUMMY"] = TH1D("H_cal_etottracknorm_SUB_DUMMY", "HMS Cal etottracknorm", 100, 0.2, 1.8)
         subDict["H_cer_npeSum_SUB_DUMMY"] = TH1D("H_cer_npeSum_SUB_DUMMY", "HMS Cer Npe Sum", 100, 0, 30)
         subDict["P_cal_etottracknorm_SUB_DUMMY"] = TH1D("P_cal_etottracknorm_SUB_DUMMY", "SHMS Cal etottracknorm", 100, 0, 1)
@@ -689,8 +689,8 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_W_SUB_DUMMY_RAND"]  = TH1D("H_W_SUB_DUMMY_RAND","W ", 100, inpDict["Wmin"], inpDict["Wmax"])
         subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DUMMY_RAND"]  = TH1D("H_epsilon_SUB_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
-        subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DUMMY_RAND"]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND",f"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+        subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_nosub_SUB_DUMMY_RAND"]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
         subDict["H_th_SUB_DUMMY_RAND"]  = TH1D("H_th_SUB_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DUMMY_RAND"]  = TH1D("H_ph_SUB_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DUMMY_RAND"]  = TH1D("H_ph_q_SUB_DUMMY_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -702,7 +702,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["H_pmx_SUB_DUMMY_RAND"]  = TH1D("H_pmx_SUB_DUMMY_RAND","pmx", 100, -10.0, 10.0)
         subDict["H_pmy_SUB_DUMMY_RAND"]  = TH1D("H_pmy_SUB_DUMMY_RAND","pmy ", 100, -10.0, 10.0)
         subDict["H_pmz_SUB_DUMMY_RAND"]  = TH1D("H_pmz_SUB_DUMMY_RAND","pmz", 100, -10.0, 10.0)
-        subDict["H_ct_SUB_DUMMY_RAND"] = TH1D("H_ct_SUB_DUMMY_RAND", "Electron-{} CTime".format(ParticleType.capitalize()), 100, -50, 50)
+        subDict["H_ct_SUB_DUMMY_RAND"] = TH1D("H_ct_SUB_DUMMY_RAND", f"Electron-{ParticleType.capitalize()} CTime", 100, -50, 50)
         subDict["H_cal_etottracknorm_SUB_DUMMY_RAND"] = TH1D("H_cal_etottracknorm_SUB_DUMMY_RAND", "HMS Cal etottracknorm", 100, 0.2, 1.8)
         subDict["H_cer_npeSum_SUB_DUMMY_RAND"] = TH1D("H_cer_npeSum_SUB_DUMMY_RAND", "HMS Cer Npe Sum", 100, 0, 30)
         subDict["P_cal_etottracknorm_SUB_DUMMY_RAND"] = TH1D("P_cal_etottracknorm_SUB_DUMMY_RAND", "SHMS Cal etottracknorm", 100, 0, 1)
