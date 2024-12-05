@@ -694,11 +694,11 @@ done
 # Make sure 3 sig figs (no more)
 
 # Full spectrum
-#MissMassMin=0.7
-#MissMassMax=1.5
+MissMassMin=0.7
+MissMassMax=1.5
 # MM cut (kaon)
-MissMassMin=1.08
-MissMassMax=1.16
+#MissMassMin=1.08
+#MissMassMax=1.16
 # MM cut (pion, Vijay)
 #MissMassMin=0.91
 #MissMassMax=0.98
