@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2024-12-05 14:49:03 trottar"
+# Time-stamp: "2024-12-05 14:59:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -132,6 +132,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     thetacm_array = array( 'f', [0])
     phipq_array = array( 'f', [0])
     missmass_array = array( 'f', [0])
+    missmass_shift_array = array( 'f', [0])    
     mmnuc_array = array( 'f', [0])
     phad_array = array( 'f', [0])
     t_array = array( 'f', [0])
@@ -196,7 +197,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC.SetBranchAddress("thetacm", thetacm_array);
     TBRANCH_SIMC.SetBranchAddress("phipq", phipq_array);
     TBRANCH_SIMC.SetBranchAddress("missmass", missmass_array);
+    TBRANCH_SIMC.SetBranchAddress("missmass_shift", missmass_shift_array);    
     TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);
+    TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);    
     TBRANCH_SIMC.SetBranchAddress("phad", phad_array);
     TBRANCH_SIMC.SetBranchAddress("t", t_array);
     TBRANCH_SIMC.SetBranchAddress("pmpar", pmpar_array);
@@ -273,6 +276,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Branch("thetacm", thetacm_array, "thetacm/F");
     new_TBRANCH_SIMC.Branch("phipq", phipq_array, "phipq/F");
     new_TBRANCH_SIMC.Branch("missmass", missmass_array, "missmass/F");
+    new_TBRANCH_SIMC.Branch("missmass_shift", missmass_shift_array, "missmass_shift/F");    
     new_TBRANCH_SIMC.Branch("mmnuc", mmnuc_array, "mmnuc/F");
     new_TBRANCH_SIMC.Branch("phad", phad_array, "phad/F");
     new_TBRANCH_SIMC.Branch("t", t_array, "t/F");
