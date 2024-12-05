@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 03:24:28 trottar"
+# Time-stamp: "2024-12-05 03:35:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1481,9 +1481,12 @@ def rand_sub(phi_setting, inpDict):
             pi_mm_max = 0.94 + MM_offset_DATA
             # Scale pion to kaon
             scale_factor = H_MM_nosub_DATA.Integral(H_MM_nosub_DATA.FindBin(pi_mm_min), H_MM_nosub_DATA.FindBin(pi_mm_max))/subDict["H_MM_nosub_SUB_DATA"]\
-                                    .Integral(subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min), subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max))
+                                          .Integral(subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min),\
+                                                    subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max))
             # Scale to proper number of events with MM cut
-            scale_factor = H_MM_nosub_DATA.Integral(H_MM_nosub_DATA.FindBin(mm_min), H_MM_nosub_DATA.FindBin(mm_max))/scale_factor
+            scale_factor = H_MM_nosub_DATA.Integral(H_MM_nosub_DATA.FindBin(pi_mm_min), H_MM_nosub_DATA.FindBin(pi_mm_max))/(scale_factor * subDict["H_MM_nosub_SUB_DATA"]\
+                                          .Integral(subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min),\
+                                                    subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max)))
         ##############
         ##############
         ##############
