@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-30 12:11:40 trottar"
+# Time-stamp: "2024-12-05 22:35:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,13 +66,21 @@ def iterWeight(arg_str):
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
-    # Calculate SigL, SigT, SigLT, SigTT
-    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
-    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
-    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
-    wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
-    
+    try:
+        # Calculate SigL, SigT, SigLT, SigTT
+        sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
+        sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
+        sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
+        sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
+        wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
+    except ZeroDivisionError:
+        # Calculate SigL, SigT, SigLT, SigTT
+        sig_L = 0.0
+        sig_T = 0.0
+        sig_LT = 0.0
+        sig_TT = 0.0
+        wfactor = 0.0
+        
     sig_L = sig_L*wfactor
     sig_T = sig_T*wfactor
     sig_TT = sig_TT*wfactor
