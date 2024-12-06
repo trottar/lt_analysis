@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 19:43:44 trottar"
+# Time-stamp: "2024-12-05 20:05:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -780,14 +780,15 @@ if EPSSET == "high":
 
 '''
 
-# Update iteration file of dates
-f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-# Check if the file exists
-if os.path.exists(f_iter):
-    # If it exists, update it with the string
-    with open(f_iter, 'a') as file:
-        file.write('\n'+formatted_date)
-else:
-    # If not, create it and fill it with the string
-    with open(f_iter, 'x') as file:
-        file.write(formatted_date)
+if EPSSET == "high":
+    # Update iteration file of dates
+    f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_iter):
+        # If it exists, update it with the string
+        with open(f_iter, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_iter, 'x') as file:
+            file.write(formatted_date)
