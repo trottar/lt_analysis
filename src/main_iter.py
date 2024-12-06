@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-03 12:57:24 trottar"
+# Time-stamp: "2024-12-05 19:43:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -740,7 +740,7 @@ for hist in histlist:
     key_str = ', '.join(hist.keys())
     print("{} keys: {}".format(hist["phi_setting"],key_str))
 '''
-
+'''
 if EPSSET == "high":
     print("\n\n\nWould you like to save iteration to cache?")
     if request_yn_response(string=f"Updating {new_dir_cache} with {new_dir}..."):
@@ -778,3 +778,16 @@ if EPSSET == "high":
         with open(f_iter, 'x') as file:
             file.write(formatted_date)
 
+'''
+
+# Update iteration file of dates
+f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+# Check if the file exists
+if os.path.exists(f_iter):
+    # If it exists, update it with the string
+    with open(f_iter, 'a') as file:
+        file.write('\n'+formatted_date)
+else:
+    # If not, create it and fill it with the string
+    with open(f_iter, 'x') as file:
+        file.write(formatted_date)
