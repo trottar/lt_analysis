@@ -44,7 +44,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
 *     RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
 *                      that incorporates Q2-dep based of pi FF
-      real Qdep_L, Qdep_T
+      real Qdep_L, Qdep_T, Qdep_TT
 
       if(npol_set.lt.0) then
          pol='mn'
