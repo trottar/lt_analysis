@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-07 11:13:44 trottar"
+# Time-stamp: "2024-12-07 11:44:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -333,8 +333,10 @@ def find_bins(histlist, inpDict):
 
                 iteration += 1
 
+                Misc.progressBar(iteration, max_iterations-1, bar_length=25)
+                
                 # Progress tracking (optional)
-                print(f"Iteration {iteration}: Bin counts = {counts}")
+                #print(f"Iteration {iteration}: Bin counts = {counts}")
 
             # Handle case where minimum events cannot be achieved
             if np.any(counts < bad_bins_threshold):
