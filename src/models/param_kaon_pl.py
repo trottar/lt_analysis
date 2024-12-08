@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 23:06:35 trottar"
+# Time-stamp: "2024-12-08 16:04:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -69,23 +69,25 @@ def iterWeight(arg_str):
     # Calculate SigL, SigT, SigLT, SigTT
     try:
         sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
-    except ZeroDivisionError:
+    except ZeroDivisionError or OverflowError:
         sig_L = 0.0
     try:
         sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
-    except ZeroDivisionError:
+    except ZeroDivisionError or OverflowError:
         sig_T = 0.0
     try:
         sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    except ZeroDivisionError:
+    except ZeroDivisionError or OverflowError:
         sig_LT = 0.0
     try:
         sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
-    except ZeroDivisionError:
+    except ZeroDivisionError or OverflowError:
         sig_TT = 0.0
+
+    # Calculate W-factor
     try:
         wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
-    except ZeroDivisionError:
+    except ZeroDivisionError or OverflowError:
         wfactor = 0.0
 
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
