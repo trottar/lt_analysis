@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 17:17:46 trottar"
+# Time-stamp: "2024-12-08 16:15:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1124,10 +1124,13 @@ def prepare_equations(equations, sig_type):
         
     func_str += "    " + "\n    ".join(eq_lst) + "\n"
     func_str += f"    return {sig_type}"
-    
-    exec_globals = {'__builtins__': None, 'math': math}
-    exec(func_str, exec_globals)
-    return exec_globals[f'{sig_type}_optimized']
+
+    try:
+        exec_globals = {'__builtins__': None, 'math': math}
+        exec(func_str, exec_globals)
+        return exec_globals[f'{sig_type}_optimized']
+    except ZeroDivisionError or OverflowError:
+        return 0.0
 
 ##################################################################################################################################################
 
