@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-08 16:28:52 trottar"
+# Time-stamp: "2024-12-08 16:50:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1104,26 +1104,37 @@ def prepare_equations(equations, sig_type):
     if sig_type == "sig_L":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4):\n"
-    if sig_type == "sig_T":
+    elif sig_type == "sig_T":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8):\n"
-    if sig_type == "sig_LT":
+    elif sig_type == "sig_LT":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
-    if sig_type == "sig_TT":
+    elif sig_type == "sig_TT":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
-    if sig_type == "wfactor":
+    elif sig_type == "wfactor":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
+    else:
+        print(f"ERROR: Unrecognized sig_type '{sig_type}'!")
+        sys.exit(2)
         
     matches = list(filter(lambda e: sig_type in e, eq_lst))
     if not matches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
         
-    func_str += "    " + "\n    ".join(eq_lst) + "\n"
-    func_str += f"    return {sig_type}"
+    # Build function body with error handling
+    func_str += "    try:\n"
+    func_str += "        " + "\n        ".join(eq_lst) + "\n"
+    func_str += f"        return {sig_type}\n"
+    func_str += "    except ZeroDivisionError:\n"
+    func_str += "        print(f'ZeroDivisionError encountered in {sig_type}_optimized! Inputs: q2_set={q2_set}, w_set={w_set}, qq={qq}, ww={ww}, tt={tt}')\n"
+    func_str += "        return 0.0\n"
+    func_str += "    except OverflowError:\n"
+    func_str += "        print(f'OverflowError encountered in {sig_type}_optimized! Inputs: q2_set={q2_set}, w_set={w_set}, qq={qq}, ww={ww}, tt={tt}')\n"
+    func_str += "        return 0.0\n"
     
     exec_globals = {'__builtins__': None, 'math': math}
     exec(func_str, exec_globals)
