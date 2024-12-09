@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-08 17:11:03 trottar"
+# Time-stamp: "2024-12-09 16:17:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -70,28 +70,28 @@ def iterWeight(arg_str):
     try:
         sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_L = 0.0
+        sig_L = float('inf')
 
     try:
         sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_T = 0.0
+        sig_T = float('inf')
 
     try:
         sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_LT = 0.0
+        sig_LT = float('inf')
 
     try:
         sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_TT = 0.0
+        sig_TT = float('inf')
 
     # Calculate W-factor
     try:
         wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
     except (ZeroDivisionError, OverflowError, TypeError):
-        wfactor = 0.0
+        wfactor = float('inf')
 
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
