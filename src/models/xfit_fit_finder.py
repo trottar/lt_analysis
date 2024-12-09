@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-06 15:02:24 trottar"
+# Time-stamp: "2024-12-09 07:05:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -165,7 +165,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
                 
                 iteration = 0
 
@@ -564,7 +564,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))
 
                 iteration = 0
 
@@ -986,7 +986,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 iteration = 0
 
@@ -1425,7 +1425,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             start_time = time.time()
 
             for start in range(num_optimizations):
-                print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
+                print("\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                 iteration = 0
 
