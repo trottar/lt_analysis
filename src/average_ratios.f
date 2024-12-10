@@ -199,7 +199,7 @@ c      pause
 
 *     Check for NaN values
                if (isnan(r)) r = 0.0
-               if (isnan(e)) e = 0.0
+               if (isnan(e)) e = -1000.0
                
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
