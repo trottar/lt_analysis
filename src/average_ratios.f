@@ -197,10 +197,14 @@ c      pause
                e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
                e=sqrt(e)
 
-*     Check for NaN values
+*     Check for NaN or unphysical values
                if (isnan(r)) r = 0.0
                if (isnan(e)) e = -1000.0
-               
+               if (r > 1.0e9) r = 0.0
+               if (e > 1.0e9) e = -1000.0
+               if (r < 1.0e-9) r = 0.0
+               if (e < 1.0e-9) e = -1000.0
+      
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
