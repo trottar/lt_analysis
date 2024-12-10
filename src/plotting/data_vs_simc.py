@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-01 10:28:45 trottar"
+# Time-stamp: "2024-12-10 02:24:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import TH1D_to_TH2D, create_polar_plot
+from utility import TH1D_to_TH2D, create_polar_plot, fit_gaussian
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()

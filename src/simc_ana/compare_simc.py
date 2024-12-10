@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 17:16:31 trottar"
+# Time-stamp: "2024-12-10 02:24:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, create_polar_plot, remove_bad_bins
+from utility import open_root_file, create_polar_plot, remove_bad_bins, fit_gaussian
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()

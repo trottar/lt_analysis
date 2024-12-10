@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-09 16:21:56 trottar"
+# Time-stamp: "2024-12-10 02:21:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1206,5 +1206,51 @@ def select_valid_parameter(sig_name, elements):
             return [e for s, e in zip(sig_dict[sig_name], elements) if s == user_input]
         else:
             print(f"ERROR: Invalid parameter! Please select one of the following...{', '.join(map(str, valid_params))}")
+
+##################################################################################################################################################            
+
+# Define a function for fitting a Gaussian with dynamically determined FWHM range
+def fit_gaussian(hist, x_min, x_max):
+
+    print("-" * 25)
+
+    # Find the corresponding bin numbers
+    bin_min = hist.GetXaxis().FindBin(x_min)
+    bin_max = hist.GetXaxis().FindBin(x_max)
+
+    # Find the maximum value within the specified range
+    max_bin = bin_min
+    max_value = hist.GetBinContent(max_bin)
+    for i in range(bin_min, bin_max):
+        if hist.GetBinContent(i) > max_value:
+            max_bin = i
+            max_value = hist.GetBinContent(i)
+
+    half_max = max_value * 0.75
+
+    # Find left and right bins closest to half-max value
+    left_bin = max_bin
+    right_bin = max_bin
+    while hist.GetBinContent(left_bin) > half_max and left_bin > 1:
+        left_bin -= 1
+    while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
+        right_bin += 1
+
+    min_range = hist.GetBinCenter(left_bin)
+    max_range = hist.GetBinCenter(right_bin)
+
+    print(f"min_range: {min_range:.4f}")
+    print(f"max_range: {max_range:.4f}")
+    print("-" * 25)
+
+    hist.Fit("gaus", "Q", "", min_range, max_range)
+    fit_func = hist.GetFunction('gaus')
+
+    fit_func.SetLineColor(kRed)
+
+    mean = fit_func.GetParameter(1)
+    mean_err = fit_func.GetParError(1)
+
+    return [mean, mean_err]
 
 ##################################################################################################################################################            

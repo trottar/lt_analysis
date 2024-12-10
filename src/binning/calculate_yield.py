@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 06:54:38 trottar"
+# Time-stamp: "2024-12-10 02:23:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import is_hist, remove_bad_bins
+from utility import is_hist, remove_bad_bins, fit_gaussian
 
 ##################################################################################################################################################
 
