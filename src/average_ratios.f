@@ -196,6 +196,11 @@ c      pause
                e=e+(drd(ip,it))/ymc(ip,it)**2
                e=e+((r/ymc(ip,it))**2)*dmc(ip,it)
                e=sqrt(e)
+
+*     Check for NaN values
+               if (isnan(r)) r = 0.0
+               if (isnan(e)) e = 0.0
+               
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
               write(*,*)'R=',r,'+/-',e
