@@ -45,7 +45,7 @@ sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (
 # 2nd iteration, (chi2<2.5)
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #
-sig_LT = -((par9 * math.exp(-par10 * math.fabs(tt)**2) / math.fabs(tt)) + (par11 / math.fabs(tt))) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(par10 / math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 
 # Transverse-Transverse interference term
 # 0th iteration, 2024December05_H07M34S41 | 1st iteration,
