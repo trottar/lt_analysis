@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:20:38 trottar"
+# Time-stamp: "2024-12-11 03:20:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -80,5 +80,6 @@ for f in [aver_hi_file, aver_lo_file]:
     with open(f, "w") as outfile:
         outfile.writelines(lines)
 
+    # Remove the last line if it's empty or just a newline
     content = f.read()
     content = content.rstrip('\n')
