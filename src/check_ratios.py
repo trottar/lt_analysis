@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:43:14 trottar"
+# Time-stamp: "2024-12-11 02:44:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -49,6 +49,8 @@ aver_hi_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_
 for hi, lo in zip(aver_hi_file, aver_lo_file):
 
     for f in [hi, lo]:
+
+        print(f"\nChecking {f}...")
         
         # Open the file, read the lines, and filter them
         with open(f, "r") as infile:
