@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:46:12 trottar"
+# Time-stamp: "2024-12-11 02:47:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -43,8 +43,8 @@ inp_W = sys.argv[4]
 inp_loeps = sys.argv[5]
 inp_hieps = sys.argv[6]
 
-aver_lo_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace("p",""), inp_W.replace("p",""), float(inp_loeps)*100)
-aver_hi_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace("p",""), inp_W.replace("p",""), float(inp_hieps)*100)
+aver_lo_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace(".",""), inp_W.replace(".",""), float(inp_loeps)*100)
+aver_hi_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace(".",""), inp_W.replace(".",""), float(inp_hieps)*100)
 
 for f in [aver_hi_file, aver_lo_file]:
 
