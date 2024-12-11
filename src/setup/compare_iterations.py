@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:56:54 trottar"
+# Time-stamp: "2024-12-11 04:59:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -357,7 +357,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 else:
                     df_key = "Low $\epsilon$"                
 
-                params_values = param_arr
+                params_values = param_arr[i+4:]
                 data_values = df[sig]
 
                 # 1. Parameter Evolution Plot
