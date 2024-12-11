@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 07:24:10 trottar"
+# Time-stamp: "2024-12-11 12:49:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -360,12 +360,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             'sigTT': comb_dict[f'Q{Q2}W{W}']['sep_file']['sigTT'].tolist()
         }
 
-    print("\n\nIteration Data:")
-    print(iteration_data)            
-    print("\n\ncomb_dict")
-    print(comb_dict)
-    print("\n\n")
-
     # Initialize the merged dictionary
     merged_dict = {}
 
@@ -511,4 +505,4 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.close(fig)
 
         # Open the PDF
-        show_pdf_with_evince(tmp_file_name)
+        #show_pdf_with_evince(tmp_file_name)
