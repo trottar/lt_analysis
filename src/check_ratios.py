@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:44:17 trottar"
+# Time-stamp: "2024-12-11 02:45:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -46,19 +46,17 @@ inp_hieps = sys.argv[6]
 aver_lo_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace("p",""), inp_W.replace("p",""), float(inp_loeps)*100)
 aver_hi_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace("p",""), inp_W.replace("p",""), float(inp_hieps)*100)
 
-for hi, lo in zip(aver_hi_file, aver_lo_file):
+for f in zip(aver_hi_file, aver_lo_file):
 
-    for f in [hi, lo]:
+    print(f"\nChecking {f}...")
 
-        print(f"\nChecking {f}...")
-        
-        # Open the file, read the lines, and filter them
-        with open(f, "r") as infile:
-            lines = infile.readlines()
+    # Open the file, read the lines, and filter them
+    with open(f, "r") as infile:
+        lines = infile.readlines()
 
-        # Filter out lines that contain '*'
-        lines = [line for line in lines if '*' not in line]
+    # Filter out lines that contain '*'
+    lines = [line for line in lines if '*' not in line]
 
-        # Open the file again, this time in write mode to overwrite the content
-        with open(f, "w") as outfile:
-            outfile.writelines(lines)
+    # Open the file again, this time in write mode to overwrite the content
+    with open(f, "w") as outfile:
+        outfile.writelines(lines)
