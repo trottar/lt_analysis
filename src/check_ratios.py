@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:18:07 trottar"
+# Time-stamp: "2024-12-11 03:20:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -67,7 +67,7 @@ for f in [aver_hi_file, aver_lo_file]:
     for line in lines:
         print(line)
         if len(line) == num_lines:
-            line.replace(f"\n","")
+            line
         else:
             line
     
@@ -79,3 +79,6 @@ for f in [aver_hi_file, aver_lo_file]:
     # Open the file again, this time in write mode to overwrite the content
     with open(f, "w") as outfile:
         outfile.writelines(lines)
+
+    content = f.read()
+    content = content.rstrip('\n')
