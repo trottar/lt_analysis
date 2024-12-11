@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:19:34 trottar"
+# Time-stamp: "2024-12-11 04:20:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -134,7 +134,7 @@ def compare_iters(pol_str, ParticleType, Q2, W):
     for key, values in settings.items():
 
         # Unpack values into variables
-        inp_dir = values.values()
+        inp_dir = values.values()[0]
 
         # Add the extracted values into comb_dict
         comb_dict[key] = {
