@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:17:13 trottar"
+# Time-stamp: "2024-12-11 03:18:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -67,9 +67,9 @@ for f in [aver_hi_file, aver_lo_file]:
     for line in lines:
         print(line)
         if len(line) == num_lines:
-            line
+            line.replace(f"\n","")
         else:
-            line.strip()
+            line
     
     # Remove the last line if it's empty or just a newline
     lines = [line.strip() if len(line) == num_lines-1 else line for line in lines]
