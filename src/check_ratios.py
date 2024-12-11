@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:59:37 trottar"
+# Time-stamp: "2024-12-11 03:00:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -57,6 +57,7 @@ for f in [aver_hi_file, aver_lo_file]:
     # Open the file, read the lines, and filter them
     with open(f, "r") as infile:
         lines = infile.readlines()
+    print(lines)
 
     # Filter out lines that contain '*'
     lines = [line for line in lines if '*' not in line]
