@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:47:09 trottar"
+# Time-stamp: "2024-12-11 02:48:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -38,6 +38,10 @@ OUTPATH=lt.OUTPATH
 # Read command-line arguments
 inp_pid = sys.argv[1]
 inp_pol = sys.argv[2]
+if inp_pol > 0.0:
+    inp_pol = "pl"
+else:
+    inp_pol = "mn"
 inp_Q2 = sys.argv[3]
 inp_W = sys.argv[4]
 inp_loeps = sys.argv[5]
