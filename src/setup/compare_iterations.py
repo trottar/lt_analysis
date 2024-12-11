@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:20:02 trottar"
+# Time-stamp: "2024-12-11 06:20:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -405,105 +405,108 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
         
         # Create a PdfPages object to manage the PDF file
         with PdfPages(tmp_file_name) as pdf:    
-            # Collect data and parameters for each iteration
-            for iter_key, iter_data in comb_dict.items():
+            # 1. Parameter Evolution Plot
+            fig = plt.figure(figsize=(12, 6))
+            for i in range(len(params_values[0])):  # Assuming all param sets have same length
+                param_evolution = [params[i] for params in params_values]
+                plt.plot(dates, param_evolution, label=f'Parameter {i}', marker='o')
 
-                df = iter_data["sep_file"]
+            plt.xlabel('Iteration Date')
+            plt.ylabel('Parameter Value')
+            plt.title(f'Parameter Evolution Across Iterations for {sig}')
+            plt.xticks(rotation=45, ha='right')
+            plt.legend()
+            plt.tight_layout()
+            plt.grid(True)
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-                date_df = iter_data["date"]
-                param_df  = iter_data["params"]
-                                        
-                # 1. Parameter Evolution Plot
-                fig = plt.figure(figsize=(12, 6))
-                for i in range(len(params_values[0][:k+4])): # Maximum of 4 parameters
-                    param_evolution = [params[i] for params in params_values]
-                    plt.plot(dates, param_evolution, label=f'Parameter {i}', marker='o')
+            # 2. Data Distribution Plot
+            fig = plt.figure(figsize=(12, 6))
+            for i, (data, date) in enumerate(zip(data_values, dates)):
+                plt.hist(data, bins=20, alpha=0.5, label=f'Iteration {date}', density=True)
 
-                plt.xlabel('Iteration Date')
-                plt.ylabel('Parameter Value')
-                plt.title(f'Parameter Evolution Across Iterations for {sig}')
-                plt.xticks(rotation=45, ha='right')
-                plt.legend()
-                plt.tight_layout()
-                plt.grid(True)
-                pdf.savefig(fig, bbox_inches='tight')
+            plt.xlabel(f'{sig} Values')
+            plt.ylabel('Density')
+            plt.title(f'Data Distribution Across Iterations for {sig}')
+            plt.legend()
+            plt.tight_layout()
+            plt.grid(True)
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-                # 2. Data Distribution Plot
-                fig = plt.figure(figsize=(12, 6))
-                for i, (data, date) in enumerate(zip(data_values, dates)):
-                    plt.hist(data, bins=20, alpha=0.5, label=f'Iteration {date}', density=True)
+            # 3. Model Comparison Plot
+            fig = plt.figure(figsize=(12, 6))
+            model_values = []
 
-                plt.xlabel(f'{sig} Values')
-                plt.ylabel('Density')
-                plt.title(f'Data Distribution Across Iterations for {sig}')
-                plt.legend()
-                plt.tight_layout()
-                plt.grid(True)
-                pdf.savefig(fig, bbox_inches='tight')
+            # Modify model prediction calculation
+            for j, (date, params) in enumerate(zip(dates, params_values)):
+                # Get the corresponding DataFrame for this iteration
+                df = iteration_data[date]['sep_file']
+                model_for_iteration = []
 
-                # 3. Model Comparison Plot
-                fig = plt.figure(figsize=(12, 6))
-                model_values = []
+                # Calculate model predictions
+                for _, row in df.iterrows():
+                    inp_param = '{} {} {} {} {} {} '.format(
+                        iteration_data[date]['Q2'].replace("p","."), 
+                        iteration_data[date]['W'].replace("p","."), 
+                        row['th_cm'], 
+                        row['t'], 
+                        row['Q2'], 
+                        row['W']
+                    ) + ' '.join(map(str, params))
 
-                for j, (df_row, date, params) in enumerate(zip(comb_dict.values(), dates, params_values)):
-                    df = df_row["sep_file"]
-                    model_for_iteration = []
+                    model_for_iteration.append(import_model(sig, inp_param))
 
-                    for _, row in df.iterrows():
-                        inp_param = '{} {} {} {} {} {} '.format(
-                            Q2.replace("p","."), 
-                            W.replace("p","."), 
-                            row['th_cm'], 
-                            row['t'], 
-                            row['Q2'], 
-                            row['W']
-                        ) + ' '.join(map(str, params))
+                model_values.append(model_for_iteration)
+                plt.plot(df['t'], model_for_iteration, label=f'Iteration {date}', marker='o')
 
-                        model_for_iteration.append(import_model(sig, inp_param))
+            plt.xlabel('t')
+            plt.ylabel(f'{sig} Model Value')
+            plt.title(f'Model Evolution Across Iterations for {sig}')
+            plt.legend()
+            plt.tight_layout()
+            plt.grid(True)
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-                    model_values.append(model_for_iteration)
+            # 4. Residuals and Convergence Plot
+            fig = plt.figure(figsize=(12, 6))
+            residuals = []
 
-                    plt.plot(df['t'], model_for_iteration, label=f'Iteration {date}', marker='o')
+            # Calculate residuals
+            for data, model in zip(data_values, model_values):
+                # Calculate residuals (difference between data and model)
+                res = np.abs(np.array(data) - np.array(model))
+                residuals.append(np.mean(res))
 
-                plt.xlabel('t')
-                plt.ylabel(f'{sig} Model Value')
-                plt.title(f'Model Evolution Across Iterations for {sig}')
-                plt.legend()
-                plt.tight_layout()
-                plt.grid(True)
-                pdf.savefig(fig, bbox_inches='tight')
+            plt.plot(dates, residuals, marker='o', color='purple')
+            plt.xlabel('Iteration Date')
+            plt.ylabel('Mean Absolute Residual')
+            plt.title(f'Convergence of Residuals Across Iterations for {sig}')
+            plt.xticks(rotation=45, ha='right')
+            plt.tight_layout()
+            plt.grid(True)
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-                # 4. Residuals and Convergence Plot
-                fig = plt.figure(figsize=(12, 6))
-                residuals = []
+            # 5. Scatter Plot of Data vs Model
+            fig = plt.figure(figsize=(12, 6))
+            for i, (data, model, date) in enumerate(zip(data_values, model_values, dates)):
+                plt.scatter(data, model, label=f'Iteration {date}', alpha=0.7)
 
-                for data, model in zip(data_values, model_values):
-                    # Calculate residuals (difference between data and model)
-                    res = np.abs(data - model)
-                    residuals.append(np.mean(res))
+            # Add ideal fit line
+            plt.plot([min(min(data) for data in data_values), max(max(data) for data in data_values)], 
+                     [min(min(data) for data in data_values), max(max(data) for data in data_values)], 
+                     'r--', label='Ideal Fit')
+            plt.xlabel('Observed Data')
+            plt.ylabel('Model Prediction')
+            plt.title(f'Data vs Model Predictions for {sig}')
+            plt.legend()
+            plt.tight_layout()
+            plt.grid(True)
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-                plt.plot(dates, residuals, marker='o', color='purple')
-                plt.xlabel('Iteration Date')
-                plt.ylabel('Mean Absolute Residual')
-                plt.title(f'Convergence of Residuals Across Iterations for {sig}')
-                plt.xticks(rotation=45, ha='right')
-                plt.tight_layout()
-                plt.grid(True)
-                pdf.savefig(fig, bbox_inches='tight')
-
-                # 5. Scatter Plot of Data vs Model
-                fig = plt.figure(figsize=(12, 6))
-                for i, (data, model, date) in enumerate(zip(data_values, model_values, dates)):
-                    plt.scatter(data, model, label=f'Iteration {date}', alpha=0.7)
-
-                plt.plot([data.min(), data.max()], [data.min(), data.max()], 'r--', label='Ideal Fit')
-                plt.xlabel('Observed Data')
-                plt.ylabel('Model Prediction')
-                plt.title(f'Data vs Model Predictions for {sig}')
-                plt.legend()
-                plt.tight_layout()
-                plt.grid(True)
-                pdf.savefig(fig, bbox_inches='tight')
-
-                # Open the PDF
-                show_pdf_with_evince(tmp_file_name)
+            # Open the PDF
+            show_pdf_with_evince(tmp_file_name)
