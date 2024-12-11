@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:50:51 trottar"
+# Time-stamp: "2024-12-11 04:51:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -346,10 +346,9 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     
     for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
 
+        tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{sig}")
         # Create a PdfPages object to manage the PDF file
-        with PdfPages(tmp_file_name) as pdf:
-    
-            tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{sig}")
+        with PdfPages(tmp_file_name) as pdf:    
         
             for i, df_key in enumerate(['sep_file']):
                 df = file_df_dict[df_key]
