@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:18:29 trottar"
+# Time-stamp: "2024-12-11 04:19:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -123,7 +123,7 @@ def compare_iters(pol_str, ParticleType, Q2, W):
     # Create settings dictionary using a loop
     settings = {}
 
-    for i, date in enumerate(iterations):
+    for i, date in enumerate(iter_arr):
         settings[f'set_{i+1}'] = {
             'inp_dir': date
         }
