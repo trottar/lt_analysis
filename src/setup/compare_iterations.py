@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:49:49 trottar"
+# Time-stamp: "2024-12-11 04:50:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -343,20 +343,20 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     # Calculate the first tmin and tmax based on the data
     tmin_initial = merged_dict['sep_file']['t'].min() - 0.1
     tmax_initial = merged_dict['sep_file']['t'].max() + 0.1
-
-    # Create a PdfPages object to manage the PDF file
-    with PdfPages(tmp_file_name) as pdf:
     
-        for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
+    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
 
+        # Create a PdfPages object to manage the PDF file
+        with PdfPages(tmp_file_name) as pdf:
+    
+            tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{sig}")
+        
             for i, df_key in enumerate(['sep_file']):
                 df = file_df_dict[df_key]
                 if "hi" in df_key:
                     df_key = "High $\epsilon$"
                 else:
-                    df_key = "Low $\epsilon$"
-
-                tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{index}")
+                    df_key = "Low $\epsilon$"                
 
                 params_values = param_arr
                 data_values = data
