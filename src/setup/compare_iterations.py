@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:31:39 trottar"
+# Time-stamp: "2024-12-11 04:33:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -16,6 +16,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import pandas as pd
 import os, sys, re
 
+'''
 # Define the function f(x; params)
 def f(x, params):
     """
@@ -49,7 +50,7 @@ def iterative_process(initial_params, initial_data, iterations=10):
         data_values.append(data)
     
     return params_values, data_values
-
+'''
 
 ###############################################################################################################################################
 '''
@@ -334,7 +335,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             # 1. Parameter Evolution Plot
             # Purpose: Track how parameters change across iterations.
             fig = plt.figure(figsize=(10, 6))
-            for i in range(len(initial_params)):
+            for i in range(len(params_values)):
                 plt.plot(range(iterations + 1), [p[i] for p in params_values], label=f'Parameter {i}', marker='o')
             plt.xlabel('Iteration')
             plt.ylabel('Parameter Value')
@@ -372,7 +373,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             # Purpose: Correlate parameters with properties of the generated data.
             data_means = [np.mean(data) for data in data_values]
             fig = plt.figure(figsize=(10, 6))
-            for i in range(len(initial_params)):
+            for i in range(len(params_values)):
                 plt.scatter([p[i] for p in params_values], data_means, label=f'Param {i} vs Data Mean', marker='o')
             plt.xlabel('Parameter Value')
             plt.ylabel('Data Mean')
