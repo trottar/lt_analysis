@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:42:20 trottar"
+# Time-stamp: "2024-12-11 05:43:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -378,7 +378,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 df = iter_data["sep_file"]
                 date = iter_key.replace('Q', '').split('W')[0]
 
-                print("!!!!!!!",df)
+                print("!!!!!!!",df["params"])
                 
                 # Collect parameters
                 param_subset = param_arr[:len(param_arr)]  # Adjust if needed
