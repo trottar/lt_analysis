@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:15:45 trottar"
+# Time-stamp: "2024-12-11 05:25:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -356,98 +356,126 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     tmin_initial = merged_dict['sep_file']['t'].min() - 0.1
     tmax_initial = merged_dict['sep_file']['t'].max() + 0.1
     
+    # Redefine the plotting section
     for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
-
+        # Lists to store iteration-specific data
         params_values = []
         data_values = []
+        dates = []
         
         tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{sig}")
+        
         # Create a PdfPages object to manage the PDF file
         with PdfPages(tmp_file_name) as pdf:    
-        
-            df = merged_dict["sep_file"]
+            # Collect data and parameters for each iteration
+            for iter_key, iter_data in comb_dict.items():
+                df = iter_data["sep_file"]
+                date = settings[iter_key]['date']
+                
+                # Collect parameters
+                param_subset = param_arr[:len(param_arr)]  # Adjust if needed
+                params_values.append(param_subset)
+                
+                # Collect data values for the specific signal
+                data_values.append(df[sig])
+                dates.append(date)
             
-            params_values.append(param_arr[:i+4]) # Maximum of 4 parameters per L, T, LT, TT
-            data_values.append(df[sig])
-
             # 1. Parameter Evolution Plot
-            # Purpose: Track how parameters change across iterations.
-            fig = plt.figure(figsize=(10, 6))
-            for i in range(len(params_values)):
-                plt.plot(range(iterations + 1), [p[i] for p in params_values], label=f'Parameter {i}', marker='o')
-            plt.xlabel('Iteration')
+            fig = plt.figure(figsize=(12, 6))
+            for i in range(len(param_subset)):
+                param_evolution = [params[i] for params in params_values]
+                plt.plot(dates, param_evolution, label=f'Parameter {i}', marker='o')
+            
+            plt.xlabel('Iteration Date')
             plt.ylabel('Parameter Value')
-            plt.title('Parameter Evolution Across Iterations')
+            plt.title(f'Parameter Evolution Across Iterations for {sig}')
+            plt.xticks(rotation=45, ha='right')
             plt.legend()
-            plt.grid()
+            plt.tight_layout()
+            plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-            print("="*50)
-            model = []
-            # Generate model for comparison
-            for j, row in df.iterrows():
-                print("-"*50)
-                print("Data {} = {:.4e}".format(sig, row[sig]))
-                inp_param = '{} {} {} {} {} {} '.format(Q2.replace("p","."), W.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
-                model.append(import_model(sig, inp_param))
-            x_values = df['t']
-            # 2. Function Evolution Plot
-            # Purpose: Visualize how f(x) changes over iterations.
-            fig = plt.figure(figsize=(10, 6))
-            for i, params in enumerate(params_values):
-                plt.plot(x_values, model, label=f'Iteration {i}')
-            plt.xlabel('x')
-            plt.ylabel('f(x)')
-            plt.title('Function Evolution Across Iterations')
-            plt.legend()
-            plt.grid()
-            pdf.savefig(fig, bbox_inches='tight')
-
-            # 3. Data Distribution Plot
-            # Purpose: Observe how the data distribution changes with updated parameterization.
-            fig = plt.figure(figsize=(10, 6))
-            for i, data in enumerate(data_values):
-                plt.hist(data, bins=20, alpha=0.5, label=f'Iteration {i}', density=True)
-            plt.xlabel('Data Values')
+            # 2. Data Distribution Plot
+            fig = plt.figure(figsize=(12, 6))
+            for i, (data, date) in enumerate(zip(data_values, dates)):
+                plt.hist(data, bins=20, alpha=0.5, label=f'Iteration {date}', density=True)
+            
+            plt.xlabel(f'{sig} Values')
             plt.ylabel('Density')
-            plt.title('Data Distribution Across Iterations')
+            plt.title(f'Data Distribution Across Iterations for {sig}')
             plt.legend()
-            plt.grid()
+            plt.tight_layout()
+            plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-            # 4. Parameter vs. Output Data Plot
-            # Purpose: Correlate parameters with properties of the generated data.
-            data_means = [np.mean(data) for data in data_values]
-            fig = plt.figure(figsize=(10, 6))
-            for i in range(len(params_values)):
-                plt.scatter([p[i] for p in params_values], data_means, label=f'Param {i} vs Data Mean', marker='o')
-            plt.xlabel('Parameter Value')
-            plt.ylabel('Data Mean')
-            plt.title('Parameter vs. Data Property')
+            # 3. Model Comparison Plot
+            fig = plt.figure(figsize=(12, 6))
+            model_values = []
+            
+            for j, (df_row, date, params) in enumerate(zip(comb_dict.values(), dates, params_values)):
+                df = df_row["sep_file"]
+                model_for_iteration = []
+                
+                for _, row in df.iterrows():
+                    inp_param = '{} {} {} {} {} {} '.format(
+                        Q2.replace("p","."), 
+                        W.replace("p","."), 
+                        row['th_cm'], 
+                        row['t'], 
+                        row['Q2'], 
+                        row['W']
+                    ) + ' '.join(map(str, params))
+                    
+                    model_for_iteration.append(import_model(sig, inp_param))
+                
+                model_values.append(model_for_iteration)
+                
+                plt.plot(df['t'], model_for_iteration, label=f'Iteration {date}', marker='o')
+            
+            plt.xlabel('t')
+            plt.ylabel(f'{sig} Model Value')
+            plt.title(f'Model Evolution Across Iterations for {sig}')
             plt.legend()
-            plt.grid()
+            plt.tight_layout()
+            plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-            # 5. Convergence Plot
-            # Purpose: Show how a chosen metric (e.g., error or residuals) evolves toward convergence.
-            residuals = [np.sum((data - f(data, params))**2) for data, params in zip(data_values, params_values)]
-            fig = plt.figure(figsize=(10, 6))
-            plt.plot(range(iterations + 1), residuals, marker='o', color='purple')
-            plt.xlabel('Iteration')
-            plt.ylabel('Residual Sum of Squares')
-            plt.title('Convergence of Residuals Across Iterations')
-            plt.grid()
+            # 4. Residuals and Convergence Plot
+            fig = plt.figure(figsize=(12, 6))
+            residuals = []
+            
+            for data, model in zip(data_values, model_values):
+                # Calculate residuals (difference between data and model)
+                res = np.abs(data - model)
+                residuals.append(np.mean(res))
+            
+            plt.plot(dates, residuals, marker='o', color='purple')
+            plt.xlabel('Iteration Date')
+            plt.ylabel('Mean Absolute Residual')
+            plt.title(f'Convergence of Residuals Across Iterations for {sig}')
+            plt.xticks(rotation=45, ha='right')
+            plt.tight_layout()
+            plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
-            # 6. Heatmap of Function Changes
-            # Purpose: Provide a comprehensive view of f(x) across x-values and iterations.
-            z_values = np.array([f(x_values, params) for params in params_values])
-            fig = plt.figure(figsize=(10, 6))
-            plt.imshow(z_values, aspect='auto', cmap='viridis', extent=[0, 2, 0, iterations])
-            plt.colorbar(label='f(x)')
-            plt.xlabel('x')
-            plt.ylabel('Iteration')
-            plt.title('Heatmap of Function Changes Across Iterations')
+            # 5. Scatter Plot of Data vs Model
+            fig = plt.figure(figsize=(12, 6))
+            for i, (data, model, date) in enumerate(zip(data_values, model_values, dates)):
+                plt.scatter(data, model, label=f'Iteration {date}', alpha=0.7)
+            
+            plt.plot([data.min(), data.max()], [data.min(), data.max()], 'r--', label='Ideal Fit')
+            plt.xlabel('Observed Data')
+            plt.ylabel('Model Prediction')
+            plt.title(f'Data vs Model Predictions for {sig}')
+            plt.legend()
+            plt.tight_layout()
+            plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
+            # Open the PDF
             show_pdf_with_evince(tmp_file_name)
