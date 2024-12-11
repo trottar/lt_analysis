@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:15:38 trottar"
+# Time-stamp: "2024-12-11 04:17:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -84,7 +84,7 @@ from utility import show_pdf_with_evince
 
 ###############################################################################################################################################
 
-def compare_iters(ParticleType,Q2,W):
+def compare_iters(pol_str, ParticleType, Q2, W):
 
     f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 

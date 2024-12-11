@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:13:47 trottar"
+# Time-stamp: "2024-12-11 04:16:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,11 +62,6 @@ NumtBins = sys.argv[11]
 NumPhiBins = sys.argv[12]
 inp_debug =  sys.argv[13]
 
-sys.path.append("setup")
-from compare_iterations import compare_iters
-compare_iters(ParticleType,Q2,W)
-
-
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
 else:
@@ -84,6 +79,13 @@ if EPSSET == "low":
     EPSVAL = LOEPS
 else:
     EPSVAL = HIEPS    
+
+
+### HERE
+sys.path.append("setup")
+from compare_iterations import compare_iters
+compare_iters(pol_str, ParticleType, Q2, W)
+
     
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
@@ -800,4 +802,4 @@ if EPSSET == "high":
 
     sys.path.append("setup")
     from compare_iterations import compare_iters
-    compare_iters(ParticleType,Q2,W)
+    compare_iters(pol_str, ParticleType, Q2, W)
