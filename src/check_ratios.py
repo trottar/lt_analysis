@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:31:54 trottar"
+# Time-stamp: "2024-12-11 03:33:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -60,7 +60,7 @@ for f in [aver_hi_file, aver_lo_file]:
     print(lines)
 
     # Filter out lines that contain '*'
-    lines = [f'   0.0000   0.0000  {line[-5:]}' if '*' in line else line for line in lines]
+    lines = [f'   0.0000   -1000.0000  {line[-5:]}' if '*' in line else line for line in lines]
 
     num_lines = len(lines)
     
@@ -70,12 +70,7 @@ for f in [aver_hi_file, aver_lo_file]:
             line
         else:
             line
-    
-    # Remove the last line if it's empty or just a newline
-    #lines = [line.strip() if len(line) == num_lines-1 else line for line in lines]
-
-    print("££££££££££\n",lines)
-    
+            
     # Open the file again, this time in write mode to overwrite the content
     with open(f, "w") as outfile:
         outfile.writelines(lines)
