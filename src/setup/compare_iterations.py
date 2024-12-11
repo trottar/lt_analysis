@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 12:49:27 trottar"
+# Time-stamp: "2024-12-11 17:35:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,6 +13,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+matplotlib.use('Agg')  # For non-GUI rendering (e.g., saving plots to files
 import pandas as pd
 import os, sys, re
 
@@ -381,27 +382,27 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     # Calculate the first tmin and tmax based on the data
     tmin_initial = merged_dict['sep_file']['t'].min() - 0.1
     tmax_initial = merged_dict['sep_file']['t'].max() + 0.1
+
+    tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}")
     
-    # Redefine the plotting section
-    for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
-        
-        # Lists to store iteration-specific data
-        params_values = []
-        data_values = []
-        dates = []
-        
-        tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{sig}")
+    # Create a PdfPages object to manage the PDF file
+    with PdfPages(tmp_file_name) as pdf:
+                
+        # Redefine the plotting section
+        for k, sig in enumerate(['sigL','sigT','sigLT','sigTT']):
 
-        # Collect data from iteration_data
-        for date, data in iteration_data.items():
-            dates.append(date)
-            params_values.append(data['params'])
-            data_values.append(data[sig])
-        
-        # Create a PdfPages object to manage the PDF file
-        with PdfPages(tmp_file_name) as pdf:
+            # Lists to store iteration-specific data
+            params_values = []
+            data_values = []
+            dates = []
 
-            # 1. Parameter Evolution Plot
+            # Collect data from iteration_data
+            for date, data in iteration_data.items():
+                dates.append(date)
+                params_values.append(data['params'])
+                data_values.append(data[sig])
+
+                # 1. Parameter Evolution Plot
             fig = plt.figure(figsize=(12, 6))
             for i in range(4*k, 4*(k+1)):  # Maximum of 4 parameters per L, T, LT, TT
                 param_evolution = [params[i] for params in params_values if not np.all(np.array(params[i]) == 0.0)]

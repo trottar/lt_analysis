@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-10 10:03:14 trottar"
+# Time-stamp: "2024-12-11 17:37:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -99,7 +99,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
     fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
     
-    num_events = nsep.GetEntries()    
+    num_events = nsep.GetEntries()
     
     for it, (key, val) in enumerate(fit_params.items()):
         
