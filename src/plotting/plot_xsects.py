@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:40:52 trottar"
+# Time-stamp: "2024-12-11 03:41:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -357,7 +357,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 legend_label = "{} (No valid data)".format(epsilon_label)
 
-            ax.errorbar(phi_bin_centers[df['phibin'][mask][non_zero_mask]], ratios, yerr=np.maximum(errors, 0.0)
+            ax.errorbar(phi_bin_centers[df['phibin'][mask][non_zero_mask]], ratios, yerr=np.maximum(errors, 0.0),
                         marker=markers[i], linestyle='None', label=legend_label, 
                         color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
