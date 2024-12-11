@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:07:57 trottar"
+# Time-stamp: "2024-12-11 06:08:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -392,7 +392,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                     # Unpack values into variables
                     Q2, W, LOEPS, HIEPS, param_arr, date = values.values()
 
-                    if date_df == date:
+                    if date_df.values()[0] == date:
                     
                         # Collect parameters
                         param_subset = param_arr[:len(param_arr)]  # Adjust if needed
