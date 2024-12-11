@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:31:23 trottar"
+# Time-stamp: "2024-12-11 06:39:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,6 +13,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import os, sys, re
 
@@ -404,10 +405,11 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             data_values.append(data[sig])
         
         # Create a PdfPages object to manage the PDF file
-        with PdfPages(tmp_file_name) as pdf:    
+        with PdfPages(tmp_file_name) as pdf:
+
             # 1. Parameter Evolution Plot
             fig = plt.figure(figsize=(12, 6))
-            for i in range(len(params_values[0])):  # Assuming all param sets have same length
+            for i in range(len(params_values[0])):  # Assuming all param sets have the same length
                 param_evolution = [params[i] for params in params_values]
                 plt.plot(dates, param_evolution, label=f'Parameter {i}', marker='o')
 
@@ -415,6 +417,10 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.ylabel('Parameter Value')
             plt.title(f'Parameter Evolution Across Iterations for {sig}')
             plt.xticks(rotation=45, ha='right')
+
+            # Set y-axis to show only 20 labels
+            plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=20))
+
             plt.legend()
             plt.tight_layout()
             plt.grid(True)
