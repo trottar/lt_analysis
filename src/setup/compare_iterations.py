@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:27:31 trottar"
+# Time-stamp: "2024-12-11 06:31:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -420,7 +420,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
-            plt.show()
 
             # 2. Data Distribution Plot
             fig = plt.figure(figsize=(12, 6))
@@ -435,7 +434,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
-            plt.show()
 
             # 3. Model Comparison Plot
             fig = plt.figure(figsize=(12, 6))
@@ -471,7 +469,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
-            plt.show()
 
             # 4. Residuals and Convergence Plot
             fig = plt.figure(figsize=(12, 6))
@@ -492,7 +489,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
-            plt.show()
 
             # 5. Scatter Plot of Data vs Model
             fig = plt.figure(figsize=(12, 6))
@@ -511,7 +507,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.grid(True)
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
-            plt.show()
 
         # Open the PDF
         show_pdf_with_evince(tmp_file_name)
