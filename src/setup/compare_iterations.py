@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:12:34 trottar"
+# Time-stamp: "2024-12-11 05:15:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -328,7 +328,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                                                        .format(pol_str, Q2.replace("p",""), W.replace("p","")) \
                                                        , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
 
-        comb_dict["Q{}W{}".format(Q2,W)] = file_df_dict
+        comb_dict[f'set_{i+1}'] = file_df_dict
 
     print("\n\ncomb_dict")
     print(comb_dict)
