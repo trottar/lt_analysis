@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-10 02:23:25 trottar"
+# Time-stamp: "2024-12-11 18:04:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -452,13 +452,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 pi_mm_min = 0.90 + MM_offset_DATA
                 pi_mm_max = 0.94 + MM_offset_DATA
                 scale_factor = (
-                    hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Integral(
-                        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].FindBin(pi_mm_min),
-                        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].FindBin(pi_mm_max)
-                    )/
-                    subDict["H_MM_nosub_SUB_DATA_{}".format(j)].Integral(
-                        subDict["H_MM_nosub_SUB_DATA_{}".format(j)].FindBin(pi_mm_min),
-                        subDict["H_MM_nosub_SUB_DATA_{}".format(j)].FindBin(pi_mm_max))
+                    fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[0]
+                    /
+                    fit_gaussian(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[0]
                 ) * 0.85                
                 ##############
                 ##############
@@ -656,8 +652,10 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
             sub_val = np.subtract(hist_val_data, hist_val_dummy)
             try:
                 # Calculate the weighted sum of frequencies and divide by the total count
-                weighted_sum = np.sum(sub_val * bin_val_data)
-                total_count = np.sum(sub_val)
+                #weighted_sum = np.sum(sub_val * bin_val_data)
+                #total_count = np.sum(sub_val)
+                weighted_sum = fit_gaussian(sub_val * bin_val_data, mm_min, mm_max)[0]
+                total_count = fit_gaussian(sub_val, mm_min, mm_max)[0]
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
@@ -919,8 +917,10 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
             sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
             try:
                 # Calculate the weighted sum of frequencies and divide by the total count
-                weighted_sum = np.sum(sub_val * bin_val_simc)
-                total_count = np.sum(sub_val)
+                #weighted_sum = np.sum(sub_val * bin_val_simc)
+                #total_count = np.sum(sub_val)
+                weighted_sum = fit_gaussian(sub_val * bin_val_simc, mm_min, mm_max)[0]
+                total_count = fit_gaussian(sub_val, mm_min, mm_max)[0]
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for simc {} (t-bin={})... ".format(kin_type, i+1))

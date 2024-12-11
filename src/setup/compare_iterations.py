@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 17:35:24 trottar"
+# Time-stamp: "2024-12-11 18:33:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -11,9 +11,10 @@
 # Copyright (c) trottar
 #
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # For non-GUI rendering (e.g., saving plots to files
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-matplotlib.use('Agg')  # For non-GUI rendering (e.g., saving plots to files
 import pandas as pd
 import os, sys, re
 

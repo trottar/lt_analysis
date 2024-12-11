@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-10 02:23:54 trottar"
+# Time-stamp: "2024-12-11 18:05:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1482,14 +1482,9 @@ def rand_sub(phi_setting, inpDict):
             
             # Scale pion to kaon data
             scale_factor = (
-                H_MM_nosub_DATA.Integral(
-                    H_MM_nosub_DATA.FindBin(pi_mm_min), 
-                    H_MM_nosub_DATA.FindBin(pi_mm_max)
-                ) / 
-                subDict["H_MM_nosub_SUB_DATA"].Integral(
-                    subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_min), 
-                    subDict["H_MM_nosub_SUB_DATA"].FindBin(pi_mm_max)
-                )
+                fit_gaussian(H_MM_nosub_DATA, pi_mm_min, pi_mm_max)[0]
+                / 
+                fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max)[0]
             ) * 0.85
         ##############
         ##############
@@ -1753,8 +1748,8 @@ def rand_sub(phi_setting, inpDict):
     histDict["MM_vs_P_cal_DATA"] = MM_vs_P_cal_DATA
     histDict["MM_vs_P_hgcer_DATA"] = MM_vs_P_hgcer_DATA
     histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
-    histDict["NumEvts_MM_DUMMY"] = int(H_MM_DUMMY.Integral())
-    histDict["NumEvts_MM_DATA"] = int(H_MM_DATA.Integral())
+    histDict["NumEvts_MM_DUMMY"] = fit_gaussian(H_MM_DUMMY, mm_min, mm_max)[0]
+    histDict["NumEvts_MM_DATA"] = fit_gaussian(H_MM_DATA, mm_min, mm_max)[0]
     
     ###
     # CT plots
