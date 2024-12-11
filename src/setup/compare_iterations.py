@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:17:01 trottar"
+# Time-stamp: "2024-12-11 04:17:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -88,7 +88,7 @@ def compare_iters(pol_str, ParticleType, Q2, W):
 
     f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 
-    inp_dir = f_iter.replace(f"{ParticleType}_Q{Q2}W{W}_iter.dat", "src/{ParticleType}")
+    inp_dir = f_iter.replace(f"{ParticleType}_Q{Q2}W{W}_iter.dat", f"src/{ParticleType}")
 
     ###############################################################################################################################################
     '''
