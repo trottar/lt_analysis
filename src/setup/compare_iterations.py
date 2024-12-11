@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:01:09 trottar"
+# Time-stamp: "2024-12-11 05:01:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -117,7 +117,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     iter_arr = [f.rstrip('\n') for f in lines]
     iter_start = iter_arr[0]
     iter_end = iter_arr[-1]
-    iterations = len(lines)
+    iterations = len(lines)-1
 
     OutFilename = f"compare_iters_{iter_start}-{iter_end}"
     outputpdf  = OUTPATH+"/" + OutFilename + ".pdf"
