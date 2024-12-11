@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:44:42 trottar"
+# Time-stamp: "2024-12-11 04:46:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -141,15 +141,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
         # Unpack values into variables
         Q2, W, LOEPS, HIEPS, date = values.values()
-
-        # Add the extracted values into comb_dict
-        comb_dict[key] = {
-            'Q2': Q2,
-            'W': W,
-            'LOEPS': LOEPS,
-            'HIEPS': HIEPS,            
-            'date': date
-        }
 
         inp_dir = f"{TEMP_CACHEPATH}/{ParticleType}/Q{Q2}W{W}/{date}"
 
