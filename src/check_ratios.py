@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:22:02 trottar"
+# Time-stamp: "2024-12-11 03:23:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,7 +72,7 @@ for f in [aver_hi_file, aver_lo_file]:
             line
     
     # Remove the last line if it's empty or just a newline
-    lines = [line.strip() if len(line) == num_lines-1 else line for line in lines]
+    #lines = [line.strip() if len(line) == num_lines-1 else line for line in lines]
 
     print("££££££££££\n",lines)
     
@@ -80,6 +80,11 @@ for f in [aver_hi_file, aver_lo_file]:
     with open(f, "w") as outfile:
         outfile.writelines(lines)
 
-        # Remove the last line if it's empty or just a newline
-        content = outfile.read()
-        content = content.rstrip('\n')
+    # Remove the last line if it's empty or just a newline
+    my_file =  open(f, "r+")
+    content = my_file.read()
+    content = content.rstrip('\n')
+    my_file.seek(0)
+    my_file.write(content)
+    my_file.truncate()
+    my_file.close()
