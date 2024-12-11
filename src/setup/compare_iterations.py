@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:40:44 trottar"
+# Time-stamp: "2024-12-11 04:42:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -333,6 +333,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 merged_dict[key] = []
             merged_dict[key].append(value)
 
+    print("$$$$$$$$$$",merged_dict)
     # Flatten the merged dictionary
     for key in merged_dict.keys():
         merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
