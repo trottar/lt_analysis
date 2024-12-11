@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:37:53 trottar"
+# Time-stamp: "2024-12-11 04:40:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -323,7 +323,29 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     print(comb_dict)
     print("\n\n")
 
-    for index, data in file_df_dict['sep_file'].iterrows():
+    # Initialize the merged dictionary
+    merged_dict = {}
+
+    # Iterate over all subdictionaries
+    for subdict in comb_dict.values():
+        for key, value in subdict.items():
+            if key not in merged_dict:
+                merged_dict[key] = []
+            merged_dict[key].append(value)
+
+    # Flatten the merged dictionary
+    for key in merged_dict.keys():
+        merged_dict[key] = pd.concat(merged_dict[key], ignore_index=True)
+        print("-"*10, key, "-"*10, "\n", merged_dict[key])
+
+    print("\n\n")
+
+    # Redefine tmin and tmax
+    # Calculate the first tmin and tmax based on the data
+    tmin_initial = merged_dict['sep_file']['t'].min() - 0.1
+    tmax_initial = merged_dict['sep_file']['t'].max() + 0.1
+    
+    for index, data in merged_dict['sep_file'].iterrows():
 
         tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{index}")
         # Create a PdfPages object to manage the PDF file
