@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:47:07 trottar"
+# Time-stamp: "2024-12-11 05:52:07 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -154,11 +154,16 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
     comb_dict = {}
 
+    file_df_dict = {}
+    
     # Extract values for specific sets
     for key, values in settings.items():
 
         # Unpack values into variables
         Q2, W, LOEPS, HIEPS, param_arr, date = values.values()
+
+        file_df_dict["param_arr"] = param_arr
+        file_df_dict["date"] = date
 
         inp_dir = f"{TEMP_CACHEPATH}/{ParticleType}/Q{Q2}W{W}/{date}"
 
@@ -222,8 +227,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
         ################################################################################################################################################
         # Read in files and convert to dataframes
-
-        file_df_dict = {}
 
         setting_file = inp_dir+"/list.settings".format(ParticleType)
         file_df_dict['setting_df'] = file_to_df(setting_file, ['POL', 'Q2', 'W', 'EPSVAL', 'thpq', 'TMIN', 'TMAX', 'NumtBins'],\
@@ -376,20 +379,18 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             # Collect data and parameters for each iteration
             for iter_key, iter_data in comb_dict.items():
 
-                # Extract values for specific sets
-                for key, values in settings.items():
+                df = iter_data["sep_file"]
 
-                    # Unpack values into variables
-                    Q2, W, LOEPS, HIEPS, param_arr, date = values.values()
-                    df = iter_data["sep_file"]
+                param_arr = df["param_arr"]
+                date = df["date"]
 
-                    # Collect parameters
-                    param_subset = param_arr[:len(param_arr)]  # Adjust if needed
-                    params_values.append(param_subset)
-
-                    # Collect data values for the specific signal
-                    data_values.append(df[sig])
-                    dates.append(date)
+                # Collect parameters
+                param_subset = param_arr[:len(param_arr)]  # Adjust if needed
+                params_values.append(param_subset)
+                
+                # Collect data values for the specific signal
+                data_values.append(df[sig])
+                dates.append(date)
 
                 # 1. Parameter Evolution Plot
                 fig = plt.figure(figsize=(12, 6))
