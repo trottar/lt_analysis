@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:34:57 trottar"
+# Time-stamp: "2024-12-11 05:41:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -104,19 +104,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
     inp_dir = f_iter.replace(f"{ParticleType}_Q{Q2}W{W}_iter.dat", f"src/{ParticleType}")
 
-    ###############################################################################################################################################
-    '''
-    Import model parameterization
-    '''
-
-    param_file = '{}/parameters/par.{}_Q{}W{}.dat'.format(inp_dir, pol_str, Q2.replace("p",""), W.replace("p",""))
-
-    param_arr = []
-    with open(param_file, 'r') as f:
-        for i, line in enumerate(f):
-            columns = line.split()
-            param_arr.append(str(columns[0]))    
-
     ################################################################################################################################################
     # Import iteration directory...
     # Grab functional forms and parameterization for each iteration directory
@@ -138,11 +125,30 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     settings = {}
 
     for i, date in enumerate(iter_arr):
+        ###############################################################################################################################################
+        '''
+        Import model parameterization
+        '''
+
+        inp_dir = f"{TEMP_CACHEPATH}/{ParticleType}/Q{Q2}W{W}/{date}"
+        
+        param_file = '{}/parameters/par.{}_Q{}W{}.dat'.format(inp_dir, pol_str, Q2.replace("p",""), W.replace("p",""))
+
+        ###############################################################################################################################################
+        
+        param_arr = []
+        
+        with open(param_file, 'r') as f:
+            for j, line in enumerate(f):
+                columns = line.split()
+                param_arr.append(str(columns[0]))    
+                
         settings[f'set_{i+1}'] = {
             'Q2': Q2,
             'W': W,
             'LOEPS': LOEPS,
             'HIEPS': HIEPS,
+            'params' : param_arr,
             'date': date
         }
 
@@ -152,7 +158,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     for key, values in settings.items():
 
         # Unpack values into variables
-        Q2, W, LOEPS, HIEPS, date = values.values()
+        Q2, W, LOEPS, HIEPS, param_arr, date = values.values()
 
         inp_dir = f"{TEMP_CACHEPATH}/{ParticleType}/Q{Q2}W{W}/{date}"
 
@@ -371,6 +377,8 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             for iter_key, iter_data in comb_dict.items():
                 df = iter_data["sep_file"]
                 date = iter_key.replace('Q', '').split('W')[0]
+
+                print("!!!!!!!",date)
                 
                 # Collect parameters
                 param_subset = param_arr[:len(param_arr)]  # Adjust if needed
