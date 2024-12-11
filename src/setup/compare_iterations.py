@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:33:02 trottar"
+# Time-stamp: "2024-12-11 04:34:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -331,6 +331,8 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
             params_values = param_arr
             data_values = data
+
+            print("!!!!!!!!!!!!!!!",params_values, data_values)
 
             # 1. Parameter Evolution Plot
             # Purpose: Track how parameters change across iterations.
