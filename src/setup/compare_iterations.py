@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:42:09 trottar"
+# Time-stamp: "2024-12-11 06:44:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,7 +13,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import os, sys, re
 
@@ -416,10 +415,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.xlabel('Iteration Date')
             plt.ylabel('Parameter Value')
             plt.title(f'Parameter Evolution Across Iterations for {sig}')
-            plt.xticks(rotation=45, ha='right')
-
-            # Set y-axis to show only 20 labels
-            plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=20))
 
             plt.legend()
             plt.tight_layout()
