@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:30:33 trottar"
+# Time-stamp: "2024-12-11 03:31:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -60,7 +60,7 @@ for f in [aver_hi_file, aver_lo_file]:
     print(lines)
 
     # Filter out lines that contain '*'
-    lines = [f'   0.0000   0.0000  {line[-6]}' if '*' in line else line for line in lines]
+    lines = [f'   0.0000   0.0000  {line[-5:]}' if '*' in line else line for line in lines]
 
     num_lines = len(lines)
     
