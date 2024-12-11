@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-17 22:18:45 trottar"
+# Time-stamp: "2024-12-11 02:29:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,6 +200,11 @@ echo "Running average_ratios..."
 #./average_ratios.expect ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 # Alma9
 python3 average_ratios.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
+
+echo
+echo
+echo "Checking ratios..."
+python3 check_ratios.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS}
 
 echo
 echo "Compiling calc_xsect.f..."
