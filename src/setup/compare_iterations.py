@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:25:28 trottar"
+# Time-stamp: "2024-12-11 04:25:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -113,7 +113,7 @@ def compare_iters(pol_str, ParticleType, Q2, W):
         lines = infile.readlines()    
 
     iter_arr = [f for f in f_iter]
-    print("!!!!!!!!",inp_dir)
+    print("!!!!!!!!",iter_arr)
     iter_start = iter_arr[0]
     iter_end = iter_arr[-1]
     iterations = len(lines)
