@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:24:06 trottar"
+# Time-stamp: "2024-12-11 06:27:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -513,5 +513,5 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
             plt.close(fig)
             plt.show()
 
-            # Open the PDF
-            show_pdf_with_evince(tmp_file_name)
+        # Open the PDF
+        show_pdf_with_evince(tmp_file_name)
