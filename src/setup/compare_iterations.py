@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:12:28 trottar"
+# Time-stamp: "2024-12-11 04:14:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -98,9 +98,9 @@ def compare_iters(ParticleType,Q2,W):
 
     param_arr = []
     with open(param_file, 'r') as f:
-    for i, line in enumerate(f):
-        columns = line.split()
-        param_arr.append(str(columns[0]))    
+        for i, line in enumerate(f):
+            columns = line.split()
+            param_arr.append(str(columns[0]))    
 
     ################################################################################################################################################
     # Import iteration directory...
