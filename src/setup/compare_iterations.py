@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:42:21 trottar"
+# Time-stamp: "2024-12-11 04:44:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -127,6 +127,10 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
     for i, date in enumerate(iter_arr):
         settings[f'set_{i+1}'] = {
+            'Q2': Q2,
+            'W': W,
+            'LOEPS': LOEPS,
+            'HIEPS': HIEPS,
             'date': date
         }
 
@@ -136,10 +140,14 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     for key, values in settings.items():
 
         # Unpack values into variables
-        date = values["date"]
+        Q2, W, LOEPS, HIEPS, date = values.values()
 
         # Add the extracted values into comb_dict
         comb_dict[key] = {
+            'Q2': Q2,
+            'W': W,
+            'LOEPS': LOEPS,
+            'HIEPS': HIEPS,            
             'date': date
         }
 
