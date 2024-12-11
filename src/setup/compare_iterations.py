@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:21:12 trottar"
+# Time-stamp: "2024-12-11 04:23:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -125,7 +125,7 @@ def compare_iters(pol_str, ParticleType, Q2, W):
 
     for i, date in enumerate(iter_arr):
         settings[f'set_{i+1}'] = {
-            'inp_dir': date
+            'date': date
         }
 
     comb_dict = {}
@@ -134,14 +134,14 @@ def compare_iters(pol_str, ParticleType, Q2, W):
     for key, values in settings.items():
 
         # Unpack values into variables
-        inp_dir = values["inp_dir"]
+        date = values["date"]
 
         # Add the extracted values into comb_dict
         comb_dict[key] = {
-            'inp_dir': inp_dir
+            'date': date
         }
 
-        inp_dir = TEMP_CACHEPATH+"/{}/Q{}W{}/".format(ParticleType,Q2,W)+inp_dir
+        inp_dir = f"{TEMP_CACHEPATH}/{ParticleType}/Q{Q2}W{W}/{date}"
 
         def are_within_tolerance(num1, num2, tolerance=0.1):
             return abs(num1 - num2) <= tolerance
