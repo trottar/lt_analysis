@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:52:14 trottar"
+# Time-stamp: "2024-12-11 02:54:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -61,6 +61,10 @@ for f in [aver_hi_file, aver_lo_file]:
     # Filter out lines that contain '*'
     lines = [line for line in lines if '*' not in line]
 
+    # Remove any trailing empty lines (if any)
+    while lines and lines[-1] == "\n":
+        lines.pop()
+    
     # Open the file again, this time in write mode to overwrite the content
     with open(f, "w") as outfile:
         outfile.writelines(lines)
