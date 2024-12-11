@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:30:23 trottar"
+# Time-stamp: "2024-12-11 04:31:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -323,6 +323,8 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     print("\n\n")
 
     for val in file_df_dict['sep_file']:
+
+        print(val)
 
         for index, data in val.iterrows():
 
