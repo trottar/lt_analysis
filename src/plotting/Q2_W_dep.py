@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:07:05 trottar"
+# Time-stamp: "2024-12-11 05:13:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -549,7 +549,6 @@ for tmin, tmax in tmin_tmax_pairs:
             q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 10000)
             t_fit = np.linspace(0.0001, 2.0, 10000)
             theta_fit = np.linspace(0.0, 360.0, 10000)
-
                 
             if sig == "sigL":
                 # Perform exponential fit
