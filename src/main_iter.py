@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:16:49 trottar"
+# Time-stamp: "2024-12-11 04:28:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -84,7 +84,7 @@ else:
 ### HERE
 sys.path.append("setup")
 from compare_iterations import compare_iters
-compare_iters(pol_str, ParticleType, Q2, W)
+compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
 
     
 ###############################################################################################################################################
@@ -802,4 +802,4 @@ if EPSSET == "high":
 
     sys.path.append("setup")
     from compare_iterations import compare_iters
-    compare_iters(pol_str, ParticleType, Q2, W)
+    compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
