@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:35:43 trottar"
+# Time-stamp: "2024-12-11 04:36:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -325,9 +325,9 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
     for index, row in file_df_dict['sep_file'].iterrows():
 
-        for sig_type, data in row.iterrows():
+        for data in row:
 
-            tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{sig_type}")
+            tmp_file_name = outputpdf.replace(OutFilename, f"{OutFilename}_{index}")
             # Create a PdfPages object to manage the PDF file
             with PdfPages(tmp_file_name) as pdf:
 
