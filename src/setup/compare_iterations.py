@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:51:17 trottar"
+# Time-stamp: "2024-12-11 04:52:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -358,7 +358,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                     df_key = "Low $\epsilon$"                
 
                 params_values = param_arr
-                data_values = data
+                data_values = df['x_real']
 
                 # 1. Parameter Evolution Plot
                 # Purpose: Track how parameters change across iterations.
