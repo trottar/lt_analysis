@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:04:37 trottar"
+# Time-stamp: "2024-12-11 03:05:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -65,7 +65,7 @@ for f in [aver_hi_file, aver_lo_file]:
     num_lines = len(lines)
     
     # Remove the last line if it's empty or just a newline
-    lines  = [line.replace("\n","") for line in lines if len(line) != num_lines line]
+    lines = [line.replace("\n", "") for line in lines if len(line) != num_lines]
     
     # Open the file again, this time in write mode to overwrite the content
     with open(f, "w") as outfile:
