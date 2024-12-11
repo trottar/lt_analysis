@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:06:28 trottar"
+# Time-stamp: "2024-12-11 05:07:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -94,7 +94,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
     Import separated xsects model
     '''
     
-    sys.path.append("../models")
+    sys.path.append("models")
     if pol_str == "pl" and ParticleType == "kaon":
         from sep_xsect_kaon_pl import import_model
 
@@ -383,7 +383,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 plt.legend()
                 plt.grid()
                 pdf.savefig(fig, bbox_inches='tight')
-
 
                 print("="*50)
                 model = []
