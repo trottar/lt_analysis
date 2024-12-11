@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:28:48 trottar"
+# Time-stamp: "2024-12-11 07:30:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,14 +78,7 @@ else:
 if EPSSET == "low":
     EPSVAL = LOEPS
 else:
-    EPSVAL = HIEPS    
-
-
-### HERE
-sys.path.append("setup")
-from compare_iterations import compare_iters
-compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
-
+    EPSVAL = HIEPS
     
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
