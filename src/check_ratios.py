@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 02:45:39 trottar"
+# Time-stamp: "2024-12-11 02:46:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -46,7 +46,7 @@ inp_hieps = sys.argv[6]
 aver_lo_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace("p",""), inp_W.replace("p",""), float(inp_loeps)*100)
 aver_hi_file = '{}/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(LTANAPATH, inp_pid, inp_pol, inp_Q2.replace("p",""), inp_W.replace("p",""), float(inp_hieps)*100)
 
-for f in zip(aver_hi_file, aver_lo_file):
+for f in [aver_hi_file, aver_lo_file]:
 
     print(f"\nChecking {f}...")
 
