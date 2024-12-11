@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-11-19 00:59:24 trottar"
+# Time-stamp: "2024-12-11 03:40:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -305,7 +305,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask = (df['tbin'] == (k+1))
-            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=df['dratio'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(phi_bin_centers[df['phibin'][mask]], df['ratio'][mask], yerr=np.maximum(df['dratio'][mask], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.axhline(1.0, color='gray', linestyle='--')
 
@@ -357,7 +357,7 @@ with PdfPages(outputpdf) as pdf:
             else:
                 legend_label = "{} (No valid data)".format(epsilon_label)
 
-            ax.errorbar(phi_bin_centers[df['phibin'][mask][non_zero_mask]], ratios, yerr=errors, 
+            ax.errorbar(phi_bin_centers[df['phibin'][mask][non_zero_mask]], ratios, yerr=np.maximum(errors, 0.0)
                         marker=markers[i], linestyle='None', label=legend_label, 
                         color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
@@ -400,7 +400,7 @@ with PdfPages(outputpdf) as pdf:
         # Use x_increment for x-axis values
         x_values = np.arange(0, len(ratios))
         
-        ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+        ax.errorbar(x_values, ratios, yerr=np.maximum(errors, 0.0), marker=markers[i], linestyle='None', 
                     label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                     markerfacecolor='none', capsize=2)
 
@@ -473,7 +473,7 @@ with PdfPages(outputpdf) as pdf:
             # Use x_increment for x-axis values
             x_values = np.arange(x_increment, x_increment+len(ratios))
 
-            ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+            ax.errorbar(x_values, ratios, yerr=np.maximum(errors, 0.0), marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
 
@@ -601,7 +601,7 @@ with PdfPages(outputpdf) as pdf:
             # Use x_increment for x-axis values
             x_values = np.arange(x_increment, x_increment+len(ratios))
             
-            ax.errorbar(x_values, ratios, yerr=errors, marker=markers[i], linestyle='None', 
+            ax.errorbar(x_values, ratios, yerr=np.maximum(errors, 0.0), marker=markers[i], linestyle='None', 
                         label=epsilon_label, color=colors[i], markeredgecolor=colors[i], 
                         markerfacecolor='none', capsize=2)
 
@@ -707,7 +707,7 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(t_bin_centers, df['Q2'], yerr=df['dQ2'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(t_bin_centers, df['Q2'], yerr=np.maximum(df['dQ2'], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
@@ -739,7 +739,7 @@ with PdfPages(outputpdf) as pdf:
         else:
             df_key = "Low $\epsilon$"
 
-        ax.errorbar(t_bin_centers, df['W'], yerr=df['dW'], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+        ax.errorbar(t_bin_centers, df['W'], yerr=np.maximum(df['dW'], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         # Fit the data using exponential function
         popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
@@ -776,7 +776,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
-            ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['th_cm'][mask], df['x_real'][mask], yerr=np.maximum(df['dx_real'][mask], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.set_xlabel('$\theta_{cm}$')
         ax.set_ylabel('x_real')
@@ -832,7 +832,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=np.maximum(df['dx_real'][mask], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
         ax.set_xlabel('$\phi$', fontsize=24)
         ax.set_ylabel('x_real', fontsize=24)
@@ -892,7 +892,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=np.maximum(df['dx_real'][mask], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key+" Model")
 
         ax.set_xlabel('$\phi$', fontsize=24)
@@ -924,7 +924,7 @@ with PdfPages(outputpdf) as pdf:
                 df_key = "Low $\epsilon$"
                 
             mask =  (df['t'][k*NumPhiBins+int(i/NumPhiBins)] == df['t']) & (df['x_real'] > 0.0)  & (df['dx_real'] > 0.0)
-            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=df['dx_real'][mask], marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['phi'][mask], df['x_real'][mask], yerr=np.maximum(df['dx_real'][mask], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
             ax.scatter(df['phi'][mask], df['x_mod'][mask], marker=markers[i+2], linestyle='None', label=df_key+" Model")
 
         ax.set_xlabel('$\phi$', fontsize=24)
@@ -965,7 +965,7 @@ with PdfPages(outputpdf) as pdf:
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
                 ax.plot(df['t'], model, linestyle='-.', color='red', label='Model Fit')
-            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=df['d{}'.format(sig)], marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=np.maximum(df['d{}'.format(sig)], marker=markers[i], 0.0), linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
