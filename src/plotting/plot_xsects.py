@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:41:20 trottar"
+# Time-stamp: "2024-12-11 03:42:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -965,7 +965,7 @@ with PdfPages(outputpdf) as pdf:
             # Check that model sig is not all zeros
             if not all(element == 0 for element in model):
                 ax.plot(df['t'], model, linestyle='-.', color='red', label='Model Fit')
-            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=np.maximum(df['d{}'.format(sig)], marker=markers[i], 0.0), linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
+            ax.errorbar(df['t'], df['{}'.format(sig)], yerr=np.maximum(df['d{}'.format(sig)], 0.0), marker=markers[i], linestyle='None', label='Data', color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
         ax.set_xlabel('t')
         ax.set_ylabel("${}$".format(formatted_sig))
         ax.tick_params(axis='x', labelsize=16)
