@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-10-17 17:40:25 trottar"
+# Time-stamp: "2024-12-11 02:07:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -44,6 +44,8 @@ LTANAPATH=lt.LTANAPATH
 CACHEPATH=lt.CACHEPATH
 ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
+
+TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
 
 foutname = OUTPATH+"/" + OutFilename + ".root"
 fouttxt  = OUTPATH+"/" + OutFilename + ".txt"
@@ -139,7 +141,7 @@ for key, values in settings.items():
     else:
         continue
 
-    inp_dir = CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+inp_dir
+    inp_dir = TEMP_CACHEPATH+"/{}/{}/Q{}W{}/".format(USER,ParticleType,Q2,W)+inp_dir
     
     ###############################################################################################################################################
     '''
