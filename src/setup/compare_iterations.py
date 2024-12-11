@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:54:54 trottar"
+# Time-stamp: "2024-12-11 06:01:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -161,9 +161,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
         # Unpack values into variables
         Q2, W, LOEPS, HIEPS, param_arr, date = values.values()
-
-        file_df_dict["param_arr"] = param_arr
-        file_df_dict["date"] = date
 
         inp_dir = f"{TEMP_CACHEPATH}/{ParticleType}/Q{Q2}W{W}/{date}"
 
@@ -337,7 +334,10 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                                                        .format(pol_str, Q2.replace("p",""), W.replace("p","")) \
                                                        , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
 
-        comb_dict[f'Q{Q2}W{W}'] = file_df_dict
+                file_df_dict["param_arr"] = pd.DataFrame(param_arr, columns=["params"])
+                file_df_dict["date"] = pd.DataFrame(date, columns=["date"])
+
+            comb_dict[f'Q{Q2}W{W}'] = file_df_dict
 
     print("\n\ncomb_dict")
     print(comb_dict)
