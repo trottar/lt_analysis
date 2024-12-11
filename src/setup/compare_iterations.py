@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 04:27:10 trottar"
+# Time-stamp: "2024-12-11 04:27:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,7 +13,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import os, sys
+import os, sys, re
 
 # Define the function f(x; params)
 def f(x, params):
