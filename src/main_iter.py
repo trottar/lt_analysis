@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 20:05:39 trottar"
+# Time-stamp: "2024-12-11 04:13:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -61,6 +61,11 @@ formatted_date = sys.argv[10]
 NumtBins = sys.argv[11]
 NumPhiBins = sys.argv[12]
 inp_debug =  sys.argv[13]
+
+sys.path.append("setup")
+from compare_iterations import compare_iters
+compare_iters(ParticleType,Q2,W)
+
 
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
@@ -792,3 +797,7 @@ if EPSSET == "high":
         # If not, create it and fill it with the string
         with open(f_iter, 'x') as file:
             file.write(formatted_date)
+
+    sys.path.append("setup")
+    from compare_iterations import compare_iters
+    compare_iters(ParticleType,Q2,W)
