@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:09:22 trottar"
+# Time-stamp: "2024-12-11 06:10:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -384,7 +384,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 date_df = iter_data["date"]
                 param_df  = iter_data["params"]
 
-                print("!!!!!!!!!",date_df,param_df)
+                print("!!!!!!!!!",date_df,"\n",param_df)
                 
                 # Extract values for specific sets
                 for key, values in settings.items():
@@ -392,7 +392,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                     # Unpack values into variables
                     Q2, W, LOEPS, HIEPS, param_arr, date = values.values()
 
-                    if date_df.values() == date:
+                    if date_df == date:
                     
                         # Collect parameters
                         param_subset = param_arr[:len(param_arr)]  # Adjust if needed
