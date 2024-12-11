@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 05:01:48 trottar"
+# Time-stamp: "2024-12-11 05:06:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -88,6 +88,18 @@ from utility import show_pdf_with_evince
 
 def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
 
+
+    ################################################################################################################################################
+    '''
+    Import separated xsects model
+    '''
+    
+    sys.path.append("../models")
+    if pol_str == "pl" and ParticleType == "kaon":
+        from sep_xsect_kaon_pl import import_model
+
+    ################################################################################################################################################        
+    
     f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 
     inp_dir = f_iter.replace(f"{ParticleType}_Q{Q2}W{W}_iter.dat", f"src/{ParticleType}")
@@ -372,12 +384,21 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 plt.grid()
                 pdf.savefig(fig, bbox_inches='tight')
 
+
+                print("="*50)
+                model = []
+                # Generate model for comparison
+                for j, row in df.iterrows():
+                    print("-"*50)
+                    print("Data {} = {:.4e}".format(sig, row[sig]))
+                    inp_param = '{} {} {} {} {} {} '.format(Q2.replace("p","."), W.replace("p","."), row['th_cm'], row['t'], row['Q2'], row['W'])+' '.join(param_arr)
+                    model.append(import_model(sig, inp_param))
+                x_values = df['t']
                 # 2. Function Evolution Plot
                 # Purpose: Visualize how f(x) changes over iterations.
-                x_values = np.linspace(0, 2, 100)  # Example x range
                 fig = plt.figure(figsize=(10, 6))
                 for i, params in enumerate(params_values):
-                    plt.plot(x_values, f(x_values, params), label=f'Iteration {i}')
+                    plt.plot(x_values, model, label=f'Iteration {i}')
                 plt.xlabel('x')
                 plt.ylabel('f(x)')
                 plt.title('Function Evolution Across Iterations')
