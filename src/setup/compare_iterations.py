@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 06:17:48 trottar"
+# Time-stamp: "2024-12-11 06:20:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -415,7 +415,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                                         
                 # 1. Parameter Evolution Plot
                 fig = plt.figure(figsize=(12, 6))
-                for i in range(len(param_subset)):
+                for i in range(len(params_values[0][:k+4])): # Maximum of 4 parameters
                     param_evolution = [params[i] for params in params_values]
                     plt.plot(dates, param_evolution, label=f'Parameter {i}', marker='o')
 
