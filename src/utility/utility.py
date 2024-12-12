@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 09:31:57 trottar"
+# Time-stamp: "2024-12-12 10:14:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1302,7 +1302,7 @@ def create_th1f_from_bin_content(bin_centers, bin_contents, histogram_name="MyHi
     # Create histogram with calculated bin edges
     hist = ROOT.TH1F(histogram_name, histogram_title, 
                      len(bin_centers), 
-                     array.array('d', bin_edges))
+                     array('d', bin_edges))
     
     # Fill histogram with bin contents
     for i, (center, content) in enumerate(zip(bin_centers, bin_contents), 1):
