@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 15:02:06 trottar"
+# Time-stamp: "2024-12-12 16:25:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -630,25 +630,18 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         hist_val_data, bin_val_data = data
         hist_val_dummy, bin_val_dummy = dummy
-        # Convert histograms to NumPy arrays (if not already)
-        bin_val_data = np.array(bin_val_data)
-        bin_val_dummy = np.array(bin_val_dummy)
         # Find bin width (optional, after sorting if needed)
         bin_width_data = np.mean(np.diff(bin_val_data))
+        # Scale the lists before subtraction         
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
+        #print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        # Scale the histogram values before subtraction
-        mm_hist_data[i].Scale(normfac_data)
-        mm_hist_dummy[i].Scale(normfac_dummy)
-        # Perform subtraction
-        mm_hist_data[i].Add(mm_hist_dummy[i], -1)
-        total_count = fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2] #/ bin_width_data        
+        total_count = np.sum(sub_val)/bin_width_data
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
-            #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2]))**2)
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
         except ZeroDivisionError:
@@ -958,16 +951,13 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     print("-"*25)
     for simc in binned_hist_simc:
         hist_val_simc, bin_val_simc = simc
-        # Convert histograms to NumPy arrays (if not already)
-        bin_val_simc = np.array(bin_val_simc)        
-        # Find bin width (optional, based on sorted bin edges)
+        # Find bin width
         bin_width_simc = np.mean(np.diff(bin_val_simc))
-        sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
-        # Scale the histogram values before subtraction
-        mm_hist_simc[i].Scale(normfac_simc)
-        total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] #/ bin_width_simc
+        # Scale the lists before subtraction         
+        scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
+        sub_val = np.array(scaled_hist_val_simc) # No dummy subtraction for simc, duh
+        total_count = np.sum(sub_val)/bin_width_simc
         try:
-            #yld = total_count*normfac_simc
             yld = total_count
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
