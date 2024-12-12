@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 16:25:01 trottar"
+# Time-stamp: "2024-12-12 16:26:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -512,7 +512,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max, show_fit=False)[2]))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
                         #if i==0 and j==0 and k==0:
                         if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
@@ -822,7 +822,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
                 "H_t_SIMC" : hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)],
-                "NumEvts_bin_MM_SIMC_unweighted" : fit_gaussian(hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)], mm_min, mm_max, show_fit=False)[2],
+                "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
             }
             
             # Sort dictionary keys alphabetically
@@ -848,7 +848,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max, show_fit=False)[2]))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
                         #if i==0 and j==0 and k==0:
                         if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
