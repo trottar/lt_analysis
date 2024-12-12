@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 04:17:07 trottar"
+# Time-stamp: "2024-12-12 04:38:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -627,11 +627,11 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Find bin width (optional, after sorting if needed)
         bin_width_data = np.mean(np.diff(bin_val_data))
         # Sort the bin edges and remap bin contents for `data`
-        sorted_indices_data = np.argsort(bin_val_data[:-1])  # Sort based on the left edges
+        sorted_indices_data = np.argsort(bin_val_data[:-1]).astype(int)  # Sort based on the left edges
         bin_edges_data = np.sort(bin_val_data)              # Monotonically increasing edges
         hist_val_data = hist_val_data[sorted_indices_data]  # Reorder contents
         # Sort the bin edges and remap bin contents for `dummy`
-        sorted_indices_dummy = np.argsort(bin_val_dummy[:-1])  # Sort based on the left edges
+        sorted_indices_dummy = np.argsort(bin_val_dummy[:-1]).astype(int)  # Sort based on the left edges
         bin_edges_dummy = np.sort(bin_val_dummy)              # Monotonically increasing edges
         hist_val_dummy = hist_val_dummy[sorted_indices_dummy]  # Reorder contents
         # Scale the histogram values before subtraction
@@ -935,7 +935,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Find bin width (optional, based on sorted bin edges)
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         # Sort the bin edges and remap bin contents
-        sorted_indices = np.argsort(bin_val_simc[:-1])  # Sort based on the left edges
+        sorted_indices = np.argsort(bin_val_simc[:-1]).astype(int)  # Sort based on the left edges
         bin_edges = np.sort(bin_val_simc)              # Monotonically increasing edges
         hist_val_simc = hist_val_simc[sorted_indices]  # Reorder contents
         # Scale the histogram values before subtraction
