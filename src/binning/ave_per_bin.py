@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 13:23:31 trottar"
+# Time-stamp: "2024-12-12 13:54:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -666,6 +666,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         for data, dummy in zip(binned_hist_data, binned_hist_dummy):
             bin_val_data, hist_val_data = data
             bin_val_dummy, hist_val_dummy = dummy
+            sub_val = np.subtract(hist_val_data, hist_val_dummy)
             try:
                 # Calculate the weighted sum of frequencies and divide by the total count
                 weighted_sum = np.sum(sub_val * bin_val_data)
