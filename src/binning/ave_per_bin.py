@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 02:40:48 trottar"
+# Time-stamp: "2024-12-12 13:23:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -537,6 +537,8 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setti
         binned_t_data = []
         binned_hist_data = []
         binned_hist_dummy = []
+        kin_hist_data = []
+        kin_hist_dummy = []
         
         # Loop through bins in t_data and identify events in specified bins
         for j in range(len(t_bins)-1):
@@ -563,24 +565,28 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setti
             tmp_binned_t_data.append(tmp_hist_data)
 
             if kin_type == "t":
+                kin_hist_data.append(H_t_DATA.Clone())
                 tmp_hist_data = [[],[]]                
                 for i in range(1, H_t_DATA.GetNbinsX() + 1):        
                     tmp_hist_data[0].append(H_t_DATA.GetBinCenter(i))
                     tmp_hist_data[1].append(H_t_DATA.GetBinContent(i))                    
                 tmp_binned_hist_data.append(tmp_hist_data)
             if kin_type == "Q2":
+                kin_hist_data.append(H_Q2_DATA.Clone())
                 tmp_hist_data = [[],[]]                
                 for i in range(1, H_Q2_DATA.GetNbinsX() + 1):        
                     tmp_hist_data[0].append(H_Q2_DATA.GetBinCenter(i))
                     tmp_hist_data[1].append(H_Q2_DATA.GetBinContent(i))                    
                 tmp_binned_hist_data.append(tmp_hist_data)
             if kin_type == "W":
+                kin_hist_data.append(H_W_DATA.Clone())            
                 tmp_hist_data = [[],[]]                
                 for i in range(1, H_W_DATA.GetNbinsX() + 1):
                     tmp_hist_data[0].append(H_W_DATA.GetBinCenter(i))
                     tmp_hist_data[1].append(H_W_DATA.GetBinContent(i))                    
                 tmp_binned_hist_data.append(tmp_hist_data)        
             if kin_type == "epsilon":
+                kin_hist_data.append(H_epsilon_DATA.Clone())
                 tmp_hist_data = [[],[]]                
                 for i in range(1, H_epsilon_DATA.GetNbinsX() + 1):
                     tmp_hist_data[0].append(H_epsilon_DATA.GetBinCenter(i))
@@ -588,24 +594,28 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setti
                 tmp_binned_hist_data.append(tmp_hist_data)
 
             if kin_type == "t":
+                kin_hist_dummy.append(H_t_DUMMY.Clone())
                 tmp_hist_dummy = [[],[]]                
                 for i in range(1, H_t_DUMMY.GetNbinsX() + 1):        
                     tmp_hist_dummy[0].append(H_t_DUMMY.GetBinCenter(i))
                     tmp_hist_dummy[1].append(H_t_DUMMY.GetBinContent(i))                    
                 tmp_binned_hist_dummy.append(tmp_hist_dummy)
             if kin_type == "Q2":
+                kin_hist_dummy.append(H_Q2_DUMMY.Clone())
                 tmp_hist_dummy = [[],[]]                
                 for i in range(1, H_Q2_DUMMY.GetNbinsX() + 1):
                     tmp_hist_dummy[0].append(H_Q2_DUMMY.GetBinCenter(i))
                     tmp_hist_dummy[1].append(H_Q2_DUMMY.GetBinContent(i))                    
                 tmp_binned_hist_dummy.append(tmp_hist_dummy)
             if kin_type == "W":
+                kin_hist_dummy.append(H_W_DUMMY.Clone())
                 tmp_hist_dummy = [[],[]]                
                 for i in range(1, H_W_DUMMY.GetNbinsX() + 1):
                     tmp_hist_dummy[0].append(H_W_DUMMY.GetBinCenter(i))
                     tmp_hist_dummy[1].append(H_W_DUMMY.GetBinContent(i))                    
                 tmp_binned_hist_dummy.append(tmp_hist_dummy)        
             if kin_type == "epsilon":
+                kin_hist_dummy.append(H_epsilon_DUMMY.Clone())
                 tmp_hist_dummy = [[],[]]                
                 for i in range(1, H_epsilon_DUMMY.GetNbinsX() + 1):
                     tmp_hist_dummy[0].append(H_epsilon_DUMMY.GetBinCenter(i))
@@ -620,7 +630,9 @@ def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setti
                 binned_dict[kin_type] = {
                     "binned_t_data" : binned_t_data,
                     "binned_hist_data" : binned_hist_data,
-                    "binned_hist_dummy" : binned_hist_dummy
+                    "binned_hist_dummy" : binned_hist_dummy,
+                    "kin_hist_data" : kin_hist_data,
+                    "kin_hist_dummy" : kin_hist_dummy
                 }
         
     return binned_dict
@@ -642,7 +654,9 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         binned_t_data = binned_dict[kin_type]["binned_t_data"]
         binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
         binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
-
+        kin_hist_data = binned_dict[kin_type]["kin_hist_data"]
+        kin_hist_dummy = binned_dict[kin_type]["kin_hist_dummy"]
+        
         ave_hist = []
         ave_err_hist = []
         binned_sub_data = [[],[]]
@@ -652,24 +666,10 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         for data, dummy in zip(binned_hist_data, binned_hist_dummy):
             bin_val_data, hist_val_data = data
             bin_val_dummy, hist_val_dummy = dummy
-            sub_val = np.subtract(hist_val_data, hist_val_dummy)
             try:
                 # Calculate the weighted sum of frequencies and divide by the total count
-                #weighted_sum = np.sum(sub_val * bin_val_data)
-                #total_count = np.sum(sub_val)
-                ## HERE
-                bin_edges_array = array('d', bin_val_data)
-                # Create histograms for sub_val and sub_val * bin_val_data
-                hist_sub_data = ROOT.TH1F("hist_sub_data", "Subtracted Histogram", len(sub_val), bin_edges_array)
-                hist_weighted_data = ROOT.TH1F("hist_weighted_data", "Weighted Histogram", len(sub_val), bin_edges_array)
-                # Fill the histograms
-                for j, value in enumerate(sorted(sub_val), start=1):
-                    hist_sub_data.SetBinContent(j, value)
-                    hist_weighted_data.SetBinContent(j, value * bin_val_data[j - 1])  # Weighted by bin center
-                # Calculate weighted sum and total count using your fit_gaussian
-                weighted_sum = fit_gaussian(hist_weighted_data, mm_min, mm_max, show_fit=False)[2]
-                total_count = fit_gaussian(hist_sub_data, mm_min, mm_max, show_fit=False)[2]
-                ## HERE               
+                weighted_sum = np.sum(sub_val * bin_val_data)
+                total_count = np.sum(sub_val)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
@@ -857,7 +857,8 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):
         # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
         binned_t_simc = []
         binned_hist_simc = []
-    
+        kin_hist_data = []
+        
         # Loop through bins in t_simc and identify events in specified bins
         for j in range(len(t_bins)-1):
 
@@ -877,20 +878,24 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):
             tmp_binned_t_simc.append(tmp_hist_simc)
 
             if kin_type == "t":
+                kin_hist_simc.append(H_t_SIMC.Clone())
                 tmp_binned_hist_simc.append(tmp_hist_simc)
             if kin_type == "Q2":
+                kin_hist_simc.append(H_Q2_SIMC.Clone())
                 tmp_hist_simc = [[],[]]                
                 for i in range(1, H_Q2_SIMC.GetNbinsX() + 1):        
                     tmp_hist_simc[0].append(H_Q2_SIMC.GetBinCenter(i))
                     tmp_hist_simc[1].append(H_Q2_SIMC.GetBinContent(i))                    
                 tmp_binned_hist_simc.append(tmp_hist_simc)
             if kin_type == "W":
+                kin_hist_simc.append(H_W_SIMC.Clone())                
                 tmp_hist_simc = [[],[]]                
                 for i in range(1, H_W_SIMC.GetNbinsX() + 1):
                     tmp_hist_simc[0].append(H_W_SIMC.GetBinCenter(i))
                     tmp_hist_simc[1].append(H_W_SIMC.GetBinContent(i))                    
                 tmp_binned_hist_simc.append(tmp_hist_simc)        
             if kin_type == "epsilon":
+                kin_hist_simc.append(H_epsilon_SIMC.Clone())                
                 tmp_hist_simc = [[],[]]                
                 for i in range(1, H_epsilon_SIMC.GetNbinsX() + 1):
                     tmp_hist_simc[0].append(H_epsilon_SIMC.GetBinCenter(i))
@@ -903,7 +908,8 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
                     "binned_t_simc" : binned_t_simc,
-                    "binned_hist_simc" : binned_hist_simc
+                    "binned_hist_simc" : binned_hist_simc,
+                    "kin_hist_simc" : kin_hist_simc                    
                 }
         
     return binned_dict                
@@ -917,7 +923,9 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration)
-
+    
+    kin_hist_simc = binned_dict[kin_type]["kin_hist_simc"]
+    
     group_dict = {}
     
     for kin_type in kinematic_types:
@@ -934,21 +942,8 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
             sub_val = np.array(hist_val_simc) # No dummy subtraction for simc
             try:
                 # Calculate the weighted sum of frequencies and divide by the total count
-                #weighted_sum = np.sum(sub_val * bin_val_simc)
-                #total_count = np.sum(sub_val)
-                ## HERE
-                bin_edges_array = array('d', bin_val_simc)
-                # Create histograms for sub_val and sub_val * bin_val_simc
-                hist_sub_simc = ROOT.TH1F("hist_simc", "SIMC Histogram", len(sub_val), bin_edges_array)
-                hist_weighted_simc = ROOT.TH1F("hist_weighted_simc", "Weighted SIMC Histogram", len(sub_val), bin_edges_array)
-                # Fill the histograms
-                for j, value in enumerate(sorted(sub_val), start=1):
-                    hist_sub_simc.SetBinContent(j, value)
-                    hist_weighted_simc.SetBinContent(j, value * bin_val_simc[j - 1])  # Weighted by bin center
-                # Calculate weighted sum and total count using your fit_gaussian function
-                weighted_sum = fit_gaussian(hist_weighted_simc, mm_min, mm_max, show_fit=False)[2]
-                total_count = fit_gaussian(hist_sub_simc, mm_min, mm_max, show_fit=False)[2]
-                ## HERE
+                weighted_sum = np.sum(sub_val * bin_val_simc)
+                total_count = np.sum(sub_val)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for simc {} (t-bin={})... ".format(kin_type, i+1))

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 13:11:40 trottar"
+# Time-stamp: "2024-12-12 13:30:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -632,9 +632,12 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         hist_val_dummy, bin_val_dummy = dummy
         # Convert histograms to NumPy arrays (if not already)
         bin_val_data = np.array(bin_val_data)
-        bin_val_dummy = np.array(bin_val_dummy)        
+        bin_val_dummy = np.array(bin_val_dummy)
         # Find bin width (optional, after sorting if needed)
         bin_width_data = np.mean(np.diff(bin_val_data))
+        scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
+        scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
+        sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         # Scale the histogram values before subtraction
         mm_hist_data[i].Scale(normfac_data)
         mm_hist_dummy[i].Scale(normfac_dummy)
@@ -932,9 +935,10 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         bin_val_simc = np.array(bin_val_simc)        
         # Find bin width (optional, based on sorted bin edges)
         bin_width_simc = np.mean(np.diff(bin_val_simc))
+        sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         # Scale the histogram values before subtraction
         mm_hist_simc[i].Scale(normfac_simc)
-        mm_hist_simc[i]  # No dummy subtraction for SIMC
+        mm_hist_simc[i]  # No dummy subtraction for simc, duh
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] / bin_width_simc
         try:
