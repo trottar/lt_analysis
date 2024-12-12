@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 18:04:14 trottar"
+# Time-stamp: "2024-12-11 20:44:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -454,9 +454,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     pi_mm_min = 0.90 + MM_offset_DATA
                     pi_mm_max = 0.94 + MM_offset_DATA
                     scale_factor = (
-                        fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[0]
+                        fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[2]
                         /
-                        fit_gaussian(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[0]
+                        fit_gaussian(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[2]
                     ) * 0.85
                     ##############
                     ##############
@@ -627,12 +627,12 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         #print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         #total_count = np.sum(sub_val)/bin_width_data
-        total_count = fit_gaussian(sub_val, mm_min, mm_max)[0]/bin_width_data
+        total_count = fit_gaussian(sub_val, mm_min, mm_max)[2]/bin_width_data
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
             #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(hist_val_data, mm_min, mm_max)[0]))**2)
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(hist_val_data, mm_min, mm_max)[2]))**2)
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
         except ZeroDivisionError:
@@ -911,7 +911,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         #total_count = np.sum(sub_val)/bin_width_simc
-        total_count = fit_gaussian(sub_val, mm_min, mm_max)[0]/bin_width_simc
+        total_count = fit_gaussian(sub_val, mm_min, mm_max)[2]/bin_width_simc
         try:
             yld = total_count*normfac_simc
             # Calculate simc yield error (relative error)
