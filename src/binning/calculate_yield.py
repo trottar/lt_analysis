@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 03:06:37 trottar"
+# Time-stamp: "2024-12-12 03:07:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -925,7 +925,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         #print("Y_simc = {:.5e}*{:.5e}".format(np.sum(hist_val_simc), normfac_simc))
         # Find bin width
         bin_width_simc = np.mean(np.diff(bin_val_simc))
-        sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
+        # Scale the lists before subtraction        
+        scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
+        sub_val = np.array(scaled_hist_val_simc) # No dummy subtraction for simc, duh
         #total_count = np.sum(sub_val)/bin_width_simc
         ## HERE
         # Convert bin edges to ROOT-compatible format
@@ -935,7 +937,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Fill histogram with subtracted values (here just sub_val)
         for j, value in enumerate(sorted(sub_val), start=1):
             print("!!!!!!!!!!!!",j, value)
-            sub_hist_simc.SetBinContent(j, value*normfac_simc)
+            sub_hist_simc.SetBinContent(j, value)
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(sub_hist_simc, mm_min, mm_max, show_fit=False)[2] / bin_width_simc
         ## HERE
