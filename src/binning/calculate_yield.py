@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 17:19:47 trottar"
+# Time-stamp: "2024-12-12 17:30:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -628,14 +628,14 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        hist_val_data, bin_val_data = data
-        hist_val_dummy, bin_val_dummy = dummy
-        # Find bin width (optional, after sorting if needed)
+        bin_val_data, hist_val_data = data
+        bin_val_dummy, hist_val_dummy = dummy
+        # Find bin width
         bin_width_data = np.mean(np.diff(bin_val_data))
         # Scale the lists before subtraction         
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
-        #print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
+        # Dummy subtraction
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
         total_count = np.sum(sub_val)/bin_width_data
         try:
@@ -950,12 +950,13 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     i=0 # iter
     print("-"*25)
     for simc in binned_hist_simc:
-        hist_val_simc, bin_val_simc = simc
+        bin_val_simc, hist_val_simc = simc
         # Find bin width
         bin_width_simc = np.mean(np.diff(bin_val_simc))
-        # Scale the lists before subtraction         
+        # Scale the lists before subtraction
         scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
-        sub_val = np.array(scaled_hist_val_simc) # No dummy subtraction for simc, duh
+        # No dummy subtraction for simc, duh
+        sub_val = np.array(scaled_hist_val_simc)
         total_count = np.sum(sub_val)/bin_width_simc
         try:
             yld = total_count
