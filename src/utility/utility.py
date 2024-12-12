@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 01:51:09 trottar"
+# Time-stamp: "2024-12-12 02:04:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1210,8 +1210,10 @@ def select_valid_parameter(sig_name, elements):
 ##################################################################################################################################################            
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
-def fit_gaussian(hist, x_min, x_max, show_fit=True):
+def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
+    hist = hist_original.Clone()
+    
     #print("-" * 25)
 
     # Find the corresponding bin numbers
@@ -1255,9 +1257,6 @@ def fit_gaussian(hist, x_min, x_max, show_fit=True):
     mean_err = fit_func.GetParError(1)
     
     integral = fit_func.Integral(min_range, max_range)
-
-    if not show_fit:
-        del fit_func
     
     return [mean, mean_err, integral]
 
