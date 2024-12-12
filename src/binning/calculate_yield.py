@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 03:26:13 trottar"
+# Time-stamp: "2024-12-12 03:49:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -621,26 +621,31 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
         bin_val_data, hist_val_data = data
         bin_val_dummy, hist_val_dummy = dummy
-        # Find bin width
+        # Find bin width (optional, after sorting if needed)
         bin_width_data = np.mean(np.diff(bin_val_data))
-        # Scale the lists before subtraction        
+        # Sort the bin edges and remap bin contents for `data`
+        sorted_indices_data = np.argsort(bin_val_data[:-1])  # Sort based on the left edges
+        bin_edges_data = np.sort(bin_val_data)              # Monotonically increasing edges
+        hist_val_data = hist_val_data[sorted_indices_data]  # Reorder contents
+        # Sort the bin edges and remap bin contents for `dummy`
+        sorted_indices_dummy = np.argsort(bin_val_dummy[:-1])  # Sort based on the left edges
+        bin_edges_dummy = np.sort(bin_val_dummy)              # Monotonically increasing edges
+        hist_val_dummy = hist_val_dummy[sorted_indices_dummy]  # Reorder contents
+        # Scale the histogram values before subtraction
         scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
         scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
-        #print("{}| Y_data = {:.5e}*{:.5e}={:.5e}".format(int(i/(len(t_bins) - 1)), np.sum(hist_val_data), normfac_data, np.sum(scaled_hist_val_data)))
+        # Perform subtraction
         sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        #total_count = np.sum(sub_val)/bin_width_data
-        ## HERE
-        # Convert bin edges to ROOT-compatible format
-        bin_edges_array = array('d', bin_val_data)
-        # Create the histogram
+        # Convert sorted bin edges for `data` to ROOT-compatible format
+        bin_edges_array = array('d', bin_edges_data)
+        # Create the ROOT histogram with sorted edges
         sub_hist_data = ROOT.TH1F("hist", "Subtracted Histogram", len(sub_val), bin_edges_array)
         # Fill histogram with subtracted values
         for j, value in enumerate(sub_val, start=1):
-            print("!!!!!!!!!!!!",j, value)
+            print("Setting bin", j, "content to", value)
             sub_hist_data.SetBinContent(j, value)
         # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(sub_hist_data, mm_min, mm_max, show_fit=False)[2] / bin_width_data
-        ## HERE        
+        total_count = fit_gaussian(sub_hist_data, mm_min, mm_max, show_fit=False)[2] / bin_width_data        
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
@@ -922,25 +927,25 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     print("-"*25)
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
-        #print("Y_simc = {:.5e}*{:.5e}".format(np.sum(hist_val_simc), normfac_simc))
-        # Find bin width
+        # Find bin width (optional, based on sorted bin edges)
         bin_width_simc = np.mean(np.diff(bin_val_simc))
-        # Scale the lists before subtraction        
+        # Sort the bin edges and remap bin contents
+        sorted_indices = np.argsort(bin_val_simc[:-1])  # Sort based on the left edges
+        bin_edges = np.sort(bin_val_simc)              # Monotonically increasing edges
+        hist_val_simc = hist_val_simc[sorted_indices]  # Reorder contents
+        # Scale the histogram values before subtraction
         scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
-        sub_val = np.array(scaled_hist_val_simc) # No dummy subtraction for simc, duh
-        #total_count = np.sum(sub_val)/bin_width_simc
-        ## HERE
-        # Convert bin edges to ROOT-compatible format
-        bin_edges_array = array('d', bin_val_simc)
-        # Create the histogram
+        sub_val = np.array(scaled_hist_val_simc)  # No dummy subtraction for SIMC
+        # Convert sorted bin edges to ROOT-compatible format
+        bin_edges_array = array('d', bin_edges)
+        # Create the ROOT histogram with the sorted edges
         sub_hist_simc = ROOT.TH1F("hist_simc", "SIMC Histogram", len(sub_val), bin_edges_array)
         # Fill histogram with subtracted values (here just sub_val)
         for j, value in enumerate(sub_val, start=1):
-            print("!!!!!!!!!!!!",j, value)
+            print("Setting bin", j, "content to", value)
             sub_hist_simc.SetBinContent(j, value)
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(sub_hist_simc, mm_min, mm_max, show_fit=False)[2] / bin_width_simc
-        ## HERE
         try:
             #yld = total_count*normfac_simc
             yld = total_count
