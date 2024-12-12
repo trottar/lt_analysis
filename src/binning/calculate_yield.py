@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 13:10:51 trottar"
+# Time-stamp: "2024-12-12 13:11:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -639,14 +639,14 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         mm_hist_data[i].Scale(normfac_data)
         mm_hist_dummy[i].Scale(normfac_dummy)
         # Perform subtraction
-        sub_hist_data = mm_hist_data[i].Add(mm_hist_dummy[i], -1)
+        mm_hist_data[i].Add(mm_hist_dummy[i], -1)
         # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(sub_hist_data, mm_min, mm_max, show_fit=False)[2] / bin_width_data        
+        total_count = fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2] / bin_width_data        
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
             #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(sub_hist_data, mm_min, mm_max, show_fit=False)[2]))**2)
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2]))**2)
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
         except ZeroDivisionError:
@@ -934,9 +934,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         # Scale the histogram values before subtraction
         mm_hist_simc[i].Scale(normfac_simc)
-        sub_hist_simc = mm_hist_simc[i]  # No dummy subtraction for SIMC
+        mm_hist_simc[i]  # No dummy subtraction for SIMC
         # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(sub_hist_simc, mm_min, mm_max, show_fit=False)[2] / bin_width_simc
+        total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] / bin_width_simc
         try:
             #yld = total_count*normfac_simc
             yld = total_count
