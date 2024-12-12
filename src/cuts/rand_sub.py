@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:43:25 trottar"
+# Time-stamp: "2024-12-11 20:54:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1491,8 +1491,6 @@ def rand_sub(phi_setting, inpDict):
         ##############
         except ZeroDivisionError:
             scale_factor = 0.0
-
-        print(scale_factor)
 
         # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)

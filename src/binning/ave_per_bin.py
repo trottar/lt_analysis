@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:43:53 trottar"
+# Time-stamp: "2024-12-11 21:07:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -629,6 +629,9 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
     nWindows, phi_setting = hist["nWindows"], hist["phi_setting"]
+
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]    
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
@@ -897,6 +900,9 @@ def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):
 def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iteration):
 
     tree_simc = hist["InFile_SIMC"]
+
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration)

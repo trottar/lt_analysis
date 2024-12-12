@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:44:03 trottar"
+# Time-stamp: "2024-12-11 21:06:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -601,7 +601,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     nWindows, phi_setting = hist["nWindows"], hist["phi_setting"]
 
     # Grab the setting by setting normalized error
-    data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())] 
+    data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())]
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
@@ -890,6 +892,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
     phi_setting = hist["phi_setting"]
+
+    mm_min = inpDict["mm_min"] 
+    mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data
     binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
