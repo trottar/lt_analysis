@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:09:50 trottar"
+# Time-stamp: "2024-12-11 20:35:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1485,7 +1485,7 @@ def rand_sub(phi_setting, inpDict):
                 fit_gaussian(H_MM_nosub_DATA, pi_mm_min, pi_mm_max)[0]
                 / 
                 fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max)[0]
-            ) * 0.85
+            ) #* 0.85
         ##############
         ##############
         ##############
