@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 09:36:01 trottar"
+# Time-stamp: "2024-12-12 10:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -547,6 +547,8 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_se
     binned_t_data = []
     binned_hist_data = []
     binned_hist_dummy = []
+    mm_hist_data = []
+    mm_hist_dummy = []
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -557,6 +559,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_se
 
             H_MM_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY"]
             H_t_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DUMMY"]
+
+            mm_hist_data.append(H_MM_DATA.Clone())
+            mm_hist_dummy.append(H_MM_DUMMY.Clone())
 
             # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_dummy
             tmp_binned_t_data = []
@@ -589,7 +594,9 @@ def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_se
                 binned_dict[kin_type] = {
                     "binned_t_data" : binned_t_data,
                     "binned_hist_data" : binned_hist_data,
-                    "binned_hist_dummy" : binned_hist_dummy
+                    "binned_hist_dummy" : binned_hist_dummy,
+                    "mm_hist_data" : mm_hist_data,
+                    "mm_hist_dummy" : mm_hist_dummy
                 }
         
     return binned_dict
@@ -627,12 +634,10 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Find bin width (optional, after sorting if needed)
         bin_width_data = np.mean(np.diff(bin_val_data))
         # Scale the histogram values before subtraction
-        scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
-        scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
+        scaled_hist_val_data = mm_hist_data.Scale(normfac_data)
+        scaled_hist_val_dummy = mm_hist_dummy.Scale(normfac_dummy)
         # Perform subtraction
-        sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        # Create the ROOT histogram with edges
-        sub_hist_data = create_th1f_from_bin_content(sub_val, bin_val_data, "sub_hist_data", "Subtracted Data")
+        sub_hist_data = scaled_hist_val_data.Add(scaled_hist_val_dummy, -1)
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(sub_hist_data, mm_min, mm_max, show_fit=False)[2] / bin_width_data        
         try:
@@ -852,7 +857,8 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
     # Initialize lists for binned_t_simc, binned_hist_simc, and binned_hist_dummy
     binned_t_simc = []
     binned_hist_simc = []
-
+    mm_hist_simc = []
+    
     binned_unweighted_NumEvts_simc = []
 
     # Loop through bins in t_simc and identify events in specified bins
@@ -863,6 +869,8 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
             H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
             NumEvts_bin_MM_SIMC_unweighted = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["NumEvts_bin_MM_SIMC_unweighted"]
 
+            mm_hist_simc.append(H_MM_SIMC.Clone())            
+            
             # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
             tmp_binned_t_simc = []
             tmp_binned_hist_simc = []
@@ -888,6 +896,7 @@ def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterat
                 binned_dict[kin_type] = {
                     "binned_t_simc" : binned_t_simc,
                     "binned_hist_simc" : binned_hist_simc,
+                    "mm_hist_simc" : mm_hist_simc,
                     "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
                 }
         
@@ -921,10 +930,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Find bin width (optional, based on sorted bin edges)
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         # Scale the histogram values before subtraction
-        scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
-        sub_val = np.array(scaled_hist_val_simc)  # No dummy subtraction for SIMC
-        # Create the ROOT histogram with sorted edges
-        sub_hist_simc = create_th1f_from_bin_content(sub_val, bin_val_simc, "sub_hist_simc", "Subtracted Simc")
+        scaled_hist_val_simc = mm_hist_simc.Scale(normfac_simc)
+        sub_hist_simc = scaled_hist_val_simc  # No dummy subtraction for SIMC
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(sub_hist_simc, mm_min, mm_max, show_fit=False)[2] / bin_width_simc
         try:
