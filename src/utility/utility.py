@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:06:54 trottar"
+# Time-stamp: "2024-12-11 20:21:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1215,8 +1215,10 @@ def fit_gaussian(hist, x_min, x_max):
     #print("-" * 25)
 
     # Find the corresponding bin numbers
-    bin_min = hist.GetXaxis().FindBin(x_min)
-    bin_max = hist.GetXaxis().FindBin(x_max)
+    #bin_min = hist.GetXaxis().FindBin(x_min)
+    #bin_max = hist.GetXaxis().FindBin(x_max)
+    bin_min = hist.FindBin(x_min)
+    bin_max = hist.FindBin(x_max)
 
     # Find the maximum value within the specified range
     max_bin = bin_min
