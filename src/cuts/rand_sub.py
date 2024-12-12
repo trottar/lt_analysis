@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 21:17:21 trottar"
+# Time-stamp: "2024-12-12 00:49:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1748,8 +1748,8 @@ def rand_sub(phi_setting, inpDict):
     histDict["MM_vs_P_cal_DATA"] = MM_vs_P_cal_DATA
     histDict["MM_vs_P_hgcer_DATA"] = MM_vs_P_hgcer_DATA
     histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
-    histDict["NumEvts_MM_DUMMY"] = fit_gaussian(H_MM_DUMMY, mm_min, mm_max)[2]
-    histDict["NumEvts_MM_DATA"] = fit_gaussian(H_MM_DATA, mm_min, mm_max)[2]
+    histDict["NumEvts_MM_DUMMY"] = fit_gaussian(H_MM_DUMMY, mm_min, mm_max, show_fit=False)[2]
+    histDict["NumEvts_MM_DATA"] = fit_gaussian(H_MM_DATA, mm_min, mm_max, show_fit=False)[2]
     
     ###
     # CT plots

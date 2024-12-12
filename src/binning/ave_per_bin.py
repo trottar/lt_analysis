@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 00:05:44 trottar"
+# Time-stamp: "2024-12-12 00:52:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -658,7 +658,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 #weighted_sum = np.sum(sub_val * bin_val_data)
                 #total_count = np.sum(sub_val)
                 ## HERE
-                bin_edges_array = array('d', bin_val_data)
+                bin_edges_array = array('d', sorted(bin_val_data))
                 # Create histograms for sub_val and sub_val * bin_val_data
                 hist_sub_data = ROOT.TH1F("hist_sub_data", "Subtracted Histogram", len(sub_val), bin_edges_array)
                 hist_weighted_data = ROOT.TH1F("hist_weighted_data", "Weighted Histogram", len(sub_val), bin_edges_array)
@@ -667,8 +667,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                     hist_sub_data.SetBinContent(i, value)
                     hist_weighted_data.SetBinContent(i, value * bin_val_data[i - 1])  # Weighted by bin center
                 # Calculate weighted sum and total count using your fit_gaussian
-                weighted_sum = fit_gaussian(hist_weighted_data, mm_min, mm_max)[2]
-                total_count = fit_gaussian(hist_sub_data, mm_min, mm_max)[2]
+                weighted_sum = fit_gaussian(hist_weighted_data, mm_min, mm_max, show_fit=False)[2]
+                total_count = fit_gaussian(hist_sub_data, mm_min, mm_max, show_fit=False)[2]
                 ## HERE               
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
@@ -937,7 +937,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 #weighted_sum = np.sum(sub_val * bin_val_simc)
                 #total_count = np.sum(sub_val)
                 ## HERE
-                bin_edges_array = array('d', bin_val_simc)
+                bin_edges_array = array('d', sorted(bin_val_simc))
                 # Create histograms for sub_val and sub_val * bin_val_simc
                 hist_sub_simc = ROOT.TH1F("hist_simc", "SIMC Histogram", len(sub_val), bin_edges_array)
                 hist_weighted_simc = ROOT.TH1F("hist_weighted_simc", "Weighted SIMC Histogram", len(sub_val), bin_edges_array)
@@ -946,8 +946,8 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                     hist_sub_simc.SetBinContent(i, value)
                     hist_weighted_simc.SetBinContent(i, value * bin_val_simc[i - 1])  # Weighted by bin center
                 # Calculate weighted sum and total count using your fit_gaussian function
-                weighted_sum = fit_gaussian(hist_weighted_simc, mm_min, mm_max)[2]
-                total_count = fit_gaussian(hist_sub_simc, mm_min, mm_max)[2]
+                weighted_sum = fit_gaussian(hist_weighted_simc, mm_min, mm_max, show_fit=False)[2]
+                total_count = fit_gaussian(hist_sub_simc, mm_min, mm_max, show_fit=False)[2]
                 ## HERE
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
