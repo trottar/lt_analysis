@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 12:08:22 trottar"
+# Time-stamp: "2024-12-12 12:29:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -638,6 +638,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Scale the histogram values before subtraction
         scaled_hist_val_data = mm_hist_data[i].Scale(normfac_data)
         scaled_hist_val_dummy = mm_hist_dummy[i].Scale(normfac_dummy)
+        print("!!!!!!!!!!!", scaled_hist_val_data, "\n\n", scaled_hist_val_dummy)
         # Perform subtraction
         sub_hist_data = scaled_hist_val_data.Add(scaled_hist_val_dummy, -1)
         # Call your fit_gaussian function, passing the TH1F as input
