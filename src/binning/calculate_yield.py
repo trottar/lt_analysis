@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 00:05:50 trottar"
+# Time-stamp: "2024-12-12 00:28:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -636,6 +636,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         sub_hist_data = ROOT.TH1F("hist", "Subtracted Histogram", len(sub_val), bin_edges_array)
         # Fill histogram with subtracted values
         for i, value in enumerate(sub_val, start=1):
+            print("!!!!!!!!!",i, value)
             sub_hist_data.SetBinContent(i, value)
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(sub_hist_data, mm_min, mm_max)[2] / bin_width_data
