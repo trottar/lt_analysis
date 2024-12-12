@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 13:59:36 trottar"
+# Time-stamp: "2024-12-12 14:18:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -512,7 +512,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max)))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max)[2]))
                         #if i==0 and j==0 and k==0:
                         if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
@@ -856,7 +856,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max)))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max)[2]))
                         #if i==0 and j==0 and k==0:
                         if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
