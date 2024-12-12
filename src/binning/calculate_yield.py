@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 09:35:28 trottar"
+# Time-stamp: "2024-12-12 09:36:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -920,10 +920,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         bin_val_simc = np.array(bin_val_simc)        
         # Find bin width (optional, based on sorted bin edges)
         bin_width_simc = np.mean(np.diff(bin_val_simc))
-        # Sort the bin edges and remap bin contents
-        sorted_indices = np.argsort(bin_val_simc[:-1]).astype(int)  # Sort based on the left edges
-        bin_edges = np.sort(bin_val_simc)              # Monotonically increasing edges
-        hist_val_simc = hist_val_simc[sorted_indices]  # Reorder contents
         # Scale the histogram values before subtraction
         scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
         sub_val = np.array(scaled_hist_val_simc)  # No dummy subtraction for SIMC
