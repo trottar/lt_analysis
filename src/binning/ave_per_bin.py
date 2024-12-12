@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 01:12:16 trottar"
+# Time-stamp: "2024-12-12 02:16:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -663,9 +663,9 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 hist_sub_data = ROOT.TH1F("hist_sub_data", "Subtracted Histogram", len(sub_val), bin_edges_array)
                 hist_weighted_data = ROOT.TH1F("hist_weighted_data", "Weighted Histogram", len(sub_val), bin_edges_array)
                 # Fill the histograms
-                for i, value in enumerate(sorted(sub_val), start=1):
-                    hist_sub_data.SetBinContent(i, value)
-                    hist_weighted_data.SetBinContent(i, value * bin_val_data[i - 1])  # Weighted by bin center
+                for j, value in enumerate(sorted(sub_val), start=1):
+                    hist_sub_data.SetBinContent(j, value)
+                    hist_weighted_data.SetBinContent(j, value * bin_val_data[j - 1])  # Weighted by bin center
                 # Calculate weighted sum and total count using your fit_gaussian
                 weighted_sum = fit_gaussian(hist_weighted_data, mm_min, mm_max, show_fit=False)[2]
                 total_count = fit_gaussian(hist_sub_data, mm_min, mm_max, show_fit=False)[2]
@@ -942,9 +942,9 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
                 hist_sub_simc = ROOT.TH1F("hist_simc", "SIMC Histogram", len(sub_val), bin_edges_array)
                 hist_weighted_simc = ROOT.TH1F("hist_weighted_simc", "Weighted SIMC Histogram", len(sub_val), bin_edges_array)
                 # Fill the histograms
-                for i, value in enumerate(sorted(sub_val), start=1):
-                    hist_sub_simc.SetBinContent(i, value)
-                    hist_weighted_simc.SetBinContent(i, value * bin_val_simc[i - 1])  # Weighted by bin center
+                for j, value in enumerate(sorted(sub_val), start=1):
+                    hist_sub_simc.SetBinContent(j, value)
+                    hist_weighted_simc.SetBinContent(j, value * bin_val_simc[j - 1])  # Weighted by bin center
                 # Calculate weighted sum and total count using your fit_gaussian function
                 weighted_sum = fit_gaussian(hist_weighted_simc, mm_min, mm_max, show_fit=False)[2]
                 total_count = fit_gaussian(hist_sub_simc, mm_min, mm_max, show_fit=False)[2]
