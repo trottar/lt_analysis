@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 19:04:50 trottar"
+# Time-stamp: "2024-12-11 20:06:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1212,7 +1212,7 @@ def select_valid_parameter(sig_name, elements):
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist, x_min, x_max):
 
-    print("-" * 25)
+    #print("-" * 25)
 
     # Find the corresponding bin numbers
     bin_min = hist.GetXaxis().FindBin(x_min)
@@ -1239,9 +1239,9 @@ def fit_gaussian(hist, x_min, x_max):
     min_range = hist.GetBinCenter(left_bin)
     max_range = hist.GetBinCenter(right_bin)
 
-    print(f"min_range: {min_range:.4f}")
-    print(f"max_range: {max_range:.4f}")
-    print("-" * 25)
+    #print(f"min_range: {min_range:.4f}")
+    #print(f"max_range: {max_range:.4f}")
+    #print("-" * 25)
 
     hist.Fit("gaus", "Q", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
