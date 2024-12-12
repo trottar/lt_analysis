@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 14:18:09 trottar"
+# Time-stamp: "2024-12-12 14:46:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -478,10 +478,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
-                "H_MM_DATA" : remove_bad_bins(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
-                "H_t_DATA" : remove_bad_bins(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)]),
-                "H_MM_DUMMY" : remove_bad_bins(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]),
-                "H_t_DUMMY" : remove_bad_bins(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]),
+                "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
+                "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
+                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]),
+                "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)],
             }
 
             # Sort dictionary keys alphabetically
@@ -512,7 +512,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max)[2]))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max, show_fit=False)[2]))
                         #if i==0 and j==0 and k==0:
                         if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
@@ -644,12 +644,12 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Perform subtraction
         mm_hist_data[i].Add(mm_hist_dummy[i], -1)
         # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(mm_hist_data[i], mm_min, mm_max)[2] / bin_width_data        
+        total_count = fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2] / bin_width_data        
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
             #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(mm_hist_data[i], mm_min, mm_max)[2]))**2)
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2]))**2)
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
         except ZeroDivisionError:
@@ -856,7 +856,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         text.SetTextAlign(22); # Centered alignment
                         text.SetTextColor(ROOT.kBlack)
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max)[2]))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), fit_gaussian(val, mm_min, mm_max, show_fit=False)[2]))
                         #if i==0 and j==0 and k==0:
                         if canvas_iter == 0:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
@@ -967,7 +967,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Scale the histogram values before subtraction
         mm_hist_simc[i].Scale(normfac_simc)
         # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max)[2] / bin_width_simc
+        total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] / bin_width_simc
         try:
             #yld = total_count*normfac_simc
             yld = total_count

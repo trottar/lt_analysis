@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 13:54:08 trottar"
+# Time-stamp: "2024-12-12 14:47:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -484,16 +484,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)
             
         processed_dict["t_bin{}".format(j+1)] = {
-            "H_Q2_DATA" : remove_bad_bins(hist_bin_dict["H_Q2_DATA_{}".format(j)]),
-            "H_W_DATA" : remove_bad_bins(hist_bin_dict["H_W_DATA_{}".format(j)]),
-            "H_t_DATA" : remove_bad_bins(hist_bin_dict["H_t_DATA_{}".format(j)]),
-            "H_epsilon_DATA" : remove_bad_bins(hist_bin_dict["H_epsilon_DATA_{}".format(j)]),
-            "H_MM_DATA" : remove_bad_bins(hist_bin_dict["H_MM_DATA_{}".format(j)]),
-            "H_Q2_DUMMY" : remove_bad_bins(hist_bin_dict["H_Q2_DUMMY_{}".format(j)]),
-            "H_W_DUMMY" : remove_bad_bins(hist_bin_dict["H_W_DUMMY_{}".format(j)]),
-            "H_t_DUMMY" : remove_bad_bins(hist_bin_dict["H_t_DUMMY_{}".format(j)]),
-            "H_epsilon_DUMMY" : remove_bad_bins(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]),
-            "H_MM_DUMMY" : remove_bad_bins(hist_bin_dict["H_MM_DUMMY_{}".format(j)]),
+            "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
+            "H_W_DATA" : hist_bin_dict["H_W_DATA_{}".format(j)],
+            "H_t_DATA" : hist_bin_dict["H_t_DATA_{}".format(j)],
+            "H_epsilon_DATA" : hist_bin_dict["H_epsilon_DATA_{}".format(j)],
+            "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}".format(j)],
+            "H_Q2_DUMMY" : hist_bin_dict["H_Q2_DUMMY_{}".format(j)],
+            "H_W_DUMMY" : hist_bin_dict["H_W_DUMMY_{}".format(j)],
+            "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}".format(j)],
+            "H_epsilon_DUMMY" : hist_bin_dict["H_epsilon_DUMMY_{}".format(j)],
+            "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}".format(j)],
         }
 
         # Sort dictionary keys alphabetically
