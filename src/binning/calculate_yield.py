@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 10:45:01 trottar"
+# Time-stamp: "2024-12-12 11:46:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -618,7 +618,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_t_data = binned_dict[kin_type]["binned_t_data"]
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
     binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
-
+    mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
+    mm_hist_dummy = binned_dict[kin_type]["mm_hist_dummy"]
+    
     yield_hist = []
     yield_err_hist = []
     binned_sub_data = [[],[]]
@@ -915,7 +917,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
-
+    mm_hist_simc = binned_dict[kin_type]["mm_hist_simc"]
+    
     binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
 
     yield_hist = []
