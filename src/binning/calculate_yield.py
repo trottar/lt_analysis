@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 03:49:55 trottar"
+# Time-stamp: "2024-12-12 04:08:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -619,8 +619,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        bin_val_data, hist_val_data = data
-        bin_val_dummy, hist_val_dummy = dummy
+        hist_val_data, bin_val_data = data
+        hist_val_dummy, bin_val_dummy = dummy
         # Find bin width (optional, after sorting if needed)
         bin_width_data = np.mean(np.diff(bin_val_data))
         # Sort the bin edges and remap bin contents for `data`
@@ -926,7 +926,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     i=0 # iter
     print("-"*25)
     for simc in binned_hist_simc:
-        bin_val_simc, hist_val_simc = simc
+        hist_val_simc, bin_val_simc = simc
         # Find bin width (optional, based on sorted bin edges)
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         # Sort the bin edges and remap bin contents
