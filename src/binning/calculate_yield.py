@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 13:30:21 trottar"
+# Time-stamp: "2024-12-12 13:31:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -938,7 +938,6 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         # Scale the histogram values before subtraction
         mm_hist_simc[i].Scale(normfac_simc)
-        mm_hist_simc[i]  # No dummy subtraction for simc, duh
         # Call your fit_gaussian function, passing the TH1F as input
         total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] / bin_width_simc
         try:
