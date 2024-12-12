@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 02:04:09 trottar"
+# Time-stamp: "2024-12-12 02:26:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1257,6 +1257,8 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
     mean_err = fit_func.GetParError(1)
     
     integral = fit_func.Integral(min_range, max_range)
+
+    del hist
     
     return [mean, mean_err, integral]
 
