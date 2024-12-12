@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:42:55 trottar"
+# Time-stamp: "2024-12-11 21:16:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1210,7 +1210,7 @@ def select_valid_parameter(sig_name, elements):
 ##################################################################################################################################################            
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
-def fit_gaussian(hist, x_min, x_max):
+def fit_gaussian(hist, x_min, x_max, show_fit=True):
 
     #print("-" * 25)
 
@@ -1243,7 +1243,10 @@ def fit_gaussian(hist, x_min, x_max):
     #print(f"max_range: {max_range:.4f}")
     #print("-" * 25)
 
-    hist.Fit("gaus", "Q", "", min_range, max_range)
+    if show_fit:
+        hist.Fit("gaus", "Q", "", min_range, max_range)
+    else:
+        hist.Fit("gaus", "Q0", "", min_range, max_range)
     fit_func = hist.GetFunction('gaus')
 
     fit_func.SetLineColor(ROOT.kRed)

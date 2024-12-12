@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 20:54:38 trottar"
+# Time-stamp: "2024-12-11 21:17:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1482,9 +1482,9 @@ def rand_sub(phi_setting, inpDict):
             
             # Scale pion to kaon data
             scale_factor = (
-                fit_gaussian(H_MM_nosub_DATA, pi_mm_min, pi_mm_max)[2]
+                fit_gaussian(H_MM_nosub_DATA, pi_mm_min, pi_mm_max, show_fit=False)[2]
                 / 
-                fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max)[2]
+                fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max, show_fit=False)[2]
             ) * 0.85
         ##############
         ##############
