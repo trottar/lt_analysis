@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 12:29:50 trottar"
+# Time-stamp: "2024-12-12 12:48:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -638,6 +638,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Scale the histogram values before subtraction
         scaled_hist_val_data = mm_hist_data[i].Scale(normfac_data)
         scaled_hist_val_dummy = mm_hist_dummy[i].Scale(normfac_dummy)
+        print("!!!!!!!!!!!", mm_hist_data[i], "\n\n", mm_hist_dummy[i])
         print("!!!!!!!!!!!", scaled_hist_val_data, "\n\n", scaled_hist_val_dummy)
         # Perform subtraction
         sub_hist_data = scaled_hist_val_data.Add(scaled_hist_val_dummy, -1)
