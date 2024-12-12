@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 10:14:21 trottar"
+# Time-stamp: "2024-12-12 14:58:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1262,52 +1262,4 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
     
     return [mean, mean_err, integral]
 
-##################################################################################################################################################            
-
-def create_th1f_from_bin_content(bin_centers, bin_contents, histogram_name="MyHistogram", histogram_title="Histogram"):
-    """
-    Create a TH1F histogram from bin centers and bin contents.
-    
-    Parameters:
-    - bin_centers: List of bin center positions
-    - bin_contents: List of bin contents (float values)
-    - histogram_name: Name of the histogram (default: "MyHistogram")
-    - histogram_title: Title of the histogram (default: "Histogram")
-    
-    Returns:
-    ROOT.TH1F histogram
-    """
-    # Validate input
-    if len(bin_centers) != len(bin_contents):
-        raise ValueError("Bin centers and bin contents must have the same length")
-    
-    # Calculate bin edges
-    bin_edges = []
-    if len(bin_centers) > 1:
-        # First edge is calculated based on first two bin centers
-        first_edge = 2 * bin_centers[0] - bin_centers[1]
-        bin_edges.append(first_edge)
-        
-        # Calculate intermediate bin edges as midpoints
-        for i in range(len(bin_centers) - 1):
-            bin_edges.append((bin_centers[i] + bin_centers[i+1]) / 2)
-        
-        # Last edge is calculated based on last two bin centers
-        last_edge = 2 * bin_centers[-1] - bin_centers[-2]
-        bin_edges.append(last_edge)
-    else:
-        # If only one bin, use a simple approach
-        bin_edges = [bin_centers[0] - 0.5, bin_centers[0] + 0.5]
-    
-    # Create histogram with calculated bin edges
-    hist = ROOT.TH1F(histogram_name, histogram_title, 
-                     len(bin_centers), 
-                     array('d', bin_edges))
-    
-    # Fill histogram with bin contents
-    for i, (center, content) in enumerate(zip(bin_centers, bin_contents), 1):
-        hist.SetBinContent(i, content)
-    
-    return hist
-
-##################################################################################################################################################            
+##################################################################################################################################################

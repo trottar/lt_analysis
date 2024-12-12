@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 14:50:01 trottar"
+# Time-stamp: "2024-12-12 15:02:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import is_hist, remove_bad_bins, fit_gaussian, create_th1f_from_bin_content
+from utility import is_hist, remove_bad_bins, fit_gaussian
 
 ##################################################################################################################################################
 
@@ -478,9 +478,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
-                "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]),
+                "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
-                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]),
+                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)],
                 "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)],
             }
 
@@ -643,8 +643,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         mm_hist_dummy[i].Scale(normfac_dummy)
         # Perform subtraction
         mm_hist_data[i].Add(mm_hist_dummy[i], -1)
-        # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2] / bin_width_data        
+        total_count = fit_gaussian(mm_hist_data[i], mm_min, mm_max, show_fit=False)[2] #/ bin_width_data        
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
@@ -830,7 +829,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
                 "H_t_SIMC" : hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)],
-                "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
+                "NumEvts_bin_MM_SIMC_unweighted" : fit_gaussian(hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)], mm_min, mm_max, show_fit=False)[2],
             }
             
             # Sort dictionary keys alphabetically
@@ -966,8 +965,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         sub_val = np.array(hist_val_simc) # No dummy subtraction for simc, duh
         # Scale the histogram values before subtraction
         mm_hist_simc[i].Scale(normfac_simc)
-        # Call your fit_gaussian function, passing the TH1F as input
-        total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] / bin_width_simc
+        total_count = fit_gaussian(mm_hist_simc[i], mm_min, mm_max, show_fit=False)[2] #/ bin_width_simc
         try:
             #yld = total_count*normfac_simc
             yld = total_count
