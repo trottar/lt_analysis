@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 23:51:02 trottar"
+# Time-stamp: "2024-12-12 00:05:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -454,9 +454,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                     pi_mm_min = 0.90 + MM_offset_DATA
                     pi_mm_max = 0.94 + MM_offset_DATA
                     scale_factor = (
-                        fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[2]
+                        fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max, show_fit=False)[2]
                         /
-                        fit_gaussian(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max)[2]
+                        fit_gaussian(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)], pi_mm_min, pi_mm_max, show_fit=False)[2]
                     ) * 0.85
                     ##############
                     ##############
