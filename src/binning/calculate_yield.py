@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 03:07:57 trottar"
+# Time-stamp: "2024-12-12 03:26:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -635,7 +635,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Create the histogram
         sub_hist_data = ROOT.TH1F("hist", "Subtracted Histogram", len(sub_val), bin_edges_array)
         # Fill histogram with subtracted values
-        for j, value in enumerate(sorted(sub_val), start=1):
+        for j, value in enumerate(sub_val, start=1):
             print("!!!!!!!!!!!!",j, value)
             sub_hist_data.SetBinContent(j, value)
         # Call your fit_gaussian function, passing the TH1F as input
@@ -935,7 +935,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Create the histogram
         sub_hist_simc = ROOT.TH1F("hist_simc", "SIMC Histogram", len(sub_val), bin_edges_array)
         # Fill histogram with subtracted values (here just sub_val)
-        for j, value in enumerate(sorted(sub_val), start=1):
+        for j, value in enumerate(sub_val, start=1):
             print("!!!!!!!!!!!!",j, value)
             sub_hist_simc.SetBinContent(j, value)
         # Call your fit_gaussian function, passing the TH1F as input
