@@ -741,7 +741,7 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     NumtBins=5
     NumPhiBins=10
     TMIN=0.160
-    TMAX=0.600
+    TMAX=0.500
 elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     # Q2=4p4, W=2p74
     #NumtBins=6
