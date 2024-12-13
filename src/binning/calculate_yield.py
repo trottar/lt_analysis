@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-13 13:27:51 trottar"
+# Time-stamp: "2024-12-13 13:51:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -488,6 +488,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
             
+           # Checks for first plots and calls +'(' to Print
+            canvas_iter=0
+
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (j == 0 and k == 0 and canvas_iter == 0)
             is_absolute_last = (j == len(t_bins)-2 and k == len(phi_bins)-2 and 
@@ -838,6 +841,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
+
+           # Checks for first plots and calls +'(' to Print
+            canvas_iter=0
             
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (j == 0 and k == 0 and canvas_iter == 0)
