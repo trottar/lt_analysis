@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 14:58:58 trottar"
+# Time-stamp: "2024-12-13 02:34:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1245,21 +1245,27 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
     #print(f"max_range: {max_range:.4f}")
     #print("-" * 25)
 
-    if show_fit:
-        hist.Fit("gaus", "Q", "", min_range, max_range)
-    else:
-        hist.Fit("gaus", "Q0", "", min_range, max_range)
-    fit_func = hist.GetFunction('gaus')
+    try:
+        
+        if show_fit:
+            hist.Fit("gaus", "Q", "", min_range, max_range)
+        else:
+            hist.Fit("gaus", "Q0", "", min_range, max_range)
+        fit_func = hist.GetFunction('gaus')
 
-    fit_func.SetLineColor(ROOT.kRed)
+        fit_func.SetLineColor(ROOT.kRed)
 
-    mean = fit_func.GetParameter(1)
-    mean_err = fit_func.GetParError(1)
-    
-    integral = fit_func.Integral(min_range, max_range)
+        mean = fit_func.GetParameter(1)
+        mean_err = fit_func.GetParError(1)
 
-    del hist
-    
-    return [mean, mean_err, integral]
+        integral = fit_func.Integral(min_range, max_range)
+
+        del hist
+
+        return [mean, mean_err, integral]
+
+    except ReferenceError:
+
+        return [0.0, 0.0, 0.0]
 
 ##################################################################################################################################################
