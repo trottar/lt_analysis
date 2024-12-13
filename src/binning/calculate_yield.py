@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-13 14:27:15 trottar"
+# Time-stamp: "2024-12-13 17:37:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -492,7 +492,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             canvas_iter=0
 
             # Track the absolute first and last plots across all iterations
-            is_absolute_first = (j == 0 and k == 0 and canvas_iter == 0)
+            is_absolute_first = (canvas_iter == 0)
             is_absolute_last = (j == len(t_bins) and k == len(phi_bins) and 
                                 i == len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1)
 
@@ -846,9 +846,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             canvas_iter=0
             
             # Track the absolute first and last plots across all iterations
-            is_absolute_first = (j == 0 and k == 0 and canvas_iter == 0)
-            is_absolute_last = (j == len(t_bins) and k == len(phi_bins) and 
-                                i == len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1)
+            is_absolute_first = (canvas_iter == 0)
+            is_absolute_last = (i == len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items())-1)
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
