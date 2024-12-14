@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 17:55:17 trottar"
+# Time-stamp: "2024-12-14 17:55:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -816,8 +816,8 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
 
     # Checks for first plots and calls +'(' to Print
-    canvas_iter = 1
-    total_plots = len(t_bins) * len(phi_bins) * len(list(["H_MM_SIMC", "H_t_SIMC"]))+1
+    canvas_iter = 0
+    total_plots = len(t_bins) * len(phi_bins) * len(list(["H_MM_SIMC", "H_t_SIMC"]))
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -839,7 +839,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                 canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
 
                 # Track the absolute first and last plots across all iterations
-                is_absolute_first = (canvas_iter == 1)
+                is_absolute_first = (canvas_iter == 0)
                 is_absolute_last = (canvas_iter == total_plots)
 
                 print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
