@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 17:18:42 trottar"
+# Time-stamp: "2024-12-14 17:55:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -817,7 +817,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 1
-    total_plots = len(t_bins) * len(phi_bins) * len(list(["H_MM_SIMC", "H_t_SIMC", "NumEvts_bin_MM_SIMC_unweighted"]))
+    total_plots = len(t_bins) * len(phi_bins) * len(list(["H_MM_SIMC", "H_t_SIMC"]))+1
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
