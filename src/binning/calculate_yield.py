@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 02:26:41 trottar"
+# Time-stamp: "2024-12-14 03:32:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -74,9 +74,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
     Q2 = inpDict["Q2"]
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
-
-    # Checks for first plots and calls +'(' to Print
-    canvas_iter=1
     
     ################################################################################################################################################
 
@@ -426,7 +423,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         subDict["MM_offset_RAND"] = MM_offset_RAND
         subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
-                            
+
+    # Checks for first plots and calls +'(' to Print
+    canvas_iter=1
+        
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -493,7 +493,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 1)
-            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*5-1) # 5 total types of plots
+            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1) # 2 total types of plots
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
@@ -750,9 +750,6 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
     Q2 = inpDict["Q2"]
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]    
-
-    # Checks for first plots and calls +'(' to Print
-    canvas_iter=1
     
     ################################################################################################################################################
 
@@ -831,6 +828,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.Weight)
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
 
+    # Checks for first plots and calls +'(' to Print
+    canvas_iter=1
+
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -847,7 +847,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 1)
-            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*2-1) # 2 total types of plots
+            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1) # 2 total types of plots
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
@@ -878,7 +878,6 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         else:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
 
-                        canvas_iter += 1
                         del canvas2
 
                     else:
@@ -894,8 +893,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         else:
                             canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
 
-                        canvas_iter += 1
                         del canvas
+
+                canvas_iter += 1
         
     return processed_dict
 
