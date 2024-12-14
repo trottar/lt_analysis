@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 03:32:48 trottar"
+# Time-stamp: "2024-12-14 03:57:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -493,7 +493,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 1)
-            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1) # 2 total types of plots
+            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1) # No extra unused keys in dictionary
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
@@ -521,32 +521,20 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         # Add the number of mesons to the plot
                         text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
 
-                        # Ensure correct PDF opening and closing
-                        if is_absolute_first:
-                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
-                        elif is_absolute_last:
-                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
-                        else:
-                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))
-
-                        canvas_iter += 1
-                        del canvas2                        
-
                     else:
                         canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                         val.Draw()
                         val.SetTitle(val.GetName())
 
-                        # Ensure correct PDF opening and closing
-                        if is_absolute_first:
-                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
-                        elif is_absolute_last:
-                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
-                        else:
-                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))
+                    # Ensure correct PDF opening and closing
+                    if is_absolute_first:
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
+                    elif is_absolute_last:
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
+                    else:
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))                        
 
-                        canvas_iter += 1        
-                        del canvas
+                    canvas_iter += 1                                
             
     return processed_dict
 
@@ -847,7 +835,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 1)
-            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1) # 2 total types of plots
+            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1)
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
@@ -878,24 +866,20 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         else:
                             canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
 
-                        del canvas2
-
                     else:
                         canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                         val.Draw()
                         val.SetTitle(val.GetName())
 
-                        # Ensure correct PDF opening and closing
-                        if is_absolute_first:
-                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
-                        elif is_absolute_last:
-                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+')')
-                        else:
-                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
-
-                        del canvas
-
-                canvas_iter += 1
+                    # Ensure correct PDF opening and closing
+                    if is_absolute_first:
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
+                    elif is_absolute_last:
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+')')
+                    else:
+                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
+                        
+                        canvas_iter += 1
         
     return processed_dict
 
