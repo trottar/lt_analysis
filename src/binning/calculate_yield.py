@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-13 22:12:30 trottar"
+# Time-stamp: "2024-12-13 22:33:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,9 +58,6 @@ from utility import is_hist, remove_bad_bins, fit_gaussian
 
 ##################################################################################################################################################
 
-# Checks for first plots and calls +'(' to Print
-canvas_iter=1
-
 def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
@@ -78,6 +75,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]
 
+    # Checks for first plots and calls +'(' to Print
+    canvas_iter=1
+    
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
@@ -489,8 +489,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
-                                                                  for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
-            
+                                                                  for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}           
 
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 0)
@@ -752,6 +751,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
     W = inpDict["W"]
     EPSSET = inpDict["EPSSET"]    
 
+    # Checks for first plots and calls +'(' to Print
+    canvas_iter=1
+    
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
