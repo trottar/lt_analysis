@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-13 19:55:56 trottar"
+# Time-stamp: "2024-12-13 22:12:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -57,6 +57,9 @@ sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, fit_gaussian
 
 ##################################################################################################################################################
+
+# Checks for first plots and calls +'(' to Print
+canvas_iter=1
 
 def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
@@ -488,8 +491,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
             
-            # Checks for first plots and calls +'(' to Print
-            canvas_iter=1
 
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 0)
@@ -841,9 +842,6 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
-
-            # Checks for first plots and calls +'(' to Print
-            canvas_iter=1
             
             # Track the absolute first and last plots across all iterations
             is_absolute_first = (canvas_iter == 0)
