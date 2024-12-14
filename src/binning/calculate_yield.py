@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 16:50:07 trottar"
+# Time-stamp: "2024-12-14 17:18:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -868,8 +868,10 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))
 
                     if is_absolute_first:
+                        print("(")
                         canvas.Print(pdf_name + '(')
                     elif is_absolute_last:
+                        print(")")
                         canvas.Print(pdf_name + ')')
                     else:
                         canvas.Print(pdf_name)
