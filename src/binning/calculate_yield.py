@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 03:57:08 trottar"
+# Time-stamp: "2024-12-14 04:19:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -498,10 +498,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+                canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                 print("!!!!!!!!!",canvas_iter)
                 if is_hist(val):
                     if "MM_nosub_DATA" in key:
-                        canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
                         if ParticleType == "kaon":
@@ -522,7 +522,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
 
                     else:
-                        canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                         val.Draw()
                         val.SetTitle(val.GetName())
 
@@ -840,10 +839,10 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+                canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                 print("$$$$$$$$$",canvas_iter)
                 if is_hist(val):
                     if "MM_SIMC" in key:
-                        canvas2 = ROOT.TCanvas("canvas2", "Canvas2", 800, 600)
                         hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Draw()
                         hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].GetName())
@@ -860,14 +859,13 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
 
                         # Ensure correct PDF opening and closing
                         if is_absolute_first:
-                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
+                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+'(')
                         elif is_absolute_last:
-                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+')')
+                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))+')')
                         else:
-                            canvas2.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
+                            canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType)))
 
                     else:
-                        canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                         val.Draw()
                         val.SetTitle(val.GetName())
 
