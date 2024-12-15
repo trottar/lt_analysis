@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 22:18:39 trottar"
+# Time-stamp: "2024-12-14 23:32:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -425,7 +425,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
 
     # Checks for first plots and calls +'(' to Print
-    canvas_iter=1
+    canvas_iter = 0
+    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove bin edge
         
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -479,6 +480,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
+
+    # Checks for first plots and calls +'(' to Print
+    canvas_iter = 0
+    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)]))-1 # '-1' to remove bin edge    
+
+    print("!!!!!!!!!",total_plots, "=", len(t_bins), len(phi_bins), len(list(["H_MM_SIMC", "H_t_SIMC"])))
+    
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
@@ -491,15 +502,17 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}           
 
-            # Track the absolute first and last plots across all iterations
-            is_absolute_first = (canvas_iter == 1)
-            is_absolute_last = (canvas_iter == len(t_bins)*len(phi_bins)*len(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)])-1) # No extra unused keys in dictionary
-
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
                 canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
-                print("!!!!!!!!!",canvas_iter)
+
+                # Track the absolute first and last plots across all iterations
+                is_absolute_first = (canvas_iter == 0)
+                is_absolute_last = (canvas_iter == total_plots)
+
+                print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
+
                 if is_hist(val):
                     if "MM_nosub_DATA" in key:
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
@@ -526,14 +539,22 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                         val.SetTitle(val.GetName())
 
                     # Ensure correct PDF opening and closing
-                    if is_absolute_first:
-                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+'(')
-                    elif is_absolute_last:
-                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))+')')
-                    else:
-                        canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType)))                        
+                    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))
 
-                    canvas_iter += 1                                
+                    if is_absolute_first:
+                        print("(")
+                        canvas.Print(pdf_name + '(')
+                    elif is_absolute_last:
+                        print(")")
+                        canvas.Print(pdf_name + ')')
+                    else:
+                        canvas.Print(pdf_name)
+
+                    # Increment canvas iterator AFTER printing
+                    canvas_iter += 1
+
+                    # Close the canvas to free up memory
+                    canvas.Close()
             
     return processed_dict
 
@@ -833,7 +854,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
-
+            
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
@@ -860,7 +881,7 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
 
                     else:
                         val.Draw()
