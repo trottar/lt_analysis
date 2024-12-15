@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 12:39:04 trottar"
+# Time-stamp: "2024-12-15 12:41:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -532,7 +532,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     # Scale simc properly for plots
                     val.Scale(normfac_data)
                     
-                    if "MM_nosub_DATA" in key:
+                    if "MM_DATA" in key:
                         
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
