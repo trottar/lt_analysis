@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 23:57:48 trottar"
+# Time-stamp: "2024-12-15 01:17:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -509,8 +509,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for key, sub_dict in processed_dict.items():
                 cloned_dict[key] = {}
                 for sub_key, obj in sub_dict.items():
-                    # Clone the object and assign it to the new dictionary
-                    cloned_dict[key][sub_key] = obj.Clone()
+                    if is_hist(obj):
+                        # Clone the object and assign it to the new dictionary
+                        cloned_dict[key][sub_key] = obj.Clone()
 
             # Optionally sort the keys in cloned_dict if needed
             for key in cloned_dict.keys():
@@ -884,8 +885,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             for key, sub_dict in processed_dict.items():
                 cloned_dict[key] = {}
                 for sub_key, obj in sub_dict.items():
-                    # Clone the object and assign it to the new dictionary
-                    cloned_dict[key][sub_key] = obj.Clone()
+                    if is_hist(obj):
+                        # Clone the object and assign it to the new dictionary
+                        cloned_dict[key][sub_key] = obj.Clone()
 
             # Optionally sort the keys in cloned_dict if needed
             for key in cloned_dict.keys():
