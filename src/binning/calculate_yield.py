@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 12:41:05 trottar"
+# Time-stamp: "2024-12-15 13:51:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -518,9 +518,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(cloned_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
 
-                # Create a new canvas for each plot
-                canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
-
                 # Track the absolute first and last plots across all iterations
                 is_absolute_first = (canvas_iter == 0)
                 is_absolute_last = (canvas_iter == total_plots)
@@ -533,6 +530,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     val.Scale(normfac_data)
                     
                     if "MM_DATA" in key:
+                        # Create a new canvas for each plot
+                        canvas2 = ROOT.TCanvas("canvas2_{}".format(canvas_iter), "Canvas", 800, 600)
                         
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
@@ -552,28 +551,47 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                         # Add the number of mesons to the plot
                         text.DrawLatex(0.7, 0.65, "Good {} Events: {:.0f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        
+                        # Ensure correct PDF opening and closing
+                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+
+                        if is_absolute_first:
+                            print("(")
+                            canvas2.Print(pdf_name + '(')
+                        elif is_absolute_last:
+                            print(")")
+                            canvas2.Print(pdf_name + ')')
+                        else:
+                            canvas2.Print(pdf_name)
+                            
+                        # Close the canvas2 to free up memory
+                        canvas2.Close()
 
                     else:
+                        # Create a new canvas for each plot
+                        canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
                         val.Draw()
                         val.SetTitle(val.GetName())
 
-                    # Ensure correct PDF opening and closing
-                    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+                        # Ensure correct PDF opening and closing
+                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
 
-                    if is_absolute_first:
-                        print("(")
-                        canvas.Print(pdf_name + '(')
-                    elif is_absolute_last:
-                        print(")")
-                        canvas.Print(pdf_name + ')')
-                    else:
-                        canvas.Print(pdf_name)
-
+                        if is_absolute_first:
+                            print("(")
+                            canvas.Print(pdf_name + '(')
+                        elif is_absolute_last:
+                            print(")")
+                            canvas.Print(pdf_name + ')')
+                        else:
+                            canvas.Print(pdf_name)
+                            
+                        # Close the canvas to free up memory
+                        canvas.Close()
+                        
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
 
-                    # Close the canvas to free up memory
-                    canvas.Close()
+
             
     return processed_dict
 
