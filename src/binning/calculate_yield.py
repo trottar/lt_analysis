@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-14 23:32:53 trottar"
+# Time-stamp: "2024-12-14 23:57:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -58,7 +58,7 @@ from utility import is_hist, remove_bad_bins, fit_gaussian
 
 ##################################################################################################################################################
 
-def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
+def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
     
@@ -483,9 +483,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
-    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)]))-1 # '-1' to remove bin edge    
+    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)])) # '-1' to remove t-phi bin edges
 
-    print("!!!!!!!!!",total_plots, "=", len(t_bins), len(phi_bins), len(list(["H_MM_SIMC", "H_t_SIMC"])))
+    print("!!!!!!!!!",total_plots, "=", len(t_bins), len(phi_bins), len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)])))
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -500,11 +500,28 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
 
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
-                                                                  for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}           
+                                                                  for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
+            
+            # Clone dictionary
+            cloned_dict = {}
+
+            # Iterate through processed_dict to clone all objects
+            for key, sub_dict in processed_dict.items():
+                cloned_dict[key] = {}
+                for sub_key, obj in sub_dict.items():
+                    # Clone the object and assign it to the new dictionary
+                    cloned_dict[key][sub_key] = obj.Clone()
+
+            # Optionally sort the keys in cloned_dict if needed
+            for key in cloned_dict.keys():
+                cloned_dict[key] = {sub_key: cloned_dict[key][sub_key]
+                                    for sub_key in sorted(cloned_dict[key].keys())}    
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
-            for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+            for i, (key,val) in enumerate(cloned_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+
+                # Create a new canvas for each plot                
                 canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
 
                 # Track the absolute first and last plots across all iterations
@@ -514,7 +531,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
                 print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
 
                 if is_hist(val):
+
+                    # Scale simc properly for plots
+                    val.Scale(normfac_data)
+                    
                     if "MM_nosub_DATA" in key:
+                        
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
                         if ParticleType == "kaon":
@@ -558,9 +580,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_set
             
     return processed_dict
 
-def bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
+def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    processed_dict = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
     
     binned_dict = {}
 
@@ -634,7 +656,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict = bin_data(kin_type, tree_data, tree_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    binned_dict = bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
 
     binned_t_data = binned_dict[kin_type]["binned_t_data"]
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
@@ -742,7 +764,7 @@ def find_yield_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
+def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
     processed_dict = {}
     
@@ -838,9 +860,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
-    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove bin edge
+    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove t-phi bin edges
 
-    print("!!!!!!!!!",total_plots, "=", len(t_bins), len(phi_bins), len(list(["H_MM_SIMC", "H_t_SIMC"])))
+    print("!!!!!!!!!",total_plots, "=", len(t_bins), len(phi_bins), len(list(["H_MM_SIMC", "H_t_SIMC"]))-1) 
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -854,10 +876,26 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
+
+            # Clone dictionary
+            cloned_dict = {}
+
+            # Iterate through processed_dict to clone all objects
+            for key, sub_dict in processed_dict.items():
+                cloned_dict[key] = {}
+                for sub_key, obj in sub_dict.items():
+                    # Clone the object and assign it to the new dictionary
+                    cloned_dict[key][sub_key] = obj.Clone()
+
+            # Optionally sort the keys in cloned_dict if needed
+            for key in cloned_dict.keys():
+                cloned_dict[key] = {sub_key: cloned_dict[key][sub_key]
+                                    for sub_key in sorted(cloned_dict[key].keys())}    
             
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
-            for i, (key,val) in enumerate(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+            for i, (key,val) in enumerate(cloned_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+                
                 # Create a new canvas for each plot
                 canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
 
@@ -868,6 +906,10 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                 print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
 
                 if is_hist(val):
+
+                    # Scale simc properly for plots
+                    val.Scale(normfac_simc)
+                    
                     if "MM_SIMC" in key:
                         hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Draw()
@@ -907,9 +949,9 @@ def process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iterati
                 
     return processed_dict
 
-def bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
+def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
+    processed_dict = process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
     
     binned_dict = {}
 
@@ -970,7 +1012,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kin_type, tree_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
+    binned_dict = bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
