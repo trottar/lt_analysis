@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 03:45:57 trottar"
+# Time-stamp: "2024-12-15 04:12:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -927,23 +927,23 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                         val.Draw()
                         val.SetTitle(val.GetName())
 
-                # Ensure correct PDF opening and closing
-                pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))
+                    # Ensure correct PDF opening and closing
+                    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
 
-                if is_absolute_first:
-                    print("(")
-                    canvas.Print(pdf_name + '(')
-                elif is_absolute_last:
-                    print(")")
-                    canvas.Print(pdf_name + ')')
-                else:
-                    canvas.Print(pdf_name)
+                    if is_absolute_first:
+                        print("(")
+                        canvas.Print(pdf_name + '(')
+                    elif is_absolute_last:
+                        print(")")
+                        canvas.Print(pdf_name + ')')
+                    else:
+                        canvas.Print(pdf_name)
 
-                # Increment canvas iterator AFTER printing
-                canvas_iter += 1
+                    # Increment canvas iterator AFTER printing
+                    canvas_iter += 1
 
-                # Close the canvas to free up memory
-                canvas.Close()
+                    # Close the canvas to free up memory
+                    canvas.Close()
                 
     return processed_dict
 
