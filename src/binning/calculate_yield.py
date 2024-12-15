@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 13:51:02 trottar"
+# Time-stamp: "2024-12-15 13:51:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -567,26 +567,25 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         # Close the canvas2 to free up memory
                         canvas2.Close()
 
+                    # Create a new canvas for each plot
+                    canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
+                    val.Draw()
+                    val.SetTitle(val.GetName())
+
+                    # Ensure correct PDF opening and closing
+                    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+
+                    if is_absolute_first:
+                        print("(")
+                        canvas.Print(pdf_name + '(')
+                    elif is_absolute_last:
+                        print(")")
+                        canvas.Print(pdf_name + ')')
                     else:
-                        # Create a new canvas for each plot
-                        canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
-                        val.Draw()
-                        val.SetTitle(val.GetName())
+                        canvas.Print(pdf_name)
 
-                        # Ensure correct PDF opening and closing
-                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
-
-                        if is_absolute_first:
-                            print("(")
-                            canvas.Print(pdf_name + '(')
-                        elif is_absolute_last:
-                            print(")")
-                            canvas.Print(pdf_name + ')')
-                        else:
-                            canvas.Print(pdf_name)
-                            
-                        # Close the canvas to free up memory
-                        canvas.Close()
+                    # Close the canvas to free up memory
+                    canvas.Close()
                         
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
