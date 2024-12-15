@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 01:40:49 trottar"
+# Time-stamp: "2024-12-15 02:20:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -522,8 +522,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             ROOT.gStyle.SetOptStat(1)
             for i, (key,val) in enumerate(cloned_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
 
-                # Create a new canvas for each plot                
-                canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+                # Create a new canvas for each plot
+                canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
 
                 # Track the absolute first and last plots across all iterations
                 is_absolute_first = (canvas_iter == 0)
