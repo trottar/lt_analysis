@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-16 14:53:08 trottar"
+# Time-stamp: "2024-12-16 15:12:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,12 +65,6 @@ def iterWeight(arg_str):
     fun_Sig_LT_optimized = prepare_equations(equations, 'sig_LT')
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
-
-    # Calculate W-factor
-    try:
-        wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
-    except (ZeroDivisionError, OverflowError, TypeError):
-        wfactor = float('inf')
     
     # Calculate SigL, SigT, SigLT, SigTT
     try:
@@ -93,9 +87,17 @@ def iterWeight(arg_str):
     except (ZeroDivisionError, OverflowError, TypeError):
         sig_TT = float('inf')
 
+    # Calculate W-factor
+    try:
+        wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
+    except (ZeroDivisionError, OverflowError, TypeError):
+        wfactor = float('inf')
+
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
 
+    sig = sig * wfactor
+    
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     #sig = sig / 2.0 / math.pi  # dsig/dtdphicm in microbarns/GeV**2/rad
     
