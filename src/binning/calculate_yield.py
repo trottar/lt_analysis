@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 16:47:20 trottar"
+# Time-stamp: "2024-12-17 10:07:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1046,7 +1046,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         sub_val = np.array(scaled_hist_val_simc)
         total_count = np.sum(sub_val)/bin_width_simc
         try:
-            yld = total_count
+            yld = total_count # Normalization applied above
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))

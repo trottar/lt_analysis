@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-15 22:57:06 trottar"
+# Time-stamp: "2024-12-17 10:17:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -91,7 +91,6 @@ from utility import show_pdf_with_evince
 ###############################################################################################################################################
 
 def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
-
 
     ################################################################################################################################################
     '''
@@ -456,6 +455,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                         row['W']
                     ) + ' '.join(map(str, params))
 
+                    print("Looking at {date}...")
                     model_for_iteration.append(import_model(sig, inp_param))
 
                 model_values.append(model_for_iteration)
