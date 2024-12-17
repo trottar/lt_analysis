@@ -101,10 +101,10 @@ c     Correct for W.
       sig_TT=sig_TT*wfactor
       sig_LT=sig_LT*wfactor
 
-      if (isnan(sig_L).or.(sig_L > 1e6)) sig_L = 0.0
-      if (isnan(sig_T).or.(sig_T > 1e6)) sig_T = 0.0
-      if (isnan(sig_LT).or.(sig_LT > 1e6)) sig_LT = 0.0
-      if (isnan(sig_TT).or.(sig_TT > 1e6)) sig_TT = 0.0
+      if (isnan(sig_L).or.(sig_L > 1.d+06)) sig_L = 0.0
+      if (isnan(sig_T).or.(sig_T > 1.d+06)) sig_T = 0.0
+      if (isnan(sig_LT).or.(sig_LT > 1.d+06)) sig_LT = 0.0
+      if (isnan(sig_TT).or.(sig_TT > 1.d+06)) sig_TT = 0.0
 
       print *,"--------------"
       WRITE(*,*) 'sig_L=', sig_L
