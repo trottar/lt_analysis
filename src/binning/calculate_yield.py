@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-17 10:07:18 trottar"
+# Time-stamp: "2024-12-17 14:21:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -548,7 +548,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3e}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
                         
                         # Ensure correct PDF opening and closing
                         pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -934,7 +934,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3f}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3e}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
 
                     else:
                         val.Draw()
