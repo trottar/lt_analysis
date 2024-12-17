@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-17 10:17:46 trottar"
+# Time-stamp: "2024-12-17 10:19:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -444,6 +444,8 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 df = iteration_data[date]['sep_file']
                 model_for_iteration = []
 
+                print("Looking at {date}...")
+                
                 # Calculate model predictions
                 for _, row in df.iterrows():
                     inp_param = '{} {} {} {} {} {} '.format(
@@ -455,7 +457,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                         row['W']
                     ) + ' '.join(map(str, params))
 
-                    print("Looking at {date}...")
                     model_for_iteration.append(import_model(sig, inp_param))
 
                 model_values.append(model_for_iteration)
