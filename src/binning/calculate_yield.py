@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-18 11:43:16 trottar"
+# Time-stamp: "2024-12-18 16:09:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -533,9 +533,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 #print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
 
                 if is_hist(val):
-
-                    # Scale simc properly for plots
-                    val.Scale(normfac_data)
                     
                     if "MM_DATA" in key:
                         # Create a new canvas for each plot
@@ -933,9 +930,6 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                 #print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
 
                 if is_hist(val):
-
-                    # Scale simc properly for plots
-                    val.Scale(normfac_simc)
                     
                     if "MM_SIMC" in key:
                         hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].SetLineColor(1)
