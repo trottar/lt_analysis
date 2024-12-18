@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-17 12:57:58 trottar"
+# Time-stamp: "2024-12-18 02:21:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -183,10 +183,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             g = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
 
             t_vec.append(tt)
-            if iter_num > 1:
-                g_vec.append(g * 1e2)
-            else:
-                g_vec.append(g)
+            g_vec.append(g)
             w_vec.append(ww)
             q2_vec.append(qq)
             th_vec.append(theta_cm)
