@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-18 12:02:09 trottar"
+# Time-stamp: "2024-12-18 16:15:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,17 +86,17 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # HARD CODED #
     ##############
     # Maximum iterations before ending loop
-    max_iterations = 100
+    #max_iterations = 100
     #max_iterations = 1000
     #max_iterations = 2000
     #max_iterations = 5000
-    #max_iterations = 10000
+    max_iterations = 10000
 
     # Number of times to run the algorithm
     #num_optimizations = 5
-    #num_optimizations = 10
+    num_optimizations = 10
     #num_optimizations = 50
-    num_optimizations = 1000
+    #num_optimizations = 1000
 
     # Initial max/min bounds of finding parameter values
     initial_param_bounds = 1e6
