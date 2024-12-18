@@ -200,10 +200,10 @@ c      pause
 *     Check for NaN or unphysical values
                if (isnan(r)) r = 0.0
                if (isnan(e)) e = -1000.0
-               if (r > 1.0e6) r = 0.0
-               if (e > 1.0e6) e = -1000.0
-               if (r < 1.0e-6) r = 0.0
-               if (e < 1.0e-6) e = -1000.0
+               if (r > 1.d+06) r = 0.0
+               if (e > 1.d+06) e = -1000.0
+               if (r < 1.d-06) r = 0.0
+               if (e < 1.d-06) e = -1000.0
       
                write(*,*)'t-bin=',it
                write(*,*)'phi-bin=',ip
