@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-18 16:09:46 trottar"
+# Time-stamp: "2024-12-18 23:44:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -555,7 +555,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3e}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
                         
                         # Ensure correct PDF opening and closing
                         pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -709,16 +709,16 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         if yld < 0.0:
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         if math.isnan(yld) or math.isnan(yld_err):
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         if math.isinf(yld) or math.isinf(yld_err):
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_data[0].append(bin_val_data)
@@ -944,7 +944,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "Good {} Events: {:.3e}".format(ParticleType.capitalize(), val.Integral(val.FindBin(mm_min), val.FindBin(mm_max))))
+                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
 
                     else:
                         val.Draw()
@@ -1065,16 +1065,16 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
             yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         if yld < 0.0:
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         if math.isnan(yld) or math.isnan(yld_err):
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         if math.isinf(yld) or math.isinf(yld_err):
             yld = 0.0
-            yld_err = 0.0            
+            yld_err = -1000.0            
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_simc[0].append(bin_val_simc)
