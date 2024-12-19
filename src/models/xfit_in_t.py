@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 07:27:29 trottar"
+# Time-stamp: "2024-12-19 07:30:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -268,12 +268,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             
             # Find optimized fits for L, T, LT, TT
             find_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-        
-            c2.Print(outputpdf+'(')
-            c3.Print(outputpdf)
-            c4.Print(outputpdf)
-            c5.Print(outputpdf)
-            c6.Print(outputpdf+')')
             
         else:
             # Create lists to store graph objects outside the loop
@@ -294,9 +288,13 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             par_vec = prv_par_vec
             par_err_vec = prv_err_vec
             plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
+        
+    c2.Print(outputpdf+'(')
+    c3.Print(outputpdf)
+    c4.Print(outputpdf)
+    c5.Print(outputpdf)
+    c6.Print(outputpdf+')')
             
-            c2.Print(outputpdf)
-
     if check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
         sys.exit(2)
 
