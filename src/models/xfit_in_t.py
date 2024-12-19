@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:24:00 trottar"
+# Time-stamp: "2024-12-19 08:26:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -222,28 +222,17 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_chi2_vec = prv_chi2_vec
 
     # Create lists to store graph objects outside the loop
-    graphs_sig_fit = []
-    graphs_sig_p0 = []
-    graphs_sig_p1 = []
-    graphs_sig_p2 = []
-    graphs_sig_p3 = []
-    graphs_sig_chi2 = []
-    graphs_sig_temp = []
-    graphs_sig_accept = []
-    graphs_sig_converge = []
-
     graph_dict = {
-        "graphs_sig_fit" : graphs_sig_fit,
-        "graphs_sig_p0" : graphs_sig_p0,
-        "graphs_sig_p1" : graphs_sig_p1,
-        "graphs_sig_p2" : graphs_sig_p2,
-        "graphs_sig_p3" : graphs_sig_p3,
-        "graphs_sig_chi2" : graphs_sig_chi2,
-        "graphs_sig_temp" : graphs_sig_temp,
-        "graphs_sig_accept" : graphs_sig_accept,
-        "graphs_sig_converge" : graphs_sig_converge,
+        "graphs_sig_fit" : [],
+        "graphs_sig_p0" : [],
+        "graphs_sig_p1" : [],
+        "graphs_sig_p2" : [],
+        "graphs_sig_p3" : [],
+        "graphs_sig_chi2" : [],
+        "graphs_sig_temp" : [],
+        "graphs_sig_accept" : [],
+        "graphs_sig_converge" : [],
     }
-
     
     # Create ROOT canvases for additional parameter convergence plots
     canvas_dict = {
@@ -262,23 +251,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
     
-    for it, (key, val) in enumerate(fit_params.items()):
-        
-        # Don't find new fits if debugging
-        if key not in fixed_params:        
-            # Find optimized fits
-            find_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
-        else:
-            for j in range(4):
-                par_vec[4*it+j] = prv_par_vec[4*it+j]
-                par_err_vec[4*it+j] = prv_err_vec[4*it+j]
-                par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
-            plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-
-        for k, v in canvas_dict.items():
-            v.Update()
-            v.Modified()
-            
     canvas_dict["c2"].Print(outputpdf+'(')
     canvas_dict["c3"].Print(outputpdf)
     canvas_dict["c4"].Print(outputpdf)
