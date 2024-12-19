@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:31:30 trottar"
+# Time-stamp: "2024-12-19 08:32:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1857,7 +1857,7 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         c5.Update()
         c6.Update()
 
-    return (c2, c3, c4, c5, c6)
+    return (canvas_dict["c2"], canvas_dict["c3"], canvas_dict["c4"], canvas_dict["c5"], canvas_dict["c6"])
 
 def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
@@ -2331,4 +2331,4 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
     c2.Update()
     
-    return (c2, c3, c4, c5, c6)
+    return (canvas_dict["c2"], canvas_dict["c3"], canvas_dict["c4"], canvas_dict["c5"], canvas_dict["c6"])
