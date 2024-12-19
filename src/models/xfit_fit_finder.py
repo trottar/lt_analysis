@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-18 11:26:22 trottar"
+# Time-stamp: "2024-12-19 02:29:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,7 +72,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
-    initial_param_bounds = inpDict["initial_param_bounds"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
@@ -100,6 +99,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
         # Grab parameters used by functional forms
         num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
+        initial_param_bounds = inpDict["initial_param_bounds"][key]
+        
         # Checks initial parameters and replaces zeros to avoid errors
         #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
         initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]

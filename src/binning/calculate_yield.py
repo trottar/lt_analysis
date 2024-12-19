@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-18 23:44:57 trottar"
+# Time-stamp: "2024-12-19 02:31:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -546,16 +546,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         background_fit[0].SetLineColor(3)
                         background_fit[0].Draw("same")
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
-
-                        # Create a TLatex object to add text to the plot
-                        text = ROOT.TLatex()
-                        text.SetNDC()
-                        text.SetTextSize(0.04)
-                        text.SetTextAlign(22) # Centered alignment
-                        text.SetTextColor(ROOT.kBlack)
-
-                        # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
                         
                         # Ensure correct PDF opening and closing
                         pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -576,7 +566,20 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
                     val.Draw()
                     val.SetTitle(val.GetName())
+                    
+                    if "MM_DATA" in key:
+                        
+                        # Create a TLatex object to add text to the plot
+                        text = ROOT.TLatex()
+                        text.SetNDC()
+                        text.SetTextSize(0.04)
+                        text.SetTextAlign(22) # Centered alignment
+                        text.SetTextColor(ROOT.kBlack)
 
+                        # Add the number of mesons to the plot
+                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
+
+                    
                     # Ensure correct PDF opening and closing
                     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
 
