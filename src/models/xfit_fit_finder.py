@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 09:05:43 trottar"
+# Time-stamp: "2024-12-19 09:06:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2328,9 +2328,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             print("\n")
 
         c2.Update()
-    
-    fixed_params = ["L", "T", "LT", "TT"]
-    #fixed_params = ["L", "T", "LT"]
 
     for it, (key, val) in enumerate(fit_params.items()):
 
@@ -2345,7 +2342,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
                 plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
 
-    c2.Print(outputpdf+'(')
+    c2.Print(outputpdf)
     c3.Print(outputpdf)
     c4.Print(outputpdf)
     c5.Print(outputpdf)
