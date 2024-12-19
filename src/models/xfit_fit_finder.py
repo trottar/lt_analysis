@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 09:16:26 trottar"
+# Time-stamp: "2024-12-19 09:29:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -389,7 +389,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
                     par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost[j]
+                    par_chi2_vec[4*it+j] = best_overall_cost
 
                 g_sig_fit = TGraphErrors()
 
@@ -816,7 +816,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
                     par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost[j]
+                    par_chi2_vec[4*it+j] = best_overall_cost
 
                 g_sig_fit = TGraphErrors()
 
@@ -1260,7 +1260,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
                     par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost[j]
+                    par_chi2_vec[4*it+j] = best_overall_cost
 
                 g_sig_fit = TGraphErrors()
 
@@ -1719,7 +1719,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
                     par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost[j]
+                    par_chi2_vec[4*it+j] = best_overall_cost
 
                 g_sig_fit = TGraphErrors()
 
