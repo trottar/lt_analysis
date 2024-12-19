@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:37:04 trottar"
+# Time-stamp: "2024-12-19 08:43:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -256,19 +256,19 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         # Don't find new fits if debugging
         if key not in fixed_params:        
             # Find optimized fits
-            find_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
+            c2, c3, c4, c5, c6 = find_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
         else:
             for j in range(4):
                 par_vec[4*it+j] = prv_par_vec[4*it+j]
                 par_err_vec[4*it+j] = prv_err_vec[4*it+j]
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
-            plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
+            c2, c3, c4, c5, c6 = plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
             
-    canvas_dict["c2"].Print(outputpdf+'(')
-    canvas_dict["c3"].Print(outputpdf)
-    canvas_dict["c4"].Print(outputpdf)
-    canvas_dict["c5"].Print(outputpdf)
-    canvas_dict["c6"].Print(outputpdf+')')
+    c2.Print(outputpdf+'(')
+    c3.Print(outputpdf)
+    c4.Print(outputpdf)
+    c5.Print(outputpdf)
+    c6.Print(outputpdf+')')
             
     if check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
         sys.exit(2)
