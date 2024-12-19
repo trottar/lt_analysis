@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 07:30:13 trottar"
+# Time-stamp: "2024-12-19 07:35:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2011,19 +2011,6 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         f_sig.SetParNames("p0")
         f_sig.FixParameter(0, par_vec[4*it])
 
-        # Fit the function to the histogram
-        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-        # Retrieve the chi-squared and degrees of freedom
-        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
-
         # Evaluate the fit function at several points to determine its range
         n_points = 100  # Number of points to evaluate the fit function
         fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -2041,6 +2028,16 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
         f_sig.Draw("same")
 
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
+        
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
@@ -2120,19 +2117,6 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         f_sig.FixParameter(0, par_vec[4*it])
         f_sig.FixParameter(1, par_vec[4*it+1])
 
-        # Fit the function to the histogram
-        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-        # Retrieve the chi-squared and degrees of freedom
-        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
-
         # Evaluate the fit function at several points to determine its range
         n_points = 100  # Number of points to evaluate the fit function
         fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -2149,6 +2133,19 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
         f_sig.Draw("same")
+
+        # Fit the function to the histogram
+        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)                    
 
         converge_status = TText()
         converge_status.SetTextSize(0.04)
@@ -2230,19 +2227,6 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         f_sig.FixParameter(1, par_vec[4*it+1])
         f_sig.FixParameter(2, par_vec[4*it+2])
 
-        # Fit the function to the histogram
-        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-        # Retrieve the chi-squared and degrees of freedom
-        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
-
         # Evaluate the fit function at several points to determine its range
         n_points = 100  # Number of points to evaluate the fit function
         fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -2259,6 +2243,19 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
         f_sig.Draw("same")
+
+        # Fit the function to the histogram
+        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
 
         converge_status = TText()
         converge_status.SetTextSize(0.04)
@@ -2340,19 +2337,6 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         f_sig.FixParameter(2, par_vec[4*it+2])
         f_sig.FixParameter(3, par_vec[4*it+3])
 
-        # Fit the function to the histogram
-        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-        # Retrieve the chi-squared and degrees of freedom
-        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
-
         # Evaluate the fit function at several points to determine its range
         n_points = 100  # Number of points to evaluate the fit function
         fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
@@ -2369,6 +2353,16 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
         r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
         f_sig.Draw("same")
+
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
 
         converge_status = TText()
         converge_status.SetTextSize(0.04)
