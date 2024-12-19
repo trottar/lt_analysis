@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 06:46:22 trottar"
+# Time-stamp: "2024-12-19 06:50:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2029,7 +2029,7 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(0, par_vec[4*it])
 
             # Fit the function to the histogram
-            fit_result = hist.Fit(f_sig, "R")  # "R" specifies the range of the fit
+            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
             # Retrieve the chi-squared and degrees of freedom
             chi2 = f_sig.GetChisquare()  # Get the chi-squared value
@@ -2137,11 +2137,9 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(0, par_vec[4*it])
             f_sig.FixParameter(1, par_vec[4*it+1])
         
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
+            # Fit the function to the histogram
+            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+            
             # Retrieve the chi-squared and degrees of freedom
             chi2 = f_sig.GetChisquare()  # Get the chi-squared value
             ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
@@ -2249,12 +2247,9 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(1, par_vec[4*it+1])
             f_sig.FixParameter(2, par_vec[4*it+2])
         
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
-
+            # Fit the function to the histogram
+            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+            
             # Retrieve the chi-squared and degrees of freedom
             chi2 = f_sig.GetChisquare()  # Get the chi-squared value
             ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
@@ -2362,11 +2357,9 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             f_sig.FixParameter(2, par_vec[4*it+2])
             f_sig.FixParameter(3, par_vec[4*it+3])
         
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
+            # Fit the function to the histogram
+            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+            
             # Retrieve the chi-squared and degrees of freedom
             chi2 = f_sig.GetChisquare()  # Get the chi-squared value
             ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
