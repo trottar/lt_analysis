@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 06:44:33 trottar"
+# Time-stamp: "2024-12-19 07:24:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,14 +217,82 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "fit_params" : fit_params,
     }
 
-    # Don't find new fits if debugging
-    if not DEBUG:
-        # Find optimized fits for L, T, LT, TT
-        find_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
-    else:
-        par_vec = prv_par_vec
-        par_err_vec = prv_err_vec
-        plot_fit(inp_dict, par_vec, par_err_vec, par_chi2_vec)
+    for it, (key, val) in enumerate(fit_params.items()):
+        # Don't find new fits if debugging
+        if not DEBUG:
+            # Create lists to store graph objects outside the loop
+            graphs_sig_fit = []
+            graphs_sig_p0 = []
+            graphs_sig_p1 = []
+            graphs_sig_p2 = []
+            graphs_sig_p3 = []
+            graphs_sig_chi2 = []
+            graphs_sig_temp = []
+            graphs_sig_accept = []
+            graphs_sig_converge = []
+
+            graph_dict = {
+                "graphs_sig_fit" : graphs_sig_fit,
+                "graphs_sig_p0" : graphs_sig_p0,
+                "graphs_sig_p1" : graphs_sig_p1,
+                "graphs_sig_p2" : graphs_sig_p2,
+                "graphs_sig_p3" : graphs_sig_p3,
+                "graphs_sig_chi2" : graphs_sig_chi2,
+                "graphs_sig_temp" : graphs_sig_temp,
+                "graphs_sig_accept" : graphs_sig_accept,
+                "graphs_sig_converge" : graphs_sig_converge,
+            }
+
+            # Create ROOT canvases for additional parameter convergence plots
+            c2 = TCanvas("c2", "c2", 800, 800)
+            c2.Divide(2, 2)
+            c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
+            c3.Divide(2, 2)
+            c4 = TCanvas("c4", "Red. Chi-Square Convergence", 800, 800)
+            c4.Divide(2, 2)
+            c5 = TCanvas("c5", "Temperature", 800, 800)
+            c5.Divide(2, 2)
+            c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
+            c6.Divide(2, 2)
+
+            canvas_dict = {
+                "c2" : c2,
+                "c3" : c3,
+                "c4" : c4,
+                "c5" : c5,
+                "c6" : c6,
+            }
+            
+            # Find optimized fits for L, T, LT, TT
+            find_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
+        
+            c2.Print(outputpdf+'(')
+            c3.Print(outputpdf)
+            c4.Print(outputpdf)
+            c5.Print(outputpdf)
+            c6.Print(outputpdf+')')
+            
+        else:
+            # Create lists to store graph objects outside the loop
+            graphs_sig_fit = []
+
+            graph_dict = {
+                "graphs_sig_fit" : graphs_sig_fit,
+            }
+
+            # Create ROOT canvases for additional parameter convergence plots
+            c2 = TCanvas("c2", "c2", 800, 800)
+            c2.Divide(2, 2)
+
+            canvas_dict = {
+                "c2" : c2,
+            }
+            
+            par_vec = prv_par_vec
+            par_err_vec = prv_err_vec
+            plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
+            
+            c2.Print(outputpdf)
 
     if check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
         sys.exit(2)

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 06:50:57 trottar"
+# Time-stamp: "2024-12-19 07:25:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,31 +42,25 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
+def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
-    graphs_sig_fit = []
-    graphs_sig_p0 = []
-    graphs_sig_p1 = []
-    graphs_sig_p2 = []
-    graphs_sig_p3 = []
-    graphs_sig_chi2 = []
-    graphs_sig_temp = []
-    graphs_sig_accept = []
-    graphs_sig_converge = []
-
-    c2 = TCanvas("c2", "c2", 800, 800)
-    c2.Divide(2, 2)
+    graphs_sig_fit = graph_dict["graphs_sig_fit"]
+    graphs_sig_p0 = graph_dict["graphs_sig_p0"]
+    graphs_sig_p1 = graph_dict["graphs_sig_p1"]
+    graphs_sig_p2 = graph_dict["graphs_sig_p2"]
+    graphs_sig_p3 = graph_dict["graphs_sig_p3"]
+    graphs_sig_chi2 = graph_dict["graphs_sig_chi2"]
+    graphs_sig_temp = graph_dict["graphs_sig_temp"]
+    graphs_sig_accept = graph_dict["graphs_sig_accept"]
+    graphs_sig_converge = graph_dict["graphs_sig_converge"]
 
     # Create ROOT canvases for additional parameter convergence plots
-    c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
-    c3.Divide(2, 2)
-    c4 = TCanvas("c4", "Red. Chi-Square Convergence", 800, 800)
-    c4.Divide(2, 2)
-    c5 = TCanvas("c5", "Temperature", 800, 800)
-    c5.Divide(2, 2)
-    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
-    c6.Divide(2, 2)
+    c2 = canvas_dict["c2"]
+    c3 = canvas_dict["c3"]
+    c4 = canvas_dict["c4"]
+    c5 = canvas_dict["c5"]
+    c6 = canvas_dict["c6"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -1903,21 +1897,14 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
         c4.Update()
         c5.Update()
         c6.Update()
-        
-    c2.Print(outputpdf+'(')
-    c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
 
-
-def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
+def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
-    graphs_sig_fit = []
+    graphs_sig_fit = graph_dict["graphs_sig_fit"]
 
-    c2 = TCanvas("c2", "c2", 800, 800)
-    c2.Divide(2, 2)
+    # Create ROOT canvases for additional parameter convergence plots
+    c2 = canvas_dict["c2"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -1941,460 +1928,455 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     #print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
     
     num_events = nsep.GetEntries()    
-    
-    for it, (key, val) in enumerate(fit_params.items()):
-        
-        sig_name = key
-        # Grab parameters used by functional forms
-        num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
-        # Checks initial parameters and replaces zeros to avoid errors
-        #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
-        initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
+    sig_name = key
+    # Grab parameters used by functional forms
+    num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
-        # String list of initial parameters
-        param_str = ', '.join(str(param) for param in initial_params)
+    # Checks initial parameters and replaces zeros to avoid errors
+    #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
+    initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
 
-        fit_convergence_type = "Fixed"
-            
-        if num_params == 1:
+    # String list of initial parameters
+    param_str = ', '.join(str(param) for param in initial_params)
 
-            # 1 param
-            #######
-            # Sig #
-            #######
+    fit_convergence_type = "Fixed"
 
-            print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-            print(f"Initial Paramters: ({param_str})")
-            print(f"{equation_str}")
-            print("/*--------------------------------------------------*/")
+    if num_params == 1:
 
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+        # 1 param
+        #######
+        # Sig #
+        #######
 
-            g_sig_fit = TGraphErrors()
-            
-            graphs_sig_fit.append(g_sig_fit)
-            
-            g_sig = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+        print("\n/*--------------------------------------------------*/")
+        print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+        print(f"Initial Paramters: ({param_str})")
+        print(f"{equation_str}")
+        print("/*--------------------------------------------------*/")
 
-            for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+        nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
-            c2.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-            graphs_sig_fit[it].Draw("A*")
-            
-            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graphs_sig_fit[it].GetXaxis().CenterTitle()
-            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-            graphs_sig_fit[it].GetYaxis().CenterTitle()
-            
-            # Set axis limits to ensure everything is shown
-            x_min = min(graphs_sig_fit[it].GetX())
-            x_max = max(graphs_sig_fit[it].GetX())
-            y_min = min(graphs_sig_fit[it].GetY())
-            y_max = max(graphs_sig_fit[it].GetY())
+        g_sig_fit = TGraphErrors()
 
-            # Set a margin to ensure all points are visible
-            margin = 0.1
-            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+        graphs_sig_fit.append(g_sig_fit)
 
-            if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-            elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-            elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-            elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-            f_sig.SetParNames("p0")
-            f_sig.FixParameter(0, par_vec[4*it])
+        g_sig = TGraphErrors()
+        for i in range(nsep.GetSelectedRows()):
+            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
-            # Fit the function to the histogram
-            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+        for i in range(len(w_vec)):
+            sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+            sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-            # Retrieve the chi-squared and degrees of freedom
-            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+        c2.cd(it+1).SetLeftMargin(0.12)
+        graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+        graphs_sig_fit[it].Draw("A*")
 
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)            
-            
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
+        graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        graphs_sig_fit[it].GetXaxis().CenterTitle()
+        graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
+        graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+        graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+        graphs_sig_fit[it].GetYaxis().CenterTitle()
 
-            # Extend the y-axis range to include the fit function range
-            y_min = min(y_min, fit_y_min)
-            y_max = max(y_max, fit_y_max)
+        # Set axis limits to ensure everything is shown
+        x_min = min(graphs_sig_fit[it].GetX())
+        x_max = max(graphs_sig_fit[it].GetX())
+        y_min = min(graphs_sig_fit[it].GetY())
+        y_max = max(graphs_sig_fit[it].GetY())
 
-            # Set a margin to ensure all points are visible
-            margin = 0.1 * (y_max - y_min)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+        # Set a margin to ensure all points are visible
+        margin = 0.1
+        graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
-            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            f_sig.Draw("same")
-                        
-            converge_status = TText()
-            converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-            c2.Update()
-            
-            print("\n")    
+        if sig_name == "L":
+            fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
+        elif sig_name == "T":
+            fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
+        elif sig_name == "LT":
+            fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
+        elif sig_name == "TT":
+            fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
+        f_sig.SetParNames("p0")
+        f_sig.FixParameter(0, par_vec[4*it])
 
-        elif num_params == 2:
+        # Fit the function to the histogram
+        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-            # 2 params
-            #######
-            # Sig #
-            #######
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-            print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-            print(f"Initial Paramters: ({param_str})")
-            print(f"{equation_str}")            
-            print("/*--------------------------------------------------*/")
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
 
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+        # Evaluate the fit function at several points to determine its range
+        n_points = 100  # Number of points to evaluate the fit function
+        fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+        fit_y_min = min(fit_y_values)
+        fit_y_max = max(fit_y_values)
 
-            g_sig_fit = TGraphErrors()
+        # Extend the y-axis range to include the fit function range
+        y_min = min(y_min, fit_y_min)
+        y_max = max(y_max, fit_y_max)
 
-            graphs_sig_fit.append(g_sig_fit)
-            
-            g_sig = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+        # Set a margin to ensure all points are visible
+        margin = 0.1 * (y_max - y_min)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
 
-            for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+        f_sig.Draw("same")
 
-            c2.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-            graphs_sig_fit[it].Draw("A*")
-            
-            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graphs_sig_fit[it].GetXaxis().CenterTitle()
-            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-            graphs_sig_fit[it].GetYaxis().CenterTitle()
-            
-            # Set axis limits to ensure everything is shown
-            x_min = min(graphs_sig_fit[it].GetX())
-            x_max = max(graphs_sig_fit[it].GetX())
-            y_min = min(graphs_sig_fit[it].GetY())
-            y_max = max(graphs_sig_fit[it].GetY())
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1
-            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-            if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-            elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-            elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-            elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-            f_sig.SetParNames("p0", "p1")
-            f_sig.FixParameter(0, par_vec[4*it])
-            f_sig.FixParameter(1, par_vec[4*it+1])
-        
-            # Fit the function to the histogram
-            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            
-            # Retrieve the chi-squared and degrees of freedom
-            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)            
-            
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
-
-            # Extend the y-axis range to include the fit function range
-            y_min = min(y_min, fit_y_min)
-            y_max = max(y_max, fit_y_max)
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1 * (y_max - y_min)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            f_sig.Draw("same")
-                        
-            converge_status = TText()
-            converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-            c2.Update()
-            
-            print("\n")    
-
-        elif num_params == 3:
-
-            # 3 params
-            #######
-            # Sig #
-            #######
-
-            print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-            print(f"Initial Paramters: ({param_str})")
-            print(f"{equation_str}")            
-            print("/*--------------------------------------------------*/")
-            
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-            g_sig_fit = TGraphErrors()
-
-            graphs_sig_fit.append(g_sig_fit)
-                        
-            g_sig = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-            for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-            c2.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-            graphs_sig_fit[it].Draw("A*")
-            
-            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graphs_sig_fit[it].GetXaxis().CenterTitle()
-            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-            graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-            # Set axis limits to ensure everything is shown
-            x_min = min(graphs_sig_fit[it].GetX())
-            x_max = max(graphs_sig_fit[it].GetX())
-            y_min = min(graphs_sig_fit[it].GetY())
-            y_max = max(graphs_sig_fit[it].GetY())
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1
-            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-            if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-            elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-            elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-            elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-            f_sig.SetParNames("p0", "p1", "p2")
-            f_sig.FixParameter(0, par_vec[4*it])
-            f_sig.FixParameter(1, par_vec[4*it+1])
-            f_sig.FixParameter(2, par_vec[4*it+2])
-        
-            # Fit the function to the histogram
-            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            
-            # Retrieve the chi-squared and degrees of freedom
-            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)            
-            
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
-
-            # Extend the y-axis range to include the fit function range
-            y_min = min(y_min, fit_y_min)
-            y_max = max(y_max, fit_y_max)
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1 * (y_max - y_min)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            f_sig.Draw("same")
-                        
-            converge_status = TText()
-            converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-            c2.Update()
-            
-            print("\n")    
-
-        elif num_params == 4:
-
-            # 4 params
-            #######
-            # Sig #
-            #######
-
-            print("\n/*--------------------------------------------------*/")
-            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-            print(f"Initial Paramters: ({param_str})")
-            print(f"{equation_str}")            
-            print("/*--------------------------------------------------*/")    
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-            g_sig_fit = TGraphErrors()
-
-            graphs_sig_fit.append(g_sig_fit)
-                        
-            g_sig = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-            for i in range(len(w_vec)):
-                sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-            c2.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-            graphs_sig_fit[it].Draw("A*")
-            
-            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graphs_sig_fit[it].GetXaxis().CenterTitle()
-            graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
-            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-            graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-            # Set axis limits to ensure everything is shown
-            x_min = min(graphs_sig_fit[it].GetX())
-            x_max = max(graphs_sig_fit[it].GetX())
-            y_min = min(graphs_sig_fit[it].GetY())
-            y_max = max(graphs_sig_fit[it].GetY())
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1
-            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-            if sig_name == "L":
-                fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-            elif sig_name == "T":
-                fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-            elif sig_name == "LT":
-                fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-            elif sig_name == "TT":
-                fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-            f_sig.SetParNames("p0", "p1", "p2", "p3")
-            f_sig.FixParameter(0, par_vec[4*it])
-            f_sig.FixParameter(1, par_vec[4*it+1])
-            f_sig.FixParameter(2, par_vec[4*it+2])
-            f_sig.FixParameter(3, par_vec[4*it+3])
-        
-            # Fit the function to the histogram
-            fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            
-            # Retrieve the chi-squared and degrees of freedom
-            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)
-            par_chi2_vec.append(red_chi2)            
-            
-            # Evaluate the fit function at several points to determine its range
-            n_points = 100  # Number of points to evaluate the fit function
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-            fit_y_min = min(fit_y_values)
-            fit_y_max = max(fit_y_values)
-
-            # Extend the y-axis range to include the fit function range
-            y_min = min(y_min, fit_y_min)
-            y_max = max(y_max, fit_y_max)
-
-            # Set a margin to ensure all points are visible
-            margin = 0.1 * (y_max - y_min)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-            f_sig.Draw("same")
-                        
-            converge_status = TText()
-            converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-            c2.Update()
-            
-            print("\n")
-
+        converge_status = TText()
+        converge_status.SetTextSize(0.04)
+        converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
         c2.Update()
-        
-    c2.Print(outputpdf)
 
+        print("\n")    
+
+    elif num_params == 2:
+
+        # 2 params
+        #######
+        # Sig #
+        #######
+
+        print("\n/*--------------------------------------------------*/")
+        print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+        print(f"Initial Paramters: ({param_str})")
+        print(f"{equation_str}")            
+        print("/*--------------------------------------------------*/")
+
+        nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+
+        g_sig_fit = TGraphErrors()
+
+        graphs_sig_fit.append(g_sig_fit)
+
+        g_sig = TGraphErrors()
+        for i in range(nsep.GetSelectedRows()):
+            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+        for i in range(len(w_vec)):
+            sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+            sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+        c2.cd(it+1).SetLeftMargin(0.12)
+        graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+        graphs_sig_fit[it].Draw("A*")
+
+        graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        graphs_sig_fit[it].GetXaxis().CenterTitle()
+        graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
+        graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+        graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+        graphs_sig_fit[it].GetYaxis().CenterTitle()
+
+        # Set axis limits to ensure everything is shown
+        x_min = min(graphs_sig_fit[it].GetX())
+        x_max = max(graphs_sig_fit[it].GetX())
+        y_min = min(graphs_sig_fit[it].GetY())
+        y_max = max(graphs_sig_fit[it].GetY())
+
+        # Set a margin to ensure all points are visible
+        margin = 0.1
+        graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
+        if sig_name == "L":
+            fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
+        elif sig_name == "T":
+            fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
+        elif sig_name == "LT":
+            fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
+        elif sig_name == "TT":
+            fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
+        f_sig.SetParNames("p0", "p1")
+        f_sig.FixParameter(0, par_vec[4*it])
+        f_sig.FixParameter(1, par_vec[4*it+1])
+
+        # Fit the function to the histogram
+        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
+
+        # Evaluate the fit function at several points to determine its range
+        n_points = 100  # Number of points to evaluate the fit function
+        fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+        fit_y_min = min(fit_y_values)
+        fit_y_max = max(fit_y_values)
+
+        # Extend the y-axis range to include the fit function range
+        y_min = min(y_min, fit_y_min)
+        y_max = max(y_max, fit_y_max)
+
+        # Set a margin to ensure all points are visible
+        margin = 0.1 * (y_max - y_min)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+
+        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+        f_sig.Draw("same")
+
+        converge_status = TText()
+        converge_status.SetTextSize(0.04)
+        converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+        c2.Update()
+
+        print("\n")    
+
+    elif num_params == 3:
+
+        # 3 params
+        #######
+        # Sig #
+        #######
+
+        print("\n/*--------------------------------------------------*/")
+        print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+        print(f"Initial Paramters: ({param_str})")
+        print(f"{equation_str}")            
+        print("/*--------------------------------------------------*/")
+
+        nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+
+        g_sig_fit = TGraphErrors()
+
+        graphs_sig_fit.append(g_sig_fit)
+
+        g_sig = TGraphErrors()
+        for i in range(nsep.GetSelectedRows()):
+            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+        for i in range(len(w_vec)):
+            sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+            sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+        c2.cd(it+1).SetLeftMargin(0.12)
+        graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+        graphs_sig_fit[it].Draw("A*")
+
+        graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        graphs_sig_fit[it].GetXaxis().CenterTitle()
+        graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
+        graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+        graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+        graphs_sig_fit[it].GetYaxis().CenterTitle()
+
+        # Set axis limits to ensure everything is shown
+        x_min = min(graphs_sig_fit[it].GetX())
+        x_max = max(graphs_sig_fit[it].GetX())
+        y_min = min(graphs_sig_fit[it].GetY())
+        y_max = max(graphs_sig_fit[it].GetY())
+
+        # Set a margin to ensure all points are visible
+        margin = 0.1
+        graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
+        if sig_name == "L":
+            fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
+        elif sig_name == "T":
+            fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
+        elif sig_name == "LT":
+            fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
+        elif sig_name == "TT":
+            fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
+        f_sig.SetParNames("p0", "p1", "p2")
+        f_sig.FixParameter(0, par_vec[4*it])
+        f_sig.FixParameter(1, par_vec[4*it+1])
+        f_sig.FixParameter(2, par_vec[4*it+2])
+
+        # Fit the function to the histogram
+        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
+
+        # Evaluate the fit function at several points to determine its range
+        n_points = 100  # Number of points to evaluate the fit function
+        fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+        fit_y_min = min(fit_y_values)
+        fit_y_max = max(fit_y_values)
+
+        # Extend the y-axis range to include the fit function range
+        y_min = min(y_min, fit_y_min)
+        y_max = max(y_max, fit_y_max)
+
+        # Set a margin to ensure all points are visible
+        margin = 0.1 * (y_max - y_min)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+
+        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+        f_sig.Draw("same")
+
+        converge_status = TText()
+        converge_status.SetTextSize(0.04)
+        converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+        c2.Update()
+
+        print("\n")    
+
+    elif num_params == 4:
+
+        # 4 params
+        #######
+        # Sig #
+        #######
+
+        print("\n/*--------------------------------------------------*/")
+        print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+        print(f"Initial Paramters: ({param_str})")
+        print(f"{equation_str}")            
+        print("/*--------------------------------------------------*/")    
+        nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+
+        g_sig_fit = TGraphErrors()
+
+        graphs_sig_fit.append(g_sig_fit)
+
+        g_sig = TGraphErrors()
+        for i in range(nsep.GetSelectedRows()):
+            g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+            g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+        for i in range(len(w_vec)):
+            sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+            sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+            graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+            graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+        c2.cd(it+1).SetLeftMargin(0.12)
+        graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+        graphs_sig_fit[it].Draw("A*")
+
+        graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        graphs_sig_fit[it].GetXaxis().CenterTitle()
+        graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
+        graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+        graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+        graphs_sig_fit[it].GetYaxis().CenterTitle()
+
+        # Set axis limits to ensure everything is shown
+        x_min = min(graphs_sig_fit[it].GetX())
+        x_max = max(graphs_sig_fit[it].GetX())
+        y_min = min(graphs_sig_fit[it].GetY())
+        y_max = max(graphs_sig_fit[it].GetY())
+
+        # Set a margin to ensure all points are visible
+        margin = 0.1
+        graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
+
+        if sig_name == "L":
+            fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
+        elif sig_name == "T":
+            fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
+        elif sig_name == "LT":
+            fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
+        elif sig_name == "TT":
+            fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+            f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+            #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
+        f_sig.SetParNames("p0", "p1", "p2", "p3")
+        f_sig.FixParameter(0, par_vec[4*it])
+        f_sig.FixParameter(1, par_vec[4*it+1])
+        f_sig.FixParameter(2, par_vec[4*it+2])
+        f_sig.FixParameter(3, par_vec[4*it+3])
+
+        # Fit the function to the histogram
+        fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
+
+        # Retrieve the chi-squared and degrees of freedom
+        chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+        ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+        red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)
+        par_chi2_vec.append(red_chi2)            
+
+        # Evaluate the fit function at several points to determine its range
+        n_points = 100  # Number of points to evaluate the fit function
+        fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+        fit_y_min = min(fit_y_values)
+        fit_y_max = max(fit_y_values)
+
+        # Extend the y-axis range to include the fit function range
+        y_min = min(y_min, fit_y_min)
+        y_max = max(y_max, fit_y_max)
+
+        # Set a margin to ensure all points are visible
+        margin = 0.1 * (y_max - y_min)
+        graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+
+        r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+        f_sig.Draw("same")
+
+        converge_status = TText()
+        converge_status.SetTextSize(0.04)
+        converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+        c2.Update()
+
+        print("\n")
+
+    c2.Update()
