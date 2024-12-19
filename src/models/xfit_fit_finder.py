@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 05:49:18 trottar"
+# Time-stamp: "2024-12-19 06:05:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2044,7 +2044,7 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0")
-            f_sig.FixParameter(0, best_overall_params[0])
+            f_sig.FixParameter(0, par_par_vec[4*it])
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -2082,7 +2082,7 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it:4*(it+1)]:.3f}")
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")
             c2.Update()
             
             print("\n")    
@@ -2156,8 +2156,8 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0", "p1")
-            f_sig.FixParameter(0, best_overall_params[0])
-            f_sig.FixParameter(1, best_overall_params[1])
+            f_sig.FixParameter(0, par_par_vec[4*it])
+            f_sig.FixParameter(1, par_par_vec[4*it+1])
         
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -2195,7 +2195,7 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it:4*(it+1)]:.3f}")            
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")            
             c2.Update()
             
             print("\n")    
