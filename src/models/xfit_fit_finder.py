@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 09:15:05 trottar"
+# Time-stamp: "2024-12-19 09:16:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2021,6 +2021,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 # Create TGraphs for parameter convergence
                 graph_sig_p0 = TGraph()
+                graph_sig_p1 = TGraph()                
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
@@ -2141,6 +2142,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 # Create TGraphs for parameter convergence
                 graph_sig_p0 = TGraph()
+                graph_sig_p1 = TGraph()
+                graph_sig_p2 = TGraph()                
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
@@ -2262,13 +2265,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 # Create TGraphs for parameter convergence
                 graph_sig_p0 = TGraph()
+                graph_sig_p1 = TGraph()
+                graph_sig_p2 = TGraph()
+                graph_sig_p3 = TGraph()                
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(graph_sig_p2)
-                graphs_sig_p3.append(graph_sig_p2)
+                graphs_sig_p3.append(graph_sig_p3)
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
