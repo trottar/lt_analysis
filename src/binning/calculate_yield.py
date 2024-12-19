@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 02:31:17 trottar"
+# Time-stamp: "2024-12-19 16:16:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -578,7 +578,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                         # Add the number of mesons to the plot
                         text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
-
                     
                     # Ensure correct PDF opening and closing
                     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
