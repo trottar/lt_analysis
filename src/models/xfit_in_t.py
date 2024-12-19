@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:51:04 trottar"
+# Time-stamp: "2024-12-19 08:51:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -224,7 +224,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
     
-    parameterize(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params)
+    parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params)
     
     if check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
         sys.exit(2)

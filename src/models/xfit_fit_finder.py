@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:50:37 trottar"
+# Time-stamp: "2024-12-19 08:51:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2335,7 +2335,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
 
 
 
-def parameterize(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params):
+def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params):
 
     # Create ROOT canvases for additional parameter convergence plots
     canvas_dict = {
