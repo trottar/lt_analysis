@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:50:32 trottar"
+# Time-stamp: "2024-12-19 08:51:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ from utility import load_equations, prepare_equations, find_params_wrapper, chec
 ##################################################################################################################################################
 # Import fit finder function
 
-from xfit_fit_finder import find_fit, plot_fit
+from xfit_fit_finder import parameterize
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
