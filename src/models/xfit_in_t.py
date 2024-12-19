@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 05:05:55 trottar"
+# Time-stamp: "2024-12-19 05:06:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,12 +73,14 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     iter_num = inpDict["iter_num"]
 
+    '''
     if iter_num > 1:
         DEBUG=False
     else:
         DEBUG=True
-
-    #DEBUG=False
+    '''
+    
+    DEBUG=False
     
     ##############
     # HARD CODED #
