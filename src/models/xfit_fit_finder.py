@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 05:13:29 trottar"
+# Time-stamp: "2024-12-19 05:15:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -337,11 +337,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
-
-                            # Reset function parameters
-                            for i, param in enumerate(recovery_params):
-                                #f_sig.SetParameter(i, param)
-                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
@@ -777,11 +772,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
-
-                            # Reset function parameters
-                            for i, param in enumerate(recovery_params):
-                                #f_sig.SetParameter(i, param)
-                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
@@ -1235,11 +1225,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
-
-                            # Reset function parameters
-                            for i, param in enumerate(recovery_params):
-                                #f_sig.SetParameter(i, param)
-                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
@@ -1709,11 +1694,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 max(min(p, max_param_bounds), -max_param_bounds) 
                                 for p in recovery_params
                             ]
-
-                            # Reset function parameters
-                            for i, param in enumerate(recovery_params):
-                                #f_sig.SetParameter(i, param)
-                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
