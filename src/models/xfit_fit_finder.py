@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:06:11 trottar"
+# Time-stamp: "2024-12-19 08:07:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -56,7 +56,7 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
     graphs_sig_converge = graph_dict["graphs_sig_converge"]
 
     # Create ROOT canvases for additional parameter convergence plots
-    canvas_dict["c2"] = canvas_dict["canvas_dict["c2"]"]
+    c2 = canvas_dict["c2"]
     c3 = canvas_dict["c3"]
     c4 = canvas_dict["c4"]
     c5 = canvas_dict["c5"]
@@ -1863,7 +1863,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
 
     # Create ROOT canvases for additional parameter convergence plots
-    canvas_dict["c2"] = canvas_dict["canvas_dict["c2"]"]
+    c2 = canvas_dict["c2"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
