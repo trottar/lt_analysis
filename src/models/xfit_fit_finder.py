@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:44:15 trottar"
+# Time-stamp: "2024-12-19 08:45:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,21 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
+# Create ROOT canvases for additional parameter convergence plots
+canvas_dict = {
+    "c2" : TCanvas("c2", "c2", 800, 800),
+    "c3" : TCanvas("c3", "Parameter Convergence", 800, 800),
+    "c4" : TCanvas("c4", "Red. Chi-Square Convergence", 800, 800),
+    "c5" : TCanvas("c5", "Temperature", 800, 800),
+    "c6" : TCanvas("c6", "Acceptance Probability", 800, 800),
+}
+canvas_dict["c2"].Divide(2, 2)
+canvas_dict["c3"].Divide(2, 2)
+canvas_dict["c4"].Divide(2, 2)
+canvas_dict["c5"].Divide(2, 2)
+canvas_dict["c6"].Divide(2, 2)
+
+def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
@@ -1859,7 +1873,7 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
     return (c2, c3, c4, c5, c6)
 
-def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
+def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = graph_dict["graphs_sig_fit"]

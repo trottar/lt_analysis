@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:43:36 trottar"
+# Time-stamp: "2024-12-19 08:44:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -234,20 +234,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "graphs_sig_converge" : [],
     }
     
-    # Create ROOT canvases for additional parameter convergence plots
-    canvas_dict = {
-        "c2" : TCanvas("c2", "c2", 800, 800),
-        "c3" : TCanvas("c3", "Parameter Convergence", 800, 800),
-        "c4" : TCanvas("c4", "Red. Chi-Square Convergence", 800, 800),
-        "c5" : TCanvas("c5", "Temperature", 800, 800),
-        "c6" : TCanvas("c6", "Acceptance Probability", 800, 800),
-    }
-    canvas_dict["c2"].Divide(2, 2)
-    canvas_dict["c3"].Divide(2, 2)
-    canvas_dict["c4"].Divide(2, 2)
-    canvas_dict["c5"].Divide(2, 2)
-    canvas_dict["c6"].Divide(2, 2)
-
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
     
