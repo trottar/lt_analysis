@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:46:37 trottar"
+# Time-stamp: "2024-12-19 08:47:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -56,6 +56,13 @@ canvas_dict["c4"].Divide(2, 2)
 canvas_dict["c5"].Divide(2, 2)
 canvas_dict["c6"].Divide(2, 2)
 
+# Create ROOT canvases for additional parameter convergence plots
+c2 = canvas_dict["c2"]
+c3 = canvas_dict["c3"]
+c4 = canvas_dict["c4"]
+c5 = canvas_dict["c5"]
+c6 = canvas_dict["c6"]
+
 def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
@@ -68,13 +75,6 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
     graphs_sig_temp = graph_dict["graphs_sig_temp"]
     graphs_sig_accept = graph_dict["graphs_sig_accept"]
     graphs_sig_converge = graph_dict["graphs_sig_converge"]
-
-    # Create ROOT canvases for additional parameter convergence plots
-    c2 = canvas_dict["c2"]
-    c3 = canvas_dict["c3"]
-    c4 = canvas_dict["c4"]
-    c5 = canvas_dict["c5"]
-    c6 = canvas_dict["c6"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -1877,13 +1877,6 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
-
-    # Create ROOT canvases for additional parameter convergence plots
-    c2 = canvas_dict["c2"]
-    c3 = canvas_dict["c3"]
-    c4 = canvas_dict["c4"]
-    c5 = canvas_dict["c5"]
-    c6 = canvas_dict["c6"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
