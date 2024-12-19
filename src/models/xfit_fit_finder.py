@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 02:29:46 trottar"
+# Time-stamp: "2024-12-19 02:33:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,42 +42,34 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
+def find_fit(inpDict, canvas_dict, graph_dict, par_vec, par_err_vec, par_chi2_vec):
 
-    # Create lists to store graph objects outside the loop
-    graphs_sig_fit = []
-    graphs_sig_p0 = []
-    graphs_sig_p1 = []
-    graphs_sig_p2 = []
-    graphs_sig_p3 = []
-    graphs_sig_converge = []
-    graphs_sig_temp = []
-    graphs_sig_accept = []
+    graphs_sig_fit = graph_dict["graphs_sig_fit"]
+    graphs_sig_p0 = graph_dict["graphs_sig_p0"]
+    graphs_sig_p1 = graph_dict["graphs_sig_p1"]
+    graphs_sig_p2 = graph_dict["graphs_sig_p2"]
+    graphs_sig_p3 = graph_dict["graphs_sig_p3"]
+    graphs_sig_converge = graph_dict["graphs_sig_converge"]
+    graphs_sig_temp = graph_dict["graphs_sig_temp"]
+    graphs_sig_accept = graph_dict["graphs_sig_accept"]
     
-    c2 = TCanvas("c2", "c2", 800, 800)
-    c2.Divide(2, 2)
-
-    # Create ROOT canvases for additional parameter convergence plots
-    c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
-    c3.Divide(2, 2)
-    c4 = TCanvas("c4", "Fit Convergence", 800, 800)
-    c4.Divide(2, 2)
-    c5 = TCanvas("c5", "Temperature", 800, 800)
-    c5.Divide(2, 2)
-    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
-    c6.Divide(2, 2)
+    c2 = canvas_dict["c2"]
+    c3 = canvas_dict["c3"]
+    c4 = canvas_dict["c4"]
+    c5 = canvas_dict["c5"]
+    c6 = canvas_dict["c6"]
 
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
+    initial_param_bounds = inpDict["initial_param_bounds"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
     Q2max_range = inpDict["Q2max_range"]
     iter_num = inpDict["iter_num"]            
-    outputpdf = inpDict["outputpdf"]
     
     fit_params = inpDict["fit_params"]
 
@@ -99,8 +91,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
         # Grab parameters used by functional forms
         num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
-        initial_param_bounds = inpDict["initial_param_bounds"][key]
-        
         # Checks initial parameters and replaces zeros to avoid errors
         #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
         initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
@@ -1903,10 +1893,4 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
         c3.Update()
         c4.Update()
         c5.Update()
-        c6.Update()
-    
-    c2.Print(outputpdf+'(')
-    c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
+        c6.Update()    
