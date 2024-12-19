@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 09:01:43 trottar"
+# Time-stamp: "2024-12-19 09:02:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2363,8 +2363,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
                 plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
 
-    c2.Print(outputpdf+'(')
-    c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
+    canvas_dict["c2"].Print(outputpdf+'(')
+    canvas_dict["c3"].Print(outputpdf)
+    canvas_dict["c4"].Print(outputpdf)
+    canvas_dict["c5"].Print(outputpdf)
+    canvas_dict["c6"].Print(outputpdf+')')
