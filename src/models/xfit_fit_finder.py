@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 03:46:12 trottar"
+# Time-stamp: "2024-12-19 03:48:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -53,6 +53,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     graphs_sig_chi2 = []
     graphs_sig_temp = []
     graphs_sig_accept = []
+    graphs_sig_converge = []
 
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
