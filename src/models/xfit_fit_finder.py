@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:54:57 trottar"
+# Time-stamp: "2024-12-19 08:55:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2372,13 +2372,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
         # Don't find new fits if debugging
         if key not in fixed_params:        
             # Find optimized fits
-            c2, c3, c4, c5, c6 = find_fit(inp_dict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
+            c2, c3, c4, c5, c6 = find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
         else:
             for j in range(4):
                 par_vec[4*it+j] = prv_par_vec[4*it+j]
                 par_err_vec[4*it+j] = prv_err_vec[4*it+j]
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
-            c2, c3, c4, c5, c6 = plot_fit(inp_dict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
+            c2, c3, c4, c5, c6 = plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
 
     c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
