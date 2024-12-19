@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:20:46 trottar"
+# Time-stamp: "2024-12-19 08:21:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -54,6 +54,13 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
     graphs_sig_temp = graph_dict["graphs_sig_temp"]
     graphs_sig_accept = graph_dict["graphs_sig_accept"]
     graphs_sig_converge = graph_dict["graphs_sig_converge"]
+
+    # Create ROOT canvases for additional parameter convergence plots
+    c2 = canvas_dict["c2"]
+    c3 = canvas_dict["c3"]
+    c4 = canvas_dict["c4"]
+    c5 = canvas_dict["c5"]
+    c6 = canvas_dict["c6"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -1854,6 +1861,9 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
+
+    # Create ROOT canvases for additional parameter convergence plots
+    c2 = canvas_dict["c2"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -1920,7 +1930,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
+        c2.cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -1989,7 +1999,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        canvas_dict["c2"].Update()
+        c2.Update()
 
         print("\n")    
 
@@ -2023,7 +2033,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
+        c2.cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -2096,7 +2106,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        canvas_dict["c2"].Update()
+        c2.Update()
 
         print("\n")    
 
@@ -2130,7 +2140,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
+        c2.cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -2204,7 +2214,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        canvas_dict["c2"].Update()
+        c2.Update()
 
         print("\n")    
 
@@ -2237,7 +2247,7 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
+        c2.cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -2309,8 +2319,8 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        canvas_dict["c2"].Update()
+        c2.Update()
 
         print("\n")
 
-    canvas_dict["c2"].Update()
+    c2.Update()
