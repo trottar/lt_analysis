@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 07:35:55 trottar"
+# Time-stamp: "2024-12-19 07:43:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -374,20 +374,10 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
-            par_vec.append(best_overall_params[0])
-            par_vec.append(best_overall_params[1])
-            par_vec.append(best_overall_params[2])
-            par_vec.append(best_overall_params[3])
-
-            par_err_vec.append(best_overall_errors[0])
-            par_err_vec.append(best_overall_errors[1])
-            par_err_vec.append(best_overall_errors[2])
-            par_err_vec.append(best_overall_errors[3])
-
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
+            for j in range(4):
+                par_vec[4*it+j] = best_overall_params[j]
+                par_err_vec[4*it+j] = best_overall_errors[j]
+                par_chi2_vec[4*it+j] = best_overall_cost[j]
 
             g_sig_fit = TGraphErrors()
             
@@ -811,20 +801,10 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
                 
-            par_vec.append(best_overall_params[0])
-            par_vec.append(best_overall_params[1])
-            par_vec.append(best_overall_params[2])
-            par_vec.append(best_overall_params[3])
-
-            par_err_vec.append(best_overall_errors[0])
-            par_err_vec.append(best_overall_errors[1])
-            par_err_vec.append(best_overall_errors[2])
-            par_err_vec.append(best_overall_errors[3])
-
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
+            for j in range(4):
+                par_vec[4*it+j] = best_overall_params[j]
+                par_err_vec[4*it+j] = best_overall_errors[j]
+                par_chi2_vec[4*it+j] = best_overall_cost[j]
 
             g_sig_fit = TGraphErrors()
 
@@ -1264,21 +1244,11 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
             except TypeError:
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
-                
-            par_vec.append(best_overall_params[0])
-            par_vec.append(best_overall_params[1])
-            par_vec.append(best_overall_params[2])
-            par_vec.append(best_overall_params[3])
 
-            par_err_vec.append(best_overall_errors[0])
-            par_err_vec.append(best_overall_errors[1])
-            par_err_vec.append(best_overall_errors[2])
-            par_err_vec.append(best_overall_errors[3])
-
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
+            for j in range(4):
+                par_vec[4*it+j] = best_overall_params[j]
+                par_err_vec[4*it+j] = best_overall_errors[j]
+                par_chi2_vec[4*it+j] = best_overall_cost[j]
 
             g_sig_fit = TGraphErrors()
 
@@ -1734,20 +1704,10 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
 
-            par_vec.append(best_overall_params[0])
-            par_vec.append(best_overall_params[1])
-            par_vec.append(best_overall_params[2])
-            par_vec.append(best_overall_params[3])
-
-            par_err_vec.append(best_overall_errors[0])
-            par_err_vec.append(best_overall_errors[1])
-            par_err_vec.append(best_overall_errors[2])
-            par_err_vec.append(best_overall_errors[3])
-
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
-            par_chi2_vec.append(best_overall_cost)
+            for j in range(4):
+                par_vec[4*it+j] = best_overall_params[j]
+                par_err_vec[4*it+j] = best_overall_errors[j]
+                par_chi2_vec[4*it+j] = best_overall_cost[j]
 
             g_sig_fit = TGraphErrors()
 
@@ -2033,10 +1993,8 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
         red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
+        for j in range(4):
+            par_chi2_vec[4*it+j] = red_chi2
         
         converge_status = TText()
         converge_status.SetTextSize(0.04)
@@ -2142,10 +2100,8 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
         red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)                    
+        for j in range(4):
+            par_chi2_vec[4*it+j] = red_chi2
 
         converge_status = TText()
         converge_status.SetTextSize(0.04)
@@ -2252,10 +2208,8 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
         red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
+        for j in range(4):
+            par_chi2_vec[4*it+j] = red_chi2
 
         converge_status = TText()
         converge_status.SetTextSize(0.04)
@@ -2359,10 +2313,8 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
         red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)
-        par_chi2_vec.append(red_chi2)            
+        for j in range(4):
+            par_chi2_vec[4*it+j] = red_chi2
 
         converge_status = TText()
         converge_status.SetTextSize(0.04)
