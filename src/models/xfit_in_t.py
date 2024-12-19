@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 03:06:58 trottar"
+# Time-stamp: "2024-12-19 05:03:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,12 +73,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     iter_num = inpDict["iter_num"]
 
-    #'''
     if iter_num > 1:
         DEBUG=False
     else:
         DEBUG=True
-    #'''
 
     #DEBUG=False
     
@@ -99,7 +97,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     #num_optimizations = 1000
 
     # Initial max/min bounds of finding parameter values
-    initial_param_bounds = 1e4
+    initial_param_bounds = {
+        "L" : , 0.05, # Percentage around iteration's parameter
+        "T" : 1e4,
+        "LT" : 0.05,
+        "TT" : 0.05,        
+    }
 
     # Threshold on how bad red. chi2 can be
     #chi2_threshold = 1.0
