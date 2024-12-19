@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:09:44 trottar"
+# Time-stamp: "2024-12-19 08:12:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -281,9 +281,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                 par_vec[4*it+j] = prv_par_vec[4*it+j]
                 par_err_vec[4*it+j] = prv_err_vec[4*it+j]
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
-            print("!!!!!!!",c2)
+            print("!!!!!!!",id(c2))
             plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-            print("!!!!!!!",c2)
+            print("!!!!!!!",id(c2))
 
     c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
