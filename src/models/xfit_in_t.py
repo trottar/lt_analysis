@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 07:51:28 trottar"
+# Time-stamp: "2024-12-19 07:57:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -282,7 +282,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                 par_err_vec[4*it+j] = prv_err_vec[4*it+j]
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
             plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-
+            
+        # Explicitly update all canvases
+        for canvas_key, canvas in canvas_dict.items():
+            canvas.Update()
     c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
     c4.Print(outputpdf)
