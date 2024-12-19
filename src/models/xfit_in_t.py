@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:15:44 trottar"
+# Time-stamp: "2024-12-19 08:17:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -244,25 +244,25 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "graphs_sig_converge" : graphs_sig_converge,
     }
 
+    
     # Create ROOT canvases for additional parameter convergence plots
-    c2 = TCanvas("c2", "c2", 800, 800)
-    c2.Divide(2, 2)
-    c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
-    c3.Divide(2, 2)
-    c4 = TCanvas("c4", "Red. Chi-Square Convergence", 800, 800)
-    c4.Divide(2, 2)
-    c5 = TCanvas("c5", "Temperature", 800, 800)
-    c5.Divide(2, 2)
-    c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
-    c6.Divide(2, 2)
-
     canvas_dict = {
-        "c2" : c2,
-        "c3" : c3,
-        "c4" : c4,
-        "c5" : c5,
-        "c6" : c6,
+        "c2" : TCanvas("c2", "c2", 800, 800),
+        "c3" : TCanvas("c3", "Parameter Convergence", 800, 800),
+        "c4" : TCanvas("c4", "Red. Chi-Square Convergence", 800, 800),
+        "c5" : TCanvas("c5", "Temperature", 800, 800)5,
+        "c6" : TCanvas("c6", "Acceptance Probability", 800, 800),
     }
+    c2 = canvas_dict["c2"]
+    c3 = canvas_dict["c3"]
+    c4 = canvas_dict["c4"]
+    c5 = canvas_dict["c5"]
+    c6 = canvas_dict["c6"]    
+    c2.Divide(2, 2)
+    c3.Divide(2, 2)
+    c4.Divide(2, 2)
+    c5.Divide(2, 2)
+    c6.Divide(2, 2)
 
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
@@ -279,9 +279,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                 par_err_vec[4*it+j] = prv_err_vec[4*it+j]
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
             plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-
-        for k, v in canvas_dict.items():
-            v.Update()
 
     c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
