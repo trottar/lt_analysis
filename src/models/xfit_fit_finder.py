@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:45:02 trottar"
+# Time-stamp: "2024-12-19 08:46:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2346,3 +2346,10 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
     c2.Update()
     
     return (c2, c3, c4, c5, c6)
+
+
+c2.Print(outputpdf+'(')
+c3.Print(outputpdf)
+c4.Print(outputpdf)
+c5.Print(outputpdf)
+c6.Print(outputpdf+')')
