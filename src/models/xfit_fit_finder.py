@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 05:46:55 trottar"
+# Time-stamp: "2024-12-19 05:47:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -85,6 +85,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     # Using central bin value to determine best fit, which should have the best statistics
     q2_center_val = get_central_value(q2_vec)
     w_center_val = get_central_value(w_vec)
+    g_center_val = get_central_value(g_vec)
     th_center_val = get_central_value(th_vec)
     #print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
     #fun_Sig_L = fun_Sig_L_wrapper(q2_center_val, w_center_val)
