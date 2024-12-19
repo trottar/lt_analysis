@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:40:37 trottar"
+# Time-stamp: "2024-12-19 08:41:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2323,7 +2323,4 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
 
         print("\n")
 
-    c2.Update()
-
-# Keep the canvas open
-ROOT.gApplication.Run()    
+    c2.Update()    
