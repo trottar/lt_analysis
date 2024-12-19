@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 06:06:51 trottar"
+# Time-stamp: "2024-12-19 06:09:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2063,23 +2063,6 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
                         
-            # Calculate the minimum and maximum values from the graphs
-            min_sig_y = float('inf')
-            max_sig_y = float('-inf')
-
-            # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graphs_sig_p0[it]]:
-                n_points = graph.GetN()
-                for i in range(n_points):
-                    y = graph.GetY()[i]
-                    if y < min_sig_y:
-                        min_sig_y = y
-                    if y > max_sig_y:
-                        max_sig_y = y
-
-            # Scale the y-axis
-            graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
-            graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
             converge_status = TText()
             converge_status.SetTextSize(0.04)
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")
@@ -2176,23 +2159,6 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
                         
-            # Calculate the minimum and maximum values from the graphs
-            min_sig_y = float('inf')
-            max_sig_y = float('-inf')
-
-            # Update min_sig_y and max_sig_y based on each graph's values
-            for graph in [graphs_sig_p0[it], graphs_sig_p1[it]]:
-                n_points = graph.GetN()
-                for i in range(n_points):
-                    y = graph.GetY()[i]
-                    if y < min_sig_y:
-                        min_sig_y = y
-                    if y > max_sig_y:
-                        max_sig_y = y
-
-            # Scale the y-axis
-            graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
-            graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
             converge_status = TText()
             converge_status.SetTextSize(0.04)
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")            
