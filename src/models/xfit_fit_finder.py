@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:51:30 trottar"
+# Time-stamp: "2024-12-19 08:52:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2364,6 +2364,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params):
         "graphs_sig_converge" : [],
     }
 
+    fit_params = inpDict["fit_params"]
+    
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
 
