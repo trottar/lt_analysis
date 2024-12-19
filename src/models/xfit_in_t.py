@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:18:40 trottar"
+# Time-stamp: "2024-12-19 08:19:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -254,10 +254,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "c6" : TCanvas("c6", "Acceptance Probability", 800, 800),
     }
     canvas_dict["c2"].Divide(2, 2)
-    c3.Divide(2, 2)
-    c4.Divide(2, 2)
-    c5.Divide(2, 2)
-    c6.Divide(2, 2)
+    canvas_dict["c3"].Divide(2, 2)
+    canvas_dict["c4"].Divide(2, 2)
+    canvas_dict["c5"].Divide(2, 2)
+    canvas_dict["c6"].Divide(2, 2)
 
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
@@ -276,10 +276,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
 
     canvas_dict["c2"].Print(outputpdf+'(')
-    c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
+    canvas_dict["c3"].Print(outputpdf)
+    canvas_dict["c4"].Print(outputpdf)
+    canvas_dict["c5"].Print(outputpdf)
+    canvas_dict["c6"].Print(outputpdf+')')
             
     if check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
         sys.exit(2)
