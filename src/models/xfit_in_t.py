@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:35:19 trottar"
+# Time-stamp: "2024-12-19 08:36:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -265,7 +265,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
 
     # Keep the canvas open
-    ROOT.gApplication.Run()
+    ROOT.gApplication
             
     canvas_dict["c2"].Print(outputpdf+'(')
     canvas_dict["c3"].Print(outputpdf)
