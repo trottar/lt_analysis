@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 04:03:02 trottar"
+# Time-stamp: "2024-12-19 04:04:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -79,8 +79,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     Q2min_range = inpDict["Q2min_range"]
     Q2max_range = inpDict["Q2max_range"]
     iter_num = inpDict["iter_num"]            
-    outputpdf = inp_dict["outputpdf"]
-    
+    outputpdf = inp_dict["outputpdf"]    
     fit_params = inpDict["fit_params"]
 
     # Using central bin value to determine best fit, which should have the best statistics
