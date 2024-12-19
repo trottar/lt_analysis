@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:56:29 trottar"
+# Time-stamp: "2024-12-19 08:57:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -387,7 +387,7 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-            c2.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[it].Draw("A*")
             
@@ -470,38 +470,38 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             # Scale the y-axis
             graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
             graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-            c2.Update()
+            canvas_dict["c2"].Update()
 
             # Plot parameter convergence
-            c3.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c3"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graphs_sig_p0[it].SetLineColor(ROOT.kRed)
             graphs_sig_p0[it].Draw("ALP")
-            c3.Update()
+            canvas_dict["c3"].Update()
             
             # Plot chi-square convergence
-            c4.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c4"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
-            c4.Update()
+            canvas_dict["c4"].Update()
             
             # Plot temperature
-            c5.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c5"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
             graphs_sig_temp[it].Draw("ALP")
-            c5.Update()
+            canvas_dict["c5"].Update()
             
             # Plot acceptance probability
-            c6.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c6"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
-            c6.Update()
+            canvas_dict["c6"].Update()
             
             print("\n")    
 
@@ -814,7 +814,7 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-            c2.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[it].Draw("A*")
             
@@ -898,40 +898,40 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             # Scale the y-axis
             graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
             graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-            c2.Update()
+            canvas_dict["c2"].Update()
 
             # Plot parameter convergence
-            c3.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c3"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graphs_sig_p0[it].SetLineColor(ROOT.kRed)
             graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
             graphs_sig_p0[it].Draw("ALP")
             graphs_sig_p1[it].Draw("LP SAME")
-            c3.Update()
+            canvas_dict["c3"].Update()
             
             # Plot chi-square convergence
-            c4.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c4"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
-            c4.Update()
+            canvas_dict["c4"].Update()
             
             # Plot temperature
-            c5.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c5"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
             graphs_sig_temp[it].Draw("ALP")
-            c5.Update()
+            canvas_dict["c5"].Update()
             
             # Plot acceptance probability
-            c6.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c6"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
-            c6.Update()
+            canvas_dict["c6"].Update()
             
             print("\n")    
 
@@ -1258,7 +1258,7 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-            c2.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[it].Draw("A*")
             
@@ -1343,10 +1343,10 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             # Scale the y-axis
             graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
             graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-            c2.Update()            
+            canvas_dict["c2"].Update()            
 
             # Plot parameter convergence
-            c3.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c3"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graphs_sig_p0[it].SetLineColor(ROOT.kRed)
             graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
@@ -1354,31 +1354,31 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             graphs_sig_p0[it].Draw("ALP")
             graphs_sig_p1[it].Draw("LP SAME")
             graphs_sig_p2[it].Draw("LP SAME")
-            c3.Update()
+            canvas_dict["c3"].Update()
             
             # Plot chi-square convergence
-            c4.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c4"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
-            c4.Update()
+            canvas_dict["c4"].Update()
             
             # Plot temperature
-            c5.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c5"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
             graphs_sig_temp[it].Draw("ALP")
-            c5.Update()
+            canvas_dict["c5"].Update()
             
             # Plot acceptance probability
-            c6.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c6"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
-            c6.Update()
+            canvas_dict["c6"].Update()
             
             print("\n")    
 
@@ -1717,7 +1717,7 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-            c2.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[it].Draw("A*")
             
@@ -1803,10 +1803,10 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             # Scale the y-axis
             graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
             graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-            c2.Update()            
+            canvas_dict["c2"].Update()            
 
             # Plot parameter convergence
-            c3.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c3"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
             graphs_sig_p0[it].SetLineColor(ROOT.kRed)
             graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
@@ -1816,41 +1816,41 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             graphs_sig_p1[it].Draw("LP SAME")
             graphs_sig_p2[it].Draw("LP SAME")
             graphs_sig_p3[it].Draw("LP SAME")
-            c3.Update()
+            canvas_dict["c3"].Update()
             
             # Plot chi-square convergence
-            c4.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c4"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
             graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
             graphs_sig_converge[it].Draw("ALP")
             converge_status = TText()
             converge_status.SetTextSize(0.04)
             converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
-            c4.Update()
+            canvas_dict["c4"].Update()
             
             # Plot temperature
-            c5.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c5"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
             graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
             graphs_sig_temp[it].Draw("ALP")
-            c5.Update()
+            canvas_dict["c5"].Update()
             
             # Plot acceptance probability
-            c6.cd(it+1).SetLeftMargin(0.12)
+            canvas_dict["c6"].cd(it+1).SetLeftMargin(0.12)
             graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
             graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
             graphs_sig_accept[it].Draw("ALP")
-            c6.Update()
+            canvas_dict["c6"].Update()
             
             print("\n")
 
-        c2.Update()
-        c3.Update()
-        c4.Update()
-        c5.Update()
-        c6.Update()
+        canvas_dict["c2"].Update()
+        canvas_dict["c3"].Update()
+        canvas_dict["c4"].Update()
+        canvas_dict["c5"].Update()
+        canvas_dict["c6"].Update()
 
-    return (c2, c3, c4, c5, c6)
+    return (canvas_dict["c2"], canvas_dict["c3"], canvas_dict["c4"], canvas_dict["c5"], canvas_dict["c6"])
 
 def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
@@ -1922,7 +1922,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        c2.cd(it+1).SetLeftMargin(0.12)
+        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -1991,7 +1991,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        c2.Update()
+        canvas_dict["c2"].Update()
 
         print("\n")    
 
@@ -2025,7 +2025,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        c2.cd(it+1).SetLeftMargin(0.12)
+        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -2098,7 +2098,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        c2.Update()
+        canvas_dict["c2"].Update()
 
         print("\n")    
 
@@ -2132,7 +2132,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        c2.cd(it+1).SetLeftMargin(0.12)
+        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -2206,7 +2206,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        c2.Update()
+        canvas_dict["c2"].Update()
 
         print("\n")    
 
@@ -2239,7 +2239,7 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
             graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
             graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
-        c2.cd(it+1).SetLeftMargin(0.12)
+        canvas_dict["c2"].cd(it+1).SetLeftMargin(0.12)
         graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
         graphs_sig_fit[it].Draw("A*")
 
@@ -2311,13 +2311,13 @@ def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
         converge_status = TText()
         converge_status.SetTextSize(0.04)
         converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
-        c2.Update()
+        canvas_dict["c2"].Update()
 
         print("\n")
 
-    c2.Update()
+    canvas_dict["c2"].Update()
     
-    return (c2, c3, c4, c5, c6)
+    return (canvas_dict["c2"], canvas_dict["c3"], canvas_dict["c4"], canvas_dict["c5"], canvas_dict["c6"])
 
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params):
 
