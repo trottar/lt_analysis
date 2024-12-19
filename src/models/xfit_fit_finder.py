@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 06:39:25 trottar"
+# Time-stamp: "2024-12-19 06:46:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2027,6 +2027,19 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
             f_sig.SetParNames("p0")
             f_sig.FixParameter(0, par_vec[4*it])
+
+            # Fit the function to the histogram
+            fit_result = hist.Fit(f_sig, "R")  # "R" specifies the range of the fit
+
+            # Retrieve the chi-squared and degrees of freedom
+            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)            
             
             # Evaluate the fit function at several points to determine its range
             n_points = 100  # Number of points to evaluate the fit function
@@ -2047,7 +2060,7 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
             c2.Update()
             
             print("\n")    
@@ -2129,6 +2142,21 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
+            # Retrieve the chi-squared and degrees of freedom
+            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)            
+            
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
 
             # Extend the y-axis range to include the fit function range
             y_min = min(y_min, fit_y_min)
@@ -2143,7 +2171,7 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                         
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")            
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
             c2.Update()
             
             print("\n")    
@@ -2227,6 +2255,22 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
 
+            # Retrieve the chi-squared and degrees of freedom
+            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)            
+            
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+
             # Extend the y-axis range to include the fit function range
             y_min = min(y_min, fit_y_min)
             y_max = max(y_max, fit_y_max)
@@ -2237,10 +2281,10 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
-
+                        
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")            
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
             c2.Update()
             
             print("\n")    
@@ -2323,6 +2367,21 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
+            # Retrieve the chi-squared and degrees of freedom
+            chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+            ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+            red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)
+            par_chi2_vec.append(red_chi2)            
+            
+            # Evaluate the fit function at several points to determine its range
+            n_points = 100  # Number of points to evaluate the fit function
+            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
 
             # Extend the y-axis range to include the fit function range
             y_min = min(y_min, fit_y_min)
@@ -2334,10 +2393,10 @@ def plot_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
-
+                        
             converge_status = TText()
             converge_status.SetTextSize(0.04)
-            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {par_chi2_vec[4*it]:.3f}")            
+            converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
             c2.Update()
             
             print("\n")
