@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:21:14 trottar"
+# Time-stamp: "2024-12-19 08:30:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1857,6 +1857,8 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         c5.Update()
         c6.Update()
 
+    return (c2, c3, c4, c5, c6)
+
 def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
@@ -2324,3 +2326,5 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
         print("\n")
 
     c2.Update()
+    
+    return (c2, c3, c4, c5, c6)
