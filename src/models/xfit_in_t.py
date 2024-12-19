@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:17:56 trottar"
+# Time-stamp: "2024-12-19 08:18:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -250,7 +250,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "c2" : TCanvas("c2", "c2", 800, 800),
         "c3" : TCanvas("c3", "Parameter Convergence", 800, 800),
         "c4" : TCanvas("c4", "Red. Chi-Square Convergence", 800, 800),
-        "c5" : TCanvas("c5", "Temperature", 800, 800)5,
+        "c5" : TCanvas("c5", "Temperature", 800, 800),
         "c6" : TCanvas("c6", "Acceptance Probability", 800, 800),
     }
     c2 = canvas_dict["c2"]
