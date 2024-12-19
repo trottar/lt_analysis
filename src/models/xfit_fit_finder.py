@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 05:04:17 trottar"
+# Time-stamp: "2024-12-19 05:13:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -73,6 +73,7 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations = inpDict["max_iterations"]
     num_optimizations = inpDict["num_optimizations"]
+    initial_param_bounds = inpDict["initial_param_bounds"]
     tmin_range = inpDict["tmin_range"]
     tmax_range = inpDict["tmax_range"]
     Q2min_range = inpDict["Q2min_range"]
@@ -99,8 +100,6 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
         # Grab parameters used by functional forms
         num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
-        initial_param_bounds = inpDict["initial_param_bounds"][sig_name]
-        
         # Checks initial parameters and replaces zeros to avoid errors
         #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
         initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
@@ -242,8 +241,9 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0")
-                            f_sig.SetParameter(0, current_params[0])
-                            f_sig.SetParLimits(0, current_params[0]-abs(current_params[0] * max_param_bounds), current_params[0]+abs(current_params[0] * max_param_bounds))
+                            #f_sig.SetParameter(0, current_params[0])
+                            f_sig.FixParameter(0, current_params[0])                            
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -340,7 +340,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Reset function parameters
                             for i, param in enumerate(recovery_params):
-                                f_sig.SetParameter(i, param)
+                                #f_sig.SetParameter(i, param)
+                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
@@ -663,10 +664,12 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0", "p1")
-                            f_sig.SetParameter(0, current_params[0])
-                            f_sig.SetParameter(1, current_params[1])
-                            f_sig.SetParLimits(0, current_params[0]-abs(current_params[0] * max_param_bounds), current_params[0]+abs(current_params[0] * max_param_bounds))
-                            f_sig.SetParLimits(1, current_params[1]-abs(current_params[1] * max_param_bounds), current_params[1]+abs(current_params[1] * max_param_bounds))
+                            #f_sig.SetParameter(0, current_params[0])
+                            f_sig.FixParameter(0, current_params[0])                            
+                            #f_sig.SetParameter(1, current_params[1])
+                            f_sig.FixParameter(1, current_params[1])                            
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -777,7 +780,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Reset function parameters
                             for i, param in enumerate(recovery_params):
-                                f_sig.SetParameter(i, param)
+                                #f_sig.SetParameter(i, param)
+                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
@@ -1108,12 +1112,15 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0", "p1", "p2")
-                            f_sig.SetParameter(0, current_params[0])
-                            f_sig.SetParameter(1, current_params[1])
-                            f_sig.SetParameter(2, current_params[2])
-                            f_sig.SetParLimits(0, current_params[0]-abs(current_params[0] * max_param_bounds), current_params[0]+abs(current_params[0] * max_param_bounds))
-                            f_sig.SetParLimits(1, current_params[1]-abs(current_params[1] * max_param_bounds), current_params[1]+abs(current_params[1] * max_param_bounds))
-                            f_sig.SetParLimits(2, current_params[2]-abs(current_params[2] * max_param_bounds), current_params[2]+abs(current_params[2] * max_param_bounds))
+                            #f_sig.SetParameter(0, current_params[0])
+                            f_sig.FixParameter(0, current_params[0])                            
+                            #f_sig.SetParameter(1, current_params[1])
+                            f_sig.FixParameter(1, current_params[1])                            
+                            #f_sig.SetParameter(2, current_params[2])
+                            f_sig.FixParameter(2, current_params[2])                            
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1231,7 +1238,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Reset function parameters
                             for i, param in enumerate(recovery_params):
-                                f_sig.SetParameter(i, param)
+                                #f_sig.SetParameter(i, param)
+                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
@@ -1569,14 +1577,18 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
                                 f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                                 #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                             f_sig.SetParNames("p0", "p1", "p2", "p3")
-                            f_sig.SetParameter(0, current_params[0])
-                            f_sig.SetParameter(1, current_params[1])
-                            f_sig.SetParameter(2, current_params[2])
-                            f_sig.SetParameter(3, current_params[3])
-                            f_sig.SetParLimits(0, current_params[0]-abs(current_params[0] * max_param_bounds), current_params[0]+abs(current_params[0] * max_param_bounds))
-                            f_sig.SetParLimits(1, current_params[1]-abs(current_params[1] * max_param_bounds), current_params[1]+abs(current_params[1] * max_param_bounds))
-                            f_sig.SetParLimits(2, current_params[2]-abs(current_params[2] * max_param_bounds), current_params[2]+abs(current_params[2] * max_param_bounds))
-                            f_sig.SetParLimits(3, current_params[3]-abs(current_params[3] * max_param_bounds), current_params[3]+abs(current_params[3] * max_param_bounds))                
+                            #f_sig.SetParameter(0, current_params[0])
+                            f_sig.FixParameter(0, current_params[0])                            
+                            #f_sig.SetParameter(1, current_params[1])
+                            f_sig.FixParameter(1, current_params[1])                            
+                            #f_sig.SetParameter(2, current_params[2])
+                            f_sig.FixParameter(2, current_params[2])                            
+                            #f_sig.SetParameter(3, current_params[3])
+                            f_sig.FixParameter(3, current_params[3])                            
+                            f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                            f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)                
 
                             r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1700,7 +1712,8 @@ def find_fit(inpDict, par_vec, par_err_vec, par_chi2_vec):
 
                             # Reset function parameters
                             for i, param in enumerate(recovery_params):
-                                f_sig.SetParameter(i, param)
+                                #f_sig.SetParameter(i, param)
+                                f_sig.FixParameter(i, param)                                
 
                             # Don't update best_cost to inf, keep previous best
                             current_params = recovery_params
