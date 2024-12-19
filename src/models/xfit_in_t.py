@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:03:32 trottar"
+# Time-stamp: "2024-12-19 08:03:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -267,23 +267,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     fixed_params = ["L", "T", "LT", "TT"]
     #fixed_params = ["L", "T", "LT"]
     
-    for it, (key, val) in enumerate(fit_params.items()):
-        
-        # Don't find new fits if debugging
-        if key not in fixed_params:
-            
-            # Find optimized fits for L, T, LT, TT
-            find_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-            
-        else:
 
-            for j in range(4):
-                par_vec[4*it+j] = prv_par_vec[4*it+j]
-                par_err_vec[4*it+j] = prv_err_vec[4*it+j]
-                par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
-            plot_fit(inp_dict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
-
-    canvas_dict["c2"].Print(outputpdf+'(')
+    c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
     c4.Print(outputpdf)
     c5.Print(outputpdf)
