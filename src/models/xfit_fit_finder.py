@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:57:45 trottar"
+# Time-stamp: "2024-12-19 08:58:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,7 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
+def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
@@ -1852,7 +1852,7 @@ def find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, v
 
     return (canvas_dict["c2"], canvas_dict["c3"], canvas_dict["c4"], canvas_dict["c5"], canvas_dict["c6"])
 
-def plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
+def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
@@ -2334,13 +2334,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     canvas_dict["c4"].Divide(2, 2)
     canvas_dict["c5"].Divide(2, 2)
     canvas_dict["c6"].Divide(2, 2)
-
-    # Create ROOT canvases for additional parameter convergence plots
-    c2 = canvas_dict["c2"]
-    c3 = canvas_dict["c3"]
-    c4 = canvas_dict["c4"]
-    c5 = canvas_dict["c5"]
-    c6 = canvas_dict["c6"]
     
     # Create lists to store graph objects outside the loop
     graph_dict = {
@@ -2365,13 +2358,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
         # Don't find new fits if debugging
         if key not in fixed_params:        
             # Find optimized fits
-            c2, c3, c4, c5, c6 = find_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
+            c2, c3, c4, c5, c6 = find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)            
         else:
             for j in range(4):
                 par_vec[4*it+j] = prv_par_vec[4*it+j]
                 par_err_vec[4*it+j] = prv_err_vec[4*it+j]
                 par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
-            c2, c3, c4, c5, c6 = plot_fit(inpDict, graph_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
+            c2, c3, c4, c5, c6 = plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_vec, it, key, val)
 
     c2.Print(outputpdf+'(')
     c3.Print(outputpdf)
