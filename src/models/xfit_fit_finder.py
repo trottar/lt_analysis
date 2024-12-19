@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 08:43:23 trottar"
+# Time-stamp: "2024-12-19 08:44:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -56,11 +56,11 @@ def find_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
     graphs_sig_converge = graph_dict["graphs_sig_converge"]
 
     # Create ROOT canvases for additional parameter convergence plots
-    c2 = canvas_dict["c2"].Clone()
-    c3 = canvas_dict["c3"].Clone()
-    c4 = canvas_dict["c4"].Clone()
-    c5 = canvas_dict["c5"].Clone()
-    c6 = canvas_dict["c6"].Clone()
+    c2 = canvas_dict["c2"]
+    c3 = canvas_dict["c3"]
+    c4 = canvas_dict["c4"]
+    c5 = canvas_dict["c5"]
+    c6 = canvas_dict["c6"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -1865,13 +1865,11 @@ def plot_fit(inpDict, graph_dict, canvas_dict, par_vec, par_err_vec, par_chi2_ve
     graphs_sig_fit = graph_dict["graphs_sig_fit"]
 
     # Create ROOT canvases for additional parameter convergence plots
-
-    # Create ROOT canvases for additional parameter convergence plots
-    c2 = canvas_dict["c2"].Clone()
-    c3 = canvas_dict["c3"].Clone()
-    c4 = canvas_dict["c4"].Clone()
-    c5 = canvas_dict["c5"].Clone()
-    c6 = canvas_dict["c6"].Clone()
+    c2 = canvas_dict["c2"]
+    c3 = canvas_dict["c3"]
+    c4 = canvas_dict["c4"]
+    c5 = canvas_dict["c5"]
+    c6 = canvas_dict["c6"]
     
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
