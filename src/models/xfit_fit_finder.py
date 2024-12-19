@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 09:13:15 trottar"
+# Time-stamp: "2024-12-19 09:15:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -98,7 +98,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     for it, (key, val) in enumerate(fit_params.items()):
 
         # Don't find new fits if debugging
-        if key not in fixed_params:        
+        if key not in fixed_params:
+            
             # Find optimized fits
             sig_name = key
             # Grab parameters used by functional forms
@@ -1902,6 +1903,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
+                # Create TGraphs for parameter convergence
+                graph_sig_p0 = TGraph()
+                graph_sig_chi2 = TGraph()
+                graph_sig_temp = TGraph()
+                graph_sig_accept = TGraph()
+                graphs_sig_p0.append(graph_sig_p0)
+                graphs_sig_p1.append(0.0)
+                graphs_sig_p2.append(0.0)
+                graphs_sig_p3.append(0.0)
+                graphs_sig_converge.append(graph_sig_chi2)
+                graphs_sig_temp.append(graph_sig_temp)
+                graphs_sig_accept.append(graph_sig_accept)
+                
                 g_sig_fit = TGraphErrors()
 
                 graphs_sig_fit.append(g_sig_fit)
@@ -2004,6 +2018,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print("/*--------------------------------------------------*/")
 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+
+                # Create TGraphs for parameter convergence
+                graph_sig_p0 = TGraph()
+                graph_sig_chi2 = TGraph()
+                graph_sig_temp = TGraph()
+                graph_sig_accept = TGraph()
+                graphs_sig_p0.append(graph_sig_p0)
+                graphs_sig_p1.append(graph_sig_p1)
+                graphs_sig_p2.append(0.0)
+                graphs_sig_p3.append(0.0)
+                graphs_sig_converge.append(graph_sig_chi2)
+                graphs_sig_temp.append(graph_sig_temp)
+                graphs_sig_accept.append(graph_sig_accept)
 
                 g_sig_fit = TGraphErrors()
 
@@ -2112,6 +2139,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
+                # Create TGraphs for parameter convergence
+                graph_sig_p0 = TGraph()
+                graph_sig_chi2 = TGraph()
+                graph_sig_temp = TGraph()
+                graph_sig_accept = TGraph()
+                graphs_sig_p0.append(graph_sig_p0)
+                graphs_sig_p1.append(graph_sig_p1)
+                graphs_sig_p2.append(graph_sig_p2)
+                graphs_sig_p3.append(0.0)
+                graphs_sig_converge.append(graph_sig_chi2)
+                graphs_sig_temp.append(graph_sig_temp)
+                graphs_sig_accept.append(graph_sig_accept)
+
                 g_sig_fit = TGraphErrors()
 
                 graphs_sig_fit.append(g_sig_fit)
@@ -2216,8 +2256,22 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
-                print("/*--------------------------------------------------*/")    
+                print("/*--------------------------------------------------*/")
+                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+
+                # Create TGraphs for parameter convergence
+                graph_sig_p0 = TGraph()
+                graph_sig_chi2 = TGraph()
+                graph_sig_temp = TGraph()
+                graph_sig_accept = TGraph()
+                graphs_sig_p0.append(graph_sig_p0)
+                graphs_sig_p1.append(graph_sig_p1)
+                graphs_sig_p2.append(graph_sig_p2)
+                graphs_sig_p3.append(graph_sig_p2)
+                graphs_sig_converge.append(graph_sig_chi2)
+                graphs_sig_temp.append(graph_sig_temp)
+                graphs_sig_accept.append(graph_sig_accept)
 
                 g_sig_fit = TGraphErrors()
 
