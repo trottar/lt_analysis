@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 07:24:42 trottar"
+# Time-stamp: "2024-12-19 07:27:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -217,9 +217,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "fit_params" : fit_params,
     }
 
+    #fixed_params = ["L", "T", "LT", "TT"]
+    fixed_params = ["L", "T", "LT"]
+    
     for it, (key, val) in enumerate(fit_params.items()):
         # Don't find new fits if debugging
-        if not DEBUG:
+        if key not in fixed_params:
             # Create lists to store graph objects outside the loop
             graphs_sig_fit = []
             graphs_sig_p0 = []
