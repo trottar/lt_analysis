@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-20 18:08:54 trottar"
+# Time-stamp: "2024-12-20 18:10:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2002,7 +2002,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {red_chi2:.5f}")
-                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
                     
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
@@ -2129,7 +2128,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {red_chi2:.5f}")
-                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
@@ -2258,7 +2256,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {red_chi2:.5f}")
-                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
@@ -2386,7 +2383,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                 print(f"\n\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {red_chi2:.5f}")
-                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
