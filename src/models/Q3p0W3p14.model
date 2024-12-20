@@ -42,18 +42,18 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 #
 # Original equation
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-# 1. Add polynomial term to better capture the flattening at high-t
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * tt**2) * (Qdep_T**par8)
-# 2. Modify exponential decay with power law for smoother transition
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt)**1.5)) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-# 3. Add asymptotic term for high-t behavior
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9) * (Qdep_T**par8)
-# 4. Include logarithmic term for better mid-range description
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * math.log(math.fabs(tt))) * (Qdep_T**par8)
-# 5. Add second exponential with different decay rate for multi-component behavior
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * math.exp(-par10 * math.fabs(tt))) * (Qdep_T**par8)
+# 1. Modify linear term to have power dependence
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)**par8)) * Qdep_T
+# 2. Adjust exponential and reorganize parameters
+#sig_T = par5 * (math.exp(-par6 * (math.fabs(tt))) + par7/par5 * (math.fabs(tt))) * (Qdep_T**par8)
+# 3. Make exponential coefficient dependent on other parameters
+#sig_T = (par5 * math.exp(-(par6/par7) * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+# 4. Modify both terms with same power
+#sig_T = ((par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (math.fabs(tt)**(par8-1)))
+# 5. Rearrange to make par8 affect exponential decay
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt)**par8)) + par7 * (math.fabs(tt))) * Qdep_T
 ####
-sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * tt**2) * (Qdep_T**par8)
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)**par8)) * Qdep_T
 ####
 
 # Longitudinal-Transverse interference term
