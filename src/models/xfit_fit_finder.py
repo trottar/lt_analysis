@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 09:29:56 trottar"
+# Time-stamp: "2024-12-20 18:08:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1868,7 +1868,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             c4.Update()
             c5.Update()
             c6.Update()
-
+            
+        ## plot_fit
         else:
             for j in range(4):
                 par_vec[4*it+j] = prv_par_vec[4*it+j]
@@ -1994,9 +1995,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                 red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                best_overall_params = []                
                 for j in range(4):
+                    best_overall_params.append(par_vec[4*it+j])
                     par_chi2_vec[4*it+j] = red_chi2
-
+                    
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {red_chi2:.5f}")
+                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
+                    
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
                 converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
@@ -2115,8 +2122,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                 red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                best_overall_params = []                
                 for j in range(4):
+                    best_overall_params.append(par_vec[4*it+j])
                     par_chi2_vec[4*it+j] = red_chi2
+                    
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {red_chi2:.5f}")
+                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
@@ -2238,8 +2251,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                 red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                best_overall_params = []                
                 for j in range(4):
+                    best_overall_params.append(par_vec[4*it+j])
                     par_chi2_vec[4*it+j] = red_chi2
+                    
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {red_chi2:.5f}")
+                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
@@ -2360,8 +2379,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                 red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                best_overall_params = []                
                 for j in range(4):
+                    best_overall_params.append(par_vec[4*it+j])
                     par_chi2_vec[4*it+j] = red_chi2
+                    
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {red_chi2:.5f}")
+                print(f"Best overall bin: t={t_center_val:.3f}, Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
