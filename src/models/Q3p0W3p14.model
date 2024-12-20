@@ -64,7 +64,7 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 # This model adds a logarithmic correction to the exponential decay for more subtle variations.
 #sig_LT_log = par9 * (math.exp(-par10 * math.fabs(tt)) * (1.0 + par11 * math.log(1.0 + math.fabs(tt)))) * math.sin(theta_cm)
 ####
-sig_LT = par9 * (math.exp(-par10 * math.fabs(tt)) * (1.0 + par11 * math.log(math.fabs(tt)))) * math.sin(theta_cm)
+sig_LT = par9 * (math.exp(-par10 * math.fabs(tt)) * (par11 + par12 * math.log(1.0 + math.fabs(tt)))) * math.sin(theta_cm)
 ####
 
 # Transverse-Transverse interference term
