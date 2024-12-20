@@ -42,7 +42,7 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 #
 # Original equation
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-# 1. Modify linear term to have power dependence
+# 1. Modify linear term to have power dependence !!FAIL!!
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)**par8)) * Qdep_T
 # 2. Adjust exponential and reorganize parameters
 #sig_T = par5 * (math.exp(-par6 * (math.fabs(tt))) + par7/par5 * (math.fabs(tt))) * (Qdep_T**par8)
@@ -53,7 +53,7 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 # 5. Rearrange to make par8 affect exponential decay
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt)**par8)) + par7 * (math.fabs(tt))) * Qdep_T
 ####
-sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)**par8)) * Qdep_T
+sig_T = par5 * (math.exp(-par6 * (math.fabs(tt))) + par7/par5 * (math.fabs(tt))) * (Qdep_T**par8)
 ####
 
 # Longitudinal-Transverse interference term
