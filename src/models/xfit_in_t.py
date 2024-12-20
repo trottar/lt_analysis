@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-20 00:29:28 trottar"
+# Time-stamp: "2024-12-20 01:54:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -216,7 +216,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_chi2_vec = prv_chi2_vec
 
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["LT", "TT"]
+    fixed_params = ["TT"]
     #fixed_params = [] # Update all
     
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
