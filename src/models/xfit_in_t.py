@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-19 16:33:50 trottar"
+# Time-stamp: "2024-12-19 21:27:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,7 +181,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             w_vec.append(ww)
             q2_vec.append(qq)
             th_vec.append(theta_cm)
-
             
     # Revert changes for rest of script
     q2_set = q2_set.replace(".","p")
@@ -217,7 +216,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_chi2_vec = prv_chi2_vec
 
     #fixed_params = ["L", "T", "LT", "TT"]
-    fixed_params = ["L", "T", "LT"]
+    fixed_params = ["T", "LT", "TT"]
+    #fixed_params = ["L", "T", "LT"]
     #fixed_params = ["LT", "TT"]
     #fixed_params = []
     
