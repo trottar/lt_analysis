@@ -48,9 +48,6 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 #sig_LT = par9 * (math.exp(-par10 * math.fabs(tt)) - 1.0 / (1.0 - math.fabs(tt))) * math.sin(theta_cm)
 #
 #sig_LT = par9 * (math.exp(-par10 * math.fabs(tt)) - par11 / (1.0 - math.fabs(tt))) * math.sin(theta_cm)
-# Pure Exponential with -t
-# This model assumes a simple exponential decay modulated by sin(theta_cm).
-#sig_LT_exp = par9 * (math.exp(-par10 * math.fabs(tt))) * math.sin(theta_cm)
 # Modified Power-Law Decay
 # This model incorporates a power-law decay to capture slower or more gradual changes.
 #sig_LT_power = par9 * ((1.0 + par10 * math.fabs(tt))**(-par11)) * math.sin(theta_cm)
@@ -64,7 +61,7 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 # This model adds a logarithmic correction to the exponential decay for more subtle variations.
 #sig_LT_log = par9 * (math.exp(-par10 * math.fabs(tt)) * (1.0 + par11 * math.log(1.0 + math.fabs(tt)))) * math.sin(theta_cm)
 ####
-sig_LT = par9 * (math.exp(-par10 * math.fabs(tt))) * math.sin(theta_cm)
+sig_LT = par9 * ((1.0 + par10 * math.fabs(tt))**(-par11)) * math.sin(theta_cm)
 ####
 
 # Transverse-Transverse interference term
