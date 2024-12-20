@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-20 14:57:00 trottar"
+# Time-stamp: "2024-12-20 15:31:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,6 +78,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     ##############
     # HARD CODED #
     ##############
+    #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
+    fixed_params = ["L", "LT", "TT"]
+    #fixed_params = [] # Update all
+    
     # Maximum iterations before ending loop
     #max_iterations = 100
     max_iterations = 1000
@@ -213,10 +217,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_vec = prv_par_vec
     par_err_vec = prv_err_vec
     par_chi2_vec = prv_chi2_vec
-
-    #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["L", "TT"]
-    #fixed_params = [] # Update all
     
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
     
