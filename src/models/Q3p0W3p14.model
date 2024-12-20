@@ -29,32 +29,16 @@ Qdep_TT = qq * math.exp(-qq)
 # Longitudinal cross-section
 # 0th iteration, 2024December05_H07M34S41
 # 2nd iteration, (chi2~1.0)
-sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
+#sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 #
-###sig_L =  (par1 * Qdep_L * ft) * (par2 * math.exp(-par3 * (math.fabs(tt))) - 1.0)
+sig_L =  (par1 * Qdep_L * ft) * (par2 * math.exp(-par3 * (math.fabs(tt))) - 1.0)
 
 # Transverse cross-section
 # 0th iteration, 2024December05_H07M34S41
 # 2nd iteration, (chi2<2.0)
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 # 1st iteration, (chi2 < 3.5)
-#sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
-#
-# Original equation
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-# 1. Exchange parameter roles in exponential and linear terms !!FAIL!!
-#sig_T = (par7 * math.exp(-par5 * (math.fabs(tt))) + par6 * (math.fabs(tt))) * (Qdep_T**par8)
-# 2. Move par8 to exponential term !!FAIL!!
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt)**par8)) + par7 * (math.fabs(tt)))
-# 3. Change linear term to exponential !!FAIL!!
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * math.exp(-par8 * math.fabs(tt)))
-# 4. Make exponential term depend on Qdep
-#sig_T = (par5 * math.exp(-par6 * (Qdep_T)) + par7 * (math.fabs(tt))) * (math.fabs(tt)**par8)
-# 5. Modify structure but keep one-time use of parameters
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt)))) * (par7 + math.fabs(tt)) * (Qdep_T**par8)
-####
-sig_T = -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
-####
+sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 
 # Longitudinal-Transverse interference term
 # 0th iteration, 2024December05_H07M34S41 
