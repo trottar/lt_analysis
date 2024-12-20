@@ -38,7 +38,23 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 # 2nd iteration, (chi2<2.0)
 sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 # 1st iteration, (chi2 < 3.5)
-###sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#
+# Original equation
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+# 1. Add polynomial term to better capture the flattening at high-t
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * tt**2) * (Qdep_T**par8)
+# 2. Modify exponential decay with power law for smoother transition
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt)**1.5)) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+# 3. Add asymptotic term for high-t behavior
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9) * (Qdep_T**par8)
+# 4. Include logarithmic term for better mid-range description
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * math.log(math.fabs(tt))) * (Qdep_T**par8)
+# 5. Add second exponential with different decay rate for multi-component behavior
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * math.exp(-par10 * math.fabs(tt))) * (Qdep_T**par8)
+####
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt)) + par9 * tt**2) * (Qdep_T**par8)
+####
 
 # Longitudinal-Transverse interference term
 # 0th iteration, 2024December05_H07M34S41 
