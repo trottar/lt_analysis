@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-13 02:34:27 trottar"
+# Time-stamp: "2024-12-21 21:03:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1021,6 +1021,8 @@ def check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations
         
     unique_bad_chi2_count = 0
     checked_values = set()  # Track unique chi-squared values we've already warned about
+
+    bad_chi2_indices = []
     
     # Only need to check every 4th value since they repeat
     for i in range(0, len(par_chi2_vec), 4):
@@ -1043,12 +1045,13 @@ def check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations
             )
             
             checked_values.add(chi2)
+            bad_chi2_indices.append(i // 4)
             unique_bad_chi2_count += 1
             
             if unique_bad_chi2_count >= 4:  # Limit to 4 unique warnings
                 break
                 
-    return unique_bad_chi2_count > 0
+    return (unique_bad_chi2_count > 0, bad_chi2_indices)
     
 ################################################################################################################################################
 
