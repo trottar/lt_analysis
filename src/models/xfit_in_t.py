@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-22 14:02:21 trottar"
+# Time-stamp: "2024-12-22 14:50:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -225,10 +225,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     i = 0
     max_checks = 5
-    while bad_chi2_bool or i>max_checks:
+    while bad_chi2_bool and i<max_checks:
         fixed_params = ["L", "T", "LT", "TT"]
         fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
-        print(f"Chi2 below {chi2_threshold}! Check ({i} / {max_checks})...")
+        print(f"\n\nChi2 above {chi2_threshold}! Check ({i} / {max_checks})...")
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
         bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
         i +=1
