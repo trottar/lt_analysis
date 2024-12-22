@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-21 23:20:59 trottar"
+# Time-stamp: "2024-12-21 23:28:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -370,7 +370,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 # Record the end time
                 end_time = time.time()
@@ -384,7 +384,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_overall_errors.append(0.0)
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
@@ -797,7 +797,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 # Record the end time
                 end_time = time.time()
@@ -811,7 +811,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_overall_errors.append(0.0)
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
@@ -1241,7 +1241,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 # Record the end time
                 end_time = time.time()
@@ -1255,7 +1255,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_overall_errors.append(0.0)
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
@@ -1700,7 +1700,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 # Record the end time
                 end_time = time.time()
@@ -1714,7 +1714,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_overall_errors.append(0.0)
                 except TypeError:
                     print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    #sys.exit(2)
+                    sys.exit(2)
                     
                 for j in range(4):
                     par_vec[4*it+j] = best_overall_params[j]
