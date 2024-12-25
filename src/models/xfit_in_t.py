@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-22 22:38:43 trottar"
+# Time-stamp: "2024-12-25 13:27:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -79,9 +79,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # HARD CODED #
     ##############
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["L", "T", "LT"]
+    #fixed_params = ["L", "T", "LT"]
     #fixed_params = ["TT"]
-    #fixed_params = [] # Update all
+    fixed_params = [] # Update all
     
     # Maximum iterations before ending loop
     #max_iterations = 100
@@ -101,8 +101,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Threshold on how bad red. chi2 can be
     #chi2_threshold = 1.0
-    chi2_threshold = 10.0
-    #chi2_threshold = 30.0
+    #chi2_threshold = 10.0
+    chi2_threshold = 30.0
     #chi2_threshold = 600.0
     ##############
     ##############
@@ -228,7 +228,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     while bad_chi2_bool and i <= max_checks:
         fixed_params = ["L", "T", "LT", "TT"]
         fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
-        print(f"\n\nChi2 above threshold of{chi2_threshold}! Check ({i} / {max_checks})...")
+        print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
         bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
         i +=1
