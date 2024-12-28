@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:46:33 trottar"
+# Time-stamp: "2024-12-28 14:56:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -63,17 +63,18 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     :param dest_prefix: Target directory prefix for the stub.
     :param batch_size: Number of files per batch.
     """
+    
     file_batches = list(generate_file_batches(source_dir, batch_size))
-    #print(len(file_batches))
+
+    print(f"Running jput -r {source_dir} {dest_prefix}...")
+    print(f"Files in {source_dir} was split into {len(file_batches)} batches...\n")
+
     for i, batch in enumerate(file_batches):
         # Progress bar
         Misc.progressBar(i, len(file_batches)-1, bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
-        #print("!!!!!",batch)
         try:
-            #print(" ".join(command))
             subprocess.run(command, check=True)
-            #subprocess.run(" ".join(command), check=True)
             print(f"Batch with {len(batch)} files uploaded successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error executing jput command for batch: {e}")
