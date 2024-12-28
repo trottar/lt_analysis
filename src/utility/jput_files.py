@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:37:35 trottar"
+# Time-stamp: "2024-12-28 14:38:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -63,7 +63,7 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     :param dest_prefix: Target directory prefix for the stub.
     :param batch_size: Number of files per batch.
     """
-    file_batches = generate_file_batches(source_dir, batch_size)
+    file_batches = list(generate_file_batches(source_dir, batch_size))
     print(file_batches)
     for i, batch in enumerate(file_batches):
         # Progress bar
