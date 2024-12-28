@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-27 17:55:38 trottar"
+# Time-stamp: "2024-12-28 01:11:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -133,7 +133,7 @@ for t in "${TARGET[@]}"; do
 				#./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
-				#jcache get $rootfile
+				jcache get $rootfile
 			        continue
 			    fi
 			done
