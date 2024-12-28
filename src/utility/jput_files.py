@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:38:05 trottar"
+# Time-stamp: "2024-12-28 14:39:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -67,7 +67,7 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     print(file_batches)
     for i, batch in enumerate(file_batches):
         # Progress bar
-        Misc.progressBar(i, len(file_batches[0])-1, bar_length=25)
+        Misc.progressBar(i, batch_size, bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
         try:
             #print(" ".join(command))
