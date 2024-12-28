@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:44:27 trottar"
+# Time-stamp: "2024-12-28 14:45:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -86,4 +86,4 @@ source_directory = f"/group/c-kaonlt/USERS/trottar/lt_analysis/OUTPUT/Analysis/K
 destination_prefix = f"/mss/hallc/kaonlt/trottar/kaon/Q3p0W3p14/{inp_dir}"  # Destination prefix
 
 # Run jput command in batches
-run_jput_in_batches(source_directory, destination_prefix, batch_size=100)
+run_jput_in_batches(source_directory, destination_prefix, batch_size=5)
