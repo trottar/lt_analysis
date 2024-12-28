@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:41:11 trottar"
+# Time-stamp: "2024-12-28 14:42:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -69,10 +69,11 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
         # Progress bar
         Misc.progressBar(i, batch_size, bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
+        print("!!!!!",batch)
         try:
-            print(" ".join(command))
-            #subprocess.run(command, check=True)
-            subprocess.run(" ".join(command), check=True)
+            #print(" ".join(command))
+            subprocess.run(command, check=True)
+            #subprocess.run(" ".join(command), check=True)
             print(f"Batch with {len(batch)} files uploaded successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error executing jput command for batch: {e}")
