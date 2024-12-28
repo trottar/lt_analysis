@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 11:54:02 trottar"
+# Time-stamp: "2024-12-28 11:56:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -11,6 +11,29 @@
 # Copyright (c) trottar
 #
 import os, sys, subprocess
+
+################################################################################################################################################
+'''
+ltsep package import and pathing definitions
+'''
+
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
+
+lt=Root(os.path.realpath(__file__),"Plot_LTSep")
+
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
+
+################################################################################################################################################
 
 inp_dir = sys.argv[1]
 
@@ -40,7 +63,10 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     :param dest_prefix: Target directory prefix for the stub.
     :param batch_size: Number of files per batch.
     """
-    for batch in generate_file_batches(source_dir, batch_size):
+    file_batches = generate_file_batches(source_dir, batch_size)
+    for i, batch in enumerate(file_batches):
+        # Progress bar
+        Misc.progressBar(i, len(file_batches)-1,bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
         try:
             print(command)
