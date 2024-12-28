@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 12:02:37 trottar"
+# Time-stamp: "2024-12-28 12:09:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -64,12 +64,13 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     :param batch_size: Number of files per batch.
     """
     file_batches = list(generate_file_batches(source_dir, batch_size))
+    print(file_batches)
     for i, batch in enumerate(file_batches):
         # Progress bar
         Misc.progressBar(i, len(batch)-1, bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
         try:
-            #print(command)
+            print(" ".join(command))
             subprocess.run(command, check=True)
             print(f"Batch with {len(batch)} files uploaded successfully.")
         except subprocess.CalledProcessError as e:
