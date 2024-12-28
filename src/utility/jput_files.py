@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 12:00:04 trottar"
+# Time-stamp: "2024-12-28 12:00:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -64,9 +64,10 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     :param batch_size: Number of files per batch.
     """
     file_batches = list(generate_file_batches(source_dir, batch_size))
+    print("!!!!!!!!!!!",len(file_batches))
     for i, batch in enumerate(file_batches):
         # Progress bar
-        Misc.progressBar(i, len(file_batches)-1,bar_length=25)
+        Misc.progressBar(i, len(file_batches)-1, bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
         try:
             #print(command)
