@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:42:17 trottar"
+# Time-stamp: "2024-12-28 14:43:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -49,7 +49,7 @@ def generate_file_batches(source_dir, batch_size=100):
     for root, _, files in os.walk(source_dir):
         for file in files:
             file_paths.append(os.path.join(root, file))
-            if len(file_paths) == batch_size:
+            if len(file_paths) >= batch_size:
                 yield file_paths
                 file_paths = []
     if file_paths:
