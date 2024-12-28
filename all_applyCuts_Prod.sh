@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 01:11:32 trottar"
+# Time-stamp: "2024-12-28 01:15:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -125,8 +125,7 @@ for t in "${TARGET[@]}"; do
 			    echo
 			    echo "Running ${number}"
 			    cd "${LTANAPATH}"
-			    #rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
-			    rootfile=/lustre24/expphy/volatile/hallc/c-kaonlt/trottar/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
+			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
 			    # Using the test command with -e option
 			    if test -e $rootfile; then
 				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} pion
