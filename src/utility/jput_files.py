@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:41:02 trottar"
+# Time-stamp: "2024-12-28 14:41:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -70,7 +70,7 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
         Misc.progressBar(i, batch_size, bar_length=25)
         command = ["jput", "-r", source_dir, dest_prefix] + batch
         try:
-            #print(" ".join(command))
+            print(" ".join(command))
             #subprocess.run(command, check=True)
             subprocess.run(" ".join(command), check=True)
             print(f"Batch with {len(batch)} files uploaded successfully.")
