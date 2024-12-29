@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 14:56:43 trottar"
+# Time-stamp: "2024-12-28 21:44:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -66,8 +66,8 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
     
     file_batches = list(generate_file_batches(source_dir, batch_size))
 
-    print(f"Running jput -r {source_dir} {dest_prefix}...")
-    print(f"Files in {source_dir} was split into {len(file_batches)} batches...\n")
+    print(f"\n\nRunning 'jput -r {source_dir} {dest_prefix}'")
+    print(f"\n\nFiles in {source_dir} was split into {len(file_batches)} batches...\n")
 
     for i, batch in enumerate(file_batches):
         # Progress bar
@@ -87,4 +87,4 @@ source_directory = f"/group/c-kaonlt/USERS/trottar/lt_analysis/OUTPUT/Analysis/K
 destination_prefix = f"/mss/hallc/kaonlt/trottar/kaon/Q3p0W3p14/{inp_dir}"  # Destination prefix
 
 # Run jput command in batches
-run_jput_in_batches(source_directory, destination_prefix, batch_size=5)
+run_jput_in_batches(source_directory, destination_prefix, batch_size=50)
