@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 22:32:30 trottar"
+# Time-stamp: "2024-12-29 22:49:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1917,14 +1917,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                best_red_chi2 = float('inf')  # Initialize with infinity
-                best_params = None
+                best_overall_cost = float('inf')  # Initialize with infinity
+                best_overall_params = None
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
+                    
                     g_sig_fit = TGraphErrors()
 
                     graphs_sig_fit.append(g_sig_fit)
@@ -1963,20 +1963,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-                    # Update best parameters and bin if current fit is better
-                    if red_chi2 < best_red_chi2:
-                        best_red_chi2 = red_chi2
-                        best_params = []
+                    # After the while loop, check if this run found a better solution
+                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = red_chi2
+                        best_overall_bin = b
                         for j in range(4):
-                            best_params.append(par_vec[4*it+j])
-                        best_overall_bin = b  # Save the best bin
-
-                    best_overall_params = best_params
-                    for j in range(4):
-                        par_chi2_vec[4*it+j] = best_red_chi2
-
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_red_chi2:.5f}")
+                            best_overall_params.append(par_vec[4*it+j])
+                            
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost:.5f}")
 
                 c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
@@ -2034,14 +2029,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
                 c2.Update()
                     
                 print("\n")    
 
             elif num_params == 2:
 
-                # 2 params
+                # 2 param
                 #######
                 # Sig #
                 #######
@@ -2049,7 +2044,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print("\n/*--------------------------------------------------*/")
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")            
+                print(f"{equation_str}")
                 print("/*--------------------------------------------------*/")
 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -2068,14 +2063,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                best_red_chi2 = float('inf')  # Initialize with infinity
-                best_params = None
+                best_overall_cost = float('inf')  # Initialize with infinity
+                best_overall_params = None
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
+                    
                     g_sig_fit = TGraphErrors()
 
                     graphs_sig_fit.append(g_sig_fit)
@@ -2115,22 +2110,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-                    # Update best parameters and bin if current fit is better
-                    if red_chi2 < best_red_chi2:
-                        best_red_chi2 = red_chi2
-                        best_params = []
+                    # After the while loop, check if this run found a better solution
+                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = red_chi2
+                        best_overall_bin = b
                         for j in range(4):
-                            best_params.append(par_vec[4*it+j])
-                        best_overall_bin = b  # Save the best bin
+                            best_overall_params.append(par_vec[4*it+j])
+                            
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost:.5f}")
 
-                    best_overall_params = best_params
-                    for j in range(4):
-                        par_chi2_vec[4*it+j] = best_red_chi2
-
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_red_chi2:.5f}")
-
-                # Final plotting with best bin parameters
                 c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
@@ -2188,14 +2177,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
                 c2.Update()
-
-                print("\n")
+                    
+                print("\n")    
 
             elif num_params == 3:
 
-                # 3 params
+                # 3 param
                 #######
                 # Sig #
                 #######
@@ -2203,7 +2192,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print("\n/*--------------------------------------------------*/")
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")            
+                print(f"{equation_str}")
                 print("/*--------------------------------------------------*/")
 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -2211,7 +2200,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Create TGraphs for parameter convergence
                 graph_sig_p0 = TGraph()
                 graph_sig_p1 = TGraph()
-                graph_sig_p2 = TGraph()
+                graph_sig_p2 = TGraph()                
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
@@ -2223,14 +2212,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                best_red_chi2 = float('inf')  # Initialize with infinity
-                best_params = None
+                best_overall_cost = float('inf')  # Initialize with infinity
+                best_overall_params = None
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
+                    
                     g_sig_fit = TGraphErrors()
 
                     graphs_sig_fit.append(g_sig_fit)
@@ -2271,22 +2260,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-                    # Update best parameters and bin if current fit is better
-                    if red_chi2 < best_red_chi2:
-                        best_red_chi2 = red_chi2
-                        best_params = []
+                    # After the while loop, check if this run found a better solution
+                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = red_chi2
+                        best_overall_bin = b
                         for j in range(4):
-                            best_params.append(par_vec[4*it+j])
-                        best_overall_bin = b  # Save the best bin
+                            best_overall_params.append(par_vec[4*it+j])
+                            
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost:.5f}")
 
-                    best_overall_params = best_params
-                    for j in range(4):
-                        par_chi2_vec[4*it+j] = best_red_chi2
-
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_red_chi2:.5f}")
-
-                # Final plotting with best bin parameters
                 c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
@@ -2323,7 +2306,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig.SetParNames("p0", "p1", "p2")
                 f_sig.FixParameter(0, par_vec[4*it])
-                f_sig.FixParameter(1, par_vec[4*it+1])
+                f_sig.FixParameter(1, par_vec[4*it+1]) 
                 f_sig.FixParameter(2, par_vec[4*it+2])
 
                 # Evaluate the fit function at several points to determine its range
@@ -2345,14 +2328,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
                 c2.Update()
-
-                print("\n")
+                    
+                print("\n")    
 
             elif num_params == 4:
 
-                # 4 params
+                # 4 param
                 #######
                 # Sig #
                 #######
@@ -2360,7 +2343,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print("\n/*--------------------------------------------------*/")
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")            
+                print(f"{equation_str}")
                 print("/*--------------------------------------------------*/")
 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
@@ -2381,14 +2364,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                best_red_chi2 = float('inf')  # Initialize with infinity
-                best_params = None
+                best_overall_cost = float('inf')  # Initialize with infinity
+                best_overall_params = None
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
 
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
+                    
                     g_sig_fit = TGraphErrors()
 
                     graphs_sig_fit.append(g_sig_fit)
@@ -2420,7 +2403,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig.FixParameter(0, par_vec[4*it])
                     f_sig.FixParameter(1, par_vec[4*it+1])
                     f_sig.FixParameter(2, par_vec[4*it+2])
-                    f_sig.FixParameter(3, par_vec[4*it+3])
+                    f_sig.FixParameter(3, par_vec[4*it+3])                    
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                     f_sig.Draw("same")
@@ -2430,22 +2413,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
-                    # Update best parameters and bin if current fit is better
-                    if red_chi2 < best_red_chi2:
-                        best_red_chi2 = red_chi2
-                        best_params = []
+                    # After the while loop, check if this run found a better solution
+                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = red_chi2
+                        best_overall_bin = b
                         for j in range(4):
-                            best_params.append(par_vec[4*it+j])
-                        best_overall_bin = b  # Save the best bin
+                            best_overall_params.append(par_vec[4*it+j])
+                            
+                print(f"\n\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost:.5f}")
 
-                    best_overall_params = best_params
-                    for j in range(4):
-                        par_chi2_vec[4*it+j] = best_red_chi2
-
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_red_chi2:.5f}")
-
-                # Final plotting with best bin parameters
                 c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
@@ -2482,7 +2459,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
                 f_sig.SetParNames("p0", "p1", "p2", "p3")
                 f_sig.FixParameter(0, par_vec[4*it])
-                f_sig.FixParameter(1, par_vec[4*it+1])
+                f_sig.FixParameter(1, par_vec[4*it+1]) 
                 f_sig.FixParameter(2, par_vec[4*it+2])
                 f_sig.FixParameter(3, par_vec[4*it+3])                
 
@@ -2505,10 +2482,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_overall_cost:.3f}")
                 c2.Update()
-
-                print("\n")
+                    
+                print("\n")    
 
             c2.Update()
 
