@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 15:38:41 trottar"
+# Time-stamp: "2024-12-30 15:47:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,9 +100,13 @@ def iterWeight(arg_str):
     
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
 
-    #wtn = weight_prev_iter * (sig / sig_prev_iter)
-    wtn = weight_prev_iter * (sig_prev_iter / sig)
-
+    if sig_prev_iter == sig:
+        wtn = weight_prev_iter    
+    elif sig_prev_iter > sig:
+        wtn = weight_prev_iter * (sig_prev_iter / sig)
+    else:
+        wtn = weight_prev_iter * (sig / sig_prev_iter)
+        
     #print("sig",sig)
     #print("sigcm",sig_prev_iter)
     #print("wtn",wtn)
