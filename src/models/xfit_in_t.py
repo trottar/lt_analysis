@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 13:48:12 trottar"
+# Time-stamp: "2024-12-30 15:11:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,7 +73,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     iter_num = inpDict["iter_num"]
     
-    DEBUG=False
+    DEBUG=True
     
     ##############
     # HARD CODED #
@@ -225,15 +225,16 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
-    i = 0
-    max_checks = 1
-    while bad_chi2_bool and i <= max_checks:
-        fixed_params = ["L", "T", "LT", "TT"]
-        fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
-        print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
-        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
-        bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
-        i +=1
+    if not DEBUG:
+        i = 0
+        max_checks = 1
+        while bad_chi2_bool and i <= max_checks:
+            fixed_params = ["L", "T", "LT", "TT"]
+            fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
+            print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
+            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+            bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+            i +=1
 
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
