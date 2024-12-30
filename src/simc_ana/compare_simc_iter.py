@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 01:11:10 trottar"
+# Time-stamp: "2024-12-30 05:39:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -240,7 +240,6 @@ def compare_simc(rootFileSimc, hist, inpDict):
           
       #Fill SIMC events
       if(ALLCUTS):
-
 
           if ParticleType == "kaon":
               # HGCer hole comparison
