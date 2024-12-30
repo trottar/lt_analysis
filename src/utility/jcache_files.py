@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:02:43 trottar"
+# Time-stamp: "2024-12-29 21:09:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -55,18 +55,17 @@ def generate_file_batches(source_dir, batch_size=100):
     if file_paths:
         yield file_paths
 
-def run_jcache_in_batches(source_dir, dest_prefix, batch_size=100):
+def run_jcache_in_batches(source_dir, batch_size=100):
     """
     Run jcache command in smaller batches to avoid exceeding command-line length limits.
 
     :param source_dir: Local source directory path.
-    :param dest_prefix: Target directory prefix for the stub.
     :param batch_size: Number of files per batch.
     """
     
     file_batches = list(generate_file_batches(source_dir, batch_size))
 
-    print(f"\n\nRunning 'jcache -r {source_dir} {dest_prefix}'")
+    print(f"\n\nRunning 'jcache get {source_dir}'")
     print(f"\n\nFiles in {source_dir} was split into {len(file_batches)} batches...\n")
 
     for i, batch in enumerate(file_batches):
@@ -83,8 +82,7 @@ def run_jcache_in_batches(source_dir, dest_prefix, batch_size=100):
             break
 
 # Parameters
-source_directory = f"/group/c-kaonlt/USERS/trottar/lt_analysis/OUTPUT/Analysis/KaonLT/cache_transfer/kaon/Q3p0W3p14/{inp_dir}"  # Source directory
-destination_prefix = f"/mss/hallc/kaonlt/trottar/kaon/Q3p0W3p14/{inp_dir}"  # Destination prefix
+source_directory = f"/mss/hallc/kaonlt/trottar/kaon/Q3p0W3p14/{inp_dir}"  # Source prefix
 
 # Run jcache command in batches
-run_jcache_in_batches(source_directory, destination_prefix, batch_size=50)
+run_jcache_in_batches(source_directory, batch_size=50)
