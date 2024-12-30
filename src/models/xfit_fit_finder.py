@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-21 23:28:14 trottar"
+# Time-stamp: "2024-12-29 22:31:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1916,23 +1916,69 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-                
-                g_sig_fit = TGraphErrors()
 
-                graphs_sig_fit.append(g_sig_fit)
+                best_red_chi2 = float('inf')  # Initialize with infinity
+                best_params = None
+                best_overall_bin = 0  # Initialize best bin tracker
 
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+                for b in range(len(w_vec)):
 
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
-                    c2.cd(it+1).SetLeftMargin(0.12)
+                    g_sig_fit = TGraphErrors()
+
+                    graphs_sig_fit.append(g_sig_fit)
+
+                    g_sig = TGraphErrors()
+                    for i in range(nsep.GetSelectedRows()):
+                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+                    for i in range(len(w_vec)):
+                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+                    if sig_name == "L":
+                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    elif sig_name == "T":
+                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    elif sig_name == "LT":
+                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    elif sig_name == "TT":
+                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig.SetParNames("p0")
+                    f_sig.FixParameter(0, par_vec[4*it])
+
+                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+                    f_sig.Draw("same")
+
+                    # Retrieve the chi-squared and degrees of freedom
+                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+                    # Update best parameters and bin if current fit is better
+                    if red_chi2 < best_red_chi2:
+                        best_red_chi2 = red_chi2
+                        best_params = []
+                        for j in range(4):
+                            best_params.append(par_vec[4*it+j])
+                        best_overall_bin = b  # Save the best bin
+
+                    best_overall_params = best_params
+                    for j in range(4):
+                        par_chi2_vec[4*it+j] = best_red_chi2
+
+                    print(f"\n\nBest overall solution: {best_overall_params}")
+                    print(f"Best overall cost: {best_red_chi2:.5f}")
+
+                c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
 
@@ -1955,21 +2001,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
                 if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
                 elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
                 elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
                 elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                 f_sig.SetParNames("p0")
                 f_sig.FixParameter(0, par_vec[4*it])
 
@@ -1990,24 +2032,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                # Retrieve the chi-squared and degrees of freedom
-                chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-                best_overall_params = []                
-                for j in range(4):
-                    best_overall_params.append(par_vec[4*it+j])
-                    par_chi2_vec[4*it+j] = red_chi2
-                    
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {red_chi2:.5f}")
-                    
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
                 c2.Update()
-
+                    
                 print("\n")    
 
             elif num_params == 2:
@@ -2039,22 +2068,70 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                g_sig_fit = TGraphErrors()
+                best_red_chi2 = float('inf')  # Initialize with infinity
+                best_params = None
+                best_overall_bin = 0  # Initialize best bin tracker
 
-                graphs_sig_fit.append(g_sig_fit)
+                for b in range(len(w_vec)):
 
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+                    g_sig_fit = TGraphErrors()
 
-                    c2.cd(it+1).SetLeftMargin(0.12)
+                    graphs_sig_fit.append(g_sig_fit)
+
+                    g_sig = TGraphErrors()
+                    for i in range(nsep.GetSelectedRows()):
+                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+                    for i in range(len(w_vec)):
+                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+                    if sig_name == "L":
+                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    elif sig_name == "T":
+                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    elif sig_name == "LT":
+                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    elif sig_name == "TT":
+                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig.SetParNames("p0", "p1")
+                    f_sig.FixParameter(0, par_vec[4*it])
+                    f_sig.FixParameter(1, par_vec[4*it+1])
+
+                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+                    f_sig.Draw("same")
+
+                    # Retrieve the chi-squared and degrees of freedom
+                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+                    # Update best parameters and bin if current fit is better
+                    if red_chi2 < best_red_chi2:
+                        best_red_chi2 = red_chi2
+                        best_params = []
+                        for j in range(4):
+                            best_params.append(par_vec[4*it+j])
+                        best_overall_bin = b  # Save the best bin
+
+                    best_overall_params = best_params
+                    for j in range(4):
+                        par_chi2_vec[4*it+j] = best_red_chi2
+
+                    print(f"\n\nBest overall solution: {best_overall_params}")
+                    print(f"Best overall cost: {best_red_chi2:.5f}")
+
+                # Final plotting with best bin parameters
+                c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
 
@@ -2077,21 +2154,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
                 if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
                 elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
                 elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
                 elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                 f_sig.SetParNames("p0", "p1")
                 f_sig.FixParameter(0, par_vec[4*it])
                 f_sig.FixParameter(1, par_vec[4*it+1])
@@ -2113,28 +2186,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                # Fit the function to the histogram
-                fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                # Retrieve the chi-squared and degrees of freedom
-                chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-                best_overall_params = []                
-                for j in range(4):
-                    best_overall_params.append(par_vec[4*it+j])
-                    par_chi2_vec[4*it+j] = red_chi2
-                    
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {red_chi2:.5f}")
-
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
                 c2.Update()
 
-                print("\n")    
+                print("\n")
 
             elif num_params == 3:
 
@@ -2154,7 +2211,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Create TGraphs for parameter convergence
                 graph_sig_p0 = TGraph()
                 graph_sig_p1 = TGraph()
-                graph_sig_p2 = TGraph()                
+                graph_sig_p2 = TGraph()
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
@@ -2166,22 +2223,71 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                g_sig_fit = TGraphErrors()
+                best_red_chi2 = float('inf')  # Initialize with infinity
+                best_params = None
+                best_overall_bin = 0  # Initialize best bin tracker
 
-                graphs_sig_fit.append(g_sig_fit)
+                for b in range(len(w_vec)):
 
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+                    g_sig_fit = TGraphErrors()
 
-                    c2.cd(it+1).SetLeftMargin(0.12)
+                    graphs_sig_fit.append(g_sig_fit)
+
+                    g_sig = TGraphErrors()
+                    for i in range(nsep.GetSelectedRows()):
+                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+                    for i in range(len(w_vec)):
+                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+                    if sig_name == "L":
+                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    elif sig_name == "T":
+                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    elif sig_name == "LT":
+                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    elif sig_name == "TT":
+                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig.SetParNames("p0", "p1", "p2")
+                    f_sig.FixParameter(0, par_vec[4*it])
+                    f_sig.FixParameter(1, par_vec[4*it+1])
+                    f_sig.FixParameter(2, par_vec[4*it+2])
+
+                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+                    f_sig.Draw("same")
+
+                    # Retrieve the chi-squared and degrees of freedom
+                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+                    # Update best parameters and bin if current fit is better
+                    if red_chi2 < best_red_chi2:
+                        best_red_chi2 = red_chi2
+                        best_params = []
+                        for j in range(4):
+                            best_params.append(par_vec[4*it+j])
+                        best_overall_bin = b  # Save the best bin
+
+                    best_overall_params = best_params
+                    for j in range(4):
+                        par_chi2_vec[4*it+j] = best_red_chi2
+
+                    print(f"\n\nBest overall solution: {best_overall_params}")
+                    print(f"Best overall cost: {best_red_chi2:.5f}")
+
+                # Final plotting with best bin parameters
+                c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
 
@@ -2204,21 +2310,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
                 if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
                 elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
                 elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
                 elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                 f_sig.SetParNames("p0", "p1", "p2")
                 f_sig.FixParameter(0, par_vec[4*it])
                 f_sig.FixParameter(1, par_vec[4*it+1])
@@ -2241,28 +2343,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                # Fit the function to the histogram
-                fit_result = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                # Retrieve the chi-squared and degrees of freedom
-                chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-                best_overall_params = []                
-                for j in range(4):
-                    best_overall_params.append(par_vec[4*it+j])
-                    par_chi2_vec[4*it+j] = red_chi2
-                    
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {red_chi2:.5f}")
-
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
                 c2.Update()
 
-                print("\n")    
+                print("\n")
 
             elif num_params == 4:
 
@@ -2276,7 +2362,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
                 print("/*--------------------------------------------------*/")
-                
+
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Create TGraphs for parameter convergence
@@ -2295,28 +2381,78 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
 
-                g_sig_fit = TGraphErrors()
+                best_red_chi2 = float('inf')  # Initialize with infinity
+                best_params = None
+                best_overall_bin = 0  # Initialize best bin tracker
 
-                graphs_sig_fit.append(g_sig_fit)
+                for b in range(len(w_vec)):
 
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+                    print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+                    g_sig_fit = TGraphErrors()
 
-                    c2.cd(it+1).SetLeftMargin(0.12)
+                    graphs_sig_fit.append(g_sig_fit)
+
+                    g_sig = TGraphErrors()
+                    for i in range(nsep.GetSelectedRows()):
+                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+                    for i in range(len(w_vec)):
+                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+
+                    if sig_name == "L":
+                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    elif sig_name == "T":
+                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    elif sig_name == "LT":
+                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    elif sig_name == "TT":
+                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
+                    f_sig.SetParNames("p0", "p1", "p2", "p3")
+                    f_sig.FixParameter(0, par_vec[4*it])
+                    f_sig.FixParameter(1, par_vec[4*it+1])
+                    f_sig.FixParameter(2, par_vec[4*it+2])
+                    f_sig.FixParameter(3, par_vec[4*it+3])
+
+                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+                    f_sig.Draw("same")
+
+                    # Retrieve the chi-squared and degrees of freedom
+                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
+                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
+                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+
+                    # Update best parameters and bin if current fit is better
+                    if red_chi2 < best_red_chi2:
+                        best_red_chi2 = red_chi2
+                        best_params = []
+                        for j in range(4):
+                            best_params.append(par_vec[4*it+j])
+                        best_overall_bin = b  # Save the best bin
+
+                    best_overall_params = best_params
+                    for j in range(4):
+                        par_chi2_vec[4*it+j] = best_red_chi2
+
+                    print(f"\n\nBest overall solution: {best_overall_params}")
+                    print(f"Best overall cost: {best_red_chi2:.5f}")
+
+                # Final plotting with best bin parameters
+                c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
 
                 graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
                 graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
+                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
                 graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
                 graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
                 graphs_sig_fit[it].GetYaxis().CenterTitle()
@@ -2333,26 +2469,22 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
 
                 if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
                 elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val)
+                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
                 elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
                 elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
                     f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                 f_sig.SetParNames("p0", "p1", "p2", "p3")
                 f_sig.FixParameter(0, par_vec[4*it])
                 f_sig.FixParameter(1, par_vec[4*it+1])
                 f_sig.FixParameter(2, par_vec[4*it+2])
-                f_sig.FixParameter(3, par_vec[4*it+3])
+                f_sig.FixParameter(3, par_vec[4*it+3])                
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function
@@ -2371,22 +2503,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                # Retrieve the chi-squared and degrees of freedom
-                chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-                best_overall_params = []                
-                for j in range(4):
-                    best_overall_params.append(par_vec[4*it+j])
-                    par_chi2_vec[4*it+j] = red_chi2
-                    
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {red_chi2:.5f}")
-
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {red_chi2:.3f}")
+                converge_status.DrawTextNDC(0.35, 0.85, f"Best cost: {best_red_chi2:.3f}")
                 c2.Update()
 
                 print("\n")
