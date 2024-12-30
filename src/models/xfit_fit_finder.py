@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 02:37:49 trottar"
+# Time-stamp: "2024-12-30 02:39:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -503,11 +503,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
 
                 # Plot temperature
@@ -935,11 +936,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
 
                 # Plot temperature
@@ -1384,11 +1386,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
 
                 # Plot temperature
@@ -1848,11 +1851,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
 
                 # Plot temperature
@@ -2033,11 +2037,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c2.Update()
                     
                 print("\n")    
@@ -2185,11 +2190,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c2.Update()
                     
                 print("\n")    
@@ -2340,11 +2346,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c2.Update()
                     
                 print("\n")    
@@ -2498,11 +2505,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 f_sig.Draw("same")
 
-                converge_status = TText()
-                converge_status.SetTextSize(0.04)
-                converge_status.SetTextFont(42)  # Use a compatible font                
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                                                
-                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
+                # Create a TLatex object
+                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex.SetTextSize(0.04)  # Adjust size as needed
+                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
+                latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c2.Update()
                     
                 print("\n")    
