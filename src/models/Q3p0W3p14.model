@@ -97,13 +97,13 @@ sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs
 #
 # Original equation
 ##sig_TT = (par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT * (math.sin(theta_cm)**2)
-# 1. Modify exponential and power terms chi2~55
-sig_TT = (par13 * math.fabs(tt) + par14 * math.exp(-par15*math.fabs(tt))) * (1.0 + math.fabs(tt))**(-par16) * Qdep_TT * (math.sin(theta_cm)**2)
-# 2. Adjust polynomial structure !!FAIL!!
-#sig_TT = (par13 / (1.0 + math.fabs(tt)) + par14 * math.exp(-par15*math.fabs(tt)**par16)) * Qdep_TT * (math.sin(theta_cm)**2)
-# 3. Change denominator structure chi2~50
+# 1. Modify exponential and power terms
+#sig_TT = (par13 * math.fabs(tt) + par14 * math.exp(-par15*math.fabs(tt))) * (1.0 + math.fabs(tt))**(-par16) * Qdep_TT * (math.sin(theta_cm)**2)
+# 2. Adjust polynomial structure 
+sig_TT = (par13 / (1.0 + math.fabs(tt)) + par14 * math.exp(-par15*math.fabs(tt)**par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+# 3. Change denominator structure
 #sig_TT = (par13 * math.fabs(tt) * math.exp(-par14*math.fabs(tt))) / (1.0 + math.fabs(tt)**(par15+par16)) * Qdep_TT * (math.sin(theta_cm)**2)
-# 4. Modify peak shape with different exponential !!FAIL!!
+# 4. Modify peak shape with different exponential
 sig_TT = par13 * (math.fabs(tt) - par14) * math.exp(-par15*math.fabs(tt)**par16) * Qdep_TT * (math.sin(theta_cm)**2)
 # 5. Change overall structure to better capture valley-peak
 #sig_TT = par13 * (math.fabs(tt) - par14) / (1.0 + math.exp(-par15*(math.fabs(tt) - par16))) * Qdep_TT * (math.sin(theta_cm)**2)
