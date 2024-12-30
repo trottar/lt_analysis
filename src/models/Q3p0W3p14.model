@@ -23,9 +23,6 @@ Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
 Qdep_TT = qq * math.exp(-qq)
 
-###****
-# Perhaps there is a very strong |-t| effect in kaon xsect. Compare t-dependence of pion vs kaon xsects
-
 # Longitudinal cross-section
 # 0th iteration,
 sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
@@ -35,10 +32,8 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 # Transverse cross-section
 # 0th iteration,
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-# 
-sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)  * (math.sin(theta_cm))
-#  (chi2 < 3.5)
-###sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#  (chi2)
+sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 
 # Longitudinal-Transverse interference term
 # 0th iteration,
