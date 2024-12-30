@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 23:18:46 trottar"
+# Time-stamp: "2024-12-29 23:23:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1871,10 +1871,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             
         ## plot_fit
         else:
-            for j in range(4):
-                par_vec[4*it+j] = prv_par_vec[4*it+j]
-                par_err_vec[4*it+j] = prv_err_vec[4*it+j]
-                par_chi2_vec[4*it+j] = prv_chi2_vec[4*it+j]
 
             sig_name = key
             # Grab parameters used by functional forms
@@ -1973,8 +1969,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Best overall cost: {best_overall_cost:.5f}")
                     
                 for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
                     par_chi2_vec[4*it+j] = best_overall_cost
 
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -2124,8 +2118,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Best overall cost: {best_overall_cost:.5f}")
                     
                 for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
                     par_chi2_vec[4*it+j] = best_overall_cost
 
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -2278,8 +2270,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Best overall cost: {best_overall_cost:.5f}")
                     
                 for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
                     par_chi2_vec[4*it+j] = best_overall_cost
 
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -2435,8 +2425,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Best overall cost: {best_overall_cost:.5f}")
                     
                 for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
                     par_chi2_vec[4*it+j] = best_overall_cost
 
                 c2.cd(it+1).SetLeftMargin(0.12)
