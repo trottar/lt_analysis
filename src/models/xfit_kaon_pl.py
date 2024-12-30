@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 04:10:45 trottar"
+# Time-stamp: "2024-12-30 04:22:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -49,7 +49,7 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 ################################################################################################################################################
 
 def fun_Sig_L_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w):
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
         return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
@@ -64,7 +64,7 @@ def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
 def fun_Sig_T_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w):
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
         return fun_Sig_T(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
