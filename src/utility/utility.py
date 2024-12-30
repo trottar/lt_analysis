@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-21 21:03:59 trottar"
+# Time-stamp: "2024-12-30 04:10:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1106,10 +1106,10 @@ def extract_values(filename):
 def prepare_equations(equations, sig_type):
     if sig_type == "sig_L":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4):\n"
     elif sig_type == "sig_T":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8):\n"
+        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8):\n"
     elif sig_type == "sig_LT":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"

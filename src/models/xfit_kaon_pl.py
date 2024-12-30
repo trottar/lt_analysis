@@ -4,7 +4,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-16 12:12:46 trottar"
+# Time-stamp: "2024-12-30 04:10:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -48,31 +48,35 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 
 ################################################################################################################################################
 
-def fun_Sig_L_wrapper(wfactor, q2, w):
+def fun_Sig_L_wrapper(wfactor, q2, w, theta):
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w):
-        return fun_Sig_L(g, qq, ww, x, par)
+        return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-def fun_Sig_L(g, qq, ww, x, par):
+def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    # Convert degrees to radians
+    theta_cm = theta_cm * math.pi/180    
     # Calculate SigL
-    return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
+    return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
-def fun_Sig_T_wrapper(wfactor, q2, w):
+def fun_Sig_T_wrapper(wfactor, q2, w, theta):
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w):
-        return fun_Sig_T(g, qq, ww, x, par)
+        return fun_Sig_T(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-def fun_Sig_T(g, qq, ww, x, par):
+def fun_Sig_T(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par5, par6, par7, par8 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    # Convert degrees to radians
+    theta_cm = theta_cm * math.pi/180    
     # Calculate SigT
-    return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
+    return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
 
 def fun_Sig_LT_wrapper(wfactor, q2, w, theta):
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
@@ -85,7 +89,7 @@ def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     w_set = float(W.replace("p","."))
     par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Convert degrees to radians
-    theta_cm = theta_cm * math.pi/180    
+    theta_cm = theta_cm * math.pi/180
     # Calculate SigLT
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
