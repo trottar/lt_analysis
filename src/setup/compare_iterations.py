@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 13:50:02 trottar"
+# Time-stamp: "2024-12-30 14:09:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -341,7 +341,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 file_df_dict["params"] = pd.DataFrame(param_arr, columns=["params"])
                 file_df_dict["date"] = pd.DataFrame([date], columns=["date"])
                 
-            comb_dict[f'Q{Q2}W{W}'] = file_df_dict
+            comb_dict[f'Q{Q2}W{W}'] = file_df_dict1
 
     # Create a structured dictionary to track iterations explicitly
     iteration_data = {}
@@ -403,6 +403,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 dates.append(date)
                 params_values.append(data['params'])
                 data_values.append(data[sig])
+                print("!!!!!!",data[sig])
 
                 # 1. Parameter Evolution Plot
             fig = plt.figure(figsize=(12, 6))
