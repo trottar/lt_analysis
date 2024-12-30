@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 22:50:17 trottar"
+# Time-stamp: "2024-12-29 22:56:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1956,7 +1956,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig.FixParameter(0, par_vec[4*it])
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                    f_sig.Draw("same")
 
                     # Retrieve the chi-squared and degrees of freedom
                     chi2 = f_sig.GetChisquare()  # Get the chi-squared value
@@ -2103,7 +2102,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig.FixParameter(1, par_vec[4*it+1])
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                    f_sig.Draw("same")
 
                     # Retrieve the chi-squared and degrees of freedom
                     chi2 = f_sig.GetChisquare()  # Get the chi-squared value
@@ -2253,7 +2251,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig.FixParameter(2, par_vec[4*it+2])
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                    f_sig.Draw("same")
 
                     # Retrieve the chi-squared and degrees of freedom
                     chi2 = f_sig.GetChisquare()  # Get the chi-squared value
@@ -2406,7 +2403,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     f_sig.FixParameter(3, par_vec[4*it+3])                    
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                    f_sig.Draw("same")
 
                     # Retrieve the chi-squared and degrees of freedom
                     chi2 = f_sig.GetChisquare()  # Get the chi-squared value
