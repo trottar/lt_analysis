@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:13:18 trottar"
+# Time-stamp: "2024-12-29 21:19:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -41,7 +41,7 @@ def generate_file_batches(source_dir, batch_size=100):
     """
     Generate batches of file paths to avoid exceeding command-line length limits.
 
-    :param source_dir: Local source directory path.
+    :param source_dir: Tape source directory path.
     :param batch_size: Number of files per batch.
     :return: A generator yielding batches of file paths.
     """
@@ -59,7 +59,7 @@ def run_jcache_in_batches(source_dir, batch_size=100):
     """
     Run jcache command in smaller batches to avoid exceeding command-line length limits.
 
-    :param source_dir: Local source directory path.
+    :param source_dir: Tape source directory path.
     :param batch_size: Number of files per batch.
     """
     
