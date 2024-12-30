@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 04:36:35 trottar"
+# Time-stamp: "2024-12-30 04:47:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -226,7 +226,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
     i = 0
-    max_checks = 5
+    max_checks = 1
     while bad_chi2_bool and i <= max_checks:
         fixed_params = ["L", "T", "LT", "TT"]
         fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
