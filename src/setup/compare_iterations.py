@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:11:29 trottar"
+# Time-stamp: "2024-12-30 14:45:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -341,7 +341,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 file_df_dict["params"] = pd.DataFrame(param_arr, columns=["params"])
                 file_df_dict["date"] = pd.DataFrame([date], columns=["date"])
                 
-            comb_dict[f'Q{Q2}W{W}'] = file_df_dict1
+            comb_dict[f'Q{Q2}W{W}'] = file_df_dict
 
     # Create a structured dictionary to track iterations explicitly
     iteration_data = {}
