@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:25:24 trottar"
+# Time-stamp: "2024-12-30 14:28:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -325,7 +325,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["H_W_SIMC"] =     H_W_SIMC
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
     histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral()
-    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted.Integral()
+    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted_SIMC.Integral()
 
     if histDict["NumEvts_MM_SIMC"] == 0.0:
         print(f"\n\nERROR: Empty results for {phi_setting} setting. Try adjusting functional forms of input model file...")
