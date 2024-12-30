@@ -111,7 +111,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # (chi2<4.2)
 ##sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
 # (chi2<)
-sig_TT =  par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * (math.sin(theta_cm)**2)
+sig_TT =  par13
 ####
 
 # Weight factor for Q2=3.0, W=3.14
