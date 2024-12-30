@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 05:07:02 trottar"
+# Time-stamp: "2024-12-30 05:07:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -68,12 +68,12 @@ def iterWeight(arg_str):
     
     # Calculate SigL, SigT, SigLT, SigTT
     try:
-        sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, par1, par2, par3, par4)
+        sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
     except (ZeroDivisionError, OverflowError, TypeError):
         sig_L = float('inf')
 
     try:
-        sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, par5, par6, par7, par8)
+        sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
     except (ZeroDivisionError, OverflowError, TypeError):
         sig_T = float('inf')
 
