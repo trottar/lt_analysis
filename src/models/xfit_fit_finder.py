@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 01:44:07 trottar"
+# Time-stamp: "2024-12-30 02:26:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2493,8 +2493,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
             c2.Update()
 
-        c2.Print(outputpdf+'(')
-        c3.Print(outputpdf)
-        c4.Print(outputpdf)
-        c5.Print(outputpdf)
-        c6.Print(outputpdf+')')
+    c2.Print(outputpdf+'(')
+    c3.Print(outputpdf)
+    c4.Print(outputpdf)
+    c5.Print(outputpdf)
+    c6.Print(outputpdf+')')
