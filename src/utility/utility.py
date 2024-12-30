@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 13:55:57 trottar"
+# Time-stamp: "2024-12-30 14:18:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1263,8 +1263,7 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
         integral = fit_func.Integral(min_range, max_range)
 
-        #del hist
-        del fit_func
+        del hist
 
         return [mean, mean_err, integral]
 
