@@ -35,15 +35,15 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 
 # Transverse cross-section
 # 0th iteration, 2024December05_H07M34S41
-# 2nd iteration, (chi2<2.0)
+# 2nd iteration, (chi2>2.0)
 sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 # 1st iteration, (chi2 < 3.5)
 ###sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 
 # Longitudinal-Transverse interference term
 # 0th iteration, 2024December05_H07M34S41 
-# 2nd iteration, (chi2<2.5)
-sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+# 2nd iteration, (chi2>2.5)
+##sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #
 #sig_LT = par9 * (math.exp(-par10 * math.fabs(tt)) - 1.0 / (1.0 - math.fabs(tt))) * math.sin(theta_cm)
 #
@@ -77,7 +77,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # 5. Add second exponential term for multi-component decay
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt) + par12 * math.exp(par13 * math.fabs(tt))) * math.sin(theta_cm)
 ####
-###sig_LT =  (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt) + par12 * tt**2) * math.sin(theta_cm)
+sig_LT =  (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt) + par12 * tt**2) * math.sin(theta_cm)
 ####
 
 # Transverse-Transverse interference term
@@ -89,9 +89,9 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 #sig_TT = par13 * (math.fabs(tt)**(par14)) * math.exp(-par15*math.fabs(tt)) * 1.0/(1.0 + (qq/par16)**2)
 # Power-law decay
 #sig_TT =  (1.0 + (par13 / math.fabs(tt)**(par14))) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**2)
-# 2nd iteration, (chi2<4.2)
+# 2nd iteration, (chi2>4.2)
 ##sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
-# 2nd iteration, (chi2<2.0)
+# 2nd iteration, (chi2>2.0)
 #sig_TT =   (par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT * (math.sin(theta_cm)**2)
 #sig_TT =   (par13 * math.fabs(tt) + par14 * (math.exp(-par15 * (math.fabs(tt)**2)) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT
 #
@@ -100,19 +100,9 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # Modify peak shape with different exponential
 #sig_TT = par13 * (math.fabs(tt) - par14) * math.exp(-par15*math.fabs(tt)**par16) * Qdep_TT * (math.sin(theta_cm)**2)
 ####
-# (chi2<4.2)
+# (chi2>4.2)
 ##sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 1 (chi2>42)
-#sig_TT = par13 + par14 * (math.exp(-par15 * math.sqrt(math.fabs(tt))) / (1.0 + par16 * math.fabs(tt))) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 2 (chi2>40)
-#sig_TT = par13 + par14 * (math.exp(-par15 * math.fabs(tt)) / (1.0 + (math.fabs(tt)**par16))) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 3 (chi2>40)
-#sig_TT = par13 + par14 * ((1.0 + par16 * math.exp(-par15 * math.fabs(tt))) / (1.0 + math.fabs(tt))) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 4 (chi2>10)
-#sig_TT = par13 + par14 * (math.exp(-par15 * math.fabs(tt)) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 4 (chi2>7)
-#sig_TT = par13 + par14 * (math.exp(-par15 * math.fabs(tt)**2) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 4 (chi2>)
+# (chi2>2.8)
 sig_TT = (par13 + par14 * (math.exp(-par15 * math.fabs(tt)**2) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT) * (math.sin(theta_cm)**2)
 ####
 
