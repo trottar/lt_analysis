@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 22:49:24 trottar"
+# Time-stamp: "2024-12-29 22:50:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1918,7 +1918,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept.append(graph_sig_accept)
 
                 best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = None
+                best_overall_params = []
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
@@ -2064,7 +2064,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept.append(graph_sig_accept)
 
                 best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = None
+                best_overall_params = []
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
@@ -2213,7 +2213,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept.append(graph_sig_accept)
 
                 best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = None
+                best_overall_params = []
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
@@ -2365,7 +2365,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept.append(graph_sig_accept)
 
                 best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = None
+                best_overall_params = []
                 best_overall_bin = 0  # Initialize best bin tracker
 
                 for b in range(len(w_vec)):
