@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 02:39:47 trottar"
+# Time-stamp: "2024-12-30 04:05:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -937,9 +937,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = ROOT.TLatex()
                 latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                latex.SetNDC(True)       # Enable normalized device coordinates
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
                 latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
@@ -1387,9 +1387,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = ROOT.TLatex()
                 latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                latex.SetNDC(True)       # Enable normalized device coordinates
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
                 latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
@@ -1852,9 +1852,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
                 graphs_sig_converge[it].Draw("ALP")
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = ROOT.TLatex()
                 latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
+                latex.SetNDC(True)       # Enable normalized device coordinates
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
                 latex.DrawLatex(0.35, 0.85, best_cost_text)                
                 c4.Update()
