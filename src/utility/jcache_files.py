@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:09:10 trottar"
+# Time-stamp: "2024-12-29 21:11:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -69,11 +69,10 @@ def run_jcache_in_batches(source_dir, batch_size=100):
     print(f"\n\nFiles in {source_dir} was split into {len(file_batches)} batches...\n")
 
     for i, batch in enumerate(file_batches):
-        # Progress bar
-        Misc.progressBar(i, len(file_batches)-1, bar_length=25)
         command = ["jcache", "get"] + batch
         try:
             subprocess.run(command, check=True)
+            print(f"Batch {i + 1}/{len(file_batches)}.")
             print(f"Batch with {len(batch)} files uploaded successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error executing jcache command for batch: {e}")
