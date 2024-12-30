@@ -109,9 +109,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 # Functional Form 3 (chi2>40)
 #sig_TT = par13 + par14 * ((1.0 + par16 * math.exp(-par15 * math.fabs(tt))) / (1.0 + math.fabs(tt))) * Qdep_TT * (math.sin(theta_cm)**2)
 # Functional Form 4
-sig_TT = par13 + par14 * (math.exp(-par15 * (math.fabs(tt) + par16)) / (1.0 + math.fabs(tt))) * Qdep_TT * (math.sin(theta_cm)**2)
-# Functional Form 5
-#sig_TT = par13 + par14 * (math.exp(-par15 * math.fabs(tt)) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT * (math.sin(theta_cm)**2)
+sig_TT = par13 + par14 * (math.exp(-par15 * math.fabs(tt)) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT * (math.sin(theta_cm)**2)
 ####
 
 # Weight factor for Q2=3.0, W=3.14
