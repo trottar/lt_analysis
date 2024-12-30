@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 16:00:26 trottar"
+# Time-stamp: "2024-12-30 16:04:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -103,9 +103,9 @@ def iterWeight(arg_str):
     if sig_prev_iter == sig:
         wtn = weight_prev_iter    
     elif sig_prev_iter > sig:
-        wtn = weight_prev_iter * (sig_prev_iter / sig)
-    else:
         wtn = weight_prev_iter * (sig / sig_prev_iter)
+    else:
+        wtn = weight_prev_iter * (sig_prev_iter / sig)
         
     #print("sig",sig)
     #print("sigcm",sig_prev_iter)
