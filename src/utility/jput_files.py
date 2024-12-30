@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:14:02 trottar"
+# Time-stamp: "2024-12-29 21:20:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -82,8 +82,8 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
             break
 
 # Parameters
-source_directory = f"/group/c-kaonlt/USERS/trottar/lt_analysis/OUTPUT/Analysis/KaonLT/cache_transfer/kaon/Q3p0W3p14/{inp_dir}"  # Source directory
-destination_prefix = f"/mss/hallc/kaonlt/trottar/kaon/Q3p0W3p14/{inp_dir}"  # Destination prefix
+source_directory = f"/group/c-kaonlt/USERS/{USER}/lt_analysis/OUTPUT/Analysis/KaonLT/cache_transfer/kaon/Q3p0W3p14/{inp_dir}"  # Source directory
+destination_prefix = f"/mss/hallc/kaonlt/{USER}/kaon/Q3p0W3p14/{inp_dir}"  # Destination prefix
 
 # Run jput command in batches
 run_jput_in_batches(source_directory, destination_prefix, batch_size=50)
