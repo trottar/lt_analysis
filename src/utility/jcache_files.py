@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:11:01 trottar"
+# Time-stamp: "2024-12-29 21:12:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -72,12 +72,12 @@ def run_jcache_in_batches(source_dir, batch_size=100):
         command = ["jcache", "get"] + batch
         try:
             subprocess.run(command, check=True)
-            print(f"Batch {i + 1}/{len(file_batches)}.")
-            print(f"Batch with {len(batch)} files uploaded successfully.")
+            print(f"\n\nBatch {i + 1}/{len(file_batches)}.")
+            print(f"Batch with {len(batch)} files uploaded successfully.\n\n")
         except subprocess.CalledProcessError as e:
-            print(f"Error executing jcache command for batch: {e}")
+            print(f"\n\nError executing jcache command for batch: {e}\n\n")
         except FileNotFoundError:
-            print("jcache command not found. Make sure it is installed and in your PATH.")
+            print("\n\njcache command not found. Make sure it is installed and in your PATH.\n\n")
             break
 
 # Parameters
