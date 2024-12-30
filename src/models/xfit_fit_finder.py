@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 02:35:48 trottar"
+# Time-stamp: "2024-12-30 02:37:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -505,6 +505,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
@@ -936,6 +937,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
@@ -1384,6 +1386,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
@@ -1847,6 +1850,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
@@ -2031,6 +2035,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
@@ -2182,6 +2187,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
@@ -2336,6 +2342,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
@@ -2493,6 +2500,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
+                converge_status.SetTextFont(42)  # Use a compatible font                
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                                                
                 converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
