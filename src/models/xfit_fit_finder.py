@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 02:32:02 trottar"
+# Time-stamp: "2024-12-30 02:35:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -505,7 +505,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
 
                 # Plot temperature
@@ -935,7 +936,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
 
                 # Plot temperature
@@ -1382,7 +1384,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
 
                 # Plot temperature
@@ -1844,7 +1847,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge[it].Draw("ALP")
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c4.Update()
 
                 # Plot temperature
@@ -2027,7 +2031,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
                     
                 print("\n")    
@@ -2177,7 +2182,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
                     
                 print("\n")    
@@ -2330,7 +2336,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
                     
                 print("\n")    
@@ -2486,7 +2493,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 converge_status = TText()
                 converge_status.SetTextSize(0.04)
-                converge_status.DrawTextNDC(0.35, 0.85, "Best #chi^{2}: %s" % f"{best_overall_cost:.3f}")
+                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"                                                                                                                                
+                converge_status.DrawTextNDC(0.35, 0.85, best_cost_text)
                 c2.Update()
                     
                 print("\n")    
