@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 05:08:18 trottar"
+# Time-stamp: "2024-12-30 14:12:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -64,6 +64,8 @@ def import_model(inp_model, arg_str):
     sig_sep = sig_sep*wfactor
     
     #sig_sep = sig_sep/2.0/math.pi
+
+    sig_sep = sig_sep / 2.0 / math.pi / 1e6
         
     print("Model {} = {:.4e}".format(inp_model, sig_sep))
     

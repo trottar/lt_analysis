@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:09:59 trottar"
+# Time-stamp: "2024-12-30 14:11:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -403,7 +403,6 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                 dates.append(date)
                 params_values.append(data['params'])
                 data_values.append(data[sig])
-                print("!!!!!!",data[sig])
 
                 # 1. Parameter Evolution Plot
             fig = plt.figure(figsize=(12, 6))
