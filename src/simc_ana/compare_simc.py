@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:20:07 trottar"
+# Time-stamp: "2024-12-30 14:25:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, create_polar_plot, remove_bad_bins, fit_gaussian
+from utility import open_root_file, create_polar_plot, remove_bad_bins
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -319,8 +319,8 @@ def compare_simc(hist, inpDict):
     histDict["H_pmz_SIMC"] =     H_pmz_SIMC
     histDict["H_W_SIMC"] =     H_W_SIMC
     histDict["polar_phiq_vs_t_SIMC"] = polar_phiq_vs_t_SIMC
-    histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral(mm_min, mm_max)
-    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted.Integral(mm_min, mm_max)
+    histDict["NumEvts_MM_SIMC"] = H_MM_SIMC.Integral()
+    histDict["NumEvts_MM_unweighted_SIMC"] = H_MM_unweighted.Integral()
 
     if histDict["NumEvts_MM_SIMC"] == 0.0:
         print(f"\n\nERROR: Empty results for {phi_setting} setting. Try adjusting functional forms of input model file...")
