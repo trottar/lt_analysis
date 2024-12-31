@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 13:41:55 trottar"
+# Time-stamp: "2024-12-31 13:51:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -13,7 +13,6 @@
 import ROOT
 from ROOT import TNtuple
 from ROOT import TCanvas
-import numpy as np
 import math
 import os, sys
 
@@ -224,20 +223,14 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_err_vec = prv_err_vec
     par_chi2_vec = prv_chi2_vec
 
+    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+    bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+
     # Store the initial values
     best_par_vec = par_vec.copy()
     best_err_vec = par_err_vec.copy()
     best_chi2_vec = par_chi2_vec.copy()
-
-    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
-    bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
-
-    # Update best values if current chi2 is closer to 1
-    if np.abs(np.mean(par_chi2_vec) - 1) < np.abs(np.mean(best_chi2_vec) - 1):
-        best_par_vec = par_vec.copy()
-        best_err_vec = par_err_vec.copy()
-        best_chi2_vec = par_chi2_vec.copy()
-
+    
     if not DEBUG:
         i = 0
         max_checks = 1
@@ -250,7 +243,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
             # Update best values if current chi2 is closer to 1
-            if np.abs(np.mean(par_chi2_vec) - 1) < np.abs(np.mean(best_chi2_vec) - 1):
+            if abs(par_chi2_vec - 1) < abs(best_chi2_vec - 1):
                 best_par_vec = par_vec.copy()
                 best_err_vec = par_err_vec.copy()
                 best_chi2_vec = par_chi2_vec.copy()
