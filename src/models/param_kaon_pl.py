@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 03:27:44 trottar"
+# Time-stamp: "2024-12-31 03:36:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,12 +93,10 @@ def iterWeight(arg_str):
     variables = {'sig_L': sig_L, 'sig_T': sig_T, 'sig_LT': sig_LT, 'sig_TT': sig_TT, 'wfactor': wfactor}
 
     # Check if any variable is infinite
-    if any(math.isinf(value) for value in [sig_L, sig_T, sig_LT, sig_TT, wfactor]):
-        
+    if any(math.isinf(value) for value in [sig_L, sig_T, sig_LT, sig_TT, wfactor]):        
         wtn = weight_prev_iter
         
-    else
-    :
+    else:
         # Convert degrees to radians
         theta_cm = theta_cm * math.pi/180
         phi_cm = phi_cm * math.pi/180
