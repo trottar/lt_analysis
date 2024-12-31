@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 15:23:07 trottar"
+# Time-stamp: "2024-12-31 15:38:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -232,6 +232,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     best_err_vec = par_err_vec.copy()
     best_chi2_vec = par_chi2_vec.copy()
 
+    print("1!!!!!!!!!!!",best_chi2_vec)
+    
     if not DEBUG:
         i = 0
         max_checks = 1
@@ -249,6 +251,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                 best_err_vec = par_err_vec.copy()
                 best_chi2_vec = par_chi2_vec.copy()
             i += 1
+            print("2!!!!!!!!!!!",best_chi2_vec)
+    print("3!!!!!!!!!!!",best_chi2_vec)
 
     # After the loop, set the vectors to their best values
     par_vec = best_par_vec
