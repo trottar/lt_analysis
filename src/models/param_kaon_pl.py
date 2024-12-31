@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 03:57:13 trottar"
+# Time-stamp: "2024-12-31 04:01:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,6 +91,8 @@ def iterWeight(arg_str):
         wfactor = float('inf')
     '''
 
+    if abs(q2_set-qq) > 0.5 or abs(w_set-ww) > 0.5:
+        return [0.0, 0.0]
 
     # Calculate SigL, SigT, SigLT, SigTT
     sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
