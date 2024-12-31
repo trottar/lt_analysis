@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 12:13:49 trottar"
+# Time-stamp: "2024-12-31 12:30:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,8 +93,8 @@ def iterWeight(arg_str):
 
     # Remove bad events which extend beyond threshold of +/-0.75 GeV^2
     if abs(q2_set-qq) > 0.75 or abs(w_set-ww) > 0.75:
-        return [0.0, 0.0]
-        #return [float(weight_prev_iter), float(sig_prev_iter)]
+        #return [0.0, 0.0]
+        return [float(weight_prev_iter), float(sig_prev_iter)]
 
     # Calculate SigL, SigT, SigLT, SigTT
     sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
@@ -116,11 +116,14 @@ def iterWeight(arg_str):
 
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
 
-    wtn = abs(weight_prev_iter * (sig / sig_prev_iter))
-    
+    wtn = weight_prev_iter * (sig / sig_prev_iter)
+
     #print("sig",sig)
     #print("sigcm",sig_prev_iter)
     #print("wtn",wtn)
     #print("weight_prev_iter",weight_prev_iter)
     
-    return [float(wtn),float(sig)]
+    if wtn < 0.0:
+        return [float(weight_prev_iter), float(sig_prev_iter)]
+    else:
+        return [float(wtn),float(sig)]
