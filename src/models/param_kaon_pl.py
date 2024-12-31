@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 03:42:15 trottar"
+# Time-stamp: "2024-12-31 03:50:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,6 +62,7 @@ def iterWeight(arg_str):
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
+    '''
     # Calculate SigL, SigT, SigLT, SigTT
     try:
         sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
@@ -88,25 +89,30 @@ def iterWeight(arg_str):
         wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
     except (ZeroDivisionError, OverflowError, TypeError):
         wfactor = float('inf')
+    '''
 
-    # Check if any variable is infinite
-    if any(math.isinf(value) for value in [sig_L, sig_T, sig_LT, sig_TT, wfactor]):
-        sig = sig_prev_iter
-        wtn = weight_prev_iter
-        
-    else:
-        # Convert degrees to radians
-        theta_cm = theta_cm * math.pi/180
-        phi_cm = phi_cm * math.pi/180
 
-        sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
-                 math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
+    # Calculate SigL, SigT, SigLT, SigTT
+    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
+    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
+    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
+    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
+    
+    # Calculate W-factor
+    wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)    
 
-        sig = sig * wfactor
+    # Convert degrees to radians
+    theta_cm = theta_cm * math.pi/180
+    phi_cm = phi_cm * math.pi/180
 
-        sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+    sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
+             math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
 
-        wtn = weight_prev_iter * (sig / sig_prev_iter)
+    sig = sig * wfactor
+
+    sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+
+    wtn = weight_prev_iter * (sig / sig_prev_iter)
     
     #print("sig",sig)
     #print("sigcm",sig_prev_iter)
