@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 03:38:33 trottar"
+# Time-stamp: "2024-12-31 03:42:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -88,9 +88,6 @@ def iterWeight(arg_str):
         wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
     except (ZeroDivisionError, OverflowError, TypeError):
         wfactor = float('inf')
-
-    # Check if each variable is infinite
-    variables = {'sig_L': sig_L, 'sig_T': sig_T, 'sig_LT': sig_LT, 'sig_TT': sig_TT, 'wfactor': wfactor}
 
     # Check if any variable is infinite
     if any(math.isinf(value) for value in [sig_L, sig_T, sig_LT, sig_TT, wfactor]):
