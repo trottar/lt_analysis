@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:18:23 trottar"
+# Time-stamp: "2024-12-31 03:18:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1128,16 +1128,9 @@ def prepare_equations(equations, sig_type):
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
         
-    # Build function body with error handling
-    func_str += "    try:\n"
+    # Build function body without error handling
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
     func_str += f"        return {sig_type}\n"
-    func_str += "    except ZeroDivisionError:\n"
-    func_str += "        print(f'ZeroDivisionError encountered in {sig_type}_optimized! Inputs: q2_set={q2_set}, w_set={w_set}, qq={qq}, ww={ww}, tt={tt}')\n"
-    func_str += "        return float('inf')\n"
-    func_str += "    except OverflowError:\n"
-    func_str += "        print(f'OverflowError encountered in {sig_type}_optimized! Inputs: q2_set={q2_set}, w_set={w_set}, qq={qq}, ww={ww}, tt={tt}')\n"
-    func_str += "        return float('inf')\n"
     
     exec_globals = {'__builtins__': None, 'math': math}
     exec(func_str, exec_globals)
