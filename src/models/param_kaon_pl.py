@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 04:01:58 trottar"
+# Time-stamp: "2024-12-31 04:03:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -98,7 +98,6 @@ def iterWeight(arg_str):
     sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
     sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
     sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    print("!!!!!!!!!!!", "q2_set", q2_set, "w_set", w_set, "qq", qq, "ww", ww, "tt", tt, "theta", theta_cm, "par13", par13, "par14", par14, "par15", par15, "par16", par16)
     sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
     
     # Calculate W-factor
