@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 16:40:31 trottar"
+# Time-stamp: "2024-12-31 16:45:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -245,7 +245,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     if not DEBUG:
         i = 0
         max_checks = 1
-        while bad_chi2_bool and i <= max_checks:
+        while bad_chi2_bool and i < max_checks:
             fixed_params = ["L", "T", "LT", "TT"]
             fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
             print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
@@ -260,6 +260,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                     best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
                     best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
             i += 1
+            print("!!!!!!!!!!", best_chi2_vec)
 
     # After the loop, set the vectors to their best values
     par_vec = best_par_vec
