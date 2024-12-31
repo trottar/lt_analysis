@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 13:06:53 trottar"
+# Time-stamp: "2024-12-31 13:26:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -261,6 +261,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_err_vec = best_err_vec
     par_chi2_vec = best_chi2_vec
 
+    # Update plots with best chi2
+    fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
+    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+    
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
         if old != new:
