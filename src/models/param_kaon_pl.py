@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 03:13:35 trottar"
+# Time-stamp: "2024-12-31 03:15:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,41 +62,33 @@ def iterWeight(arg_str):
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
-    '''
     # Calculate SigL, SigT, SigLT, SigTT
     try:
         sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_L = float('inf')
+        sig_L = 0.0
 
     try:
         sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_T = float('inf')
+        sig_T = 0.0
 
     try:
         sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_LT = float('inf')
+        sig_LT = 0.0
 
     try:
         sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
     except (ZeroDivisionError, OverflowError, TypeError):
-        sig_TT = float('inf')
+        sig_TT = 0.0
 
     # Calculate W-factor
     try:
         wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
     except (ZeroDivisionError, OverflowError, TypeError):
-        wfactor = float('inf')
-    '''
+        wfactor = 0.0
     
-    # Calculate SigL, SigT, SigLT, SigTT
-    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
-    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
-    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
-
     # Calculate W-factor
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
 
