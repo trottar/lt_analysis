@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 04:42:42 trottar"
+# Time-stamp: "2024-12-31 13:06:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -222,9 +222,20 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_vec = prv_par_vec
     par_err_vec = prv_err_vec
     par_chi2_vec = prv_chi2_vec
-    
+
+    # Store the initial values
+    best_par_vec = par_vec.copy()
+    best_err_vec = par_err_vec.copy()
+    best_chi2_vec = par_chi2_vec.copy()
+
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+
+    # Update best values if current chi2 is closer to 1
+    if np.abs(np.mean(par_chi2_vec) - 1) < np.abs(np.mean(best_chi2_vec) - 1):
+        best_par_vec = par_vec.copy()
+        best_err_vec = par_err_vec.copy()
+        best_chi2_vec = par_chi2_vec.copy()
 
     if not DEBUG:
         i = 0
@@ -233,9 +244,21 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             fixed_params = ["L", "T", "LT", "TT"]
             fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
             print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
+
             parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
-            i +=1
+
+            # Update best values if current chi2 is closer to 1
+            if np.abs(np.mean(par_chi2_vec) - 1) < np.abs(np.mean(best_chi2_vec) - 1):
+                best_par_vec = par_vec.copy()
+                best_err_vec = par_err_vec.copy()
+                best_chi2_vec = par_chi2_vec.copy()
+            i += 1
+
+    # After the loop, set the vectors to their best values
+    par_vec = best_par_vec
+    par_err_vec = best_err_vec
+    par_chi2_vec = best_chi2_vec
 
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
