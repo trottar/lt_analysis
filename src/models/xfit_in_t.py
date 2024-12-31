@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-31 15:39:12 trottar"
+# Time-stamp: "2024-12-31 15:56:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -227,17 +227,25 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
-    # Store the initial values
+    # Store initial values
     best_par_vec = par_vec.copy()
     best_err_vec = par_err_vec.copy()
     best_chi2_vec = par_chi2_vec.copy()
 
-    print("1!!!!!!!!!!!",best_chi2_vec)
-    
+    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+    bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+
+    # Update best values for each group of 4 elements
+    for j in range(0, len(par_chi2_vec), 4):
+        if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
+            best_par_vec[j:j+4] = par_vec[j:j+4].copy()
+            best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
+            best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
+
     if not DEBUG:
         i = 0
         max_checks = 1
-        while bad_chi2_bool and i < max_checks:
+        while bad_chi2_bool and i <= max_checks:
             fixed_params = ["L", "T", "LT", "TT"]
             fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
             print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
@@ -245,23 +253,23 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
-            # Update best values if current chi2 is closer to 1
-            if np.abs(np.mean(par_chi2_vec) - 1) < np.abs(np.mean(best_chi2_vec) - 1):
-                best_par_vec = par_vec.copy()
-                best_err_vec = par_err_vec.copy()
-                best_chi2_vec = par_chi2_vec.copy()
+            # Update best values for each group of 4 elements
+            for j in range(0, len(par_chi2_vec), 4):
+                if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
+                    best_par_vec[j:j+4] = par_vec[j:j+4].copy()
+                    best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
+                    best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
             i += 1
-            print("2!!!!!!!!!!!",best_chi2_vec)
-    print("3!!!!!!!!!!!",best_chi2_vec)
 
     # After the loop, set the vectors to their best values
     par_vec = best_par_vec
     par_err_vec = best_err_vec
     par_chi2_vec = best_chi2_vec
-    prv_par_vec = best_par_vec
-    prv_err_vec = best_err_vec
-    prv_chi2_vec = best_chi2_vec    
 
+    par_vec = prv_par_vec
+    par_err_vec = prv_err_vec
+    par_chi2_vec = prv_chi2_vec
+    
     # Update plots with best chi2
     fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
