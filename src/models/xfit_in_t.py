@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 18:27:00 trottar"
+# Time-stamp: "2025-01-01 18:27:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -244,7 +244,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         
     if not DEBUG:
         i = 0
-        max_checks = 1
+        max_checks = 3
         while bad_chi2_bool and i < max_checks:
             fixed_params = ["L", "T", "LT", "TT"]
             fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
