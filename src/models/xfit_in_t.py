@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 17:40:29 trottar"
+# Time-stamp: "2025-01-01 18:24:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -313,5 +313,3 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         print("\n\nDEBUG ENABLED: No changes to previous iteration...")
         for i,par in enumerate(prv_par_vec):
             print("par{} = {:.3f}".format(i+1, par))
-
-    sys.exit(2)            

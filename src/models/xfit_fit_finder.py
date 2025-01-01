@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 18:18:12 trottar"
+# Time-stamp: "2025-01-01 18:23:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2083,6 +2083,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = 0  # Initialize best bin tracker
                 
                 for b in range(len(w_vec)):
+
+                    print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     
                     g_sig_fit = TGraphErrors()
 
