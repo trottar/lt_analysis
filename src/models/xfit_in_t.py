@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 15:23:12 trottar"
+# Time-stamp: "2025-01-01 16:09:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -237,13 +237,13 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Update best values for each group of 4 elements
     for j in range(0, len(par_chi2_vec), 4):
-        best_par_vec[j:j+4] = par_vec[j:j+4].copy()
-        best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
-        best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
+        best_par_vec[4*j:4*(j+1)] = par_vec[4*j:4*(j+1)].copy()
+        best_err_vec[4*j:4*(j+1)] = par_err_vec[4*j:4*(j+1)].copy()
+        best_chi2_vec[4*j:4*(j+1)] = par_chi2_vec[4*j:4*(j+1)].copy()
 
     if not DEBUG:
         i = 0
-        max_checks = 3
+        max_checks = 1
         while bad_chi2_bool and i < max_checks:
             fixed_params = ["L", "T", "LT", "TT"]
             fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices]
@@ -254,10 +254,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
             # Update best values for each group of 4 elements
             for j in range(0, len(par_chi2_vec), 4):
-                if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
-                    best_par_vec[j:j+4] = par_vec[j:j+4].copy()
-                    best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
-                    best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
+                if np.abs(np.mean(par_chi2_vec[4*j:4*(j+1)]) - 1) < np.abs(np.mean(best_chi2_vec[4*j:4*(j+1)]) - 1):
+                    
+                    print("\n\nNew set of best chi2 values found for  ")
+                    best_par_vec[4*j:4*(j+1)] = par_vec[4*j:4*(j+1)].copy()
+                    best_err_vec[4*j:4*(j+1)] = par_err_vec[4*j:4*(j+1)].copy()
+                    best_chi2_vec[4*j:4*(j+1)] = par_chi2_vec[4*j:4*(j+1)].copy()
             i += 1
 
     # After the loop, set the vectors to their best values
@@ -290,3 +292,5 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         print("\n\nDEBUG ENABLED: No changes to previous iteration...")
         for i,par in enumerate(prv_par_vec):
             print("par{} = {:.3f}".format(i+1, par))
+
+    sys.exit(2)            
