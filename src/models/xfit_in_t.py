@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 16:25:10 trottar"
+# Time-stamp: "2025-01-01 16:27:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -236,11 +236,11 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
     # Update best values for each group of 4 elements
-    for j in range(0, len(par_chi2_vec)):
-        print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j]} of {par_chi2_vec[4*j]:.3f}...")
-        best_par_vec[4*j:4*(j+1)] = par_vec[4*j:4*(j+1)].copy()
-        best_err_vec[4*j:4*(j+1)] = par_err_vec[4*j:4*(j+1)].copy()
-        best_chi2_vec[4*j:4*(j+1)] = par_chi2_vec[4*j:4*(j+1)].copy()
+    for j in range(0, len(par_chi2_vec), 4):
+        print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
+        best_par_vec[j:j+4] = par_vec[j:j+4].copy()
+        best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
+        best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
 
     if not DEBUG:
         i = 0
@@ -254,12 +254,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
             # Update best values for each group of 4 elements
-            for j in range(0, len(par_chi2_vec)):
-                if np.abs(np.mean(par_chi2_vec[4*j:4*(j+1)]) - 1) < np.abs(np.mean(best_chi2_vec[4*j:4*(j+1)]) - 1):                    
-                    print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j]} of {par_chi2_vec[4*j]:.3f}...")
-                    best_par_vec[4*j:4*(j+1)] = par_vec[4*j:4*(j+1)].copy()
-                    best_err_vec[4*j:4*(j+1)] = par_err_vec[4*j:4*(j+1)].copy()
-                    best_chi2_vec[4*j:4*(j+1)] = par_chi2_vec[4*j:4*(j+1)].copy()
+            for j in range(0, len(par_chi2_vec), 4):
+                if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):                    
+                    print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
+                    best_par_vec[j:j+4] = par_vec[j:j+4].copy()
+                    best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
+                    best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
             i += 1
 
     # After the loop, set the vectors to their best values
