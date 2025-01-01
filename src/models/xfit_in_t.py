@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 16:39:34 trottar"
+# Time-stamp: "2025-01-01 16:45:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -255,7 +255,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
             # Update best values for each group of 4 elements
             for j in range(0, len(par_chi2_vec), 4):
-                print("!!!!!!!!!",np.abs(np.mean(par_chi2_vec[j:j+4]) - 1), "<" ,np.abs(np.mean(best_chi2_vec[j:j+4]) - 1))
                 if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
                     print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
                     best_par_vec[j:j+4] = par_vec[j:j+4].copy()
@@ -263,6 +262,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                     best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
             i += 1
 
+    # Update best values for each group of 4 elements
+    for j in range(0, len(par_chi2_vec), 4):
+        print("!!!!!!!!!!!!",best_chi2_vec[j:j+4])
+            
     # After the loop, set the vectors to their best values
     par_vec = best_par_vec
     par_err_vec = best_err_vec
