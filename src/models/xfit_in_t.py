@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 17:31:54 trottar"
+# Time-stamp: "2025-01-01 17:40:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -286,7 +286,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         print("$$$$$$$$$$$$",prv_chi2_vec[j])
         print("$$$$$$$$$$$$",best_par_vec[j:j+4])
         print("$$$$$$$$$$$$",prv_par_vec[j:j+4])
-    
+
+    print("££££££££££££",best_chi2_vec)
+    print("££££££££££££",prv_chi2_vec)
+    print("££££££££££££",best_par_vec)
+    print("££££££££££££",prv_par_vec)
+        
     # Update plots with best chi2
     fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
