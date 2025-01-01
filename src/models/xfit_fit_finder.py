@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 04:20:42 trottar"
+# Time-stamp: "2025-01-01 17:48:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1970,6 +1970,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                    print("\tCost: {red_chi2}")
+                    
                     # After the while loop, check if this run found a better solution
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
@@ -2121,7 +2123,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     chi2 = f_sig.GetChisquare()  # Get the chi-squared value
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
+                    
+                    print("\tCost: {red_chi2}")
+                    
                     # After the while loop, check if this run found a better solution
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
@@ -2277,6 +2281,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                    print("\tCost: {red_chi2}")
+                    
                     # After the while loop, check if this run found a better solution
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
@@ -2435,6 +2441,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
                     red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
 
+                    print("\tCost: {red_chi2}")
+                    
                     # After the while loop, check if this run found a better solution
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
