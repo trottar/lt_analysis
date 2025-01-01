@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 18:24:13 trottar"
+# Time-stamp: "2025-01-01 18:27:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -93,8 +93,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     #max_iterations = 10000
 
     # Number of times to run the algorithm
-    num_optimizations = 5
-    #num_optimizations = 10
+    #um_optimizations = 5
+    num_optimizations = 10
     #num_optimizations = 50
     #num_optimizations = 1000
 
@@ -241,13 +241,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         best_par_vec[j:j+4] = par_vec[j:j+4].copy()
         best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
         best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
-
-    # Update best values for each group of 4 elements
-    for j in range(0, len(par_chi2_vec), 4):
-        print("!!!!!!!!!!!!",best_chi2_vec[j])
-        print("!!!!!!!!!!!!",par_chi2_vec[j])
-        print("!!!!!!!!!!!!",best_par_vec[j:j+4])
-        print("!!!!!!!!!!!!",par_vec[j:j+4])
         
     if not DEBUG:
         i = 0
@@ -268,29 +261,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                     best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
                     best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
             i += 1
-
-    # Update best values for each group of 4 elements
-    for j in range(0, len(par_chi2_vec), 4):
-        print("!!!!!!!!!!!!",best_chi2_vec[j])
-        print("!!!!!!!!!!!!",par_chi2_vec[j])
-        print("!!!!!!!!!!!!",best_par_vec[j:j+4])
-        print("!!!!!!!!!!!!",par_vec[j:j+4])
             
     prv_par_vec = par_vec
     prv_err_vec = par_err_vec
     prv_chi2_vec = par_chi2_vec
-
-    # Update best values for each group of 4 elements
-    for j in range(0, len(par_chi2_vec), 4):
-        print("$$$$$$$$$$$$",best_chi2_vec[j])
-        print("$$$$$$$$$$$$",prv_chi2_vec[j])
-        print("$$$$$$$$$$$$",best_par_vec[j:j+4])
-        print("$$$$$$$$$$$$",prv_par_vec[j:j+4])
-
-    print("££££££££££££",best_chi2_vec)
-    print("££££££££££££",prv_chi2_vec)
-    print("££££££££££££",best_par_vec)
-    print("££££££££££££",prv_par_vec)
         
     # Update plots with best chi2
     fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
