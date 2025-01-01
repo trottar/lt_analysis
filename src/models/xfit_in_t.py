@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 16:09:47 trottar"
+# Time-stamp: "2025-01-01 16:13:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -237,6 +237,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Update best values for each group of 4 elements
     for j in range(0, len(par_chi2_vec), 4):
+        print(f"\n\nNew set of best chi2 values found for  {list(fit_params.keys())[4*j]} of {par_chi2_vec[4*j:4*(j+1)]}...")
         best_par_vec[4*j:4*(j+1)] = par_vec[4*j:4*(j+1)].copy()
         best_err_vec[4*j:4*(j+1)] = par_err_vec[4*j:4*(j+1)].copy()
         best_chi2_vec[4*j:4*(j+1)] = par_chi2_vec[4*j:4*(j+1)].copy()
@@ -254,9 +255,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
             # Update best values for each group of 4 elements
             for j in range(0, len(par_chi2_vec), 4):
-                if np.abs(np.mean(par_chi2_vec[4*j:4*(j+1)]) - 1) < np.abs(np.mean(best_chi2_vec[4*j:4*(j+1)]) - 1):
-                    
-                    print("\n\nNew set of best chi2 values found for  ")
+                if np.abs(np.mean(par_chi2_vec[4*j:4*(j+1)]) - 1) < np.abs(np.mean(best_chi2_vec[4*j:4*(j+1)]) - 1):                    
+                    print(f"\n\nNew set of best chi2 values found for  {list(fit_params.keys())[4*j]} of {par_chi2_vec[4*j:4*(j+1)]}...")
                     best_par_vec[4*j:4*(j+1)] = par_vec[4*j:4*(j+1)].copy()
                     best_err_vec[4*j:4*(j+1)] = par_err_vec[4*j:4*(j+1)].copy()
                     best_chi2_vec[4*j:4*(j+1)] = par_chi2_vec[4*j:4*(j+1)].copy()
