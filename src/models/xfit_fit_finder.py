@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 17:58:46 trottar"
+# Time-stamp: "2025-01-01 18:11:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1924,10 +1924,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-
+                
+                best_overall_cost = float('inf')  # Initialize with infinity
+                
                 for b in range(len(w_vec)):
 
-                    best_overall_cost = float('inf')  # Initialize with infinity
                     best_overall_params = []
                     best_overall_bin = 0  # Initialize best bin tracker
                     
@@ -2077,10 +2078,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-
+                
+                best_overall_cost = float('inf')  # Initialize with infinity
+                
                 for b in range(len(w_vec)):
 
-                    best_overall_cost = float('inf')  # Initialize with infinity
                     best_overall_params = []
                     best_overall_bin = 0  # Initialize best bin tracker
                     
@@ -2233,10 +2235,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-
+                
+                best_overall_cost = float('inf')  # Initialize with infinity
+                
                 for b in range(len(w_vec)):
 
-                    best_overall_cost = float('inf')  # Initialize with infinity
                     best_overall_params = []
                     best_overall_bin = 0  # Initialize best bin tracker
                     
@@ -2392,10 +2395,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-
+                
+                best_overall_cost = float('inf')  # Initialize with infinity
+                
                 for b in range(len(w_vec)):
 
-                    best_overall_cost = float('inf')  # Initialize with infinity
                     best_overall_params = []
                     best_overall_bin = 0  # Initialize best bin tracker
                     
