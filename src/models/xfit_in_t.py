@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 18:27:11 trottar"
+# Time-stamp: "2025-01-01 19:22:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -101,7 +101,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # Initial max/min bounds of finding parameter values
     initial_param_bounds = 1e4
 
-    # Threshold on how bad red. chi2 can be
+    # Threshold value of red. chi2
     #chi2_threshold = 1.0
     chi2_threshold = 3.0
     #chi2_threshold = 5.0
@@ -267,7 +267,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     prv_chi2_vec = par_chi2_vec
         
     # Update plots with best chi2
-    fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
+    fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
     
     # Check if parameter values changed and print changes to terminal
