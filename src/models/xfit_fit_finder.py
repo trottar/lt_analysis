@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-04 14:51:18 trottar"
+# Time-stamp: "2025-01-04 15:34:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -211,10 +211,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             try:
                                 # Perturb parameters
-                                '''
+
                                 current_params = [simulated_annealing(par_sig_0, temperature)]
-                                '''
-                                current_params = [par_sig_0]
 
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
@@ -630,13 +628,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             try:
                                 # Perturb parameters
-                                '''
+
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature)
                                 ]
-                                '''
-                                current_params = [par_sig_0, par_sig_1]
                                 
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
@@ -1077,14 +1073,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             try:
 
                                 # Perturb parameters
-                                '''
+
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature),
                                     simulated_annealing(par_sig_2, temperature)
                                 ]
-                                '''
-                                current_params = [par_sig_0, par_sig_1, par_sig_2]
                                 
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
@@ -1542,15 +1536,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             try:
                                 # Perturb parameters
-                                '''
+
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature),
                                     simulated_annealing(par_sig_2, temperature),
                                     simulated_annealing(par_sig_3, temperature),
                                 ]
-                                '''
-                                current_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
                                 
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
