@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-04 15:34:21 trottar"
+# Time-stamp: "2025-01-04 18:41:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -106,7 +106,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
             # Checks initial parameters and replaces zeros to avoid errors
-            #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
             initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
 
             # String list of initial parameters
@@ -252,8 +251,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                                 f_sig.SetParNames("p0")
                                 f_sig.SetParameter(0, current_params[0])
-                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                if iter_num == 1:
+                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                else:
+                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
 
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -673,11 +674,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParNames("p0", "p1")
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
-                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-                                #f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
-
+                                if iter_num == 1:
+                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                    f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                                else:
+                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                    f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
+                                
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                                 #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
@@ -1120,12 +1123,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
-                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-                                #f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
-                                #f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
+                                if iter_num == 1:
+                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                    f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)                                
+                                    f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                                else:
+                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                    f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
+                                    f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
 
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1585,15 +1590,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
                                 f_sig.SetParameter(3, current_params[3])
-                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-                                #f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
-                                #f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
-                                #f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(3, current_params[3]-param_offset_3*current_params[3], current_params[3]+param_offset_3*current_params[3])
-
+                                if iter_num == 1:
+                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)                                
+                                    f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                                    f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
+                                    f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                                else:
+                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                    f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
+                                    f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
+                                    f_sig.SetParLimits(3, current_params[3]-param_offset_3*current_params[3], current_params[3]+param_offset_3*current_params[3])                                
+                                
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                                 #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
@@ -1922,7 +1929,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
 
             # Checks initial parameters and replaces zeros to avoid errors
-            #initial_params = [v if abs(v) > 0.0 else max_iterations for v in initial_params]
             initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
 
             # String list of initial parameters

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-04 05:19:40 trottar"
+# Time-stamp: "2025-01-04 18:41:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -100,7 +100,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     #num_optimizations = 50
     #num_optimizations = 1000
 
-    # Initial max/min bounds of finding parameter values
+    # Initial max/min bounds of finding parameter values (only used for iter=1)
     initial_param_bounds = 1e4
 
     # Threshold value of red. chi2
