@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-04 02:44:57 trottar"
+# Time-stamp: "2025-01-04 04:20:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -73,16 +73,17 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     Q2max_range = inpDict["Q2max"]
 
     iter_num = inpDict["iter_num"]
-    
-    DEBUG=False
-    #DEBUG=True
-    
+        
     ##############
     # HARD CODED #
     ##############
+
+    #DEBUG=False
+    DEBUG=True
+    
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    #fixed_params = ["L", "T", "LT"]
-    fixed_params = ["L", "LT"]
+    fixed_params = ["L", "T", "LT"]
+    #fixed_params = ["L", "LT"]
     #fixed_params = ["TT"]
     #fixed_params = [] # Update all
     
