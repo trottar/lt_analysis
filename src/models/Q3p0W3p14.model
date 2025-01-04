@@ -66,7 +66,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 ####
 # (chi2>4.2)
 #sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
-sig_TT = -6.05572 + par13 * (math.exp(-par14*math.fabs(tt)**(par15)) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+sig_TT = (-0.1 + par13 * (math.exp(-par14*math.fabs(tt)**(par15)) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT * (math.sin(theta_cm)**2)
 # (chi2>2.8)
 ###sig_TT = (par13 + par14 * (math.exp(-par15 * math.fabs(tt)**2) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT) * (math.sin(theta_cm)**2)
 ####
