@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-01 18:23:58 trottar"
+# Time-stamp: "2025-01-04 14:51:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -142,6 +142,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                # Parameter range offset (% of param value)
+                param_offset_0 = 0.1
+                param_offset_1 = 0.1                
+                
                 # Store the parameter values and chi-square values for each iteration
                 params_sig_history = {'p0': []}
 
@@ -207,7 +211,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             try:
                                 # Perturb parameters
+                                '''
                                 current_params = [simulated_annealing(par_sig_0, temperature)]
+                                '''
+                                current_params = [par_sig_0]
 
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
@@ -247,7 +254,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                                 f_sig.SetParNames("p0")
                                 f_sig.SetParameter(0, current_params[0])
-                                f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
 
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -551,6 +559,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                # Parameter range offset (% of param value)
+                param_offset_0 = 0.1
+                param_offset_1 = 0.1                                
+
                 # Store the parameter values and chi-square values for each iteration
                 params_sig_history = {'p0': [], 'p1': []}
 
@@ -618,11 +630,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             try:
                                 # Perturb parameters
+                                '''
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature)
                                 ]
-
+                                '''
+                                current_params = [par_sig_0, par_sig_1]
+                                
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
                                     tabu_list.add(tuple(current_params))
@@ -662,8 +677,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParNames("p0", "p1")
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
-                                f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                #f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
 
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -984,6 +1001,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                # Parameter range offset (% of param value)
+                param_offset_0 = 0.1
+                param_offset_1 = 0.1
+                param_offset_2 = 0.1
+
                 # Store the parameter values and chi-square values for each iteration
                 params_sig_history = {'p0': [], 'p1': [], 'p2': []}
 
@@ -1055,12 +1077,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             try:
 
                                 # Perturb parameters
+                                '''
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature),
                                     simulated_annealing(par_sig_2, temperature)
                                 ]
-
+                                '''
+                                current_params = [par_sig_0, par_sig_1, par_sig_2]
+                                
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
                                     tabu_list.add(tuple(current_params))
@@ -1101,9 +1126,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
-                                f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                #f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
+                                #f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
 
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
@@ -1434,6 +1462,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                # Parameter range offset (% of param value)
+                param_offset_0 = 0.1
+                param_offset_1 = 0.1                                
+                param_offset_2 = 0.1
+                param_offset_3 = 0.1
+                
                 # Store the parameter values and chi-square values for each iteration
                 params_sig_history = {'p0': [], 'p1': [], 'p2': [], 'p3': []}
 
@@ -1508,13 +1542,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             try:
                                 # Perturb parameters
+                                '''
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature),
                                     simulated_annealing(par_sig_2, temperature),
                                     simulated_annealing(par_sig_3, temperature),
                                 ]
-
+                                '''
+                                current_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
+                                
                                 # Insert tabu list check here
                                 if tuple(current_params) not in tabu_list:
                                     tabu_list.add(tuple(current_params))
@@ -1556,10 +1593,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
                                 f_sig.SetParameter(3, current_params[3])
-                                f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
-                                f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)                
+                                #f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
+                                #f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
+                                #f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
+                                #f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
+                                f_sig.SetParLimits(3, current_params[3]-param_offset_3*current_params[3], current_params[3]+param_offset_3*current_params[3])
 
                                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
