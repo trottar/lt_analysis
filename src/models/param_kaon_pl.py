@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-02 00:39:34 trottar"
+# Time-stamp: "2025-01-04 00:39:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,8 +91,8 @@ def iterWeight(arg_str):
         wfactor = float('inf')
     '''
 
-    # Remove bad events which extend beyond threshold of +/-0.5 GeV^2
-    if abs(q2_set-qq) > 0.5 or abs(w_set-ww) > 0.5:
+    # Remove bad events which extend beyond threshold of +/-0.75 GeV^2
+    if abs(q2_set-qq) > 0.75 or abs(w_set-ww) > 0.75:
         #return [0.0, 0.0]
         return [float(weight_prev_iter), float(sig_prev_iter)]
 
