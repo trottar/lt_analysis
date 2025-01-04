@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-03 22:17:31 trottar"
+# Time-stamp: "2025-01-04 02:44:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,7 +81,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     # HARD CODED #
     ##############
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["L", "T", "LT"]
+    #fixed_params = ["L", "T", "LT"]
+    fixed_params = ["L", "LT"]
     #fixed_params = ["TT"]
     #fixed_params = [] # Update all
     
