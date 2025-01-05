@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-04 21:26:37 trottar"
+# Time-stamp: "2025-01-04 22:44:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -263,6 +263,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
                     best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
                     print("!!!!!!", best_chi2_vec[j])
             i += 1
+
+    par_vec = best_par_vec
+    par_err_vec = best_err_vec
+    par_chi2_vec = best_chi2_vec
             
     prv_par_vec = par_vec
     prv_err_vec = par_err_vec
