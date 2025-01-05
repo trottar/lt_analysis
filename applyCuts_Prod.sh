@@ -514,7 +514,9 @@ if [[ $p_flag = "true" ]]; then
 	fi
 	rm -f ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log
-	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	if [ ${ParticleType} = "kaon" ]; then
+	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	fi
 	echo
     fi
 
@@ -538,7 +540,9 @@ if [[ $p_flag = "true" ]]; then
 	fi
 	rm -f ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log
-	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	if [ ${ParticleType} = "kaon" ]; then
+	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	fi	
     fi
 
     # Checks that array isn't empty
@@ -561,7 +565,9 @@ if [[ $p_flag = "true" ]]; then
 	fi
 	rm -f ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log
-	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	if [ ${ParticleType} = "kaon" ]; then
+	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	fi
     fi
 
 else
@@ -592,8 +598,10 @@ else
 		rm "$out_f_file"
 	    fi
 	    rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log
-	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
+	    if [ ${ParticleType} = "kaon" ]; then
+		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    fi
 	    echo
 	fi
 
@@ -617,7 +625,9 @@ else
 	    fi
 	    rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
-	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    if [ ${ParticleType} = "kaon" ]; then
+		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    fi
 	fi
 
 	# Checks that array isn't empty
@@ -640,11 +650,13 @@ else
 	    fi
 	    rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
-	    python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    if [ ${ParticleType} = "kaon" ]; then
+		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    fi
 	fi
     done
 fi
-	
+
 echo
 echo
 echo
