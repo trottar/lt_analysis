@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-06 15:22:06 trottar"
+# Time-stamp: "2025-01-06 15:37:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -251,7 +251,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                                 f_sig.SetParNames("p0")
                                 f_sig.SetParameter(0, current_params[0])
-                                if iter_num == 0:
+                                if iter_num == 1:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
                                 else:
                                     f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
@@ -674,7 +674,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParNames("p0", "p1")
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
-                                if iter_num == 0:
+                                if iter_num == 1:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
                                 else:
@@ -1123,7 +1123,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
-                                if iter_num == 0:
+                                if iter_num == 1:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)                                
                                     f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
@@ -1590,7 +1590,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
                                 f_sig.SetParameter(3, current_params[3])
-                                if iter_num == 0:
+                                if iter_num == 1:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)                                
                                     f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
