@@ -37,8 +37,8 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 
 # Longitudinal-Transverse interference term
 # 0th, 1st iteration, (chi2~2.0)
-###sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+###sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 ####
 # 1st iteration, (chi2~0.5)
 #sig_LT =  (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt) + par12 * tt**2)
@@ -46,7 +46,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # 0th iteration,
-sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+##sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 # Marco's thesis
 #sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
 # Modified Marco's thesis
@@ -65,7 +65,7 @@ sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 #sig_TT = par13 * (math.fabs(tt) - par14) * math.exp(-par15*math.fabs(tt)**par16) * Qdep_TT * (math.sin(theta_cm)**2)
 ####
 # (chi2>4.2) 12/18 21:55
-###sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
 # (chi2>2.8)  Discontinuity in fit
 ###sig_TT = (par13 + par14 * (math.exp(-par15 * math.fabs(tt)**2) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT) * (math.sin(theta_cm)**2)
 ####
