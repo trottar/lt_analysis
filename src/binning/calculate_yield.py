@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-07 14:40:33 trottar"
+# Time-stamp: "2025-01-07 17:03:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -709,7 +709,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
             yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(sub_val/normfac_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = yld_err*yld
+            #yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = -1000.0
@@ -1063,10 +1063,9 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
             yld = total_count # Normalization applied above
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
-            #yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i] * normfac_simc))
+            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = yld_err*yld
+            #yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = -1000.0
