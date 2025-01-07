@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-06 15:37:25 trottar"
+# Time-stamp: "2025-01-07 10:11:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,6 +110,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     #chi2_threshold = 10.0
     #chi2_threshold = 30.0
     #chi2_threshold = 600.0
+    
     ##############
     ##############
     ##############
@@ -287,8 +288,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         with open(para_file_out, 'w') as f:
             for i in range(len(par_vec)):
                 f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-                print("  {:.3f} {:.3f} {:.1f} {:.1f}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
     else:
         print("\n\nDEBUG ENABLED: No changes to previous iteration...")
         for i,par in enumerate(prv_par_vec):
-            print("par{} = {:.3f}".format(i+1, par))
+            print("par{} = {:.3e}".format(i+1, par))
