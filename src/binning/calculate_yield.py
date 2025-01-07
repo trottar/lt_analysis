@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-06 22:31:14 trottar"
+# Time-stamp: "2025-01-07 08:14:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -484,7 +484,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
-            
+
+            '''
             # Normalize for yields
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
@@ -494,6 +495,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Dummy subtraction
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)
+            '''
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
@@ -697,11 +699,11 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Find bin width
         bin_width_data = np.mean(np.diff(bin_val_data))
         # Scale the lists before subtraction         
-        #scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
-        #scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
+        scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
+        scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
         # Dummy subtraction
-        #sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        sub_val = np.array(hist_val_data)
+        sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
+        #sub_val = np.array(hist_val_data)
         total_count = np.sum(sub_val)/bin_width_data
         try:
             yld = total_count # Normalization applied above
@@ -888,9 +890,11 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
+            '''
             # Normalize for yields
             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            '''
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
@@ -1053,10 +1057,10 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         # Find bin width
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         # Scale the lists before subtraction
-        #scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
+        scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
         # No dummy subtraction for simc, duh
-        #sub_val = np.array(scaled_hist_val_simc)
-        sub_val = np.array(hist_val_simc)
+        sub_val = np.array(scaled_hist_val_simc)
+        #sub_val = np.array(hist_val_simc)
         total_count = np.sum(sub_val)/bin_width_simc
         try:
             yld = total_count # Normalization applied above
