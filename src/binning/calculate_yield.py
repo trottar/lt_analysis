@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-07 11:23:21 trottar"
+# Time-stamp: "2025-01-07 11:24:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -708,7 +708,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         try:
             yld = total_count # Normalization applied above
             # Calculate experimental yield error (relative error)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
+            #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
+            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(sub_val/normfac_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
             yld_err = yld_err*yld
         except ZeroDivisionError:
