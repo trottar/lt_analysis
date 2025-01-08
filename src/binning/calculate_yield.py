@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-07 19:37:52 trottar"
+# Time-stamp: "2025-01-08 10:12:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -712,16 +712,16 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         if yld < 0.0:
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         if math.isnan(yld) or math.isnan(yld_err):
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         if math.isinf(yld) or math.isinf(yld_err):
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_data[0].append(bin_val_data)
@@ -1068,16 +1068,16 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
             yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         if yld < 0.0:
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         if math.isnan(yld) or math.isnan(yld_err):
             yld = 0.0
-            yld_err = -1000.0
+            yld_err = 0.0
         if math.isinf(yld) or math.isinf(yld_err):
             yld = 0.0
-            yld_err = -1000.0            
+            yld_err = 0.0            
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_simc[0].append(bin_val_simc)
