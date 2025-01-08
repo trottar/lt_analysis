@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 11:27:55 trottar"
+# Time-stamp: "2025-01-08 11:50:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,7 +62,7 @@ grab_runs () {
 # TODO
 #Q2="2p1"
 #W="2p95"
-# ONGOING
+# ONGOING **
 #Q2="3p0"
 #W="2p32"
 # DONE
@@ -71,7 +71,7 @@ grab_runs () {
 # DONE
 #Q2="4p4"
 #W="2p74"
-# TODO
+# ONGOING **
 Q2="5p5"
 W="3p02"
 
