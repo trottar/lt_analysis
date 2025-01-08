@@ -1367,7 +1367,6 @@ if [[ $i_flag != "true" ]]; then
 	if [[ ${#data_center_tmp[@]} -ne 0 ]]; then
 	    echo
 	    echo "Calculating data total effective charge center..."
-	    python3 findEffectiveCharge.py ${EffData} "${data_center_tmp[*]}" ${ParticleType} ${KIN}
 	    PYCENTERSTRING=$(python3 findEffectiveCharge.py ${EffData} "${data_center_tmp[*]}" ${ParticleType} ${KIN})
 	    arr1=()
 	    arr2=()
