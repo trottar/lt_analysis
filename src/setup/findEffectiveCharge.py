@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 16:34:27 trottar"
+# Time-stamp: "2025-01-08 16:37:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,8 +66,6 @@ ebeam_val_lst = ""
 pTheta_val_lst = ""
 
 for runNum in RUNLIST:
-
-    print("!!!!!!!!!!!!!!!!!",runNum)
     
     if ParticleType == "heep":
 
