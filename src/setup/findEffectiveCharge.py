@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 16:37:54 trottar"
+# Time-stamp: "2025-01-08 16:39:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,6 +90,7 @@ for runNum in RUNLIST:
         # Check if run number exists in analysed root files
         if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ANATYPE)):
 
+            print("$$$$$$$$$$$$", runNum)
             efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
             efficiency_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency_err")
             eff_charge = getEfficiencyValue(runNum,efficiency_table,foutcsv,"eff_charge")
