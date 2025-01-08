@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 16:28:31 trottar"
+# Time-stamp: "2025-01-08 16:28:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -50,7 +50,7 @@ if "None" in OUTPATH:
 
 OutFilename = f"table_{ParticleType}_{kinematics}"
 foutcsv = OUTPATH + "/" + OutFilename + ".csv"
-print(foutcsv)
+print("!!!!!!!!!!!!",foutcsv)
 
 ################################################################################################################################################
 # Grab and calculate efficiency 
