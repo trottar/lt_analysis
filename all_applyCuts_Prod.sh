@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-28 01:15:52 trottar"
+# Time-stamp: "2025-01-07 20:14:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,16 +59,16 @@ grab_runs () {
 # TODO
 #Q2="0p5"
 #W="2p40"
-# DONE (pi+k)
+# TODO
 #Q2="2p1"
 #W="2p95"
 # TODO
 #Q2="3p0"
 #W="2p32"
-# ONGOING **
-Q2="3p0"
-W="3p14"
-# TODO
+# DONE
+#Q2="3p0"
+#W="3p14"
+# ONGOING
 #Q2="4p4"
 #W="2p74"
 # TODO
@@ -129,7 +129,7 @@ for t in "${TARGET[@]}"; do
 			    # Using the test command with -e option
 			    if test -e $rootfile; then
 				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} pion
-				#./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
+				./applyCuts_Prod.sh -p ${EPS} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
 				jcache get $rootfile
