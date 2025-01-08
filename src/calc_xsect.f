@@ -237,26 +237,16 @@ c angle check
             dx_real=x_mod*dr                        
 
 *     Check for NaN values
-            if (isnan(x_real).or.(x_real > 1.d+06)
-     *           .or.(x_real < 1.d-06)) x_real = 0.0
-            if (isnan(dx_real).or.(dx_real > 1.d+06)
-     *           .or.(dx_real < 1.d-06)) dx_real = -1000.0
-            if (isnan(x_mod).or.(x_mod > 1.d+06)
-     *           .or.(x_mod < 1.d-06)) x_mod = 0.0            
-            if (isnan(eps_mod).or.(eps_mod > 1.d+06)
-     *           .or.(eps_mod < 1.d-06)) eps_mod = 0.0
-            if (isnan(th_mod).or.(th_mod > 1.d+06)
-     *           .or.(th_mod < 1.d-06)) th_mod = 0.0            
-            if (isnan(phi).or.(phi > 1.d+06)
-     *           .or.(phi < 1.d-06)) phi = 0.0            
-            if (isnan(tt).or.(tt > 1.d+06)
-     *           .or.(tt < 1.d-06)) tt = 0.0
-            if (isnan(tm).or.(tm > 1.d+06)
-     *           .or.(tm < 1.d-06)) tm = 0.0
-            if (isnan(w).or.(w > 1.d+06)
-     *           .or.(w < 1.d-06)) w = 0.0
-            if (isnan(q2).or.(q2 > 1.d+06)
-     *           .or.(q2 < 1.d-06)) q2 = 0.0            
+            if (isnan(x_real)) x_real = 0.0
+            if (isnan(dx_real)) dx_real = -1000.0
+            if (isnan(x_mod)) x_mod = 0.0            
+            if (isnan(eps_mod)) eps_mod = 0.0
+            if (isnan(th_mod)) th_mod = 0.0            
+            if (isnan(phi)) phi = 0.0            
+            if (isnan(tt)) tt = 0.0
+            if (isnan(tm)) tm = 0.0
+            if (isnan(w)) w = 0.0
+            if (isnan(q2)) q2 = 0.0            
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
      *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
