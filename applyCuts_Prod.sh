@@ -510,10 +510,10 @@ if [[ $p_flag = "true" ]]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
 	    echo
-	    #rm "$out_f_file"
+	    rm "$out_f_file"
 	fi
-	#rm -f ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log	
-	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log
+	rm -f ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log	
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log
 	if [ ${ParticleType} = "kaon" ]; then
 	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
@@ -536,10 +536,10 @@ if [[ $p_flag = "true" ]]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
 	    echo
-	    #rm "$out_f_file"
+	    rm "$out_f_file"
 	fi
-	#rm -f ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log	
-	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log
+	rm -f ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log	
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log
 	if [ ${ParticleType} = "kaon" ]; then
 	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi	
@@ -561,10 +561,10 @@ if [[ $p_flag = "true" ]]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
 	    echo
-	    #rm "$out_f_file"
+	    rm "$out_f_file"
 	fi
-	#rm -f ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log	
-	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log
+	rm -f ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log	
+	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log
 	if [ ${ParticleType} = "kaon" ]; then
 	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
@@ -595,10 +595,10 @@ else
 		echo "$out_f_file already exists. Removing..."
 		echo
 		echo
-		#rm "$out_f_file"
+		rm "$out_f_file"
 	    fi
-	    #rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
-	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
+	    rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
 	    if [ ${ParticleType} = "kaon" ]; then
 		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
@@ -621,10 +621,10 @@ else
 		echo "$out_f_file already exists. Removing..."
 		echo
 		echo
-		#rm "$out_f_file"
+		rm "$out_f_file"
 	    fi
-	    #rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
-	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
+	    rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
 	    if [ ${ParticleType} = "kaon" ]; then
 		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
@@ -646,10 +646,10 @@ else
 		echo "$out_f_file already exists. Removing..."
 		echo
 		echo
-		#rm "$out_f_file"
+		rm "$out_f_file"
 	    fi
-	    #rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
-	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
+	    rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
+	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
 	    if [ ${ParticleType} = "kaon" ]; then
 		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
