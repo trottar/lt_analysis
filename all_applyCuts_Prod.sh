@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 17:47:02 trottar"
+# Time-stamp: "2025-01-08 17:47:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -127,11 +127,11 @@ for t in "${TARGET[@]}"; do
 			    cd "${LTANAPATH}"
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
 			    # Using the test command with -e option
-			    ./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
+			    ./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
 			    if test -e $rootfile; then
 				echo
-				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${TARGET} ${number} pion
-				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${TARGET} ${number} kaon
+				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
+				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
 				jcache get $rootfile
