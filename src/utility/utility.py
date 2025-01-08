@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 16:41:49 trottar"
+# Time-stamp: "2025-01-08 16:44:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -161,12 +161,20 @@ def data_to_csv(file_path, column_name, new_value, run_number):
     file_exists = os.path.isfile(file_path)
     
     if file_exists:
-        # Read existing data into memory
+        # Check if file has columns
         with open(file_path, 'r', newline='') as file:
             reader = csv.DictReader(file)
-            data = list(reader)
             fieldnames = reader.fieldnames
+            if not fieldnames:  # If no columns are found
+                os.remove(file_path)  # Delete the file
+                file_exists = False  # Proceed as if file doesn't exist
+            else:
+                data = list(reader)
     else:
+        data = []
+        fieldnames = ['Run Number']
+
+    if not file_exists:
         # Initialize new file structure
         data = []
         fieldnames = ['Run Number']
