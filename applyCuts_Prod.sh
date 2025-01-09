@@ -27,7 +27,7 @@ SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 # Flag definitions (flags: h, p)
-while getopts 'hp' flag; do
+while getopts 'hpm' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -41,6 +41,7 @@ while getopts 'hp' flag; do
 	echo "     EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, target=arg5, RUNNUM=arg6"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
 	echo "        EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, target=arg5, RUNNUM=arg6, ParticleType=arg7"
+	echo "    -m, apply missing mass shift which is specified in /src/setup/shift_MM.py (kaon->Lambda=1.1156 or pion->Proton=0.938)."
 	echo
 	echo " Avaliable Kinematics..."
 	echo "                      EPSILON={high,low}"
@@ -54,6 +55,7 @@ while getopts 'hp' flag; do
         exit 0
         ;;
 	p) p_flag='true' ;;
+	m) m_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
@@ -514,7 +516,7 @@ if [[ $p_flag = "true" ]]; then
 	fi
 	#rm -f ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log	
 	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log
-	if [ ${ParticleType} = "kaon" ]; then
+	if [[ $m_flag = "true" ]]; then
 	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
 	echo
@@ -540,7 +542,7 @@ if [[ $p_flag = "true" ]]; then
 	fi
 	#rm -f ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log	
 	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log
-	if [ ${ParticleType} = "kaon" ]; then
+	if [[ $m_flag = "true" ]]; then
 	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi	
     fi
@@ -565,7 +567,7 @@ if [[ $p_flag = "true" ]]; then
 	fi
 	#rm -f ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log	
 	#python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log
-	if [ ${ParticleType} = "kaon" ]; then
+	if [[ $m_flag = "true" ]]; then
 	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
     fi
@@ -599,7 +601,7 @@ else
 	    fi
 	    #rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
-	    if [ ${ParticleType} = "kaon" ]; then
+	    if [[ $m_flag = "true" ]]; then
 		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
 	    echo
@@ -625,7 +627,7 @@ else
 	    fi
 	    #rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
-	    if [ ${ParticleType} = "kaon" ]; then
+	    if [[ $m_flag = "true" ]]; then
 		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
 	fi
@@ -650,7 +652,7 @@ else
 	    fi
 	    #rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
 	    #python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
-	    if [ ${ParticleType} = "kaon" ]; then
+	    if [[ $m_flag = "true" ]]; then
 		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
 	fi
