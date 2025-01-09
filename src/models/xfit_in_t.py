@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 11:38:13 trottar"
+# Time-stamp: "2025-01-09 12:11:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ from xfit_active import set_val
 ###############################################################################################################################################
 
 # dir_iter = closest_date
-def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
+def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_file_lst):
 
     tmin_range = inpDict["tmin"]
     tmax_range = inpDict["tmax"]
@@ -237,6 +237,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Define output file name
     outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_0.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+    output_file_lst.append(outputpdf)
     
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
@@ -257,6 +258,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
             # Define output file name
             outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i+1)
+            output_file_lst.append(outputpdf)
             
             parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
@@ -280,6 +282,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
 
     # Define output file name
     outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+    output_file_lst.append(outputpdf)
     
     # Update plots with best chi2
     fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
