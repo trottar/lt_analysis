@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 13:53:23 trottar"
+# Time-stamp: "2025-01-09 13:58:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1154,7 +1154,7 @@ def rand_sub(phi_setting, inpDict):
         ##############
         ##############        
         ##############
-        
+        print("££££££££££££")        
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
