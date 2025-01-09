@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:20:04 trottar"
+# Time-stamp: "2025-01-09 15:08:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -81,7 +81,8 @@ def run_jcache_in_batches(source_dir, batch_size=100):
             break
 
 # Parameters
-source_directory = f"/mss/hallc/kaonlt/{USER}/kaon/Q3p0W3p14/{inp_dir}"  # Source prefix
+#source_directory = f"/mss/hallc/kaonlt/{USER}/kaon/Q3p0W3p14/{inp_dir}"  # Source prefix
+source_directory = f"/mss/hallc/kaonlt/{USER}/kaon/Q4p4W2p74/{inp_dir}"  # Source prefix
 
 # Run jcache command in batches
 run_jcache_in_batches(source_directory, batch_size=50)
