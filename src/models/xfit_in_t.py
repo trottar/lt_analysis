@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 10:50:24 trottar"
+# Time-stamp: "2025-01-09 11:38:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -116,9 +116,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     ##############
 
     # Set pol_str, q2_set, w_set for xfit_active script
-    set_val(pol_str, q2_set, w_set)
-    
-    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+    set_val(pol_str, q2_set, w_set)        
     
     prv_par_vec = []
     prv_err_vec = []
@@ -219,7 +217,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
         "Q2min_range" : Q2min_range,
         "Q2max_range" : Q2max_range,
         "iter_num" : iter_num,
-        "outputpdf" : outputpdf,
         "fit_params" : fit_params,
     }
 
@@ -227,7 +224,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     par_err_vec = prv_err_vec
     par_chi2_vec = prv_chi2_vec
 
-    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+    # Define output file name
+    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Start.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+    
+    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
     # Store initial values
@@ -235,7 +235,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     best_err_vec = par_err_vec.copy()
     best_chi2_vec = par_chi2_vec.copy()
 
-    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+    # Define output file name
+    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_0.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+    
+    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
     # Update best values for each group of 4 elements
@@ -252,7 +255,10 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
             #fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
             print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
 
-            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+            # Define output file name
+            outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i+1)
+            
+            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
             # Update best values for each group of 4 elements
@@ -271,10 +277,13 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict):
     prv_par_vec = par_vec
     prv_err_vec = par_err_vec
     prv_chi2_vec = par_chi2_vec
-        
+
+    # Define output file name
+    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+    
     # Update plots with best chi2
     fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
-    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params)
+    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
     
     # Check if parameter values changed and print changes to terminal
     for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):

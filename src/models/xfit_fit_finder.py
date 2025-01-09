@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 02:32:46 trottar"
+# Time-stamp: "2025-01-09 11:38:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,7 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params):
+def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = []
@@ -80,7 +80,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     Q2max_range = inpDict["Q2max_range"]
     iter_num = inpDict["iter_num"]            
     fit_params = inpDict["fit_params"]
-    outputpdf = inpDict["outputpdf"]
 
     # Using central bin value to determine best fit, which should have the best statistics
     q2_center_val = get_central_value(q2_vec)
