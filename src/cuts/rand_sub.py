@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:25:31 trottar"
+# Time-stamp: "2025-01-09 13:47:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -910,7 +910,7 @@ def rand_sub(phi_setting, inpDict):
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
 
-          MM_offset_DATA = evt.MM_shift-evt.MM
+          MM_offset_DATA = adj_MM-evt.MM
           
     ################################################################################################################################################
     # Fill dummy histograms for various trees called above
@@ -1021,7 +1021,7 @@ def rand_sub(phi_setting, inpDict):
           #H_MM_DUMMY.Fill(pow(adj_MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
 
-          MM_offset_DUMMY = evt.MM_shift-evt.MM
+          MM_offset_DUMMY = adj_MM-evt.MM
           
     ###################################################################################################################################################    
     # Fill random histograms for various trees called above
@@ -1128,7 +1128,7 @@ def rand_sub(phi_setting, inpDict):
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(adj_MM)
 
-          MM_offset_RAND = evt.MM_shift-evt.MM
+          MM_offset_RAND = adj_MM-evt.MM
           
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
@@ -1235,7 +1235,7 @@ def rand_sub(phi_setting, inpDict):
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(adj_MM)
 
-          MM_offset_DUMMY_RAND = evt.MM_shift-evt.MM
+          MM_offset_DUMMY_RAND = adj_MM-evt.MM
           
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
