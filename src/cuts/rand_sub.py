@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 13:47:21 trottar"
+# Time-stamp: "2025-01-09 13:50:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1470,6 +1470,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["MM_offset_DATA"] = MM_offset_DATA
         subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
         subDict["MM_offset_RAND"] = MM_offset_RAND
+        print("!!!!!!!!!!!!!!!!!",MM_offset_DUMMY_RAND)
         subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
