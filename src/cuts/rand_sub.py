@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 13:58:21 trottar"
+# Time-stamp: "2025-01-09 14:04:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1020,8 +1020,6 @@ def rand_sub(phi_setting, inpDict):
           H_MM_DUMMY.Fill(adj_MM)
           #H_MM_DUMMY.Fill(pow(adj_MM, 2))  
           #H_MM_DUMMY.Fill(evt.Mrecoil)
-
-          MM_offset_DUMMY = adj_MM-evt.MM
           
     ###################################################################################################################################################    
     # Fill random histograms for various trees called above
@@ -1127,8 +1125,6 @@ def rand_sub(phi_setting, inpDict):
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(adj_MM)
-
-          MM_offset_RAND = adj_MM-evt.MM
           
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
@@ -1154,7 +1150,7 @@ def rand_sub(phi_setting, inpDict):
         ##############
         ##############        
         ##############
-        print("££££££££££££")        
+
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
@@ -1234,9 +1230,6 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(adj_MM)
-
-          MM_offset_DUMMY_RAND = adj_MM-evt.MM
-          print("!!!!!!!!!!!!!!!!!",MM_offset_DUMMY_RAND)
           
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
@@ -1469,9 +1462,6 @@ def rand_sub(phi_setting, inpDict):
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
-        subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
-        subDict["MM_offset_RAND"] = MM_offset_RAND
-        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
         try:

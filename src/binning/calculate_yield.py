@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 10:12:41 trottar"
+# Time-stamp: "2025-01-09 14:05:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -304,7 +304,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
-                            MM_offset_DUMMY = evt.MM_shift-evt.MM
                             
     print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
@@ -358,7 +357,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            MM_offset_RAND = evt.MM_shift-evt.MM
                             
     print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -412,16 +410,12 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            MM_offset_DUMMY_RAND = evt.MM_shift-evt.MM
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
-        subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
-        subDict["MM_offset_RAND"] = MM_offset_RAND
-        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
         
     # Loop through bins in t_data and identify events in specified bins

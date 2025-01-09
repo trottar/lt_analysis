@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-12 14:50:06 trottar"
+# Time-stamp: "2025-01-09 14:05:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -307,7 +307,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_DUMMY_{}".format(j)].Fill(adj_MM)                    
-                    MM_offset_DUMMY = evt.MM_shift-evt.MM
                     
     print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
@@ -353,7 +352,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_W_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_RAND_{}".format(j)].Fill(adj_MM)
-                    MM_offset_RAND = evt.MM_shift-evt.MM
                     
     print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
@@ -399,16 +397,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
                     hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
-                    MM_offset_DUMMY_RAND = evt.MM_shift-evt.MM
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
-        subDict["MM_offset_DUMMY"] = MM_offset_DUMMY
-        subDict["MM_offset_RAND"] = MM_offset_RAND
-        subDict["MM_offset_DUMMY_RAND"] = MM_offset_DUMMY_RAND
         particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)
                     
     # Loop through bins in t_data and identify events in specified bins

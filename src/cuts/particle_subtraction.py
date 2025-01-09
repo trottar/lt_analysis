@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-05 05:46:39 trottar"
+# Time-stamp: "2025-01-09 14:04:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -66,9 +66,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     phi_setting = subDict["phi_setting"]
 
     MM_offset_DATA = subDict["MM_offset_DATA"]
-    MM_offset_DUMMY = subDict["MM_offset_DUMMY"]
-    MM_offset_RAND = subDict["MM_offset_RAND"]
-    MM_offset_DUMMY_RAND = subDict["MM_offset_DUMMY_RAND"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -516,7 +513,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_DUMMY
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -629,7 +626,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_RAND
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -742,7 +739,7 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_DUMMY_RAND
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -1077,9 +1074,6 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     phi_setting = subDict["phi_setting"]
 
     MM_offset_DATA = subDict["MM_offset_DATA"]
-    MM_offset_DUMMY = subDict["MM_offset_DUMMY"]
-    MM_offset_RAND = subDict["MM_offset_RAND"]
-    MM_offset_DUMMY_RAND = subDict["MM_offset_DUMMY_RAND"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1196,7 +1190,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + MM_offset_DATA
 
         # Check if variable shift branch exists
         try:
@@ -1248,7 +1242,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_DUMMY
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -1294,7 +1288,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_RAND
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -1340,7 +1334,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_DUMMY_RAND
+            adj_MM = evt.MM + MM_offset_DATA
         
         ##############
         ##############        
@@ -1422,9 +1416,6 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     phi_setting = subDict["phi_setting"]
 
     MM_offset_DATA = subDict["MM_offset_DATA"]
-    MM_offset_DUMMY = subDict["MM_offset_DUMMY"]
-    MM_offset_RAND = subDict["MM_offset_RAND"]
-    MM_offset_DUMMY_RAND = subDict["MM_offset_DUMMY_RAND"]
     
     ################################################################################################################################################
     # Import function to define cut bools
@@ -1531,7 +1522,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+        adj_hsdelta = evt.hsdelta + MM_offset_DATA
 
         # Check if variable shift branch exists
         try:
@@ -1588,7 +1579,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_DUMMY
+            adj_MM = evt.MM + MM_offset_DATA
 
         ##############
         ##############        
@@ -1639,7 +1630,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_RAND
+            adj_MM = evt.MM + MM_offset_DATA
 
         ##############
         ##############        
@@ -1690,7 +1681,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         try:
             adj_MM = evt.MM_shift
         except AttributeError:
-            adj_MM = evt.MM + MM_offset_DUMMY_RAND
+            adj_MM = evt.MM + MM_offset_DATA
 
         ##############
         ##############        
