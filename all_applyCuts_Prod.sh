@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 01:57:54 trottar"
+# Time-stamp: "2025-01-09 08:39:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -59,7 +59,7 @@ grab_runs () {
 # TODO
 #Q2="0p5"
 #W="2p40"
-# ONGOING **
+# ONGOING ** High L+C Done
 Q2="2p1"
 W="2p95"
 # ONGOING **
