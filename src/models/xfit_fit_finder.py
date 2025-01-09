@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 02:21:30 trottar"
+# Time-stamp: "2025-01-09 02:32:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -1590,7 +1590,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
                                 f_sig.SetParameter(3, current_params[3])
-                                if iter_num >= 1:
+                                if iter_num == 2:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)                                
                                     f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
