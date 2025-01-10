@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 11:38:32 trottar"
+# Time-stamp: "2025-01-09 17:17:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2568,3 +2568,5 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     c4.Print(outputpdf)
     c5.Print(outputpdf)
     c6.Print(outputpdf+')')
+
+    print(f"\n\nFits saved to {outputpdf}...")
