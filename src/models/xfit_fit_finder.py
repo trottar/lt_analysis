@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 15:20:51 trottar"
+# Time-stamp: "2025-01-10 15:22:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -359,18 +359,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
                         # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_params[0])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
+                        print(f"\nBest Cost: {best_cost:.3f}")
+                        
                         # After the while loop, check if this run found a better solution
                         if abs(best_cost - 1) < abs(best_overall_cost - 1):
                             best_overall_cost = best_cost
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -798,19 +798,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
                         # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_params[0])
+                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_params[1])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
+                        print(f"\nBest Cost: {best_cost:.3f}")
+                        
                         # After the while loop, check if this run found a better solution
                         if abs(best_cost - 1) < abs(best_overall_cost - 1):
                             best_overall_cost = best_cost
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1256,20 +1256,20 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
                         # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_params[0])
+                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_params[1])
+                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_params[2])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
+                        print(f"\nBest Cost: {best_cost:.3f}")
+                        
                         # After the while loop, check if this run found a better solution
                         if abs(best_cost - 1) < abs(best_overall_cost - 1):
                             best_overall_cost = best_cost
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1731,21 +1731,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
 
                         # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
-                        graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, current_params[3])
+                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_params[0])
+                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_params[1])
+                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_params[2])
+                        graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, best_params[3])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
+                        print(f"\nBest Cost: {best_cost:.3f}")
+                        
                         # After the while loop, check if this run found a better solution
                         if abs(best_cost - 1) < abs(best_overall_cost - 1):
                             best_overall_cost = best_cost
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
