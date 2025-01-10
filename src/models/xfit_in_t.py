@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 11:03:37 trottar"
+# Time-stamp: "2025-01-10 12:13:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -97,7 +97,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #um_optimizations = 5
     #num_optimizations = 10
     #num_optimizations = 50
-    num_optimizations = 1000
+    num_optimizations = 100
+    #num_optimizations = 1000
 
     # Initial max/min bounds of finding parameter values (only used for iter=1)
     initial_param_bounds = 1e4
