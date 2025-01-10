@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 15:07:06 trottar"
+# Time-stamp: "2025-01-10 15:09:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -370,7 +370,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -810,7 +810,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1269,7 +1269,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1745,7 +1745,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             best_overall_bin = best_bin
                             best_overall_params = best_params[:]
                             best_overall_errors = best_errors[:]
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        print(f"\nBest Cost: {best_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")

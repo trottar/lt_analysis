@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 15:05:52 trottar"
+# Time-stamp: "2025-01-10 15:08:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -292,15 +292,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         if old != new:
             print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
             
-    # Don't write to new parameter file if debugging
-    if not DEBUG:
-        para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-        print("\nWriting {}...".format(para_file_out))
-        with open(para_file_out, 'w') as f:
-            for i in range(len(par_vec)):
-                f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-                print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-    else:
-        print("\n\nDEBUG ENABLED: No changes to previous iteration...")
-        for i,par in enumerate(prv_par_vec):
-            print("par{} = {:.3e}".format(i+1, par))
+    para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    print("\nWriting {}...".format(para_file_out))
+    with open(para_file_out, 'w') as f:
+        for i in range(len(par_vec)):
+            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+            print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
