@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 10:27:20 trottar"
+# Time-stamp: "2025-01-10 11:03:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,8 +78,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # HARD CODED #
     ##############
 
-    DEBUG=False
-    #DEBUG=True
+    full_optimization = True
     
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
     #fixed_params = ["L", "T", "LT"]
@@ -249,28 +248,27 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
         best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
         
-    if not DEBUG:
-        i = 0
-        max_checks = 3
-        while bad_chi2_bool and i < max_checks:
-            #fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
-            print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
+    i = 0
+    max_checks = 3
+    while bad_chi2_bool and i < max_checks:
+        #fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
+        print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
 
-            # Define output file name
-            outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i+1)
-            output_file_lst.append(outputpdf)
-            
-            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
-            bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+        # Define output file name
+        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i+1)
+        output_file_lst.append(outputpdf)
 
-            # Update best values for each group of 4 elements
-            for j in range(0, len(par_chi2_vec), 4):
-                if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
-                    print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
-                    best_par_vec[j:j+4] = par_vec[j:j+4].copy()
-                    best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
-                    best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
-            i += 1
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
+        bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+
+        # Update best values for each group of 4 elements
+        for j in range(0, len(par_chi2_vec), 4):
+            if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
+                print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
+                best_par_vec[j:j+4] = par_vec[j:j+4].copy()
+                best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
+                best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
+        i += 1
 
     par_vec = best_par_vec
     par_err_vec = best_err_vec

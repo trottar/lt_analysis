@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 10:06:25 trottar"
+# Time-stamp: "2025-01-10 11:02:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -42,7 +42,7 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf):
+def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization=True):
 
     # Create lists to store graph objects outside the loop
     graphs_sig_fit = []
@@ -1589,7 +1589,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
                                 f_sig.SetParameter(3, current_params[3])
-                                if iter_num == 0:
+                                if full_optimization:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)                                
                                     f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
