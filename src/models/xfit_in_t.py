@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 15:17:26 trottar"
+# Time-stamp: "2025-01-10 17:42:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,17 +81,17 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     full_optimization = True
     
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["T", "LT", "TT"]
+    #fixed_params = ["T", "LT", "TT"]
     #fixed_params = ["L", "LT"]
     #fixed_params = ["TT"]
-    #fixed_params = [] # Update all
+    fixed_params = [] # Update all
     
     # Maximum iterations before ending loop
-    max_iterations = 100
+    #max_iterations = 100
     #max_iterations = 1000
     #max_iterations = 2000
     #max_iterations = 5000
-    #max_iterations = 10000
+    max_iterations = 10000
 
     # Number of times to run the algorithm
     num_optimizations = 5
@@ -230,7 +230,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     
     parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf)
     bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
-    sys.exit(2)
+
     # Store initial values
     best_par_vec = par_vec.copy()
     best_err_vec = par_err_vec.copy()
