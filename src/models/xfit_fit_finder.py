@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 15:10:56 trottar"
+# Time-stamp: "2025-01-10 15:14:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -280,12 +280,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 current_errors = [f_sig.GetParError(0)]
                                 current_bin = b
 
-                                # Update ROOT TGraphs for plotting
-                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
-                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
                                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                                 if accept_prob > random.random():
                                     best_params = current_params
@@ -334,6 +328,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     current_params = adjust_params(best_params)
                                     par_sig_0 = current_params
                                     par_sig_err_0 = [0.0]
+
+                                # Update ROOT TGraphs for plotting
+                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
+                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -715,13 +715,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 current_bin = b
 
-                                # Update ROOT TGraphs for plotting
-                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                                graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
-                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
                                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                                 if accept_prob > random.random():
                                     best_params = current_params
@@ -774,6 +767,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     current_params = adjust_params(best_params)
                                     par_sig_0, par_sig_1 = current_params
                                     par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
+
+                                # Update ROOT TGraphs for plotting
+                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                                graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
+                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1170,14 +1170,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 current_bin = b
 
-                                # Update ROOT TGraphs for plotting
-                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                                graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                                graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
-                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
-                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
                                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                                 if accept_prob > random.random():
                                     best_params = current_params
@@ -1233,6 +1225,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     current_params = adjust_params(best_params)
                                     par_sig_0, par_sig_1, par_sig_2 = current_params
                                     par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
+
+                                # Update ROOT TGraphs for plotting
+                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                                graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                                graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
+                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1643,15 +1643,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 current_bin = b
 
-                                # Update ROOT TGraphs for plotting
-                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
-                                graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
-                                graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
-                                graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, current_params[3])
-                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
-                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-
                                 # If the new cost is better or accepted by the acceptance probability, update the best parameters
                                 if accept_prob > random.random():
                                     best_params = current_params
@@ -1709,6 +1700,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     current_params = adjust_params(best_params)
                                     par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
                                     par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
+
+                                # Update ROOT TGraphs for plotting
+                                graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, current_params[0])
+                                graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, current_params[1])
+                                graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, current_params[2])
+                                graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, current_params[3])
+                                graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_cost, 4))
+                                graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
+                                graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
