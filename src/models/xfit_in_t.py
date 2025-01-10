@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 14:17:23 trottar"
+# Time-stamp: "2025-01-10 14:40:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,8 +83,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
     #fixed_params = ["L", "T", "LT"]
     #fixed_params = ["L", "LT"]
-    #fixed_params = ["TT"]
-    fixed_params = [] # Update all
+    fixed_params = ["L"]
+    #fixed_params = [] # Update all
     
     # Maximum iterations before ending loop
     #max_iterations = 100
@@ -94,8 +94,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     max_iterations = 10000
 
     # Number of times to run the algorithm
-    #um_optimizations = 5
-    num_optimizations = 10
+    um_optimizations = 5
+    #num_optimizations = 10
     #num_optimizations = 50
     #num_optimizations = 100
     #num_optimizations = 1000
