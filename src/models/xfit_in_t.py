@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-11 12:40:29 trottar"
+# Time-stamp: "2025-01-11 12:40:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,10 +114,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     ##############
     ##############
     ##############
-
-    # Recalculation of kinematics for simc requires renormalization of weight
-    if iter_num == 1:
-        fixed_params = ["L", "T", "LT", "TT"] # Skip optimization        
     
     # Set pol_str, q2_set, w_set for xfit_active script
     set_val(pol_str, q2_set, w_set)        
