@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-11 12:40:43 trottar"
+# Time-stamp: "2025-01-11 12:41:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -110,6 +110,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #chi2_threshold = 10.0
     #chi2_threshold = 30.0
     #chi2_threshold = 600.0
+
+    # Number of rechecks to assure chi2_threshold not reached
+    max_checks = 2
     
     ##############
     ##############
@@ -250,8 +253,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
         best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
         
-    i = 0
-    max_checks = 2
+    i = 0    
     while bad_chi2_bool and i < max_checks:
         #fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
         print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
