@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-11 13:38:55 trottar"
+# Time-stamp: "2025-01-11 13:43:56 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -80,7 +80,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     Q2max_range = inpDict["Q2max_range"]
     iter_num = inpDict["iter_num"]            
     fit_params = inpDict["fit_params"]
-
+    chi2_threshold = inpDict["chi2_threshold"]
+    
     # Using central bin value to determine best fit, which should have the best statistics
     q2_center_val = get_central_value(q2_vec)
     w_center_val = get_central_value(w_vec)
@@ -364,7 +365,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
-
+                                if best_overall_cost < chi2_threshold:
+                                    full_optimization = False                                    
+                                    
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
@@ -803,7 +806,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
-
+                                if best_overall_cost < chi2_threshold:
+                                    full_optimization = False                                    
+                                    
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
@@ -1261,7 +1266,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
-
+                                if best_overall_cost < chi2_threshold:
+                                    full_optimization = False                                    
+                                    
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
@@ -1736,7 +1743,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
-
+                                if best_overall_cost < chi2_threshold:
+                                    full_optimization = False
+                                    
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
