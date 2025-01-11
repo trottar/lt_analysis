@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-11 13:43:56 trottar"
+# Time-stamp: "2025-01-11 13:51:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -169,6 +169,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for start in range(num_optimizations):
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
+                    set_optimization = full_optimization
                     
                     for b in range(len(w_vec)):
 
@@ -252,7 +253,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
                                 f_sig.SetParNames("p0")
                                 f_sig.SetParameter(0, current_params[0])
-                                if full_optimization:
+                                if set_optimization:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
                                 else:
                                     f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
@@ -366,7 +367,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
                                 if best_overall_cost < chi2_threshold:
-                                    full_optimization = False                                    
+                                    set_optimization = False                                    
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -591,6 +592,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for start in range(num_optimizations):
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))
 
+                    set_optimization = full_optimization
+                    
                     for b in range(len(w_vec)):
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
@@ -678,7 +681,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParNames("p0", "p1")
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
-                                if full_optimization:
+                                if set_optimization:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
                                 else:
@@ -807,7 +810,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
                                 if best_overall_cost < chi2_threshold:
-                                    full_optimization = False                                    
+                                    set_optimization = False                                    
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1038,6 +1041,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for start in range(num_optimizations):
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
+                    set_optimization = full_optimization
+                    
                     for b in range(len(w_vec)):
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
@@ -1130,7 +1135,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(0, current_params[0])
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
-                                if full_optimization:
+                                if set_optimization:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)                                
                                     f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
@@ -1267,7 +1272,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
                                 if best_overall_cost < chi2_threshold:
-                                    full_optimization = False                                    
+                                    set_optimization = False                                    
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1504,6 +1509,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for start in range(num_optimizations):
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
+                    set_optimization = full_optimization
+                    
                     for b in range(len(w_vec)):
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
@@ -1600,7 +1607,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 f_sig.SetParameter(1, current_params[1])
                                 f_sig.SetParameter(2, current_params[2])
                                 f_sig.SetParameter(3, current_params[3])
-                                if full_optimization:
+                                if set_optimization:
                                     f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)                                
                                     f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
                                     f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
@@ -1744,7 +1751,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
                                 if best_overall_cost < chi2_threshold:
-                                    full_optimization = False
+                                    set_optimization = False
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
