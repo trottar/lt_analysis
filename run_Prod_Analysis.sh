@@ -738,6 +738,7 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     #NumPhiBins=16    
     #TMIN=0.175
     #TMAX=0.400
+    # Good
     NumtBins=5
     NumPhiBins=10
     TMIN=0.160
@@ -748,10 +749,15 @@ elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     #NumPhiBins=8
     #TMIN=0.350
     #TMAX=0.950
-    NumtBins=10
-    NumPhiBins=15
+    #NumtBins=10
+    #NumPhiBins=15
+    #TMIN=0.350
+    #TMAX=0.950
+    #
+    NumtBins=5
+    NumPhiBins=10
     TMIN=0.350
-    TMAX=0.950
+    TMAX=0.950    
 elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     # Q2=5p5, W=3p02
     NumtBins=3 # bad_bins_threshold = 200
