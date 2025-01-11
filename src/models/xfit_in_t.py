@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-10 17:42:01 trottar"
+# Time-stamp: "2025-01-11 09:59:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -90,8 +90,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #max_iterations = 100
     #max_iterations = 1000
     #max_iterations = 2000
-    #max_iterations = 5000
-    max_iterations = 10000
+    max_iterations = 5000
+    #max_iterations = 10000
 
     # Number of times to run the algorithm
     num_optimizations = 5
@@ -251,7 +251,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
         
     i = 0
-    max_checks = 3
+    max_checks = 2
     while bad_chi2_bool and i < max_checks:
         #fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
         print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
