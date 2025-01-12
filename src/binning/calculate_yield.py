@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 14:05:18 trottar"
+# Time-stamp: "2025-01-12 15:20:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -456,6 +456,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     ##############
                     ##############
                 except ZeroDivisionError:
+                    scale_factor = 0.0
+
+                if scale_factor > 10.0:
+                    print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
 
                 # Apply scale factor
