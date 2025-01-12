@@ -26,6 +26,7 @@ Qdep_TT = qq * math.exp(-qq)
 # 0th, 1st iteration, (chi2~1.2)
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 ####
+# (chi2~4.1)
 sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.fabs(tt)**(par4))
 ####
 

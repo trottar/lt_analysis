@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 18:07:35 trottar"
+# Time-stamp: "2025-01-12 12:47:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -442,13 +442,14 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             events_between_tmp.append(sum(hist["H_t_DATA"].GetBinContent(k) for k in range(bin1, bin2+1)))
         events_between.append(sum(events_between_tmp))
 
+        
     for j in range(0, len(t_bins)-1):
         b = t_bins[j]
         if j == 0:
             tBin_line.SetLineColor(7)
         else:
             tBin_line.SetLineColor(7)
-        l_t.AddEntry(tBin_line,"Evts in {:.2f}-{:.2f}: {:.0f}".format(t_bins[j],t_bins[j+1], events_between[j]))     
+        #l_t.AddEntry(tBin_line,"Evts in {:.2f}-{:.2f}: {:.0f}".format(t_bins[j],t_bins[j+1], events_between[j]))     
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
         

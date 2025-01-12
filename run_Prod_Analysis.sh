@@ -722,12 +722,16 @@ elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     #TMAX=0.400 # Center low
 elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     # Q2=3p0, W=2p32
-    NumtBins=8
-    NumPhiBins=12
-    TMIN=0.450
-    TMAX=0.850
+    #NumtBins=8
+    #NumPhiBins=12
+    #TMIN=0.450
+    #TMAX=0.850
     #TMIN=0.350
     #TMAX=0.850
+    NumtBins=5
+    NumPhiBins=10
+    TMIN=0.450
+    TMAX=0.850    
 elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     # Q2=3p0, W=3p14
     #NumtBins=6
