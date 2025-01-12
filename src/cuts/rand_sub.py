@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-12 14:27:50 trottar"
+# Time-stamp: "2025-01-12 14:32:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1483,7 +1483,9 @@ def rand_sub(phi_setting, inpDict):
         except ZeroDivisionError:
             scale_factor = 0.0
 
-        print("!!!!!!!!!!!",scale_factor)
+        if scale_factor > 10.0:
+            print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
+            scale_factor = 0.0
             
         # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
