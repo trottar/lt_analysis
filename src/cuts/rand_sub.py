@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 14:04:28 trottar"
+# Time-stamp: "2025-01-12 14:27:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1465,9 +1465,9 @@ def rand_sub(phi_setting, inpDict):
         particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
         try:
-        ##############
-        # HARD CODED #
-        ##############
+            ##############
+            # HARD CODED #
+            ##############
             pi_mm_min = 0.90 + MM_offset_DATA
             pi_mm_max = 0.94 + MM_offset_DATA
             
@@ -1477,12 +1477,14 @@ def rand_sub(phi_setting, inpDict):
                 / 
                 fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max, show_fit=False)[2]
             ) * 0.85
-        ##############
-        ##############
-        ##############
+            ##############
+            ##############
+            ##############
         except ZeroDivisionError:
             scale_factor = 0.0
 
+        print("!!!!!!!!!!!",scale_factor)
+            
         # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
         subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
