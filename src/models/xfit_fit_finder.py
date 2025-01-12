@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-11 23:02:22 trottar"
+# Time-stamp: "2025-01-11 23:02:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -361,7 +361,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) <= abs(best_overall_cost - 1):
+                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
@@ -804,7 +804,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) <= abs(best_overall_cost - 1):
+                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
@@ -1266,7 +1266,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) <= abs(best_overall_cost - 1):
+                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
@@ -1745,7 +1745,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) <= abs(best_overall_cost - 1):
+                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
