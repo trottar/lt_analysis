@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:34:07 trottar"
+# Time-stamp: "2025-01-13 14:38:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -375,7 +375,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
-                                    set_optimization = False                                    
+                                    set_optimization = False
+
+                        # If there were no good values, set params to zero
+                        if best_overall_params == None:
+                            while len(best_overall_params) < 4:
+                                best_overall_params.append(0.0)
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -827,6 +832,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
+
+                        # If there were no good values, set params to zero
+                        if best_overall_params == None:
+                            while len(best_overall_params) < 4:
+                                best_overall_params.append(0.0)
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1297,6 +1307,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
+
+                        # If there were no good values, set params to zero
+                        if best_overall_params == None:
+                            while len(best_overall_params) < 4:
+                                best_overall_params.append(0.0)
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1784,6 +1799,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False
+
+                        # If there were no good values, set params to zero
+                        if best_overall_params == None:
+                            while len(best_overall_params) < 4:
+                                best_overall_params.append(0.0)
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
