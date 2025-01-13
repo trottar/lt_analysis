@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-04 04:57:13 trottar"
+# Time-stamp: "2025-01-13 14:22:19 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -89,13 +89,13 @@ def iterWeight(arg_str):
         wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
     except (ZeroDivisionError, OverflowError, TypeError):
         wfactor = float('inf')
-    '''
 
     # Remove bad events which extend beyond threshold of +/-1.0 GeV^2
     if abs(q2_set-qq) > 1.0 or abs(w_set-ww) > 1.0:
         #return [0.0, 0.0]
         return [float(weight_prev_iter), float(sig_prev_iter)]
-
+    '''
+    
     # Calculate SigL, SigT, SigLT, SigTT
     sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
     sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
