@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-09 13:12:23 trottar"
+# Time-stamp: "2025-01-13 11:16:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -643,6 +643,9 @@ if EPSSET == "high":
 
     try:
         subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"])])
+        # Check for the specific error message in the output
+        if "2 ERROR:" in result.stdout or "2 ERROR:" in result.stderr:
+            sys.exit(2)        
     except Exception as e:
         print("1 ERROR: {}".format(e))
         sys.exit(2)

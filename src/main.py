@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-26 13:28:54 trottar"
+# Time-stamp: "2025-01-13 11:16:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -706,6 +706,9 @@ if EPSSET == "high":
     # if still iterating weights
     try:
         subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"])])
+        # Check for the specific error message in the output
+        if "2 ERROR:" in result.stdout or "2 ERROR:" in result.stderr:
+            sys.exit(2)
     except Exception as e:
         print("{}".format(e))
         sys.exit(2)
