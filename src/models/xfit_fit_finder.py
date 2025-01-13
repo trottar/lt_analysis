@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:48:15 trottar"
+# Time-stamp: "2025-01-13 14:51:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -129,8 +129,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")
                 print("/*--------------------------------------------------*/")
-                
-                best_overall_params = None                
+
+                best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
@@ -140,7 +140,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 # Set thresholds on temperature and probability to avoid local minima
                 temp_threshold = 0.01  # Temperature should be very low
-                prob_threshold = 0.1   # Low acceptance probability indicates stability
+                prob_threshold = 1e-8   # Low acceptance probability indicates stability
                 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -375,18 +375,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
-                                    set_optimization = False
-
-                        # If there were no good values, set params to zero
-                        if best_overall_params == None:
-                            best_overall_params = [0.0, 0.0, 0.0, 0.0]
+                                    set_optimization = False                                    
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -564,7 +559,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
                 print("/*--------------------------------------------------*/")
-                
+
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
@@ -574,8 +569,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 0.01  # Temperature should be very low
-                prob_threshold = 0.1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-10  # Temperature should be very low
+                prob_threshold = 1e-8   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -832,10 +827,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
-
-                        # If there were no good values, set params to zero
-                        if best_overall_params == None:
-                            best_overall_params = [0.0, 0.0, 0.0, 0.0]
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -843,7 +834,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1024,7 +1014,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
                 print("/*--------------------------------------------------*/")
-                
+
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
@@ -1034,8 +1024,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 0.01  # Temperature should be very low
-                prob_threshold = 0.1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-10  # Temperature should be very low
+                prob_threshold = 1e-8   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1307,10 +1297,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
-
-                        # If there were no good values, set params to zero
-                        if best_overall_params == None:
-                            best_overall_params = [0.0, 0.0, 0.0, 0.0]
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1319,7 +1305,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1502,8 +1487,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
-                print("/*--------------------------------------------------*/")
-                
+                print("/*--------------------------------------------------*/")    
+
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
@@ -1513,8 +1498,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 0.01  # Temperature should be very low
-                prob_threshold = 0.1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-10  # Temperature should be very low
+                prob_threshold = 1e-8   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1799,10 +1784,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False
-
-                        # If there were no good values, set params to zero
-                        if best_overall_params == None:
-                            best_overall_params = [0.0, 0.0, 0.0, 0.0]
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1812,7 +1793,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
