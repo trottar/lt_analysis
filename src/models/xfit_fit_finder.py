@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:46:23 trottar"
+# Time-stamp: "2025-01-13 14:46:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -130,6 +130,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"{equation_str}")
                 print("/*--------------------------------------------------*/")
                 
+                best_overall_params = None                
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
@@ -563,7 +564,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
                 print("/*--------------------------------------------------*/")
-
+                
+                best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
@@ -1022,7 +1024,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
                 print("/*--------------------------------------------------*/")
-
+                
+                best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
@@ -1499,8 +1502,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Paramters: ({param_str})")
                 print(f"{equation_str}")            
-                print("/*--------------------------------------------------*/")    
-
+                print("/*--------------------------------------------------*/")
+                
+                best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
