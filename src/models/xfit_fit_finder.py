@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:53:27 trottar"
+# Time-stamp: "2025-01-13 14:58:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -376,13 +376,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
-                                    
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        try:                                    
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                        except TypeError:
+                            print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
+                            sys.exit(2)
+                        print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -827,14 +830,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
-                                    
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        try:                                    
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                        except TypeError:
+                            print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
+                            sys.exit(2)
+                        print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1297,15 +1303,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
-                                    
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        try:                                    
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
+                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                        except TypeError:
+                            print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
+                            sys.exit(2)
+                        print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1784,16 +1793,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False
-                                    
-                        # Update ROOT TGraphs for plotting
-                        graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                        graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                        graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
-                        graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, best_overall_params[3])
-                        graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
+                        try:                                    
+                            # Update ROOT TGraphs for plotting
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
+                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
+                            graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, best_overall_params[3])
+                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
+                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                        except TypeError:
+                            print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
+                            sys.exit(2)
+                        print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
