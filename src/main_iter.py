@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 15:28:22 trottar"
+# Time-stamp: "2025-01-13 17:15:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -640,12 +640,43 @@ if EPSSET == "high":
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
-
     try:
-        result = subprocess.call(['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"])])
-        # Check for the specific error message in the output
-        if "2 ERROR:" in result.stdout or "2 ERROR:" in result.stderr:
-            sys.exit(2)        
+        # Run the bash script and capture the output in real-time
+        process = subprocess.Popen(
+            ['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"])],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True  # Ensures the output is returned as a string
+        )
+
+        error_detected = False
+
+        # Process stdout and stderr line by line
+        while True:
+            stdout_line = process.stdout.readline()
+            stderr_line = process.stderr.readline()
+
+            if stdout_line:
+                sys.stdout.write(stdout_line)  # Print stdout to the terminal
+                if "2 ERROR:" in stdout_line:
+                    error_detected = True
+
+            if stderr_line:
+                sys.stderr.write(stderr_line)  # Print stderr to the terminal
+                if "2 ERROR:" in stderr_line:
+                    error_detected = True
+
+            # Break if both streams are exhausted
+            if not stdout_line and not stderr_line and process.poll() is not None:
+                break
+
+        # Exit with code 2 if the error was detected
+        if error_detected:
+            sys.exit(2)
+
+        # Ensure the process completes successfully
+        process.wait()
+        
     except Exception as e:
         print("1 ERROR: {}".format(e))
         sys.exit(2)
