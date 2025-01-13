@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:45:40 trottar"
+# Time-stamp: "2025-01-13 14:46:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -385,7 +385,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None                        
+                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -841,7 +841,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None                        
+                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1316,7 +1316,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None                        
+                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1808,7 +1808,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                         graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                         graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                        best_overall_params = None                        
+                        best_overall_params = None # Reinitializing
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
