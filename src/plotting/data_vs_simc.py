@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-12 23:52:08 trottar"
+# Time-stamp: "2025-01-13 09:52:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -439,7 +439,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             bin1 = hist["H_t_DATA"].FindBin(t_bins[j])
             bin2 = hist["H_t_DATA"].FindBin(t_bins[j+1])
             # Get the content of the bins and calculate the number of events between them
-            events_between_tmp.append(sum(hist["H_t_DATA"].GetBinContent(k) * hist["normfac_data"] for k in range(bin1, bin2+1)))
+            events_between_tmp.append(sum(hist["H_t_DATA"].GetBinContent(k) / hist["normfac_data"] for k in range(bin1, bin2+1)))
         events_between.append(sum(events_between_tmp))
 
         
