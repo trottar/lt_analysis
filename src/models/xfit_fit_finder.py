@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 11:40:27 trottar"
+# Time-stamp: "2025-01-13 13:37:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -133,9 +133,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
+                best_overall_temp = float('inf')
+                best_overall_prob = 1.0
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
+                # Set thresholds on temperature and probability to avoid local minima
+                temp_threshold = 0.01  # Temperature should be very low
+                prob_threshold = 0.1   # Low acceptance probability indicates stability
+                
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
                 lambda_reg = 0.01  # Initial regularization strength
@@ -361,19 +367,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                            if (abs(best_cost - 1) < abs(best_overall_cost - 1) and temperature < temp_threshold and accept_prob < prob_threshold):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
+                                best_overall_temp = temperature
+                                best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                                     
                         # Update ROOT TGraphs for plotting
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -555,8 +563,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
+                best_overall_temp = float('inf')
+                best_overall_prob = 1.0                
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
+
+                # Set thresholds on temperature and probability to avoid local minima
+                temp_threshold = 0.01  # Temperature should be very low
+                prob_threshold = 0.1   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -804,11 +818,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                            if (abs(best_cost - 1) < abs(best_overall_cost - 1) and temperature < temp_threshold and accept_prob < prob_threshold):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
+                                best_overall_temp = temperature
+                                best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                                     
@@ -816,8 +832,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1002,8 +1018,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
+                best_overall_temp = float('inf')
+                best_overall_prob = 1.0                
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
+
+                # Set thresholds on temperature and probability to avoid local minima
+                temp_threshold = 0.01  # Temperature should be very low
+                prob_threshold = 0.1   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1266,11 +1288,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                            if (abs(best_cost - 1) < abs(best_overall_cost - 1) and temperature < temp_threshold and accept_prob < prob_threshold):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
+                                best_overall_temp = temperature
+                                best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                                     
@@ -1279,8 +1303,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
                         graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1468,8 +1492,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_params = None
                 best_overall_cost = float('inf')
                 best_overall_bin = None
+                best_overall_temp = float('inf')
+                best_overall_prob = 1.0                
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
+
+                # Set thresholds on temperature and probability to avoid local minima
+                temp_threshold = 0.01  # Temperature should be very low
+                prob_threshold = 0.1   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1745,11 +1775,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
                             # After the while loop, check if this run found a better solution
-                            if abs(best_cost - 1) < abs(best_overall_cost - 1):
+                            if (abs(best_cost - 1) < abs(best_overall_cost - 1) and temperature < temp_threshold and accept_prob < prob_threshold):
                                 best_overall_cost = best_cost
                                 best_overall_bin = best_bin
                                 best_overall_params = best_params[:]
                                 best_overall_errors = best_errors[:]
+                                best_overall_temp = temperature
+                                best_overall_prob = accept_prob
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False
                                     
@@ -1759,8 +1791,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
                         graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, best_overall_params[3])
                         graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, temperature)
-                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                        graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
+                        graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
