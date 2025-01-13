@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 13:37:32 trottar"
+# Time-stamp: "2025-01-13 14:21:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2067,6 +2067,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
                         best_overall_bin = b
+                        best_overall_params = []
                         for j in range(4):
                             best_overall_params.append(par_vec[4*it+j])
                             
@@ -2221,6 +2222,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
                         best_overall_bin = b
+                        best_overall_params = []                        
                         for j in range(4):
                             best_overall_params.append(par_vec[4*it+j])
                             
@@ -2378,6 +2380,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
                         best_overall_bin = b
+                        best_overall_params = []                        
                         for j in range(4):
                             best_overall_params.append(par_vec[4*it+j])
                             
@@ -2538,6 +2541,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
                         best_overall_cost = red_chi2
                         best_overall_bin = b
+                        best_overall_params = []                        
                         for j in range(4):
                             best_overall_params.append(par_vec[4*it+j])
                             
