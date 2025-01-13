@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-11 03:42:15 trottar"
+# Time-stamp: "2025-01-13 13:23:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -903,8 +903,6 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=14)
         # Add grid to subplot
         ax.grid(True, linestyle='--', linewidth=0.5)
-        # Set y-axis to logarithmic scale
-        ax.set_yscale('log')
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
