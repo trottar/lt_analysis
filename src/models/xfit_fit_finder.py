@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:32:31 trottar"
+# Time-stamp: "2025-01-14 12:35:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -150,7 +150,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 0.01  # Temperature should be very low
+                temp_threshold = 1e-3  # Temperature should be very low
                 prob_threshold = 1e-2   # Low acceptance probability indicates stability
                 
                 # Regularization strength (used when num_events > num_params)
