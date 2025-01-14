@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:29:32 trottar"
+# Time-stamp: "2025-01-14 13:31:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -360,6 +360,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
+                                print("£££££££££££££",ic_aic, ic_bic)
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -869,6 +870,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
+                                print("£££££££££££££",ic_aic, ic_bic)
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1372,6 +1374,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
+                                print("£££££££££££££",ic_aic, ic_bic)
                                 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1918,6 +1921,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
+                                print("£££££££££££££",ic_aic, ic_bic)
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
