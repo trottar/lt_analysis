@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:23:33 trottar"
+# Time-stamp: "2025-01-14 11:27:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -12,9 +12,10 @@
 #
 import random
 import ROOT
-from ROOT import TFile, TNtuple, TText
+from ROOT import TFile, TNtuple, TText, TLatex
 from ROOT import TGraph, TGraphErrors, TMultiGraph, TCanvas
 from ROOT import TF1, TFitResultPtr
+from ROOT import kRed, kBlue, kGreen, kMagenta, kCyan
 import numpy as np
 import math
 import time
@@ -543,17 +544,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot parameter convergence
                 c3.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(ROOT.kRed)
+                graphs_sig_p0[it].SetLineColor(kRed)
                 graphs_sig_p0[it].Draw("ALP")
                 c3.Update()
 
                 # Plot chi-square convergence
                 c4.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_converge[it].SetLineColor(kBlack)
                 graphs_sig_converge[it].Draw("ALP")
                 # Create a TLatex object
-                latex = ROOT.TLatex()
+                latex = TLatex()
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
@@ -563,14 +564,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot temperature
                 c5.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_temp[it].SetLineColor(kBlack)
                 graphs_sig_temp[it].Draw("ALP")
                 c5.Update()
 
                 # Plot acceptance probability
                 c6.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_accept[it].SetLineColor(kBlack)
                 graphs_sig_accept[it].Draw("ALP")
                 c6.Update()
 
@@ -1054,8 +1055,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot parameter convergence
                 c3.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(ROOT.kRed)
-                graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
+                graphs_sig_p0[it].SetLineColor(kRed)
+                graphs_sig_p1[it].SetLineColor(kBlue)
                 graphs_sig_p0[it].Draw("ALP")
                 graphs_sig_p1[it].Draw("LP SAME")
                 c3.Update()
@@ -1558,9 +1559,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot parameter convergence
                 c3.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(ROOT.kRed)
-                graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
-                graphs_sig_p2[it].SetLineColor(ROOT.kGreen)
+                graphs_sig_p0[it].SetLineColor(kRed)
+                graphs_sig_p1[it].SetLineColor(kBlue)
+                graphs_sig_p2[it].SetLineColor(kGreen)
                 graphs_sig_p0[it].Draw("ALP")
                 graphs_sig_p1[it].Draw("LP SAME")
                 graphs_sig_p2[it].Draw("LP SAME")
@@ -1569,10 +1570,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot chi-square convergence
                 c4.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_converge[it].SetLineColor(kBlack)
                 graphs_sig_converge[it].Draw("ALP")
                 # Create a TLatex object
-                latex = ROOT.TLatex()
+                latex = TLatex()
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
@@ -1582,14 +1583,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot temperature
                 c5.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_temp[it].SetLineColor(kBlack)
                 graphs_sig_temp[it].Draw("ALP")
                 c5.Update()
 
                 # Plot acceptance probability
                 c6.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_accept[it].SetLineColor(kBlack)
                 graphs_sig_accept[it].Draw("ALP")
                 c6.Update()
 
@@ -2106,10 +2107,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot parameter convergence
                 c3.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(ROOT.kRed)
-                graphs_sig_p1[it].SetLineColor(ROOT.kBlue)
-                graphs_sig_p2[it].SetLineColor(ROOT.kGreen)
-                graphs_sig_p3[it].SetLineColor(ROOT.kPink)
+                graphs_sig_p0[it].SetLineColor(kRed)
+                graphs_sig_p1[it].SetLineColor(kBlue)
+                graphs_sig_p2[it].SetLineColor(kGreen)
+                graphs_sig_p3[it].SetLineColor(kPink)
                 graphs_sig_p0[it].Draw("ALP")
                 graphs_sig_p1[it].Draw("LP SAME")
                 graphs_sig_p2[it].Draw("LP SAME")
@@ -2119,10 +2120,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot chi-square convergence
                 c4.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_converge[it].SetLineColor(kBlack)
                 graphs_sig_converge[it].Draw("ALP")
                 # Create a TLatex object
-                latex = ROOT.TLatex()
+                latex = TLatex()
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
@@ -2132,14 +2133,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot temperature
                 c5.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_temp[it].SetLineColor(kBlack)
                 graphs_sig_temp[it].Draw("ALP")
                 c5.Update()
 
                 # Plot acceptance probability
                 c6.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
+                graphs_sig_accept[it].SetLineColor(kBlack)
                 graphs_sig_accept[it].Draw("ALP")
                 c6.Update()
 
@@ -2348,7 +2349,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 f_sig.Draw("same")
 
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = TLatex()# Set the font size and alignment (optional but recommended)
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
@@ -2504,7 +2505,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 f_sig.Draw("same")
 
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = TLatex()# Set the font size and alignment (optional but recommended)
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
@@ -2663,7 +2664,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 f_sig.Draw("same")
 
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = TLatex()# Set the font size and alignment (optional but recommended)
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
@@ -2825,7 +2826,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 f_sig.Draw("same")
 
                 # Create a TLatex object
-                latex = ROOT.TLatex()# Set the font size and alignment (optional but recommended)
+                latex = TLatex()# Set the font size and alignment (optional but recommended)
                 latex.SetTextSize(0.04)  # Adjust size as needed
                 latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
                 best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
