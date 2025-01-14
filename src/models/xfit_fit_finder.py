@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:35:01 trottar"
+# Time-stamp: "2025-01-14 13:59:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -199,7 +199,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                     for b in range(len(w_vec)):
 
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                        print(f"\tDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
                         iteration = 0
 
@@ -323,6 +323,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     best_cost = current_cost
                                     best_bin = current_bin
                                     best_errors = current_errors
+                                    # Calculate information criteria
+                                    n_samples = len(w_vec)
+                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                    ic_aic, ic_bic = ic_values
 
                                 if iteration % local_search_interval == 0:
                                     current_params = local_search(current_params, f_sig, num_params)
@@ -354,11 +358,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)                                
-
-                                # Calculate information criteria
-                                n_samples = len(w_vec)
-                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                ic_aic, ic_bic = ic_values
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -685,7 +684,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                     for b in range(len(w_vec)):
 
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                        print(f"\tDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
                         iteration = 0
 
@@ -829,6 +828,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 if iteration % local_search_interval == 0:
                                     current_params = local_search(current_params, f_sig, num_params)
                                     par_sig_0, par_sig_1 = current_params
+                                    # Calculate information criteria
+                                    n_samples = len(w_vec)
+                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                    ic_aic, ic_bic = ic_values
 
                                 # Check if current parameters haven't changed for the past N iterations
                                 if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
@@ -860,11 +863,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-                                # Calculate information criteria
-                                n_samples = len(w_vec)
-                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                ic_aic, ic_bic = ic_values
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1170,7 +1168,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                     for b in range(len(w_vec)):
 
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                        print(f"\tDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
                         iteration = 0
 
@@ -1325,6 +1323,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 if iteration % local_search_interval == 0:
                                     current_params = local_search(current_params, f_sig, num_params)
                                     par_sig_0, par_sig_1, par_sig_2 = current_params
+                                    # Calculate information criteria
+                                    n_samples = len(w_vec)
+                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                    ic_aic, ic_bic = ic_values
 
                                 # Check if current parameters haven't changed for the past N iterations
                                 if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
@@ -1360,11 +1362,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
-                                # Calculate information criteria
-                                n_samples = len(w_vec)
-                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                ic_aic, ic_bic = ic_values
-                                
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -1702,7 +1699,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     
                     for b in range(len(w_vec)):
 
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                        print(f"\tDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
                         iteration = 0
 
@@ -1862,6 +1859,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     best_cost = current_cost
                                     best_bin = current_bin
                                     best_errors = current_errors
+                                    # Calculate information criteria
+                                    n_samples = len(w_vec)
+                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                    ic_aic, ic_bic = ic_values
 
                                 if iteration % local_search_interval == 0:
                                     current_params = local_search(current_params, f_sig, num_params)
@@ -1902,11 +1903,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-                                # Calculate information criteria
-                                n_samples = len(w_vec)
-                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                ic_aic, ic_bic = ic_values
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
