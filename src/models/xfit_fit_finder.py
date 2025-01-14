@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:21:43 trottar"
+# Time-stamp: "2025-01-14 11:23:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,7 +13,7 @@
 import random
 import ROOT
 from ROOT import TFile, TNtuple, TText
-from ROOT import TGraph, TGraphErrors, TCanvas
+from ROOT import TGraph, TGraphErrors, TMultiGraph, TCanvas
 from ROOT import TF1, TFitResultPtr
 import numpy as np
 import math
