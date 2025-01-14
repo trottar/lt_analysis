@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:27:42 trottar"
+# Time-stamp: "2025-01-14 13:29:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -358,6 +358,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
 
                                 iteration += 1
@@ -866,6 +867,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
 
                                 iteration += 1
@@ -1368,6 +1370,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = len(w_vec)
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
                                 
                                 iteration += 1
@@ -1913,6 +1916,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
                                 ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
+                                print("$$$$$$$$$$",ic_values)
                                 ic_aic, ic_bic = ic_values
 
                                 iteration += 1
