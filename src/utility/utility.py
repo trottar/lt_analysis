@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 01:39:39 trottar"
+# Time-stamp: "2025-01-14 11:07:21 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1058,7 +1058,30 @@ def get_central_value(lst):
         return (lst[mid1] + lst[mid2]) / 2
 
 ################################################################################################################################################
-    
+
+def calculate_information_criteria(n_samples, n_parameters, log_likelihood):
+    """Calculate AIC and BIC for model selection."""
+    aic = 2 * n_parameters - 2 * log_likelihood
+    bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
+    return {'AIC': aic, 'BIC': bic}
+
+################################################################################################################################################
+
+def create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals):
+    """Create and update residual plots for each optimization iteration."""
+    g_residuals = TGraphErrors()
+    for i in range(g_sig.GetN()):
+        x = g_sig.GetX()[i]
+        y_data = g_sig.GetY()[i]
+        y_err = g_sig.GetEY()[i]
+        y_fit = f_sig.Eval(x)
+        residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
+        g_residuals.SetPoint(i, x, residual)
+        g_residuals.SetPointError(i, 0, 1.0)
+    return g_residuals
+
+################################################################################################################################################
+
 def check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations):
     """
     Check chi-squared values where every 4 elements are identical.

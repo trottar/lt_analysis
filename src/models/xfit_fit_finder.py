@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 21:42:31 trottar"
+# Time-stamp: "2025-01-14 11:21:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -25,7 +25,7 @@ import os, sys
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value
+from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value, calculate_information_criteria, create_residual_plots
 
 ##################################################################################################################################################
 
@@ -54,6 +54,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     graphs_sig_temp = []
     graphs_sig_accept = []
     graphs_sig_converge = []
+    graphs_sig_residuals = []
+    graphs_sig_ic_aic = []
+    graphs_sig_ic_bic = []
     
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -67,6 +70,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     c5.Divide(2, 2)
     c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
     c6.Divide(2, 2)
+    c7 = TCanvas("c7", "Residuals", 800, 600)
+    c7.Divide(2, 2)
+    c8 = TCanvas("c8", "Information Criteria", 800, 600)
+    c8.Divide(2, 2)
 
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
@@ -159,6 +166,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TMultiGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(0.0)
                 graphs_sig_p2.append(0.0)
@@ -166,7 +176,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
 
+                ic_history = {'AIC': [], 'BIC': []}
+                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Record the start time
@@ -276,6 +291,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     f_sig, g_sig, current_params,
                                     num_events, num_params, lambda_reg
                                 )
+
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_history['AIC'].append(ic_values['AIC'])
+                                ic_history['BIC'].append(ic_values['BIC'])
+
+                                # Create residual plot for this iteration
+                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                
                                 # Store cost for history
                                 cost_history.append(current_cost)            
                                 # Adapt regularization strength based on history
@@ -548,6 +574,42 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept[it].Draw("ALP")
                 c6.Update()
 
+                # Plot residuals
+                c7.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
+                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
+                for i, g_res in enumerate(graphs_sig_residuals[it]):
+                    g_res.SetMarkerStyle(20)
+                    g_res.SetMarkerColor(colors[i % len(colors)])
+                    g_res.SetLineColor(colors[i % len(colors)])
+                graphs_sig_residuals[it].Draw("AP")
+                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                c7.Update()
+
+                # Plot information criteria
+                c8.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
+                graphs_sig_ic_aic[it].SetMarkerStyle(20)
+                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].SetMarkerStyle(21)
+                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
+                graphs_sig_ic_bic[it].SetLineColor(kBlue)
+
+                mg = TMultiGraph()
+                mg.Add(graphs_sig_ic_aic[it])
+                mg.Add(graphs_sig_ic_bic[it])
+                mg.Draw("ALP")
+                mg.GetXaxis().SetTitle("Optimization Run")
+                mg.GetYaxis().SetTitle("Information Criteria Value")
+
+                legend = TLegend(0.7, 0.7, 0.9, 0.9)
+                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
+                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
+                legend.Draw()
+                c8.Update()
+
                 print("\n")    
 
             elif num_params == 2:
@@ -593,6 +655,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TMultiGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(0.0)
@@ -600,7 +665,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
+                
+                ic_history = {'AIC': [], 'BIC': []}
+                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Record the start time
@@ -718,6 +788,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     f_sig, g_sig, current_params,
                                     num_events, num_params, lambda_reg
                                 )
+                                
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_history['AIC'].append(ic_values['AIC'])
+                                ic_history['BIC'].append(ic_values['BIC'])
+
+                                # Create residual plot for this iteration
+                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                
                                 # Store cost for history
                                 cost_history.append(current_cost)            
                                 # Adapt regularization strength based on history
@@ -979,32 +1060,41 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_p1[it].Draw("LP SAME")
                 c3.Update()
 
-                # Plot chi-square convergence
-                c4.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(ROOT.kBlack)
-                graphs_sig_converge[it].Draw("ALP")
-                # Create a TLatex object
-                latex = ROOT.TLatex()
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c4.Update()
+                # Plot residuals
+                c7.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
+                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
+                for i, g_res in enumerate(graphs_sig_residuals[it]):
+                    g_res.SetMarkerStyle(20)
+                    g_res.SetMarkerColor(colors[i % len(colors)])
+                    g_res.SetLineColor(colors[i % len(colors)])
+                graphs_sig_residuals[it].Draw("AP")
+                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                c7.Update()
 
-                # Plot temperature
-                c5.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(ROOT.kBlack)
-                graphs_sig_temp[it].Draw("ALP")
-                c5.Update()
+                # Plot information criteria
+                c8.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
+                graphs_sig_ic_aic[it].SetMarkerStyle(20)
+                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].SetMarkerStyle(21)
+                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
+                graphs_sig_ic_bic[it].SetLineColor(kBlue)
 
-                # Plot acceptance probability
-                c6.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(ROOT.kBlack)
-                graphs_sig_accept[it].Draw("ALP")
-                c6.Update()
+                mg = TMultiGraph()
+                mg.Add(graphs_sig_ic_aic[it])
+                mg.Add(graphs_sig_ic_bic[it])
+                mg.Draw("ALP")
+                mg.GetXaxis().SetTitle("Optimization Run")
+                mg.GetYaxis().SetTitle("Information Criteria Value")
+
+                legend = TLegend(0.7, 0.7, 0.9, 0.9)
+                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
+                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
+                legend.Draw()
+                c8.Update()
 
                 print("\n")    
 
@@ -1053,6 +1143,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TMultiGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(graph_sig_p2)
@@ -1060,7 +1153,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
 
+                ic_history = {'AIC': [], 'BIC': []}
+                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Record the start time
@@ -1185,7 +1283,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 current_cost, lambda_reg = calculate_cost(
                                     f_sig, g_sig, current_params,
                                     num_events, num_params, lambda_reg
+
                                 )
+                                
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_history['AIC'].append(ic_values['AIC'])
+                                ic_history['BIC'].append(ic_values['BIC'])
+
+                                # Create residual plot for this iteration
+                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                
                                 # Store cost for history
                                 cost_history.append(current_cost)            
                                 # Adapt regularization strength based on history
@@ -1483,6 +1593,42 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept[it].Draw("ALP")
                 c6.Update()
 
+                # Plot residuals
+                c7.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
+                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
+                for i, g_res in enumerate(graphs_sig_residuals[it]):
+                    g_res.SetMarkerStyle(20)
+                    g_res.SetMarkerColor(colors[i % len(colors)])
+                    g_res.SetLineColor(colors[i % len(colors)])
+                graphs_sig_residuals[it].Draw("AP")
+                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                c7.Update()
+
+                # Plot information criteria
+                c8.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
+                graphs_sig_ic_aic[it].SetMarkerStyle(20)
+                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].SetMarkerStyle(21)
+                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
+                graphs_sig_ic_bic[it].SetLineColor(kBlue)
+
+                mg = TMultiGraph()
+                mg.Add(graphs_sig_ic_aic[it])
+                mg.Add(graphs_sig_ic_bic[it])
+                mg.Draw("ALP")
+                mg.GetXaxis().SetTitle("Optimization Run")
+                mg.GetYaxis().SetTitle("Information Criteria Value")
+
+                legend = TLegend(0.7, 0.7, 0.9, 0.9)
+                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
+                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
+                legend.Draw()
+                c8.Update()
+
                 print("\n")    
 
             elif num_params == 4:
@@ -1532,6 +1678,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TMultiGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(graph_sig_p2)
@@ -1539,7 +1688,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
-
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
+                
+                ic_history = {'AIC': [], 'BIC': []}
+                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Record the start time
@@ -1671,7 +1825,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 current_cost, lambda_reg = calculate_cost(
                                     f_sig, g_sig, current_params,
                                     num_events, num_params, lambda_reg
+
                                 )
+                                
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_history['AIC'].append(ic_values['AIC'])
+                                ic_history['BIC'].append(ic_values['BIC'])
+
+                                # Create residual plot for this iteration
+                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                
                                 # Store cost for history
                                 cost_history.append(current_cost)            
                                 # Adapt regularization strength based on history
@@ -1977,6 +2143,42 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_accept[it].Draw("ALP")
                 c6.Update()
 
+                # Plot residuals
+                c7.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
+                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
+                for i, g_res in enumerate(graphs_sig_residuals[it]):
+                    g_res.SetMarkerStyle(20)
+                    g_res.SetMarkerColor(colors[i % len(colors)])
+                    g_res.SetLineColor(colors[i % len(colors)])
+                graphs_sig_residuals[it].Draw("AP")
+                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                c7.Update()
+
+                # Plot information criteria
+                c8.cd(it+1).SetLeftMargin(0.12)
+                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
+                graphs_sig_ic_aic[it].SetMarkerStyle(20)
+                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].SetMarkerStyle(21)
+                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
+                graphs_sig_ic_bic[it].SetLineColor(kBlue)
+
+                mg = TMultiGraph()
+                mg.Add(graphs_sig_ic_aic[it])
+                mg.Add(graphs_sig_ic_bic[it])
+                mg.Draw("ALP")
+                mg.GetXaxis().SetTitle("Optimization Run")
+                mg.GetYaxis().SetTitle("Information Criteria Value")
+
+                legend = TLegend(0.7, 0.7, 0.9, 0.9)
+                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
+                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
+                legend.Draw()
+                c8.Update()
+
                 print("\n")
 
             c2.Update()
@@ -1984,6 +2186,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             c4.Update()
             c5.Update()
             c6.Update()
+            c7.Update()
+            c8.Update()
             
         ## plot_fit
         else:
@@ -2636,6 +2840,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     c3.Print(outputpdf)
     c4.Print(outputpdf)
     c5.Print(outputpdf)
-    c6.Print(outputpdf+')')
+    c6.Print(outputpdf)
+    c7.Print(outputpdf)
+    c8.Print(outputpdf+')')
 
     print(f"\n\nFits saved to {outputpdf}...")
