@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:31:15 trottar"
+# Time-stamp: "2025-01-14 12:32:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -13,7 +13,7 @@
 import random
 import ROOT
 from ROOT import TFile, TNtuple, TText, TLatex, TLegend
-from ROOT import TGraph, TGraphErrors, TMultiGraph, TCanvas
+from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
 from ROOT import kBlack, kRed, kBlue, kGreen, kMagenta, kCyan
 import numpy as np
@@ -657,7 +657,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
-                graph_sig_residuals = TMultiGraph()
+                graph_sig_residuals = TGraph()
                 graph_sig_aic = TGraph()
                 graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
@@ -1143,7 +1143,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
-                graph_sig_residuals = TMultiGraph()
+                graph_sig_residuals = TGraph()
                 graph_sig_aic = TGraph()
                 graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
@@ -1676,7 +1676,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
-                graph_sig_residuals = TMultiGraph()
+                graph_sig_residuals = TGraph()
                 graph_sig_aic = TGraph()
                 graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
