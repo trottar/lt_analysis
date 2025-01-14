@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 20:33:44 trottar"
+# Time-stamp: "2025-01-13 20:34:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -140,7 +140,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 # Set thresholds on temperature and probability to avoid local minima
                 temp_threshold = 0.01  # Temperature should be very low
-                prob_threshold = 1e-3   # Low acceptance probability indicates stability
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
                 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -572,8 +572,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-4  # Temperature should be very low
-                prob_threshold = 1e-3   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1030,8 +1030,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-4  # Temperature should be very low
-                prob_threshold = 1e-3   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1507,8 +1507,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-4  # Temperature should be very low
-                prob_threshold = 1e-3   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
