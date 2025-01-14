@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:11:00 trottar"
+# Time-stamp: "2025-01-14 13:14:28 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -356,7 +356,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)                                
 
                                 # Calculate information criteria
-                                n_samples = g_sig.GetN()
+                                n_samples = len(w_vec)
                                 log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
                                 ic_aic = ic_values['AIC']
@@ -866,7 +866,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                                 # Calculate information criteria
-                                n_samples = g_sig.GetN()
+                                n_samples = len(w_vec)
                                 log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
                                 ic_aic = ic_values['AIC']
@@ -1369,7 +1369,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                                 # Calculate information criteria
-                                n_samples = g_sig.GetN()
+                                n_samples = len(w_vec)
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
                                 ic_aic = ic_values['AIC']
@@ -1916,7 +1916,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
                                 # Calculate information criteria
-                                n_samples = g_sig.GetN()
+                                n_samples = len(w_vec)
                                 log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
                                 ic_aic = ic_values['AIC']
