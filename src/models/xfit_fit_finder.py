@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:34:00 trottar"
+# Time-stamp: "2025-01-14 13:35:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -411,8 +411,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                print(best_overall_ic_aic)
-                                print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                         try:                                    
@@ -919,8 +917,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                print(best_overall_ic_aic)
-                                print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                         try:                                    
@@ -1420,8 +1416,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                print(best_overall_ic_aic)
-                                print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                         try:                                    
@@ -1965,8 +1959,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                print(best_overall_ic_aic)
-                                print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False
                         try:                                    
