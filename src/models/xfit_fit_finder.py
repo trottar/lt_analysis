@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:28:58 trottar"
+# Time-stamp: "2025-01-14 12:30:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -143,7 +143,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = None
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
-                best_overall_residuals = float('inf')
+                best_overall_residual = float('inf')
                 best_overall_ic_aic = None
                 best_overall_ic_bic = None
                 total_iteration = 0
@@ -409,7 +409,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
-                                best_overall_residuals = residuals
+                                best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overabll_ic_bic = ic_bic
                                 if best_overall_cost < chi2_threshold:
@@ -420,7 +420,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))
                         except TypeError:
@@ -629,7 +629,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = None
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
-                best_overall_residuals = float('inf')
+                best_overall_residual = float('inf')
                 best_overall_ic_aic = None
                 best_overall_ic_bic = None
                 total_iteration = 0
@@ -916,7 +916,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
-                                best_overall_residuals = residuals
+                                best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overabll_ic_bic = ic_bic                                
                                 if best_overall_cost < chi2_threshold:
@@ -928,7 +928,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
@@ -1113,7 +1113,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = None
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
-                best_overall_residuals = float('inf')
+                best_overall_residual = float('inf')
                 best_overall_ic_aic = None
                 best_overall_ic_bic = None
                 total_iteration = 0
@@ -1416,7 +1416,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
-                                best_overall_residuals = residuals
+                                best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overabll_ic_bic = ic_bic                                
                                 if best_overall_cost < chi2_threshold:
@@ -1429,7 +1429,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
@@ -1644,7 +1644,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = None
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
-                best_overall_residuals = float('inf')
+                best_overall_residual = float('inf')
                 best_overall_ic_aic = None
                 best_overall_ic_bic = None
                 total_iteration = 0
@@ -1960,7 +1960,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
-                                best_overall_residuals = residuals
+                                best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overabll_ic_bic = ic_bic                                
                                 if best_overall_cost < chi2_threshold:
@@ -1974,7 +1974,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
