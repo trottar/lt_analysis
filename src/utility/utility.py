@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:15:07 trottar"
+# Time-stamp: "2025-01-14 13:19:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1059,7 +1059,8 @@ def get_central_value(lst):
 
 ################################################################################################################################################
 
-def calculate_information_criteria(n_samples, n_parameters, log_likelihood):
+def calculate_information_criteria(n_samples, n_parameters, chi2):
+    log_likelihood = -chi2 / 2  # Approximate log likelihood from chi-square
     print("!!!!!!!!!!!!",n_samples, n_parameters, log_likelihood)
     """Calculate AIC and BIC for model selection."""
     aic = 2 * n_parameters - 2 * log_likelihood

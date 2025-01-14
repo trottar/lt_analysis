@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:14:28 trottar"
+# Time-stamp: "2025-01-14 13:20:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -357,8 +357,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
-                                log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 ic_aic = ic_values['AIC']
                                 ic_bic = ic_values['BIC']
 
@@ -867,8 +866,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
-                                log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 ic_aic = ic_values['AIC']
                                 ic_bic = ic_values['BIC']
 
@@ -1371,7 +1369,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 ic_aic = ic_values['AIC']
                                 ic_bic = ic_values['BIC']
                                 
@@ -1917,8 +1915,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Calculate information criteria
                                 n_samples = len(w_vec)
-                                log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                 ic_aic = ic_values['AIC']
                                 ic_bic = ic_values['BIC']
 
