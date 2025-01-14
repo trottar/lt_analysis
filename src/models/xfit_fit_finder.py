@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:30:47 trottar"
+# Time-stamp: "2025-01-14 11:31:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -15,7 +15,7 @@ import ROOT
 from ROOT import TFile, TNtuple, TText, TLatex
 from ROOT import TGraph, TGraphErrors, TMultiGraph, TCanvas
 from ROOT import TF1, TFitResultPtr
-from ROOT import kRed, kBlue, kGreen, kMagenta, kCyan, kPink
+from ROOT import kRed, kBlue, kGreen, kMagenta, kCyan
 import numpy as np
 import math
 import time
@@ -2110,7 +2110,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_p0[it].SetLineColor(kRed)
                 graphs_sig_p1[it].SetLineColor(kBlue)
                 graphs_sig_p2[it].SetLineColor(kGreen)
-                graphs_sig_p3[it].SetLineColor(kPink)
+                graphs_sig_p3[it].SetLineColor(kMagenta)
                 graphs_sig_p0[it].Draw("ALP")
                 graphs_sig_p1[it].Draw("LP SAME")
                 graphs_sig_p2[it].Draw("LP SAME")
