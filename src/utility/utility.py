@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:07:21 trottar"
+# Time-stamp: "2025-01-14 12:14:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1064,21 +1064,6 @@ def calculate_information_criteria(n_samples, n_parameters, log_likelihood):
     aic = 2 * n_parameters - 2 * log_likelihood
     bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
     return {'AIC': aic, 'BIC': bic}
-
-################################################################################################################################################
-
-def create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals):
-    """Create and update residual plots for each optimization iteration."""
-    g_residuals = TGraphErrors()
-    for i in range(g_sig.GetN()):
-        x = g_sig.GetX()[i]
-        y_data = g_sig.GetY()[i]
-        y_err = g_sig.GetEY()[i]
-        y_fit = f_sig.Eval(x)
-        residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
-        g_residuals.SetPoint(i, x, residual)
-        g_residuals.SetPointError(i, 0, 1.0)
-    return g_residuals
 
 ################################################################################################################################################
 

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:56:27 trottar"
+# Time-stamp: "2025-01-14 12:25:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -167,7 +167,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
-                graph_sig_residuals = TMultiGraph()
+                graph_sig_residuals = TGraph()
                 graph_sig_aic = TGraph()
                 graph_sig_bic = TGraph()
                 graphs_sig_p0.append(graph_sig_p0)
@@ -301,7 +301,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_history['BIC'].append(ic_values['BIC'])
 
                                 # Create residual plot for this iteration
-                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                for i in range(g_sig.GetN()):
+                                    x = g_sig.GetX()[i]
+                                    y_data = g_sig.GetY()[i]
+                                    y_err = g_sig.GetEY()[i]
+                                    y_fit = f_sig.Eval(x)
+                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
                                 
                                 # Store cost for history
                                 cost_history.append(current_cost)            
@@ -401,6 +406,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
+                                best_overall_residuals = residuals
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                         try:                                    
@@ -409,6 +417,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -578,35 +589,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot residuals
                 c7.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
-                for i, g_res in enumerate(graphs_sig_residuals[it]):
-                    g_res.SetMarkerStyle(20)
-                    g_res.SetMarkerColor(colors[i % len(colors)])
-                    g_res.SetLineColor(colors[i % len(colors)])
-                graphs_sig_residuals[it].Draw("AP")
-                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                graphs_sig_residuals[it].SetLineColor(kBlack)
+                graphs_sig_residuals[it].Draw("ALP")
                 c7.Update()
 
                 # Plot information criteria
                 c8.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetMarkerStyle(20)
-                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kBlack)
+                graphs_sig_ic_aic[it].Draw("ALP")
                 graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].SetMarkerStyle(21)
-                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
-                graphs_sig_ic_bic[it].SetLineColor(kBlue)
-
-                mg = TMultiGraph()
-                mg.Add(graphs_sig_ic_aic[it])
-                mg.Add(graphs_sig_ic_bic[it])
-                mg.Draw("ALP")
-                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
-                if axes:
-                    axes.GetXaxis().SetTitle("Optimization Run")
-                    axes.GetYaxis().SetTitle("Information Criteria Value")
-                    
+                graphs_sig_ic_aic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -800,7 +793,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_history['BIC'].append(ic_values['BIC'])
 
                                 # Create residual plot for this iteration
-                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                for i in range(g_sig.GetN()):
+                                    x = g_sig.GetX()[i]
+                                    y_data = g_sig.GetY()[i]
+                                    y_err = g_sig.GetEY()[i]
+                                    y_fit = f_sig.Eval(x)
+                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
                                 
                                 # Store cost for history
                                 cost_history.append(current_cost)            
@@ -912,6 +910,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
+                                best_overall_residuals = residuals
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                         try:                                    
@@ -921,6 +922,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1066,35 +1070,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot residuals
                 c7.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
-                for i, g_res in enumerate(graphs_sig_residuals[it]):
-                    g_res.SetMarkerStyle(20)
-                    g_res.SetMarkerColor(colors[i % len(colors)])
-                    g_res.SetLineColor(colors[i % len(colors)])
-                graphs_sig_residuals[it].Draw("AP")
-                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                graphs_sig_residuals[it].SetLineColor(kBlack)
+                graphs_sig_residuals[it].Draw("ALP")
                 c7.Update()
 
                 # Plot information criteria
                 c8.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetMarkerStyle(20)
-                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kBlack)
+                graphs_sig_ic_aic[it].Draw("ALP")
                 graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].SetMarkerStyle(21)
-                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
-                graphs_sig_ic_bic[it].SetLineColor(kBlue)
-
-                mg = TMultiGraph()
-                mg.Add(graphs_sig_ic_aic[it])
-                mg.Add(graphs_sig_ic_bic[it])
-                mg.Draw("ALP")
-                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
-                if axes:
-                    axes.GetXaxis().SetTitle("Optimization Run")
-                    axes.GetYaxis().SetTitle("Information Criteria Value")
-
+                graphs_sig_ic_aic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -1299,7 +1285,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_history['BIC'].append(ic_values['BIC'])
 
                                 # Create residual plot for this iteration
-                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                for i in range(g_sig.GetN()):
+                                    x = g_sig.GetX()[i]
+                                    y_data = g_sig.GetY()[i]
+                                    y_err = g_sig.GetEY()[i]
+                                    y_fit = f_sig.Eval(x)
+                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
                                 
                                 # Store cost for history
                                 cost_history.append(current_cost)            
@@ -1416,6 +1407,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
+                                best_overall_residuals = residuals
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False                                    
                         try:                                    
@@ -1426,6 +1420,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1601,35 +1598,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot residuals
                 c7.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
-                for i, g_res in enumerate(graphs_sig_residuals[it]):
-                    g_res.SetMarkerStyle(20)
-                    g_res.SetMarkerColor(colors[i % len(colors)])
-                    g_res.SetLineColor(colors[i % len(colors)])
-                graphs_sig_residuals[it].Draw("AP")
-                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                graphs_sig_residuals[it].SetLineColor(kBlack)
+                graphs_sig_residuals[it].Draw("ALP")
                 c7.Update()
 
                 # Plot information criteria
                 c8.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetMarkerStyle(20)
-                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kBlack)
+                graphs_sig_ic_aic[it].Draw("ALP")
                 graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].SetMarkerStyle(21)
-                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
-                graphs_sig_ic_bic[it].SetLineColor(kBlue)
-
-                mg = TMultiGraph()
-                mg.Add(graphs_sig_ic_aic[it])
-                mg.Add(graphs_sig_ic_bic[it])
-                mg.Draw("ALP")
-                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
-                if axes:
-                    axes.GetXaxis().SetTitle("Optimization Run")
-                    axes.GetYaxis().SetTitle("Information Criteria Value")
-
+                graphs_sig_ic_aic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -1843,7 +1822,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 ic_history['BIC'].append(ic_values['BIC'])
 
                                 # Create residual plot for this iteration
-                                g_residuals = create_residual_plots(iteration, g_sig, f_sig, graphs_sig_residuals)                                
+                                for i in range(g_sig.GetN()):
+                                    x = g_sig.GetX()[i]
+                                    y_data = g_sig.GetY()[i]
+                                    y_err = g_sig.GetEY()[i]
+                                    y_fit = f_sig.Eval(x)
+                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
                                 
                                 # Store cost for history
                                 cost_history.append(current_cost)            
@@ -1964,6 +1948,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_errors = best_errors[:]
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
+                                best_overall_residuals = residuals
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic                                
                                 if best_overall_cost < chi2_threshold:
                                     set_optimization = False
                         try:                                    
@@ -1975,6 +1962,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
+                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residuals, 4))
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -2153,35 +2143,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot residuals
                 c7.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                colors = [kRed, kBlue, kGreen, kMagenta, kCyan]
-                for i, g_res in enumerate(graphs_sig_residuals[it]):
-                    g_res.SetMarkerStyle(20)
-                    g_res.SetMarkerColor(colors[i % len(colors)])
-                    g_res.SetLineColor(colors[i % len(colors)])
-                graphs_sig_residuals[it].Draw("AP")
-                graphs_sig_residuals[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_residuals[it].GetYaxis().SetTitle("Normalized Residuals")
+                graphs_sig_residuals[it].SetLineColor(kBlack)
+                graphs_sig_residuals[it].Draw("ALP")
                 c7.Update()
 
                 # Plot information criteria
                 c8.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetMarkerStyle(20)
-                graphs_sig_ic_aic[it].SetMarkerColor(kRed)
+                graphs_sig_ic_aic[it].SetLineColor(kBlack)
+                graphs_sig_ic_aic[it].Draw("ALP")
                 graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].SetMarkerStyle(21)
-                graphs_sig_ic_bic[it].SetMarkerColor(kBlue)
-                graphs_sig_ic_bic[it].SetLineColor(kBlue)
-
-                mg = TMultiGraph()
-                mg.Add(graphs_sig_ic_aic[it])
-                mg.Add(graphs_sig_ic_bic[it])
-                mg.Draw("ALP")
-                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
-                if axes:
-                    axes.GetXaxis().SetTitle("Optimization Run")
-                    axes.GetYaxis().SetTitle("Information Criteria Value")
-
+                graphs_sig_ic_aic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
