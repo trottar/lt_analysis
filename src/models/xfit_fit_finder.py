@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:36:47 trottar"
+# Time-stamp: "2025-01-14 12:38:14 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -150,8 +150,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
                 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -421,8 +421,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -636,8 +636,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -929,8 +929,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1120,8 +1120,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1430,8 +1430,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1651,8 +1651,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 max_param_bounds = initial_param_bounds
 
                 # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
+                temp_threshold = 1e-3  # Temperature should be very low
+                prob_threshold = 1e-2   # Low acceptance probability indicates stability
 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -1975,8 +1975,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
