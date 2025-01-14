@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 01:24:43 trottar"
+# Time-stamp: "2025-01-14 01:27:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1174,10 +1174,10 @@ def prepare_equations(equations, sig_type):
     elif sig_type == "sig_T":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8):\n"
+        func_str += "        par6 = par6 if par6 != 0 else par5 + tiny_offset\n"
         func_str += "        par6 = par6 if par6 != 0 else par6 + tiny_offset\n"
         func_str += "        par7 = par7 if par7 != 0 else par7 + tiny_offset\n"
         func_str += "        par8 = par8 if par8 != 0 else par8 + tiny_offset\n"
-        func_str += "        par9 = par9 if par9 != 0 else par9 + tiny_offset\n"
     elif sig_type == "sig_LT":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
