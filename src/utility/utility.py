@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 19:54:55 trottar"
+# Time-stamp: "2025-01-13 22:45:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1162,6 +1162,8 @@ def extract_values(filename):
 ################################################################################################################################################
 
 def prepare_equations(equations, sig_type):
+    tiny_offset = 1e-10  # Define a tiny offset to avoid division by zero
+
     if sig_type == "sig_L":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4):\n"
@@ -1180,17 +1182,26 @@ def prepare_equations(equations, sig_type):
     else:
         print(f"ERROR: Unrecognized sig_type '{sig_type}'!")
         sys.exit(2)
-        
+
     matches = list(filter(lambda e: sig_type in e, eq_lst))
     if not matches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
-        
-    # Build function body without error handling
+
+    # Add checks to avoid zero values
+    func_str += "        # Avoid zero inputs by adding a tiny offset\n"
+    func_str += "        q2_set = q2_set if q2_set != 0 else q2_set + tiny_offset\n"
+    func_str += "        w_set = w_set if w_set != 0 else w_set + tiny_offset\n"
+    func_str += "        qq = qq if qq != 0 else qq + tiny_offset\n"
+    func_str += "        ww = ww if ww != 0 else ww + tiny_offset\n"
+    func_str += "        tt = tt if tt != 0 else tt + tiny_offset\n"
+    func_str += "        theta_cm = theta_cm if theta_cm != 0 else theta_cm + tiny_offset\n"
+
+    # Build function body with equations
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
     func_str += f"        return {sig_type}\n"
-    
-    exec_globals = {'__builtins__': None, 'math': math}
+
+    exec_globals = {'__builtins__': None, 'math': math, 'tiny_offset': tiny_offset}
     exec(func_str, exec_globals)
     return exec_globals[f'{sig_type}_optimized']
 
