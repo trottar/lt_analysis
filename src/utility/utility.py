@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 01:27:06 trottar"
+# Time-stamp: "2025-01-14 01:30:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1194,7 +1194,9 @@ def prepare_equations(equations, sig_type):
         func_str += "        par16 = par16 if par16 != 0 else par16 + tiny_offset\n"
     elif sig_type == "wfactor":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
+        # Need to initialize since isn't an argument
+        func_str += "        theta_cm = 0.0\n"
+        
     else:
         print(f"ERROR: Unrecognized sig_type '{sig_type}'!")
         sys.exit(2)
@@ -1205,7 +1207,6 @@ def prepare_equations(equations, sig_type):
         sys.exit(2)
 
     # Add checks to avoid zero values
-    func_str += "        # Avoid zero inputs by adding a tiny offset\n"
     func_str += "        qq = qq if qq != 0 else qq + tiny_offset\n"
     func_str += "        ww = ww if ww != 0 else ww + tiny_offset\n"
     func_str += "        tt = tt if tt != 0 else tt + tiny_offset\n"
