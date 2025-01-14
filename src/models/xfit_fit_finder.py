@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:25:12 trottar"
+# Time-stamp: "2025-01-14 12:26:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -26,7 +26,7 @@ import os, sys
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value, calculate_information_criteria, create_residual_plots
+from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value, calculate_information_criteria
 
 ##################################################################################################################################################
 
