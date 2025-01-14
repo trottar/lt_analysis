@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:26:13 trottar"
+# Time-stamp: "2025-01-14 12:28:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -143,6 +143,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = None
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
+                best_overall_residuals = float('inf')
+                best_overall_ic_aic = None
+                best_overall_ic_bic = None
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -625,7 +628,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
-                best_overall_prob = 1.0                
+                best_overall_prob = 1.0
+                best_overall_residuals = float('inf')
+                best_overall_ic_aic = None
+                best_overall_ic_bic = None
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -1106,7 +1112,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
-                best_overall_prob = 1.0                
+                best_overall_prob = 1.0
+                best_overall_residuals = float('inf')
+                best_overall_ic_aic = None
+                best_overall_ic_bic = None
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -1634,7 +1643,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_cost = float('inf')
                 best_overall_bin = None
                 best_overall_temp = float('inf')
-                best_overall_prob = 1.0                
+                best_overall_prob = 1.0
+                best_overall_residuals = float('inf')
+                best_overall_ic_aic = None
+                best_overall_ic_bic = None
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
