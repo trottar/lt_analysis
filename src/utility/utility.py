@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 22:45:05 trottar"
+# Time-stamp: "2025-01-13 23:54:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1196,6 +1196,7 @@ def prepare_equations(equations, sig_type):
     func_str += "        ww = ww if ww != 0 else ww + tiny_offset\n"
     func_str += "        tt = tt if tt != 0 else tt + tiny_offset\n"
     func_str += "        theta_cm = theta_cm if theta_cm != 0 else theta_cm + tiny_offset\n"
+    func_str += "        print(theta_cm)\n"
 
     # Build function body with equations
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
