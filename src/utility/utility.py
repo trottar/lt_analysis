@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 01:33:38 trottar"
+# Time-stamp: "2025-01-14 01:39:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1162,7 +1162,7 @@ def extract_values(filename):
 ################################################################################################################################################
 
 def prepare_equations(equations, sig_type):
-    tiny_offset = 1e-10  # Define a tiny offset to avoid division by zero
+    tiny_offset = 1e-15  # Define a tiny offset to avoid division by zero
 
     if sig_type == "sig_L":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
