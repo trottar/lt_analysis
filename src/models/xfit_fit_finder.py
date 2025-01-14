@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:51:52 trottar"
+# Time-stamp: "2025-01-14 12:54:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -184,7 +184,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
 
-                ic_history = {'AIC': [], 'BIC': []}
+                ic_aic = None
+                ic_bic= None
                 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -300,8 +301,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'] = ic_values['AIC']
-                                ic_history['BIC'] = ic_values['BIC']
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -410,8 +411,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
                                 best_overall_residual = residual
-                                best_overall_ic_aic = ic_history['AIC']
-                                best_overabll_ic_bic = ic_history['BIC']
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic
                                 print(best_overall_ic_aic)
                                 print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
@@ -673,7 +674,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
                 
-                ic_history = {'AIC': [], 'BIC': []}
+                ic_aic = None
+                ic_bic= None
                 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -797,8 +799,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'] = ic_values['AIC']
-                                ic_history['BIC'] = ic_values['BIC']
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -919,8 +921,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
                                 best_overall_residual = residual
-                                best_overall_ic_aic = ic_history['AIC']
-                                best_overabll_ic_bic = ic_history['BIC']
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic
                                 print(best_overall_ic_aic)
                                 print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
@@ -1161,7 +1163,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
 
-                ic_history = {'AIC': [], 'BIC': []}
+                ic_aic = None
+                ic_bic= None
                 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -1294,8 +1297,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'] = ic_values['AIC']
-                                ic_history['BIC'] = ic_values['BIC']
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -1421,8 +1424,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
                                 best_overall_residual = residual
-                                best_overall_ic_aic = ic_history['AIC']
-                                best_overabll_ic_bic = ic_history['BIC']
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic
                                 print(best_overall_ic_aic)
                                 print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
@@ -1696,7 +1699,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
                 
-                ic_history = {'AIC': [], 'BIC': []}
+                ic_aic = None
+                ic_bic= None
                 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -1836,8 +1840,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'] = ic_values['AIC']
-                                ic_history['BIC'] = ic_values['BIC']
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -1967,8 +1971,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_temp = temperature
                                 best_overall_prob = accept_prob
                                 best_overall_residual = residual
-                                best_overall_ic_aic = ic_history['AIC']
-                                best_overabll_ic_bic = ic_history['BIC']
+                                best_overall_ic_aic = ic_aic
+                                best_overabll_ic_bic = ic_bic
                                 print(best_overall_ic_aic)
                                 print(best_overall_ic_bic)                                
                                 if best_overall_cost < chi2_threshold:
