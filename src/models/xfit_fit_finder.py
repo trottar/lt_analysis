@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 15:23:50 trottar"
+# Time-stamp: "2025-01-14 17:01:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -144,8 +144,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
                 best_overall_residual = float('inf')
-                best_overall_ic_aic = None
-                best_overall_ic_bic = None
+                best_overall_ic_aic = float('inf')
+                best_overall_ic_bic = float('inf')
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -410,8 +410,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                if best_overall_cost < chi2_threshold:
-                                    set_optimization = False                                    
+                                #if best_overall_cost < chi2_threshold:
+                                #    set_optimization = False                                    
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -599,8 +599,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
                 graphs_sig_ic_aic[it].SetLineColor(kBlack)
                 graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_aic[it].Draw("same")
+                graphs_sig_ic_bic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -628,8 +628,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
                 best_overall_residual = float('inf')
-                best_overall_ic_aic = None
-                best_overall_ic_bic = None
+                best_overall_ic_aic = float('inf')
+                best_overall_ic_bic = float('inf')
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -915,8 +915,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                if best_overall_cost < chi2_threshold:
-                                    set_optimization = False                                    
+                                #if best_overall_cost < chi2_threshold:
+                                #    set_optimization = False                                    
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1081,8 +1081,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
                 graphs_sig_ic_aic[it].SetLineColor(kBlack)
                 graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_aic[it].Draw("same")
+                graphs_sig_ic_bic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -1110,8 +1110,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
                 best_overall_residual = float('inf')
-                best_overall_ic_aic = None
-                best_overall_ic_bic = None
+                best_overall_ic_aic = float('inf')
+                best_overall_ic_bic = float('inf')
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -1413,8 +1413,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                if best_overall_cost < chi2_threshold:
-                                    set_optimization = False                                    
+                                #if best_overall_cost < chi2_threshold:
+                                #    set_optimization = False                                    
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1610,8 +1610,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
                 graphs_sig_ic_aic[it].SetLineColor(kBlack)
                 graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_aic[it].Draw("same")
+                graphs_sig_ic_bic[it].SetLineColor(kRed)
+                graphs_sig_ic_bic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -1639,8 +1639,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_temp = float('inf')
                 best_overall_prob = 1.0
                 best_overall_residual = float('inf')
-                best_overall_ic_aic = None
-                best_overall_ic_bic = None
+                best_overall_ic_aic = float('inf')
+                best_overall_ic_bic = float('inf')
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
@@ -1955,8 +1955,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_residual = residual
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
-                                if best_overall_cost < chi2_threshold:
-                                    set_optimization = False
+                                #if best_overall_cost < chi2_threshold:
+                                #    set_optimization = False
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -2154,10 +2154,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # Plot information criteria
                 c8.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetLineColor(kBlack)
-                graphs_sig_ic_aic[it].Draw("ALP")
                 graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_aic[it].Draw("same")
+                graphs_sig_ic_aic[it].Draw("ALP")
+                graphs_sig_ic_bic[it].SetLineColor(kGreen)
+                graphs_sig_ic_bic[it].Draw("same")
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")

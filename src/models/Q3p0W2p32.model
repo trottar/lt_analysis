@@ -31,16 +31,16 @@ sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.
 
 # Transverse cross-section
 # 0th, 1st iteration, (chi2~2.6)
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 ####
 #  (chi2)
-sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 ####
 
 # Longitudinal-Transverse interference term
 # 0th, 1st iteration, (chi2~2.0)
-###sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+###sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 ####
 # 1st iteration, (chi2~0.5)
 #sig_LT =  (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt) + par12 * tt**2)
