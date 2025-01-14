@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 01:18:13 trottar"
+# Time-stamp: "2025-01-14 01:20:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1187,6 +1187,13 @@ def prepare_equations(equations, sig_type):
     if not matches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
+
+    # Add checks to avoid zero values
+    func_str += "        # Avoid zero inputs by adding a tiny offset\n"
+    func_str += "        qq = qq if qq != 0 else qq + tiny_offset\n"
+    func_str += "        ww = ww if ww != 0 else ww + tiny_offset\n"
+    func_str += "        tt = tt if tt != 0 else tt + tiny_offset\n"
+    func_str += "        theta_cm = theta_cm if theta_cm != 0 else theta_cm + tiny_offset\n"
 
     # Build function body with equations
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
