@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:44:20 trottar"
+# Time-stamp: "2025-01-14 12:51:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -300,8 +300,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'].append(ic_values['AIC'])
-                                ic_history['BIC'].append(ic_values['BIC'])
+                                ic_history['AIC'] = ic_values['AIC']
+                                ic_history['BIC'] = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -423,8 +423,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            #graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            #graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -797,8 +797,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'].append(ic_values['AIC'])
-                                ic_history['BIC'].append(ic_values['BIC'])
+                                ic_history['AIC'] = ic_values['AIC']
+                                ic_history['BIC'] = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -933,8 +933,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            #graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            #graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1294,8 +1294,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'].append(ic_values['AIC'])
-                                ic_history['BIC'].append(ic_values['BIC'])
+                                ic_history['AIC'] = ic_values['AIC']
+                                ic_history['BIC'] = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -1436,8 +1436,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            #graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            #graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1836,8 +1836,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 n_samples = g_sig.GetN()
                                 log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
                                 ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_history['AIC'].append(ic_values['AIC'])
-                                ic_history['BIC'].append(ic_values['BIC'])
+                                ic_history['AIC'] = ic_values['AIC']
+                                ic_history['BIC'] = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -1983,8 +1983,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            #graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            #graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
