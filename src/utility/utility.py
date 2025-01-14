@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:28:25 trottar"
+# Time-stamp: "2025-01-14 13:34:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1064,7 +1064,6 @@ def calculate_information_criteria(n_samples, n_parameters, chi2):
     log_likelihood = -chi2 / 2  # Approximate log likelihood from chi-square
     aic = 2 * n_parameters - 2 * log_likelihood
     bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
-    print("!!!!!!!!!!!!!", aic, bic)
     return aic, bic
 
 ################################################################################################################################################
