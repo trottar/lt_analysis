@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:34:21 trottar"
+# Time-stamp: "2025-01-14 13:40:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -45,7 +45,7 @@ TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import load_equations, prepare_equations, find_params_wrapper, check_chi_squared_values
+from utility import load_equations, prepare_equations, find_params_wrapper, check_chi_squared_values, request_yn_response
 
 ##################################################################################################################################################
 # Import fit finder function
@@ -88,6 +88,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     fixed_params = [] # Update all
     
     # Maximum iterations before ending loop (should always aim for >5000)
+
     max_iterations = 2000
     #max_iterations = 5000
     #max_iterations = 10000
@@ -290,3 +291,11 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
 
     print("\n\n")
+
+    if request_yn_response("Would you like to continue with the analysis?"):
+        continue
+    else:
+        print("-"*25)
+        print("\n\nExiting script...")
+        print("-"*25)
+        sys.exit(2)
