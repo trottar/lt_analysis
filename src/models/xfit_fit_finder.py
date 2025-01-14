@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:58:14 trottar"
+# Time-stamp: "2025-01-13 20:01:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -385,7 +385,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                    print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -840,7 +840,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                    print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1314,7 +1314,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                    print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
@@ -1805,7 +1805,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
-                        print(f"\nBest Cost: {best_overall_cost:.3f}")
+                    print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
                     print(f"\n\nBest overall solution: {best_overall_params}")
