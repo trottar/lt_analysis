@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:42:07 trottar"
+# Time-stamp: "2025-01-14 11:56:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -602,9 +602,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 mg.Add(graphs_sig_ic_aic[it])
                 mg.Add(graphs_sig_ic_bic[it])
                 mg.Draw("ALP")
-                mg.GetXaxis().SetTitle("Optimization Run")
-                mg.GetYaxis().SetTitle("Information Criteria Value")
-
+                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
+                if axes:
+                    axes.GetXaxis().SetTitle("Optimization Run")
+                    axes.GetYaxis().SetTitle("Information Criteria Value")
+                    
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
                 legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
@@ -1088,8 +1090,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 mg.Add(graphs_sig_ic_aic[it])
                 mg.Add(graphs_sig_ic_bic[it])
                 mg.Draw("ALP")
-                mg.GetXaxis().SetTitle("Optimization Run")
-                mg.GetYaxis().SetTitle("Information Criteria Value")
+                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
+                if axes:
+                    axes.GetXaxis().SetTitle("Optimization Run")
+                    axes.GetYaxis().SetTitle("Information Criteria Value")
 
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
@@ -1621,8 +1625,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 mg.Add(graphs_sig_ic_aic[it])
                 mg.Add(graphs_sig_ic_bic[it])
                 mg.Draw("ALP")
-                mg.GetXaxis().SetTitle("Optimization Run")
-                mg.GetYaxis().SetTitle("Information Criteria Value")
+                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
+                if axes:
+                    axes.GetXaxis().SetTitle("Optimization Run")
+                    axes.GetYaxis().SetTitle("Information Criteria Value")
 
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
@@ -2171,8 +2177,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 mg.Add(graphs_sig_ic_aic[it])
                 mg.Add(graphs_sig_ic_bic[it])
                 mg.Draw("ALP")
-                mg.GetXaxis().SetTitle("Optimization Run")
-                mg.GetYaxis().SetTitle("Information Criteria Value")
+                axes = mg.GetHistogram()  # This is the safe way to get axes after drawing
+                if axes:
+                    axes.GetXaxis().SetTitle("Optimization Run")
+                    axes.GetYaxis().SetTitle("Information Criteria Value")
 
                 legend = TLegend(0.7, 0.7, 0.9, 0.9)
                 legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
