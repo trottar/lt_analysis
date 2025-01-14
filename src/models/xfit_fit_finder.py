@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 12:54:48 trottar"
+# Time-stamp: "2025-01-14 13:01:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -158,6 +158,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                ic_aic = float('inf')
+                ic_bic = float('inf')
+                
                 # Parameter range offset (% of param value)
                 param_offset_0 = 0.1
                 param_offset_1 = 0.1                
@@ -183,9 +186,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
-
-                ic_aic = None
-                ic_bic= None
                 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -297,12 +297,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     num_events, num_params, lambda_reg
                                 )
 
-                                # Calculate information criteria
-                                n_samples = g_sig.GetN()
-                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_aic = ic_values['AIC']
-                                ic_bic = ic_values['BIC']
+                                if current_cost != None:
+                                    # Calculate information criteria
+                                    n_samples = g_sig.GetN()
+                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                    ic_aic = ic_values['AIC']
+                                    ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -424,8 +425,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -647,6 +648,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                ic_aic = float('inf')
+                ic_bic = float('inf')
+                
                 # Parameter range offset (% of param value)
                 param_offset_0 = 0.1
                 param_offset_1 = 0.1                                
@@ -673,10 +677,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
-                
-                ic_aic = None
-                ic_bic= None
-                
+                                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Record the start time
@@ -795,12 +796,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     num_events, num_params, lambda_reg
                                 )
                                 
-                                # Calculate information criteria
-                                n_samples = g_sig.GetN()
-                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_aic = ic_values['AIC']
-                                ic_bic = ic_values['BIC']
+
+                                if current_cost != None:# Calculate information criteria
+                                    n_samples = g_sig.GetN()
+                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                    ic_aic = ic_values['AIC']
+                                    ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -935,8 +937,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1134,6 +1136,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                ic_aic = float('inf')
+                ic_bic = float('inf')
+                
                 # Parameter range offset (% of param value)
                 param_offset_0 = 0.1
                 param_offset_1 = 0.1
@@ -1162,9 +1167,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
-
-                ic_aic = None
-                ic_bic= None
                 
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
@@ -1293,12 +1295,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 )
                                 
-                                # Calculate information criteria
-                                n_samples = g_sig.GetN()
-                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_aic = ic_values['AIC']
-                                ic_bic = ic_values['BIC']
+
+                                if current_cost != None:# Calculate information criteria
+                                    n_samples = g_sig.GetN()
+                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                    ic_aic = ic_values['AIC']
+                                    ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -1439,8 +1442,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
@@ -1668,6 +1671,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 lambda_reg = 0.01  # Initial regularization strength
                 cost_history = []
 
+                ic_aic = float('inf')
+                ic_bic = float('inf')
+                
                 # Parameter range offset (% of param value)
                 param_offset_0 = 0.1
                 param_offset_1 = 0.1                                
@@ -1698,10 +1704,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
-                
-                ic_aic = None
-                ic_bic= None
-                
+                                
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
 
                 # Record the start time
@@ -1836,12 +1839,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 )
                                 
-                                # Calculate information criteria
-                                n_samples = g_sig.GetN()
-                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                ic_aic = ic_values['AIC']
-                                ic_bic = ic_values['BIC']
+
+                                if current_cost != None:# Calculate information criteria
+                                    n_samples = g_sig.GetN()
+                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                    ic_aic = ic_values['AIC']
+                                    ic_bic = ic_values['BIC']
 
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
@@ -1987,8 +1991,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_aic)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, best_overall_ic_bic)                            
+                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
+                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
                             print("ERROR: There were no good fits found! Try increasing search parameters or adjusting functional form...")
                             sys.exit(2)
