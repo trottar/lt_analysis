@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 17:15:06 trottar"
+# Time-stamp: "2025-01-13 19:57:46 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -36,7 +36,7 @@ import shutil
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email, request_yn_response
+from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email, request_yn_response, run_bash_script
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -705,42 +705,8 @@ if EPSSET == "high":
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
     # if still iterating weights
     try: 
-        # Run the bash script and capture the output in real-time
-        process = subprocess.Popen(
-            ['bash', '{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"])],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True  # Ensures the output is returned as a string
-        )
-
-        error_detected = False
-
-        # Process stdout and stderr line by line
-        while True:
-            stdout_line = process.stdout.readline()
-            stderr_line = process.stderr.readline()
-
-            if stdout_line:
-                sys.stdout.write(stdout_line)  # Print stdout to the terminal
-                if "2 ERROR:" in stdout_line:
-                    error_detected = True
-
-            if stderr_line:
-                sys.stderr.write(stderr_line)  # Print stderr to the terminal
-                if "2 ERROR:" in stderr_line:
-                    error_detected = True
-
-            # Break if both streams are exhausted
-            if not stdout_line and not stderr_line and process.poll() is not None:
-                break
-
-        # Exit with code 2 if the error was detected
-        if error_detected:
-            sys.exit(2)
-
-        # Ensure the process completes successfully
-        process.wait()
-        
+        # Run the xsect bash script to get ratio, average kinematics, xsects
+        run_bash_script('{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"]))        
     except Exception as e:
         print("1 ERROR: {}".format(e))
         sys.exit(2)

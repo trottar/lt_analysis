@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-08 16:44:09 trottar"
+# Time-stamp: "2025-01-13 19:54:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,6 +18,7 @@ import csv
 from array import array
 import numpy as np
 from datetime import datetime
+import select
 import shutil
 import signal
 import random
@@ -94,6 +95,55 @@ def process_lines(string, file_path):
         for i, line in enumerate(lines):
             if i not in to_remove:
                 file.write(line)
+
+################################################################################################################################################
+
+def run_bash_script(filename, *args):
+    """
+    Runs a bash script with given parameters and outputs real-time logs.
+    
+    :param filename: The bash script file to run.
+    :param args: Additional arguments to pass to the bash script.
+    """
+    # Start the subprocess with args unpacked
+    process = subprocess.Popen(
+        ['bash', filename, *map(str, args)],  # Ensure all args are converted to strings
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1  # Line-buffered
+    )
+
+    error_detected = False
+
+    # Monitor both stdout and stderr
+    streams = [process.stdout, process.stderr]
+
+    while True:
+        readable, _, _ = select.select(streams, [], [])
+
+        for stream in readable:
+            line = stream.readline()
+            if line:
+                if stream is process.stdout:
+                    sys.stdout.write(line)  # Print stdout to terminal
+                    if "ERROR:" in line:
+                        error_detected = True
+                elif stream is process.stderr:
+                    sys.stderr.write(line)  # Print stderr to terminal
+                    if "ERROR:" in line:
+                        error_detected = True
+
+        # Break when both streams are exhausted and process ends
+        if process.poll() is not None and all(stream.closed or stream.read() == '' for stream in streams):
+            break
+
+    # Ensure process completes
+    process.wait()
+
+    # Exit with error code if an error is detected
+    if error_detected:
+        sys.exit(2)
                 
 ################################################################################################################################################
                 
