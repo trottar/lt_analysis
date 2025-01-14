@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 11:27:39 trottar"
+# Time-stamp: "2025-01-14 11:30:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -15,7 +15,7 @@ import ROOT
 from ROOT import TFile, TNtuple, TText, TLatex
 from ROOT import TGraph, TGraphErrors, TMultiGraph, TCanvas
 from ROOT import TF1, TFitResultPtr
-from ROOT import kRed, kBlue, kGreen, kMagenta, kCyan
+from ROOT import kRed, kBlue, kGreen, kMagenta, kCyan, kPink
 import numpy as np
 import math
 import time
