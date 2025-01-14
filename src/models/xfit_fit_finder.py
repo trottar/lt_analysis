@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:01:47 trottar"
+# Time-stamp: "2025-01-14 13:11:00 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -297,14 +297,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     num_events, num_params, lambda_reg
                                 )
 
-                                if current_cost != None:
-                                    # Calculate information criteria
-                                    n_samples = g_sig.GetN()
-                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                    ic_aic = ic_values['AIC']
-                                    ic_bic = ic_values['BIC']
-
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
                                     x = g_sig.GetX()[i]
@@ -361,7 +353,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 par_sig_err_0 = best_errors
 
                                 # Update the temperature
-                                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)                                
+
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -398,7 +397,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
-
+                                
                                 max_param_bounds = max_param_bounds * random.random()
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
@@ -796,14 +795,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     num_events, num_params, lambda_reg
                                 )
                                 
-
-                                if current_cost != None:# Calculate information criteria
-                                    n_samples = g_sig.GetN()
-                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                    ic_aic = ic_values['AIC']
-                                    ic_bic = ic_values['BIC']
-
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
                                     x = g_sig.GetX()[i]
@@ -873,6 +864,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
@@ -1295,14 +1293,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 )
                                 
-
-                                if current_cost != None:# Calculate information criteria
-                                    n_samples = g_sig.GetN()
-                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                    ic_aic = ic_values['AIC']
-                                    ic_bic = ic_values['BIC']
-
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
                                     x = g_sig.GetX()[i]
@@ -1378,6 +1368,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
 
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
+                                
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
@@ -1839,14 +1836,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 )
                                 
-
-                                if current_cost != None:# Calculate information criteria
-                                    n_samples = g_sig.GetN()
-                                    log_likelihood = -current_cost / 2  # Approximate log likelihood from chi-square
-                                    ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
-                                    ic_aic = ic_values['AIC']
-                                    ic_bic = ic_values['BIC']
-
                                 # Create residual plot for this iteration
                                 for i in range(g_sig.GetN()):
                                     x = g_sig.GetX()[i]
@@ -1925,6 +1914,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Update the temperature
                                 temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+
+                                # Calculate information criteria
+                                n_samples = g_sig.GetN()
+                                log_likelihood = -best_cost / 2  # Approximate log likelihood from chi-square
+                                ic_values = calculate_information_criteria(n_samples, num_params, log_likelihood)
+                                ic_aic = ic_values['AIC']
+                                ic_bic = ic_values['BIC']
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
