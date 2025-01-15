@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-15 17:19:02 trottar"
+# Time-stamp: "2025-01-15 17:36:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -148,10 +148,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_ic_bic = float('inf')
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
-
-                # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
                 
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
@@ -196,6 +192,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                     set_optimization = full_optimization
+                    
+                    # Set thresholds on temperature and probability to avoid local minima
+                    temp_threshold = 1e-2  # Temperature should be very low
+                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
+
+                    threshold_minimizer = 5e-2
                     
                     for b in range(len(w_vec)):
 
@@ -411,7 +413,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
                                 #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False                                    
+                                #    set_optimization = False
+                                # Shrink temperature and accepted probability to increase likelyhood of global minima
+                                temp_threshold = temp_threshold-threshold_minimizer
+                                prob_threshold = prob_threshold-threshold_minimizer
+                                
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -639,10 +645,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
-                # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
                 lambda_reg = 0.01  # Initial regularization strength
@@ -687,6 +689,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))
 
                     set_optimization = full_optimization
+                    
+                    # Set thresholds on temperature and probability to avoid local minima
+                    temp_threshold = 1e-2  # Temperature should be very low
+                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
+
+                    threshold_minimizer = 5e-2
                     
                     for b in range(len(w_vec)):
 
@@ -922,7 +930,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
                                 #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False                                    
+                                #    set_optimization = False
+                                # Shrink temperature and accepted probability to increase likelyhood of global minima
+                                temp_threshold = temp_threshold-threshold_minimizer
+                                prob_threshold = prob_threshold-threshold_minimizer
+                                
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1127,10 +1139,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
-                # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
                 lambda_reg = 0.01  # Initial regularization strength
@@ -1177,6 +1185,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                     set_optimization = full_optimization
+                    
+                    # Set thresholds on temperature and probability to avoid local minima
+                    temp_threshold = 1e-2  # Temperature should be very low
+                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
+
+                    threshold_minimizer = 5e-2
                     
                     for b in range(len(w_vec)):
 
@@ -1426,7 +1440,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_ic_aic = ic_aic
                                 best_overall_ic_bic = ic_bic
                                 #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False                                    
+                                #    set_optimization = False
+                                # Shrink temperature and accepted probability to increase likelyhood of global minima
+                                temp_threshold = temp_threshold-threshold_minimizer
+                                prob_threshold = prob_threshold-threshold_minimizer
+                                
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
@@ -1662,10 +1680,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 total_iteration = 0
                 max_param_bounds = initial_param_bounds
 
-                # Set thresholds on temperature and probability to avoid local minima
-                temp_threshold = 1e-2  # Temperature should be very low
-                prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
                 # Regularization strength (used when num_events > num_params)
                 # Initialize adaptive regularization parameters
                 lambda_reg = 0.01  # Initial regularization strength
@@ -1714,6 +1728,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
 
                     set_optimization = full_optimization
+                    
+                    # Set thresholds on temperature and probability to avoid local minima
+                    temp_threshold = 1e-2  # Temperature should be very low
+                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
+
+                    threshold_minimizer = 5e-2
                     
                     for b in range(len(w_vec)):
 
@@ -1975,6 +1995,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_overall_ic_bic = ic_bic
                                 #if best_overall_cost < chi2_threshold:
                                 #    set_optimization = False
+                                # Shrink temperature and accepted probability to increase likelyhood of global minima
+                                temp_threshold = temp_threshold-threshold_minimizer
+                                prob_threshold = prob_threshold-threshold_minimizer
+                                
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
