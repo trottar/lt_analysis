@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-15 11:54:43 trottar"
+# Time-stamp: "2025-01-15 13:07:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2240,6 +2240,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2394,6 +2397,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2551,6 +2557,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2711,6 +2720,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
+                graphs_sig_residuals.append(graph_sig_residuals)
+                graphs_sig_ic_aic.append(graph_sig_aic)
+                graphs_sig_ic_bic.append(graph_sig_bic)
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
