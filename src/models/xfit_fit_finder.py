@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-15 13:07:40 trottar"
+# Time-stamp: "2025-01-15 16:08:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2233,6 +2233,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()                
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(0.0)
                 graphs_sig_p2.append(0.0)
@@ -2390,6 +2393,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()                
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(0.0)
@@ -2550,6 +2556,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()                
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(graph_sig_p2)
@@ -2713,6 +2722,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graph_sig_chi2 = TGraph()
                 graph_sig_temp = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_residuals = TGraph()
+                graph_sig_aic = TGraph()
+                graph_sig_bic = TGraph()                
                 graphs_sig_p0.append(graph_sig_p0)
                 graphs_sig_p1.append(graph_sig_p1)
                 graphs_sig_p2.append(graph_sig_p2)
