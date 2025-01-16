@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-15 22:22:53 trottar"
+# Time-stamp: "2025-01-16 00:02:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -857,7 +857,7 @@ def acceptance_probability(old_cost, new_cost, temperature):
     # Calculate the probability of accepting a worse solution
     if abs(new_cost - 1) < abs(old_cost - 1):
         return 1.0
-    elif temperature == 0:
+    elif temperature <= 1e-15:
         return 0.0
     else:
         return math.exp((old_cost - new_cost) / temperature)
