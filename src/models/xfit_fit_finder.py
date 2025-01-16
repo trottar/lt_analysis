@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-15 18:10:24 trottar"
+# Time-stamp: "2025-01-15 22:30:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2270,6 +2270,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
+
+                # Regularization strength (used when num_events > num_params)
+                # Initialize adaptive regularization parameters
+                lambda_reg = 0.01  # Initial regularization strength
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2311,16 +2315,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                    # Retrieve the chi-squared and degrees of freedom
-                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
-
-                    print(f"\tCost: {red_chi2:.3f}")
+                    # Calculate cost with consistent regularization
+                    current_cost, lambda_reg = calculate_cost(
+                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
+                        num_events, num_params, lambda_reg
+                    )                    
+                    
+                    print(f"\tCost: {current_cost:.3f}")
                     
                     # After the while loop, check if this run found a better solution
-                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = red_chi2
+                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = current_cost
                         best_overall_bin = b
                         best_overall_params = []
                         for j in range(4):
@@ -2430,6 +2435,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
+
+                # Regularization strength (used when num_events > num_params)
+                # Initialize adaptive regularization parameters
+                lambda_reg = 0.01  # Initial regularization strength
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2472,16 +2481,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                    # Retrieve the chi-squared and degrees of freedom
-                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+                    # Calculate cost with consistent regularization
+                    current_cost, lambda_reg = calculate_cost(
+                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
+                        num_events, num_params, lambda_reg
+                    )                    
                     
-                    print(f"\tCost: {red_chi2:.3f}")
+                    print(f"\tCost: {current_cost:.3f}")
                     
                     # After the while loop, check if this run found a better solution
-                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = red_chi2
+                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = current_cost
                         best_overall_bin = b
                         best_overall_params = []                        
                         for j in range(4):
@@ -2593,6 +2603,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
+
+                # Regularization strength (used when num_events > num_params)
+                # Initialize adaptive regularization parameters
+                lambda_reg = 0.01  # Initial regularization strength
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2636,16 +2650,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                    # Retrieve the chi-squared and degrees of freedom
-                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+                    # Calculate cost with consistent regularization
+                    current_cost, lambda_reg = calculate_cost(
+                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
+                        num_events, num_params, lambda_reg
+                    )                    
 
-                    print(f"\tCost: {red_chi2:.3f}")
+                    print(f"\tCost: {current_cost:.3f}")
                     
                     # After the while loop, check if this run found a better solution
-                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = red_chi2
+                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = current_cost
                         best_overall_bin = b
                         best_overall_params = []                        
                         for j in range(4):
@@ -2759,6 +2774,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_residuals.append(graph_sig_residuals)
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
+
+                # Regularization strength (used when num_events > num_params)
+                # Initialize adaptive regularization parameters
+                lambda_reg = 0.01  # Initial regularization strength
                 
                 best_overall_cost = float('inf')  # Initialize with infinity
                 best_overall_params = []
@@ -2803,16 +2822,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                     r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
-                    # Retrieve the chi-squared and degrees of freedom
-                    chi2 = f_sig.GetChisquare()  # Get the chi-squared value
-                    ndf = f_sig.GetNDF()         # Get the number of degrees of freedom
-                    red_chi2 = chi2 / ndf    # Calculate reduced chi-squared
+                    # Calculate cost with consistent regularization
+                    current_cost, lambda_reg = calculate_cost(
+                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
+                        num_events, num_params, lambda_reg
+                    )
 
-                    print(f"\tCost: {red_chi2:.3f}")
+                    print(f"\tCost: {current_cost:.3f}")
                     
                     # After the while loop, check if this run found a better solution
-                    if abs(red_chi2 - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = red_chi2
+                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
+                        best_overall_cost = current_cost
                         best_overall_bin = b
                         best_overall_params = []                        
                         for j in range(4):
@@ -2862,7 +2882,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 f_sig.FixParameter(0, par_vec[4*it])
                 f_sig.FixParameter(1, par_vec[4*it+1]) 
                 f_sig.FixParameter(2, par_vec[4*it+2])
-                f_sig.FixParameter(3, par_vec[4*it+3])                
+                f_sig.FixParameter(3, par_vec[4*it+3])
 
                 # Evaluate the fit function at several points to determine its range
                 n_points = 100  # Number of points to evaluate the fit function

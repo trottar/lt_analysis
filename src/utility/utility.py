@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-14 13:34:10 trottar"
+# Time-stamp: "2025-01-15 22:22:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -957,7 +957,8 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
         and best_lambda is the optimal regularization parameter
     """
     # Calculate basic chi-square from the fit
-    chi_square = f_sig.GetChisquare()
+    chi_square = f_sig.GetChisquare()  # Get the chi-squared value
+    nu = f_sig.GetNDF() # Get the number of degrees of freedom
 
     try:
         # Calculate L2 regularization term
@@ -1008,7 +1009,7 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
                 best_lambda = lambda_try
     else:
         # For overdetermined case, use standard reduced chi-square with small regularization
-        best_cost = (chi_square + lambda_reg * l2_reg) / (num_events - num_params)
+        best_cost = (chi_square + lambda_reg * l2_reg) / nu
         best_lambda = lambda_reg
     
     return best_cost, best_lambda
