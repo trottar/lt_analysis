@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-30 14:45:02 trottar"
+# Time-stamp: "2025-01-16 03:12:44 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -117,7 +117,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
         lines = infile.readlines()    
 
     iter_arr = [f.rstrip('\n') for f in lines]
-    #del iter_arr[0] # Delete 0th iteration to show only fits
+    del iter_arr[0] # Delete 0th iteration to show only fits
     iter_start = iter_arr[0]
     iter_end = iter_arr[-1]
     iterations = len(lines)-1
