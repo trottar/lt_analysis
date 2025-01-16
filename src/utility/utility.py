@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-16 00:02:08 trottar"
+# Time-stamp: "2025-01-16 00:02:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -854,14 +854,15 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1):
     return param + perturbation
 
 def acceptance_probability(old_cost, new_cost, temperature):
-    # Calculate the probability of accepting a worse solution
-    if abs(new_cost - 1) < abs(old_cost - 1):
-        return 1.0
-    elif temperature <= 1e-15:
+    try:
+        # Calculate the probability of accepting a worse solution
+        if abs(new_cost - 1) < abs(old_cost - 1):
+            return 1.0
+        else:
+            return math.exp((old_cost - new_cost) / temperature)
+    except OverflowError:
         return 0.0
-    else:
-        return math.exp((old_cost - new_cost) / temperature)
-    
+        
 def adjust_params(params, adjustment_factor=0.1):
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
