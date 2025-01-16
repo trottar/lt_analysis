@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 14:22:19 trottar"
+# Time-stamp: "2025-01-16 14:04:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -124,6 +124,7 @@ def iterWeight(arg_str):
     #print("weight_prev_iter",weight_prev_iter)
     
     if wtn < 0.0:
-        return [float(weight_prev_iter), float(sig_prev_iter)]
+        #return [float(weight_prev_iter), float(sig_prev_iter)]
+        return [0.0, 0.0]
     else:
         return [float(wtn),float(sig)]
