@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-16 00:02:52 trottar"
+# Time-stamp: "2025-01-17 03:43:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1178,31 +1178,31 @@ def prepare_equations(equations, sig_type):
     if sig_type == "sig_L":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4):\n"
-        func_str += "        par1 = par1 if par1 != 0 else par1 + tiny_offset\n"
-        func_str += "        par2 = par2 if par2 != 0 else par2 + tiny_offset\n"
-        func_str += "        par3 = par3 if par3 != 0 else par3 + tiny_offset\n"
-        func_str += "        par4 = par4 if par4 != 0 else par4 + tiny_offset\n"
+        func_str += "        par1 = par1 if par1 > 1e-15 else par1 + tiny_offset\n"
+        func_str += "        par2 = par2 if par2 > 1e-15 else par2 + tiny_offset\n"
+        func_str += "        par3 = par3 if par3 > 1e-15 else par3 + tiny_offset\n"
+        func_str += "        par4 = par4 if par4 > 1e-15 else par4 + tiny_offset\n"
     elif sig_type == "sig_T":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8):\n"
-        func_str += "        par6 = par6 if par6 != 0 else par5 + tiny_offset\n"
-        func_str += "        par6 = par6 if par6 != 0 else par6 + tiny_offset\n"
-        func_str += "        par7 = par7 if par7 != 0 else par7 + tiny_offset\n"
-        func_str += "        par8 = par8 if par8 != 0 else par8 + tiny_offset\n"
+        func_str += "        par6 = par6 if par6 > 1e-15 else par5 + tiny_offset\n"
+        func_str += "        par6 = par6 if par6 > 1e-15 else par6 + tiny_offset\n"
+        func_str += "        par7 = par7 if par7 > 1e-15 else par7 + tiny_offset\n"
+        func_str += "        par8 = par8 if par8 > 1e-15 else par8 + tiny_offset\n"
     elif sig_type == "sig_LT":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
-        func_str += "        par9 = par9 if par9 != 0 else par9 + tiny_offset\n"
-        func_str += "        par10 = par10 if par10 != 0 else par10 + tiny_offset\n"
-        func_str += "        par11 = par11 if par11 != 0 else par11 + tiny_offset\n"
-        func_str += "        par12 = par12 if par12 != 0 else par12 + tiny_offset\n"
+        func_str += "        par9 = par9 if par9 > 1e-15 else par9 + tiny_offset\n"
+        func_str += "        par10 = par10 if par10 > 1e-15 else par10 + tiny_offset\n"
+        func_str += "        par11 = par11 if par11 > 1e-15 else par11 + tiny_offset\n"
+        func_str += "        par12 = par12 if par12 > 1e-15 else par12 + tiny_offset\n"
     elif sig_type == "sig_TT":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
-        func_str += "        par13 = par13 if par13 != 0 else par13 + tiny_offset\n"
-        func_str += "        par14 = par14 if par14 != 0 else par14 + tiny_offset\n"
-        func_str += "        par15 = par15 if par15 != 0 else par15 + tiny_offset\n"
-        func_str += "        par16 = par16 if par16 != 0 else par16 + tiny_offset\n"
+        func_str += "        par13 = par13 if par13 > 1e-15 else par13 + tiny_offset\n"
+        func_str += "        par14 = par14 if par14 > 1e-15 else par14 + tiny_offset\n"
+        func_str += "        par15 = par15 if par15 > 1e-15 else par15 + tiny_offset\n"
+        func_str += "        par16 = par16 if par16 > 1e-15 else par16 + tiny_offset\n"
     elif sig_type == "wfactor":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
