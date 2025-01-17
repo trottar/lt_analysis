@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-17 03:43:17 trottar"
+# Time-stamp: "2025-01-17 03:56:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1218,10 +1218,10 @@ def prepare_equations(equations, sig_type):
         sys.exit(2)
 
     # Add checks to avoid zero values
-    func_str += "        qq = qq if qq != 0 else qq + tiny_offset\n"
-    func_str += "        ww = ww if ww != 0 else ww + tiny_offset\n"
-    func_str += "        tt = tt if tt != 0 else tt + tiny_offset\n"
-    func_str += "        theta_cm = theta_cm if theta_cm != 0 else theta_cm + tiny_offset\n"
+    func_str += "        qq = qq if qq > 1e-15 else qq + tiny_offset\n"
+    func_str += "        ww = ww if ww > 1e-15 else ww + tiny_offset\n"
+    func_str += "        tt = tt if tt > 1e-15 else tt + tiny_offset\n"
+    func_str += "        theta_cm = theta_cm if theta_cm > 1e-15 else theta_cm + tiny_offset\n"
 
     # Build function body with equations
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
