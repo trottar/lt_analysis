@@ -48,7 +48,7 @@ sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)**(par1
 
 # Transverse-Transverse interference term
 # 0th iteration,
-sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+#sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 #
 #sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
 # Marco's thesis
@@ -70,6 +70,7 @@ sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 ####
 # (chi2>4.2) 12/18 21:55
 ###sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT
 # (chi2>2.8)  Discontinuity in fit
 ###sig_TT = (par13 + par14 * (math.exp(-par15 * math.fabs(tt)**2) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT) * (math.sin(theta_cm)**2)
 ####
