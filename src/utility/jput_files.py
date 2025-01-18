@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-12-29 21:20:13 trottar"
+# Time-stamp: "2025-01-18 07:07:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -35,7 +35,9 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-inp_dir = sys.argv[1]
+Q2 = sys.argv[1]
+W = sys.argv[2]
+inp_dir = sys.argv[3]
 
 def generate_file_batches(source_dir, batch_size=100):
     """
@@ -82,8 +84,8 @@ def run_jput_in_batches(source_dir, dest_prefix, batch_size=100):
             break
 
 # Parameters
-source_directory = f"/group/c-kaonlt/USERS/{USER}/lt_analysis/OUTPUT/Analysis/KaonLT/cache_transfer/kaon/Q3p0W3p14/{inp_dir}"  # Source directory
-destination_prefix = f"/mss/hallc/kaonlt/{USER}/kaon/Q3p0W3p14/{inp_dir}"  # Destination prefix
+source_directory = f"/group/c-kaonlt/USERS/{USER}/lt_analysis/OUTPUT/Analysis/KaonLT/cache_transfer/kaon/Q{Q2}W{W}/{inp_dir}"  # Source directory
+destination_prefix = f"/mss/hallc/kaonlt/{USER}/kaon/Q{Q2}W{W}/{inp_dir}"  # Destination prefix
 
 # Run jput command in batches
 run_jput_in_batches(source_directory, destination_prefix, batch_size=50)
