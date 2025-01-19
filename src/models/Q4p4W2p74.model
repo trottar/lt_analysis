@@ -24,17 +24,17 @@ Qdep_TT = qq * math.exp(-qq)
 
 # Longitudinal cross-section
 # 0th, 1st iteration, (chi2~1.2)
-#sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
+sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 ####
-sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.fabs(tt)**(par4))
+#sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.fabs(tt)**(par4))
 ####  
 
 # Transverse cross-section
 # 0th, 1st iteration, (chi2~2.6)
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 ####
 #  (chi2)
-sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+###sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
 ####
 
 # Longitudinal-Transverse interference term

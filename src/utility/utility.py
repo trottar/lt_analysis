@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-17 03:56:37 trottar"
+# Time-stamp: "2025-01-19 17:53:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1012,7 +1012,10 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
         # For overdetermined case, use standard reduced chi-square with small regularization
         best_cost = (chi_square + lambda_reg * l2_reg) / nu
         best_lambda = lambda_reg
-    
+
+    best_cost = (chi_square + lambda_reg * l2_reg) / nu
+    best_lambda = lambda_reg
+        
     return best_cost, best_lambda
 
 ################################################################################################################################################
