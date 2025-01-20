@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-19 22:57:05 trottar"
+# Time-stamp: "2025-01-19 22:58:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -435,7 +435,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            sys.exit(2)
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -954,7 +953,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            sys.exit(2)
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -1467,7 +1465,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            sys.exit(2)
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
@@ -2025,7 +2022,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            sys.exit(2)
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
                     
                 try:
