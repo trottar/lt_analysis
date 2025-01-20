@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-19 23:55:08 trottar"
+# Time-stamp: "2025-01-20 00:03:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -397,7 +397,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
                                 
-                                max_param_bounds = max_param_bounds * random.random()
+                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
@@ -913,7 +913,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
 
-                                max_param_bounds = max_param_bounds * random.random()
+                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
@@ -1423,7 +1423,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
 
-                                max_param_bounds = max_param_bounds * random.random()
+                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
@@ -1978,7 +1978,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
 
-                                max_param_bounds = max_param_bounds * random.random()
+                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
