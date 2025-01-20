@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-20 00:13:43 trottar"
+# Time-stamp: "2025-01-20 00:19:33 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -397,7 +397,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
                                 
-                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
+                                max_param_bounds = max_param_bounds * random.uniform(1e-15, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
@@ -418,19 +418,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temp_threshold = temp_threshold-threshold_minimizer
                                 prob_threshold = prob_threshold-threshold_minimizer
 
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
                                 
                         try:                                    
@@ -928,7 +928,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
 
-                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
+                                max_param_bounds = max_param_bounds * random.uniform(1e-15, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
@@ -949,21 +949,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temp_threshold = temp_threshold-threshold_minimizer
                                 prob_threshold = prob_threshold-threshold_minimizer
 
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p1[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p1[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p1[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
                                 
                         try:                                    
@@ -1455,7 +1455,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
 
-                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
+                                max_param_bounds = max_param_bounds * random.uniform(1e-15, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
                         
@@ -1476,23 +1476,23 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temp_threshold = temp_threshold-threshold_minimizer
                                 prob_threshold = prob_threshold-threshold_minimizer
 
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p1[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p1[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p1[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p2[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p2[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p2[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
                                 
                         try:                                    
@@ -2029,7 +2029,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 # Increase temperature slightly to encourage exploration
                                 temperature = min(temperature * 1.2, initial_temperature)
 
-                                max_param_bounds = max_param_bounds * random.uniform(1, 10)
+                                max_param_bounds = max_param_bounds * random.uniform(1e-15, 10)
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0                
                         
@@ -2050,27 +2050,27 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 temp_threshold = temp_threshold-threshold_minimizer
                                 prob_threshold = prob_threshold-threshold_minimizer
 
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p1[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p1[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p1[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p2[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p2[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p2[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p3[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_p3[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_p3[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, 1e-10)
+                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iterations+1)
                         graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, 1e-10)
-                        graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                                
+                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iterations+1)
+                        graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)
+
                         try:                                    
                             # Update ROOT TGraphs for plotting
                             graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
