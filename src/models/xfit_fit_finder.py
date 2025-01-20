@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-19 22:54:50 trottar"
+# Time-stamp: "2025-01-19 22:57:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -428,7 +428,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))
                         except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
@@ -946,8 +946,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
@@ -1458,9 +1458,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, 0.0)
+                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
@@ -2015,10 +2015,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
                             graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
                         except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
-                            graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, best_overall_params[3])
+                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
+                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, 0.0)
+                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, 0.0)
+                            graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
                             graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
