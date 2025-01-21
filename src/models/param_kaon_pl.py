@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-16 17:10:04 trottar"
+# Time-stamp: "2025-01-21 10:30:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -62,40 +62,6 @@ def iterWeight(arg_str):
     fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
-    '''
-    # Calculate SigL, SigT, SigLT, SigTT
-    try:
-        sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
-    except (ZeroDivisionError, OverflowError, TypeError):
-        sig_L = float('inf')
-
-    try:
-        sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
-    except (ZeroDivisionError, OverflowError, TypeError):
-        sig_T = float('inf')
-
-    try:
-        sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    except (ZeroDivisionError, OverflowError, TypeError):
-        sig_LT = float('inf')
-
-    try:
-        sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
-    except (ZeroDivisionError, OverflowError, TypeError):
-        sig_TT = float('inf')
-
-    # Calculate W-factor
-    try:
-        wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
-    except (ZeroDivisionError, OverflowError, TypeError):
-        wfactor = float('inf')
-
-    # Remove bad events which extend beyond threshold of +/-1.0 GeV^2
-    if abs(q2_set-qq) > 1.0 or abs(w_set-ww) > 1.0:
-        #return [0.0, 0.0]
-        return [float(weight_prev_iter), float(sig_prev_iter)]
-    '''
-    
     # Calculate SigL, SigT, SigLT, SigTT
     sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
     sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
@@ -126,8 +92,7 @@ def iterWeight(arg_str):
     #print("wtn",wtn)
     #print("weight_prev_iter",weight_prev_iter)
     
-    if wtn < 0.0:
-        #return [float(weight_prev_iter), float(sig_prev_iter)]
+    if wtn <= 0.0:
         return [0.0, 0.0]
     else:
         return [float(wtn),float(sig)]

@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2025-01-02 01:14:06 trottar"
+# Time-stamp: "2025-01-21 10:37:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -346,6 +346,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
+
+          # Check for bad events
+          if np.all(iter_lst == 0.0):
+              continue
           
           Weight_array[0] = evt.iter_weight
           sigcm_array[0] = evt.iter_sig
@@ -373,6 +377,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
+          
+          # Check for bad events
+          if np.all(iter_lst == 0.0):
+              continue
           
           Weight_array[0] = evt.Weight
           sigcm_array[0] = evt.sigcm
