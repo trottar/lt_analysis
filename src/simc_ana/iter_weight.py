@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2025-01-21 18:18:54 trottar"
+# Time-stamp: "2025-01-21 20:34:39 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -348,7 +348,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_lst = iterWeight(inp_param)
 
           # Check for bad events
-          if iter_lst[0] == 0.0):
+          if iter_lst[0] == 0.0:
               print("!!!!!!!!",iter_lst)
               continue
           
@@ -380,7 +380,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_lst = iterWeight(inp_param)
           
           # Check for bad events
-          if iter_lst[0] == 0.0):
+          if iter_lst[0] == 0.0:
               print("!!!!!!!!",iter_lst)
               continue
           
