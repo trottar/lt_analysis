@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2025-01-22 10:50:47 trottar"
+# Time-stamp: "2025-01-22 10:59:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -400,4 +400,4 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
 
-    print(f"\n\nThere were {sum(bad_events)}/{total_events} bad events skipped...")
+    print(f"\n\nThere were {len(bad_events)}/{total_events} bad events skipped...")
