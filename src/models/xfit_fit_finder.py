@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-22 12:21:16 trottar"
+# Time-stamp: "2025-01-22 12:24:15 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -221,11 +221,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_errors = [par_sig_err_0]
                         previous_params = best_params[:]
 
-                        # Check for local minima
-                        local_minima = []
-                        local_iterations = 0
-                        tabu_list = set()
-
                         # Local search
                         local_search_interval = 25
 
@@ -241,16 +236,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             try:
                                 # Perturb parameters
 
-                                current_params = [simulated_annealing(par_sig_0, temperature)]
+                                current_params = [
+                                    simulated_annealing(par_sig_0, temperature)
+                                ]
 
-                                # Insert tabu list check here
-                                if tuple(current_params) not in tabu_list:
-                                    tabu_list.add(tuple(current_params))
-                                else:
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
 
                                 g_sig = TGraphErrors()
                                 for i in range(nsep.GetSelectedRows()):
@@ -708,10 +701,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_errors = [par_sig_err_0, par_sig_err_1]
                         previous_params = best_params[:]
 
-                        # Check for local minima
-                        local_minima = []
-                        tabu_list = set()
-
                         # Local search
                         local_search_interval = 25
 
@@ -730,16 +719,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 current_params = [
                                     simulated_annealing(par_sig_0, temperature),
                                     simulated_annealing(par_sig_1, temperature)
-                                ]
-                                
-                                # Insert tabu list check here
-                                if tuple(current_params) not in tabu_list:
-                                    tabu_list.add(tuple(current_params))
-                                else:
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
+                                ]                                
+
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
 
                                 g_sig = TGraphErrors()
                                 for i in range(nsep.GetSelectedRows()):
@@ -834,11 +819,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     n_samples = len(w_vec)
                                     ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                     ic_aic, ic_bic = ic_values
-
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
 
                                 previous_params = current_params[:]
 
@@ -1198,10 +1178,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
                         previous_params = best_params[:]
 
-                        # Check for local minima
-                        local_minima = []
-                        tabu_list = set()
-
                         # Local search
                         local_search_interval = 25
 
@@ -1224,14 +1200,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     simulated_annealing(par_sig_2, temperature)
                                 ]
                                 
-                                # Insert tabu list check here
-                                if tuple(current_params) not in tabu_list:
-                                    tabu_list.add(tuple(current_params))
-                                else:
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
 
                                 g_sig = TGraphErrors()
                                 for i in range(nsep.GetSelectedRows()):
@@ -1333,11 +1305,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     n_samples = len(w_vec)
                                     ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                     ic_aic, ic_bic = ic_values
-
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
 
                                 previous_params = current_params[:]
 
@@ -1735,11 +1702,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
                         previous_params = best_params[:]
 
-                        # Check for local minima
-                        local_minima = []
-                        local_iterations = 0
-                        tabu_list = set()
-
                         # Local search
                         local_search_interval = 25
 
@@ -1762,14 +1724,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     simulated_annealing(par_sig_3, temperature),
                                 ]
                                 
-                                # Insert tabu list check here
-                                if tuple(current_params) not in tabu_list:
-                                    tabu_list.add(tuple(current_params))
-                                else:
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
+                                # Restart from initial parameters
+                                current_params = initial_params
+                                temperature = initial_temperature
+                                unchanged_iterations = 0
 
                                 g_sig = TGraphErrors()
                                 for i in range(nsep.GetSelectedRows()):
