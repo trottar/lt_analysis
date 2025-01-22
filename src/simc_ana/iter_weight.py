@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2025-01-21 20:34:39 trottar"
+# Time-stamp: "2025-01-21 21:37:54 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -316,6 +316,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
+    # Keep track of bad events
+    bad_events = []
+    
     print("\nRecalculating weight for %s simc..." % phi_setting)
     for i,evt in enumerate(TBRANCH_SIMC):
 
@@ -349,7 +352,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
           # Check for bad events
           if iter_lst[0] == 0.0:
-              print("!!!!!!!!",iter_lst)
+              bad_events.append(i)
               continue
           
           Weight_array[0] = evt.iter_weight
@@ -378,10 +381,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
           iter_lst = iterWeight(inp_param)
-          
+
           # Check for bad events
           if iter_lst[0] == 0.0:
-              print("!!!!!!!!",iter_lst)
+              bad_events.append(i)
               continue
           
           Weight_array[0] = evt.Weight
@@ -395,3 +398,5 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
+
+    print(f"\n\nThere were {sum(bad_events)} bad events skipped...")
