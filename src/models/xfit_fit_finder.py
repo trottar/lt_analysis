@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-22 12:19:53 trottar"
+# Time-stamp: "2025-01-22 12:21:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -345,14 +345,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                                # Check if current_params are close to any local minimum
-                                if any(np.allclose([current_params], minima, atol=5.0) for minima in local_minima):
-                                    #print("WARNING: Parameters p0={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params))
-
-                                    current_params = adjust_params(best_params)
-                                    par_sig_0 = current_params
-                                    par_sig_err_0 = [0.0]
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -860,14 +852,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
 
-                                # Check if current_params are close to any local minimum
-                                if any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):
-                                    #print("WARNING: Parameters p0={:.3e}, p1={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1]))
-
-                                    current_params = adjust_params(best_params)
-                                    par_sig_0, par_sig_1 = current_params
-                                    par_sig_err_0, par_sig_err_1 = [0.0 for _ in range(num_params)]
-
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
                                 # Generate safer parameter values within reasonable bounds
@@ -1366,14 +1350,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                                # Check if current_params are close to any local minimum
-                                if any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                                    #print("WARNING: Parameters p0={:.3e}, p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
-
-                                    current_params = adjust_params(best_params)
-                                    par_sig_0, par_sig_1, par_sig_2 = current_params
-                                    par_sig_err_0, par_sig_err_1, par_sig_err_2 = [0.0 for _ in range(num_params)]
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
@@ -1913,14 +1889,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 iteration += 1
                                 total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                                # Check if current_params are close to any local minimum
-                                if any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):
-                                    #print("WARNING: Parameters p0={:.3e}, p1={:.3e}, p2={:.3e} are a local minima. Adjusting parameter limits and retrying...".format(current_params[0], current_params[1], current_params[2]))
-
-                                    current_params = adjust_params(best_params)
-                                    par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
-                                    par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = [0.0 for _ in range(num_params)]
 
                             except (TypeError or ZeroDivisionError) as e:
                                 #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
