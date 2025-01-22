@@ -3,7 +3,7 @@
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
-# Time-stamp: "2025-01-22 10:34:59 trottar"
+# Time-stamp: "2025-01-22 10:50:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -318,12 +318,13 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Keep track of bad events
     bad_events = []
+    total_events = TBRANCH_SIMC.GetEntries()
     
     print("\nRecalculating weight for %s simc..." % phi_setting)
     for i,evt in enumerate(TBRANCH_SIMC):
 
       # Progress bar
-      Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
+      Misc.progressBar(i, total_events,bar_length=25)
 
       TBRANCH_SIMC.GetEntry(i)
 
@@ -399,4 +400,4 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
 
-    print(f"\n\nThere were {sum(bad_events)/TBRANCH_SIMC.GetEntries()} bad events skipped...")
+    print(f"\n\nThere were {sum(bad_events)}/{total_events} bad events skipped...")
