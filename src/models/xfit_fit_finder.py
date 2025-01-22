@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-22 12:17:58 trottar"
+# Time-stamp: "2025-01-22 12:18:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -343,7 +343,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Adjust the cooling rate if parameters haven't changed for N iterations
                                 if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!1",here)
+                                    print("!!!!!!!!!!!here")
                                     if not any(np.allclose([current_params[0]], minima, atol=5.0) for minima in local_minima):                    
                                         local_minima.append([
                                             current_params[0]
@@ -873,7 +873,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Adjust the cooling rate if parameters haven't changed for N iterations
                                 if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!1",here)
+                                    print("!!!!!!!!!!!here")
                                     if not any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):                    
                                         local_minima.append([
                                             current_params[0],
@@ -1400,7 +1400,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Adjust the cooling rate if parameters haven't changed for N iterations
                                 if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!1",here)
+                                    print("!!!!!!!!!!!here")
                                     if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
                                         local_minima.append([
                                             current_params[0],
@@ -1975,7 +1975,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                                 # Adjust the cooling rate if parameters haven't changed for N iterations
                                 if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!1",here)
+                                    print("!!!!!!!!!!!here")
                                     if not any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):                    
                                         local_minima.append([
                                             current_params[0],
