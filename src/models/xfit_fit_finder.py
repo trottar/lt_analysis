@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-22 12:18:55 trottar"
+# Time-stamp: "2025-01-22 12:19:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -333,25 +333,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 if iteration % local_search_interval == 0:
                                     current_params = local_search(current_params, f_sig, num_params)
                                     par_sig_0 = current_params
-
-                                # Check if current parameters haven't changed for the past N iterations
-                                if len(params_sig_history['p0']) >= max_unchanged_iterations:
-                                    if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0):
-                                        unchanged_iterations += 1
-                                    else:
-                                        unchanged_iterations = 0
-
-                                # Adjust the cooling rate if parameters haven't changed for N iterations
-                                if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!here")
-                                    if not any(np.allclose([current_params[0]], minima, atol=5.0) for minima in local_minima):                    
-                                        local_minima.append([
-                                            current_params[0]
-                                        ])
-                                    # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
 
                                 previous_params = current_params[:]
 
@@ -862,24 +843,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                     ic_aic, ic_bic = ic_values
 
-                                # Check if current parameters haven't changed for the past N iterations
-                                if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
-                                   len(params_sig_history['p1']) >= max_unchanged_iterations:
-                                    if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
-                                       np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0):
-                                        unchanged_iterations += 1        
-                                    else:
-                                        unchanged_iterations = 0
-
-                                # Adjust the cooling rate if parameters haven't changed for N iterations
-                                if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!here")
-                                    if not any(np.allclose([current_params[0], current_params[1]], minima, atol=5.0) for minima in local_minima):                    
-                                        local_minima.append([
-                                            current_params[0],
-                                            current_params[1]
-                                        ])
-
                                     # Restart from initial parameters
                                     current_params = initial_params
                                     temperature = initial_temperature
@@ -1386,27 +1349,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                     n_samples = len(w_vec)
                                     ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
                                     ic_aic, ic_bic = ic_values
-
-                                # Check if current parameters haven't changed for the past N iterations
-                                if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
-                                   len(params_sig_history['p1']) >= max_unchanged_iterations  and \
-                                   len(params_sig_history['p2']) >= max_unchanged_iterations:
-                                    if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
-                                       np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0) and \
-                                       np.allclose(round(params_sig_history['p2'][-2], 3), round(params_sig_history['p2'][-1], 3), atol=5.0):
-                                        unchanged_iterations += 1
-                                    else:
-                                        unchanged_iterations = 0
-
-                                # Adjust the cooling rate if parameters haven't changed for N iterations
-                                if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!here")
-                                    if not any(np.allclose([current_params[0], current_params[1], current_params[2]], minima, atol=5.0) for minima in local_minima):
-                                        local_minima.append([
-                                            current_params[0],
-                                            current_params[1],
-                                            current_params[2]
-                                        ])
 
                                     # Restart from initial parameters
                                     current_params = initial_params
@@ -1959,34 +1901,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 if iteration % local_search_interval == 0:
                                     current_params = local_search(current_params, f_sig, num_params)
                                     par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
-
-                                # Check if current parameters haven't changed for the past N iterations
-                                if len(params_sig_history['p0']) >= max_unchanged_iterations  and \
-                                   len(params_sig_history['p1']) >= max_unchanged_iterations  and \
-                                   len(params_sig_history['p2']) >= max_unchanged_iterations  and \
-                                   len(params_sig_history['p3']) >= max_unchanged_iterations:
-                                    if np.allclose(round(params_sig_history['p0'][-2], 3), round(params_sig_history['p0'][-1], 3), atol=5.0) and \
-                                       np.allclose(round(params_sig_history['p1'][-2], 3), round(params_sig_history['p1'][-1], 3), atol=5.0) and \
-                                       np.allclose(round(params_sig_history['p2'][-2], 3), round(params_sig_history['p2'][-1], 3), atol=5.0) and \
-                                       np.allclose(round(params_sig_history['p3'][-2], 3), round(params_sig_history['p3'][-1], 3), atol=5.0):
-                                        unchanged_iterations += 1
-                                    else:
-                                        unchanged_iterations = 0
-
-                                # Adjust the cooling rate if parameters haven't changed for N iterations
-                                if unchanged_iterations >= max_unchanged_iterations:
-                                    print("!!!!!!!!!!!here")
-                                    if not any(np.allclose([current_params[0], current_params[1], current_params[2], current_params[3]], minima, atol=5.0) for minima in local_minima):                    
-                                        local_minima.append([
-                                            current_params[0],
-                                            current_params[1],
-                                            current_params[2],
-                                            current_params[3]
-                                        ])
-                                        # Restart from initial parameters
-                                    current_params = initial_params
-                                    temperature = initial_temperature
-                                    unchanged_iterations = 0
 
                                 previous_params = current_params[:]                
 
