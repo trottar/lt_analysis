@@ -20,7 +20,7 @@ ftav = (math.fabs(tt) - tav) / tav
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
-Qdep_LT = (math.exp(-qq**2)) / qq
+Qdep_LT = 1 / qq
 Qdep_TT = qq * math.exp(-qq)
 
 # Longitudinal cross-section
@@ -45,7 +45,7 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 ####
 # 1st iteration, (chi2~0.5)
 ###sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)**(par12))
-sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)**(par12)) * Qdep_LT * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)**(par12)) * Qdep_LT
 ####
 
 # Transverse-Transverse interference term
