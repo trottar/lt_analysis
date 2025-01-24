@@ -18,10 +18,14 @@ tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 ##tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
+#Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+#Qdep_T = (math.exp(-qq**2)) / qq
+#Qdep_LT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+#Qdep_TT = qq * math.exp(-qq)
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
-Qdep_T = (math.exp(-qq**2)) / qq
+Qdep_T = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_LT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
-Qdep_TT = qq * math.exp(-qq)
+Qdep_TT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 
 # Longitudinal cross-section
 # 0th, 1st iteration, (chi2~1.2)
@@ -78,14 +82,14 @@ sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(t
 
 # Weight factor for Q2=4.4, W=2.74
 # 0th iteration, 
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 # Q2=4.4, W=2.74
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.65
 # From linear fit of all Q2
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 # From quadratic fit of all Q2
 # 2nd iteration, 
-##wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 
 ################################################################################
 # Previous iterations
