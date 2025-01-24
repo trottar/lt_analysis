@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-24 01:54:26 trottar"
+# Time-stamp: "2025-01-24 01:57:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,8 +81,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     full_optimization = True
 
     # Fixed separated xsect parameterization
-    #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["LT", "T", "L", "TT"]
+    fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
     #fixed_params = ["T", "LT", "TT"]
     #fixed_params = ["L", "LT"]
     #fixed_params = ["TT"]
