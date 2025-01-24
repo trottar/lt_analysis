@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-24 02:25:17 trottar"
+# Time-stamp: "2025-01-24 11:45:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -200,7 +200,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     threshold_minimizer = 5e-2
                     
                     #for b in range(len(w_vec)):
-                    for b in [2]:
+                    for b in [0]:
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
@@ -679,7 +679,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     threshold_minimizer = 5e-2
                     
                     #for b in range(len(w_vec)):
-                    for b in [2]:
+                    for b in [0]:
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
@@ -1155,7 +1155,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     threshold_minimizer = 5e-2
                     
                     #for b in range(len(w_vec)):
-                    for b in [2]:
+                    for b in [0]:
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
@@ -1678,7 +1678,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     threshold_minimizer = 5e-2
                     
                     #for b in range(len(w_vec)):
-                    for b in [2]:
+                    for b in [0]:
 
                         print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
@@ -2202,7 +2202,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = 0  # Initialize best bin tracker
                 
                 #for b in range(len(w_vec)):
-                for b in [2]:
+                for b in [0]:
                     
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     
@@ -2368,7 +2368,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = 0  # Initialize best bin tracker
                 
                 #for b in range(len(w_vec)):
-                for b in [2]:
+                for b in [0]:
 
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     
@@ -2537,7 +2537,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = 0  # Initialize best bin tracker
                 
                 #for b in range(len(w_vec)):
-                for b in [2]:
+                for b in [0]:
                     
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     
@@ -2709,7 +2709,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 best_overall_bin = 0  # Initialize best bin tracker
                 
                 #for b in range(len(w_vec)):
-                for b in [2]:
+                for b in [0]:
                     
                     print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     
