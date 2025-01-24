@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-22 18:33:18 trottar"
+# Time-stamp: "2025-01-24 02:25:17 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -2149,10 +2149,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
             sig_name = key
             # Grab parameters used by functional forms
-            num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
+            num_params, old_params, equation_str = inpDict["initial_params"](sig_name, val)
 
             # Checks initial parameters and replaces zeros to avoid errors
-            initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
+            initial_params = [v if abs(v) > 0.0 else 1.0 for v in par_vec[4*it:4*(it+1)]]
 
             # String list of initial parameters
             param_str = ', '.join(str(param) for param in initial_params)
