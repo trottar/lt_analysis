@@ -23,7 +23,7 @@ ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
 #Qdep_LT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 #Qdep_TT = qq * math.exp(-qq)
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
-Qdep_T = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+Qdep_T = (math.exp(-qq**2)) / qq
 Qdep_LT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_TT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 
@@ -36,8 +36,7 @@ sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.
 
 # Transverse cross-section
 # 0th, 1st iteration, (chi2~2.6)
-###sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
-sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T)
+sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 ####
 #  (chi2)
 ###sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
@@ -45,13 +44,13 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 
 # Longitudinal-Transverse interference term
 # 0th, 1st iteration, (chi2~2.0)
-###sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * Qdep_LT * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * Qdep_LT * math.sin(theta_cm)
 ###sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 ####
 # 1st iteration, (chi2~0.5)
 ###sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)**(par12))
 #sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)**(par12)) * Qdep_LT * math.sin(theta_cm)
-sig_LT = (par9 * math.exp(-par10 * (math.fabs(tt))**2) + par11 / (1.0 + math.fabs(tt))) * Qdep_LT * math.sin(theta_cm)
+#sig_LT = (par9 * math.exp(-par10 * (math.fabs(tt))**2) + par11 / (1.0 + math.fabs(tt))) * Qdep_LT * math.sin(theta_cm)
 ####
 
 # Transverse-Transverse interference term
