@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-26 11:21:30 trottar"
+# Time-stamp: "2025-01-26 15:51:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -78,8 +78,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # HARD CODED #
     ##############
 
-    #full_optimization = True
-    full_optimization = False
+    full_optimization = True
 
     # Fixed separated xsect parameterization
     fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
@@ -90,10 +89,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     
     # Maximum iterations before ending loop (should always aim for >10000)
     #max_iterations = 1000
-    max_iterations = 10000
-    #max_iterations = 15000
+    #max_iterations = 10000
+    max_iterations = 15000
     #max_iterations = 25000
-    #max_iterations = 50000
 
     # Number of times to run the algorithm
     num_optimizations = 5
