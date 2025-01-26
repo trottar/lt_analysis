@@ -29,9 +29,9 @@ Qdep_TT = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 
 # Longitudinal cross-section
 # 0th, 1st iteration, (chi2~1.2)
-#sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
+sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 ####
-sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.fabs(tt)**(par4))
+#sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.fabs(tt)**(par4))
 ####  
 
 # Transverse cross-section
