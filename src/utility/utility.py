@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-26 11:11:12 trottar"
+# Time-stamp: "2025-01-26 11:17:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -940,173 +940,132 @@ def local_search(params, inp_func, num_params):
         return improved_params            
 
 ################################################################################################################################################
-import numpy as np
-import ROOT  # Assuming ROOT is imported
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """
-    Calculate a robust cost function (modified reduced chi-square) with adaptive regularization.
+    Calculate cost (modified reduced chi-square) with adaptive regularization.
     
-    Enhanced features:
-    - Handles underdetermined and overdetermined cases
-    - Adaptive regularization strength
-    - Robust to parameter scaling and numerical instabilities
-    - Flexible error handling
+    Handles cases with fewer or more data points than parameters.
     
     Args:
-        f_sig (ROOT.TF1): Fit function 
-        g_sig (ROOT.TGraphErrors): Data points graph
-        current_params (list): Current parameter values
-        num_events (int): Number of data points
-        num_params (int): Number of fit parameters
-        lambda_reg (float, optional): Initial regularization strength. Defaults to 0.01.
+        f_sig: ROOT TF1 fit function
+        g_sig: ROOT TGraphErrors with data points
+        current_params: List of current parameter values
+        num_events: Number of data points
+        num_params: Number of fit parameters
+        lambda_reg: Initial regularization strength
     
     Returns:
-        tuple: (best_cost, best_lambda)
-            - best_cost: Modified reduced chi-square cost
-            - best_lambda: Optimal regularization parameter
+        tuple: (cost, best_lambda, regularization_details)
     """
     # Robust parameter handling
-    def safe_param_processing(params):
-        """
-        Safely process parameters to avoid numerical issues
-        
-        Args:
-            params (list): Input parameter values
-        
-        Returns:
-            list: Processed parameter values
-        """
-        processed_params = []
-        for p in params:
-            # Handle extreme values
-            if np.isnan(p) or np.isinf(p):
-                processed_params.append(0.0)
-            elif abs(p) < 1e-12:
-                processed_params.append(0.0)
-            elif abs(p) > 1e12:
-                processed_params.append(np.sign(p) * 1e12)
-            else:
-                processed_params.append(p)
-        return processed_params
+    def sanitize_params(params):
+        return [0.0 if abs(p) < 1e-9 or abs(p) > 1e9 else p for p in params]
     
-    # Validate input data
-    if not isinstance(f_sig, ROOT.TF1) or not isinstance(g_sig, ROOT.TGraphErrors):
-        raise ValueError("Invalid input types. Requires ROOT.TF1 and ROOT.TGraphErrors")
+    current_params = sanitize_params(current_params)
     
-    # Robust parameter processing
-    current_params = safe_param_processing(current_params)
+    # Calculate L2 regularization term
+    l2_reg = np.sum(np.square(current_params))
     
-    # Adaptive regularization parameters
+    # Adaptive regularization settings
     lambda_min = 1e-6
-    lambda_max = 1e3
-    complexity_penalty = 0.5  # Adjusted complexity penalty
+    lambda_max = 100.0
     
-    # Calculate base metrics
-    try:
-        chi_square = f_sig.GetChisquare()
-        nu = max(1, f_sig.GetNDF())  # Ensure non-zero degrees of freedom
-    except Exception:
-        # Fallback calculation if ROOT methods fail
-        chi_square = 0.0
-        nu = max(1, num_events - num_params)
+    # Residual calculation with error-weighted approach
+    def calculate_residuals():
+        residuals = []
+        for i in range(num_events):
+            observed = g_sig.GetY()[i]
+            expected = f_sig.Eval(g_sig.GetX()[i])
+            error = g_sig.GetEY()[i]
+            
+            # Robust residual calculation
+            residual = (observed - expected) / (error if error != 0 else 1.0)
+            residuals.append(residual)
+        return np.array(residuals)
     
-    # L2 regularization with robust calculation
-    def calculate_l2_regularization(params):
-        """
-        Calculate L2 regularization with numerical stability
+    # Cost function with adaptive regularization
+    def compute_cost(lambda_val, residuals):
+        # Mean squared error
+        mse = np.mean(np.square(residuals))
         
-        Args:
-            params (list): Parameter values
+        # Complexity penalty
+        complexity_penalty = 0.1 * num_params / num_events
         
-        Returns:
-            float: L2 regularization term
-        """
-        return sum(p**2 / (1 + abs(p)) for p in params)
+        # Adaptive cost calculation
+        if num_events <= num_params:
+            # Underdetermined case: stronger regularization
+            cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
+        else:
+            # Overdetermined case: lighter regularization
+            chi_square = f_sig.GetChisquare()
+            nu = f_sig.GetNDF()
+            cost = (chi_square + lambda_val * l2_reg) / nu
+        
+        return cost
     
-    l2_reg = calculate_l2_regularization(current_params)
+    # Residual calculation
+    residuals = calculate_residuals()
     
-    # Cost calculation strategy
+    # Lambda optimization for underdetermined or ill-conditioned cases
     if num_events <= num_params:
-        # Underdetermined case: More sophisticated regularization search
-        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 15)
-        best_cost = float('inf')
-        best_lambda = lambda_reg
+        # Use log-spaced lambda values for broader search
+        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 20)
         
-        for lambda_try in lambda_values:
-            # Calculate residuals with error-weighted approach
-            residuals = []
-            for i in range(num_events):
-                x = g_sig.GetX()[i]
-                observed = g_sig.GetY()[i]
-                expected = f_sig.Eval(x)
-                error = max(g_sig.GetEY()[i], 1e-6)  # Prevent division by zero
-                
-                # Normalized residual with error weighting
-                residual = (observed - expected) / error
-                residuals.append(residual)
-            
-            # Mean squared error with robust calculation
-            mse = np.mean(np.square(residuals))
-            
-            # Modified cost function for underdetermined case
-            current_cost = (
-                mse + 
-                lambda_try * l2_reg / (1 + complexity_penalty * num_params)
-            )
-            
-            # Update best lambda
-            if current_cost < best_cost:
-                best_cost = current_cost
-                best_lambda = lambda_try
+        # Find optimal lambda
+        costs = [compute_cost(lam, residuals) for lam in lambda_values]
+        best_index = np.argmin(costs)
+        best_lambda = lambda_values[best_index]
+        best_cost = costs[best_index]
         
-        return best_cost, best_lambda
-    
+        regularization_details = {
+            'lambda_values': lambda_values,
+            'costs': costs,
+            'optimal_lambda_index': best_index
+        }
     else:
-        # Overdetermined case: Standard reduced chi-square with adaptive regularization
-        regularized_chi_square = (
-            chi_square + 
-            lambda_reg * l2_reg / (1 + complexity_penalty * num_params)
-        )
-        
-        best_cost = regularized_chi_square / nu
+        # Standard case
         best_lambda = lambda_reg
-        
-        return best_cost, best_lambda
+        best_cost = compute_cost(best_lambda, residuals)
+        regularization_details = {}
+    
+    return best_cost, best_lambda
 
 ################################################################################################################################################
 
-def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4):
+def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
     """
-    Adapt regularization strength based on cost history.
+    Dynamically adapt regularization strength based on cost history.
     
     Args:
         cost_history: List of previous costs
         lambda_reg: Current regularization parameter
-        min_improvement: Minimum relative improvement to continue reducing lambda
+        min_improvement: Minimum relative improvement threshold
+        max_lambda: Maximum allowed regularization strength
+        min_lambda: Minimum allowed regularization strength
         
     Returns:
-        float: Updated lambda value
+        float: Updated lambda value with adaptive adjustment
     """
     if len(cost_history) < 2:
         return lambda_reg
-        
-    # Calculate relative improvement
+    
+    # Robust improvement calculation
     try:
-        improvement = (cost_history[-2] - cost_history[-1]) / cost_history[-2]
-    except ZeroDivisionError:
+        improvement = (cost_history[-2] - cost_history[-1]) / (abs(cost_history[-2]) + 1e-10)
+    except Exception:
         improvement = 0.0
-        
-    # Adjust lambda based on improvement
+    
+    # Adaptive lambda adjustment
     if improvement > min_improvement:
-        # Cost is still improving significantly, reduce regularization
-        return max(lambda_reg * 0.95, 1e-6)
+        # Significant improvement: reduce regularization
+        lambda_reg *= 0.9
     elif improvement < 0:
-        # Cost is getting worse, increase regularization
-        return min(lambda_reg * 1.05, 1.0)
-    else:
-        # Cost improvement is small, keep current lambda
-        return lambda_reg
+        # Cost increasing: increase regularization
+        lambda_reg *= 1.1
+    
+    # Enforce lambda bounds
+    return max(min_lambda, min(lambda_reg, max_lambda))
 
 ################################################################################################################################################
 
