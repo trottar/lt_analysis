@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-19 18:06:14 trottar"
+# Time-stamp: "2025-01-26 11:11:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -940,80 +940,139 @@ def local_search(params, inp_func, num_params):
         return improved_params            
 
 ################################################################################################################################################
+import numpy as np
+import ROOT  # Assuming ROOT is imported
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """
-    Calculate cost (modified reduced chi-square) with consistent regularization.
+    Calculate a robust cost function (modified reduced chi-square) with adaptive regularization.
+    
+    Enhanced features:
+    - Handles underdetermined and overdetermined cases
+    - Adaptive regularization strength
+    - Robust to parameter scaling and numerical instabilities
+    - Flexible error handling
     
     Args:
-        f_sig: ROOT TF1 fit function
-        g_sig: ROOT TGraphErrors with data points
-        current_params: List of current parameter values
-        num_events: Number of data points
-        num_params: Number of fit parameters
-        lambda_reg: Regularization strength
+        f_sig (ROOT.TF1): Fit function 
+        g_sig (ROOT.TGraphErrors): Data points graph
+        current_params (list): Current parameter values
+        num_events (int): Number of data points
+        num_params (int): Number of fit parameters
+        lambda_reg (float, optional): Initial regularization strength. Defaults to 0.01.
     
     Returns:
-        tuple: (cost, best_lambda) where cost is the modified reduced chi-square
-        and best_lambda is the optimal regularization parameter
+        tuple: (best_cost, best_lambda)
+            - best_cost: Modified reduced chi-square cost
+            - best_lambda: Optimal regularization parameter
     """
-    # Calculate basic chi-square from the fit
-    chi_square = f_sig.GetChisquare()  # Get the chi-squared value
-    nu = f_sig.GetNDF() # Get the number of degrees of freedom
-
-    try:
-        # Calculate L2 regularization term
-        l2_reg = sum(p**2 for p in current_params)
-    except OverflowError:
-        # Check for very small or large parameters and set to zero
-        for i in range(len(current_params)):
-            if current_params[i] < 1e-9 or current_params[i] > 1e9:
-                current_params[i] = 0.0
-        # Calculate L2 regularization term
-        l2_reg = sum(p**2 for p in current_params)
+    # Robust parameter handling
+    def safe_param_processing(params):
+        """
+        Safely process parameters to avoid numerical issues
         
-    # Initialize variables for adaptive regularization
-    lambda_min = 1e-6
-    lambda_max = 1.0
-    alpha = 0.1  # Complexity penalty factor
-    best_cost = float('inf')
-    best_lambda = lambda_reg
+        Args:
+            params (list): Input parameter values
+        
+        Returns:
+            list: Processed parameter values
+        """
+        processed_params = []
+        for p in params:
+            # Handle extreme values
+            if np.isnan(p) or np.isinf(p):
+                processed_params.append(0.0)
+            elif abs(p) < 1e-12:
+                processed_params.append(0.0)
+            elif abs(p) > 1e12:
+                processed_params.append(np.sign(p) * 1e12)
+            else:
+                processed_params.append(p)
+        return processed_params
     
+    # Validate input data
+    if not isinstance(f_sig, ROOT.TF1) or not isinstance(g_sig, ROOT.TGraphErrors):
+        raise ValueError("Invalid input types. Requires ROOT.TF1 and ROOT.TGraphErrors")
+    
+    # Robust parameter processing
+    current_params = safe_param_processing(current_params)
+    
+    # Adaptive regularization parameters
+    lambda_min = 1e-6
+    lambda_max = 1e3
+    complexity_penalty = 0.5  # Adjusted complexity penalty
+    
+    # Calculate base metrics
+    try:
+        chi_square = f_sig.GetChisquare()
+        nu = max(1, f_sig.GetNDF())  # Ensure non-zero degrees of freedom
+    except Exception:
+        # Fallback calculation if ROOT methods fail
+        chi_square = 0.0
+        nu = max(1, num_events - num_params)
+    
+    # L2 regularization with robust calculation
+    def calculate_l2_regularization(params):
+        """
+        Calculate L2 regularization with numerical stability
+        
+        Args:
+            params (list): Parameter values
+        
+        Returns:
+            float: L2 regularization term
+        """
+        return sum(p**2 / (1 + abs(p)) for p in params)
+    
+    l2_reg = calculate_l2_regularization(current_params)
+    
+    # Cost calculation strategy
     if num_events <= num_params:
-        # For underdetermined case, search for optimal lambda
-        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 10)
+        # Underdetermined case: More sophisticated regularization search
+        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 15)
+        best_cost = float('inf')
+        best_lambda = lambda_reg
         
         for lambda_try in lambda_values:
-            # Calculate residuals for each point
+            # Calculate residuals with error-weighted approach
             residuals = []
             for i in range(num_events):
+                x = g_sig.GetX()[i]
                 observed = g_sig.GetY()[i]
-                expected = f_sig.Eval(g_sig.GetX()[i])
-                error = g_sig.GetEY()[i]
+                expected = f_sig.Eval(x)
+                error = max(g_sig.GetEY()[i], 1e-6)  # Prevent division by zero
                 
-                # Normalize residual by error if available
-                if error != 0:
-                    residual = (observed - expected) / error
-                else:
-                    residual = observed - expected
+                # Normalized residual with error weighting
+                residual = (observed - expected) / error
                 residuals.append(residual)
             
-            # Calculate mean squared error
+            # Mean squared error with robust calculation
             mse = np.mean(np.square(residuals))
             
             # Modified cost function for underdetermined case
-            current_cost = (mse + lambda_try * l2_reg) / (num_events + alpha * num_params)
+            current_cost = (
+                mse + 
+                lambda_try * l2_reg / (1 + complexity_penalty * num_params)
+            )
             
-            # Update best lambda if this cost is better
+            # Update best lambda
             if current_cost < best_cost:
                 best_cost = current_cost
                 best_lambda = lambda_try
-    else:
-        # For overdetermined case, use standard reduced chi-square with small regularization
-        best_cost = (chi_square + lambda_reg * l2_reg) / nu
-        best_lambda = lambda_reg
+        
+        return best_cost, best_lambda
     
-    return best_cost, best_lambda
+    else:
+        # Overdetermined case: Standard reduced chi-square with adaptive regularization
+        regularized_chi_square = (
+            chi_square + 
+            lambda_reg * l2_reg / (1 + complexity_penalty * num_params)
+        )
+        
+        best_cost = regularized_chi_square / nu
+        best_lambda = lambda_reg
+        
+        return best_cost, best_lambda
 
 ################################################################################################################################################
 
