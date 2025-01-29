@@ -33,8 +33,8 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 
 # Transverse-Transverse interference term
-#sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
-sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+#sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=4.4, W=2.74
 # 0th iteration, 
