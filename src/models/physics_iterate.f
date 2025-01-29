@@ -409,12 +409,10 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 	   sigT=(fitpar(5)*exp(-fitpar(6)*(abs(t_gev)))+fitpar(7)*(abs(t_gev)))
      >          *(Qdep_T**fitpar(8))
 	   
-	   sigLT=(fitpar(9)*exp(-fitpar(10)*(abs(t_gev)))+fitpar(11)/(abs(t_gev)))
-     >          *sin(thetacm)
-	   
-	   sigTT=fitpar(13)+fitpar(14)*(exp(-fitpar(15)*(abs(t_gev)**2))
-     >          /(1.0+abs(t_gev))**(fitpar(16)))
-     >          *Qdep_TT*(sin(thetacm)**2)
+	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
+     >           +fitpar(11)/abs(t_gev))*sin(thetacm)	   
+
+	   sigtt=(fitpar(13)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
 	   
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
