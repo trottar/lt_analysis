@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-16 15:13:06 trottar"
+# Time-stamp: "2025-01-31 02:23:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -481,14 +481,17 @@ with PdfPages(outputpdf) as pdf:
                 Wval, Q2val = data
                 return fit_function(Wval, Q2val, a, b, c, d)
 
-            popt, pcov = curve_fit(fit_func, (df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
+            try:
+                popt, pcov = curve_fit(fit_func, (df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
+                
+                a_fit, b_fit, c_fit, d_fit = popt
 
-            a_fit, b_fit, c_fit, d_fit = popt
+                fitted_values = fit_function(df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
-            fitted_values = fit_function(df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
-
-            # Plot fitted function
-            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+                # Plot fitted function
+                ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+            except TypeError as e:
+                print("Fit not found!")
 
             x_len = x_increment+len(x_values)
 
@@ -609,14 +612,17 @@ with PdfPages(outputpdf) as pdf:
                 phival, thetaval = data
                 return fit_function(phival, thetaval, a, b, c, d)
 
-            popt, pcov = curve_fit(fit_func, (df['phi'][mask][non_zero_mask].to_numpy(), df['th_cm'][mask][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
+            try:
+                popt, pcov = curve_fit(fit_func, (df['phi'][mask][non_zero_mask].to_numpy(), df['th_cm'][mask][non_zero_mask].to_numpy()), ratios, sigma=errors, absolute_sigma=True)
 
-            a_fit, b_fit, c_fit, d_fit = popt
+                a_fit, b_fit, c_fit, d_fit = popt
+                
+                fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
 
-            fitted_values = fit_function(df['phi'][mask][non_zero_mask], df['th_cm'][mask][non_zero_mask], a_fit, b_fit, c_fit, d_fit)
-
-            # Plot fitted function
-            ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+                # Plot fitted function
+                ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+            except TypeError as e:
+                print("Fit not found!")                
             
             x_len = x_increment+len(x_values)
             
@@ -709,10 +715,13 @@ with PdfPages(outputpdf) as pdf:
 
         ax.errorbar(t_bin_centers, df['Q2'], yerr=np.maximum(df['dQ2'], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-        # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
-        fit_line = exp_func(t_bin_centers, *popt)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        try:
+            # Fit the data using exponential function
+            popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
+            fit_line = exp_func(t_bin_centers, *popt)
+            ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        except TypeError as e:
+            print("Fit not found!")
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -741,11 +750,14 @@ with PdfPages(outputpdf) as pdf:
 
         ax.errorbar(t_bin_centers, df['W'], yerr=np.maximum(df['dW'], 0.0), marker=markers[i], linestyle='None', label=df_key, color=colors[i], markeredgecolor=colors[i], markerfacecolor='none', capsize=2)
 
-        # Fit the data using exponential function
-        popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
-        fit_line = exp_func(t_bin_centers, *popt)
-        ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
-
+        try:
+            # Fit the data using exponential function
+            popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
+            fit_line = exp_func(t_bin_centers, *popt)
+            ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
+        except TypeError as e:
+            print("Fit not found!")
+            
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
     ax.tick_params(axis='x', labelsize=16)
