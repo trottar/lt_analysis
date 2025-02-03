@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:14:50 trottar"
+# Time-stamp: "2025-02-02 23:15:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -912,7 +912,6 @@ def local_search(params, inp_func, num_params):
     else:
         improved_params = [opt_x[i] for i in range(num_params+1)]
     
-    func.Delete()
     return improved_params
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
