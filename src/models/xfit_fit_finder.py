@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 22:58:17 trottar"
+# Time-stamp: "2025-02-02 22:59:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -110,7 +110,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
         graph_sig_accept    = TGraph()
         graph_sig_converge  = TGraph()
         graph_sig_residuals = TGraph()
-        graph_sig_aic       = TGraph()
+        graph_sig_ic_aic       = TGraph()
         graph_sig_ic_bic    = TGraph()
 
         graphs_sig_fit.append(graph_sig_fit)
@@ -119,7 +119,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
         graphs_sig_accept.append(graph_sig_accept)
         graphs_sig_converge.append(graph_sig_converge)
         graphs_sig_residuals.append(graph_sig_residuals)
-        graphs_sig_ic_aic.append(graph_sig_aic)
+        graphs_sig_ic_aic.append(graph_sig_ic_aic)
         graphs_sig_ic_bic.append(graph_sig_ic_bic)
 
         # Check if we are optimizing or using fixed parameters.
@@ -206,8 +206,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
                     n_samples = len(w_vec)
                     ic_aic, ic_bic = calculate_information_criteria(n_samples, num_params, current_cost)
-                    graph_sig_aic.SetPoint(total_iteration, total_iteration, round(ic_aic, 4))
-                    graph_sig_bic.SetPoint(total_iteration, total_iteration, round(ic_bic, 4))
+                    graph_sig_ic_aic.SetPoint(total_iteration, total_iteration, round(ic_aic, 4))
+                    graph_sig_ic_bic.SetPoint(total_iteration, total_iteration, round(ic_bic, 4))
 
                     if accept_prob > random.random():
                         best_overall_params = [f_sig.GetParameter(i) for i in range(num_params)]
