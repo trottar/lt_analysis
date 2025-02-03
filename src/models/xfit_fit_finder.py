@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 21:35:02 trottar"
+# Time-stamp: "2025-02-02 22:42:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -21,7 +21,7 @@ sys.path.append("utility")
 from utility import (adaptive_regularization, calculate_cost, adaptive_cooling,
                      simulated_annealing, acceptance_probability, adjust_params, 
                      local_search, select_valid_parameter, get_central_value, 
-                     calculate_information_criteria)
+                     calculate_information_criteria, compute_p_value, log_iteration)
 
 ##################################################################################################################################################
 
@@ -80,6 +80,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     iter_num            = inpDict["iter_num"]
     fit_params          = inpDict["fit_params"]
     chi2_threshold      = inpDict["chi2_threshold"]
+    xfit_log            = inpDict["xfit_log"]
 
     num_events = nsep.GetEntries()
 
@@ -195,7 +196,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     accept_prob = acceptance_probability(best_overall_cost, current_cost, temperature)
 
                     # ------------------ Diagnostic Logging ------------------
-                    log_iteration(total_iteration, current_cost, current_params, accept_prob, temperature, "fit_diagnostics.log")
+                    log_iteration(total_iteration, current_cost, current_params, accept_prob, temperature, xfit_log)
                     # ----------------------------------------------------------
 
                     # Update diagnostic graphs.
