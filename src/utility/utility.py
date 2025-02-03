@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:01:04 trottar"
+# Time-stamp: "2025-02-02 23:02:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -875,8 +875,9 @@ def adjust_params(params, adjustment_factor=0.1):
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
 def local_search(params, inp_func, num_params):
+    # Here, we assume the function actually has num_params+1 parameters.
     def chi2_func(par):
-        for i in range(num_params):
+        for i in range(num_params+1):
             inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
     
@@ -885,24 +886,19 @@ def local_search(params, inp_func, num_params):
             return chi2_func(par)
     
     py_func = PyFunc()
-    # Create the functor with the python callable.
-    func = ROOT.Math.Functor(py_func)
-    # Then set the number of parameters explicitly.
-    func.SetNPar(num_params)
-    
+    # Revert to your original working call:
+    func = ROOT.Math.Functor(py_func, num_params+1)  # num_params+1 is the total parameter count
     minimizer = ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
     minimizer.SetMaxIterations(100000)
     minimizer.SetTolerance(0.001)
     minimizer.SetPrintLevel(0)
     minimizer.SetFunction(func)
-    
     for i, param in enumerate(params):
         step = 0.01 * abs(param) if abs(param) > 1e-6 else 0.01
         minimizer.SetVariable(i, f"p{i}", param, step)
-    
     minimizer.Minimize()
-    improved_params = [minimizer.X()[i] for i in range(num_params)]
+    improved_params = [minimizer.X()[i] for i in range(num_params+1)]
     minimizer.Delete()
     func.Delete()
     return improved_params
