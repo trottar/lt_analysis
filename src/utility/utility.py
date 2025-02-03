@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:15:31 trottar"
+# Time-stamp: "2025-02-02 23:24:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -944,6 +944,9 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
             chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
             cost = (chi_square + lambda_val * l2_reg) / nu
+            chi2_raw = f_sig.GetChisquare()
+            ndf = f_sig.GetNDF()
+            print("Raw chi² =", chi2_raw, "NDF =", ndf)
         return cost
 
     residuals = calculate_residuals()
