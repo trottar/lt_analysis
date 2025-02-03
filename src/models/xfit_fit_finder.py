@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:16:53 trottar"
+# Time-stamp: "2025-02-02 23:18:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -139,6 +139,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             cost_history = []
             local_search_interval = 25
             current_errors = [0.0] * num_params
+            best_overall_errors = current_errors
 
             start_time = time.time()
             
