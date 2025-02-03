@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:55:57 trottar"
+# Time-stamp: "2025-02-03 00:58:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -262,7 +262,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             current_bin = b  # using the same bin as above
 
                             # If the new cost is accepted (by probability) then update best values
-                            print("££££££££££",accept_prob)
                             if accept_prob > random.random():
                                 best_params = list(current_params)
                                 best_cost = current_cost
