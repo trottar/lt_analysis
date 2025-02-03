@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:58:05 trottar"
+# Time-stamp: "2025-02-03 17:58:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -37,6 +37,7 @@ mkpl = 0.493677
 from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
 
 ##################################################################################################################################################
+
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization=True):
 
     # Create lists to store global graphs
@@ -205,8 +206,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
                             for i in range(len(w_vec)):
-                                sig_X_fit = g_sig.GetY()[i]
-                                sig_X_fit_err = g_sig.GetEY()[i]
+                                sig_X_fit = g_sig.GetY()[i] / (g_vec[i])
+                                sig_X_fit_err = g_sig.GetEY()[i] / (g_vec[i])
                                 g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                                 g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
 
@@ -350,8 +351,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
             for i in range(len(w_vec)):
-                sig_X_fit = g_sig.GetY()[i]
-                sig_X_fit_err = g_sig.GetEY()[i]
+                sig_X_fit = g_sig.GetY()[i] / (g_vec[i])
+                sig_X_fit_err = g_sig.GetEY()[i] / (g_vec[i])
                 g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
             c2.cd(it+1).SetLeftMargin(0.12)
@@ -494,8 +495,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                     g_sig.SetPointError(i, 0, nsep.GetV3()[i])
                 for i in range(len(w_vec)):
-                    sig_X_fit = g_sig.GetY()[i]
-                    sig_X_fit_err = g_sig.GetEY()[i]
+                    sig_X_fit = g_sig.GetY()[i] / (g_vec[i])
+                    sig_X_fit_err = g_sig.GetEY()[i] / (g_vec[i])
                     g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                     g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
                 if sig_name == "L":
