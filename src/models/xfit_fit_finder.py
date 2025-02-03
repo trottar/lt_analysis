@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 22:42:55 trottar"
+# Time-stamp: "2025-02-02 22:47:35 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -38,7 +38,9 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization=True):
+def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
+                 prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params,
+                 outputpdf, full_optimization=True):
     # Create lists to store graph objects for each fit
     graphs_sig_fit       = []  # TGraphErrors for data and final fit curve
     graphs_sig_params    = []  # List of lists: one TGraph per parameter (for convergence)
@@ -81,7 +83,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     fit_params          = inpDict["fit_params"]
     chi2_threshold      = inpDict["chi2_threshold"]
     xfit_log            = inpDict["xfit_log"]
-
+    
     num_events = nsep.GetEntries()
 
     # Determine central values for guidance
@@ -256,7 +258,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig_final.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                 g_sig_final.SetPointError(i, 0, nsep.GetV3()[i])
 
-            # Rebuild final fit function using best_overall_bin.
+            # Rebuild the final fit function using best_overall_bin.
             if sig_name == "L":
                 fun_Sig_final = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin],
                                                   w_vec[best_overall_bin], th_vec[best_overall_bin])
@@ -313,7 +315,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             latex.DrawLatex(0.35, 0.85, f"p-value: {p_value:.4f}")
             c2.Update()
 
-            # ------------------ Plotting Diagnostics ------------------
+            # ------------------ Plotting Diagnostics for Optimization Branch ------------------
             # Parameter Convergence on Canvas c3
             c3.cd(it+1)
             for i in range(num_params):
@@ -370,6 +372,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             graphs_sig_ic_bic[it].Draw("LP SAME")
             c8.Update()
             # ---------------------------------------------------------------------
+            print("\n")
         else:
             # --------------------- Fixed Parameter Branch ---------------------
             print("\n/*--------------------------------------------------*/")
@@ -380,27 +383,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             
-            # Create dynamic TGraphs for parameter convergence (for display)
-            param_graphs = []
-            for i in range(num_params):
-                param_graphs.append(TGraph())
-            graphs_sig_params.append(param_graphs)
-            
-            # Create diagnostic graphs for fixed branch.
-            graph_sig_chi2 = TGraph()
-            graph_sig_temp = TGraph()
-            graph_sig_accept = TGraph()
-            graph_sig_residuals = TGraph()
-            graph_sig_aic = TGraph()
-            graph_sig_bic = TGraph()
-            
-            graphs_sig_chi2.append(graph_sig_chi2)
-            graphs_sig_temp.append(graph_sig_temp)
-            graphs_sig_accept.append(graph_sig_accept)
-            graphs_sig_residuals.append(graph_sig_residuals)
-            graphs_sig_ic_aic.append(graph_sig_aic)
-            graphs_sig_ic_bic.append(graph_sig_bic)
-            
+            # Do NOT re-create and append diagnostic graphs here—use those created above.
             lambda_reg = 0.01
             best_overall_cost = float('inf')
             best_overall_params = []
@@ -422,7 +405,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                     graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
                 
-                # Select the proper model function.
                 if sig_name == "L":
                     fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 elif sig_name == "T":
@@ -432,11 +414,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 elif sig_name == "TT":
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 
-                # Create the fit function with dynamic number of parameters.
                 f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
                 f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
                 for i in range(num_params):
-                    # Fix parameters using the current values stored in par_vec.
                     f_sig.FixParameter(i, par_vec[num_params * it + i])
                 
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
@@ -454,7 +434,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             for j in range(num_params):
                 par_chi2_vec[num_params * it + j] = best_overall_cost
 
-            # Draw final data and fit on canvas c2.
             c2.cd(it+1)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (Fixed Parameters)")
             graphs_sig_fit[it].Draw("A*")
@@ -549,7 +528,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             c8.Update()
             # ---------------------------------------------------------------------
             print("\n")
-        # End each signal's branch.
+        # End of each signal's branch.
     # Print canvases to the output PDF file.
     c2.Print(outputpdf + '(')
     c3.Print(outputpdf)
