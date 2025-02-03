@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 22:59:18 trottar"
+# Time-stamp: "2025-02-02 23:16:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -140,6 +140,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             local_search_interval = 25
             current_errors = [0.0] * num_params
 
+            start_time = time.time()
+            
             for b in [2]:
                 print(f"\nOptimizing Sig {sig_name} for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 iteration = 0
