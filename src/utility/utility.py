@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 22:42:13 trottar"
+# Time-stamp: "2025-02-02 22:52:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -890,7 +890,7 @@ def local_search(params, inp_func, num_params):
             return chi2_func(par)
 
     py_func = PyFunc()
-    func = Math.Functor(py_func, num_params)
+    func = Math.Functor(py_func)
     minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
     minimizer.SetMaxIterations(100000)
