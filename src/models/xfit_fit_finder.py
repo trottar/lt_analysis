@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:04:08 trottar"
+# Time-stamp: "2025-02-03 00:05:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -459,6 +459,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             # --- ELSE branch: if sig_name is in fixed_params, use the provided parameters.
             sig_name = sig_name
             num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
+            param_str = ', '.join(str(p) for p in initial_params)
             print("\n/*--------------------------------------------------*/")
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print(f"Initial Parameters: ({param_str})")
