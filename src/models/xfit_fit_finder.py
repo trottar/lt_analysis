@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:23:42 trottar"
+# Time-stamp: "2025-02-03 00:34:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -32,29 +32,6 @@ m_n = 0.93956541
 mkpl = 0.493677
 
 ###############################################################################################################################################
-# Import separated xsects models
-
-from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
-
-##################################################################################################################################################
-
-##################################################################################################################################################
-# Importing utility functions and necessary modules
-
-import sys, math, time, random
-import numpy as np
-sys.path.append("utility")
-from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value, calculate_information_criteria
-from ROOT import TCanvas, TGraph, TGraphErrors, TF1, TText, TLatex, TLegend, kRed, kBlue, kGreen, kMagenta
-
-##################################################################################################################################################
-# Define constants
-PI   = math.pi
-m_p  = 0.93827231
-m_n  = 0.93956541
-mkpl = 0.493677
-
-##################################################################################################################################################
 # Import separated xsects models
 
 from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
