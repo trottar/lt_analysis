@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:58:36 trottar"
+# Time-stamp: "2025-02-03 00:14:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -846,8 +846,8 @@ def get_centroid(hist, x_min, x_max):
 ################################################################################################################################################
 
 def adaptive_cooling(initial_temp, iteration, cooling_rate=0.95):
-    """Exponential cooling schedule."""
-    return initial_temp * (cooling_rate ** iteration)
+    """Exponential cooling schedule using math.exp to avoid overflow."""
+    return initial_temp * math.exp(iteration * math.log(cooling_rate))
 
 def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6):
     """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero)."""
