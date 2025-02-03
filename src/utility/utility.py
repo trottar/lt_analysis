@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 18:10:04 trottar"
+# Time-stamp: "2025-02-03 18:16:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -844,25 +844,18 @@ def get_centroid(hist, x_min, x_max):
     return [mean, mean_err]
 
 ################################################################################################################################################
-'''
+
 def adaptive_cooling(initial_temp, iteration, cooling_rate=0.95):
     """Exponential cooling schedule using math.exp to avoid overflow."""
     try:
         return initial_temp * (cooling_rate ** iteration)
     except OverflowError:
         return initial_temp * (cooling_rate ** math.log(iteration))
-'''
 
-
-def adaptive_cooling(initial_temp, iteration, total_iterations, cooling_rate=0.99):
-    """Adaptive cooling that slows down over time to prevent premature convergence."""
-    return initial_temp / (1 + cooling_rate * iteration / total_iterations)    
-    
 def sanitize_params(params, clip_min=-1e4, clip_max=1e4):
     """Clip parameters to a reasonable range to avoid huge values."""
     return [max(min(p, clip_max), clip_min) for p in params]
 
-'''
 def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6, clip_min=-1e4, clip_max=1e4):
     """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero) and then clip the result."""
     scale = abs(param) if abs(param) > min_scale else min_scale
@@ -871,13 +864,6 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1
     new_param = param + perturbation
     # Clip new_param to keep it in a reasonable range:
     return max(min(new_param, clip_max), clip_min)
-'''
-
-def simulated_annealing(param, temperature, perturbation_factor=0.2, min_scale=1e-4):
-    """Perturb parameters using a normal distribution based on the current temperature."""
-    scale = max(abs(param), min_scale)  
-    perturbation = np.random.normal(0, scale * perturbation_factor * temperature)
-    return param + perturbation
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """

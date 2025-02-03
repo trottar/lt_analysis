@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 17:58:06 trottar"
+# Time-stamp: "2025-02-03 18:19:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -195,10 +195,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         try:
                             # Perturb each parameter with simulated annealing
                             current_params = [simulated_annealing(p, temperature) for p in current_params]
-                            # (Optionally you might restart from initial_params; here we follow the original logic)
-                            current_params = list(initial_params)
-                            temperature = initial_temperature
-                            unchanged_iterations = 0
 
                             # Build the TGraphErrors for the data points
                             g_sig = TGraphErrors()
