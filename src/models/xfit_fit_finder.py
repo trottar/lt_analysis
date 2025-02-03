@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:07:26 trottar"
+# Time-stamp: "2025-02-03 00:10:51 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -201,6 +201,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     best_errors = list(current_errors)
                     best_cost = float('inf')
                     previous_params = list(current_params)
+                    accept_prob = 0.0
+                    residual = float('inf')
+                    ic_aic = float('inf')
+                    ic_bic = float('inf')
 
                     # Begin the iterative optimization loop
                     while iteration <= max_iterations:
@@ -323,6 +327,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(residual, 4))
                         graph_sig_aic.SetPoint(total_iteration, total_iteration, round(ic_aic, 4))
                         graph_sig_bic.SetPoint(total_iteration, total_iteration, round(ic_bic, 4))
+                        
             # End of optimization runs
 
             try:
