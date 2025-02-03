@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:59:38 trottar"
+# Time-stamp: "2025-02-03 01:27:23 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -851,13 +851,77 @@ def adaptive_cooling(initial_temp, iteration, cooling_rate=0.95):
         return initial_temp * (cooling_rate ** iteration)
     except OverflowError:
         return initial_temp * (cooling_rate ** math.log(iteration))
+    
+def sanitize_params(params, clip_min=-1e4, clip_max=1e4):
+    """Clip parameters to a reasonable range to avoid huge values."""
+    return [max(min(p, clip_max), clip_min) for p in params]
 
-def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6):
-    """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero)."""
+def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6, clip_min=-1e4, clip_max=1e4):
+    """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero) and then clip the result."""
     scale = abs(param) if abs(param) > min_scale else min_scale
     max_perturbation = scale * perturbation_factor
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
-    return param + perturbation
+    new_param = param + perturbation
+    # Clip new_param to keep it in a reasonable range:
+    return max(min(new_param, clip_max), clip_min)
+
+def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
+    """
+    Calculate cost (modified reduced chi-square) with adaptive regularization.
+    Includes parameter clipping to avoid huge l2_reg values.
+    """
+    # Clip parameters before cost calculation
+    current_params = sanitize_params(current_params, clip_min=-1e4, clip_max=1e4)
+    
+    # Compute l2 regularization using the sanitized parameters.
+    l2_reg = np.sum(np.square(current_params))
+    
+    lambda_min = 1e-6
+    lambda_max = 100.0
+
+    def calculate_residuals():
+        residuals = []
+        for i in range(num_events):
+            observed = g_sig.GetY()[i]
+            expected = f_sig.Eval(g_sig.GetX()[i])
+            error = g_sig.GetEY()[i]
+            residual = (observed - expected) / (error if error != 0 else 1.0)
+            residuals.append(residual)
+        return np.array(residuals)
+
+    residuals = calculate_residuals()
+    
+    # If any residual is non-finite, return a very large cost.
+    if not np.all(np.isfinite(residuals)):
+        print("Non-finite residual detected. Parameters:", current_params)
+        return 1e12, lambda_reg
+
+    def compute_cost(lambda_val, residuals):
+        mse = np.mean(np.square(residuals))
+        complexity_penalty = 0.1 * num_params / num_events
+        if num_events <= num_params:
+            cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
+        else:
+            chi_square = f_sig.GetChisquare()
+            nu = f_sig.GetNDF()
+            # Safeguard against division by very small nu:
+            if nu < 1e-6:
+                nu = 1e-6
+            #cost = (chi_square + lambda_val * l2_reg) / nu
+            cost = (chi_square) / nu
+            print("!!!!!!!!!!!!!!!", chi_square, lambda_val, l2_reg, nu)
+        return cost
+
+    if num_events <= num_params:
+        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 20)
+        costs = [compute_cost(lam, residuals) for lam in lambda_values]
+        best_index = np.argmin(costs)
+        best_lambda = lambda_values[best_index]
+        best_cost = costs[best_index]
+    else:
+        best_lambda = lambda_reg
+        best_cost = compute_cost(best_lambda, residuals)
+    return best_cost, best_lambda
 
 def acceptance_probability(old_cost, new_cost, temperature):
     """
@@ -916,51 +980,6 @@ def local_search(params, inp_func, num_params):
         improved_params = [opt_x[i] for i in range(num_params+1)]
     
     return improved_params
-
-def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
-    """
-    Calculate cost (modified reduced chi-square) with adaptive regularization.
-    """
-    def sanitize_params(params):
-        return [0.0 if abs(p) < 1e-9 or abs(p) > 1e9 else p for p in params]
-    current_params = sanitize_params(current_params)
-    l2_reg = np.sum(np.square(current_params))
-    lambda_min = 1e-6
-    lambda_max = 100.0
-
-    def calculate_residuals():
-        residuals = []
-        for i in range(num_events):
-            observed = g_sig.GetY()[i]
-            expected = f_sig.Eval(g_sig.GetX()[i])
-            error = g_sig.GetEY()[i]
-            residual = (observed - expected) / (error if error != 0 else 1.0)
-            residuals.append(residual)
-        return np.array(residuals)
-
-    def compute_cost(lambda_val, residuals):
-        mse = np.mean(np.square(residuals))
-        complexity_penalty = 0.1 * num_params / num_events
-        if num_events <= num_params:
-            cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
-        else:
-            chi_square = f_sig.GetChisquare()
-            nu = f_sig.GetNDF()
-            cost = (chi_square + lambda_val * l2_reg) / nu
-            print("!!!!!!!!!!!!!", chi_square, lambda_val, l2_reg, nu)
-        return cost
-
-    residuals = calculate_residuals()
-    if num_events <= num_params:
-        lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 20)
-        costs = [compute_cost(lam, residuals) for lam in lambda_values]
-        best_index = np.argmin(costs)
-        best_lambda = lambda_values[best_index]
-        best_cost = costs[best_index]
-    else:
-        best_lambda = lambda_reg
-        best_cost = compute_cost(best_lambda, residuals)
-    return best_cost, best_lambda
 
 def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
     """
