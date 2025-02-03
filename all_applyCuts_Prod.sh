@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 19:19:38 trottar"
+# Time-stamp: "2025-02-02 20:44:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -128,7 +128,7 @@ for t in "${TARGET[@]}"; do
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
 			    if test -e $rootfile; then
 				echo
-				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
+				./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
 				./applyCuts_Prod.sh -pm ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
 			    else
 				echo "${rootfile} does not exist! Running jcache..."
