@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:12:41 trottar"
+# Time-stamp: "2025-02-02 23:14:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -874,21 +874,17 @@ def adjust_params(params, adjustment_factor=0.1):
     """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-import cppyy
-
 def local_search(params, inp_func, num_params):
+    # Define your chi² function; note we expect num_params+1 parameters.
     def chi2_func(par):
-        # Loop over num_params+1 values
         for i in range(num_params+1):
             inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
     
-    # Wrap chi2_func in a C++ std::function.
-    # The signature here is: double(const double*)
+    # Wrap chi2_func in a C++ std::function using cppyy.
+    import cppyy
     std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
-    
-    # Now call the Functor constructor with the std::function and the parameter count.
-    # (Note: use num_params+1 if your model indeed requires that many.)
+    # Create a functor using std_func; use num_params+1 if your model requires it.
     func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params+1)
     
     minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
@@ -903,8 +899,21 @@ def local_search(params, inp_func, num_params):
         minimizer.SetVariable(i, f"p{i}", param, step)
     
     minimizer.Minimize()
-    improved_params = [minimizer.X()[i] for i in range(num_params+1)]
+    
+    # Try to retrieve the optimized parameters.
+    try:
+        opt_x = minimizer.X()
+    except Exception as e:
+        opt_x = None
+
+    # If opt_x is invalid, return the input parameters.
+    if not opt_x:
+        improved_params = params
+    else:
+        improved_params = [opt_x[i] for i in range(num_params+1)]
+    
     minimizer.Delete()
+    func.Delete()
     return improved_params
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
