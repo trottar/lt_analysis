@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:09:59 trottar"
+# Time-stamp: "2025-02-02 23:12:41 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -874,44 +874,39 @@ def adjust_params(params, adjustment_factor=0.1):
     """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-class PyIFunction(ROOT.Math.IFunction):
-    def __init__(self, func, npar):
-        super(PyIFunction, self).__init__()
-        self.func = func
-        self.npar = npar
-    def NDim(self):
-        return self.npar
-    def DoEval(self, par):
-        # par is a ROOT.Math.Array, convert it to a Python list if needed.
-        return self.func(par)
+import cppyy
 
 def local_search(params, inp_func, num_params):
     def chi2_func(par):
-        # Loop over all expected parameters (here num_params+1)
+        # Loop over num_params+1 values
         for i in range(num_params+1):
             inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
-
-    # Create the IFunction wrapper for your Python callable.
-    functor = PyIFunction(chi2_func, num_params+1)
     
-    minimizer = ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
+    # Wrap chi2_func in a C++ std::function.
+    # The signature here is: double(const double*)
+    std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
+    
+    # Now call the Functor constructor with the std::function and the parameter count.
+    # (Note: use num_params+1 if your model indeed requires that many.)
+    func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params+1)
+    
+    minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
     minimizer.SetMaxIterations(100000)
     minimizer.SetTolerance(0.001)
     minimizer.SetPrintLevel(0)
-    minimizer.SetFunction(functor)
+    minimizer.SetFunction(func)
     
     for i, param in enumerate(params):
         step = 0.01 * abs(param) if abs(param) > 1e-6 else 0.01
         minimizer.SetVariable(i, f"p{i}", param, step)
     
     minimizer.Minimize()
-    # Retrieve optimized parameters; note we expect num_params+1 parameters.
     improved_params = [minimizer.X()[i] for i in range(num_params+1)]
     minimizer.Delete()
     return improved_params
-    
+
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """
     Calculate cost (modified reduced chi-square) with adaptive regularization.
