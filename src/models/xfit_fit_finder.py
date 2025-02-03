@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:29:29 trottar"
+# Time-stamp: "2025-02-02 23:39:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -159,6 +159,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                         g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                         g_sig.SetPointError(i, 0, nsep.GetV3()[i])
 
+
+                    for i in range(len(w_vec)):
+                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
+                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
+                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)                        
+
                     # Choose the proper model function based on sig_name.
                     if sig_name == "L":
                         fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
@@ -179,9 +186,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             offset = 0.1 * abs(current_params[i])
                             f_sig.SetParLimits(i, current_params[i]-offset, current_params[i]+offset)
                             
-                    # Copy g_sig into the graph used for the fit
-                    graph_sig_fit = g_sig.Clone("graph_sig_fit")
-                    fit_result = graph_sig_fit.Fit(f_sig, "SQ")
+                    fit_result = graph_sig_fit[it].Fit(f_sig, "SQ")
 
                     # Update the convergence graphs.
                     for i in range(num_params):
@@ -266,19 +271,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             c2.cd(it+1)
             g_sig_final.Draw("AP")
             f_sig_final.Draw("same")
-            graph_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graph_sig_fit.GetXaxis().CenterTitle()
-            graph_sig_fit.GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^2]")
-            graph_sig_fit.GetYaxis().SetTitleOffset(1.5)
-            graph_sig_fit.GetYaxis().SetTitleSize(0.035)
-            graph_sig_fit.GetYaxis().CenterTitle()
-            x_min = min(graph_sig_fit.GetX())
-            x_max = max(graph_sig_fit.GetX())
-            y_min = min(graph_sig_fit.GetY())
-            y_max = max(graph_sig_fit.GetY())
+            graph_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graph_sig_fit[it].GetXaxis().CenterTitle()
+            graph_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^2]")
+            graph_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graph_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graph_sig_fit[it].GetYaxis().CenterTitle()
+            x_min = min(graph_sig_fit[it].GetX())
+            x_max = max(graph_sig_fit[it].GetX())
+            y_min = min(graph_sig_fit[it].GetY())
+            y_max = max(graph_sig_fit[it].GetY())
             margin = 0.1
-            graph_sig_fit.GetXaxis().SetRangeUser(x_min-margin, x_max+margin)
-            graph_sig_fit.GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
+            graph_sig_fit[it].GetXaxis().SetRangeUser(x_min-margin, x_max+margin)
+            graph_sig_fit[it].GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
             n_points = 100
             fit_y_values = [f_sig_final.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
@@ -286,8 +291,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             y_min = min(y_min, fit_y_min)
             y_max = max(y_max, fit_y_max)
             margin = 0.1*(y_max-y_min)
-            graph_sig_fit.GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
-            r_sig_fit = graph_sig_fit.Fit(f_sig_final, "SQ")
+            graph_sig_fit[it].GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
+            r_sig_fit = graph_sig_fit[it].Fit(f_sig_final, "SQ")
             f_sig_final.Draw("same")
 
             latex = TLatex()
