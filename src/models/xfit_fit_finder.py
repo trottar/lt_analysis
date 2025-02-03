@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:40:46 trottar"
+# Time-stamp: "2025-02-02 23:43:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -49,8 +49,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     graphs_sig_accept    = []  # Acceptance probability evolution
     graphs_sig_converge  = []  # Alternate chi-square convergence
     graphs_sig_residuals = []  # Residual evolution
-    graphs_sig_ic_aic    = []  # AIC evolution
-    graphs_sig_ic_bic    = []  # BIC evolution
+    graphs_sig_aic    = []  # AIC evolution
+    graphs_sig_bic    = []  # BIC evolution
 
     # Create ROOT canvases for plotting
     c2 = TCanvas("c2", "Data & Final Fit", 800, 800)
@@ -110,8 +110,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
         graph_sig_accept    = TGraph()
         graph_sig_converge  = TGraph()
         graph_sig_residuals = TGraph()
-        graph_sig_ic_aic       = TGraph()
-        graph_sig_ic_bic    = TGraph()
+        graph_sig_aic       = TGraph()
+        graph_sig_bic    = TGraph()
 
         graphs_sig_fit.append(graph_sig_fit)
         graphs_sig_chi2.append(graph_sig_chi2)
@@ -119,8 +119,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
         graphs_sig_accept.append(graph_sig_accept)
         graphs_sig_converge.append(graph_sig_converge)
         graphs_sig_residuals.append(graph_sig_residuals)
-        graphs_sig_ic_aic.append(graph_sig_ic_aic)
-        graphs_sig_ic_bic.append(graph_sig_ic_bic)
+        graphs_sig_aic.append(graph_sig_aic)
+        graphs_sig_bic.append(graph_sig_bic)
 
         # Check if we are optimizing or using fixed parameters.
         if sig_name not in fixed_params:
@@ -199,9 +199,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     # Diagnostic logging using xfit_log from inpDict.
                     log_iteration(total_iteration, current_cost, current_params, accept_prob, temperature, xfit_log)
 
-                    graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                    graph_sig_temp.SetPoint(total_iteration, total_iteration, round(temperature, 4))
-                    graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+                    graphs_sig_chi2[it].SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                    graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(temperature, 4))
+                    graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
 
                     # Compute average residual.
                     residuals = []
@@ -212,12 +212,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                         y_fit = f_sig.Eval(x)
                         residuals.append(abs((y_data - y_fit) / (y_err if y_err != 0 else 1.0)))
                     avg_residual = np.mean(residuals) if residuals else 0.0
-                    graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(avg_residual, 4))
+                    graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(avg_residual, 4))
 
                     n_samples = len(w_vec)
-                    ic_aic, ic_bic = calculate_information_criteria(n_samples, num_params, current_cost)
-                    graph_sig_ic_aic.SetPoint(total_iteration, total_iteration, round(ic_aic, 4))
-                    graph_sig_ic_bic.SetPoint(total_iteration, total_iteration, round(ic_bic, 4))
+                    aic, bic = calculate_information_criteria(n_samples, num_params, current_cost)
+                    graphss_sig_aic[it].SetPoint(total_iteration, total_iteration, round(aic, 4))
+                    graph_sig_bic.SetPoint(total_iteration, total_iteration, round(bic, 4))
 
                     if accept_prob > random.random():
                         best_overall_params = [f_sig.GetParameter(i) for i in range(num_params)]
@@ -354,12 +354,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
             # Information Criteria on Canvas c8
             c8.cd(it+1)
-            graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria (AIC)")
-            graphs_sig_ic_aic[it].SetLineColor(kRed)
-            graphs_sig_ic_aic[it].Draw("ALP")
-            graphs_sig_ic_bic[it].SetTitle(f"Sig {sig_name} Information Criteria (BIC)")
-            graphs_sig_ic_bic[it].SetLineColor(kGreen)
-            graphs_sig_ic_bic[it].Draw("LP SAME")
+            graphs_sig_aic[it].SetTitle(f"Sig {sig_name} Information Criteria (AIC)")
+            graphs_sig_aic[it].SetLineColor(kRed)
+            graphs_sig_aic[it].Draw("ALP")
+            graphs_sig_bic[it].SetTitle(f"Sig {sig_name} Information Criteria (BIC)")
+            graphs_sig_bic[it].SetLineColor(kGreen)
+            graphs_sig_bic[it].Draw("LP SAME")
             c8.Update()
             # ---------------------------------------------------------------------
             print("\n")
@@ -379,8 +379,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
             for b in [2]:
                 print(f"\nDetermining best fit for fixed Sig {sig_name} using bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-                # Reuse the already created graph (do not append a new one)
-                g_sig_fit = graphs_sig_fit[it]
+                
                 g_sig = TGraphErrors()
                 for i in range(nsep.GetSelectedRows()):
                     g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -388,8 +387,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 for i in range(len(w_vec)):
                     sig_X_fit = g_sig.GetY()[i]
                     sig_X_fit_err = g_sig.GetEY()[i]
-                    g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
 
                 if sig_name == "L":
                     fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
@@ -403,7 +402,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
                 for i in range(num_params):
                     f_sig.FixParameter(i, par_vec[num_params*it+i])
-                r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
 
                 current_cost, lambda_reg = calculate_cost(f_sig, g_sig, par_vec[num_params*it : num_params*(it+1)],
                                                           num_events, num_params, lambda_reg)
@@ -419,21 +418,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 par_chi2_vec[num_params*it+j] = best_overall_cost
 
             c2.cd(it+1)
-            g_sig_fit.SetTitle(f"Sigma {sig_name} Model Fit (Fixed Parameters)")
-            g_sig_fit.Draw("A*")
-            g_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            g_sig_fit.GetXaxis().CenterTitle()
-            g_sig_fit.GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^2]")
-            g_sig_fit.GetYaxis().SetTitleOffset(1.5)
-            g_sig_fit.GetYaxis().SetTitleSize(0.035)
-            g_sig_fit.GetYaxis().CenterTitle()
-            x_min = min(g_sig_fit.GetX())
-            x_max = max(g_sig_fit.GetX())
-            y_min = min(g_sig_fit.GetY())
-            y_max = max(g_sig_fit.GetY())
+            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (Fixed Parameters)")
+            graphs_sig_fit[it].Draw("A*")
+            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit[it].GetXaxis().CenterTitle()
+            graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^2]")
+            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit[it].GetYaxis().CenterTitle()
+            x_min = min(graphs_sig_fit[it].GetX())
+            x_max = max(graphs_sig_fit[it].GetX())
+            y_min = min(graphs_sig_fit[it].GetY())
+            y_max = max(graphs_sig_fit[it].GetY())
             margin = 0.1
-            g_sig_fit.GetXaxis().SetRangeUser(x_min-margin, x_max+margin)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
+            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min-margin, x_max+margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
             n_points = 100
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
@@ -441,8 +440,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             y_min = min(y_min, fit_y_min)
             y_max = max(y_max, fit_y_max)
             margin = 0.1*(y_max-y_min)
-            g_sig_fit.GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
-            r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min-margin, y_max+margin)
+            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
 
             latex = TLatex()
@@ -498,12 +497,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             c7.Update()
 
             c8.cd(it+1)
-            graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria (AIC)")
-            graphs_sig_ic_aic[it].SetLineColor(kRed)
-            graphs_sig_ic_aic[it].Draw("ALP")
-            graphs_sig_ic_bic[it].SetTitle(f"Sig {sig_name} Information Criteria (BIC)")
-            graphs_sig_ic_bic[it].SetLineColor(kGreen)
-            graphs_sig_ic_bic[it].Draw("LP SAME")
+            graphs_sig_aic[it].SetTitle(f"Sig {sig_name} Information Criteria (AIC)")
+            graphs_sig_aic[it].SetLineColor(kRed)
+            graphs_sig_aic[it].Draw("ALP")
+            graphs_sig_bic[it].SetTitle(f"Sig {sig_name} Information Criteria (BIC)")
+            graphs_sig_bic[it].SetLineColor(kGreen)
+            graphs_sig_bic[it].Draw("LP SAME")
             c8.Update()
             # ---------------------------------------------------------------------
             print("\n")
