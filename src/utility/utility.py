@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:06:45 trottar"
+# Time-stamp: "2025-02-02 23:07:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -886,8 +886,8 @@ def local_search(params, inp_func, num_params):
             return chi2_func(par)
     
     py_func = PyFunc()
-    # Use the FromPython method to create the functor
-    func = ROOT.Math.Functor.FromPython(py_func, num_params+1)
+    # Specify the template argument "double" (the return type) explicitly.
+    func = ROOT.Math.Functor["double"](py_func, num_params+1)
     
     minimizer = ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
@@ -903,6 +903,7 @@ def local_search(params, inp_func, num_params):
     minimizer.Minimize()
     improved_params = [minimizer.X()[i] for i in range(num_params+1)]
     minimizer.Delete()
+    func.Delete()
     return improved_params
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
