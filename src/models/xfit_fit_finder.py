@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 18:19:34 trottar"
+# Time-stamp: "2025-02-03 18:30:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -167,12 +167,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 for b in [2]:
                     print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     iteration = 0
+                    stagnation_count = 0
                     initial_temperature = 1.0
                     temperature = initial_temperature
                     unchanged_iterations = 0
                     max_unchanged_iterations = 5
 
                     # Initialize the parameters and errors
+                    initial_params = [
+                        random.uniform(-max_param_bounds, max_param_bounds)
+                        for _ in range(num_params)
+                    ]                    
                     current_params = list(initial_params)
                     current_errors = [0.0] * num_params
                     best_params = list(current_params)
@@ -251,7 +256,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             cost_history.append(current_cost)
                             if len(cost_history) >= 2:
                                 lambda_reg = adaptive_regularization(cost_history, lambda_reg)
-                            accept_prob = acceptance_probability(best_overall_cost, current_cost, temperature)
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                             # Get the updated parameter values and errors from the fit
                             current_params = [f_sig.GetParameter(i) for i in range(num_params)]
@@ -266,11 +271,24 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 best_errors = list(current_errors)
                                 n_samples = len(w_vec)
                                 ic_aic, ic_bic = calculate_information_criteria(n_samples, num_params, best_cost)
-
+                                if current_cost > best_overall_cost:
+                                    stagnation_count += 1
+                            else:
+                                # Reject => revert, so do nothing special here
+                                stagnation_count += 1
+                                
                             if iteration % 25 == 0:
                                 current_params = local_search(current_params, f_sig, num_params)
                             previous_params = list(current_params)
 
+                            if stagnation_count > 20:
+                                print("No improvement in 20 accepted steps; random re-init.")
+                                current_params = [
+                                    random.uniform(-max_param_bounds, max_param_bounds)
+                                    for _ in range(num_params)
+                                ]
+                                stagnation_count = 0
+                            
                             # Update current parameters with best found so far
                             current_params = list(best_params)
                             current_errors = list(best_errors)
