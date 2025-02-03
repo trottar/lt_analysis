@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:41:10 trottar"
+# Time-stamp: "2025-02-03 00:55:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -295,6 +295,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             max_param_bounds = random.uniform(0.0, max_param_bounds)
                             iteration += 1
                             total_iteration += 1
+                            continue
+
+                        if best_cost < best_overall_cost or (temperature <= temp_threshold and accept_prob <= prob_threshold):
+                            best_overall_cost    = best_cost
+                            best_overall_bin     = best_bin
+                            best_overall_params  = best_params[:]    # copy the list
+                            best_overall_errors  = best_errors[:]    # copy the errors
+                            best_overall_temp    = temperature
+                            best_overall_prob    = accept_prob
+                            best_overall_residual= residual
+                            best_overall_ic_aic  = ic_aic
+                            best_overall_ic_bic  = ic_bic
+
+                            temp_threshold -= threshold_minimizer
+                            prob_threshold -= threshold_minimizer
 
                         # Update the parameter convergence graphs
                         for i in range(num_params):
