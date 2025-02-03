@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 18:16:06 trottar"
+# Time-stamp: "2025-02-03 18:34:48 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -845,12 +845,20 @@ def get_centroid(hist, x_min, x_max):
 
 ################################################################################################################################################
 
-def adaptive_cooling(initial_temp, iteration, cooling_rate=0.95):
-    """Exponential cooling schedule using math.exp to avoid overflow."""
+def adaptive_cooling(initial_temp, iteration, max_iterations, cooling_rate=0.95):
+    """
+    Exponential-ish cooling schedule that scales with the fraction of total iterations,
+    ensuring we don't push the exponent too high too soon.
+    """
+    # fraction of the way done:
+    frac_done = iteration / float(max_iterations + 1e-9)  # to avoid /0
+    
+    # Then scale exponent by the fraction:
+    effective_exponent = frac_done * 50  # e.g. scale up to some factor
     try:
-        return initial_temp * (cooling_rate ** iteration)
+        return initial_temp * (cooling_rate ** effective_exponent)
     except OverflowError:
-        return initial_temp * (cooling_rate ** math.log(iteration))
+        return initial_temp * (cooling_rate ** math.log(effective_exponent + 1))
 
 def sanitize_params(params, clip_min=-1e4, clip_max=1e4):
     """Clip parameters to a reasonable range to avoid huge values."""

@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 18:30:09 trottar"
+# Time-stamp: "2025-02-03 18:33:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -274,7 +274,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 if current_cost > best_overall_cost:
                                     stagnation_count += 1
                             else:
-                                # Reject => revert, so do nothing special here
                                 stagnation_count += 1
                                 
                             if iteration % 25 == 0:
@@ -282,7 +281,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             previous_params = list(current_params)
 
                             if stagnation_count > 20:
-                                print("No improvement in 20 accepted steps; random re-init.")
                                 current_params = [
                                     random.uniform(-max_param_bounds, max_param_bounds)
                                     for _ in range(num_params)
