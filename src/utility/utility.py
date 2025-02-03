@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 23:15:06 trottar"
+# Time-stamp: "2025-02-02 23:15:31 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -884,8 +884,8 @@ def local_search(params, inp_func, num_params):
     # Wrap chi2_func in a C++ std::function using cppyy.
     import cppyy
     std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
-    # Create a functor using std_func; use num_params+1 if your model requires it.
-    func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params+1)
+    # Create a functor using std_func; use num_params if your model requires it.
+    func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params)
     
     minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
