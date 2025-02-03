@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-26 11:17:04 trottar"
+# Time-stamp: "2025-02-02 21:24:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -14,6 +14,7 @@ from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
 from ROOT import Math
+import scipy.stats as stats
 import csv
 from array import array
 import numpy as np
@@ -844,247 +845,155 @@ def get_centroid(hist, x_min, x_max):
 
 ################################################################################################################################################
 
-def adaptive_cooling(initial_temp, iteration, max_iterations):
-    return initial_temp * (1 - iteration / max_iterations)
+def adaptive_cooling(initial_temp, iteration, cooling_rate=0.95):
+    """Exponential cooling schedule."""
+    return initial_temp * (cooling_rate ** iteration)
 
-def simulated_annealing(param, temperature, perturbation_factor=0.1):
-    # Perturbation factor determines the maximum percentage change
-    max_perturbation = abs(param) * perturbation_factor
+def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6):
+    """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero)."""
+    scale = abs(param) if abs(param) > min_scale else min_scale
+    max_perturbation = scale * perturbation_factor
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
     return param + perturbation
 
 def acceptance_probability(old_cost, new_cost, temperature):
-    try:
-        # Calculate the probability of accepting a worse solution
-        if abs(new_cost - 1) < abs(old_cost - 1):
-            return 1.0
-        else:
-            return math.exp((old_cost - new_cost) / temperature)
-    except OverflowError:
-        return 0.0
-        
+    """
+    Return 1 if the new cost is lower.
+    Otherwise, return exp(-(new_cost - old_cost)/temperature)
+    to decide probabilistically.
+    """
+    if new_cost < old_cost:
+        return 1.0
+    else:
+        try:
+            return math.exp(-(new_cost - old_cost) / temperature)
+        except OverflowError:
+            return 0.0
+
 def adjust_params(params, adjustment_factor=0.1):
+    """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-################################################################################################################################################
-
-# Create a PyROOT callable object
-class PyFunc:
-    def __call__(self, par):
-        return chi2_func(par)
-
-# RedHat7    
-#minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-# Alma9
-minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
-minimizer.SetMaxFunctionCalls(1000000)
-minimizer.SetMaxIterations(100000)
-minimizer.SetTolerance(0.001)
-minimizer.SetPrintLevel(0)
-
 def local_search(params, inp_func, num_params):
+    """
+    Perform a local search using ROOT's minimizer.
+    Works dynamically for any number of parameters.
+    """
+    def chi2_func(par):
+        for i in range(num_params):
+            inp_func.SetParameter(i, par[i])
+        return inp_func.GetChisquare()
 
-    if num_params+1 > 2:
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(num_params+1):
-                inp_func.SetParameter(i, par[i])
-            return inp_func.GetChisquare()
+    # Create a callable functor for ROOT minimizer
+    class PyFunc:
+        def __call__(self, par):
+            return chi2_func(par)
 
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, num_params+1)  # num_params+1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(num_params+1)]
-
-        minimizer.Delete()
-        func.Delete()
-
-        return improved_params
-
-    else:
-
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            inp_func.SetParameter(1, par)
-            return inp_func.GetChisquare()
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        minimizer.SetVariable(1, "p1", param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = minimizer.X()
-
-        minimizer.Delete()
-        func.Delete()
-        
-        return improved_params            
-
-################################################################################################################################################
+    py_func = PyFunc()
+    func = Math.Functor(py_func, num_params)
+    minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
+    minimizer.SetMaxFunctionCalls(1000000)
+    minimizer.SetMaxIterations(100000)
+    minimizer.SetTolerance(0.001)
+    minimizer.SetPrintLevel(0)
+    minimizer.SetFunction(func)
+    for i, param in enumerate(params):
+        step = 0.01 * abs(param) if abs(param) > 1e-6 else 0.01
+        minimizer.SetVariable(i, f"p{i}", param, step)
+    minimizer.Minimize()
+    improved_params = [minimizer.X()[i] for i in range(num_params)]
+    minimizer.Delete()
+    func.Delete()
+    return improved_params
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """
     Calculate cost (modified reduced chi-square) with adaptive regularization.
-    
-    Handles cases with fewer or more data points than parameters.
-    
-    Args:
-        f_sig: ROOT TF1 fit function
-        g_sig: ROOT TGraphErrors with data points
-        current_params: List of current parameter values
-        num_events: Number of data points
-        num_params: Number of fit parameters
-        lambda_reg: Initial regularization strength
-    
-    Returns:
-        tuple: (cost, best_lambda, regularization_details)
     """
-    # Robust parameter handling
     def sanitize_params(params):
         return [0.0 if abs(p) < 1e-9 or abs(p) > 1e9 else p for p in params]
-    
     current_params = sanitize_params(current_params)
-    
-    # Calculate L2 regularization term
     l2_reg = np.sum(np.square(current_params))
-    
-    # Adaptive regularization settings
     lambda_min = 1e-6
     lambda_max = 100.0
-    
-    # Residual calculation with error-weighted approach
+
     def calculate_residuals():
         residuals = []
         for i in range(num_events):
             observed = g_sig.GetY()[i]
             expected = f_sig.Eval(g_sig.GetX()[i])
             error = g_sig.GetEY()[i]
-            
-            # Robust residual calculation
             residual = (observed - expected) / (error if error != 0 else 1.0)
             residuals.append(residual)
         return np.array(residuals)
-    
-    # Cost function with adaptive regularization
+
     def compute_cost(lambda_val, residuals):
-        # Mean squared error
         mse = np.mean(np.square(residuals))
-        
-        # Complexity penalty
         complexity_penalty = 0.1 * num_params / num_events
-        
-        # Adaptive cost calculation
         if num_events <= num_params:
-            # Underdetermined case: stronger regularization
             cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
         else:
-            # Overdetermined case: lighter regularization
             chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
             cost = (chi_square + lambda_val * l2_reg) / nu
-        
         return cost
-    
-    # Residual calculation
+
     residuals = calculate_residuals()
-    
-    # Lambda optimization for underdetermined or ill-conditioned cases
     if num_events <= num_params:
-        # Use log-spaced lambda values for broader search
         lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 20)
-        
-        # Find optimal lambda
         costs = [compute_cost(lam, residuals) for lam in lambda_values]
         best_index = np.argmin(costs)
         best_lambda = lambda_values[best_index]
         best_cost = costs[best_index]
-        
-        regularization_details = {
-            'lambda_values': lambda_values,
-            'costs': costs,
-            'optimal_lambda_index': best_index
-        }
     else:
-        # Standard case
         best_lambda = lambda_reg
         best_cost = compute_cost(best_lambda, residuals)
-        regularization_details = {}
-    
     return best_cost, best_lambda
-
-################################################################################################################################################
 
 def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
     """
     Dynamically adapt regularization strength based on cost history.
-    
-    Args:
-        cost_history: List of previous costs
-        lambda_reg: Current regularization parameter
-        min_improvement: Minimum relative improvement threshold
-        max_lambda: Maximum allowed regularization strength
-        min_lambda: Minimum allowed regularization strength
-        
-    Returns:
-        float: Updated lambda value with adaptive adjustment
     """
     if len(cost_history) < 2:
         return lambda_reg
-    
-    # Robust improvement calculation
     try:
         improvement = (cost_history[-2] - cost_history[-1]) / (abs(cost_history[-2]) + 1e-10)
     except Exception:
         improvement = 0.0
-    
-    # Adaptive lambda adjustment
     if improvement > min_improvement:
-        # Significant improvement: reduce regularization
         lambda_reg *= 0.9
     elif improvement < 0:
-        # Cost increasing: increase regularization
         lambda_reg *= 1.1
-    
-    # Enforce lambda bounds
     return max(min_lambda, min(lambda_reg, max_lambda))
 
-################################################################################################################################################
-
 def get_central_value(lst):
+    """Return the median value from a list."""
     n = len(lst)
-    if n % 2 == 1:  # Odd-sized list
+    if n % 2 == 1:
         return lst[n // 2]
-    else:  # Even-sized list
+    else:
         mid1, mid2 = n // 2 - 1, n // 2
         return (lst[mid1] + lst[mid2]) / 2
 
-################################################################################################################################################
-
 def calculate_information_criteria(n_samples, n_parameters, chi2):
     """Calculate AIC and BIC for model selection."""
-    log_likelihood = -chi2 / 2  # Approximate log likelihood from chi-square
+    log_likelihood = -chi2 / 2  # approximate
     aic = 2 * n_parameters - 2 * log_likelihood
     bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
     return aic, bic
+
+def select_valid_parameter(param, lower_bound, upper_bound):
+    """Ensure the parameter stays within the given bounds."""
+    return max(lower_bound, min(param, upper_bound))
+
+def compute_p_value(chi2, ndf):
+    """Compute the p-value for a given chi-square and degrees of freedom."""
+    return 1 - stats.chi2.cdf(chi2, ndf)
+
+def log_iteration(iteration, cost, params, acceptance, temperature, logfile):
+    """Log iteration details to a file for later analysis."""
+    with open(logfile, 'a') as f:
+        f.write(f"{iteration}\t{cost:.6f}\t{' '.join(f'{p:.6f}' for p in params)}\t{acceptance:.6f}\t{temperature:.6f}\n")
 
 ################################################################################################################################################
 

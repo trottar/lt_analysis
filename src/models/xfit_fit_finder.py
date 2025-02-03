@@ -3,30 +3,25 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-28 14:38:29 trottar"
+# Time-stamp: "2025-02-02 21:35:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
 #
 # Copyright (c) trottar
 #
-import random
-import ROOT
-from ROOT import TFile, TNtuple, TText, TLatex, TLegend
-from ROOT import TGraph, TGraphErrors, TCanvas
-from ROOT import TF1, TFitResultPtr
-from ROOT import kBlack, kRed, kBlue, kGreen, kMagenta, kCyan
 import numpy as np
-import math
-import time
-import gc
-import os, sys
+from ROOT import TGraph, TGraphErrors, TF1, TCanvas, TText, TLatex, TLegend, kRed, kBlue, kGreen, kMagenta, kBlack
+import sys, math, time, random
 
 ##################################################################################################################################################
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import adaptive_regularization, calculate_cost, adaptive_cooling, simulated_annealing, acceptance_probability, adjust_params, local_search, select_valid_parameter, get_central_value, calculate_information_criteria
+from utility import (adaptive_regularization, calculate_cost, adaptive_cooling,
+                     simulated_annealing, acceptance_probability, adjust_params, 
+                     local_search, select_valid_parameter, get_central_value, 
+                     calculate_information_criteria)
 
 ##################################################################################################################################################
 
@@ -44,2807 +39,523 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 ##################################################################################################################################################
 
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization=True):
+    # Create lists to store graph objects for each fit
+    graphs_sig_fit       = []  # TGraphErrors for data and final fit curve
+    graphs_sig_params    = []  # List of lists: one TGraph per parameter (for convergence)
+    graphs_sig_chi2      = []  # Reduced chi-square evolution
+    graphs_sig_temp      = []  # Temperature evolution
+    graphs_sig_accept    = []  # Acceptance probability evolution
+    graphs_sig_converge  = []  # Alternate chi2 convergence
+    graphs_sig_residuals = []  # Residual evolution
+    graphs_sig_ic_aic    = []  # AIC evolution
+    graphs_sig_ic_bic    = []  # BIC evolution
 
-    # Create lists to store graph objects outside the loop
-    graphs_sig_fit = []
-    graphs_sig_p0 = []
-    graphs_sig_p1 = []
-    graphs_sig_p2 = []
-    graphs_sig_p3 = []
-    graphs_sig_chi2 = []
-    graphs_sig_temp = []
-    graphs_sig_accept = []
-    graphs_sig_converge = []
-    graphs_sig_residuals = []
-    graphs_sig_ic_aic = []
-    graphs_sig_ic_bic = []
-    
-    c2 = TCanvas("c2", "c2", 800, 800)
-    c2.Divide(2, 2)
-
-    # Create ROOT canvases for additional parameter convergence plots
+    # Create ROOT canvases for plotting
+    c2 = TCanvas("c2", "Data & Final Fit", 800, 800)
+    c2.Divide(2,2)
     c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
-    c3.Divide(2, 2)
+    c3.Divide(2,2)
     c4 = TCanvas("c4", "Red. Chi-Square Convergence", 800, 800)
-    c4.Divide(2, 2)
+    c4.Divide(2,2)
     c5 = TCanvas("c5", "Temperature", 800, 800)
-    c5.Divide(2, 2)
+    c5.Divide(2,2)
     c6 = TCanvas("c6", "Acceptance Probability", 800, 800)
-    c6.Divide(2, 2)
-    c7 = TCanvas("c7", "Residuals", 800, 600)
-    c7.Divide(2, 2)
-    c8 = TCanvas("c8", "Information Criteria", 800, 600)
-    c8.Divide(2, 2)
+    c6.Divide(2,2)
+    c7 = TCanvas("c7", "Residuals", 800,600)
+    c7.Divide(2,2)
+    c8 = TCanvas("c8", "Information Criteria", 800,600)
+    c8.Divide(2,2)
 
+    # Unpack input dictionary
     q2_set = inpDict["q2_set"]
     w_set = inpDict["w_set"]
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
-    max_iterations = inpDict["max_iterations"]
-    num_optimizations = inpDict["num_optimizations"]
-    initial_param_bounds = inpDict["initial_param_bounds"]
-    tmin_range = inpDict["tmin_range"]
-    tmax_range = inpDict["tmax_range"]
-    Q2min_range = inpDict["Q2min_range"]
-    Q2max_range = inpDict["Q2max_range"]
-    iter_num = inpDict["iter_num"]            
-    fit_params = inpDict["fit_params"]
-    chi2_threshold = inpDict["chi2_threshold"]
-    
-    # Using central bin value to determine best fit, which should have the best statistics
+    max_iterations      = inpDict["max_iterations"]
+    num_optimizations   = inpDict["num_optimizations"]
+    initial_param_bounds= inpDict["initial_param_bounds"]
+    tmin_range          = inpDict["tmin_range"]
+    tmax_range          = inpDict["tmax_range"]
+    Q2min_range         = inpDict["Q2min_range"]
+    Q2max_range         = inpDict["Q2max_range"]
+    iter_num            = inpDict["iter_num"]
+    fit_params          = inpDict["fit_params"]
+    chi2_threshold      = inpDict["chi2_threshold"]
+
+    num_events = nsep.GetEntries()
+
+    # Determine central values for guidance
     q2_center_val = get_central_value(q2_vec)
     w_center_val = get_central_value(w_vec)
     g_center_val = get_central_value(g_vec)
     th_center_val = get_central_value(th_vec)
-    #print(f"\n\nDetermining best fit off the central bin values...\n Q2={q2_center_val:.3f}, W={w_center_val:.3f}, theta={th_center_val:.3f}")
-    #fun_Sig_L = fun_Sig_L_wrapper(q2_center_val, w_center_val)
-    #fun_Sig_T = fun_Sig_T_wrapper(q2_center_val, w_center_val)
-    #fun_Sig_LT = fun_Sig_LT_wrapper(q2_center_val, w_center_val, th_center_val)
-    #fun_Sig_TT = fun_Sig_TT_wrapper(q2_center_val, w_center_val, th_center_val)
 
-    num_events = nsep.GetEntries()
+    # Loop over each signal in fit_params
+    for it, (sig_name, val) in enumerate(fit_params.items()):
+        # Get the number of parameters, initial parameters, and the equation string.
+        num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
+        # Replace any zero parameters (to avoid perturbation issues)
+        initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
+        param_str = ', '.join(str(p) for p in initial_params)
 
-    for it, (key, val) in enumerate(fit_params.items()):
+        # Create dynamic parameter convergence graphs (one TGraph per parameter)
+        param_graphs = []
+        for i in range(num_params):
+            param_graphs.append(TGraph())
+        graphs_sig_params.append(param_graphs)
 
-        # Don't find new fits if debugging
-        if key not in fixed_params:
+        # Create diagnostic graphs for this signal
+        graph_sig_fit       = TGraphErrors()
+        graph_sig_chi2      = TGraph()
+        graph_sig_temp      = TGraph()
+        graph_sig_accept    = TGraph()
+        graph_sig_converge  = TGraph()
+        graph_sig_residuals = TGraph()
+        graph_sig_aic       = TGraph()
+        graph_sig_bic       = TGraph()
+
+        graphs_sig_fit.append(graph_sig_fit)
+        graphs_sig_chi2.append(graph_sig_chi2)
+        graphs_sig_temp.append(graph_sig_temp)
+        graphs_sig_accept.append(graph_sig_accept)
+        graphs_sig_converge.append(graph_sig_converge)
+        graphs_sig_residuals.append(graph_sig_residuals)
+        graphs_sig_ic_aic.append(graph_sig_aic)
+        graphs_sig_ic_bic.append(graph_sig_bic)
+
+        # Branch based on whether parameters are to be re-fitted or fixed.
+        if sig_name not in fixed_params:
+            # --------------------- Optimization Branch ---------------------
+            print("\n/*--------------------------------------------------*/")
+            print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+            print(f"Initial Parameters: ({param_str})")
+            print(f"{equation_str}")
+            print("/*--------------------------------------------------*/")
             
-            # Find optimized fits
-            sig_name = key
-            # Grab parameters used by functional forms
-            num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
-
-            # Checks initial parameters and replaces zeros to avoid errors
-            initial_params = [v if abs(v) > 0.0 else 1.0 for v in initial_params]
-
-            # String list of initial parameters
-            param_str = ', '.join(str(param) for param in initial_params)
-
-            if num_events <= num_params:
-                print(f"\n\nWARNING: The number of parameters ({num_params}) for Sig {sig_name} is greater than or equal to the number of data points ({num_events})! Using adaptive regularization methods for determining quality of fit...")
-                fit_convergence_type = "Adapt. Reg." # Adaptive Regularization            
-            else:
-                fit_convergence_type = "Red. Chi-Square"
-
-            if num_params == 1:
-
-                # 1 param
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")
-                print("/*--------------------------------------------------*/")
-
-                best_overall_params = None
-                best_overall_cost = float('inf')
-                best_overall_bin = None
-                best_overall_temp = float('inf')
-                best_overall_prob = 1.0
-                best_overall_residual = float('inf')
-                best_overall_ic_aic = float('inf')
-                best_overall_ic_bic = float('inf')
-                total_iteration = 0
-                max_param_bounds = initial_param_bounds
-                
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
-                cost_history = []
-
-                ic_aic = float('inf')
-                ic_bic = float('inf')
-                
-                # Parameter range offset (% of param value)
-                param_offset_0 = 0.1
-                param_offset_1 = 0.1                
-                
-                # Store the parameter values and chi-square values for each iteration
-                params_sig_history = {'p0': []}
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(0.0)
-                graphs_sig_p2.append(0.0)
-                graphs_sig_p3.append(0.0)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-                
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Record the start time
-                start_time = time.time()
-
-                for start in range(num_optimizations):
-                    print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
-
-                    set_optimization = full_optimization
-                    
-                    # Set thresholds on temperature and probability to avoid local minima
-                    temp_threshold = 1e-2  # Temperature should be very low
-                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
-                    threshold_minimizer = 5e-2
-                    
-                    #for b in range(len(w_vec)):
-                    for b in [2]:
-
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
-                        iteration = 0
-
-                        initial_temperature = 1.0
-                        temperature = initial_temperature
-                        unchanged_iterations = 0
-                        max_unchanged_iterations = 5
-
-                        # Initialize adaptive parameter limits
-                        par_sig_0 = initial_params[0]
-                        par_sig_err_0 = 0.0
-
-                        # Track the best solution
-                        best_params = [par_sig_0]
-                        best_cost = float('inf')
-                        best_bin = None
-                        best_errors = [par_sig_err_0]
-                        previous_params = best_params[:]
-
-                        # Local search
-                        local_search_interval = 25
-
-                        while iteration <= max_iterations:
-
-                            g_sig_fit = TGraphErrors()
-
-                            graphs_sig_fit.append(g_sig_fit)
-
-                            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                            sys.stdout.flush()
-
-                            try:
-                                # Perturb parameters
-
-                                current_params = [
-                                    simulated_annealing(par_sig_0, temperature)
-                                ]
-
-                                # Restart from initial parameters
-                                current_params = initial_params
-                                temperature = initial_temperature
-                                unchanged_iterations = 0
-
-                                g_sig = TGraphErrors()
-                                for i in range(nsep.GetSelectedRows()):
-                                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                                for i in range(len(w_vec)):
-                                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                                if sig_name == "L":
-                                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                                elif sig_name == "T":
-                                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                                elif sig_name == "LT":
-                                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                                elif sig_name == "TT":
-                                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                                f_sig.SetParNames("p0")
-                                f_sig.SetParameter(0, current_params[0])
-                                if set_optimization:
-                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                else:
-                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-
-                                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                                f_sig_status = f_sig.GetNDF() != 0
-
-                                params_sig_history['p0'].append(current_params[0])
-
-                                # Calculate cost with consistent regularization
-                                current_cost, lambda_reg = calculate_cost(
-                                    f_sig, g_sig, current_params,
-                                    num_events, num_params, lambda_reg
-                                )
-
-                                # Create residual plot for this iteration
-                                for i in range(g_sig.GetN()):
-                                    x = g_sig.GetX()[i]
-                                    y_data = g_sig.GetY()[i]
-                                    y_err = g_sig.GetEY()[i]
-                                    y_fit = f_sig.Eval(x)
-                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
-                                
-                                # Store cost for history
-                                cost_history.append(current_cost)            
-                                # Adapt regularization strength based on history
-                                if len(cost_history) >= 2:
-                                    lambda_reg = adaptive_regularization(cost_history, lambda_reg)
-                                # Update acceptance probability for simulated annealing
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-
-                                current_params = [f_sig.GetParameter(0)]
-                                current_errors = [f_sig.GetParError(0)]
-                                current_bin = b
-
-                                # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                                if accept_prob > random.random():
-                                    best_params = current_params
-                                    best_cost = current_cost
-                                    best_bin = current_bin
-                                    best_errors = current_errors
-                                    # Calculate information criteria
-                                    n_samples = len(w_vec)
-                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                    ic_aic, ic_bic = ic_values
-
-                                if iteration % local_search_interval == 0:
-                                    current_params = local_search(current_params, f_sig, num_params)
-                                    par_sig_0 = current_params
-
-                                previous_params = current_params[:]
-
-                                # Update parameters with the best found so far
-                                par_sig_0 = best_params
-                                par_sig_err_0 = best_errors
-
-                                # Update the temperature
-                                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)                                
-
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                            except (TypeError or ZeroDivisionError) as e:
-                                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                                # Generate safer parameter values within reasonable bounds
-                                recovery_params = [
-                                    p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
-                                    for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
-                                ]
-
-                                # Ensure parameters stay within bounds
-                                recovery_params = [
-                                    max(min(p, max_param_bounds), -max_param_bounds) 
-                                    for p in recovery_params
-                                ]
-
-                                # Reset function parameters
-                                for i, param in enumerate(recovery_params):
-                                    f_sig.SetParameter(i, param)
-
-                                # Don't update best_cost to inf, keep previous best
-                                current_params = recovery_params
-                                current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-
-                                # Increase temperature slightly to encourage exploration
-                                temperature = min(temperature * 1.2, initial_temperature)
-                                
-                                max_param_bounds = random.uniform(0.0, max_param_bounds)
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0                
-                        
-                            # After the while loop, check if this run found a better solution
-                            if (abs(best_cost - 1) <= abs(best_overall_cost - 1) and temperature <= temp_threshold and accept_prob <= prob_threshold):
-                                best_overall_cost = best_cost
-                                best_overall_bin = best_bin
-                                best_overall_params = best_params[:]
-                                best_overall_errors = best_errors[:]
-                                best_overall_temp = temperature
-                                best_overall_prob = accept_prob
-                                best_overall_residual = residual
-                                best_overall_ic_aic = ic_aic
-                                best_overall_ic_bic = ic_bic
-                                #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False
-                                # Shrink temperature and accepted probability to increase likelyhood of global minima
-                                temp_threshold = temp_threshold-threshold_minimizer
-                                prob_threshold = prob_threshold-threshold_minimizer
-
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                                
-                        try:                                    
-                            # Update ROOT TGraphs for plotting
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))
-                        except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
-                    
-                try:
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_overall_cost:.5f}")
-                    print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                # Record the end time
-                end_time = time.time()
-                # Calculate the total duration
-                total_duration = end_time - start_time
-                print("The loop took {:.2f} seconds.".format(total_duration))
-
-                try:            
-                    while len(best_overall_params) < 4:
-                        best_overall_params.append(0.0)
-                        best_overall_errors.append(0.0)
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                g_sig_fit = TGraphErrors()
-
-                graphs_sig_fit.append(g_sig_fit)
-
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                f_sig.SetParNames("p0")
-                f_sig.FixParameter(0, best_overall_params[0])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                f_sig_status = f_sig.GetNDF() != 0
-                f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
-
-                fit_status = TText()
-                fit_status.SetTextSize(0.04)
-                fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-                # Calculate the minimum and maximum values from the graphs
-                min_sig_y = float('inf')
-                max_sig_y = float('-inf')
-
-                # Update min_sig_y and max_sig_y based on each graph's values
-                for graph in [graphs_sig_p0[it]]:
-                    n_points = graph.GetN()
-                    for i in range(n_points):
-                        y = graph.GetY()[i]
-                        if y < min_sig_y:
-                            min_sig_y = y
-                        if y > max_sig_y:
-                            max_sig_y = y
-
-                # Scale the y-axis
-                graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
-                graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-                c2.Update()
-
-                # Plot parameter convergence
-                c3.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(kRed)
-                graphs_sig_p0[it].Draw("ALP")
-                c3.Update()
-
-                # Plot chi-square convergence
-                c4.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(kBlack)
-                graphs_sig_converge[it].Draw("ALP")
-                # Create a TLatex object
-                latex = TLatex()
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c4.Update()
-
-                # Plot temperature
-                c5.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(kBlack)
-                graphs_sig_temp[it].Draw("ALP")
-                c5.Update()
-
-                # Plot acceptance probability
-                c6.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(kBlack)
-                graphs_sig_accept[it].Draw("ALP")
-                c6.Update()
-
-                # Plot residuals
-                c7.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                graphs_sig_residuals[it].SetLineColor(kBlack)
-                graphs_sig_residuals[it].Draw("ALP")
-                c7.Update()
-
-                # Plot information criteria
-                c8.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetLineColor(kBlack)
-                graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_bic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].Draw("same")
-                legend = TLegend(0.7, 0.7, 0.9, 0.9)
-                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
-                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
-                legend.Draw()
-                c8.Update()
-
-                print("\n")    
-
-            elif num_params == 2:
-
-                # 2 params
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")            
-                print("/*--------------------------------------------------*/")
-
-                best_overall_params = None
-                best_overall_cost = float('inf')
-                best_overall_bin = None
-                best_overall_temp = float('inf')
-                best_overall_prob = 1.0
-                best_overall_residual = float('inf')
-                best_overall_ic_aic = float('inf')
-                best_overall_ic_bic = float('inf')
-                total_iteration = 0
-                max_param_bounds = initial_param_bounds
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
-                cost_history = []
-
-                ic_aic = float('inf')
-                ic_bic = float('inf')
-                
-                # Parameter range offset (% of param value)
-                param_offset_0 = 0.1
-                param_offset_1 = 0.1                                
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sig_history = {'p0': [], 'p1': []}
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_p1 = TGraph()
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(graph_sig_p1)
-                graphs_sig_p2.append(0.0)
-                graphs_sig_p3.append(0.0)            
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-                                
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Record the start time
-                start_time = time.time()
-
-                for start in range(num_optimizations):
-                    print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))
-
-                    set_optimization = full_optimization
-                    
-                    # Set thresholds on temperature and probability to avoid local minima
-                    temp_threshold = 1e-2  # Temperature should be very low
-                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
-                    threshold_minimizer = 5e-2
-                    
-                    #for b in range(len(w_vec)):
-                    for b in [2]:
-
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
-                        iteration = 0
-
-                        initial_temperature = 1.0
-                        temperature = initial_temperature
-                        unchanged_iterations = 0
-                        max_unchanged_iterations = 5
-
-                        # Initialize adaptive parameter limits
-                        par_sig_0 = initial_params[0]
-                        par_sig_1 = initial_params[1]
-                        par_sig_err_0 = 0.0
-                        par_sig_err_1 = 0.0
-
-                        # Track the best solution
-                        best_params = [par_sig_0, par_sig_1]
-                        best_cost = float('inf')
-                        best_bin = None
-                        best_errors = [par_sig_err_0, par_sig_err_1]
-                        previous_params = best_params[:]
-
-                        # Local search
-                        local_search_interval = 25
-
-                        while iteration <= max_iterations:
-
-                            g_sig_fit = TGraphErrors()
-
-                            graphs_sig_fit.append(g_sig_fit)
-
-                            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                            sys.stdout.flush()
-
-                            try:
-                                # Perturb parameters
-
-                                current_params = [
-                                    simulated_annealing(par_sig_0, temperature),
-                                    simulated_annealing(par_sig_1, temperature)
-                                ]                                
-
-                                # Restart from initial parameters
-                                current_params = initial_params
-                                temperature = initial_temperature
-                                unchanged_iterations = 0
-
-                                g_sig = TGraphErrors()
-                                for i in range(nsep.GetSelectedRows()):
-                                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                                for i in range(len(w_vec)):
-                                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                                if sig_name == "L":
-                                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                                elif sig_name == "T":
-                                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                                elif sig_name == "LT":
-                                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                                elif sig_name == "TT":
-                                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                                f_sig.SetParNames("p0", "p1")
-                                f_sig.SetParameter(0, current_params[0])
-                                f_sig.SetParameter(1, current_params[1])
-                                if set_optimization:
-                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                    f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                else:
-                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-                                    f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
-                                
-                                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                                f_sig_status = f_sig.GetNDF() != 0
-
-                                params_sig_history['p0'].append(current_params[0])
-                                params_sig_history['p1'].append(current_params[1])
-
-                                # Calculate cost with consistent regularization
-                                current_cost, lambda_reg = calculate_cost(
-                                    f_sig, g_sig, current_params,
-                                    num_events, num_params, lambda_reg
-                                )
-                                
-                                # Create residual plot for this iteration
-                                for i in range(g_sig.GetN()):
-                                    x = g_sig.GetX()[i]
-                                    y_data = g_sig.GetY()[i]
-                                    y_err = g_sig.GetEY()[i]
-                                    y_fit = f_sig.Eval(x)
-                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
-                                
-                                # Store cost for history
-                                cost_history.append(current_cost)            
-                                # Adapt regularization strength based on history
-                                if len(cost_history) >= 2:
-                                    lambda_reg = adaptive_regularization(cost_history, lambda_reg)            
-                                # Update acceptance probability for simulated annealing
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-
-                                current_params = [
-                                    f_sig.GetParameter(0),
-                                    f_sig.GetParameter(1)
-                                ]
-
-                                current_errors = [
-                                    f_sig.GetParError(0),
-                                    f_sig.GetParError(1)
-                                ]
-
-                                current_bin = b
-
-                                # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                                if accept_prob > random.random():
-                                    best_params = current_params
-                                    best_cost = current_cost
-                                    best_bin = current_bin
-                                    best_errors = current_errors
-
-                                if iteration % local_search_interval == 0:
-                                    current_params = local_search(current_params, f_sig, num_params)
-                                    par_sig_0, par_sig_1 = current_params
-                                    # Calculate information criteria
-                                    n_samples = len(w_vec)
-                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                    ic_aic, ic_bic = ic_values
-
-                                previous_params = current_params[:]
-
-                                # Update parameters with the best found so far
-                                par_sig_0, par_sig_1 = best_params
-                                par_sig_err_0, par_sig_err_1 = best_errors
-
-                                # Update the temperature
-                                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                            except (TypeError or ZeroDivisionError) as e:
-                                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                                # Generate safer parameter values within reasonable bounds
-                                recovery_params = [
-                                    p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
-                                    for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
-                                ]
-
-                                # Ensure parameters stay within bounds
-                                recovery_params = [
-                                    max(min(p, max_param_bounds), -max_param_bounds) 
-                                    for p in recovery_params
-                                ]
-
-                                # Reset function parameters
-                                for i, param in enumerate(recovery_params):
-                                    f_sig.SetParameter(i, param)
-
-                                # Don't update best_cost to inf, keep previous best
-                                current_params = recovery_params
-                                current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-
-                                # Increase temperature slightly to encourage exploration
-                                temperature = min(temperature * 1.2, initial_temperature)
-
-                                max_param_bounds = random.uniform(0.0, max_param_bounds)
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0
-                        
-                            # After the while loop, check if this run found a better solution
-                            if (abs(best_cost - 1) <= abs(best_overall_cost - 1) and temperature <= temp_threshold and accept_prob <= prob_threshold):
-                                best_overall_cost = best_cost
-                                best_overall_bin = best_bin
-                                best_overall_params = best_params[:]
-                                best_overall_errors = best_errors[:]
-                                best_overall_temp = temperature
-                                best_overall_prob = accept_prob
-                                best_overall_residual = residual
-                                best_overall_ic_aic = ic_aic
-                                best_overall_ic_bic = ic_bic
-                                #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False
-                                # Shrink temperature and accepted probability to increase likelyhood of global minima
-                                temp_threshold = temp_threshold-threshold_minimizer
-                                prob_threshold = prob_threshold-threshold_minimizer
-
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p1[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p1[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                                
-                        try:                                    
-                            # Update ROOT TGraphs for plotting
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
-                        except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
-                    
-                try:
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_overall_cost:.5f}")
-                    print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                # Record the end time
-                end_time = time.time()
-                # Calculate the total duration
-                total_duration = end_time - start_time
-                print("The loop took {:.2f} seconds.".format(total_duration))
-
-                try:            
-                    while len(best_overall_params) < 4:
-                        best_overall_params.append(0.0)
-                        best_overall_errors.append(0.0)
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                g_sig_fit = TGraphErrors()
-
-                graphs_sig_fit.append(g_sig_fit)
-
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                f_sig.SetParNames("p0", "p1")
-                f_sig.FixParameter(0, best_overall_params[0])
-                f_sig.FixParameter(1, best_overall_params[1])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                f_sig_status = f_sig.GetNDF() != 0
-                f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
-
-                fit_status = TText()
-                fit_status.SetTextSize(0.04)
-                fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-                # Calculate the minimum and maximum values from the graphs
-                min_sig_y = float('inf')
-                max_sig_y = float('-inf')
-
-                # Update min_sig_y and max_sig_y based on each graph's values
-                for graph in [graphs_sig_p0[it], graphs_sig_p1[it]]:
-                    n_points = graph.GetN()
-                    for i in range(n_points):
-                        y = graph.GetY()[i]
-                        if y < min_sig_y:
-                            min_sig_y = y
-                        if y > max_sig_y:
-                            max_sig_y = y
-
-                # Scale the y-axis
-                graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
-                graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-                c2.Update()
-
-                # Plot parameter convergence
-                c3.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(kRed)
-                graphs_sig_p1[it].SetLineColor(kBlue)
-                graphs_sig_p0[it].Draw("ALP")
-                graphs_sig_p1[it].Draw("LP SAME")
-                c3.Update()
-
-                # Plot residuals
-                c7.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                graphs_sig_residuals[it].SetLineColor(kBlack)
-                graphs_sig_residuals[it].Draw("ALP")
-                c7.Update()
-
-                # Plot information criteria
-                c8.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetLineColor(kBlack)
-                graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_bic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].Draw("same")
-                legend = TLegend(0.7, 0.7, 0.9, 0.9)
-                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
-                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
-                legend.Draw()
-                c8.Update()
-
-                print("\n")    
-
-            elif num_params == 3:
-
-                # 3 params
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")            
-                print("/*--------------------------------------------------*/")
-
-                best_overall_params = None
-                best_overall_cost = float('inf')
-                best_overall_bin = None
-                best_overall_temp = float('inf')
-                best_overall_prob = 1.0
-                best_overall_residual = float('inf')
-                best_overall_ic_aic = float('inf')
-                best_overall_ic_bic = float('inf')
-                total_iteration = 0
-                max_param_bounds = initial_param_bounds
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
-                cost_history = []
-
-                ic_aic = float('inf')
-                ic_bic = float('inf')
-                
-                # Parameter range offset (% of param value)
-                param_offset_0 = 0.1
-                param_offset_1 = 0.1
-                param_offset_2 = 0.1
-
-                # Store the parameter values and chi-square values for each iteration
-                params_sig_history = {'p0': [], 'p1': [], 'p2': []}
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_p1 = TGraph()
-                graph_sig_p2 = TGraph()
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(graph_sig_p1)
-                graphs_sig_p2.append(graph_sig_p2)
-                graphs_sig_p3.append(0.0)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-                
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Record the start time
-                start_time = time.time()
-
-                for start in range(num_optimizations):
-                    print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
-
-                    set_optimization = full_optimization
-                    
-                    # Set thresholds on temperature and probability to avoid local minima
-                    temp_threshold = 1e-2  # Temperature should be very low
-                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
-                    threshold_minimizer = 5e-2
-                    
-                    #for b in range(len(w_vec)):
-                    for b in [2]:
-
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
-                        iteration = 0
-
-                        initial_temperature = 1.0
-                        temperature = initial_temperature
-                        unchanged_iterations = 0
-                        max_unchanged_iterations = 5
-
-                        # Initialize adaptive parameter limits
-                        par_sig_0 = initial_params[0]
-                        par_sig_1 = initial_params[1]
-                        par_sig_2 = initial_params[2]
-                        par_sig_err_0 = 0.0
-                        par_sig_err_1 = 0.0
-                        par_sig_err_2 = 0.0
-
-                        # Track the best solution
-                        best_params = [par_sig_0, par_sig_1, par_sig_2]
-                        best_cost = float('inf')
-                        best_bin = None
-                        best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2]
-                        previous_params = best_params[:]
-
-                        # Local search
-                        local_search_interval = 25
-
-                        while iteration <= max_iterations:
-
-                            g_sig_fit = TGraphErrors()
-
-                            graphs_sig_fit.append(g_sig_fit)
-
-                            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                            sys.stdout.flush()
-
-                            try:
-
-                                # Perturb parameters
-
-                                current_params = [
-                                    simulated_annealing(par_sig_0, temperature),
-                                    simulated_annealing(par_sig_1, temperature),
-                                    simulated_annealing(par_sig_2, temperature)
-                                ]
-                                
-                                # Restart from initial parameters
-                                current_params = initial_params
-                                temperature = initial_temperature
-                                unchanged_iterations = 0
-
-                                g_sig = TGraphErrors()
-                                for i in range(nsep.GetSelectedRows()):
-                                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                                for i in range(len(w_vec)):
-                                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                                if sig_name == "L":
-                                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                                elif sig_name == "T":
-                                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                                elif sig_name == "LT":
-                                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                                elif sig_name == "TT":
-                                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                                f_sig.SetParNames("p0", "p1", "p2")
-                                f_sig.SetParameter(0, current_params[0])
-                                f_sig.SetParameter(1, current_params[1])
-                                f_sig.SetParameter(2, current_params[2])
-                                if set_optimization:
-                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)
-                                    f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)                                
-                                    f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
-                                else:
-                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-                                    f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
-                                    f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
-
-                                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                                f_sig_status = f_sig.GetNDF() != 0
-
-                                params_sig_history['p0'].append(current_params[0])
-                                params_sig_history['p1'].append(current_params[1])
-                                params_sig_history['p2'].append(current_params[2])
-
-                                # Calculate cost with consistent regularization
-                                current_cost, lambda_reg = calculate_cost(
-                                    f_sig, g_sig, current_params,
-                                    num_events, num_params, lambda_reg
-
-                                )
-                                
-                                # Create residual plot for this iteration
-                                for i in range(g_sig.GetN()):
-                                    x = g_sig.GetX()[i]
-                                    y_data = g_sig.GetY()[i]
-                                    y_err = g_sig.GetEY()[i]
-                                    y_fit = f_sig.Eval(x)
-                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
-                                
-                                # Store cost for history
-                                cost_history.append(current_cost)            
-                                # Adapt regularization strength based on history
-                                if len(cost_history) >= 2:
-                                    lambda_reg = adaptive_regularization(cost_history, lambda_reg)            
-                                # Update acceptance probability for simulated annealing
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-
-                                current_params = [
-                                    f_sig.GetParameter(0),
-                                    f_sig.GetParameter(1),
-                                    f_sig.GetParameter(2)
-                                ]
-
-                                current_errors = [
-                                    f_sig.GetParError(0),
-                                    f_sig.GetParError(1),
-                                    f_sig.GetParError(2)
-                                ]
-
-                                current_bin = b
-
-                                # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                                if accept_prob > random.random():
-                                    best_params = current_params
-                                    best_cost = current_cost
-                                    best_bin = current_bin
-                                    best_errors = current_errors
-
-                                if iteration % local_search_interval == 0:
-                                    current_params = local_search(current_params, f_sig, num_params)
-                                    par_sig_0, par_sig_1, par_sig_2 = current_params
-                                    # Calculate information criteria
-                                    n_samples = len(w_vec)
-                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                    ic_aic, ic_bic = ic_values
-
-                                previous_params = current_params[:]
-
-                                # Update parameters with the best found so far
-                                par_sig_0, par_sig_1, par_sig_2 = best_params
-                                par_sig_err_0, par_sig_err_1, par_sig_err_2 = best_errors
-
-                                # Update the temperature
-                                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                            except (TypeError or ZeroDivisionError) as e:
-                                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                                # Generate safer parameter values within reasonable bounds
-                                recovery_params = [
-                                    p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
-                                    for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
-                                ]
-
-                                # Ensure parameters stay within bounds
-                                recovery_params = [
-                                    max(min(p, max_param_bounds), -max_param_bounds) 
-                                    for p in recovery_params
-                                ]
-
-                                # Reset function parameters
-                                for i, param in enumerate(recovery_params):
-                                    f_sig.SetParameter(i, param)
-
-                                # Don't update best_cost to inf, keep previous best
-                                current_params = recovery_params
-                                current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-
-                                # Increase temperature slightly to encourage exploration
-                                temperature = min(temperature * 1.2, initial_temperature)
-
-                                max_param_bounds = random.uniform(0.0, max_param_bounds)
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0
-                        
-                            # After the while loop, check if this run found a better solution
-                            if (abs(best_cost - 1) <= abs(best_overall_cost - 1) and temperature <= temp_threshold and accept_prob <= prob_threshold):
-                                best_overall_cost = best_cost
-                                best_overall_bin = best_bin
-                                best_overall_params = best_params[:]
-                                best_overall_errors = best_errors[:]
-                                best_overall_temp = temperature
-                                best_overall_prob = accept_prob
-                                best_overall_residual = residual
-                                best_overall_ic_aic = ic_aic
-                                best_overall_ic_bic = ic_bic
-                                #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False
-                                # Shrink temperature and accepted probability to increase likelyhood of global minima
-                                temp_threshold = temp_threshold-threshold_minimizer
-                                prob_threshold = prob_threshold-threshold_minimizer
-
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p1[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p1[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p2[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p2[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                                
-                        try:                                    
-                            # Update ROOT TGraphs for plotting
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
-                        except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
-                    
-                try:
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_overall_cost:.5f}")
-                    print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                # Record the end time
-                end_time = time.time()
-                # Calculate the total duration
-                total_duration = end_time - start_time
-                print("The loop took {:.2f} seconds.".format(total_duration))
-
-                try:            
-                    while len(best_overall_params) < 4:
-                        best_overall_params.append(0.0)
-                        best_overall_errors.append(0.0)
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                g_sig_fit = TGraphErrors()
-
-                graphs_sig_fit.append(g_sig_fit)
-
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                f_sig.SetParNames("p0", "p1", "p2")
-                f_sig.FixParameter(0, best_overall_params[0])
-                f_sig.FixParameter(1, best_overall_params[1])
-                f_sig.FixParameter(2, best_overall_params[2])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                f_sig_status = f_sig.GetNDF() != 0
-                f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
-
-                fit_status = TText()
-                fit_status.SetTextSize(0.04)
-                fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-                # Calculate the minimum and maximum values from the graphs
-                min_sig_y = float('inf')
-                max_sig_y = float('-inf')
-
-                # Update min_sig_y and max_sig_y based on each graph's values
-                for graph in [graphs_sig_p0[it], graphs_sig_p1[it], graphs_sig_p2[it]]:
-                    n_points = graph.GetN()
-                    for i in range(n_points):
-                        y = graph.GetY()[i]
-                        if y < min_sig_y:
-                            min_sig_y = y
-                        if y > max_sig_y:
-                            max_sig_y = y
-
-                # Scale the y-axis
-                graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
-                graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-                c2.Update()            
-
-                # Plot parameter convergence
-                c3.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(kRed)
-                graphs_sig_p1[it].SetLineColor(kBlue)
-                graphs_sig_p2[it].SetLineColor(kGreen)
-                graphs_sig_p0[it].Draw("ALP")
-                graphs_sig_p1[it].Draw("LP SAME")
-                graphs_sig_p2[it].Draw("LP SAME")
-                c3.Update()
-
-                # Plot chi-square convergence
-                c4.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(kBlack)
-                graphs_sig_converge[it].Draw("ALP")
-                # Create a TLatex object
-                latex = TLatex()
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c4.Update()
-
-                # Plot temperature
-                c5.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(kBlack)
-                graphs_sig_temp[it].Draw("ALP")
-                c5.Update()
-
-                # Plot acceptance probability
-                c6.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(kBlack)
-                graphs_sig_accept[it].Draw("ALP")
-                c6.Update()
-
-                # Plot residuals
-                c7.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                graphs_sig_residuals[it].SetLineColor(kBlack)
-                graphs_sig_residuals[it].Draw("ALP")
-                c7.Update()
-
-                # Plot information criteria
-                c8.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetLineColor(kBlack)
-                graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_bic[it].SetLineColor(kRed)
-                graphs_sig_ic_bic[it].Draw("same")
-                legend = TLegend(0.7, 0.7, 0.9, 0.9)
-                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
-                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
-                legend.Draw()
-                c8.Update()
-
-                print("\n")    
-
-            elif num_params == 4:
-
-                # 4 params
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")            
-                print("/*--------------------------------------------------*/")    
-
-                best_overall_params = None
-                best_overall_cost = float('inf')
-                best_overall_bin = None
-                best_overall_temp = float('inf')
-                best_overall_prob = 1.0
-                best_overall_residual = float('inf')
-                best_overall_ic_aic = float('inf')
-                best_overall_ic_bic = float('inf')
-                total_iteration = 0
-                max_param_bounds = initial_param_bounds
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
-                cost_history = []
-
-                ic_aic = float('inf')
-                ic_bic = float('inf')
-                
-                # Parameter range offset (% of param value)
-                param_offset_0 = 0.1
-                param_offset_1 = 0.1                                
-                param_offset_2 = 0.1
-                param_offset_3 = 0.1
-                
-                # Store the parameter values and chi-square values for each iteration
-                params_sig_history = {'p0': [], 'p1': [], 'p2': [], 'p3': []}
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_p1 = TGraph()
-                graph_sig_p2 = TGraph()
-                graph_sig_p3 = TGraph()
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(graph_sig_p1)
-                graphs_sig_p2.append(graph_sig_p2)
-                graphs_sig_p3.append(graph_sig_p3)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-                                
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Record the start time
-                start_time = time.time()
-
-                for start in range(num_optimizations):
-                    print("\n\nStarting optimization run {0}/{1}".format(start + 1, num_optimizations))    
-
-                    set_optimization = full_optimization
-                    
-                    # Set thresholds on temperature and probability to avoid local minima
-                    temp_threshold = 1e-2  # Temperature should be very low
-                    prob_threshold = 1e-1   # Low acceptance probability indicates stability
-
-                    threshold_minimizer = 5e-2
-                    
-                    #for b in range(len(w_vec)):
-                    for b in [2]:
-
-                        print(f"Determining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-
-                        iteration = 0
-
-                        initial_temperature = 1.0
-                        temperature = initial_temperature
-                        unchanged_iterations = 0
-                        max_unchanged_iterations = 5
-
-                        # Initialize adaptive parameter limits
-                        par_sig_0 = initial_params[0]
-                        par_sig_1 = initial_params[1]
-                        par_sig_2 = initial_params[2]
-                        par_sig_3 = initial_params[3]
-                        par_sig_err_0 = 0.0
-                        par_sig_err_1 = 0.0
-                        par_sig_err_2 = 0.0
-                        par_sig_err_3 = 0.0
-
-                        # Track the best solution
-                        best_params = [par_sig_0, par_sig_1, par_sig_2, par_sig_3]
-                        best_cost = float('inf')
-                        best_bin = None
-                        best_errors = [par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3]
-                        previous_params = best_params[:]
-
-                        # Local search
-                        local_search_interval = 25
-
-                        while iteration <= max_iterations:
-
-                            g_sig_fit = TGraphErrors()
-
-                            graphs_sig_fit.append(g_sig_fit)
-
-                            sys.stdout.write(" \rSearching for best parameters...({0}/{1})\r{2}".format(iteration, max_iterations, ''))
-                            sys.stdout.flush()
-
-                            try:
-                                # Perturb parameters
-
-                                current_params = [
-                                    simulated_annealing(par_sig_0, temperature),
-                                    simulated_annealing(par_sig_1, temperature),
-                                    simulated_annealing(par_sig_2, temperature),
-                                    simulated_annealing(par_sig_3, temperature),
-                                ]
-                                
-                                # Restart from initial parameters
-                                current_params = initial_params
-                                temperature = initial_temperature
-                                unchanged_iterations = 0
-
-                                g_sig = TGraphErrors()
-                                for i in range(nsep.GetSelectedRows()):
-                                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                                for i in range(len(w_vec)):
-                                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                                if sig_name == "L":
-                                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                                elif sig_name == "T":
-                                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                                elif sig_name == "LT":
-                                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                                elif sig_name == "TT":
-                                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                                f_sig.SetParNames("p0", "p1", "p2", "p3")
-                                f_sig.SetParameter(0, current_params[0])
-                                f_sig.SetParameter(1, current_params[1])
-                                f_sig.SetParameter(2, current_params[2])
-                                f_sig.SetParameter(3, current_params[3])
-                                if set_optimization:
-                                    f_sig.SetParLimits(0, -max_param_bounds, max_param_bounds)                                
-                                    f_sig.SetParLimits(2, -max_param_bounds, max_param_bounds)
-                                    f_sig.SetParLimits(3, -max_param_bounds, max_param_bounds)
-                                    f_sig.SetParLimits(1, -max_param_bounds, max_param_bounds)
-                                else:
-                                    f_sig.SetParLimits(0, current_params[0]-param_offset_0*current_params[0], current_params[0]+param_offset_0*current_params[0])
-                                    f_sig.SetParLimits(1, current_params[1]-param_offset_1*current_params[1], current_params[1]+param_offset_1*current_params[1])
-                                    f_sig.SetParLimits(2, current_params[2]-param_offset_2*current_params[2], current_params[2]+param_offset_2*current_params[2])
-                                    f_sig.SetParLimits(3, current_params[3]-param_offset_3*current_params[3], current_params[3]+param_offset_3*current_params[3])                                
-                                
-                                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                                f_sig_status = f_sig.GetNDF() != 0
-
-                                params_sig_history['p0'].append(current_params[0])
-                                params_sig_history['p1'].append(current_params[1])
-                                params_sig_history['p2'].append(current_params[2])
-                                params_sig_history['p3'].append(current_params[3])
-
-                                # Calculate cost with consistent regularization
-                                current_cost, lambda_reg = calculate_cost(
-                                    f_sig, g_sig, current_params,
-                                    num_events, num_params, lambda_reg
-
-                                )
-                                
-                                # Create residual plot for this iteration
-                                for i in range(g_sig.GetN()):
-                                    x = g_sig.GetX()[i]
-                                    y_data = g_sig.GetY()[i]
-                                    y_err = g_sig.GetEY()[i]
-                                    y_fit = f_sig.Eval(x)
-                                    residual = (y_data - y_fit) / y_err if y_err != 0 else (y_data - y_fit)
-                                
-                                # Store cost for history
-                                cost_history.append(current_cost)            
-                                # Adapt regularization strength based on history
-                                if len(cost_history) >= 2:
-                                    lambda_reg = adaptive_regularization(cost_history, lambda_reg)
-                                # Update acceptance probability for simulated annealing
-                                accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-
-                                current_params = [
-                                    f_sig.GetParameter(0),
-                                    f_sig.GetParameter(1),
-                                    f_sig.GetParameter(2),
-                                    f_sig.GetParameter(3)
-                                ]
-
-                                current_errors = [
-                                    f_sig.GetParError(0),
-                                    f_sig.GetParError(1),
-                                    f_sig.GetParError(2),
-                                    f_sig.GetParError(3)
-                                ]
-
-                                current_bin = b
-
-                                # If the new cost is better or accepted by the acceptance probability, update the best parameters
-                                if accept_prob > random.random():
-                                    best_params = current_params
-                                    best_cost = current_cost
-                                    best_bin = current_bin
-                                    best_errors = current_errors
-                                    # Calculate information criteria
-                                    n_samples = len(w_vec)
-                                    ic_values = calculate_information_criteria(n_samples, num_params, best_cost)
-                                    ic_aic, ic_bic = ic_values
-
-                                if iteration % local_search_interval == 0:
-                                    current_params = local_search(current_params, f_sig, num_params)
-                                    par_sig_0, par_sig_1, par_sig_2, par_sig_3 = current_params
-
-                                previous_params = current_params[:]                
-
-                                # Update parameters with the best found so far
-                                par_sig_0, par_sig_1, par_sig_2, par_sig_3 = best_params
-                                par_sig_err_0, par_sig_err_1, par_sig_err_2, par_sig_err_3 = best_errors
-
-                                # Update the temperature
-                                temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0
-
-                            except (TypeError or ZeroDivisionError) as e:
-                                #print("WARNING: {}, Adjusting parameter limits and retrying...".format(e))
-                                # Generate safer parameter values within reasonable bounds
-                                recovery_params = [
-                                    p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
-                                    for p in (best_params if best_params != [float('inf')] * len(initial_params) else initial_params)
-                                ]
-
-                                # Ensure parameters stay within bounds
-                                recovery_params = [
-                                    max(min(p, max_param_bounds), -max_param_bounds) 
-                                    for p in recovery_params
-                                ]
-
-                                # Reset function parameters
-                                for i, param in enumerate(recovery_params):
-                                    f_sig.SetParameter(i, param)
-
-                                # Don't update best_cost to inf, keep previous best
-                                current_params = recovery_params
-                                current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-
-                                # Increase temperature slightly to encourage exploration
-                                temperature = min(temperature * 1.2, initial_temperature)
-
-                                max_param_bounds = random.uniform(0.0, max_param_bounds)
-                                iteration += 1
-                                total_iteration += 1 if iteration % max_iterations == 0 else 0                
-                        
-                            # After the while loop, check if this run found a better solution
-                            if (abs(best_cost - 1) <= abs(best_overall_cost - 1) and temperature <= temp_threshold and accept_prob <= prob_threshold):
-                                best_overall_cost = best_cost
-                                best_overall_bin = best_bin
-                                best_overall_params = best_params[:]
-                                best_overall_errors = best_errors[:]
-                                best_overall_temp = temperature
-                                best_overall_prob = accept_prob
-                                best_overall_residual = residual
-                                best_overall_ic_aic = ic_aic
-                                best_overall_ic_bic = ic_bic
-                                #if best_overall_cost < chi2_threshold:
-                                #    set_optimization = False
-                                # Shrink temperature and accepted probability to increase likelyhood of global minima
-                                temp_threshold = temp_threshold-threshold_minimizer
-                                prob_threshold = prob_threshold-threshold_minimizer
-
-                        graphs_sig_p0[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p0[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p1[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p1[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p2[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p2[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_p3[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_p3[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_converge[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_converge[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_temp[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_temp[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_accept[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_accept[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_residuals[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_residuals[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_aic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_aic[it].GetYaxis().SetRangeUser(0, 1e-10)                        
-                        graphs_sig_ic_bic[it].GetXaxis().SetLimits(0, total_iteration+1)
-                        graphs_sig_ic_bic[it].GetYaxis().SetRangeUser(0, 1e-10)
-
-                        try:                                    
-                            # Update ROOT TGraphs for plotting
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, best_overall_params[0])
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, best_overall_params[1])
-                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, best_overall_params[2])
-                            graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, best_overall_params[3])
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, round(best_overall_cost, 4))
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, round(best_overall_temp, 4))
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, round(best_overall_prob, 4))
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, round(best_overall_residual, 4))
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_aic, 4))
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, round(best_overall_ic_bic, 4))                            
-                        except TypeError:
-                            graphs_sig_p0[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_p1[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_p2[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_p3[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_converge[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_temp[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_accept[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_residuals[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_aic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                            graphs_sig_ic_bic[it].SetPoint(total_iteration, total_iteration, 0.0)
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
-                    
-                try:
-                    print(f"\n\nBest overall solution: {best_overall_params}")
-                    print(f"Best overall cost: {best_overall_cost:.5f}")
-                    print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                # Record the end time
-                end_time = time.time()
-                # Calculate the total duration
-                total_duration = end_time - start_time
-                print("The loop took {:.2f} seconds.".format(total_duration))
-
-                try:            
-                    while len(best_overall_params) < 4:
-                        best_overall_params.append(0.0)
-                        best_overall_errors.append(0.0)
-                except TypeError:
-                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
-                    sys.exit(2)
-                    
-                for j in range(4):
-                    par_vec[4*it+j] = best_overall_params[j]
-                    par_err_vec[4*it+j] = best_overall_errors[j]
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                g_sig_fit = TGraphErrors()
-
-                graphs_sig_fit.append(g_sig_fit)
-
-                g_sig = TGraphErrors()
-                for i in range(nsep.GetSelectedRows()):
-                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                for i in range(len(w_vec)):
-                    sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                    sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s } [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, 0.0, 3.0, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, 0.0, 3.0, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, 0.0, 3.0, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    #f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, 0.0, 3.0, num_params)
-                f_sig.SetParNames("p0", "p1", "p2", "p3")
-                f_sig.FixParameter(0, best_overall_params[0])
-                f_sig.FixParameter(1, best_overall_params[1])
-                f_sig.FixParameter(2, best_overall_params[2])
-                f_sig.FixParameter(3, best_overall_params[3])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                #f_sig_status = (r_sig_fit.Status() == 0 and r_sig_fit.IsValid())
-                f_sig_status = f_sig.GetNDF() != 0
-                f_sig_status_message = "Fit Successful" if f_sig_status else "Fit Failed"
-
-                fit_status = TText()
-                fit_status.SetTextSize(0.04)
-                fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: {}".format(f_sig_status_message))
-
-                # Calculate the minimum and maximum values from the graphs
-                min_sig_y = float('inf')
-                max_sig_y = float('-inf')
-
-                # Update min_sig_y and max_sig_y based on each graph's values
-                for graph in [graphs_sig_p0[it], graphs_sig_p1[it], graphs_sig_p2[it], graphs_sig_p3[it]]:
-                    n_points = graph.GetN()
-                    for i in range(n_points):
-                        y = graph.GetY()[i]
-                        if y < min_sig_y:
-                            min_sig_y = y
-                        if y > max_sig_y:
-                            max_sig_y = y
-
-                # Scale the y-axis
-                graphs_sig_p0[it].SetMinimum(min_sig_y * 0.9)
-                graphs_sig_p0[it].SetMaximum(max_sig_y * 1.1)
-                c2.Update()            
-
-                # Plot parameter convergence
-                c3.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_p0[it].SetTitle(f"Sig {sig_name} Parameter Convergence;Optimization Run;Parameter")
-                graphs_sig_p0[it].SetLineColor(kRed)
-                graphs_sig_p1[it].SetLineColor(kBlue)
-                graphs_sig_p2[it].SetLineColor(kGreen)
-                graphs_sig_p3[it].SetLineColor(kMagenta)
-                graphs_sig_p0[it].Draw("ALP")
-                graphs_sig_p1[it].Draw("LP SAME")
-                graphs_sig_p2[it].Draw("LP SAME")
-                graphs_sig_p3[it].Draw("LP SAME")
-                c3.Update()
-
-                # Plot chi-square convergence
-                c4.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_converge[it].SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
-                graphs_sig_converge[it].SetLineColor(kBlack)
-                graphs_sig_converge[it].Draw("ALP")
-                # Create a TLatex object
-                latex = TLatex()
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c4.Update()
-
-                # Plot temperature
-                c5.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
-                graphs_sig_temp[it].SetLineColor(kBlack)
-                graphs_sig_temp[it].Draw("ALP")
-                c5.Update()
-
-                # Plot acceptance probability
-                c6.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
-                graphs_sig_accept[it].SetLineColor(kBlack)
-                graphs_sig_accept[it].Draw("ALP")
-                c6.Update()
-
-                # Plot residuals
-                c7.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residuals Evolution")
-                graphs_sig_residuals[it].SetLineColor(kBlack)
-                graphs_sig_residuals[it].Draw("ALP")
-                c7.Update()
-
-                # Plot information criteria
-                c8.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria Evolution")
-                graphs_sig_ic_aic[it].SetLineColor(kRed)
-                graphs_sig_ic_aic[it].Draw("ALP")
-                graphs_sig_ic_bic[it].SetLineColor(kGreen)
-                graphs_sig_ic_bic[it].Draw("same")
-                legend = TLegend(0.7, 0.7, 0.9, 0.9)
-                legend.AddEntry(graphs_sig_ic_aic[it], "AIC", "lp")
-                legend.AddEntry(graphs_sig_ic_bic[it], "BIC", "lp")
-                legend.Draw()
-                c8.Update()
-
-                print("\n")
-
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            
+            # Initialize adaptive regularization and solution tracking.
+            lambda_reg = 0.01
+            best_overall_cost = float('inf')
+            best_overall_params = current_params = initial_params[:]  # working copy
+            best_overall_bin = None
+            total_iteration = 0
+            cost_history = []
+            local_search_interval = 25
+            current_errors = [0.0] * num_params
+
+            # For demonstration, loop over a chosen bin (e.g. bin index 2)
+            for b in [2]:
+                print(f"\nOptimizing Sig {sig_name} for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                iteration = 0
+                initial_temperature = 1.0
+                temperature = initial_temperature
+
+                while iteration <= max_iterations:
+                    # Perturb parameters using simulated annealing
+                    new_params = [simulated_annealing(p, temperature) for p in current_params]
+                    current_params = new_params
+
+                    # Build data graph from nsep
+                    g_sig = TGraphErrors()
+                    for i in range(nsep.GetSelectedRows()):
+                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+
+                    # Select model function based on sig_name
+                    if sig_name == "L":
+                        fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    elif sig_name == "T":
+                        fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    elif sig_name == "LT":
+                        fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    elif sig_name == "TT":
+                        fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+
+                    # Create the fit function with dynamic parameter number
+                    f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+                    f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
+                    for i in range(num_params):
+                        f_sig.SetParameter(i, current_params[i])
+                        if full_optimization:
+                            f_sig.SetParLimits(i, -initial_param_bounds, initial_param_bounds)
+                        else:
+                            offset = 0.1 * abs(current_params[i])
+                            f_sig.SetParLimits(i, current_params[i]-offset, current_params[i]+offset)
+
+                    # Fit the function to the data graph in quiet mode ("SQ")
+                    fit_result = graph_sig_fit.Fit(f_sig, "SQ")
+
+                    # Update parameter convergence graphs.
+                    for i in range(num_params):
+                        graphs_sig_params[it][i].SetPoint(total_iteration, total_iteration, current_params[i])
+
+                    # Compute cost with adaptive regularization.
+                    current_cost, lambda_reg = calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg)
+                    cost_history.append(current_cost)
+                    accept_prob = acceptance_probability(best_overall_cost, current_cost, temperature)
+
+                    # ------------------ Diagnostic Logging ------------------
+                    log_iteration(total_iteration, current_cost, current_params, accept_prob, temperature, "fit_diagnostics.log")
+                    # ----------------------------------------------------------
+
+                    # Update diagnostic graphs.
+                    graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
+                    graph_sig_temp.SetPoint(total_iteration, total_iteration, round(temperature, 4))
+                    graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
+
+                    # Compute average residual for this iteration.
+                    residuals = []
+                    for i in range(g_sig.GetN()):
+                        x = g_sig.GetX()[i]
+                        y_data = g_sig.GetY()[i]
+                        y_err  = g_sig.GetEY()[i]
+                        y_fit  = f_sig.Eval(x)
+                        residuals.append(abs((y_data - y_fit) / (y_err if y_err != 0 else 1.0)))
+                    avg_residual = np.mean(residuals) if residuals else 0.0
+                    graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(avg_residual, 4))
+
+                    # Update information criteria graphs.
+                    n_samples = len(w_vec)
+                    ic_aic, ic_bic = calculate_information_criteria(n_samples, num_params, current_cost)
+                    graph_sig_aic.SetPoint(total_iteration, total_iteration, round(ic_aic, 4))
+                    graph_sig_bic.SetPoint(total_iteration, total_iteration, round(ic_bic, 4))
+
+                    # Accept new state based on probability.
+                    if accept_prob > random.random():
+                        best_overall_params = [f_sig.GetParameter(i) for i in range(num_params)]
+                        best_cost = current_cost
+                        best_overall_bin = b
+                        best_overall_errors = [f_sig.GetParError(i) for i in range(num_params)]
+
+                    # Periodically perform a local search to refine parameters.
+                    if iteration % local_search_interval == 0:
+                        current_params = local_search(current_params, f_sig, num_params)
+
+                    previous_params = current_params[:]
+                    temperature = adaptive_cooling(initial_temperature, iteration)
+                    iteration += 1
+                    total_iteration += 1
+
+                # End bin loop.
+            end_time = time.time()
+            total_duration = end_time - start_time
+            print(f"\nBest overall cost for Sig {sig_name}: {best_overall_cost:.3f}")
+            print(f"Best overall parameters: {best_overall_params}")
+            print(f"Time taken: {total_duration:.2f} seconds")
+
+            # Update output parameter vectors dynamically.
+            for j in range(num_params):
+                par_vec[num_params * it + j] = best_overall_params[j]
+                par_err_vec[num_params * it + j] = best_overall_errors[j]
+                par_chi2_vec[num_params * it + j] = best_overall_cost
+
+            # Prepare final data graph for the best bin.
+            g_sig_final = TGraphErrors()
+            for i in range(nsep.GetSelectedRows()):
+                g_sig_final.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                g_sig_final.SetPointError(i, 0, nsep.GetV3()[i])
+
+            # Rebuild final fit function using best_overall_bin.
+            if sig_name == "L":
+                fun_Sig_final = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                                                  w_vec[best_overall_bin], th_vec[best_overall_bin])
+            elif sig_name == "T":
+                fun_Sig_final = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                                                  w_vec[best_overall_bin], th_vec[best_overall_bin])
+            elif sig_name == "LT":
+                fun_Sig_final = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                                                   w_vec[best_overall_bin], th_vec[best_overall_bin])
+            elif sig_name == "TT":
+                fun_Sig_final = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                                                   w_vec[best_overall_bin], th_vec[best_overall_bin])
+            f_sig_final = TF1(f"sig_{sig_name}_final", fun_Sig_final, tmin_range, tmax_range, num_params)
+            f_sig_final.SetParNames(*[f"p{i}" for i in range(num_params)])
+            for i in range(num_params):
+                f_sig_final.FixParameter(i, best_overall_params[i])
+
+            # Draw the final fit on canvas c2.
+            c2.cd(it+1)
+            g_sig_final.Draw("AP")
+            f_sig_final.Draw("same")
+            graph_sig_fit.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graph_sig_fit.GetXaxis().CenterTitle()
+            graph_sig_fit.GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^2]")
+            graph_sig_fit.GetYaxis().SetTitleOffset(1.5)
+            graph_sig_fit.GetYaxis().SetTitleSize(0.035)
+            graph_sig_fit.GetYaxis().CenterTitle()
+            x_min = min(graph_sig_fit.GetX())
+            x_max = max(graph_sig_fit.GetX())
+            y_min = min(graph_sig_fit.GetY())
+            y_max = max(graph_sig_fit.GetY())
+            margin = 0.1
+            graph_sig_fit.GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graph_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            n_points = 100
+            fit_y_values = [f_sig_final.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
+            margin = 0.1 * (y_max - y_min)
+            graph_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            r_sig_fit = graph_sig_fit.Fit(f_sig_final, "SQ")
+            f_sig_final.Draw("same")
+
+            # Compute and display chi-square p-value for the optimization branch.
+            latex = TLatex()
+            latex.SetTextSize(0.04)
+            latex.SetNDC(True)
+            ndf = f_sig_final.GetNDF()
+            chi2_val = f_sig_final.GetChisquare()
+            p_value = compute_p_value(chi2_val, ndf)
+            print(f"Chi-square p-value (optimization branch): {p_value:.4f}")
+            latex.DrawLatex(0.35, 0.85, f"p-value: {p_value:.4f}")
             c2.Update()
+
+            # ------------------ Plotting Diagnostics ------------------
+            # Parameter Convergence on Canvas c3
+            c3.cd(it+1)
+            for i in range(num_params):
+                param_graph = graphs_sig_params[it][i]
+                if i == 0:
+                    param_graph.SetLineColor(kRed)
+                elif i == 1:
+                    param_graph.SetLineColor(kBlue)
+                elif i == 2:
+                    param_graph.SetLineColor(kGreen)
+                elif i == 3:
+                    param_graph.SetLineColor(kMagenta)
+                if i == 0:
+                    param_graph.Draw("ALP")
+                else:
+                    param_graph.Draw("LP SAME")
             c3.Update()
+
+            # Reduced Chi-square Convergence on Canvas c4
+            c4.cd(it+1)
+            graphs_sig_converge[it].SetTitle(f"Sig {sig_name} Chi-square Convergence")
+            graphs_sig_converge[it].SetLineColor(kBlack)
+            graphs_sig_converge[it].Draw("ALP")
             c4.Update()
+
+            # Temperature Evolution on Canvas c5
+            c5.cd(it+1)
+            graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Evolution")
+            graphs_sig_temp[it].SetLineColor(kBlack)
+            graphs_sig_temp[it].Draw("ALP")
             c5.Update()
+
+            # Acceptance Probability on Canvas c6
+            c6.cd(it+1)
+            graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability")
+            graphs_sig_accept[it].SetLineColor(kBlack)
+            graphs_sig_accept[it].Draw("ALP")
             c6.Update()
+
+            # Residual Evolution on Canvas c7
+            c7.cd(it+1)
+            graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residual Evolution")
+            graphs_sig_residuals[it].SetLineColor(kBlack)
+            graphs_sig_residuals[it].Draw("ALP")
             c7.Update()
+
+            # Information Criteria on Canvas c8
+            c8.cd(it+1)
+            graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria (AIC)")
+            graphs_sig_ic_aic[it].SetLineColor(kRed)
+            graphs_sig_ic_aic[it].Draw("ALP")
+            graphs_sig_ic_bic[it].SetTitle(f"Sig {sig_name} Information Criteria (BIC)")
+            graphs_sig_ic_bic[it].SetLineColor(kGreen)
+            graphs_sig_ic_bic[it].Draw("LP SAME")
             c8.Update()
-            
-        ## plot_fit
+            # ---------------------------------------------------------------------
         else:
-
-            sig_name = key
-            # Grab parameters used by functional forms
-            num_params, old_params, equation_str = inpDict["initial_params"](sig_name, val)
-
-            # Checks initial parameters and replaces zeros to avoid errors
-            initial_params = [v if abs(v) > 0.0 else 1.0 for v in par_vec[4*it:4*(it+1)]]
-
-            # String list of initial parameters
-            param_str = ', '.join(str(param) for param in initial_params)
-
-            fit_convergence_type = "Fixed"
-
-            if num_params == 1:
-
-                # 1 param
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")
-                print("/*--------------------------------------------------*/")
-
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()                
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(0.0)
-                graphs_sig_p2.append(0.0)
-                graphs_sig_p3.append(0.0)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
+            # --------------------- Fixed Parameter Branch ---------------------
+            print("\n/*--------------------------------------------------*/")
+            print(f"Fixed Fit for Sig {sig_name} ({num_params} parameters)")
+            print(f"Initial Parameters: ({param_str})")
+            print(f"{equation_str}")
+            print("/*--------------------------------------------------*/")
+            
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            
+            # Create dynamic TGraphs for parameter convergence (for display)
+            param_graphs = []
+            for i in range(num_params):
+                param_graphs.append(TGraph())
+            graphs_sig_params.append(param_graphs)
+            
+            # Create diagnostic graphs for fixed branch.
+            graph_sig_chi2 = TGraph()
+            graph_sig_temp = TGraph()
+            graph_sig_accept = TGraph()
+            graph_sig_residuals = TGraph()
+            graph_sig_aic = TGraph()
+            graph_sig_bic = TGraph()
+            
+            graphs_sig_chi2.append(graph_sig_chi2)
+            graphs_sig_temp.append(graph_sig_temp)
+            graphs_sig_accept.append(graph_sig_accept)
+            graphs_sig_residuals.append(graph_sig_residuals)
+            graphs_sig_ic_aic.append(graph_sig_aic)
+            graphs_sig_ic_bic.append(graph_sig_bic)
+            
+            lambda_reg = 0.01
+            best_overall_cost = float('inf')
+            best_overall_params = []
+            best_overall_bin = 0
+            
+            for b in [2]:
+                print(f"\nDetermining best fit for fixed Sig {sig_name} using bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                g_sig_fit = TGraphErrors()
+                graphs_sig_fit.append(g_sig_fit)
                 
-                best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = []
-                best_overall_bin = 0  # Initialize best bin tracker
+                # Build data graph from nsep
+                g_sig = TGraphErrors()
+                for i in range(nsep.GetSelectedRows()):
+                    g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
+                    g_sig.SetPointError(i, 0, nsep.GetV3()[i])
+                for i in range(len(w_vec)):
+                    sig_X_fit = g_sig.GetY()[i]
+                    sig_X_fit_err = g_sig.GetEY()[i]
+                    graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                    graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
                 
-                #for b in range(len(w_vec)):
-                for b in [2]:
-                    
-                    print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-                    
-                    g_sig_fit = TGraphErrors()
-
-                    graphs_sig_fit.append(g_sig_fit)
-
-                    g_sig = TGraphErrors()
-                    for i in range(nsep.GetSelectedRows()):
-                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                    for i in range(len(w_vec)):
-                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    if sig_name == "L":
-                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    elif sig_name == "T":
-                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    elif sig_name == "LT":
-                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    elif sig_name == "TT":
-                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    f_sig.SetParNames("p0")
-                    f_sig.FixParameter(0, par_vec[4*it])
-
-                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                    # Calculate cost with consistent regularization
-                    current_cost, lambda_reg = calculate_cost(
-                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
-                        num_events, num_params, lambda_reg
-                    )                    
-                    
-                    print(f"\tCost: {current_cost:.3f}")
-                    
-                    # After the while loop, check if this run found a better solution
-                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = current_cost
-                        best_overall_bin = b
-                        best_overall_params = []
-                        for j in range(4):
-                            best_overall_params.append(par_vec[4*it+j])
-                            
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {best_overall_cost:.5f}")
-                    
-                for j in range(4):
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
+                # Select the proper model function.
                 if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
+                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
+                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
+                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig.SetParNames("p0")
-                f_sig.FixParameter(0, par_vec[4*it])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
+                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                
+                # Create the fit function with dynamic number of parameters.
+                f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+                f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
+                for i in range(num_params):
+                    # Fix parameters using the current values stored in par_vec.
+                    f_sig.FixParameter(i, par_vec[num_params * it + i])
+                
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                # Create a TLatex object
-                latex = TLatex()# Set the font size and alignment (optional but recommended)
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c2.Update()
-                    
-                print("\n")    
-
-            elif num_params == 2:
-
-                # 2 param
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")
-                print("/*--------------------------------------------------*/")
-
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_p1 = TGraph()                
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()                
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(graph_sig_p1)
-                graphs_sig_p2.append(0.0)
-                graphs_sig_p3.append(0.0)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
                 
-                best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = []
-                best_overall_bin = 0  # Initialize best bin tracker
-                
-                #for b in range(len(w_vec)):
-                for b in [2]:
-
-                    print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-                    
-                    g_sig_fit = TGraphErrors()
-
-                    graphs_sig_fit.append(g_sig_fit)
-
-                    g_sig = TGraphErrors()
-                    for i in range(nsep.GetSelectedRows()):
-                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                    for i in range(len(w_vec)):
-                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    if sig_name == "L":
-                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    elif sig_name == "T":
-                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    elif sig_name == "LT":
-                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    elif sig_name == "TT":
-                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    f_sig.SetParNames("p0", "p1")
-                    f_sig.FixParameter(0, par_vec[4*it])
-                    f_sig.FixParameter(1, par_vec[4*it+1])
-
-                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                    # Calculate cost with consistent regularization
-                    current_cost, lambda_reg = calculate_cost(
-                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
-                        num_events, num_params, lambda_reg
-                    )                    
-                    
-                    print(f"\tCost: {current_cost:.3f}")
-                    
-                    # After the while loop, check if this run found a better solution
-                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = current_cost
-                        best_overall_bin = b
-                        best_overall_params = []                        
-                        for j in range(4):
-                            best_overall_params.append(par_vec[4*it+j])
-                            
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {best_overall_cost:.5f}")
-                    
-                for j in range(4):
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig.SetParNames("p0", "p1")
-                f_sig.FixParameter(0, par_vec[4*it])
-                f_sig.FixParameter(1, par_vec[4*it+1])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                # Create a TLatex object
-                latex = TLatex()# Set the font size and alignment (optional but recommended)
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c2.Update()
-                    
-                print("\n")    
-
-            elif num_params == 3:
-
-                # 3 param
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")
-                print("/*--------------------------------------------------*/")
-
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_p1 = TGraph()
-                graph_sig_p2 = TGraph()                
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()                
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(graph_sig_p1)
-                graphs_sig_p2.append(graph_sig_p2)
-                graphs_sig_p3.append(0.0)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
-                
-                best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = []
-                best_overall_bin = 0  # Initialize best bin tracker
-                
-                #for b in range(len(w_vec)):
-                for b in [2]:
-                    
-                    print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-                    
-                    g_sig_fit = TGraphErrors()
-
-                    graphs_sig_fit.append(g_sig_fit)
-
-                    g_sig = TGraphErrors()
-                    for i in range(nsep.GetSelectedRows()):
-                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                    for i in range(len(w_vec)):
-                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    if sig_name == "L":
-                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    elif sig_name == "T":
-                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    elif sig_name == "LT":
-                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    elif sig_name == "TT":
-                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    f_sig.SetParNames("p0", "p1", "p2")
-                    f_sig.FixParameter(0, par_vec[4*it])
-                    f_sig.FixParameter(1, par_vec[4*it+1])
-                    f_sig.FixParameter(2, par_vec[4*it+2])
-
-                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                    # Calculate cost with consistent regularization
-                    current_cost, lambda_reg = calculate_cost(
-                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
-                        num_events, num_params, lambda_reg
-                    )                    
-
-                    print(f"\tCost: {current_cost:.3f}")
-                    
-                    # After the while loop, check if this run found a better solution
-                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = current_cost
-                        best_overall_bin = b
-                        best_overall_params = []                        
-                        for j in range(4):
-                            best_overall_params.append(par_vec[4*it+j])
-                            
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {best_overall_cost:.5f}")
-                    
-                for j in range(4):
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig.SetParNames("p0", "p1", "p2")
-                f_sig.FixParameter(0, par_vec[4*it])
-                f_sig.FixParameter(1, par_vec[4*it+1]) 
-                f_sig.FixParameter(2, par_vec[4*it+2])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                # Create a TLatex object
-                latex = TLatex()# Set the font size and alignment (optional but recommended)
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c2.Update()
-                    
-                print("\n")    
-
-            elif num_params == 4:
-
-                # 4 param
-                #######
-                # Sig #
-                #######
-
-                print("\n/*--------------------------------------------------*/")
-                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-                print(f"Initial Paramters: ({param_str})")
-                print(f"{equation_str}")
-                print("/*--------------------------------------------------*/")
-
-                nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-
-                # Create TGraphs for parameter convergence
-                graph_sig_p0 = TGraph()
-                graph_sig_p1 = TGraph()
-                graph_sig_p2 = TGraph()
-                graph_sig_p3 = TGraph()                
-                graph_sig_chi2 = TGraph()
-                graph_sig_temp = TGraph()
-                graph_sig_accept = TGraph()
-                graph_sig_residuals = TGraph()
-                graph_sig_aic = TGraph()
-                graph_sig_bic = TGraph()                
-                graphs_sig_p0.append(graph_sig_p0)
-                graphs_sig_p1.append(graph_sig_p1)
-                graphs_sig_p2.append(graph_sig_p2)
-                graphs_sig_p3.append(graph_sig_p3)
-                graphs_sig_converge.append(graph_sig_chi2)
-                graphs_sig_temp.append(graph_sig_temp)
-                graphs_sig_accept.append(graph_sig_accept)
-                graphs_sig_residuals.append(graph_sig_residuals)
-                graphs_sig_ic_aic.append(graph_sig_aic)
-                graphs_sig_ic_bic.append(graph_sig_bic)
-
-                # Regularization strength (used when num_events > num_params)
-                # Initialize adaptive regularization parameters
-                lambda_reg = 0.01  # Initial regularization strength
-                
-                best_overall_cost = float('inf')  # Initialize with infinity
-                best_overall_params = []
-                best_overall_bin = 0  # Initialize best bin tracker
-                
-                #for b in range(len(w_vec)):
-                for b in [2]:
-                    
-                    print(f"\n\nDetermining best fit off the bin values...\n t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-                    
-                    g_sig_fit = TGraphErrors()
-
-                    graphs_sig_fit.append(g_sig_fit)
-
-                    g_sig = TGraphErrors()
-                    for i in range(nsep.GetSelectedRows()):
-                        g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                        g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-
-                    for i in range(len(w_vec)):
-                        sig_X_fit = (g_sig.GetY()[i])# / (g_vec[i])
-                        sig_X_fit_err = (g_sig.GetEY()[i])# / (g_vec[i])
-                        graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                        graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
-
-                    if sig_name == "L":
-                        fun_Sig_L = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                    elif sig_name == "T":
-                        fun_Sig_T = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                    elif sig_name == "LT":
-                        fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                    elif sig_name == "TT":
-                        fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                        f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                    f_sig.SetParNames("p0", "p1", "p2", "p3")
-                    f_sig.FixParameter(0, par_vec[4*it])
-                    f_sig.FixParameter(1, par_vec[4*it+1])
-                    f_sig.FixParameter(2, par_vec[4*it+2])
-                    f_sig.FixParameter(3, par_vec[4*it+3])                    
-
-                    r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-
-                    # Calculate cost with consistent regularization
-                    current_cost, lambda_reg = calculate_cost(
-                        f_sig, g_sig, par_vec[4*it:4*(it+1)],
-                        num_events, num_params, lambda_reg
-                    )
-
-                    print(f"\tCost: {current_cost:.3f}")
-                    
-                    # After the while loop, check if this run found a better solution
-                    if abs(current_cost - 1) < abs(best_overall_cost - 1):
-                        best_overall_cost = current_cost
-                        best_overall_bin = b
-                        best_overall_params = []                        
-                        for j in range(4):
-                            best_overall_params.append(par_vec[4*it+j])
-                            
-                print(f"\n\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {best_overall_cost:.5f}")
-                    
-                for j in range(4):
-                    par_chi2_vec[4*it+j] = best_overall_cost
-
-                c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-                graphs_sig_fit[it].Draw("A*")
-
-                graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-                graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right)_{%s} [nb/GeV^{2}]" % sig_name)
-                graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-                graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-                graphs_sig_fit[it].GetYaxis().CenterTitle()
-
-                # Set axis limits to ensure everything is shown
-                x_min = min(graphs_sig_fit[it].GetX())
-                x_max = max(graphs_sig_fit[it].GetX())
-                y_min = min(graphs_sig_fit[it].GetY())
-                y_max = max(graphs_sig_fit[it].GetY())
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1
-                graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)            
-
-                if sig_name == "L":
-                    fun_Sig_L = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_L, tmin_range, tmax_range, num_params)
-                elif sig_name == "T":
-                    fun_Sig_T = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_T, tmin_range, tmax_range, num_params)
-                elif sig_name == "LT":
-                    fun_Sig_LT = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_LT, tmin_range, tmax_range, num_params)
-                elif sig_name == "TT":
-                    fun_Sig_TT = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-                    f_sig = TF1(f"sig_{sig_name}", fun_Sig_TT, tmin_range, tmax_range, num_params)
-                f_sig.SetParNames("p0", "p1", "p2", "p3")
-                f_sig.FixParameter(0, par_vec[4*it])
-                f_sig.FixParameter(1, par_vec[4*it+1]) 
-                f_sig.FixParameter(2, par_vec[4*it+2])
-                f_sig.FixParameter(3, par_vec[4*it+3])
-
-                # Evaluate the fit function at several points to determine its range
-                n_points = 100  # Number of points to evaluate the fit function
-                fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-
-                # Extend the y-axis range to include the fit function range
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-
-                # Set a margin to ensure all points are visible
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-
-                r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                f_sig.Draw("same")
-
-                # Create a TLatex object
-                latex = TLatex()# Set the font size and alignment (optional but recommended)
-                latex.SetTextSize(0.04)  # Adjust size as needed
-                latex.SetNDC(True)       # Enable normalized device coordinates# Format the text
-                best_cost_text = f"Best #chi^{{2}}: {best_overall_cost:.3f}"
-                latex.DrawLatex(0.35, 0.85, best_cost_text)                
-                c2.Update()
-                    
-                print("\n")    
-
+                current_cost, lambda_reg = calculate_cost(f_sig, g_sig, par_vec[num_params * it : num_params * (it+1)],
+                                                          num_events, num_params, lambda_reg)
+                print(f"\tCost: {current_cost:.3f}")
+                if abs(current_cost - 1) < abs(best_overall_cost - 1):
+                    best_overall_cost = current_cost
+                    best_overall_bin = b
+                    best_overall_params = [par_vec[num_params * it + j] for j in range(num_params)]
+            
+            print(f"\nBest overall solution (fixed): {best_overall_params}")
+            print(f"Best overall cost (fixed): {best_overall_cost:.5f}")
+            for j in range(num_params):
+                par_chi2_vec[num_params * it + j] = best_overall_cost
+
+            # Draw final data and fit on canvas c2.
+            c2.cd(it+1)
+            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (Fixed Parameters)")
+            graphs_sig_fit[it].Draw("A*")
+            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit[it].GetXaxis().CenterTitle()
+            graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^2]")
+            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit[it].GetYaxis().CenterTitle()
+            x_min = min(graphs_sig_fit[it].GetX())
+            x_max = max(graphs_sig_fit[it].GetX())
+            y_min = min(graphs_sig_fit[it].GetY())
+            y_max = max(graphs_sig_fit[it].GetY())
+            margin = 0.1
+            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            n_points = 100
+            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_min = min(fit_y_values)
+            fit_y_max = max(fit_y_values)
+            y_min = min(y_min, fit_y_min)
+            y_max = max(y_max, fit_y_max)
+            margin = 0.1 * (y_max - y_min)
+            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+            f_sig.Draw("same")
+            latex = TLatex()
+            latex.SetTextSize(0.04)
+            latex.SetNDC(True)
+            ndf = f_sig.GetNDF()
+            chi2_val = f_sig.GetChisquare()
+            p_value = compute_p_value(chi2_val, ndf)
+            print(f"Chi-square p-value (fixed branch): {p_value:.4f}")
+            latex.DrawLatex(0.35, 0.85, f"p-value: {p_value:.4f}")
             c2.Update()
 
-        c2.Print(outputpdf+'(')
-        c3.Print(outputpdf)
-        c4.Print(outputpdf)
-        c5.Print(outputpdf)
-        c6.Print(outputpdf)
-        c7.Print(outputpdf)
-        c8.Print(outputpdf+')')
+            # ------------------ Plotting Diagnostics for Fixed Branch ------------------
+            # Parameter Convergence on Canvas c3
+            c3.cd(it+1)
+            for i in range(num_params):
+                param_graph = graphs_sig_params[it][i]
+                if i == 0:
+                    param_graph.SetLineColor(kRed)
+                elif i == 1:
+                    param_graph.SetLineColor(kBlue)
+                elif i == 2:
+                    param_graph.SetLineColor(kGreen)
+                elif i == 3:
+                    param_graph.SetLineColor(kMagenta)
+                if i == 0:
+                    param_graph.Draw("ALP")
+                else:
+                    param_graph.Draw("LP SAME")
+            c3.Update()
+
+            # Reduced Chi-square Convergence on Canvas c4
+            c4.cd(it+1)
+            graphs_sig_converge[it].SetTitle(f"Sig {sig_name} Chi-square Convergence")
+            graphs_sig_converge[it].SetLineColor(kBlack)
+            graphs_sig_converge[it].Draw("ALP")
+            c4.Update()
+
+            # Temperature Evolution on Canvas c5
+            c5.cd(it+1)
+            graphs_sig_temp[it].SetTitle(f"Sig {sig_name} Temperature Evolution")
+            graphs_sig_temp[it].SetLineColor(kBlack)
+            graphs_sig_temp[it].Draw("ALP")
+            c5.Update()
+
+            # Acceptance Probability on Canvas c6
+            c6.cd(it+1)
+            graphs_sig_accept[it].SetTitle(f"Sig {sig_name} Acceptance Probability")
+            graphs_sig_accept[it].SetLineColor(kBlack)
+            graphs_sig_accept[it].Draw("ALP")
+            c6.Update()
+
+            # Residual Evolution on Canvas c7
+            c7.cd(it+1)
+            graphs_sig_residuals[it].SetTitle(f"Sig {sig_name} Residual Evolution")
+            graphs_sig_residuals[it].SetLineColor(kBlack)
+            graphs_sig_residuals[it].Draw("ALP")
+            c7.Update()
+
+            # Information Criteria on Canvas c8
+            c8.cd(it+1)
+            graphs_sig_ic_aic[it].SetTitle(f"Sig {sig_name} Information Criteria (AIC)")
+            graphs_sig_ic_aic[it].SetLineColor(kRed)
+            graphs_sig_ic_aic[it].Draw("ALP")
+            graphs_sig_ic_bic[it].SetTitle(f"Sig {sig_name} Information Criteria (BIC)")
+            graphs_sig_ic_bic[it].SetLineColor(kGreen)
+            graphs_sig_ic_bic[it].Draw("LP SAME")
+            c8.Update()
+            # ---------------------------------------------------------------------
+            print("\n")
+        # End each signal's branch.
+    # Print canvases to the output PDF file.
+    c2.Print(outputpdf + '(')
+    c3.Print(outputpdf)
+    c4.Print(outputpdf)
+    c5.Print(outputpdf)
+    c6.Print(outputpdf)
+    c7.Print(outputpdf)
+    c8.Print(outputpdf + ')')
 
     print(f"\n\nFits saved to {outputpdf}...")

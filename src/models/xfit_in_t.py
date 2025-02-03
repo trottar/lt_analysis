@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-02 11:04:57 trottar"
+# Time-stamp: "2025-02-02 21:10:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -81,8 +81,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     full_optimization = True
 
     # Fixed separated xsect parameterization
-    #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    fixed_params = ["L", "T", "LT"]
+    fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
+    #fixed_params = ["L", "T", "LT"]
     #fixed_params = ["L", "LT"]
     #fixed_params = ["TT"]
     #fixed_params = [] # Update all
@@ -110,8 +110,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #chi2_threshold = 600.0
 
     # Number of rechecks to assure chi2_threshold not reached (set to zero to ignore chi2_threshold)
-    max_checks = 0
-    #max_checks = 1
+    #max_checks = 0
+    max_checks = 1
     
     ##############
     ##############
