@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 00:05:34 trottar"
+# Time-stamp: "2025-02-03 00:07:26 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -199,6 +199,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     current_errors = [0.0] * num_params
                     best_params = list(current_params)
                     best_errors = list(current_errors)
+                    best_cost = float('inf')
                     previous_params = list(current_params)
 
                     # Begin the iterative optimization loop
