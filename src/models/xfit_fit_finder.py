@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 22:42:08 trottar"
+# Time-stamp: "2025-02-03 22:46:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -301,13 +301,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
                             # If stalling
                             if stagnation_count > 5:
-                                if debug:
-                                    print("[DEBUG] Stalling => re-randomizing.")
                                 current_params = [
                                     random.uniform(-initial_param_bounds, initial_param_bounds)
                                     for _ in range(num_params)
                                 ]
                                 stagnation_count = 0
+                                if debug:
+                                    print(f"[DEBUG] Stalling => re-randomizing. new_params={current_params}")
 
                             current_params = list(best_params)
                             temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
