@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 05:57:20 trottar"
+# Time-stamp: "2025-02-04 06:02:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -192,7 +192,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     best_cost   = float('inf')
                     accept_prob = 0.0
                     residual    = float('inf')
-                    out_bounds = False
 
                     while iteration <= max_iterations:
                         # Debug prints every 100 iterations
@@ -246,6 +245,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             fits_sig.append(f_sig)
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
+                                if abs(current_params[i_par]) > abs(initial_param_bounds):
+                                    current_params[i_par] = 0
                                 fits_sig[it].SetParameter(i_par, current_params[i_par])
                                 if set_optimization:
                                     fits_sig[it].SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
@@ -287,12 +288,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             # Update current params from the fit
                             current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
                             current_errors = [fits_sig[it].GetParError(i_par) for i_par in range(num_params)]
-
-                            if any(abs(p) > abs(initial_param_bounds) for p in current_params):
-                                out_bounds = True                                
                             
                             # Accept or not
-                            if accept_prob > random.random() and not out_bounds:
+                            if accept_prob > random.random():
                                 best_params = list(current_params)
                                 best_cost   = current_cost
                                 best_errors = list(current_errors)
