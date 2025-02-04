@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:37:47 trottar"
+# Time-stamp: "2025-02-04 04:45:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -576,12 +576,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     f_sig.FixParameter(i, par_vec[4*it + i])
-                    print("!!!!!!!!", par_vec[4*it + i])
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 current_cost, lambda_reg = calculate_cost(
                     f_sig, g_sig, par_vec[4*it:4*(it+1)],
                     num_events, num_params, lambda_reg
                 )
+                current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
+                print("!!!!!!!", current_params)
                 print(f"\tCost: {current_cost:.3f}")
                 if current_cost < best_overall_cost:
                     best_overall_cost = current_cost
