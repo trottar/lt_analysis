@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:27:38 trottar"
+# Time-stamp: "2025-02-03 20:36:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -850,7 +850,7 @@ def adaptive_cooling(initial_temp, iteration, max_iterations, cooling_rate=0.95)
     Exponential-ish cooling schedule that scales with the fraction of total iterations,
     ensuring we don't push the exponent too high too soon.
     """
-    frac_done = iteration / float(max_iterations + 1e-9)
+    frac_done = iteration / float(max_iterations + 1e-9)  # to avoid /0
     effective_exponent = frac_done * 50  # e.g. scale up to some factor
     try:
         return initial_temp * (cooling_rate ** effective_exponent)
@@ -862,7 +862,7 @@ def sanitize_params(params, clip_min=-1e4, clip_max=1e4):
     return [max(min(p, clip_max), clip_min) for p in params]
 
 def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6, clip_min=-1e4, clip_max=1e4):
-    """Perturb a parameter using a factor of its scale and clip the result."""
+    """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero) and then clip the result."""
     scale = abs(param) if abs(param) > min_scale else min_scale
     max_perturbation = scale * perturbation_factor
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
@@ -899,10 +899,8 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
         mse = np.mean(np.square(residuals))
         complexity_penalty = 0.1 * num_params / num_events
         if num_events <= num_params:
-            # Adaptive regularization approach
             cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
         else:
-            # Normal reduced chi-square approach
             chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
             if nu < 1e-6:
@@ -923,7 +921,9 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
 
 def acceptance_probability(old_cost, new_cost, temperature):
     """
-    Return 1 if the new cost is lower; otherwise exp(-(new_cost - old_cost)/temperature).
+    Return 1 if the new cost is lower.
+    Otherwise, return exp(-(new_cost - old_cost)/temperature)
+    to decide probabilistically.
     """
     if new_cost < old_cost:
         return 1.0
@@ -938,10 +938,7 @@ def adjust_params(params, adjustment_factor=0.1):
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
 def local_search(params, inp_func, num_params):
-    """
-    Local search using Minuit. We do a standard chi² minimization on the TF1
-    assigned with the given parameters.
-    """
+    # Define your chi² function; note we expect num_params+1 parameters.
     def chi2_func(par):
         for i in range(num_params+1):
             inp_func.SetParameter(i, par[i])
@@ -950,6 +947,7 @@ def local_search(params, inp_func, num_params):
     import cppyy
     std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
     func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params)
+    
     minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
     minimizer.SetMaxIterations(100000)
@@ -965,17 +963,20 @@ def local_search(params, inp_func, num_params):
     
     try:
         opt_x = minimizer.X()
-    except Exception as e:
+    except Exception:
         opt_x = None
 
     if not opt_x:
         improved_params = params
     else:
         improved_params = [opt_x[i] for i in range(num_params+1)]
+    
     return improved_params
 
 def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
-    """Dynamically adapt regularization strength based on cost history."""
+    """
+    Dynamically adapt regularization strength based on cost history.
+    """
     if len(cost_history) < 2:
         return lambda_reg
     try:
@@ -999,7 +1000,7 @@ def get_central_value(lst):
 
 def calculate_information_criteria(n_samples, n_parameters, chi2):
     """Calculate AIC and BIC for model selection."""
-    log_likelihood = -chi2 / 2.0
+    log_likelihood = -chi2 / 2  # approximate
     aic = 2 * n_parameters - 2 * log_likelihood
     bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
     return aic, bic
