@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 23:16:39 trottar"
+# Time-stamp: "2025-02-03 23:29:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -361,13 +361,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
             # end for run_idx
             try:
-                print(f"\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {best_overall_cost:.5f}")
-                if best_overall_bin is not None:
+                if best_overall_params is not None:
+                    print(f"\nBest overall solution: {best_overall_params}")
+                    print(f"Best overall cost: {best_overall_cost:.5f}")
                     print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, "
                           f"Q2={q2_vec[best_overall_bin]:.3f}, "
                           f"W={w_vec[best_overall_bin]:.3f}, "
                           f"theta={th_vec[best_overall_bin]:.3f}")
+                else:
+                    print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
+                    sys.exit(2)                    
             except TypeError:
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
