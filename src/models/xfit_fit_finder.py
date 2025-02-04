@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 19:02:10 trottar"
+# Time-stamp: "2025-02-03 19:07:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -309,7 +309,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             total_iteration += 1
                             continue
 
-                        if best_cost < best_overall_cost or (temperature <= temp_threshold and accept_prob <= prob_threshold):
+                        if best_cost < best_overall_cost and temperature <= temp_threshold and accept_prob <= prob_threshold:
                             best_overall_cost    = best_cost
                             best_overall_bin     = best_bin
                             best_overall_params  = best_params[:]    # copy the list
