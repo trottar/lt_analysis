@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 23:31:53 trottar"
+# Time-stamp: "2025-02-03 23:50:05 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,20 +83,20 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # Fixed separated xsect parameterization
     #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
     #fixed_params = ["L", "T", "LT"]
-    fixed_params = ["LT", "TT"]
+    #fixed_params = ["LT", "TT"]
     #fixed_params = ["TT"]
-    #fixed_params = [] # Update all
+    fixed_params = [] # Update all
     
     # Maximum iterations before ending loop (should always aim for >10000)
     #max_iterations = 1000
     #max_iterations = 10000
-    #max_iterations = 15000
+    max_iterations = 15000
     #max_iterations = 50000
-    max_iterations = 100000
+    #max_iterations = 100000
 
     # Number of times to run the algorithm
-    num_optimizations = 2
-    #num_optimizations = 5
+    #num_optimizations = 2
+    num_optimizations = 5
     #num_optimizations = 10
 
     # Initial max/min bounds of finding parameter values (only used for iter=1)
