@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 22:27:02 trottar"
+# Time-stamp: "2025-02-03 22:40:50 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -949,18 +949,26 @@ def adjust_params(params, adjustment_factor=0.1):
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
 def local_search(params, inp_func, num_params):
-    # Define your chi² function; note we expect num_params+1 parameters.
+    """
+    Local search that uses Minuit to refine your current `params`.
+    Assumes the function truly has exactly `num_params` parameters.
+    """
+
     def chi2_func(par):
-        for i in range(num_params+1):
+        # If your TF1 really has num_params parameters, set them from 0..num_params-1
+        for i in range(num_params):
             inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
     
-    # Wrap chi2_func in a C++ std::function using cppyy.
     import cppyy
+
+    # Create a std::function<double(const double*)> out of our python chi2_func
     std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
-    # Create a functor using std_func; use num_params if your model requires it.
+
+    # Create a Functor specifying dimension = num_params
     func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params)
-    
+
+    # Use a ROOT minimizer (Minuit) for local minimization
     minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1000000)
     minimizer.SetMaxIterations(100000)
@@ -968,23 +976,24 @@ def local_search(params, inp_func, num_params):
     minimizer.SetPrintLevel(0)
     minimizer.SetFunction(func)
     
+    # Initialize each parameter
     for i, param in enumerate(params):
         step = 0.01 * abs(param) if abs(param) > 1e-6 else 0.01
         minimizer.SetVariable(i, f"p{i}", param, step)
     
     minimizer.Minimize()
     
-    # Try to retrieve the optimized parameters.
     try:
         opt_x = minimizer.X()
     except Exception as e:
         opt_x = None
 
-    # If opt_x is invalid, return the input parameters.
+    # If we fail to retrieve the optimized parameters, return original
     if not opt_x:
         improved_params = params
     else:
-        improved_params = [opt_x[i] for i in range(num_params+1)]
+        # If dimension == num_params, we read exactly num_params from opt_x
+        improved_params = [opt_x[i] for i in range(num_params)]
     
     return improved_params
 
