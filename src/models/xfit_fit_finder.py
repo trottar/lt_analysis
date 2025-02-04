@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:28:57 trottar"
+# Time-stamp: "2025-02-03 20:33:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -244,13 +244,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             # SA step
                             current_params = [simulated_annealing(p, temperature) for p in current_params]
 
-                            for i in range(nsep.GetSelectedRows()):
-                                xval = nsep.GetV2()[i]
-                                yval = nsep.GetV1()[i]
-                                yerr = nsep.GetV3()[i]
-                                g_sig_fit.SetPoint(i, xval, yval)
-                                g_sig_fit.SetPointError(i, 0, yerr)
-
+                            for i in range(len(w_vec)):
+                                sig_X_fit = g_sig.GetY()[i]  # / (g_vec[i]) if needed
+                                sig_X_fit_err = g_sig.GetEY()[i]  # / (g_vec[i]) if needed
+                                g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                                g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
+                                
                             # Setup TF1 for fitting
                             for i in range(num_params):
                                 f_sig.SetParName(i, f"p{i}")
