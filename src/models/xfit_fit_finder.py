@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 22:30:59 trottar"
+# Time-stamp: "2025-02-03 22:40:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -300,7 +300,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 current_params = local_search(current_params, f_sig, num_params)
 
                             # If stalling
-                            if stagnation_count > 40:
+                            if stagnation_count > 10:
                                 if debug:
                                     print("[DEBUG] Stalling => re-randomizing.")
                                 current_params = [
