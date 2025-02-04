@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 02:00:20 trottar"
+# Time-stamp: "2025-02-04 02:07:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -69,7 +69,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     graphs_sig_residuals= []
     graphs_sig_ic_aic   = []
     graphs_sig_ic_bic   = []
-
+    fits_sig = []
+    
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
     c3 = TCanvas("c3", "Parameter Convergence", 800, 800)
@@ -244,8 +245,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                             else:
                                 raise ValueError("Unknown signal name")
+                            fits_sig[it] = fun_Sig
 
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+                            f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
                             f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
                             for i_par in range(num_params):
                                 f_sig.SetParameter(i_par, current_params[i_par])
@@ -424,7 +426,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "TT":
                 fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-            f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+            fits_sig[it] = fun_Sig                
+            f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
             for i in range(num_params):
                 f_sig.FixParameter(i, best_overall_params[i])
@@ -551,7 +554,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 elif sig_name == "TT":
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+                fits_sig[it] = fun_Sig                    
+                f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
                 f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
                 for i in range(num_params):
                     f_sig.FixParameter(i, par_vec[num_params*it + i])
@@ -591,7 +595,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "TT":
                 fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-            f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+            fits_sig[it] = fun_Sig
+            f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
             for i in range(num_params):
                 f_sig.FixParameter(i, par_vec[num_params*it + i])
@@ -611,6 +616,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_overall_cost:.3f}")
             c2.Update()
             print("\n")
+        c2.Update()
+        c3.Update()
+        c4.Update()
+        c5.Update()
+        c6.Update()
+        c7.Update()
+        c8.Update()
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
         c3.Print(outputpdf)
