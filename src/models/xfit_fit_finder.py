@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:17:42 trottar"
+# Time-stamp: "2025-02-04 04:32:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -151,7 +151,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             params_sig_history = [[] for _ in range(num_params)]
             graph_sig_params = [TGraph() for _ in range(num_params)]
             graphs_sig_params_all.append(graph_sig_params)
-
             graph_sig_chi2   = TGraph()
             graph_sig_temp   = TGraph()
             graph_sig_accept = TGraph()
@@ -505,17 +504,30 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             c8.Update()
             print("\n")
         else:
-            # --- ELSE branch: if sig_name is in fixed_params, use the provided parameters.
-            sig_name = sig_name
-            num_params, initial_params, equation_str = inpDict["initial_params"](sig_name, val)
-            param_str = ', '.join(str(p) for p in initial_params)
+
+            num_params, init_params, equation_str = inpDict["init_params"](sig_name, val)
+            param_str = ', '.join(str(p) for p in init_params)
             print("\n/*--------------------------------------------------*/")
             print(f"Fit for Sig {sig_name} ({num_params} parameters)")
             print(f"Initial Parameters: ({param_str})")
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            # Track best across all runs
+            best_overall_params   = None
+            best_overall_errors   = None
+            best_overall_cost     = float('inf')
+            best_overall_bin      = None
+            best_overall_temp     = float('inf')
+            best_overall_prob     = 1.0
+            best_overall_residual= float('inf')
+            best_overall_ic_aic  = float('inf')
+            best_overall_ic_bic  = float('inf')
+            
+            total_iteration = 0
+            lambda_reg = 0.01
+            cost_history = []
+            
             graph_sig_params = [TGraph() for _ in range(num_params)]
             graphs_sig_params_all.append(graph_sig_params)
             graph_sig_chi2   = TGraph()
@@ -531,12 +543,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             graphs_sig_ic_aic.append(graph_sig_aic)
             graphs_sig_ic_bic.append(graph_sig_bic)
 
-            lambda_reg = 0.01
-            best_overall_cost = float('inf')
-            best_overall_params = []
-            best_overall_bin = 0
+            # Draw data
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+
             for b in [2]:
-                print(f"\nDetermining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+                print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, "
+                      f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
                 g_sig = TGraphErrors()
@@ -564,11 +576,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     f_sig.FixParameter(i, par_vec[4*it + i])
+                    print("!!!!!!!!", par_vec[4*it + i])
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                current_cost, lambda_reg = calculate_cost(f_sig, g_sig, par_vec[4*it:num_params*(it+1)],
-                                                          num_events, num_params, lambda_reg)
+                current_cost, lambda_reg = calculate_cost(
+                    f_sig, g_sig, par_vec[4*it:4*(it+1)],
+                    g_sig.GetN(), num_params, lambda_reg
+                )
                 print(f"\tCost: {current_cost:.3f}")
-                if abs(current_cost - 1) < abs(best_overall_cost - 1):
+                if current_cost < best_overall_cost:
                     best_overall_cost = current_cost
                     best_overall_bin = b
                     best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
@@ -577,6 +592,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             
             for j in range(num_params):
                 par_chi2_vec[4*it + j] = best_overall_cost
+                
             # Plot the final model fit
             g_sig_fit = TGraphErrors()
             graphs_sig_fit_plot.append(g_sig_fit)
