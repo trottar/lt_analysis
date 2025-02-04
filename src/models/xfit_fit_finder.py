@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 05:01:11 trottar"
+# Time-stamp: "2025-02-04 05:11:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -521,7 +521,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             best_overall_ic_bic  = float('inf')
             
             total_iteration = 0
-            lambda_reg = 0.01
+            lambda_reg = 0.0
             cost_history = []
             
             graph_sig_params = [TGraph() for _ in range(num_params)]
