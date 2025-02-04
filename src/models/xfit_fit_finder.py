@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 02:56:16 trottar"
+# Time-stamp: "2025-02-04 03:13:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -360,7 +360,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                         total_iteration += 1
 
                     # end while iteration <= max_iterations
-                    print(f"\nBest Cost this run: {best_overall_cost:.3f}")
+                    print(f"\nBest Cost: {best_overall_cost:.3f}")
 
             # end for run_idx
             try:
@@ -386,9 +386,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 best_overall_params.append(0.0)
                 best_overall_errors.append(0.0)
             for j in range(num_params):
-                par_vec[num_params*it + j]     = best_overall_params[j]
-                par_err_vec[num_params*it + j] = best_overall_errors[j]
-                par_chi2_vec[num_params*it + j]  = best_overall_cost
+                par_vec[4*it + j]     = best_overall_params[j]
+                par_err_vec[4*it + j] = best_overall_errors[j]
+                par_chi2_vec[4*it + j]  = best_overall_cost
 
             # Plot the final model fit
             g_sig_fit = TGraphErrors()
@@ -559,19 +559,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
                 f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
                 for i in range(num_params):
-                    f_sig.FixParameter(i, par_vec[num_params*it + i])
+                    f_sig.FixParameter(i, par_vec[4*it + i])
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
-                current_cost, lambda_reg = calculate_cost(f_sig, g_sig, par_vec[num_params*it:num_params*(it+1)],
+                current_cost, lambda_reg = calculate_cost(f_sig, g_sig, par_vec[4*it:num_params*(it+1)],
                                                           num_events, num_params, lambda_reg)
                 print(f"\tCost: {current_cost:.3f}")
                 if abs(current_cost - 1) < abs(best_overall_cost - 1):
                     best_overall_cost = current_cost
                     best_overall_bin = b
-                    best_overall_params = [par_vec[num_params*it + j] for j in range(num_params)]
+                    best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
             print(f"\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost:.5f}")
             for j in range(num_params):
-                par_chi2_vec[num_params*it + j] = best_overall_cost
+                par_chi2_vec[4*it + j] = best_overall_cost
             c2.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[-1].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[-1].Draw("A*")
@@ -600,7 +600,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
             for i in range(num_params):
-                f_sig.FixParameter(i, par_vec[num_params*it + i])
+                f_sig.FixParameter(i, par_vec[4*it + i])
             n_points = 100
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
