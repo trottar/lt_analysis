@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 22:40:08 trottar"
+# Time-stamp: "2025-02-03 22:41:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -51,7 +51,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
       - Stall check if cost doesn't improve => re-randomize.
       - Unconditional best cost update, so we never stay at inf if we find a better cost.
       - TGraph updates each iteration for diagnostic plots (cost, params, etc.).
-      - Debug prints every 25 iterations if debug=True, showing params, cost, temperature, etc.
+      - Debug prints every 100 iterations if debug=True, showing params, cost, temperature, etc.
       - Data-collection lines from nsep remain in the same order, no reordering.
       - Fixes the NameError by defining best_overall_errors properly.
     """
@@ -198,7 +198,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     residual    = float('inf')
 
                     while iteration <= max_iterations:
-                        if debug and iteration % 25 == 0:
+                        if debug and iteration % 100 == 0:
                             print(f"[DEBUG run={run_idx+1}] iteration={iteration}, "
                                   f"best_cost={best_cost:.3f}, temp={temperature:.3f}, "
                                   f"stagnation={stagnation_count}, params={current_params}")
@@ -296,11 +296,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 stagnation_count += 1
 
                             # Occasionally do local search
-                            if iteration % 25 == 0:
+                            if iteration % 10 == 0:
                                 current_params = local_search(current_params, f_sig, num_params)
 
                             # If stalling
-                            if stagnation_count > 10:
+                            if stagnation_count > 5:
                                 if debug:
                                     print("[DEBUG] Stalling => re-randomizing.")
                                 current_params = [
