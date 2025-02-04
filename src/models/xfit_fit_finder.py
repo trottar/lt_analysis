@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 02:53:25 trottar"
+# Time-stamp: "2025-02-04 02:56:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -333,7 +333,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 random.uniform(-initial_param_bounds, initial_param_bounds)
                                 for _ in range(num_params)
                             ]
-                            max_param_bounds = random.uniform(0.0, max_param_bounds)
+                            initial_param_bounds = random.uniform(0.0, initial_param_bounds)
                             iteration += 1
                             continue
 
