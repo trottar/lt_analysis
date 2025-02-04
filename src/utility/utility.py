@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 00:18:57 trottar"
+# Time-stamp: "2025-02-04 00:20:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -845,9 +845,9 @@ def get_centroid(hist, x_min, x_max):
 
 ################################################################################################################################################
 
-def adaptive_cooling(initial_temp, iteration, max_iterations, cooling_rate=0.99, scaling=1):
-    frac = iteration# / float(max_iterations)
-    exponent = scaling * frac  
+def adaptive_cooling(initial_temp, iteration, max_iterations, cooling_rate=0.99, scaling=50):
+    frac = iteration / float(max_iterations)
+    exponent = scaling * frac
     return initial_temp * (cooling_rate ** exponent)
 
 def sanitize_params(params, clip_min=-1e4, clip_max=1e4):
