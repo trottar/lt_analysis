@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:45:30 trottar"
+# Time-stamp: "2025-02-03 20:46:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -381,39 +381,39 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             iteration += 1
                             total_iteration += 1
 
-                        except (TypeError, ZeroDivisionError) as e:
-                            # In case of error, generate recovery parameters
-                            recovery_params = [
-                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
-                                for p in (best_params if best_params != [float('inf')]*num_params else initial_params)
-                            ]
-                            recovery_params = [max(min(p, max_param_bounds), -max_param_bounds) for p in recovery_params]
-                            for i_par, param in enumerate(recovery_params):
-                                f_sig.SetParameter(i_par, param)
-                            current_params = recovery_params
-                            current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-                            temperature = min(temperature * 1.2, initial_temperature)
-                            max_param_bounds = random.uniform(0.0, max_param_bounds)
-                            iteration += 1
-                            total_iteration += 1
-                            continue
+                    except (TypeError, ZeroDivisionError) as e:
+                        # In case of error, generate recovery parameters
+                        recovery_params = [
+                            p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                            for p in (best_params if best_params != [float('inf')]*num_params else initial_params)
+                        ]
+                        recovery_params = [max(min(p, max_param_bounds), -max_param_bounds) for p in recovery_params]
+                        for i_par, param in enumerate(recovery_params):
+                            f_sig.SetParameter(i_par, param)
+                        current_params = recovery_params
+                        current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
+                        temperature = min(temperature * 1.2, initial_temperature)
+                        max_param_bounds = random.uniform(0.0, max_param_bounds)
+                        iteration += 1
+                        total_iteration += 1
+                        continue
 
-                        # Check if we update global best under certain thresholds
-                        if (best_cost < best_overall_cost
-                                and temperature <= temp_threshold
-                                and accept_prob <= prob_threshold):
-                            best_overall_cost    = best_cost
-                            best_overall_bin     = best_bin
-                            best_overall_params  = best_params[:]
-                            best_overall_errors  = best_errors[:]
-                            best_overall_temp    = temperature
-                            best_overall_prob    = accept_prob
-                            best_overall_residual= residual
-                            best_overall_ic_aic  = ic_aic
-                            best_overall_ic_bic  = ic_bic
+                    # Check if we update global best under certain thresholds
+                    if (best_cost < best_overall_cost
+                            and temperature <= temp_threshold
+                            and accept_prob <= prob_threshold):
+                        best_overall_cost    = best_cost
+                        best_overall_bin     = best_bin
+                        best_overall_params  = best_params[:]
+                        best_overall_errors  = best_errors[:]
+                        best_overall_temp    = temperature
+                        best_overall_prob    = accept_prob
+                        best_overall_residual= residual
+                        best_overall_ic_aic  = ic_aic
+                        best_overall_ic_bic  = ic_bic
 
-                            temp_threshold -= threshold_minimizer
-                            prob_threshold -= threshold_minimizer
+                        temp_threshold -= threshold_minimizer
+                        prob_threshold -= threshold_minimizer
 
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
 
