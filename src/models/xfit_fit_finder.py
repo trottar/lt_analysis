@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 05:51:05 trottar"
+# Time-stamp: "2025-02-04 05:55:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -287,9 +287,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             # Update current params from the fit
                             current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
                             current_errors = [fits_sig[it].GetParError(i_par) for i_par in range(num_params)]
-
-                            if any(abs(p) > abs(initial_param_bounds) for p in current_params):
-                                out_bounds = True                                
                             
                             # Accept or not
                             if accept_prob > random.random() and not out_bounds:
