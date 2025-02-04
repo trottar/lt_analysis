@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 06:30:22 trottar"
+# Time-stamp: "2025-02-04 06:30:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -246,7 +246,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
                                 if abs(current_params[i_par]) > abs(initial_param_bounds) or abs(current_params[i_par]) < 1e-10:
-                                    print("!!!!!!!!", abs(current_params[i_par])))
+                                    print("!!!!!!!!", abs(current_params[i_par]))
                                     current_params[i_par] = 0.0
                                 fits_sig[it].SetParameter(i_par, current_params[i_par])
                                 if set_optimization:
