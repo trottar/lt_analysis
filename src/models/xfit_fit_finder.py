@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 19:07:22 trottar"
+# Time-stamp: "2025-02-03 20:01:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -159,7 +159,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             for start in range(num_optimizations):
                 print(f"\nStarting optimization run {start+1}/{num_optimizations}")
                 set_optimization = full_optimization
-                temp_threshold = 1e-2
+                temp_threshold = 1e-1
                 prob_threshold = 1e-1
                 threshold_minimizer = 5e-2
 
