@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 03:22:24 trottar"
+# Time-stamp: "2025-02-04 03:33:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -600,6 +600,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
+                print("!!!!!!!!!!",par_vec[4*it + i])
                 f_sig.FixParameter(i, par_vec[4*it + i])
             n_points = 100
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
