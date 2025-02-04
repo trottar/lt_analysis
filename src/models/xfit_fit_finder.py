@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 06:57:25 trottar"
+# Time-stamp: "2025-02-04 06:58:25 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -326,6 +326,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             current_params = list(best_params)
                             # Adjust temperature with your adaptive_cooling
                             temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                            initial_param_bounds = random.uniform(100.0, initial_param_bounds)
                             iteration += 1
 
                         except (TypeError, ZeroDivisionError, OverflowError) as e:
