@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:19:13 trottar"
+# Time-stamp: "2025-02-03 20:20:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -18,10 +18,10 @@ import sys, math, time, random
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import (adaptive_regularization, calculate_cost, adaptive_cooling,
-                     simulated_annealing, acceptance_probability, adjust_params, 
-                     local_search, select_valid_parameter, get_central_value, 
-                     calculate_information_criteria)
+# Utility imports (from the file utility.py)
+from utility import (adaptive_cooling, sanitize_params, simulated_annealing,
+                     calculate_cost, acceptance_probability, local_search,
+                     adaptive_regularization, calculate_information_criteria)
 
 ##################################################################################################################################################
 
