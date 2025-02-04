@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 05:44:09 trottar"
+# Time-stamp: "2025-02-04 05:44:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -192,7 +192,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     best_cost   = float('inf')
                     accept_prob = 0.0
                     residual    = float('inf')
-                    out_bounds = True
+                    out_bounds = False
 
                     while iteration <= max_iterations:
                         # Debug prints every 100 iterations
@@ -292,7 +292,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 out_bounds = True                                
                             
                             # Accept or not
-                            if accept_prob > random.random() and out_bounds:
+                            if accept_prob > random.random() and not out_bounds:
                                 best_params = list(current_params)
                                 best_cost   = current_cost
                                 best_errors = list(current_errors)
