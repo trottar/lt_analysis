@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-31 02:23:26 trottar"
+# Time-stamp: "2025-02-04 07:47:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -490,21 +490,23 @@ with PdfPages(outputpdf) as pdf:
 
                 # Plot fitted function
                 ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+
+                if "hi" in df_key:
+                    a_hi_lst.append((df['t'][x_increment], a_fit))
+                    b_hi_lst.append((df['t'][x_increment], b_fit))
+                    c_hi_lst.append((df['t'][x_increment], c_fit))
+                    d_hi_lst.append((df['t'][x_increment], d_fit))
+                else:
+                    a_lo_lst.append((df['t'][x_increment], a_fit))
+                    b_lo_lst.append((df['t'][x_increment], b_fit))
+                    c_lo_lst.append((df['t'][x_increment], c_fit))
+                    d_lo_lst.append((df['t'][x_increment], d_fit))
+                
             except TypeError as e:
                 print("Fit not found!")
 
             x_len = x_increment+len(x_values)
 
-            if "hi" in df_key:
-                a_hi_lst.append((df['t'][x_increment], a_fit))
-                b_hi_lst.append((df['t'][x_increment], b_fit))
-                c_hi_lst.append((df['t'][x_increment], c_fit))
-                d_hi_lst.append((df['t'][x_increment], d_fit))
-            else:
-                a_lo_lst.append((df['t'][x_increment], a_fit))
-                b_lo_lst.append((df['t'][x_increment], b_fit))
-                c_lo_lst.append((df['t'][x_increment], c_fit))
-                d_lo_lst.append((df['t'][x_increment], d_fit))
                 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot(W - W_{\text{c}}) + c\cdot(Q^2 - Q^2_{\text{c}}) + d\cdot(W - W_{\text{c}}) (Q^2 - Q^2_{\text{c}})$'
@@ -621,21 +623,22 @@ with PdfPages(outputpdf) as pdf:
 
                 # Plot fitted function
                 ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
+
+                if "hi" in df_key:
+                    a_hi_lst.append((df['t'][x_increment], a_fit))
+                    b_hi_lst.append((df['t'][x_increment], b_fit))
+                    c_hi_lst.append((df['t'][x_increment], c_fit))
+                    d_hi_lst.append((df['t'][x_increment], d_fit))
+                else:
+                    a_lo_lst.append((df['t'][x_increment], a_fit))
+                    b_lo_lst.append((df['t'][x_increment], b_fit))
+                    c_lo_lst.append((df['t'][x_increment], c_fit))
+                    d_lo_lst.append((df['t'][x_increment], d_fit))
+                
             except TypeError as e:
                 print("Fit not found!")                
             
             x_len = x_increment+len(x_values)
-            
-            if "hi" in df_key:
-                a_hi_lst.append((df['t'][x_increment], a_fit))
-                b_hi_lst.append((df['t'][x_increment], b_fit))
-                c_hi_lst.append((df['t'][x_increment], c_fit))
-                d_hi_lst.append((df['t'][x_increment], d_fit))
-            else:
-                a_lo_lst.append((df['t'][x_increment], a_fit))
-                b_lo_lst.append((df['t'][x_increment], b_fit))
-                c_lo_lst.append((df['t'][x_increment], c_fit))
-                d_lo_lst.append((df['t'][x_increment], d_fit))
 
         # Add the equation as text above the legend
         equation = r'$a + b\cdot\sin^2(\theta) + c\cdot\sin(\theta) \cos(\phi) + d\cdot\sin^2(\theta) \cos(2\phi)$'
