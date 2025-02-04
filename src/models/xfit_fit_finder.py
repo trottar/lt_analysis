@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:12:43 trottar"
+# Time-stamp: "2025-02-04 04:17:06 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -57,6 +57,20 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
       - Debug prints (if debug=True) every 100 iterations => param/cost/temperature/stall info.
       - Data lines from nsep remain in same order, no reordering.
     """
+
+    # -----------------------------------------------------------------------------
+    # 1. Create lists to store global graphs (unchanged structure)
+    # -----------------------------------------------------------------------------
+    graphs_sig_fit      = []
+    graphs_sig_fit_plot      = []
+    graphs_sig_params_all = []
+    graphs_sig_converge = []
+    graphs_sig_temp     = []
+    graphs_sig_accept   = []
+    graphs_sig_residuals= []
+    graphs_sig_ic_aic   = []
+    graphs_sig_ic_bic   = []
+    fits_sig = []
     
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -118,19 +132,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
-            # -----------------------------------------------------------------------------
-            # 1. Create lists to store global graphs (unchanged structure)
-            # -----------------------------------------------------------------------------
-            graphs_sig_fit      = []
-            graphs_sig_params_all = []
-            graphs_sig_converge = []
-            graphs_sig_temp     = []
-            graphs_sig_accept   = []
-            graphs_sig_residuals= []
-            graphs_sig_ic_aic   = []
-            graphs_sig_ic_bic   = []
-            fits_sig = []
-            
             # Track best across all runs
             best_overall_params   = None
             best_overall_errors   = None
@@ -392,7 +393,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
             # Plot the final model fit
             g_sig_fit = TGraphErrors()
-            graphs_sig_fit.append(g_sig_fit)
+            graphs_sig_fit_plot.append(g_sig_fit)
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -400,24 +401,24 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             for i in range(len(w_vec)):
                 sig_X_fit = g_sig.GetY()[i]# / (g_vec[i])
                 sig_X_fit_err = g_sig.GetEY()[i]# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
+                graphs_sig_fit_plot[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                graphs_sig_fit_plot[it].SetPointError(i, 0, sig_X_fit_err)
             c2.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-            graphs_sig_fit[it].Draw("A*")
-            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graphs_sig_fit[it].GetXaxis().CenterTitle()
-            graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^{2}]")
-            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-            graphs_sig_fit[it].GetYaxis().CenterTitle()
-            x_min = min(graphs_sig_fit[it].GetX())
-            x_max = max(graphs_sig_fit[it].GetX())
-            y_min = min(graphs_sig_fit[it].GetY())
-            y_max = max(graphs_sig_fit[it].GetY())
+            graphs_sig_fit_plot[it].SetTitle(f"Sigma {sig_name} Model Fit")
+            graphs_sig_fit_plot[it].Draw("A*")
+            graphs_sig_fit_plot[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit_plot[it].GetXaxis().CenterTitle()
+            graphs_sig_fit_plot[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^{2}]")
+            graphs_sig_fit_plot[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit_plot[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit_plot[it].GetYaxis().CenterTitle()
+            x_min = min(graphs_sig_fit_plot[it].GetX())
+            x_max = max(graphs_sig_fit_plot[it].GetX())
+            y_min = min(graphs_sig_fit_plot[it].GetY())
+            y_max = max(graphs_sig_fit_plot[it].GetY())
             margin = 0.1
-            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            graphs_sig_fit_plot[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit_plot[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
             # Now create and draw a final TF1 with the best parameters fixed
             if sig_name == "L":
                 fun_Sig = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
@@ -431,7 +432,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
-                f_sig.FixParameter(i, best_overall_params[i])
+                f_sig.FixParameter(i, best_overall_params[i]))
             n_points = 100
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
@@ -439,8 +440,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             y_min = min(y_min, fit_y_min)
             y_max = max(y_max, fit_y_max)
             margin = 0.1 * (y_max - y_min)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+            graphs_sig_fit_plot[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            r_sig_fit = graphs_sig_fit_plot[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
             f_sig_status = "Fit Successful" if f_sig.GetNDF() != 0 else "Fit Failed"
             fit_status = TText()
@@ -514,24 +515,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
-            lambda_reg = 0.01
-            best_overall_cost = float('inf')
-            best_overall_params = []
-            best_overall_bin = 0            
-
-            # -----------------------------------------------------------------------------
-            # 1. Create lists to store global graphs (unchanged structure)
-            # -----------------------------------------------------------------------------
-            graphs_sig_fit      = []
-            graphs_sig_params_all = []
-            graphs_sig_converge = []
-            graphs_sig_temp     = []
-            graphs_sig_accept   = []
-            graphs_sig_residuals= []
-            graphs_sig_ic_aic   = []
-            graphs_sig_ic_bic   = []
-            fits_sig = []
-            
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            graph_sig_params = [TGraph() for _ in range(num_params)]
+            graphs_sig_params_all.append(graph_sig_params)
             graph_sig_chi2   = TGraph()
             graph_sig_temp   = TGraph()
             graph_sig_accept = TGraph()
@@ -545,10 +531,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             graphs_sig_ic_aic.append(graph_sig_aic)
             graphs_sig_ic_bic.append(graph_sig_bic)
 
-            # Draw data
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-            start_time = time.time()
-
+            lambda_reg = 0.01
+            best_overall_cost = float('inf')
+            best_overall_params = []
+            best_overall_bin = 0
             for b in [2]:
                 print(f"\nDetermining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 g_sig_fit = TGraphErrors()
@@ -588,11 +574,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
             print(f"\nBest overall solution: {best_overall_params}")
             print(f"Best overall cost: {best_overall_cost:.5f}")
+            
             for j in range(num_params):
                 par_chi2_vec[4*it + j] = best_overall_cost
             # Plot the final model fit
             g_sig_fit = TGraphErrors()
-            graphs_sig_fit.append(g_sig_fit)
+            graphs_sig_fit_plot.append(g_sig_fit)
             g_sig = TGraphErrors()
             for i in range(nsep.GetSelectedRows()):
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -600,24 +587,24 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             for i in range(len(w_vec)):
                 sig_X_fit = g_sig.GetY()[i]# / (g_vec[i])
                 sig_X_fit_err = g_sig.GetEY()[i]# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)                
+                graphs_sig_fit_plot[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
+                graphs_sig_fit_plot[it].SetPointError(i, 0, sig_X_fit_err)                
             c2.cd(it+1).SetLeftMargin(0.12)
-            graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
-            graphs_sig_fit[it].Draw("A*")
-            graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-            graphs_sig_fit[it].GetXaxis().CenterTitle()
-            graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^{2}]")
-            graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
-            graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
-            graphs_sig_fit[it].GetYaxis().CenterTitle()
-            x_min = min(graphs_sig_fit[it].GetX())
-            x_max = max(graphs_sig_fit[it].GetX())
-            y_min = min(graphs_sig_fit[it].GetY())
-            y_max = max(graphs_sig_fit[it].GetY())
+            graphs_sig_fit_plot[it].SetTitle(f"Sigma {sig_name} Model Fit")
+            graphs_sig_fit_plot[it].Draw("A*")
+            graphs_sig_fit_plot[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+            graphs_sig_fit_plot[it].GetXaxis().CenterTitle()
+            graphs_sig_fit_plot[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^{2}]")
+            graphs_sig_fit_plot[it].GetYaxis().SetTitleOffset(1.5)
+            graphs_sig_fit_plot[it].GetYaxis().SetTitleSize(0.035)
+            graphs_sig_fit_plot[it].GetYaxis().CenterTitle()
+            x_min = min(graphs_sig_fit_plot[it].GetX())
+            x_max = max(graphs_sig_fit_plot[it].GetX())
+            y_min = min(graphs_sig_fit_plot[it].GetY())
+            y_max = max(graphs_sig_fit_plot[it].GetY())
             margin = 0.1
-            graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            graphs_sig_fit_plot[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
+            graphs_sig_fit_plot[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
             if sig_name == "L":
                 fun_Sig = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "T":
@@ -638,8 +625,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             y_min = min(y_min, fit_y_min)
             y_max = max(y_max, fit_y_max)
             margin = 0.1 * (y_max - y_min)
-            graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-            r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
+            graphs_sig_fit_plot[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+            r_sig_fit = graphs_sig_fit_plot[it].Fit(f_sig, "SQ")
             f_sig.Draw("same")
             latex = TLatex()
             latex.SetTextSize(0.04)
