@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:55:42 trottar"
+# Time-stamp: "2025-02-04 05:01:11 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -578,8 +578,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     fits_sig[it], g_sig, par_vec[4*it:4*(it+1)],
                     num_events, num_params, lambda_reg
                 )
-                current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
-                print("!!!!!!!", current_params)
                 print(f"\tCost: {current_cost:.3f}")
                 if current_cost < best_overall_cost:
                     best_overall_cost = current_cost
