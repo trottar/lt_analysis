@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 07:00:31 trottar"
+# Time-stamp: "2025-02-04 07:01:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -181,9 +181,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     initial_temperature = 1.0
                     temperature         = initial_temperature
 
-                    # Random initialization in ± initial_param_bounds
+                    max_param_bounds = initial_param_bounds
+                    
+                    # Random initialization in ± max_param_bounds
                     current_params = [
-                        random.uniform(-initial_param_bounds, initial_param_bounds)
+                        random.uniform(-max_param_bounds, max_param_bounds)
                         for _ in range(num_params)
                     ]
                     current_errors = [0.0]*num_params
@@ -245,13 +247,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             fits_sig.append(f_sig)
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
-                                if abs(current_params[i_par]) > abs(initial_param_bounds):
+                                if abs(current_params[i_par]) > abs(max_param_bounds):
                                     current_params[i_par] = 0.0                                        
                                 if abs(current_params[i_par]) < 1e-10:
                                     current_params[i_par] = 0.0
                                 fits_sig[it].SetParameter(i_par, current_params[i_par])
                                 if set_optimization:
-                                    fits_sig[it].SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
+                                    fits_sig[it].SetParLimits(i_par, -max_param_bounds, max_param_bounds)
                                 else:
                                     off = param_offsets[i_par]
                                     fits_sig[it].SetParLimits(
@@ -311,7 +313,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             if stagnation_count > 5:
                                 # re-random
                                 current_params = [
-                                    random.uniform(-initial_param_bounds, initial_param_bounds)
+                                    random.uniform(-max_param_bounds, max_param_bounds)
                                     for _ in range(num_params)
                                 ]
                                 stagnation_count = 0
@@ -322,17 +324,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             current_params = list(best_params)
                             # Adjust temperature with your adaptive_cooling
                             temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                            initial_param_bounds = random.uniform(100.0, initial_param_bounds)
-                            print("!!!!!!!!!!", initial_param_bounds)
+                            max_param_bounds = random.uniform(100.0, max_param_bounds)
+                            print("!!!!!!!!!!", max_param_bounds)
                             iteration += 1
 
                         except (TypeError, ZeroDivisionError, OverflowError) as e:
                             # On error => re-random
                             if debug:
                                 print(f"[DEBUG] Exception => {str(e)}, re-randomizing.")
-                            initial_param_bounds = random.uniform(100.0, initial_param_bounds)
+                            max_param_bounds = random.uniform(100.0, max_param_bounds)
                             current_params = [
-                                random.uniform(-initial_param_bounds, initial_param_bounds)
+                                random.uniform(-max_param_bounds, max_param_bounds)
                                 for _ in range(num_params)
                             ]                        
                             iteration += 1
