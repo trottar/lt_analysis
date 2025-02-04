@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 07:03:13 trottar"
+# Time-stamp: "2025-02-04 07:06:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -435,7 +435,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
                 fits_sig[it].FixParameter(i, best_overall_params[i])
-            n_points = 100
+            n_points = 10000
             fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
@@ -638,7 +638,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
                 fits_sig[it].FixParameter(i, par_vec[4*it + i])
-            n_points = 100
+            n_points = 10000
             fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
