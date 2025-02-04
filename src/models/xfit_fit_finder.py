@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 21:55:20 trottar"
+# Time-stamp: "2025-02-03 22:01:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -45,11 +45,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                  fixed_params, outputpdf, full_optimization=True,
                  debug=False):
     """
-    'parameterize' function with:
-      - Original data-collection lines from nsep unchanged
-      - Additional checks before Fit(...) to skip large params / function overflow
-      - Catch (OverflowError, TypeError, ZeroDivisionError) around Fit(...)
-      - Stall check, unconditional best cost update, debug prints, TGraph iteration
+    'parameterize' function with repeated TGraph::Fit fallback:
+      - Original data lines
+      - Additional checks/fallback if TGraph::Fit(...) fails multiple times
+      - Possibly do Fit(..., "0Q") or skip Fit to avoid repeated OverflowError
+      - Keep stall checks, unconditional cost update, TGraph iteration
     """
 
     # -------------------------------------------------------------------------
@@ -80,7 +80,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     c8.Divide(2, 2)
 
     # -------------------------------------------------------------------------
-    # 2. Unpack input objects and settings (unchanged)
+    # 2. Unpack input objects/settings (unchanged)
     # -------------------------------------------------------------------------
     q2_set, w_set = inpDict["q2_set"], inpDict["w_set"]
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
@@ -93,7 +93,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     fit_params = inpDict["fit_params"]
     chi2_threshold = inpDict["chi2_threshold"]
 
-    # “center” values
     q2_center_val = get_central_value(q2_vec)
     w_center_val  = get_central_value(w_vec)
     g_center_val  = get_central_value(g_vec)
@@ -113,7 +112,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             param_str = ', '.join(str(p) for p in initial_params)
 
             if num_events <= num_params:
-                print(f"\nWARNING: For Sig {sig_name} (#params={num_params} >= #data={num_events}). Using adapt. reg.")
+                print(f"\nWARNING: For Sig {sig_name}, #params={num_params} >= #data={num_events}.")
                 fit_convergence_type = "Adapt. Reg."
             else:
                 fit_convergence_type = "Red. Chi-Square"
@@ -159,8 +158,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             start_time = time.time()
 
+            # Additional: track consecutive fit errors
+            consecutive_fit_errors = 0
+            max_fit_errors_allowed = 20  # how many times we allow Fit to fail before fallback
+
             # -----------------------------------------------------------------
-            # 4. Multiple optimization runs
+            # 4. We run multiple optimization passes
             # -----------------------------------------------------------------
             for run_idx in range(num_optimizations):
                 print(f"\nStarting optimization run {run_idx+1}/{num_optimizations}")
@@ -187,177 +190,156 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     best_cost   = float('inf')
                     accept_prob = 0.0
                     residual    = float('inf')
-                    ic_aic      = float('inf')
-                    ic_bic      = float('inf')
 
-                    # Main iteration
                     while iteration <= max_iterations:
                         if debug and iteration % 25 == 0:
-                            print(f"[DEBUG run={run_idx+1}] iteration={iteration}, "
-                                  f"best_cost={best_cost:.3f}, temp={temperature:.3f}, "
-                                  f"stagnation={stagnation_count}, params={current_params}")
+                            print(f"[DEBUG run={run_idx+1}] iteration={iteration}, best_cost={best_cost:.3f}, "
+                                  f"temp={temperature:.3f}, stagnation={stagnation_count}, params={current_params}")
 
                         g_sig_fit = TGraphErrors()
                         graphs_sig_fit.append(g_sig_fit)
                         sys.stdout.write(f"\rSearching for best parameters...({iteration}/{max_iterations})")
                         sys.stdout.flush()
 
-                        try:
-                            # Build TGraphErrors for data (unchanged)
-                            g_sig = TGraphErrors()
-                            for i_data in range(nsep.GetSelectedRows()):
-                                g_sig.SetPoint(i_data, nsep.GetV2()[i_data], nsep.GetV1()[i_data])
-                                g_sig.SetPointError(i_data, 0, nsep.GetV3()[i_data])
+                        # Build TGraphErrors for data
+                        g_sig = TGraphErrors()
+                        for i_data in range(nsep.GetSelectedRows()):
+                            g_sig.SetPoint(i_data, nsep.GetV2()[i_data], nsep.GetV1()[i_data])
+                            g_sig.SetPointError(i_data, 0, nsep.GetV3()[i_data])
 
-                            for i_pt in range(len(w_vec)):
-                                sig_X_fit = g_sig.GetY()[i_pt]
-                                sig_X_fit_err = g_sig.GetEY()[i_pt]
-                                g_sig_fit.SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
-                                g_sig_fit.SetPointError(i_pt, 0, sig_X_fit_err)
+                        for i_pt in range(len(w_vec)):
+                            sig_X_fit = g_sig.GetY()[i_pt]
+                            sig_X_fit_err = g_sig.GetEY()[i_pt]
+                            g_sig_fit.SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
+                            g_sig_fit.SetPointError(i_pt, 0, sig_X_fit_err)
 
-                            # Choose function
-                            if sig_name == "L":
-                                fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                            elif sig_name == "T":
-                                fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                            elif sig_name == "LT":
-                                fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                            elif sig_name == "TT":
-                                fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        # pick function
+                        if sig_name == "L":
+                            fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        elif sig_name == "T":
+                            fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        elif sig_name == "LT":
+                            fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        elif sig_name == "TT":
+                            fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                        else:
+                            raise ValueError("Unknown signal name")
+
+                        f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
+                        f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
+                        for i_par in range(num_params):
+                            f_sig.SetParameter(i_par, current_params[i_par])
+                            if set_optimization:
+                                f_sig.SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
                             else:
-                                raise ValueError("Unknown signal name")
+                                off = param_offsets[i_par]
+                                f_sig.SetParLimits(
+                                    i_par,
+                                    current_params[i_par] - off*abs(current_params[i_par]),
+                                    current_params[i_par] + off*abs(current_params[i_par])
+                                )
 
-                            f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
-                            f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
-                            for i_par in range(num_params):
-                                f_sig.SetParameter(i_par, current_params[i_par])
-                                if set_optimization:
-                                    f_sig.SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
-                                else:
-                                    off = param_offsets[i_par]
-                                    f_sig.SetParLimits(
-                                        i_par,
-                                        current_params[i_par] - off*abs(current_params[i_par]),
-                                        current_params[i_par] + off*abs(current_params[i_par])
-                                    )
-
-                            # -----------------------------------------------------------------
-                            # (A) Parameter magnitude check
-                            # -----------------------------------------------------------------
-                            MAX_PARAM_MAG = 800  # e.g. pick something physically reasonable
-                            too_large_param = any(abs(f_sig.GetParameter(i))>MAX_PARAM_MAG
-                                                  for i in range(num_params))
-                            if too_large_param:
-                                if debug:
-                                    print("[DEBUG] Param too large => re-randomizing to avoid overflow.")
-                                current_params = [random.uniform(-50, 50) for _ in range(num_params)]
-                                iteration += 1
-                                continue
-
-                            # -----------------------------------------------------------------
-                            # (B) Function evaluation check
-                            # -----------------------------------------------------------------
-                            overflow_detected = False
-                            for i_chk in range(g_sig_fit.GetN()):
-                                x_val = g_sig_fit.GetX()[i_chk]
-                                try:
-                                    val_test = f_sig.Eval(x_val)
-                                    if not math.isfinite(val_test):
-                                        overflow_detected = True
-                                        break
-                                except OverflowError:
+                        # Evaluate function on data points to avoid overflow
+                        overflow_detected = False
+                        for i_chk in range(g_sig_fit.GetN()):
+                            xx = g_sig_fit.GetX()[i_chk]
+                            try:
+                                val_eval = f_sig.Eval(xx)
+                                if not math.isfinite(val_eval):
                                     overflow_detected = True
                                     break
+                            except OverflowError:
+                                overflow_detected = True
+                                break
 
-                            if overflow_detected:
-                                if debug:
-                                    print("[DEBUG] f_sig overflow => re-randomizing.")
-                                current_params = [random.uniform(-50, 50) for _ in range(num_params)]
-                                iteration += 1
-                                continue
-
-                            # -----------------------------------------------------------------
-                            # Now we actually do the fit
-                            # -----------------------------------------------------------------
-                            try:
-                                r_sig_fit = g_sig_fit.Fit(f_sig, "SQ")
-                            except OverflowError as e:
-                                if debug:
-                                    print(f"[DEBUG] Fit Overflow => re-randomizing. Error: {e}")
-                                current_params = [random.uniform(-50, 50) for _ in range(num_params)]
-                                iteration += 1
-                                continue
-
-                            # -----------------------------------------------------------------
-                            # If we made it here, Fit(...) didn't blow up
-                            # -----------------------------------------------------------------
-                            current_cost, lambda_reg = calculate_cost(
-                                f_sig, g_sig, current_params,
-                                g_sig.GetN(), num_params, lambda_reg
-                            )
-
-                            # simple residual from last point
-                            residual = 0.0
-                            for i_pt2 in range(g_sig.GetN()):
-                                x_pt = g_sig.GetX()[i_pt2]
-                                y_data = g_sig.GetY()[i_pt2]
-                                y_err  = g_sig.GetEY()[i_pt2]
-                                y_fit  = f_sig.Eval(x_pt)
-                                residual = (y_data - y_fit)/y_err if y_err!=0 else (y_data-y_fit)
-
-                            cost_history.append(current_cost)
-                            if len(cost_history) >= 2:
-                                lambda_reg = adaptive_regularization(cost_history, lambda_reg)
-
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
-
-                            # update param/err from the fit
-                            current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
-                            current_errors = [f_sig.GetParError(i_par) for i_par in range(num_params)]
-
-                            if accept_prob > random.random():
-                                best_params = list(current_params)
-                                best_cost   = current_cost
-                                best_errors = list(current_errors)
-                                if debug:
-                                    print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, iteration={iteration}")
-
-                                if current_cost > best_overall_cost:
-                                    stagnation_count += 1
-                            else:
-                                stagnation_count += 1
-
-                            if iteration % 25 == 0:
-                                current_params = local_search(current_params, f_sig, num_params)
-
-                            if stagnation_count > 40:
-                                if debug:
-                                    print("[DEBUG] Stalling => re-randomizing.")
-                                current_params = [
-                                    random.uniform(-initial_param_bounds, initial_param_bounds)
-                                    for _ in range(num_params)
-                                ]
-                                stagnation_count = 0
-
-                            # sync
-                            current_params = list(best_params)
-                            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                            iteration += 1
-
-                        except (TypeError, ZeroDivisionError, OverflowError) as e:
-                            # If we still get an Overflow/TypeError from TGraph::Fit, re-init
+                        if overflow_detected:
                             if debug:
-                                print(f"[DEBUG] Exception: {e} => re-randomizing.")
+                                print("[DEBUG] Pre-check overflow => re-randomizing.")
+                            current_params = [random.uniform(-50, 50) for _ in range(num_params)]
+                            iteration += 1
+                            continue
+
+                        # Attempt the Fit with a fallback approach if repeated errors
+                        fit_option = "SQ"
+                        if consecutive_fit_errors > 10:
+                            # try quiet or alternative approach
+                            fit_option = "SQ0"  # or "S0" or "0Q" etc.
+
+                        try:
+                            r_sig_fit = g_sig_fit.Fit(f_sig, fit_option)
+                            consecutive_fit_errors = 0
+                        except (OverflowError, TypeError) as e:
+                            # If we still fail
+                            consecutive_fit_errors += 1
+                            if debug:
+                                print(f"[DEBUG] Fit error => {e}, consecutive={consecutive_fit_errors}")
+
+                            if consecutive_fit_errors > max_fit_errors_allowed:
+                                # fallback: skip Fit entirely and do a rough cost guess
+                                # or re-random
+                                if debug:
+                                    print("[DEBUG] Too many consecutive fit errors => forcing re-init.")
+                                current_params = [random.uniform(-50, 50) for _ in range(num_params)]
+                            else:
+                                # re-random only
+                                current_params = [random.uniform(-50, 50) for _ in range(num_params)]
+                            iteration += 1
+                            continue
+
+                        # If we made it here => Fit was successful
+                        # compute cost
+                        current_cost, lambda_reg = calculate_cost(
+                            f_sig, g_sig, current_params,
+                            g_sig.GetN(), num_params, lambda_reg
+                        )
+
+                        # simple residual from last point
+                        residual = 0.0
+                        for i_pt2 in range(g_sig.GetN()):
+                            x_pt = g_sig.GetX()[i_pt2]
+                            y_data = g_sig.GetY()[i_pt2]
+                            y_err  = g_sig.GetEY()[i_pt2]
+                            y_fit  = f_sig.Eval(x_pt)
+                            residual = (y_data - y_fit)/y_err if y_err!=0 else (y_data-y_fit)
+
+                        cost_history.append(current_cost)
+                        if len(cost_history) >= 2:
+                            lambda_reg = adaptive_regularization(cost_history, lambda_reg)
+
+                        accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+
+                        # update param from the fit
+                        current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
+                        current_errors = [f_sig.GetParError(i_par) for i_par in range(num_params)]
+
+                        if accept_prob > random.random():
+                            best_params = list(current_params)
+                            best_cost   = current_cost
+                            best_errors = list(current_errors)
+                            if debug:
+                                print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, iteration={iteration}")
+                            if current_cost > best_overall_cost:
+                                stagnation_count += 1
+                        else:
+                            stagnation_count += 1
+
+                        if iteration % 25 == 0:
+                            current_params = local_search(current_params, f_sig, num_params)
+
+                        if stagnation_count > 40:
+                            if debug:
+                                print("[DEBUG] Stalling => re-randomizing.")
                             current_params = [
                                 random.uniform(-50, 50)
                                 for _ in range(num_params)
                             ]
-                            iteration += 1
-                            continue
+                            stagnation_count = 0
 
-                        # ---------------------------------------------------------------------
+                        current_params = list(best_params)
+                        temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                        iteration   += 1
+
                         # Always update best_overall_cost if better
-                        # ---------------------------------------------------------------------
                         if best_cost < best_overall_cost:
                             best_overall_cost    = best_cost
                             best_overall_bin     = b
@@ -365,25 +347,24 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             best_overall_temp    = temperature
                             best_overall_prob    = accept_prob
                             best_overall_residual= residual
-                            # ic_aic, ic_bic => if you want to compute each iteration
-                            # just placeholders for now
 
-                        # Update TGraph points each iteration
+                        # Update TGraph points
                         for i_par in range(num_params):
                             graph_sig_params[i_par].SetPoint(total_iteration, total_iteration, best_params[i_par])
                         graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(best_cost, 4))
                         graph_sig_temp.SetPoint(total_iteration, total_iteration, round(temperature, 4))
                         graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                         graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(residual, 4))
-                        graph_sig_aic.SetPoint(total_iteration, total_iteration, 0)   # placeholders
+                        # placeholders
+                        graph_sig_aic.SetPoint(total_iteration, total_iteration, 0)
                         graph_sig_bic.SetPoint(total_iteration, total_iteration, 0)
 
                         total_iteration += 1
 
-                    # end while iteration <= max_iterations
+                    # end while iteration
                     print(f"\nBest Cost this run: {best_overall_cost:.3f}")
 
-            # end of optimization runs
+            # end runs
             try:
                 print(f"\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {best_overall_cost:.5f}")
