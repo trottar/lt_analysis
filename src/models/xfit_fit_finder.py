@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:45:27 trottar"
+# Time-stamp: "2025-02-04 04:54:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -40,10 +40,7 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
-                 prv_par_vec, prv_err_vec, prv_chi2_vec,
-                 fixed_params, outputpdf, full_optimization=True,
-                 debug=False):
+def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
     'parameterize' function including:
       - Simple ±initial_param_bounds random init (no expansions).
@@ -69,7 +66,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     graphs_sig_accept   = []
     graphs_sig_residuals= []
     graphs_sig_ic_aic   = []
-    graphs_sig_ic_bic   = []
+    graphs_sig_ic_bic   = []    
+    funcs_sig = []
     fits_sig = []
     
     c2 = TCanvas("c2", "c2", 800, 800)
@@ -174,9 +172,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             for run_idx in range(num_optimizations):
                 print(f"\nStarting optimization run {run_idx+1}/{num_optimizations}")
                 set_optimization   = full_optimization
-                temp_threshold     = 1e-1
-                prob_threshold     = 1e-1
-                threshold_minimizer= 5e-2
 
                 # For example: bin=2
                 for b in [2]:
@@ -245,17 +240,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                             else:
                                 raise ValueError("Unknown signal name")
-                            fits_sig.append(fun_Sig)
+                            funcs_sig.append(fun_Sig)
 
-                            f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
-                            f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
+                            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
+                            fits_sig.append(f_sig)
+                            fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
-                                f_sig.SetParameter(i_par, current_params[i_par])
+                                fits_sig[it].SetParameter(i_par, current_params[i_par])
                                 if set_optimization:
-                                    f_sig.SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
+                                    fits_sig[it].SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
                                 else:
                                     off = param_offsets[i_par]
-                                    f_sig.SetParLimits(
+                                    fits_sig[it].SetParLimits(
                                         i_par,
                                         current_params[i_par] - off*abs(current_params[i_par]),
                                         current_params[i_par] + off*abs(current_params[i_par])
@@ -276,7 +272,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 x_pt = g_sig.GetX()[i_pt2]
                                 y_data = g_sig.GetY()[i_pt2]
                                 y_err  = g_sig.GetEY()[i_pt2]
-                                y_fit  = f_sig.Eval(x_pt)
+                                y_fit  = fits_sig[it].Eval(x_pt)
                                 if y_err != 0:
                                     residual = (y_data - y_fit)/y_err
                                 else:
@@ -289,8 +285,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                             # Update current params from the fit
-                            current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
-                            current_errors = [f_sig.GetParError(i_par) for i_par in range(num_params)]
+                            current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
+                            current_errors = [fits_sig[it].GetParError(i_par) for i_par in range(num_params)]
 
                             # Accept or not
                             if accept_prob > random.random():
@@ -427,13 +423,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "TT":
                 fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-            fits_sig.append(fun_Sig)                
-            f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
-            f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
+            funcs_sig.append(fun_Sig)                
+            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
+            fits_sig.append(f_sig)
+            fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
-                f_sig.FixParameter(i, best_overall_params[i])
+                fits_sig[it].FixParameter(i, best_overall_params[i])
             n_points = 100
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
             y_min = min(y_min, fit_y_min)
@@ -441,8 +438,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             margin = 0.1 * (y_max - y_min)
             graphs_sig_fit_plot[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
             r_sig_fit = graphs_sig_fit_plot[it].Fit(f_sig, "SQ")
-            f_sig.Draw("same")
-            f_sig_status = "Fit Successful" if f_sig.GetNDF() != 0 else "Fit Failed"
+            fits_sig[it].Draw("same")
+            f_sig_status = "Fit Successful" if fits_sig[it].GetNDF() != 0 else "Fit Failed"
             fit_status = TText()
             fit_status.SetTextSize(0.04)
             fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: " + f_sig_status)
@@ -571,17 +568,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 elif sig_name == "TT":
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
-                fits_sig.append(fun_Sig)                    
-                f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
-                f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
+                funcs_sig.append(fun_Sig)                    
+                f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
+                fits_sig.append(f_sig)
+                fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
-                    f_sig.FixParameter(i, par_vec[4*it + i])
+                    fits_sig[it].FixParameter(i, par_vec[4*it + i])
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 current_cost, lambda_reg = calculate_cost(
                     f_sig, g_sig, par_vec[4*it:4*(it+1)],
                     num_events, num_params, lambda_reg
                 )
-                current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
+                current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
                 print("!!!!!!!", current_params)
                 print(f"\tCost: {current_cost:.3f}")
                 if current_cost < best_overall_cost:
@@ -630,13 +628,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "TT":
                 fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-            fits_sig.append(fun_Sig)
-            f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
-            f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
+            funcs_sig.append(fun_Sig)
+            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
+            fits_sig.append(f_sig)
+            fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
-                f_sig.FixParameter(i, par_vec[4*it + i])
+                fits_sig[it].FixParameter(i, par_vec[4*it + i])
             n_points = 100
-            fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+            fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
             fit_y_max = max(fit_y_values)
             y_min = min(y_min, fit_y_min)
@@ -644,7 +643,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             margin = 0.1 * (y_max - y_min)
             graphs_sig_fit_plot[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
             r_sig_fit = graphs_sig_fit_plot[it].Fit(f_sig, "SQ")
-            f_sig.Draw("same")
+            fits_sig[it].Draw("same")
             latex = TLatex()
             latex.SetTextSize(0.04)
             latex.SetNDC(True)
