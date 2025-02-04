@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 22:46:10 trottar"
+# Time-stamp: "2025-02-03 22:50:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -45,15 +45,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                  fixed_params, outputpdf, full_optimization=True,
                  debug=False):
     """
-    'parameterize' function:
-      - Simple ±initial_param_bounds random init (no expansions/clamps).
-      - Multiple runs to mitigate local minima.
-      - Stall check if cost doesn't improve => re-randomize.
-      - Unconditional best cost update, so we never stay at inf if we find a better cost.
-      - TGraph updates each iteration for diagnostic plots (cost, params, etc.).
-      - Debug prints every 100 iterations if debug=True, showing params, cost, temperature, etc.
-      - Data-collection lines from nsep remain in the same order, no reordering.
-      - Fixes the NameError by defining best_overall_errors properly.
+    'parameterize' function including:
+      - Simple ±initial_param_bounds random init (no expansions).
+      - Simulated annealing step each iteration (on all parameters).
+      - Adaptive cooling of temperature each iteration.
+      - Local search every 15 iterations.
+      - Stall check => re-random if no improvement in cost for many accepted attempts.
+      - Multiple runs => mitigate local minima.
+      - Unconditional best cost updates => no infinite.
+      - TGraph updates each iteration => full diagnostic.
+      - Debug prints (if debug=True) every 100 iterations => param/cost/temperature/stall info.
+      - Data lines from nsep remain in same order, no reordering.
     """
 
     # -----------------------------------------------------------------------------
@@ -84,7 +86,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     c8.Divide(2, 2)
 
     # -----------------------------------------------------------------------------
-    # 2. Unpack input objects/settings (unchanged)
+    # 2. Unpack input objects/settings
     # -----------------------------------------------------------------------------
     q2_set, w_set = inpDict["q2_set"], inpDict["w_set"]
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
@@ -93,11 +95,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     initial_param_bounds = inpDict["initial_param_bounds"]
     tmin_range, tmax_range = inpDict["tmin_range"], inpDict["tmax_range"]
     Q2min_range, Q2max_range = inpDict["Q2min_range"], inpDict["Q2max_range"]
-    iter_num   = inpDict["iter_num"]
-    fit_params = inpDict["fit_params"]
+    iter_num    = inpDict["iter_num"]
+    fit_params  = inpDict["fit_params"]
     chi2_threshold = inpDict["chi2_threshold"]
 
-    # "center" values
     q2_center_val = get_central_value(q2_vec)
     w_center_val  = get_central_value(w_vec)
     g_center_val  = get_central_value(g_vec)
@@ -113,6 +114,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
         if sig_name not in fixed_params:
 
             num_params, init_params, equation_str = inpDict["initial_params"](sig_name, val)
+            # Avoid zero init param
             init_params = [v if abs(v) > 0.0 else 1.0 for v in init_params]
             param_str = ', '.join(str(p) for p in init_params)
 
@@ -128,9 +130,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
-            # Track best overall solution
+            # Track best across all runs
             best_overall_params   = None
-            best_overall_errors   = None   # define to avoid NameError
+            best_overall_errors   = None
             best_overall_cost     = float('inf')
             best_overall_bin      = None
             best_overall_temp     = float('inf')
@@ -139,7 +141,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             best_overall_ic_aic  = float('inf')
             best_overall_ic_bic  = float('inf')
 
-            # We'll track iteration across all runs
             total_iteration = 0
             lambda_reg = 0.01
             cost_history = []
@@ -167,7 +168,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             start_time = time.time()
 
             # -----------------------------------------------------------------------------
-            # 4. Multiple runs => local minima mitigation
+            # 4. Outer loop => multiple runs => helps avoid local minima
             # -----------------------------------------------------------------------------
             for run_idx in range(num_optimizations):
                 print(f"\nStarting optimization run {run_idx+1}/{num_optimizations}")
@@ -176,16 +177,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 prob_threshold     = 1e-1
                 threshold_minimizer= 5e-2
 
-                # e.g., bin=2
+                # For example: bin=2
                 for b in [2]:
                     print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, "
                           f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     iteration = 0
                     stagnation_count = 0
                     initial_temperature = 1.0
-                    temperature = initial_temperature
+                    temperature         = initial_temperature
 
-                    # Random init in ± initial_param_bounds
+                    # Random initialization in ± initial_param_bounds
                     current_params = [
                         random.uniform(-initial_param_bounds, initial_param_bounds)
                         for _ in range(num_params)
@@ -198,10 +199,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     residual    = float('inf')
 
                     while iteration <= max_iterations:
+                        # Debug prints every 100 iterations
                         if debug and iteration % 100 == 0:
                             print(f"[DEBUG run={run_idx+1}] iteration={iteration}, "
                                   f"best_cost={best_cost:.3f}, temp={temperature:.3f}, "
                                   f"stagnation={stagnation_count}, params={current_params}")
+
+                        # -----------------------------------------------------------------
+                        # Simulated annealing step => perturb each param by some fraction
+                        # using the current 'temperature'
+                        # -----------------------------------------------------------------
+                        current_params = [simulated_annealing(p, temperature)
+                                          for p in current_params]
 
                         g_sig_fit = TGraphErrors()
                         graphs_sig_fit.append(g_sig_fit)
@@ -209,9 +218,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                         sys.stdout.flush()
 
                         try:
-                            # -----------------------------------------------------------------
-                            # Data-collection lines from nsep (unchanged order)
-                            # -----------------------------------------------------------------
+                            # Data lines from nsep => build g_sig => fill g_sig_fit
                             g_sig = TGraphErrors()
                             for i_data in range(nsep.GetSelectedRows()):
                                 x_val = nsep.GetV2()[i_data]
@@ -226,7 +233,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 g_sig_fit.SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
                                 g_sig_fit.SetPointError(i_pt, 0, sig_X_fit_err)
 
-                            # Choose function
+                            # Pick function
                             if sig_name == "L":
                                 fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                             elif sig_name == "T":
@@ -261,7 +268,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 g_sig.GetN(), num_params, lambda_reg
                             )
 
-                            # Simple residual from last point
+                            # Simple residual from last data point
                             residual = 0.0
                             for i_pt2 in range(g_sig.GetN()):
                                 x_pt = g_sig.GetX()[i_pt2]
@@ -279,7 +286,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
-                            # Update param from the fit
+                            # Update current params from the fit
                             current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
                             current_errors = [f_sig.GetParError(i_par) for i_par in range(num_params)]
 
@@ -288,33 +295,36 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 best_params = list(current_params)
                                 best_cost   = current_cost
                                 best_errors = list(current_errors)
-                                if debug:
+                                if debug and iteration % 50 == 0:
                                     print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, iteration={iteration}")
                                 if current_cost > best_overall_cost:
                                     stagnation_count += 1
                             else:
                                 stagnation_count += 1
 
-                            # Occasionally do local search
+                            # Local search every 15 iterations
                             if iteration % 15 == 0:
                                 current_params = local_search(current_params, f_sig, num_params)
 
                             # If stalling
                             if stagnation_count > 5:
+                                # re-random
                                 current_params = [
                                     random.uniform(-initial_param_bounds, initial_param_bounds)
                                     for _ in range(num_params)
                                 ]
                                 stagnation_count = 0
                                 if debug:
-                                    print(f"[DEBUG] Stalling => re-randomizing. new_params={current_params}")
+                                    print(f"[DEBUG] Stalling => re-random => params={current_params}")
 
+                            # Sync best
                             current_params = list(best_params)
+                            # Adjust temperature with your adaptive_cooling
                             temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                            iteration   += 1
+                            iteration += 1
 
                         except (TypeError, ZeroDivisionError, OverflowError) as e:
-                            # On exception, re-randomize
+                            # On error => re-random
                             if debug:
                                 print(f"[DEBUG] Exception => {str(e)}, re-randomizing.")
                             current_params = [
@@ -324,7 +334,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             iteration += 1
                             continue
 
-                        # Unconditional update of best_overall_cost
+                        # Unconditionally update best_overall_cost
                         if best_cost < best_overall_cost:
                             best_overall_cost    = best_cost
                             best_overall_bin     = b
@@ -334,14 +344,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             best_overall_prob    = accept_prob
                             best_overall_residual= residual
 
-                        # TGraph updates each iteration
+                        # TGraph updates
                         for i_par in range(num_params):
                             graph_sig_params[i_par].SetPoint(total_iteration, total_iteration, best_params[i_par])
                         graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(best_cost, 4))
                         graph_sig_temp.SetPoint(total_iteration, total_iteration, round(temperature, 4))
                         graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                         graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(residual, 4))
-                        graph_sig_aic.SetPoint(total_iteration, total_iteration, 0)   # placeholders
+                        graph_sig_aic.SetPoint(total_iteration, total_iteration, 0)
                         graph_sig_bic.SetPoint(total_iteration, total_iteration, 0)
 
                         total_iteration += 1
