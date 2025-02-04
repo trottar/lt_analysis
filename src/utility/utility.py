@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:36:55 trottar"
+# Time-stamp: "2025-02-03 20:51:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -850,7 +850,10 @@ def adaptive_cooling(initial_temp, iteration, max_iterations, cooling_rate=0.95)
     Exponential-ish cooling schedule that scales with the fraction of total iterations,
     ensuring we don't push the exponent too high too soon.
     """
+    # fraction of the way done:
     frac_done = iteration / float(max_iterations + 1e-9)  # to avoid /0
+    
+    # Then scale exponent by the fraction:
     effective_exponent = frac_done * 50  # e.g. scale up to some factor
     try:
         return initial_temp * (cooling_rate ** effective_exponent)
@@ -867,6 +870,7 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1
     max_perturbation = scale * perturbation_factor
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
     new_param = param + perturbation
+    # Clip new_param to keep it in a reasonable range:
     return max(min(new_param, clip_max), clip_min)
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
@@ -874,7 +878,10 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
     Calculate cost (modified reduced chi-square) with adaptive regularization.
     Includes parameter clipping to avoid huge l2_reg values.
     """
+    # Clip parameters before cost calculation
     current_params = sanitize_params(current_params, clip_min=-1e4, clip_max=1e4)
+    
+    # Compute l2 regularization using the sanitized parameters.
     l2_reg = np.sum(np.square(current_params))
     
     lambda_min = 1e-6
@@ -891,6 +898,8 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
         return np.array(residuals)
 
     residuals = calculate_residuals()
+    
+    # If any residual is non-finite, return a very large cost.
     if not np.all(np.isfinite(residuals)):
         print("Non-finite residual detected. Parameters:", current_params)
         return 1e12, lambda_reg
@@ -903,8 +912,10 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
         else:
             chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
+            # Safeguard against division by very small nu:
             if nu < 1e-6:
                 nu = 1e-6
+            # cost = (chi_square + lambda_val * l2_reg) / nu
             cost = (chi_square) / nu
         return cost
 
@@ -944,8 +955,10 @@ def local_search(params, inp_func, num_params):
             inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
     
+    # Wrap chi2_func in a C++ std::function using cppyy.
     import cppyy
     std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
+    # Create a functor using std_func; use num_params if your model requires it.
     func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params)
     
     minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
@@ -961,11 +974,13 @@ def local_search(params, inp_func, num_params):
     
     minimizer.Minimize()
     
+    # Try to retrieve the optimized parameters.
     try:
         opt_x = minimizer.X()
-    except Exception:
+    except Exception as e:
         opt_x = None
 
+    # If opt_x is invalid, return the input parameters.
     if not opt_x:
         improved_params = params
     else:
