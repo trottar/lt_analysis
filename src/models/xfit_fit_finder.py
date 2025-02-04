@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:32:32 trottar"
+# Time-stamp: "2025-02-04 04:34:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -267,12 +267,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             # Evaluate cost
                             current_cost, lambda_reg = calculate_cost(
                                 f_sig, g_sig, current_params,
-                                g_sig.GetN(), num_params, lambda_reg
+                                num_events, num_params, lambda_reg
                             )
 
                             # Simple residual from last data point
                             residual = 0.0
-                            for i_pt2 in range(g_sig.GetN()):
+                            for i_pt2 in range(num_events):
                                 x_pt = g_sig.GetX()[i_pt2]
                                 y_data = g_sig.GetY()[i_pt2]
                                 y_err  = g_sig.GetEY()[i_pt2]
@@ -580,7 +580,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                 r_sig_fit = graphs_sig_fit[it].Fit(f_sig, "SQ")
                 current_cost, lambda_reg = calculate_cost(
                     f_sig, g_sig, par_vec[4*it:4*(it+1)],
-                    g_sig.GetN(), num_params, lambda_reg
+                    num_events, num_params, lambda_reg
                 )
                 print(f"\tCost: {current_cost:.3f}")
                 if current_cost < best_overall_cost:
