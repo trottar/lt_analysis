@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:53:31 trottar"
+# Time-stamp: "2025-02-03 20:54:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -22,7 +22,7 @@ from utility import (
     adaptive_regularization, calculate_cost, adaptive_cooling,
     simulated_annealing, acceptance_probability, adjust_params, 
     local_search, select_valid_parameter, get_central_value, 
-    calculate_information_criteria
+    calculate_information_criteria, sanitize_params
 )
 
 ##################################################################################################################################################
