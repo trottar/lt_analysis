@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 22:17:45 trottar"
+# Time-stamp: "2025-02-03 22:27:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -948,70 +948,46 @@ def adjust_params(params, adjustment_factor=0.1):
     """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-# Alma9
-minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
-minimizer.SetMaxFunctionCalls(1000000)
-minimizer.SetMaxIterations(100000)
-minimizer.SetTolerance(0.001)
-minimizer.SetPrintLevel(0)
-
 def local_search(params, inp_func, num_params):
-
-    if num_params+1 > 2:
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(num_params+1):
-                inp_func.SetParameter(i, par[i])
-            return inp_func.GetChisquare()
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, num_params+1)  # num_params+1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(num_params+1)]
-
-        minimizer.Delete()
-        func.Delete()
-
-        return improved_params
-
-    else:
-
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            inp_func.SetParameter(1, par)
-            return inp_func.GetChisquare()
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        minimizer.SetVariable(1, "p1", param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = minimizer.X()
-
-        minimizer.Delete()
-        func.Delete()
-        
-        return improved_params
+    # Define your chi² function; note we expect num_params+1 parameters.
+    def chi2_func(par):
+        for i in range(num_params+1):
+            inp_func.SetParameter(i, par[i])
+        return inp_func.GetChisquare()
     
+    # Wrap chi2_func in a C++ std::function using cppyy.
+    import cppyy
+    std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
+    # Create a functor using std_func; use num_params if your model requires it.
+    func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params)
+    
+    minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
+    minimizer.SetMaxFunctionCalls(1000000)
+    minimizer.SetMaxIterations(100000)
+    minimizer.SetTolerance(0.001)
+    minimizer.SetPrintLevel(0)
+    minimizer.SetFunction(func)
+    
+    for i, param in enumerate(params):
+        step = 0.01 * abs(param) if abs(param) > 1e-6 else 0.01
+        minimizer.SetVariable(i, f"p{i}", param, step)
+    
+    minimizer.Minimize()
+    
+    # Try to retrieve the optimized parameters.
+    try:
+        opt_x = minimizer.X()
+    except Exception as e:
+        opt_x = None
+
+    # If opt_x is invalid, return the input parameters.
+    if not opt_x:
+        improved_params = params
+    else:
+        improved_params = [opt_x[i] for i in range(num_params+1)]
+    
+    return improved_params
+
 def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
     """
     Dynamically adapt regularization strength based on cost history.
