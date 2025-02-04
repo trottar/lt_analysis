@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 20:57:57 trottar"
+# Time-stamp: "2025-02-03 20:59:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -117,9 +117,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             total_iteration       = 0
             max_param_bounds      = initial_param_bounds
 
-            lambda_reg     = 0.01
-            cost_history   = []
-            param_offsets  = [0.1 for _ in range(num_params)]
+            lambda_reg = 0.01
+            cost_history = []
+            param_offsets = [0.1 for _ in range(num_params)]
             params_sig_history = [[] for _ in range(num_params)]
             graph_sig_params   = [TGraph() for _ in range(num_params)]
             graphs_sig_params_all.append(graph_sig_params)
@@ -157,9 +157,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     unchanged_iterations= 0
                     max_unchanged_iterations = 5
 
-                    # Predefine f_sig, best_params so 'except' block won't fail
-                    f_sig       = None
-                    best_params = None
+                    # Pre-initialize these so the except block can safely reference them:
+                    f_sig       = None             # TF1 object
+                    best_params = [float('inf')] * num_params
+                    best_cost   = float('inf')
+                    best_errors = [0.0] * num_params
+                    best_bin    = None
 
                     g_sig_fit = TGraphErrors()
                     graphs_sig_fit.append(g_sig_fit)
@@ -178,9 +181,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                             g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
 
-                        # --------------------------------------------------
-                        # GLOBAL RANDOM SEARCH
-                        # --------------------------------------------------
+                        # -----------
+                        # GLOBAL SEARCH
+                        # -----------
                         global_search_samples = 20
                         best_global_params = None
                         best_global_cost   = float('inf')
@@ -238,9 +241,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         ic_aic         = float('inf')
                         ic_bic         = float('inf')
 
-                        # --------------------------------------------------
+                        # ----------------------
                         # MAIN ITERATION LOOP
-                        # --------------------------------------------------
+                        # ----------------------
                         while iteration <= max_iterations:
                             g_sig_fit_iter = TGraphErrors()
                             graphs_sig_fit.append(g_sig_fit_iter)
@@ -270,7 +273,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             else:
                                 raise ValueError("Unknown signal name")
 
-                            # Initialize f_sig here so we have it in case of except
+                            # Initialize f_sig
                             f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
                             f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
                             for i_par in range(num_params):
@@ -314,11 +317,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             current_bin    = b
 
                             if accept_prob > random.random():
-                                best_params  = list(current_params)
-                                best_cost    = current_cost
-                                best_bin     = current_bin
-                                best_errors  = list(current_errors)
-                                n_samples    = len(w_vec)
+                                best_params = list(current_params)
+                                best_cost   = current_cost
+                                best_bin    = current_bin
+                                best_errors = list(current_errors)
+                                n_samples   = len(w_vec)
                                 ic_aic, ic_bic = calculate_information_criteria(n_samples, num_params, best_cost)
                                 if current_cost > best_overall_cost:
                                     stagnation_count += 1
@@ -343,31 +346,35 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             total_iteration += 1
 
                     except (TypeError, ZeroDivisionError) as e:
-                        # Ensure best_params, f_sig exist
-                        if best_params is None:
+                        # If we land here before best_cost or best_params are assigned, we fall back:
+                        if not math.isfinite(best_cost):
+                            best_cost = float('inf')
+                        if best_params is None or best_params == [float('inf')] * num_params:
                             best_params = initial_params[:]
-                        if f_sig is None:
-                            # We can't call f_sig.SetParameter() if f_sig wasn't made yet
-                            # so we skip that part
-                            pass
-
-                        # Recovery
-                        recovery_params = [
-                            p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
-                            for p in (best_params if best_params != [float('inf')]*num_params else initial_params)
-                        ]
-                        recovery_params = [
-                            max(min(p, max_param_bounds), -max_param_bounds) 
-                            for p in recovery_params
-                        ]
-                        # Only call f_sig.SetParameter() if f_sig is valid
                         if f_sig is not None:
+                            # We can only set f_sig params if f_sig was created
+                            recovery_params = [
+                                p + random.uniform(-0.1 * abs(p), 0.1 * abs(p)) 
+                                for p in (best_params if best_params != [float('inf')]*num_params else initial_params)
+                            ]
+                            recovery_params = [
+                                max(min(p, max_param_bounds), -max_param_bounds) 
+                                for p in recovery_params
+                            ]
                             for i_par, param in enumerate(recovery_params):
                                 f_sig.SetParameter(i_par, param)
+                            current_params = recovery_params
+                        else:
+                            # If f_sig is None, just revert to initial_params
+                            current_params = list(initial_params)
 
-                        current_params = recovery_params
-                        current_cost   = best_cost * 1.1 if math.isfinite(best_cost) else 1000.0
-                        temperature    = min(temperature * 1.2, initial_temperature)
+                        # Set a fallback cost
+                        if not math.isfinite(best_cost):
+                            current_cost = 1000.0
+                        else:
+                            current_cost = best_cost * 1.1
+                        
+                        temperature = min(temperature * 1.2, initial_temperature)
                         max_param_bounds = random.uniform(0.0, max_param_bounds)
                         iteration += 1
                         total_iteration += 1
