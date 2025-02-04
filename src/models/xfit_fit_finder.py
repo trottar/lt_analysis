@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 04:05:51 trottar"
+# Time-stamp: "2025-02-04 04:11:16 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -57,19 +57,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
       - Debug prints (if debug=True) every 100 iterations => param/cost/temperature/stall info.
       - Data lines from nsep remain in same order, no reordering.
     """
-
-    # -----------------------------------------------------------------------------
-    # 1. Create lists to store global graphs (unchanged structure)
-    # -----------------------------------------------------------------------------
-    graphs_sig_fit      = []
-    graphs_sig_params_all = []
-    graphs_sig_converge = []
-    graphs_sig_temp     = []
-    graphs_sig_accept   = []
-    graphs_sig_residuals= []
-    graphs_sig_ic_aic   = []
-    graphs_sig_ic_bic   = []
-    fits_sig = []
     
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -131,6 +118,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
+            # -----------------------------------------------------------------------------
+            # 1. Create lists to store global graphs (unchanged structure)
+            # -----------------------------------------------------------------------------
+            graphs_sig_fit      = []
+            graphs_sig_params_all = []
+            graphs_sig_converge = []
+            graphs_sig_temp     = []
+            graphs_sig_accept   = []
+            graphs_sig_residuals= []
+            graphs_sig_ic_aic   = []
+            graphs_sig_ic_bic   = []
+            fits_sig = []
+            
             # Track best across all runs
             best_overall_params   = None
             best_overall_errors   = None
@@ -431,8 +431,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             f_sig = TF1(f"sig_{sig_name}", fits_sig[it], tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
-                f_sig.FixParameter(i, best_overall_params[i])
-                print("!!!!!!!!!", best_overall_params[i])
+                f_sig.FixParameter(i, best_overall_params[i]))
             n_points = 100
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
@@ -515,9 +514,24 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
-            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
-            graph_sig_params = [TGraph() for _ in range(num_params)]
-            graphs_sig_params_all.append(graph_sig_params)
+            lambda_reg = 0.01
+            best_overall_cost = float('inf')
+            best_overall_params = []
+            best_overall_bin = 0            
+
+            # -----------------------------------------------------------------------------
+            # 1. Create lists to store global graphs (unchanged structure)
+            # -----------------------------------------------------------------------------
+            graphs_sig_fit      = []
+            graphs_sig_params_all = []
+            graphs_sig_converge = []
+            graphs_sig_temp     = []
+            graphs_sig_accept   = []
+            graphs_sig_residuals= []
+            graphs_sig_ic_aic   = []
+            graphs_sig_ic_bic   = []
+            fits_sig = []
+            
             graph_sig_chi2   = TGraph()
             graph_sig_temp   = TGraph()
             graph_sig_accept = TGraph()
@@ -531,10 +545,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             graphs_sig_ic_aic.append(graph_sig_aic)
             graphs_sig_ic_bic.append(graph_sig_bic)
 
-            lambda_reg = 0.01
-            best_overall_cost = float('inf')
-            best_overall_params = []
-            best_overall_bin = 0
+            # Draw data
+            nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+            start_time = time.time()
+
             for b in [2]:
                 print(f"\nDetermining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                 g_sig_fit = TGraphErrors()
