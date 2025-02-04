@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 00:08:49 trottar"
+# Time-stamp: "2025-02-04 00:12:53 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -906,8 +906,7 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
             # Safeguard against division by very small nu:
             if nu < 1e-6:
                 nu = 1e-6
-            # cost = (chi_square + lambda_val * l2_reg) / nu
-            cost = (chi_square) / nu
+            cost = (chi_square + lambda_val * l2_reg) / nu
         return cost
 
     if num_events <= num_params:
