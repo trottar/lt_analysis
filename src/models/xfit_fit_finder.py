@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 01:54:01 trottar"
+# Time-stamp: "2025-02-04 02:00:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -611,13 +611,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_overall_cost:.3f}")
             c2.Update()
             print("\n")
-        c2.Update()
-        c3.Update()
-        c4.Update()
-        c5.Update()
-        c6.Update()
-        c7.Update()
-        c8.Update()
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
         c3.Print(outputpdf)
