@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 21:05:56 trottar"
+# Time-stamp: "2025-02-03 21:10:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -45,18 +45,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                  fixed_params, outputpdf, full_optimization=True,
                  debug=False):
     """
-    An adapted parameterize function that:
-    1) Does staged global search in smaller domains first,
-    2) Dynamically expands/shrinks search bounds on overflow,
-    3) Allows a debug flag to toggle printouts for diagnosing infinite costs.
-    
-    Everything else (including data collection from nsep, TGraph filling, etc.)
-    remains the same as your original code.
+    Adapted parameterize function with:
+    1) Global search using the same bin kinematics as the main loop.
+    2) Layered smaller->larger param ranges to avoid immediate overflow.
+    3) Debug prints toggled by 'debug' flag.
+    4) Data-collection lines unchanged/re-ordered.
     """
 
-    # ------------------------------------------------------------------
-    #  UNCHANGED UTILITY-LIKE SETUP (canvas, global graphs, etc.)
-    # ------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
+    # 1. EXACT UTILITY-LIKE SETUP (canvases, global graphs) -- unchanged from original
+    # ----------------------------------------------------------------------------------
     graphs_sig_fit      = []
     graphs_sig_params_all = []
     graphs_sig_converge = []
@@ -81,7 +79,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     c8 = TCanvas("c8", "Information Criteria", 800, 600)
     c8.Divide(2, 2)
 
-    # Unpack input objects and settings (exactly as before)
+    # ----------------------------------------------------------------------------------
+    # 2. UNPACK INPUT DICTIONARY (unchanged)
+    # ----------------------------------------------------------------------------------
     q2_set, w_set = inpDict["q2_set"], inpDict["w_set"]
     nsep, t_vec, g_vec, w_vec, q2_vec, th_vec = inpDict["objects"]
     max_iterations     = inpDict["max_iterations"]
@@ -93,7 +93,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     fit_params = inpDict["fit_params"]
     chi2_threshold = inpDict["chi2_threshold"]
 
-    # "Center" values for the bins (unchanged)
     q2_center_val = get_central_value(q2_vec)
     w_center_val  = get_central_value(w_vec)
     g_center_val  = get_central_value(g_vec)
@@ -102,9 +101,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
     num_events = nsep.GetEntries()
     colors = [kRed, kBlue, kGreen, kMagenta]
 
-    # ------------------------------------------------------------------
-    #   MAIN LOOP OVER FIT_PARAMS (unchanged except for inserted search)
-    # ------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------
+    # 3. MAIN LOOP OVER EACH FIT (unchanged except for new global search logic)
+    # ----------------------------------------------------------------------------------
     for it, (sig_name, val) in enumerate(fit_params.items()):
         if sig_name not in fixed_params:
 
@@ -113,7 +112,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             param_str = ', '.join(str(p) for p in initial_params)
 
             if num_events <= num_params:
-                print(f"\nWARNING: For Sig {sig_name} the number of parameters ({num_params}) >= data points ({num_events}). Using adaptive regularization.")
+                print(f"\nWARNING: For Sig {sig_name} the #params ({num_params}) >= #data ({num_events}). Using adaptive regularization.")
                 fit_convergence_type = "Adapt. Reg."
             else:
                 fit_convergence_type = "Red. Chi-Square"
@@ -124,6 +123,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             print(equation_str)
             print("/*--------------------------------------------------*/")
 
+            # Global "best" solution for this signal
             best_overall_params   = None
             best_overall_cost     = float('inf')
             best_overall_bin      = None
@@ -133,9 +133,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             best_overall_ic_aic   = float('inf')
             best_overall_ic_bic   = float('inf')
             total_iteration       = 0
-            max_param_bounds      = initial_param_bounds  # your original big bound, e.g. 1e4
+            max_param_bounds      = initial_param_bounds  # e.g. 1e4
 
-            # For adaptive reg
+            # Adaptive reg strength
             lambda_reg   = 0.01
             cost_history = []
             param_offsets = [0.1 for _ in range(num_params)]
@@ -156,21 +156,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             graphs_sig_ic_aic.append(graph_sig_aic)
             graphs_sig_ic_bic.append(graph_sig_bic)
 
-            # Draw data as you originally do
+            # Draw data
             nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
             start_time = time.time()
 
-            # ------------------------------------------------------------------------
-            #  LOOP over your optimization runs (unchanged except for new global search)
-            # ------------------------------------------------------------------------
+            # ----------------------------------------------------------------------------------
+            # 4. FOR each optimization run
+            # ----------------------------------------------------------------------------------
             for start in range(num_optimizations):
                 print(f"\nStarting optimization run {start+1}/{num_optimizations}")
-                set_optimization   = full_optimization
-                temp_threshold     = 1e-1
-                prob_threshold     = 1e-1
-                threshold_minimizer= 5e-2
+                set_optimization     = full_optimization
+                temp_threshold       = 1e-1
+                prob_threshold       = 1e-1
+                threshold_minimizer  = 5e-2
 
-                # You had a single bin, b=2
+                # For example b=2, as you do
                 for b in [2]:
                     print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
                     iteration         = 0
@@ -180,6 +180,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     unchanged_iterations= 0
                     max_unchanged_iterations = 5
 
+                    # Pre-init for except block
+                    f_sig       = None
+                    best_params = [float('inf')] * num_params
+                    best_cost   = float('inf')
+                    best_errors = [0.0] * num_params
+                    best_bin    = None
+
                     # Create TGraph for data
                     g_sig_fit = TGraphErrors()
                     graphs_sig_fit.append(g_sig_fit)
@@ -187,7 +194,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                     sys.stdout.flush()
 
                     try:
-                        # EXACT data-collection lines
+                        # ----------------------------------------------------------------------------------
+                        #    EXACT data-collection lines: (unchanged!)
+                        # ----------------------------------------------------------------------------------
                         g_sig = TGraphErrors()
                         for i in range(nsep.GetSelectedRows()):
                             g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
@@ -198,54 +207,56 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             g_sig_fit.SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                             g_sig_fit.SetPointError(i, 0, sig_X_fit_err)
 
-                        # ===========================================
-                        #  LAYERED GLOBAL SEARCH: smaller -> bigger
-                        # ===========================================
-                        # Example: we do 2 "layers": [-100,100] then [-1000,1000], etc.
-                        # Stop layering if we find a cost < some threshold.
-                        global_layer_bounds = [100, 1000, 5000]  # expand stepwise
+                        # ---------------------------------------------------------------------
+                        # 5. GLOBAL SEARCH using the *same bin* (b=2) kinematics:
+                        # ---------------------------------------------------------------------
+                        if debug:
+                            print("Global search for bin kinematics (no mismatch).")
+
+                        # We'll do a layered approach with smaller->bigger bounds
+                        global_layer_bounds = [100, 1000, 3000]  # example
                         best_global_params  = None
                         best_global_cost    = float('inf')
 
+                        # Build the same function the main loop uses for bin b
                         if sig_name == "L":
-                            fun_Sig_test = fun_Sig_L_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                            fun_Sig_test = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                         elif sig_name == "T":
-                            fun_Sig_test = fun_Sig_T_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                            fun_Sig_test = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                         elif sig_name == "LT":
-                            fun_Sig_test = fun_Sig_LT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                            fun_Sig_test = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                         elif sig_name == "TT":
-                            fun_Sig_test = fun_Sig_TT_wrapper(g_center_val, q2_center_val, w_center_val, th_center_val)
+                            fun_Sig_test = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                         else:
                             raise ValueError("Unknown signal name")
 
                         f_sig_test = TF1("f_sig_test", fun_Sig_test, tmin_range, tmax_range, num_params)
 
-                        # For each layer
+                        # Loop over each layer
                         for layer_idx, layer_bound in enumerate(global_layer_bounds):
-                            if best_global_cost < 1e6:
-                                # Suppose we consider <1e6 "good enough" to stop expanding
+                            # If we already have a "good" cost, we can skip more expansions
+                            if best_global_cost < 1e-3:
                                 if debug:
-                                    print(f"Global search: stopping layering at step {layer_idx} because best_global_cost={best_global_cost:.3f}")
+                                    print(f"Stopping layered search after layer {layer_idx}, cost={best_global_cost:.6f}")
                                 break
 
                             if debug:
-                                print(f"Global search layer {layer_idx+1}/{len(global_layer_bounds)} => [-{layer_bound}, +{layer_bound}]")
+                                print(f"  Layer {layer_idx+1}/{len(global_layer_bounds)} => ±{layer_bound}")
 
-                            global_search_samples = 30
-                            for _gs in range(global_search_samples):
-                                # draw random in smaller range
+                            # Sample random param sets in ±layer_bound
+                            layer_samples = 30
+                            for _gs in range(layer_samples):
                                 test_params = [
-                                    random.uniform(-layer_bound, +layer_bound)
+                                    random.uniform(-layer_bound, layer_bound)
                                     for _ in range(num_params)
                                 ]
-                                # sanitize further if desired
+                                # sanitize if desired
                                 test_params = sanitize_params(test_params, clip_min=-layer_bound, clip_max=layer_bound)
 
-                                # set them
                                 for i_par in range(num_params):
                                     f_sig_test.SetParameter(i_par, test_params[i_par])
 
-                                # attempt cost
+                                # Evaluate cost w.r.t. the *same* TGraph
                                 try:
                                     test_cost, _ = calculate_cost(
                                         f_sig_test, g_sig_fit, test_params,
@@ -254,42 +265,37 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 except OverflowError:
                                     test_cost = 1e12
 
-                                # debug prints
                                 if debug:
-                                    print(f"   layer_bound={layer_bound}, test_params={test_params}, cost={test_cost}")
+                                    print(f"    params={test_params}, cost={test_cost:.4f}")
 
                                 # track best
                                 if test_cost < best_global_cost:
                                     best_global_cost   = test_cost
                                     best_global_params = list(test_params)
 
-                            # If everything overflowed, we can do an adaptive domain shrink
+                            # Example adaptive domain check:
                             if not math.isfinite(best_global_cost) or best_global_cost>1e11:
-                                # Example approach: reduce next layer by factor
                                 if debug:
-                                    print("=> Overflows encountered, next layer bound shrinks.")
-                                # If everything was infinite, maybe reduce the next layer by half:
-                                # but do not reorder or remove data lines, just logic for next iteration
-                                # We'll do something simple: layer_bound = layer_bound/2
-                                pass
+                                    print("    => mostly overflow, might reduce next bound if wanted")
+                                # do nothing but you can shrink next layer if you want
 
-                        # after layering
+                        # after layered global search, see what we got
                         if best_global_params is not None:
-                            if debug:
-                                print(f"Global search final best cost= {best_global_cost:.3f}, params= {best_global_params}")
                             initial_params = best_global_params
+                            if debug:
+                                print(f"Global search found cost={best_global_cost}, params={best_global_params}")
                         else:
-                            # fallback
+                            # fallback to something moderate
                             initial_params = [
-                                random.uniform(-100, 100)  # narrower fallback
+                                random.uniform(-100, 100)
                                 for _ in range(num_params)
                             ]
 
-                        # -------------------
-                        #  MAIN FIT LOOP
-                        # -------------------
+                        # ----------------------------------------------------------------------------------
+                        # 6. MAIN ITERATION LOOP
+                        # ----------------------------------------------------------------------------------
                         current_params = list(initial_params)
-                        current_errors = [0.0] * num_params
+                        current_errors = [0.0]*num_params
                         best_params    = list(current_params)
                         best_errors    = list(current_errors)
                         best_cost      = float('inf')
@@ -300,15 +306,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                         ic_bic         = float('inf')
 
                         while iteration <= max_iterations:
+                            # Build a fresh TGraph for each iteration’s fit
                             g_sig_fit_iter = TGraphErrors()
                             graphs_sig_fit.append(g_sig_fit_iter)
                             sys.stdout.write(f" \rSearching for best parameters...({iteration}/{max_iterations})")
                             sys.stdout.flush()
 
-                            # Simulated Annealing
+                            # Simulated annealing
                             current_params = [simulated_annealing(p, temperature) for p in current_params]
 
-                            # EXACT data rebuild lines
+                            # EXACT data lines for iteration
                             g_sig = TGraphErrors()
                             for i2 in range(nsep.GetSelectedRows()):
                                 g_sig.SetPoint(i2, nsep.GetV2()[i2], nsep.GetV1()[i2])
@@ -319,7 +326,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 g_sig_fit_iter.SetPoint(i2, g_sig.GetX()[i2], sig_X_fit2)
                                 g_sig_fit_iter.SetPointError(i2, 0, sig_X_fit_err2)
 
-                            # choose the function
+                            # Same wrapper
                             if sig_name == "L":
                                 fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                             elif sig_name == "T":
@@ -336,32 +343,35 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             for i_par in range(num_params):
                                 f_sig.SetParameter(i_par, current_params[i_par])
                                 if set_optimization:
-                                    f_sig.SetParLimits(i_par, -max_param_bounds, max_param_bounds)
+                                    f_sig.SetParLimits(i_par, -max_param_bounds, +max_param_bounds)
                                 else:
                                     off = param_offsets[i_par]
                                     f_sig.SetParLimits(
                                         i_par,
-                                        current_params[i_par] - off * abs(current_params[i_par]),
-                                        current_params[i_par] + off * abs(current_params[i_par])
+                                        current_params[i_par] - off*abs(current_params[i_par]),
+                                        current_params[i_par] + off*abs(current_params[i_par])
                                     )
 
                             r_sig_fit = g_sig_fit_iter.Fit(f_sig, "SQ")
 
+                            # Record param history
                             for i_par in range(num_params):
                                 params_sig_history[i_par].append(current_params[i_par])
 
+                            # Evaluate cost
                             current_cost, lambda_reg = calculate_cost(
                                 f_sig, g_sig_fit_iter, current_params,
                                 g_sig_fit_iter.GetN(), num_params, lambda_reg
                             )
 
+                            # Simple last-point residual
                             residual = 0.0
                             for i3 in range(g_sig_fit_iter.GetN()):
                                 x = g_sig_fit_iter.GetX()[i3]
                                 y_data = g_sig_fit_iter.GetY()[i3]
                                 y_err  = g_sig_fit_iter.GetEY()[i3]
                                 y_fit  = f_sig.Eval(x)
-                                residual = (y_data - y_fit)/y_err if y_err != 0 else (y_data - y_fit)
+                                residual = (y_data - y_fit)/y_err if y_err!=0 else (y_data - y_fit)
 
                             cost_history.append(current_cost)
                             if len(cost_history) >= 2:
@@ -369,10 +379,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
                             accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
+                            # Update current params from the fit
                             current_params = [f_sig.GetParameter(i_par) for i_par in range(num_params)]
                             current_errors = [f_sig.GetParError(i_par) for i_par in range(num_params)]
                             current_bin    = b
 
+                            # If accepted, update best
                             if accept_prob > random.random():
                                 best_params = list(current_params)
                                 best_cost   = current_cost
@@ -385,10 +397,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                             else:
                                 stagnation_count += 1
 
+                            # Debug print each iteration if desired
+                            if debug and (iteration % 1000 == 0):
+                                print(f"[DEBUG] iter={iteration}, cost={current_cost}, best_cost={best_cost}, params={current_params}")
+
+                            # Local search occasionally
                             if iteration % 25 == 0:
                                 current_params = local_search(current_params, f_sig, num_params)
                             previous_params = list(current_params)
 
+                            # If stalling too long, random re-init
                             if stagnation_count > 20:
                                 current_params = [
                                     random.uniform(-max_param_bounds, +max_param_bounds)
@@ -396,44 +414,43 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
                                 ]
                                 stagnation_count = 0
 
+                            # Sync back
                             current_params = list(best_params)
                             current_errors = list(best_errors)
-                            temperature    = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                            iteration     += 1
+                            temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
+                            iteration += 1
                             total_iteration += 1
 
                     except (TypeError, ZeroDivisionError) as e:
-                        # Recovery
-                        # If we landed here super early, define f_sig or best_params if needed
-                        if 'f_sig' not in locals() or f_sig is None:
-                            pass  # can't set f_sig
-                        if 'best_params' not in locals() or best_params is None:
+                        # If not assigned yet, define them
+                        if best_params is None or best_params==[float('inf')]*num_params:
                             best_params = initial_params[:]
-
-                        # do recovery logic
+                        if 'best_cost' not in locals() or not math.isfinite(best_cost):
+                            best_cost = float('inf')
                         recovery_params = [
-                            p + random.uniform(-0.1 * abs(p), 0.1 * abs(p))
+                            p + random.uniform(-0.1*abs(p), 0.1*abs(p))
                             for p in best_params
                         ]
                         recovery_params = [
                             max(min(p, max_param_bounds), -max_param_bounds)
                             for p in recovery_params
                         ]
-                        if 'f_sig' in locals() and f_sig is not None:
+                        if f_sig is not None:
                             for i_par, param in enumerate(recovery_params):
                                 f_sig.SetParameter(i_par, param)
 
-                        # fallback cost
-                        if 'best_cost' not in locals():
-                            best_cost = float('inf')
-                        current_cost = best_cost * 1.1 if math.isfinite(best_cost) else 1e9
-                        temperature  = min(temperature * 1.2, initial_temperature)
+                        current_params = recovery_params
+                        if not math.isfinite(best_cost):
+                            current_cost = 1e9
+                        else:
+                            current_cost = best_cost*1.1
+                        temperature = min(temperature * 1.2, initial_temperature)
                         max_param_bounds = random.uniform(0.0, max_param_bounds)
-                        iteration    += 1
+                        iteration += 1
                         total_iteration += 1
                         continue
 
-                    # If we found a better overall solution at low T/prob
+                    # If we find a better overall solution at low T/prob
                     if (best_cost < best_overall_cost
                             and temperature <= temp_threshold
                             and accept_prob <= prob_threshold):
@@ -452,7 +469,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
 
                 print(f"\nBest Cost: {best_overall_cost:.3f}")
 
-            # End of optimization runs
+            # After all runs
             try:
                 print(f"\nBest overall solution: {best_overall_params}")
                 print(f"Best overall cost: {best_overall_cost:.5f}")
@@ -461,6 +478,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             except TypeError:
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
+
             end_time = time.time()
             print("The loop took {:.2f} seconds.".format(end_time - start_time))
             
