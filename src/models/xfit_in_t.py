@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 23:20:06 trottar"
+# Time-stamp: "2025-02-03 23:25:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -91,7 +91,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #max_iterations = 1000
     #max_iterations = 10000
     #max_iterations = 15000
-    max_iterations = 50000
+    #max_iterations = 50000
+    max_iterations = 100000
 
     # Number of times to run the algorithm
     num_optimizations = 2
@@ -101,7 +102,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # Initial max/min bounds of finding parameter values (only used for iter=1)
     #initial_param_bounds = 1e2
     #initial_param_bounds = 1e4
-    initial_param_bounds = 1e6
+    initial_param_bounds = 1e9
 
     # Threshold value of red. chi2
     #chi2_threshold = 1.0
