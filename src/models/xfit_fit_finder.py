@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 23:29:01 trottar"
+# Time-stamp: "2025-02-04 00:32:22 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -611,14 +611,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec,
             latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_overall_cost:.3f}")
             c2.Update()
             print("\n")
-        c2.Update()
-    # Print all canvases to the output PDF
-    c2.Print(outputpdf+'(')
-    c3.Print(outputpdf)
-    c4.Print(outputpdf)
-    c5.Print(outputpdf)
-    c6.Print(outputpdf)
-    c7.Print(outputpdf)
-    c8.Print(outputpdf+')')
+        # Print all canvases to the output PDF
+        c2.Print(outputpdf+'(')
+        c3.Print(outputpdf)
+        c4.Print(outputpdf)
+        c5.Print(outputpdf)
+        c6.Print(outputpdf)
+        c7.Print(outputpdf)
+        c8.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
