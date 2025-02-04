@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 18:53:32 trottar"
+# Time-stamp: "2025-02-03 19:02:10 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -337,23 +337,23 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             # End of optimization runs
 
             try:
-                print(f"\nBest overall solution: {best_params}")
-                print(f"Best overall cost: {best_cost:.5f}")
-                print(f"Best overall bin: t={t_vec[best_bin]:.3f}, Q2={q2_vec[best_bin]:.3f}, W={w_vec[best_bin]:.3f}, theta={th_vec[best_bin]:.3f}")
+                print(f"\nBest overall solution: {best_overall_params}")
+                print(f"Best overall cost: {best_overall_cost:.5f}")
+                print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, W={w_vec[best_overall_bin]:.3f}, theta={th_vec[best_overall_bin]:.3f}")
             except TypeError:
                 print(f"ERROR: Fit failed! Check {equation_str} in input model file...")
                 sys.exit(2)
             end_time = time.time()
             print("The loop took {:.2f} seconds.".format(end_time - start_time))
 
-            # Make sure best_params has the expected length
-            while len(best_params) < num_params:
-                best_params.append(0.0)
-                best_errors.append(0.0)
+            # Make sure best_overall_params has the expected length
+            while len(best_overall_params) < num_params:
+                best_overall_params.append(0.0)
+                best_overall_errors.append(0.0)
             for j in range(num_params):
-                par_vec[num_params*it + j]     = best_params[j]
-                par_err_vec[num_params*it + j] = best_errors[j]
-                par_chi2_vec[num_params*it + j]  = best_cost
+                par_vec[num_params*it + j]     = best_overall_params[j]
+                par_err_vec[num_params*it + j] = best_overall_errors[j]
+                par_chi2_vec[num_params*it + j]  = best_overall_cost
 
             # Plot the final model fit
             g_sig_fit = TGraphErrors()
@@ -385,17 +385,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             g_sig_fit.GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
             # Now create and draw a final TF1 with the best parameters fixed
             if sig_name == "L":
-                fun_Sig = fun_Sig_L_wrapper(g_vec[best_bin], q2_vec[best_bin], w_vec[best_bin], th_vec[best_bin])
+                fun_Sig = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "T":
-                fun_Sig = fun_Sig_T_wrapper(g_vec[best_bin], q2_vec[best_bin], w_vec[best_bin], th_vec[best_bin])
+                fun_Sig = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "LT":
-                fun_Sig = fun_Sig_LT_wrapper(g_vec[best_bin], q2_vec[best_bin], w_vec[best_bin], th_vec[best_bin])
+                fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "TT":
-                fun_Sig = fun_Sig_TT_wrapper(g_vec[best_bin], q2_vec[best_bin], w_vec[best_bin], th_vec[best_bin])
+                fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             f_sig = TF1(f"sig_{sig_name}", fun_Sig, tmin_range, tmax_range, num_params)
             f_sig.SetParNames(*[f"p{i}" for i in range(num_params)])
             for i in range(num_params):
-                f_sig.FixParameter(i, best_params[i])
+                f_sig.FixParameter(i, best_overall_params[i])
             n_points = 100
             fit_y_values = [f_sig.Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
             fit_y_min = min(fit_y_values)
@@ -433,7 +433,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             latex = TLatex()
             latex.SetTextSize(0.04)
             latex.SetNDC(True)
-            latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_cost:.3f}")
+            latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_overall_cost:.3f}")
             c4.Update()
 
             # Plot temperature, acceptance probability, residuals, and information criteria on their canvases
