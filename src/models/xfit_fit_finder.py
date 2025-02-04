@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 06:40:52 trottar"
+# Time-stamp: "2025-02-04 06:42:47 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -245,10 +245,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             fits_sig.append(f_sig)
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
-                                if (abs(current_params[i_par]) > abs(initial_param_bounds)) or (abs(float(current_params[i_par])) < 1e-10):
-                                    print(f"Checking: {abs(current_params[i_par])} < 1e-10")
-                                    print(f"Boolean result: {abs(current_params[i_par]) < 1e-10}")
-                                    current_params[i_par] = 0.0
+                                if (abs(current_params[i_par]) > abs(initial_param_bounds)):
+                                    if (abs(current_params[i_par]) < 1e-10):
+                                        print(f"Checking: {abs(current_params[i_par])} < 1e-10")
+                                        print(f"Boolean result: {abs(current_params[i_par]) < 1e-10}")
+                                        current_params[i_par] = 0.0
                                 fits_sig[it].SetParameter(i_par, current_params[i_par])
                                 if set_optimization:
                                     fits_sig[it].SetParLimits(i_par, -initial_param_bounds, initial_param_bounds)
