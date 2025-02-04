@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-03 18:34:48 trottar"
+# Time-stamp: "2025-02-03 20:16:20 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -844,17 +844,14 @@ def get_centroid(hist, x_min, x_max):
     return [mean, mean_err]
 
 ################################################################################################################################################
-
+# Reuse or adapt your existing utility functions:
 def adaptive_cooling(initial_temp, iteration, max_iterations, cooling_rate=0.95):
     """
     Exponential-ish cooling schedule that scales with the fraction of total iterations,
     ensuring we don't push the exponent too high too soon.
     """
-    # fraction of the way done:
     frac_done = iteration / float(max_iterations + 1e-9)  # to avoid /0
-    
-    # Then scale exponent by the fraction:
-    effective_exponent = frac_done * 50  # e.g. scale up to some factor
+    effective_exponent = frac_done * 50
     try:
         return initial_temp * (cooling_rate ** effective_exponent)
     except OverflowError:
@@ -864,24 +861,21 @@ def sanitize_params(params, clip_min=-1e4, clip_max=1e4):
     """Clip parameters to a reasonable range to avoid huge values."""
     return [max(min(p, clip_max), clip_min) for p in params]
 
-def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1e-6, clip_min=-1e4, clip_max=1e4):
-    """Perturb a parameter using a factor of its scale (with a minimum scale to avoid zero) and then clip the result."""
+def simulated_annealing(param, temperature, perturbation_factor=0.1, 
+                        min_scale=1e-6, clip_min=-1e4, clip_max=1e4):
+    """Perturb a parameter using a factor of its scale (with a minimum scale) and clip to result."""
     scale = abs(param) if abs(param) > min_scale else min_scale
     max_perturbation = scale * perturbation_factor
     perturbation = random.uniform(-max_perturbation, max_perturbation) * temperature
     new_param = param + perturbation
-    # Clip new_param to keep it in a reasonable range:
     return max(min(new_param, clip_max), clip_min)
 
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """
     Calculate cost (modified reduced chi-square) with adaptive regularization.
-    Includes parameter clipping to avoid huge l2_reg values.
+    Clipping parameters to avoid huge L2 penalty blow-ups.
     """
-    # Clip parameters before cost calculation
-    current_params = sanitize_params(current_params, clip_min=-1e4, clip_max=1e4)
-    
-    # Compute l2 regularization using the sanitized parameters.
+    current_params = sanitize_params(current_params)
     l2_reg = np.sum(np.square(current_params))
     
     lambda_min = 1e-6
@@ -893,34 +887,35 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
             observed = g_sig.GetY()[i]
             expected = f_sig.Eval(g_sig.GetX()[i])
             error = g_sig.GetEY()[i]
+            # Avoid division by zero in error:
             residual = (observed - expected) / (error if error != 0 else 1.0)
             residuals.append(residual)
         return np.array(residuals)
 
     residuals = calculate_residuals()
     
-    # If any residual is non-finite, return a very large cost.
+    # If any residual is non-finite, return a large cost
     if not np.all(np.isfinite(residuals)):
-        print("Non-finite residual detected. Parameters:", current_params)
         return 1e12, lambda_reg
 
     def compute_cost(lambda_val, residuals):
         mse = np.mean(np.square(residuals))
         complexity_penalty = 0.1 * num_params / num_events
         if num_events <= num_params:
+            # Use an MSE + L2 reg approach if data points are too few
             cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
         else:
+            # If you want to rely on the built-in chi-square from the TF1
             chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
-            # Safeguard against division by very small nu:
             if nu < 1e-6:
                 nu = 1e-6
-            #cost = (chi_square + lambda_val * l2_reg) / nu
+            # We keep it simpler here, ignoring lambda_val:
             cost = (chi_square) / nu
-            #print("!!!!!!!!!!!!!!!", chi_square, lambda_val, l2_reg, nu)
         return cost
 
     if num_events <= num_params:
+        # Adapt the regularization by scanning lambda_val
         lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 20)
         costs = [compute_cost(lam, residuals) for lam in lambda_values]
         best_index = np.argmin(costs)
@@ -929,13 +924,12 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
     else:
         best_lambda = lambda_reg
         best_cost = compute_cost(best_lambda, residuals)
+
     return best_cost, best_lambda
 
 def acceptance_probability(old_cost, new_cost, temperature):
     """
-    Return 1 if the new cost is lower.
-    Otherwise, return exp(-(new_cost - old_cost)/temperature)
-    to decide probabilistically.
+    Standard Metropolis acceptance probability function.
     """
     if new_cost < old_cost:
         return 1.0
@@ -945,25 +939,22 @@ def acceptance_probability(old_cost, new_cost, temperature):
         except OverflowError:
             return 0.0
 
-def adjust_params(params, adjustment_factor=0.1):
-    """Adjust parameters randomly by a percentage of their value."""
-    return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
-
 def local_search(params, inp_func, num_params):
-    # Define your chi² function; note we expect num_params+1 parameters.
+    """
+    Local search step using Minuit from ROOT.
+    Minimizes the chi-square from the given function.
+    """
     def chi2_func(par):
-        for i in range(num_params+1):
+        for i in range(num_params):
             inp_func.SetParameter(i, par[i])
         return inp_func.GetChisquare()
     
-    # Wrap chi2_func in a C++ std::function using cppyy.
     import cppyy
     std_func = cppyy.gbl.std.function["double(const double*)"](chi2_func)
-    # Create a functor using std_func; use num_params if your model requires it.
     func = cppyy.gbl.ROOT.Math.Functor(std_func, num_params)
     
     minimizer = cppyy.gbl.ROOT.Math.Factory.CreateMinimizer("Minuit", "Migrad")
-    minimizer.SetMaxFunctionCalls(1000000)
+    minimizer.SetMaxFunctionCalls(100000)
     minimizer.SetMaxIterations(100000)
     minimizer.SetTolerance(0.001)
     minimizer.SetPrintLevel(0)
@@ -974,22 +965,18 @@ def local_search(params, inp_func, num_params):
         minimizer.SetVariable(i, f"p{i}", param, step)
     
     minimizer.Minimize()
-    
-    # Try to retrieve the optimized parameters.
     try:
         opt_x = minimizer.X()
-    except Exception as e:
+    except Exception:
         opt_x = None
 
-    # If opt_x is invalid, return the input parameters.
     if not opt_x:
-        improved_params = params
+        return params
     else:
-        improved_params = [opt_x[i] for i in range(num_params+1)]
-    
-    return improved_params
+        return [opt_x[i] for i in range(num_params)]
 
-def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
+def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, 
+                            max_lambda=1.0, min_lambda=1e-6):
     """
     Dynamically adapt regularization strength based on cost history.
     """
@@ -1005,6 +992,15 @@ def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_
         lambda_reg *= 1.1
     return max(min_lambda, min(lambda_reg, max_lambda))
 
+def calculate_information_criteria(n_samples, n_parameters, chi2):
+    """
+    Calculate AIC/BIC for model selection. You can refine as needed.
+    """
+    log_likelihood = -chi2 / 2.0
+    aic = 2 * n_parameters - 2 * log_likelihood
+    bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
+    return aic, bic
+
 def get_central_value(lst):
     """Return the median value from a list."""
     n = len(lst)
@@ -1013,14 +1009,7 @@ def get_central_value(lst):
     else:
         mid1, mid2 = n // 2 - 1, n // 2
         return (lst[mid1] + lst[mid2]) / 2
-
-def calculate_information_criteria(n_samples, n_parameters, chi2):
-    """Calculate AIC and BIC for model selection."""
-    log_likelihood = -chi2 / 2  # approximate
-    aic = 2 * n_parameters - 2 * log_likelihood
-    bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
-    return aic, bic
-
+    
 def select_valid_parameter(param, lower_bound, upper_bound):
     """Ensure the parameter stays within the given bounds."""
     return max(lower_bound, min(param, upper_bound))
