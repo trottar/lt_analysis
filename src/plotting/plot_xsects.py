@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 14:24:46 trottar"
+# Time-stamp: "2025-02-04 15:17:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -502,7 +502,7 @@ with PdfPages(outputpdf) as pdf:
                     c_lo_lst.append((df['t'][x_increment], c_fit))
                     d_lo_lst.append((df['t'][x_increment], d_fit))
                 
-            except (TypeError or ValueError) as e:
+            except (TypeError, ValueError) as e:
                 print("Fit not found!")
 
             x_len = x_increment+len(x_values)
@@ -635,7 +635,7 @@ with PdfPages(outputpdf) as pdf:
                     c_lo_lst.append((df['t'][x_increment], c_fit))
                     d_lo_lst.append((df['t'][x_increment], d_fit))
                 
-            except (TypeError or ValueError) as e:
+            except (TypeError, ValueError) as e:
                 print("Fit not found!")                
             
             x_len = x_increment+len(x_values)
@@ -723,7 +723,7 @@ with PdfPages(outputpdf) as pdf:
             popt, _ = curve_fit(exp_func, t_bin_centers, df['Q2'])
             fit_line = exp_func(t_bin_centers, *popt)
             ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
-        except (TypeError or ValueError) as e:
+        except (TypeError, ValueError) as e:
             print("Fit not found!")
 
     ax.set_xlabel('-t', fontsize=24)
@@ -758,7 +758,7 @@ with PdfPages(outputpdf) as pdf:
             popt, _ = curve_fit(exp_func, t_bin_centers, df['W'])
             fit_line = exp_func(t_bin_centers, *popt)
             ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
-        except (TypeError or ValueError) as e:
+        except (TypeError, ValueError) as e:
             print("Fit not found!")
             
     ax.set_xlabel('-t', fontsize=24)
