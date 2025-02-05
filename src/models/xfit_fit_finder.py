@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-05 11:40:32 trottar"
+# Time-stamp: "2025-02-05 11:46:34 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -144,6 +144,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             lambda_reg = 0.01
             cost_history = []
 
+            g_sig_fit = TGraphErrors()
+            graphs_sig_fit.append(g_sig_fit)            
             param_offsets = [0.1 for _ in range(num_params)]
             params_sig_history = [[] for _ in range(num_params)]
             graph_sig_params = [TGraph() for _ in range(num_params)]
@@ -209,8 +211,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         current_params = [simulated_annealing(p, temperature)
                                           for p in current_params]
 
-                        g_sig_fit = TGraphErrors()
-                        graphs_sig_fit.append(g_sig_fit)
                         sys.stdout.write(f"\rSearching for best parameters...({iteration}/{max_iterations})")
                         sys.stdout.flush()
 
@@ -519,7 +519,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             total_iteration = 0
             lambda_reg = 0.0
             cost_history = []
-            
+
+            g_sig_fit = TGraphErrors()
+            graphs_sig_fit.append(g_sig_fit)            
             graph_sig_params = [TGraph() for _ in range(num_params)]
             graphs_sig_params_all.append(graph_sig_params)
             graph_sig_chi2   = TGraph()
@@ -541,8 +543,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             for b in [2]:
                 print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, "
                       f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
-                g_sig_fit = TGraphErrors()
-                graphs_sig_fit.append(g_sig_fit)
+
                 g_sig = TGraphErrors()
                 for i_data in range(nsep.GetSelectedRows()):
                     x_val = nsep.GetV2()[i_data]
