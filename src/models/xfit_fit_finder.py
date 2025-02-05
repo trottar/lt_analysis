@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-05 10:40:17 trottar"
+# Time-stamp: "2025-02-05 11:40:32 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -393,17 +393,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 par_chi2_vec[4*it + j]  = best_overall_cost
 
             # Plot the final model fit
-            g_sig_fit = TGraphErrors()
-            graphs_sig_fit.append(g_sig_fit)
-            g_sig = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-            for i in range(len(w_vec)):
-                sig_X_fit = g_sig.GetY()[i]# / (g_vec[i])
-                sig_X_fit_err = g_sig.GetEY()[i]# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
             c2.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[it].Draw("A*")
@@ -597,17 +586,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 par_chi2_vec[4*it + j] = best_overall_cost
                 
             # Plot the final model fit
-            g_sig_fit = TGraphErrors()
-            graphs_sig_fit.append(g_sig_fit)
-            g_sig = TGraphErrors()
-            for i in range(nsep.GetSelectedRows()):
-                g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
-                g_sig.SetPointError(i, 0, nsep.GetV3()[i])
-            for i in range(len(w_vec)):
-                sig_X_fit = g_sig.GetY()[i]# / (g_vec[i])
-                sig_X_fit_err = g_sig.GetEY()[i]# / (g_vec[i])
-                graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
-                graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)                
             c2.cd(it+1).SetLeftMargin(0.12)
             graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
             graphs_sig_fit[it].Draw("A*")
