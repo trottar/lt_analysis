@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-05 11:46:34 trottar"
+# Time-stamp: "2025-02-05 12:02:49 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -145,7 +145,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             cost_history = []
 
             g_sig_fit = TGraphErrors()
-            graphs_sig_fit.append(g_sig_fit)            
+            graphs_sig_fit.append(g_sig_fit)
+            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
+            fits_sig.append(f_sig)
+            
             param_offsets = [0.1 for _ in range(num_params)]
             params_sig_history = [[] for _ in range(num_params)]
             graph_sig_params = [TGraph() for _ in range(num_params)]
@@ -243,8 +246,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 raise ValueError("Unknown signal name")
                             funcs_sig.append(fun_Sig)
 
-                            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-                            fits_sig.append(f_sig)
+
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
                                 if abs(current_params[i_par]) > abs(max_param_bounds):
@@ -418,9 +420,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             elif sig_name == "TT":
                 fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
-            funcs_sig.append(fun_Sig)                
-            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-            fits_sig.append(f_sig)
+            funcs_sig.append(fun_Sig)
             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
                 fits_sig[it].FixParameter(i, best_overall_params[i])
@@ -521,7 +521,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             cost_history = []
 
             g_sig_fit = TGraphErrors()
-            graphs_sig_fit.append(g_sig_fit)            
+            graphs_sig_fit.append(g_sig_fit)
+            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
+            fits_sig.append(f_sig)
+            
             graph_sig_params = [TGraph() for _ in range(num_params)]
             graphs_sig_params_all.append(graph_sig_params)
             graph_sig_chi2   = TGraph()
@@ -565,8 +568,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 elif sig_name == "TT":
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
                 funcs_sig.append(fun_Sig)                    
-                f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-                fits_sig.append(f_sig)
                 fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     fits_sig[it].FixParameter(i, par_vec[4*it + i])
@@ -612,8 +613,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             elif sig_name == "TT":
                 fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
             funcs_sig.append(fun_Sig)
-            f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-            fits_sig.append(f_sig)
             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
             for i in range(num_params):
                 fits_sig[it].FixParameter(i, par_vec[4*it + i])
