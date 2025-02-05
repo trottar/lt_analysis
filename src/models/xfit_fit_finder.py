@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 07:20:28 trottar"
+# Time-stamp: "2025-02-05 09:54:24 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -225,8 +225,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 g_sig.SetPointError(i_data, 0, y_err)
 
                             for i_pt in range(len(w_vec)):
-                                sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt])
-                                sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt])
+                                sig_X_fit = g_sig.GetY()[i_pt] / (g_vec[i_pt])
+                                sig_X_fit_err = g_sig.GetEY()[i_pt] / (g_vec[i_pt])
                                 graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)
 
@@ -400,8 +400,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
             for i in range(len(w_vec)):
-                sig_X_fit = g_sig.GetY()[i]# / (g_vec[i])
-                sig_X_fit_err = g_sig.GetEY()[i]# / (g_vec[i])
+                sig_X_fit = g_sig.GetY()[i] / (g_vec[i])
+                sig_X_fit_err = g_sig.GetEY()[i] / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)
             c2.cd(it+1).SetLeftMargin(0.12)
@@ -562,8 +562,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     g_sig.SetPoint(i_data, x_val, y_val)
                     g_sig.SetPointError(i_data, 0, y_err)
                 for i_pt in range(len(w_vec)):
-                    sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt])
-                    sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt])
+                    sig_X_fit = g_sig.GetY()[i_pt] / (g_vec[i_pt])
+                    sig_X_fit_err = g_sig.GetEY()[i_pt] / (g_vec[i_pt])
                     graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
                     graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)
                 if sig_name == "L":
@@ -604,8 +604,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig.SetPoint(i, nsep.GetV2()[i], nsep.GetV1()[i])
                 g_sig.SetPointError(i, 0, nsep.GetV3()[i])
             for i in range(len(w_vec)):
-                sig_X_fit = g_sig.GetY()[i]# / (g_vec[i])
-                sig_X_fit_err = g_sig.GetEY()[i]# / (g_vec[i])
+                sig_X_fit = g_sig.GetY()[i] / (g_vec[i])
+                sig_X_fit_err = g_sig.GetEY()[i] / (g_vec[i])
                 graphs_sig_fit[it].SetPoint(i, g_sig.GetX()[i], sig_X_fit)
                 graphs_sig_fit[it].SetPointError(i, 0, sig_X_fit_err)                
             c2.cd(it+1).SetLeftMargin(0.12)
