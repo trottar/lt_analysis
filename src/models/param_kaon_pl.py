@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-05 10:41:24 trottar"
+# Time-stamp: "2025-02-06 17:05:02 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -82,6 +82,8 @@ def iterWeight(arg_str):
 
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
 
+    sig = sig / 1e3
+    
     try:
         wtn = weight_prev_iter * (sig / sig_prev_iter)
     except ZeroDivisionError:
