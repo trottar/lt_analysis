@@ -44,7 +44,7 @@ sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * mat
 #sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
 #
 #sig_TT = (par13 + par14 * (math.exp(-math.fabs(par15 * tt)**2) / (1.0 + math.fabs(tt))**(math.fabs(par16)))) * Qdep_TT * (math.sin(theta_cm)**2)
-sig_TT = (par13 * math.exp(-math.fabs(par14 * tt)) + par15 * (math.fabs(tt))) * (Qdep_T**par16) * Qdep_TT * (math.sin(theta_cm)**2)
+sig_TT = (par13 * math.exp(-math.fabs(par14 * tt)) + par15 * (math.fabs(tt))) * (Qdep_TT**par16) * (math.sin(theta_cm)**2)
 
 # Weight factor for Q2=4.4, W=2.74
 # 0th iteration, 
