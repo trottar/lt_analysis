@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-06 04:22:57 trottar"
+# Time-stamp: "2025-02-06 04:25:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -111,8 +111,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     # -----------------------------------------------------------------------------
     for it, (sig_name, val) in enumerate(fit_params.items()):
 
-        # For example: bin=2
-        for b in [2]:
+        for b in [0]:
             if sig_name not in fixed_params:
 
                 num_params, init_params, equation_str = inpDict["initial_params"](sig_name, val)
