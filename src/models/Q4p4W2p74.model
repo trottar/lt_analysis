@@ -34,7 +34,8 @@ sig_L = (par1 * Qdep_L * ft) * math.exp(-math.fabs(par2 * tt))
 #sig_T = (par5 * math.exp(-math.fabs(par6 * tt)) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 #sig_T = (par5 * math.exp(-math.fabs(par6 * tt)) + par7 * (math.fabs(tt))) * Qdep_T
 #sig_T = (par5 + par6 * math.exp(-math.fabs(par7 * tt))) * Qdep_T
-sig_T = (par5 + par6 * math.exp(-math.fabs(par7 * (tt - par8)))) * Qdep_T
+sig_T = par5 + par6 * math.exp(-math.fabs(par7 * (tt - par8))) * (1 + par7 * (tt - par8)) * Qdep_T
+
 
 
 
