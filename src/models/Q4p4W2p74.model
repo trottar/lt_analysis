@@ -51,8 +51,8 @@ sig_TT = (par13 * math.exp(-math.fabs(par14 * tt))  + par15 / math.fabs(tt)) * (
 
 # Weight factor for Q2=4.4, W=2.74
 # 0th iteration, 
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
-#wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 
 ################################################################################
 # Previous iterations
