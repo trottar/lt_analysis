@@ -9,7 +9,7 @@ pi = math.pi
 mtar = 0.93827231
 mpipl=0.139570
 mkpl=0.493677
-#
+
 # 0th iteration, 
 #tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
 # Determined from (tmin, Q2) = [(0.145, 2.115), (0.17, 3.0), (0.3, 4.4), (0.35, 5.5)]
@@ -60,7 +60,7 @@ sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 #wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
 # Fixes W=2.2 to 2.25 and W=3.14 to 2.0
 #wfactor = 1 / ((ww**2) - (mtar**2))**(2.871975-(mpipl/mkpl)*ww)
-wfactor = 1 / ((ww**2) - (mtar**2))**(5.0-(mpipl/mkpl)*ww)
+wfactor = 1 / ((ww**2) - (mtar**2))**(2.871975-(0.139570/mkpl)*ww)
 
 ################################################################################
 # Previous iterations
