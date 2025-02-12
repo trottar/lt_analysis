@@ -18,12 +18,13 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
       real mtar,mp,mn,pi
       real mpipl, mkpl
-      real n
+      real exp_fac
       parameter (pi=3.14159)
       parameter (mp=.93827231)   !mp
       parameter (mn=.93956563)   !mn
       parameter (mpipl=0.139570)
       parameter (mkpl=0.493677)
+      parameter (exp_fac=2.0)
       
       real wfactor
       real theta_cm
