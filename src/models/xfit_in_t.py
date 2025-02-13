@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-13 15:53:08 trottar"
+# Time-stamp: "2025-02-13 15:54:13 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -200,8 +200,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             th_vec.append(theta_cm)
             
     # Revert changes for rest of script
-    q2_set = q2_set.replace(".","p")
-    w_set = w_set.replace(".","p")
+    q2_set = str(q2_set).replace(".","p")
+    w_set = str(w_set).replace(".","p")
 
     # Find fits for L, T, LT, TT
     fit_params = {
