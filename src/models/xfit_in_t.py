@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-11 14:19:33 trottar"
+# Time-stamp: "2025-02-13 15:53:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,8 +181,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     
     ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
     # Redefine strings for retrieving equation defintions
-    q2_set = q2_set.replace("p",".")
-    w_set = w_set.replace("p",".")
+    q2_set = float(q2_set.replace("p","."))
+    w_set = float(w_set.replace("p","."))
     with open(ave_file_in, 'r') as f:
         for line in f:
             ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
