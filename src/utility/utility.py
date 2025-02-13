@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-04 05:11:03 trottar"
+# Time-stamp: "2025-02-12 19:03:27 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1254,7 +1254,7 @@ def find_params(equations, sig_type, param_vals):
             new_param_lst.append(param_vals[i])
         return num_params, new_param_lst, eq_str.split(f"sig_{sig_type}")[1].replace("=", f"sig_{sig_type} = ").strip()
     if sig_type == "wfactor":
-        eq_str = '\n'.join([f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')])
+        eq_str = '\n'.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'sig_TT')])
         num_params = eq_str.count('par')
         for i in range(num_params):
             new_param_lst.append(param_vals[i])
