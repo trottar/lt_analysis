@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-12 19:15:31 trottar"
+# Time-stamp: "2025-02-12 19:15:55 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1217,7 +1217,6 @@ def prepare_equations(equations, sig_type):
 
     exec_globals = {'__builtins__': None, 'math': math, 'tiny_offset': tiny_offset}
     exec(func_str, exec_globals)
-    print(func_str)
     return exec_globals[f'{sig_type}_optimized']
 
 ##################################################################################################################################################
