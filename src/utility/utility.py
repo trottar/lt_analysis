@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-12 19:06:09 trottar"
+# Time-stamp: "2025-02-12 19:11:04 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1217,6 +1217,7 @@ def prepare_equations(equations, sig_type):
 
     exec_globals = {'__builtins__': None, 'math': math, 'tiny_offset': tiny_offset}
     exec(func_str, exec_globals)
+    print(func_str)
     return exec_globals[f'{sig_type}_optimized']
 
 ##################################################################################################################################################
@@ -1255,7 +1256,7 @@ def find_params(equations, sig_type, param_vals):
         return num_params, new_param_lst, eq_str.split(f"sig_{sig_type}")[1].replace("=", f"sig_{sig_type} = ").strip()
     if sig_type == "wfactor":
         eq_str = '\n'.join([f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'sig_TT')])
-        return eq_str.split(f"wfactor")[1].replace("=", f"wfactor = ").strip()
+        return num_params, new_param_lst, eq_str.split(f"wfactor")[1].replace("=", f"wfactor = ").strip()
     else:
         print("ERROR: Invalid function request!")
         sys.exit(2)
