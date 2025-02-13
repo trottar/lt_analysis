@@ -2,7 +2,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-12 19:11:04 trottar"
+# Time-stamp: "2025-02-12 19:12:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -1192,7 +1192,7 @@ def prepare_equations(equations, sig_type):
         func_str += "        par15 = par15 if par15 > 1e-15 else par15 + tiny_offset\n"
         func_str += "        par16 = par16 if par16 > 1e-15 else par16 + tiny_offset\n"
     elif sig_type == "wfactor":
-        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('mtar', 'wfactor')]
+        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'sig_TT')]
         func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
         # Need to initialize since isn't an argument
         func_str += "        theta_cm = 0.0\n"        
