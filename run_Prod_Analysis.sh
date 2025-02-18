@@ -767,7 +767,7 @@ elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     # Q2=5p5, W=3p02
     NumtBins=3 # bad_bins_threshold = 200
     NumPhiBins=8
-    TMIN=0.400
+    TMIN=0.500
     TMAX=0.950
 else
     # For testing
