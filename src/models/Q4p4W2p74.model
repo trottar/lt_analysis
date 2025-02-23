@@ -51,8 +51,8 @@ sig_T = (par5 * math.exp(-math.fabs(par6 * tt))) * Qdep_T
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
 #####
-#sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+#sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
 #####
 
 # Transverse-Transverse interference term
