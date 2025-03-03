@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-03-02 20:58:50 trottar"
+# Time-stamp: "2025-03-02 21:26:43 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -150,8 +150,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
 
-        #tcut = "t=={0} && x>0.0".format(float(t_list[i]))
-        tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
+        tcut = "t=={0} && x!=0.0 && dx>0.0".format(float(t_list[i]))
+        #tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
         #tcut = "t=={0} && x!=0.0 && (phi>25)".format(float(t_list[i]))
         print(tcut)
         
