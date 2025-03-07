@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-03-07 00:14:08 trottar"
+# Time-stamp: "2025-03-07 00:30:58 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -209,9 +209,6 @@ def find_bins(histlist, inpDict):
 
             # Calculate the number of events in each bin
             counts, _ = np.histogram(x, bins=bin_edges)
-
-            # Threshold for minimum events per bin (you may want to define this earlier in your code)
-            #bad_bins_threshold = n_per_bin // 2  # Example threshold
 
             def calculate_edge_scaling(index, total_bins):
                 """
