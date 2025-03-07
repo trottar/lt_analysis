@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-03-06 23:53:11 trottar"
+# Time-stamp: "2025-03-06 23:58:40 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -277,7 +277,7 @@ def find_bins(histlist, inpDict):
         # The bins are determined by an iterative algorithm (see function above)
         #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
         try:
-            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=50000, edge_bias=3)
+            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=100000, edge_bias=1.0)
             n, bins = np.histogram(H_t_BinTest, bin_edges)
         except ValueError:
             print("ERROR: Unavoidable empty bins. Tighten t-range or adjust number of t-bins...")
