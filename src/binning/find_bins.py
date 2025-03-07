@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-03-07 00:03:12 trottar"
+# Time-stamp: "2025-03-07 00:14:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -211,7 +211,7 @@ def find_bins(histlist, inpDict):
             counts, _ = np.histogram(x, bins=bin_edges)
 
             # Threshold for minimum events per bin (you may want to define this earlier in your code)
-            bad_bins_threshold = n_per_bin // 2  # Example threshold
+            #bad_bins_threshold = n_per_bin // 2  # Example threshold
 
             def calculate_edge_scaling(index, total_bins):
                 """
@@ -277,7 +277,7 @@ def find_bins(histlist, inpDict):
         # The bins are determined by an iterative algorithm (see function above)
         #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
         try:
-            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=100000, edge_bias=5.0)
+            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=50000, edge_bias=2.0)
             n, bins = np.histogram(H_t_BinTest, bin_edges)
         except ValueError:
             print("ERROR: Unavoidable empty bins. Tighten t-range or adjust number of t-bins...")
