@@ -27,7 +27,8 @@ Qdep_TT = qq * math.exp(-qq)
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 #####
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-math.fabs(par2 * tt))
-sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
+#sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
+sig_L = (par1 * ft)
 #####
 
 # Transverse cross-section
@@ -46,8 +47,8 @@ sig_T = par5 / math.fabs(tt)**par6
 # 0th
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #####
-sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
-#sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
+#sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * Qdep_L * math.sin(theta_cm)
 #####
 
@@ -55,8 +56,8 @@ sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * mat
 # 0th
 #sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 #####
-sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
-#sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
+#sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
 #####
 
 # Weight factor
