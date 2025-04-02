@@ -396,35 +396,39 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 ***	   
 *       tav=(0.0735+0.028*log(q2_set))*q2_set
 *       RLT (10/8/2023): Testing new tav parameterization
-	   tav=(0.1112 + 0.0066*log(q2_set))*q2_set
+*       tav=(0.1112 + 0.0066*log(q2_set))*q2_set
+*       RLT (4/2/2025): Determined from (tmin, Q2) = [(0.145, 2.115), (0.17, 3.0), (0.3, 4.4), (0.35, 5.5)]
+	   tav=(0.05032 + 0.01345*log(q2_set))*q2_set	   
 	   ftav=(abs(t_gev)-tav)/tav
 	   ft=abs(t_gev)/(abs(t_gev)+mkpl**2)**2 ! pole factor
 	   
 	   Qdep_L=Q2_g/(1.0+(1.77*Q2_g)+0.12*(Q2_g**2))
 	   Qdep_T=(exp(-Q2_g**2))/Q2_g
 	   Qdep_TT=Q2_g*(exp(-Q2_g))
+
+C       Testing functions, works for all Q2 but bad ratios
+	   sigL=(fitpar(1)*Qdep_L*ft)*exp(-fitpar(2)*(abs(t_gev)))
+
+	   sigT=(fitpar(5)*exp(-fitpar(6)*(abs(t_gev)))+fitpar(7)*(abs(t_gev)))
+     >          *(Qdep_T**fitpar(8))
 	   
-c	   sigL=(fitpar(1)*Qdep_L*ft)*exp(-fitpar(2)*(abs(t_gev)))
+	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
+     >           +fitpar(11)/abs(t_gev))*sin(thetacm)	   
+
+	   sigtt=(fitpar(13)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
+
+C       Best for Q2=4.4, 5.5 (No Q2 dependence)
+c	   sigL=(fitpar(1)*ft)*exp(-fitpar(2)*(abs(t_gev)))
 c
-c	   sigT=(fitpar(5)*exp(-fitpar(6)*(abs(t_gev)))+fitpar(7)*(abs(t_gev)))
-c    >          *(Qdep_T**fitpar(8))
+c	   sigT=(fitpar(5)/(abs(t_gev)**fitpar(6)))
 c	   
-c	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
-c    >           +fitpar(11)/abs(t_gev))*sin(thetacm)	   
+c	   siglt=fitpar(9)*exp(fitpar(10)*abs(t_gev))
+c    >           *sin(thetacm)
 c
-c	   sigtt=(fitpar(13)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
-
-	   sigL=(fitpar(1)*ft)*exp(-fitpar(2)*(abs(t_gev)))
-
-	   sigT=(fitpar(5)/(abs(t_gev)**fitpar(6)))
-	   
-	   siglt=fitpar(9)*exp(fitpar(10)*abs(t_gev))
-     >           *sin(thetacm)
-
-	   sigtt=(fitpar(13)/(abs(t_gev)**fitpar(14)))*sin(thetacm)**2
-	
-	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
-     >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
+c	   sigtt=(fitpar(13)/(abs(t_gev)**fitpar(14)))*sin(thetacm)**2
+c	
+c	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
+c    >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
 	  
 c       now convert to different W
 c       W dependence given by 1/(W^2-M^2)^2
