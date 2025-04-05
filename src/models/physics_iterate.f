@@ -426,9 +426,9 @@ c	   siglt=fitpar(9)*exp(fitpar(10)*abs(t_gev))
 c    >           *sin(thetacm)
 c
 c	   sigtt=(fitpar(13)/(abs(t_gev)**fitpar(14)))*sin(thetacm)**2
-c	
-c	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
-c    >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
+
+	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
+     >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
 	  
 c       now convert to different W
 c       W dependence given by 1/(W^2-M^2)^2
