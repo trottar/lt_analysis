@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-04-06 11:37:19 trottar"
+# Time-stamp: "2025-04-06 17:07:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -49,7 +49,8 @@ CACHEPATH = lt.CACHEPATH
 
 #################################################################################################################################################################
 
-for data_type in ["data", "simc"]:
+#for data_type in ["data", "simc"]:
+for data_type in ["simc"]:
     
     print(f"\n\nFinding MM shift for {data_type}...")
     
