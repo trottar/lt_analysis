@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 20:33:06 trottar"
+# Time-stamp: "2025-04-15 15:48:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -791,6 +791,6 @@ if EPSSET == "high":
         with open(f_iter, 'x') as file:
             file.write(formatted_date)
 
-    sys.path.append("setup")
-    from compare_iterations import compare_iters
-    compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
+    #sys.path.append("setup")
+    #from compare_iterations import compare_iters
+    #compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
