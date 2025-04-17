@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-04-02 18:45:22 trottar"
+# Time-stamp: "2025-04-17 14:00:01 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -65,7 +65,7 @@ from xfit_active import set_val
 ###############################################################################################################################################
 
 # dir_iter = closest_date
-def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_file_lst):
+def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_file_lst, skip_optimization=False):
 
     tmin_range = inpDict["tmin"]
     tmax_range = inpDict["tmax"]
@@ -78,14 +78,19 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # HARD CODED #
     ##############
 
+    # True - Set range of parameter search from +/- max_param_bounds
+    # False - Set range of parameter search from current_params +/- off*abs(current_params) (off = 0.1, 10% param value)
     full_optimization = True
 
     # Fixed separated xsect parameterization
-    #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
-    #fixed_params = ["L", "LT", "TT"]
-    #fixed_params = ["LT", "TT"]
-    #fixed_params = ["TT"]
-    fixed_params = [] # Update all
+    if skip_optimization:
+        fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
+    else:
+        #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
+        #fixed_params = ["L", "LT", "TT"]
+        #fixed_params = ["LT", "TT"]
+        #fixed_params = ["TT"]
+        fixed_params = [] # Update all
     
     # Maximum iterations before ending loop (should always aim for >10000)
     #max_iterations = 1000
@@ -233,67 +238,77 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     par_err_vec = prv_err_vec
     par_chi2_vec = prv_chi2_vec
 
-    # Define output file name
-    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Start.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
-    output_file_lst.append(outputpdf)
-    
-    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
-    bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
-
-    # Store initial values
-    best_par_vec = par_vec.copy()
-    best_err_vec = par_err_vec.copy()
-    best_chi2_vec = par_chi2_vec.copy()
-        
-    i = 0    
-    while bad_chi2_bool and i < max_checks:
-        fixed_params = ["L", "T", "LT", "TT"] # Check and rerun any with bad chi2
-        fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
-        print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
+    if skip_optimization:
 
         # Define output file name
-        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i)
+        outputpdf  = "{}/{}_lt_fit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
 
-        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
+        
+    else:
+            
+        # Define output file name
+        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Start.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+        output_file_lst.append(outputpdf)
+
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
         bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
-        # Update best values for each group of 4 elements
-        for j in range(0, len(par_chi2_vec), 4):
-            if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
-                print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
-                best_par_vec[j:j+4] = par_vec[j:j+4].copy()
-                best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
-                best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
-        i += 1
+        # Store initial values
+        best_par_vec = par_vec.copy()
+        best_err_vec = par_err_vec.copy()
+        best_chi2_vec = par_chi2_vec.copy()
 
-    par_vec = best_par_vec
-    par_err_vec = best_err_vec
-    par_chi2_vec = best_chi2_vec
-            
-    prv_par_vec = par_vec
-    prv_err_vec = par_err_vec
-    prv_chi2_vec = par_chi2_vec
+        i = 0    
+        while bad_chi2_bool and i < max_checks:
+            fixed_params = ["L", "T", "LT", "TT"] # Check and rerun any with bad chi2
+            fixed_params = [x for i, x in enumerate(fixed_params) if i not in bad_chi2_indices] # Rerun any settings with bad chi2
+            print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
 
-    # Define output file name
-    outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
-    output_file_lst.append(outputpdf)
+            # Define output file name
+            outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i)
+            output_file_lst.append(outputpdf)
+
+            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
+            bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
+
+            # Update best values for each group of 4 elements
+            for j in range(0, len(par_chi2_vec), 4):
+                if np.abs(np.mean(par_chi2_vec[j:j+4]) - 1) < np.abs(np.mean(best_chi2_vec[j:j+4]) - 1):
+                    print(f"\n\nNew set of best chi2 values found for sig_{list(fit_params.keys())[j // 4]} of {par_chi2_vec[j]:.1f}...")
+                    best_par_vec[j:j+4] = par_vec[j:j+4].copy()
+                    best_err_vec[j:j+4] = par_err_vec[j:j+4].copy()
+                    best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
+            i += 1
+
+        par_vec = best_par_vec
+        par_err_vec = best_err_vec
+        par_chi2_vec = best_chi2_vec
+
+        prv_par_vec = par_vec
+        prv_err_vec = par_err_vec
+        prv_chi2_vec = par_chi2_vec
+
+        # Define output file name
+        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+        output_file_lst.append(outputpdf)
+
+        # Update plots with best chi2
+        fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
     
-    # Update plots with best chi2
-    fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
-    parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
-    
-    # Check if parameter values changed and print changes to terminal
-    for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
-        if old != new:
-            print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
-            
-    para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-    print("\nWriting {}...".format(para_file_out))
-    with open(para_file_out, 'w') as f:
-        for i in range(len(par_vec)):
-            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-            print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+        # Check if parameter values changed and print changes to terminal
+        for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
+            if old != new:
+                print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
+
+        para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+        print("\nWriting {}...".format(para_file_out))
+        with open(para_file_out, 'w') as f:
+            for i in range(len(par_vec)):
+                f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
 
     '''
     print("\n\nWould you like to continue with the analysis?\n")
