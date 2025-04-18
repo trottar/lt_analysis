@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-01-13 19:57:46 trottar"
+# Time-stamp: "2025-04-18 09:36:52 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -738,6 +738,13 @@ if EPSSET == "high":
     aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
     output_file_lst.append(aver_hi_file)    
 
+    # Plot model on this iteration's data
+    sys.path.append("models")
+    from xfit_in_t import x_fit_in_t
+    x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict, output_file_lst, skip_optimization=True)
+    if DEBUG:
+        show_pdf_with_evince(OUTPATH+"/{}_lt_fit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    
 ##############################
 # Step 8 of the lt_analysis: #
 ##############################
