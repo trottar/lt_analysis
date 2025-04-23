@@ -63,11 +63,11 @@ grab_runs () {
 #Q2="2p1"
 #W="2p95"
 # ONGOING **
-Q2="3p0"
-W="2p32"
-# DONE
 #Q2="3p0"
-#W="3p14"
+#W="2p32"
+# DONE
+Q2="3p0"
+W="3p14"
 # DONE
 #Q2="4p4"
 #W="2p74"
