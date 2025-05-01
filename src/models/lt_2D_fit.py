@@ -150,7 +150,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
 
-        tcut = "t=={0} && x!=0.0 && dx>0.0".format(float(t_list[i]))
+        tcut = "t=={0} && x!=0.0 && dx>1e-6".format(float(t_list[i]))
         #tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
         #tcut = "t=={0} && x!=0.0 && (phi>25)".format(float(t_list[i]))
         print(tcut)
