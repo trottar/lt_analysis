@@ -150,8 +150,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
 
-        #tcut = "t=={0} && x!=0.0 && dx>0.0".format(float(t_list[i]))
-        tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
+        tcut = "t=={0} && x!=0.0 && dx>0.0".format(float(t_list[i]))
+        #tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
         #tcut = "t=={0} && x!=0.0 && (phi>25)".format(float(t_list[i]))
         print(tcut)
         
@@ -415,7 +415,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
 
-        '''
         #########
         # Fit 6 #
         #########
@@ -448,7 +447,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN() + 1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN() - 1, 0, fff2.GetParError(0))
-        '''
         
         ####################
         # Last Step, Fit 7 #
