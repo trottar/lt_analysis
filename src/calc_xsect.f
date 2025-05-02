@@ -237,14 +237,12 @@ c angle check
             dx_real=x_mod*dr                        
 
 *     Check for NaN values or zero values           
-            if (isnan(x_real) .or. x_real <= 1e-6) then
-               x_real = 0.0
-            endif
-            if (isnan(dx_real) .or. dx_real <= 1e-6) then
-               dx_real = -1000.0
-            endif
-            if (isnan(x_mod) .or. x_mod <= 1e-6) then
-               x_mod = 0.0                      
+            if (isnan(x_real) .or. x_real <= 1e-6)
+     >         x_real = 0.0
+            if (isnan(dx_real) .or. dx_real <= 1e-6)
+     >         dx_real = -1000.0
+            if (isnan(x_mod) .or. x_mod <= 1e-6)
+     >         x_mod = 0.0                      
             if (isnan(eps_mod)) eps_mod = 0.0
             if (isnan(th_mod)) th_mod = 0.0            
             if (isnan(phi)) phi = 0.0            
