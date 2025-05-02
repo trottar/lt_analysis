@@ -236,10 +236,15 @@ c angle check
 *     Cross section error is same percent as ratio
             dx_real=x_mod*dr                        
 
-*     Check for NaN values
-            if (isnan(x_real)) x_real = 0.0
-            if (isnan(dx_real)) dx_real = -1000.0
-            if (isnan(x_mod)) x_mod = 0.0            
+*     Check for NaN values or zero values           
+            if (isnan(x_real) .or. x_real <= 1e-6) then
+               x_real = 0.0
+            endif
+            if (isnan(dx_real) .or. dx_real <= 1e-6) then
+               dx_real = -1000.0
+            endif
+            if (isnan(x_mod) .or. x_mod <= 1e-6) then
+               x_mod = 0.0                      
             if (isnan(eps_mod)) eps_mod = 0.0
             if (isnan(th_mod)) th_mod = 0.0            
             if (isnan(phi)) phi = 0.0            
