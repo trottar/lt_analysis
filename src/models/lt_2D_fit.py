@@ -462,6 +462,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
 
+        # Set parameter limits
+        fff2.SetParLimits(0, 1e-6, 200)
+        fff2.SetParLimits(1, 1e-6, 200)
+        fff2.SetParLimits(2, 1e-6, 20)
+        fff2.SetParLimits(3, 1e-6, 20)
+
         # Fit
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
