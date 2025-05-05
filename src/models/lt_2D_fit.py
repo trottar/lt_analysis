@@ -266,10 +266,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 1e-6, 200)
+        fff2.SetParLimits(0, 1e-6, 1000)
 
         fff2.SetParameter(1, 1)
-        fff2.SetParLimits(1, 1e-6, 200)
+        fff2.SetParLimits(1, 1e-6, 1000)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
@@ -463,8 +463,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(3)
 
         # Set parameter limits
-        fff2.SetParLimits(0, 1e-6, 200)
-        fff2.SetParLimits(1, 1e-6, 200)
+        fff2.SetParLimits(0, 1e-6, 1000)
+        fff2.SetParLimits(1, 1e-6, 1000)
         fff2.SetParLimits(2, 1e-6, 20)
         fff2.SetParLimits(3, 1e-6, 20)
 
