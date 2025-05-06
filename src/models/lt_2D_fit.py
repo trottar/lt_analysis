@@ -150,8 +150,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
         print("\n/*--------------------------------------------------*/\n\n")
 
-        #tcut = "t=={0} && x!=0.0 && dx>0.0".format(float(t_list[i]))
-        tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
+        tcut = "t=={0} && x!=0.0 && dx>0.0".format(float(t_list[i]))
+        ##tcut = "t=={0} && x!=0.0".format(float(t_list[i]))
         #tcut = "t=={0} && x!=0.0 && (phi>25)".format(float(t_list[i]))
         print(tcut)
         
@@ -266,10 +266,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 0 and 1
         fff2.SetParameter(0, 1)
-        fff2.SetParLimits(0, 1e-6, 1000)
+        fff2.SetParLimits(0, -5.0, 1000.0)
 
         fff2.SetParameter(1, 1)
-        fff2.SetParLimits(1, 1e-6, 1000)
+        fff2.SetParLimits(1, -5.0, 1000.0)
 
         # Fix parameter 2 and 3
         fff2.FixParameter(2, 0.0)
@@ -312,7 +312,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 2
         fff2.SetParameter(2, 0.0)
-        fff2.SetParLimits(2, 1e-6, 20)
+        fff2.SetParLimits(2, -20.0, 20.0)
 
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
@@ -373,7 +373,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 3
         fff2.SetParameter(3, 0.0)
-        fff2.SetParLimits(3, 1e-6, 20)
+        fff2.SetParLimits(3, -20.0, 20.0)
 
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
@@ -463,10 +463,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(3)
 
         # Set parameter limits
-        fff2.SetParLimits(0, 1e-6, 1000)
-        fff2.SetParLimits(1, 1e-6, 1000)
-        fff2.SetParLimits(2, 1e-6, 20)
-        fff2.SetParLimits(3, 1e-6, 20)
+        fff2.SetParLimits(0, -5.0, 1000.0)
+        fff2.SetParLimits(1, -5.0, 1000.0)
+        fff2.SetParLimits(2, -20.0, 20.0)
+        fff2.SetParLimits(3, -20.0, 20.0)
 
         # Fit
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
