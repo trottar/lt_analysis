@@ -312,7 +312,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 2
         fff2.SetParameter(2, 0.0)
-        fff2.SetParLimits(2, -1e6, 1e6)
+        fff2.SetParLimits(2, -5, 5)
 
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
@@ -373,7 +373,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Set parameter 3
         fff2.SetParameter(3, 0.0)
-        fff2.SetParLimits(3, -1e6, 1e6)
+        fff2.SetParLimits(3, -5, 5)
 
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
         g_plot_err.Fit(fff2, "MRQ")
@@ -465,8 +465,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Set parameter limits
         fff2.SetParLimits(0, -1e6, 1e6)
         fff2.SetParLimits(1, -1e6, 1e6)
-        fff2.SetParLimits(2, -1e6, 1e6)
-        fff2.SetParLimits(3, -1e6, 1e6)
+        fff2.SetParLimits(2, -5, 5)
+        fff2.SetParLimits(3, -5, 5)
 
         # Fit
         # Options: M-> Improve fit info splash, R-> Use range specified, Q-> Quiet splash
