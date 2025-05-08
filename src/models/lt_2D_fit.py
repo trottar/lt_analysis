@@ -427,10 +427,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(0, fff2.GetParameter(0))
         fff2.FixParameter(1, fff2.GetParameter(1))
 
-        # Set parameter limits
-        fff2.SetParLimits(0, fff2.GetParameter(0) - fff2.GetParError(0), fff2.GetParameter(0) + fff2.GetParError(0))
-        fff2.SetParLimits(1, fff2.GetParameter(1) - fff2.GetParError(1), fff2.GetParameter(0) + fff2.GetParError(0))
-
         # Release and set parameters
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
