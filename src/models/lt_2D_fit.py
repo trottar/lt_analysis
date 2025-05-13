@@ -228,10 +228,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         for step in fit_plan:
 
-            # fix/release per plan
+            # fix or release parameters according to the table
             for p in range(fff2.GetNpar()):
-                (fff2.ReleaseParameter if p in step["free"]
-                 else fff2.FixParameter)(p, fff2.GetParameter(p))
+                if p in step["free"]:
+                    fff2.ReleaseParameter(p)                      # <- one arg only
+                else:
+                    fff2.FixParameter(p, fff2.GetParameter(p))    # <- index + value
 
             # seed newly released params
             for p in step["free"]:
