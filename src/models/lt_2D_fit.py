@@ -47,7 +47,7 @@ outputpdf = f"{OUTPATH}/{ParticleType}_lt_fit_Q{Q2}W{W}.pdf"
 # Importing utility functions
 # ------------------------------------------------------------------
 
-sys.path.append("utility")
+sys.path.append("../utility")
 from utility import adapt_limits
 
 # ------------------------------------------------------------------
