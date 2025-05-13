@@ -98,175 +98,225 @@ from lt_active import (LT_sep_x_lo_fun, LT_sep_x_lo_fun_unsep,
 # ------------------------------------------------------------------
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
-    set_val(LOEPS, HIEPS)              # hand LO/HI ε to lt_active
+    set_val(LOEPS, HIEPS)
     eps_diff = HIEPS - LOEPS
 
-    # → graphs initialisation (unchanged) --------------------------
+    # overall result graphs
     sig_L_g  = TGraphErrors()
     sig_T_g  = TGraphErrors()
     sig_LT_g = TGraphErrors()
     sig_TT_g = TGraphErrors()
-
-    sig_lo = TGraphErrors()
-    sig_hi = TGraphErrors()
+    sig_lo   = TGraphErrors()
+    sig_hi   = TGraphErrors()
     sig_diff_g = TGraphErrors()
 
-    # --------------------------------------------------------------
+    # load tuples --------------------------------------------------
     nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:w:Q2")
     nlo.ReadFile(fn_lo)
     nhi = TNtuple("nhi", "nhi", "x/F:dx:x_mod:eps:theta:phi:t:w:Q2")
     nhi.ReadFile(fn_hi)
 
-    # gather unique t-bins  ---------------------------------------
+    # collect unique t-bins ---------------------------------------
     q2_list, w_list, theta_list, t_list = [], [], [], []
     lo_eps_list, hi_eps_list           = [], []
 
     for evt in nlo:
         if evt.t not in t_list:
-            q2_list.append(evt.Q2); w_list.append(evt.w)
-            theta_list.append(evt.theta); t_list.append(evt.t)
+            q2_list.append(evt.Q2);  w_list.append(evt.w)
+            theta_list.append(evt.theta);  t_list.append(evt.t)
             lo_eps_list.append(evt.eps)
 
-    tmp_t_list = []
     for evt in nhi:
-        if evt.t not in tmp_t_list:
-            tmp_t_list.append(evt.t)
+        if evt.t not in hi_eps_list:
             hi_eps_list.append(evt.eps)
 
     t_bin_num = len(t_list)
 
-    # storage for integrated unsep cross sections -----------------
-    lo_cross_sec      = np.zeros(t_bin_num, dtype=float)
-    hi_cross_sec      = np.zeros(t_bin_num, dtype=float)
-    lo_cross_sec_err  = np.zeros(t_bin_num, dtype=float)
-    hi_cross_sec_err  = np.zeros(t_bin_num, dtype=float)
+    # integrated unsep σ
+    lo_cross_sec  = np.zeros(t_bin_num)
+    hi_cross_sec  = np.zeros(t_bin_num)
+    lo_cross_err  = np.zeros(t_bin_num)
+    hi_cross_err  = np.zeros(t_bin_num)
 
-    # loop over t-bins --------------------------------------------
+    # --------------------------------------------------------------
     for i in range(t_bin_num):
 
-        print("\n/*--------------------------------------------------*/")
-        print(f" Starting t-bin {i+1} (t={t_list[i]:.4f})...")
-        print("/*--------------------------------------------------*/\n")
+        print(f"\n---- t-bin {i+1}/{t_bin_num}   (-t = {t_list[i]:.4f}) ----")
 
         tcut   = f"t=={t_list[i]} && x!=0.0"
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        # low-ε graph --------------------------------------------
+        # low-ε points -------------------------------------------
         nlo.Draw("x:phi:dx", tcut, "goff")
-        glo_tmp = TGraphErrors()
-        for j in range(nlo.GetSelectedRows()):
-            glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
-            glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
-        glo = glo_tmp.Clone("glo")
-
-        ave_sig_lo = glo.GetMean(2)
-        err_sig_lo = glo.GetRMS(2)
+        glo = TGraphErrors(nlo.GetSelectedRows(),
+                           nlo.GetV2(), nlo.GetV1(),
+                           np.zeros(nlo.GetSelectedRows()),
+                           nlo.GetV3())
+        ave_sig_lo = glo.GetMean(2);   err_sig_lo = glo.GetRMS(2)
         sig_lo.SetPoint(sig_lo.GetN(), t_list[i], ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
 
-        # high-ε graph -------------------------------------------
+        # high-ε points ------------------------------------------
         nhi.Draw("x:phi:dx", tcut, "goff")
-        ghi_tmp = TGraphErrors()
-        for j in range(nhi.GetSelectedRows()):
-            ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
-            ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
-        ghi = ghi_tmp.Clone("ghi")
-
-        ave_sig_hi = ghi.GetMean(2)
-        err_sig_hi = ghi.GetRMS(2)
+        ghi = TGraphErrors(nhi.GetSelectedRows(),
+                           nhi.GetV2(), nhi.GetV1(),
+                           np.zeros(nhi.GetSelectedRows()),
+                           nhi.GetV3())
+        ave_sig_hi = ghi.GetMean(2);   err_sig_hi = ghi.GetRMS(2)
         sig_hi.SetPoint(sig_hi.GetN(), t_list[i], ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
 
-        # build 2D graph (φ,ε,σ) ----------------------------------
+        # build 2-D graph (φ,ε,σ) with total errors --------------
         g_plot_err = TGraph2DErrors()
-        g_xx = ctypes.c_double(0); g_yy = ctypes.c_double(0)
+        for g,eps,err_acc in [(glo,lo_eps,lo_cross_err),
+                              (ghi,hi_eps,hi_cross_err)]:
+            for ii in range(g.GetN()):
+                x, y = ctypes.c_double(), ctypes.c_double()
+                g.GetPoint(ii, x, y)
+                stat = g.GetErrorY(ii)
+                tot  = math.sqrt(stat**2 + (pt_to_pt_systematic_error/100*y.value)**2)
+                g_plot_err.SetPoint(g_plot_err.GetN(), x, eps, y)
+                g_plot_err.SetPointError(g_plot_err.GetN()-1, 0, 0, tot)
+                err_acc[i] += 1/(tot**2)            # accumulate 1/σ²
 
-        for ii in range(glo.GetN()):
-            glo.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((glo.GetErrorY(ii)/g_yy.value)**2 +
-                                 (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            lo_cross_sec_err[i] += 1/(g_yy_err**2)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0, 0,
-                                     math.sqrt(glo.GetErrorY(ii)**2 +
-                                               (pt_to_pt_systematic_error/100)**2))
+        lo_cross_err[i] = 1/math.sqrt(lo_cross_err[i])
+        hi_cross_err[i] = 1/math.sqrt(hi_cross_err[i])
 
-        for ii in range(ghi.GetN()):
-            ghi.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((ghi.GetErrorY(ii)/g_yy.value)**2 +
-                                 (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            hi_cross_sec_err[i] += 1/(g_yy_err**2)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0, 0,
-                                     math.sqrt(ghi.GetErrorY(ii)**2 +
-                                               (pt_to_pt_systematic_error/100)**2))
-
-        lo_cross_sec_err[i] = (1/math.sqrt(lo_cross_sec_err[i])
-                               if lo_cross_sec_err[i] else -1000)
-        hi_cross_sec_err[i] = (1/math.sqrt(hi_cross_sec_err[i])
-                               if hi_cross_sec_err[i] else -1000)
-
-        # ---------------------------------------------------------
-        # *** adaptive fit starts here ***
-        # ---------------------------------------------------------
+        # --- TF2 with adaptive limits ---------------------------
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] "
                    "+ y*cos(2*x*0.017453)*[3]",
                    0, 360, 0.0, 1.0)
-
-        # initial guesses
         fff2.SetParameters(ave_sig_hi, ave_sig_lo, 0.0, 0.0)
-        for p,(lo,hi) in enumerate(zip(HARD_LO, HARD_HI)):
+        for p,(lo,hi) in enumerate(zip(HARD_LO,HARD_HI)):
             fff2.SetParLimits(p, lo, hi)
 
-        # canvases tracking change
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
-        sigL_change.SetTitle(f"t = {t_list[i]:.3f}")
-        sigT_change.SetTitle(f"t = {t_list[i]:.3f}")
 
         for step in fit_plan:
-
-            # fix or release parameters according to the table
-            for p in range(fff2.GetNpar()):
+            for p in range(4):
                 if p in step["free"]:
-                    fff2.ReleaseParameter(p)                      # <- one arg only
+                    fff2.ReleaseParameter(p)
                 else:
-                    fff2.FixParameter(p, fff2.GetParameter(p))    # <- index + value
+                    fff2.FixParameter(p, fff2.GetParameter(p))
 
-            # seed newly released params
             for p in step["free"]:
                 if fff2.GetParError(p) == 0:
-                    seed = 0.0 if p > 1 else ave_sig_lo
-                    fff2.SetParameter(p, seed)
+                    fff2.SetParameter(p, 0.0 if p>1 else ave_sig_lo)
 
-            # tighten search box
-            adapt_limits(fff2, nsig=4, hard_lo=HARD_LO, hard_hi=HARD_HI)
+            adapt_limits(fff2, nsig=4,
+                         hard_lo=HARD_LO, hard_hi=HARD_HI)
+            g_plot_err.Fit(fff2, "MRQ")       # silent
 
-            # fit quietly
-            g_plot_err.Fit(fff2, "MRQ")
-
-            # record evolution
             idx = sigL_change.GetN()
             sigL_change.SetPoint(idx, idx+1, fff2.GetParameter(1))
             sigL_change.SetPointError(idx, 0, fff2.GetParError(1))
             sigT_change.SetPoint(idx, idx+1, fff2.GetParameter(0))
             sigT_change.SetPointError(idx, 0, fff2.GetParError(0))
-        # ---------------------------------------------------------
-        # *** adaptive fit finished ***
-        # ---------------------------------------------------------
 
-        # -------- remainder of your original code ----------------
-        # (parameter extraction, plotting, file output, etc.)
-        # -- unchanged, still uses fff2.GetParameter / GetParError --
-        # (snipped here for brevity; keep everything you had below)
-        # ---------------------------------------------------------
+        # ------------ post-fit handling (unchanged) -------------
+        flo        = TF1("flo", LT_sep_x_lo_fun, 0, 360, 4)
+        flo_unsep  = TF1("flo_u", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
+        fhi        = TF1("fhi", LT_sep_x_hi_fun, 0, 360, 4)
+        fhi_unsep  = TF1("fhi_u", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
 
-    # end for-each t-bin
-    return t_list
+        for f in (flo,fhi,flo_unsep,fhi_unsep):
+            f.FixParameter(0, fff2.GetParameter(0))   # σT
+            f.FixParameter(1, fff2.GetParameter(1))   # σL
+            f.FixParameter(2, fff2.GetParameter(2))   # σLT
+            f.FixParameter(3, fff2.GetParameter(3))   # σTT
+
+        glo.Fit(flo, "MRQ")
+        ghi.Fit(fhi, "MRQ")
+
+        # integrate un-separated σ
+        lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
+        hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
+
+        # averaged σ difference for slope plot
+        try:
+            sig_diff = (ave_sig_hi - ave_sig_lo) / eps_diff
+            sig_diff_err = sig_diff*math.sqrt(
+                (err_sig_hi/ave_sig_hi)**2 + (err_sig_lo/ave_sig_lo)**2)
+        except ZeroDivisionError:
+            sig_diff, sig_diff_err = 0, 0
+        sig_diff_g.SetPoint(sig_diff_g.GetN(), t_list[i], sig_diff)
+        sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)
+
+        # add to separated-σ vs t graphs
+        sig_L_g .SetPoint(i, t_list[i], fff2.GetParameter(1))
+        sig_T_g .SetPoint(i, t_list[i], fff2.GetParameter(0))
+        sig_LT_g.SetPoint(i, t_list[i], fff2.GetParameter(2))
+        sig_TT_g.SetPoint(i, t_list[i], fff2.GetParameter(3))
+        sig_L_g .SetPointError(i, 0, fff2.GetParError(1))
+        sig_T_g .SetPointError(i, 0, fff2.GetParError(0))
+        sig_LT_g.SetPointError(i, 0, fff2.GetParError(2))
+        sig_TT_g.SetPointError(i, 0, fff2.GetParError(3))
+
+        # ---------------- plotting canvases --------------------
+        c1 = TCanvas()
+        g_plot_err.SetTitle(f"t = {t_list[i]:.3f}")
+        g_plot_err.GetXaxis().SetTitle("φ [deg]")
+        g_plot_err.GetYaxis().SetTitle("ε")
+        g_plot_err.GetZaxis().SetTitle("σ")
+        g_plot_err.Draw("perr")
+        if i == 0:  c1.Print(outputpdf+"(")
+        else:       c1.Print(outputpdf)
+        c1.Close()
+
+        # unseparated φ plots
+        c2 = TCanvas()
+        glo.SetMarkerStyle(5)
+        ghi.SetMarkerStyle(4);  ghi.SetMarkerColor(ROOT.kRed)
+        mg = ROOT.TMultiGraph()
+        mg.Add(glo); mg.Add(ghi); mg.Draw("AP")
+        mg.GetXaxis().SetTitle("φ [deg]")
+        mg.GetYaxis().SetTitle("Unsep σ [nb/GeV²]")
+        flo.SetLineWidth(2);    fhi.SetLineWidth(2); fhi.SetLineColor(ROOT.kRed)
+        flo.Draw("same");       fhi.Draw("same")
+        leg = ROOT.TLegend(0.8,0.8,0.96,0.96)
+        leg.AddEntry(glo,"ε_low","p"); leg.AddEntry(ghi,"ε_high","p")
+        leg.Draw()
+        c2.Print(outputpdf);  c2.Close()
+
+        # σL/T evolution
+        c3 = TCanvas()
+        sigL_change.Draw("AP*")
+        sigT_change.SetMarkerColor(ROOT.kRed); sigT_change.Draw("P*same")
+        c3.Print(outputpdf); c3.Close()
+
+        # separated σ vs t
+        for g,cname in [(sig_L_g ,"σ_L"),(sig_T_g ,"σ_T"),
+                        (sig_LT_g,"σ_LT"),(sig_TT_g,"σ_TT")]:
+            c = TCanvas()
+            g.SetTitle(cname); g.Draw("AP")
+            c.Print(outputpdf); c.Close()
+
+        # unsep vs ε at this t
+        g_unsep_lo.SetPoint(i, LOEPS, lo_cross_sec[i])
+        g_unsep_hi.SetPoint(i, HIEPS, hi_cross_sec[i])
+        g_unsep_lo.SetPointError(i, 0, lo_cross_err[i])
+        g_unsep_hi.SetPointError(i, 0, hi_cross_err[i])
+
+        # write separated values
+        fn_sep = (f"{LTANAPATH}/src/{ParticleType}/xsects/"
+                  f"x_sep.{polID}_Q{Q2.replace('p','')}W{W.replace('p','')}.dat")
+        mode = 'w' if i==0 else 'a'
+        with open(fn_sep, mode) as f:
+            f.write(f"{fff2.GetParameter(1):.4f} {fff2.GetParError(1):.4f} "
+                    f"{fff2.GetParameter(0):.4f} {fff2.GetParError(0):.4f} "
+                    f"{fff2.GetParameter(2):.4f} {fff2.GetParError(2):.4f} "
+                    f"{fff2.GetParameter(3):.4f} {fff2.GetParError(3):.4f} "
+                    f"{fff2.GetChisquare():.2f} {t_list[i]:.4f} "
+                    f"{w_list[i]:.3f} {q2_list[i]:.3f} {theta_list[i]:.3f}\n")
+
+    # -------- end per-t-bin loop --------------------------------
+    return t_list, sig_L_g, sig_T_g, sig_LT_g, sig_TT_g, g_unsep_lo, g_unsep_hi
+
 # ------------------------------------------------------------------
-# paths & driver call
+# file paths & driver call
 # ------------------------------------------------------------------
 fn_lo = (f"{LTANAPATH}/src/{ParticleType}/xsects/"
          f"x_unsep.{polID}_Q{Q2.replace('p','')}W{W.replace('p','')}"
@@ -275,180 +325,57 @@ fn_hi = (f"{LTANAPATH}/src/{ParticleType}/xsects/"
          f"x_unsep.{polID}_Q{Q2.replace('p','')}W{W.replace('p','')}"
          f"_{HIEPS*100:.0f}.dat")
 
-g_sig_l_total = TGraphErrors()
-g_sig_t_total = TGraphErrors()
-g_sig_lt_total = TGraphErrors()
-g_sig_tt_total = TGraphErrors()
-g_unsep_lo    = TGraphErrors()
-g_unsep_hi    = TGraphErrors()
+(t_list, g_sig_l_total, g_sig_t_total,
+ g_sig_lt_total, g_sig_tt_total,
+ g_unsep_lo,     g_unsep_hi) = single_setting(Q2, W, fn_lo, fn_hi)
 
-t_list = single_setting(Q2, W, fn_lo, fn_hi)
+# ------------------------------------------------------------------
+# ε-slope plots (unchanged)
+# ------------------------------------------------------------------
+f_lin = TF1("f_lin", "[0]+[1]*x", 0, 1)
+for i in range(g_unsep_lo.GetN()):
+    c = TCanvas()
+    mg = ROOT.TMultiGraph()
+    x_lo,y_lo = ctypes.c_double(), ctypes.c_double()
+    x_hi,y_hi = ctypes.c_double(), ctypes.c_double()
+    g_unsep_lo.GetPoint(i,x_lo,y_lo)
+    g_unsep_hi.GetPoint(i,x_hi,y_hi)
+    g_lo_evt = TGraphErrors(1, array('d',[x_lo.value]), array('d',[y_lo.value]),
+                            array('d',[g_unsep_lo.GetErrorX(i)]),
+                            array('d',[g_unsep_lo.GetErrorY(i)]))
+    g_hi_evt = TGraphErrors(1, array('d',[x_hi.value]), array('d',[y_hi.value]),
+                            array('d',[g_unsep_hi.GetErrorX(i)]),
+                            array('d',[g_unsep_hi.GetErrorY(i)]))
+    mg.Add(g_lo_evt); mg.Add(g_hi_evt); mg.Draw("AP")
+    mg.GetXaxis().SetTitle("ε"); mg.GetYaxis().SetTitle("Unsep σ [nb/GeV²]")
+    mg.Fit(f_lin,"MRQ")
+    f_lin.SetLineWidth(2); f_lin.Draw("same")
+    leg = ROOT.TLegend(0.75,0.8,0.95,0.95)
+    leg.AddEntry(g_lo_evt,f"-t={t_list[i]:.3f}",""); leg.AddEntry(g_lo_evt,"ε_low","p")
+    leg.AddEntry(g_hi_evt,"ε_high","p"); leg.Draw()
+    c.Print(outputpdf); c.Close()
 
-f_lin_l = TF1("f_lin_l", "[0]+[1]*x", 0.0, 1.0)
-f_lin_t = TF1("f_lin_t", "[0]+[1]*x", 0.0, 1.0)
+# ------------------------------------------------------------------
+# separated σ_L & σ_T vs t with exponentials
+# ------------------------------------------------------------------
+for g,color,name in [(g_sig_l_total, ROOT.kBlack,"σ_L"),
+                     (g_sig_t_total, ROOT.kRed,  "σ_T")]:
+    c = TCanvas()
+    g.SetMarkerColor(color); g.SetLineColor(color); g.Draw("AP")
+    f_exp = TF1("f_exp","[0]*exp(-[1]*x)",0,2)
+    g.Fit(f_exp,"MRQ"); f_exp.SetLineColor(color); f_exp.Draw("same")
+    c.Print(outputpdf); c.Close()
 
-# Define the number of events in 'lo'
-num_events = g_unsep_lo.GetN()
+# ------------------------------------------------------------------
+# σ_LT and σ_TT exponentials
+# ------------------------------------------------------------------
+for g,name in [(g_sig_lt_total,"σ_LT"),(g_sig_tt_total,"σ_TT")]:
+    c = TCanvas(); g.Draw("AP")
+    f_exp = TF1("f_exp","[0]*exp(-[1]*x)",0,2)
+    g.Fit(f_exp,"MRQ"); f_exp.Draw("same"); c.Print(outputpdf); c.Close()
 
-# Loop over each event in 'lo'
-for i in range(num_events):
-
-    # Create a canvas
-    c = ROOT.TCanvas("c", "c", 800, 600)
-    
-    # Create a new TMultiGraph for each event
-    g_unsep_mult = ROOT.TMultiGraph()
-    
-    # Create TGraphErrors for 'lo' event
-    x_lo, y_lo = ctypes.c_double(0), ctypes.c_double(0)
-    g_unsep_lo.GetPoint(i, x_lo, y_lo)
-    x_err_lo = g_unsep_lo.GetErrorX(i)
-    y_err_lo = g_unsep_lo.GetErrorY(i)
-    g_lo_event = ROOT.TGraphErrors(1, array('d', [x_lo.value]), array('d', [y_lo.value]), array('d', [x_err_lo]), array('d', [y_err_lo]))
-    
-    # Add 'lo' event to the TMultiGraph
-    g_unsep_mult.Add(g_lo_event)
-    
-    # Create TGraphErrors for 'hi' event
-    x_hi, y_hi = ctypes.c_double(0), ctypes.c_double(0)
-    g_unsep_hi.GetPoint(i, x_hi, y_hi)
-    x_err_hi = g_unsep_hi.GetErrorX(i)
-    y_err_hi = g_unsep_hi.GetErrorY(i)
-    g_hi_event = ROOT.TGraphErrors(1, array('d', [x_hi.value]), array('d', [y_hi.value]), array('d', [x_err_hi]), array('d', [y_err_hi]))
-    
-    # Add 'hi' event to the TMultiGraph
-    g_unsep_mult.Add(g_hi_event)
-
-    g_lo_event.SetMarkerStyle(5)
-    g_hi_event.SetMarkerStyle(5)
-    
-    # Draw TMultiGraph for the current event
-    g_unsep_mult.Draw("AP")
-    
-    # Set axis titles and offsets
-    g_unsep_mult.GetYaxis().SetTitle("Unseparated Cross Section [nb/GeV^{2}]")
-    g_unsep_mult.GetYaxis().SetTitleOffset(1.2)
-    g_unsep_mult.GetXaxis().SetTitle("#epsilon")
-    g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
-    
-    # Fit functions to 'lo' and 'hi' events
-    f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)  # Define fit function for 'lo'
-    g_unsep_mult.Fit(f_lin, "MRQ")
-        
-    # Set line properties for 'lo' and 'hi' fits
-    f_lin.SetLineColor(2)
-    f_lin.SetLineWidth(2)    
-    f_lin.Draw("same")
-    
-    # Create and draw TLegend
-    leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
-    leg.SetFillColor(0)
-    leg.SetMargin(0.4)
-    leg.AddEntry(g_hi_event, "t = {:.3f}".format(t_list[i]), "")
-    leg.AddEntry(g_lo_event, "Low #it{#font[120]{e}}", "p")
-    leg.AddEntry(g_hi_event, "High #it{#font[120]{e}}", "p")
-    leg.Draw()
-    
-    c.Print(outputpdf)
-    c.Clear()
-
-    del c
-    
-f_exp_l = TF1("f_exp_l", "[0]*exp(-[1]*x)", 0.0, 2.0)
-f_exp_t = TF1("f_exp_t", "[0]*exp(-[1]*x)", 0.0, 2.0)
-
-c_total_l_t = TCanvas()
-
-# Create TMultiGraph and add glo, ghi
-g_sig_mult = ROOT.TMultiGraph()
-g_sig_mult.Add(g_sig_l_total)
-g_sig_mult.Add(g_sig_t_total)
-
-#g_sig_l_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_l_total.GetYaxis().SetRangeUser(-5,30)
-#g_sig_t_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_t_total.GetYaxis().SetRangeUser(-5,30)
-
-g_sig_mult.Draw("AP")
-
-g_sig_mult.GetYaxis().SetTitle("#left(#frac{#it{d#sigma}}{#it{dt}}#right) [nb/GeV^{2}]")
-g_sig_mult.GetYaxis().SetTitleOffset(1.2)
-
-g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-g_sig_mult.GetXaxis().SetTitleOffset(1.2)
-
-g_sig_l_total.Fit(f_exp_l, "MRQ")
-g_sig_t_total.Fit(f_exp_t, "MRQ")
-
-# Set properties for g_sig_l_total and g_sig_t_total
-g_sig_l_total.SetLineColor(1)
-g_sig_l_total.SetMarkerStyle(5)
-g_sig_t_total.SetLineColor(2)
-g_sig_t_total.SetMarkerColor(2)
-g_sig_t_total.SetMarkerStyle(4)
-
-# Set line properties for g_sig_l_total and g_sig_t_total
-f_exp_l.SetLineColor(1)
-f_exp_l.SetLineWidth(2)
-f_exp_t.SetLineColor(2)
-f_exp_t.SetLineWidth(2)
-f_exp_t.SetLineStyle(2)
-
-# Draw f_exp_l and f_exp_t on the same canvas
-f_exp_l.Draw("same")
-f_exp_t.Draw("same")
-
-# Create and draw TLegend
-leg = ROOT.TLegend(0.85, 0.85, 0.99, 0.99)
-leg.SetFillColor(0)
-leg.SetMargin(0.4)
-leg.AddEntry(g_sig_l_total, "#it{#sigma}_{L}", "p")
-leg.AddEntry(g_sig_t_total, "#it{#sigma}_{T}", "p")
-leg.Draw()
-
-c_total_l_t.Print(outputpdf)
-c_total_l_t.Clear()
-
-ROOT.gStyle.SetOptFit(1)
-
-# Set the size of the statbox
-ROOT.gStyle.SetStatW(0.15)  # Set width of statbox
-ROOT.gStyle.SetStatH(0.15)  # Set height of statbox
-
-# Set the position of the statbox
-#ROOT.gStyle.SetStatX(0.8)  # Set x position of statbox (right edge)
-#ROOT.gStyle.SetStatY(0.8)  # Set y position of statbox (top edge)
-
-f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
-
-c_total = TCanvas()
-
-#g_sig_l_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_l_total.GetYaxis().SetRangeUser(-5,30)
-g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "MRQ")
-c_total.Print(outputpdf)
-c_total.Clear()
-
-#g_sig_t_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_t_total.GetYaxis().SetRangeUser(-5,30)
-g_sig_t_total.SetMarkerColor(1)
-g_sig_t_total.SetLineColor(1)
-g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "MRQ")
-c_total.Print(outputpdf)
-c_total.Clear()
-
-#g_sig_lt_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_lt_total.GetYaxis().SetRangeUser(-5,3)
-g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "MRQ")
-c_total.Print(outputpdf)
-c_total.Clear()
-
-#g_sig_tt_total.GetXaxis().SetRangeUser(0.0,0.4)
-#g_sig_tt_total.GetYaxis().SetRangeUser(-3,1)
-g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "MRQ")
-c_total.Print(outputpdf+')')
-c_total.Clear()
+# ------------------------------------------------------------------
+# close multi-page PDF
+# ------------------------------------------------------------------
+dummy = TCanvas(); dummy.Print(outputpdf+"]")
+print(f"\nPlots written to {outputpdf}")
