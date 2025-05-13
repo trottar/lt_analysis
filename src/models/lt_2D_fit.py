@@ -20,13 +20,6 @@ from array import array
 import math, ctypes, os, sys
 
 # ------------------------------------------------------------------
-# Importing utility functions
-# ------------------------------------------------------------------
-
-sys.path.append("utility")
-from utility import adapt_limits
-
-# ------------------------------------------------------------------
 # cmd-line args
 # ------------------------------------------------------------------
 ParticleType = sys.argv[1]
@@ -49,6 +42,13 @@ ANATYPE        = lt.ANATYPE
 OUTPATH        = lt.OUTPATH
 
 outputpdf = f"{OUTPATH}/{ParticleType}_lt_fit_Q{Q2}W{W}.pdf"
+
+# ------------------------------------------------------------------
+# Importing utility functions
+# ------------------------------------------------------------------
+
+sys.path.append("utility")
+from utility import adapt_limits
 
 # ------------------------------------------------------------------
 # ROOT batch mode & constants
