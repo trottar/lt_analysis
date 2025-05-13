@@ -20,9 +20,11 @@ from array import array
 import math, ctypes, os, sys
 
 # ------------------------------------------------------------------
-# utilities
+# Importing utility functions
 # ------------------------------------------------------------------
-from fit_utils import adapt_limits            # <── NEW helper import
+
+sys.path.append("utility")
+from utility import adapt_limits
 
 # ------------------------------------------------------------------
 # cmd-line args

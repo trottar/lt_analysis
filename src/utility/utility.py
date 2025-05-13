@@ -1345,3 +1345,23 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
         return [0.0, 0.0, 0.0]
 
 ##################################################################################################################################################
+
+def adapt_limits(f, nsig=5, hard_lo=None, hard_hi=None, min_width=1e-3):
+    """
+    Shrink/grow parameter limits around last best value ± nsig·σ,
+    but never exceed the hard envelopes hard_lo / hard_hi.
+    """
+    npar = f.GetNpar()
+    hard_lo = hard_lo or [-np.inf]*npar
+    hard_hi = hard_hi or [ np.inf]*npar
+
+    for i in range(npar):
+        p  = f.GetParameter(i)
+        dp = f.GetParError(i) or 1e-6
+        lo = max(hard_lo[i], p - nsig*dp)
+        hi = min(hard_hi[i], p + nsig*dp)
+        if hi - lo < min_width:
+            lo, hi = p - min_width/2, p + min_width/2
+        f.SetParLimits(i, lo, hi)
+
+##################################################################################################################################################
