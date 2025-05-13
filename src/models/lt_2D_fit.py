@@ -94,6 +94,16 @@ from lt_active import (LT_sep_x_lo_fun, LT_sep_x_lo_fun_unsep,
                        LT_sep_x_hi_fun, LT_sep_x_hi_fun_unsep, set_val)
 
 # ------------------------------------------------------------------
+# global graphs
+# ------------------------------------------------------------------
+g_sig_l_total  = TGraphErrors()
+g_sig_t_total  = TGraphErrors()
+g_sig_lt_total = TGraphErrors()
+g_sig_tt_total = TGraphErrors()
+g_unsep_lo     = TGraphErrors()
+g_unsep_hi     = TGraphErrors()
+
+# ------------------------------------------------------------------
 # main per-setting routine
 # ------------------------------------------------------------------
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
