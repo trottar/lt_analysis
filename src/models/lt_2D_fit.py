@@ -78,8 +78,8 @@ PI = math.pi
 #     the sequence is shorter than the maximum number of steps (7 here).
 #
 PARAM_LIMITS = {
-    'sigT' : [(0.0, 1000.0)]*7,   # parameter 0
-    'sigL' : [(0.0, 1000.0)]*7,   # parameter 1
+    'sigT' : [(-5.0, 1000.0)]*7,   # parameter 0
+    'sigL' : [(-5.0, 1000.0)]*7,   # parameter 1
     'sigLT': [(-10.0,  50.0)]*7,  # parameter 2
     'sigTT': [(-10.0,  50.0)]*7   # parameter 3
 }
