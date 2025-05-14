@@ -113,7 +113,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     eps_diff = HIEPS - LOEPS
 
     sig_L_g  = TGraphErrors()
-    sig_T_g  = TGraphErrors()
     sig_LT_g = TGraphErrors()
     sig_TT_g = TGraphErrors()
 
