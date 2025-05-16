@@ -335,7 +335,9 @@ def calculate_eff_charge_err(runNum,efficiency_table,foutcsv):
     # Calculate run by run total efficiency error
     # Error propagation by addition in quadrature
     d_eff = np.sqrt(sum((float(efferr)/float(eff))**2 for efferr,eff in zip(efficiency_errDict.values(),effDict.values())))
-    d_charge = 2e-6 # 200 nC, FIX!! NEED TO CHECK WITH DAVE MACK WRITE UP!!
+    # Dave Mack's write up on the charge error: dI/I(%) = 0.05 + 0.15/I (in uA) -> dQ/Q(%) = 0.05 + 0.15/Q
+    # https://hallcweb.jlab.org/doc-public/ShowDocument?docid=1034
+    d_charge = 0.05 + 0.00015/eff_charge # in percent (0.15 uC converted to 0.00015 mC)
     # Error propagation by addition in quadrature (units of mC)
     eff_charge_err = np.sqrt((eff_charge**2)*(d_eff**2+d_charge**2))
     
