@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-02-25 10:54:08 trottar"
+# Time-stamp: "2025-05-20 02:41:45 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -492,6 +492,7 @@ with PdfPages(outputpdf) as pdf:
                 ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
             except (TypeError, ValueError) as e:
                 print("Fit not found!")
+                continue
 
             x_len = x_increment+len(x_values)
 
@@ -623,7 +624,8 @@ with PdfPages(outputpdf) as pdf:
                 ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
                 
             except (TypeError, ValueError) as e:
-                print("Fit not found!")                
+                print("Fit not found!")
+                continue
             
             x_len = x_increment+len(x_values)
 
@@ -723,6 +725,7 @@ with PdfPages(outputpdf) as pdf:
             ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: Q(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
         except (TypeError, ValueError) as e:
             print("Fit not found!")
+            continue
 
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('$Q^2$', fontsize=24)
@@ -758,6 +761,7 @@ with PdfPages(outputpdf) as pdf:
             ax.plot(t_bin_centers, fit_line, linestyle='-', color=colors[i], label="{0} Fit: W(t) = {1:.2f}e^({2:.2f}t)".format(df_key, popt[0], popt[1]))
         except (TypeError, ValueError) as e:
             print("Fit not found!")
+            continue
             
     ax.set_xlabel('-t', fontsize=24)
     ax.set_ylabel('W', fontsize=24)
