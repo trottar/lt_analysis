@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-05-20 02:41:45 trottar"
+# Time-stamp: "2025-05-20 15:23:59 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -529,6 +529,7 @@ with PdfPages(outputpdf) as pdf:
 
         j+=1
 
+    '''
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
@@ -994,3 +995,4 @@ with PdfPages(outputpdf) as pdf:
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
 
+    '''
