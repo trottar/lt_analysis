@@ -16,13 +16,15 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       REAL m2,m3,m4
       REAL m12,m22,m32,m42
 
-      real mp,mp2,mpi,mpi2,mn,mn2,mK,mK2
+      real mp,mp2,mpi,mpi2,mn,mn2,mlamb,mlamb2,mK,mK2
       parameter (mp=.93827231)   !mp
       parameter (mp2=.88035493)  !mp^2
       parameter (mpi=.13956995)   !mpi
       parameter (mpi2=.01947977)  !mpi^2
       parameter (mn=.93956563)   !mn
       parameter (mn2=.88278357) !mn^2
+      parameter (mlamb=1.115683)   !mlamb
+      parameter (mlamb2=1.24474855649) !mlamb^2      
       parameter (mK=0.493677)   !mK
       parameter (mK2=0.24387)   !mK2    
 
@@ -40,8 +42,8 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       if(npol.gt.0) then
          m2=mp
          m22=mp2
-         m4=mn
-         m42=mn2
+         m4=mlamb ! Lambda Mass
+         m42=mlamb2
       else
          m2=mn
          m22=mn2
