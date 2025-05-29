@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-05-28 22:47:23 trottar"
+# Time-stamp: "2025-05-29 12:30:30 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -86,10 +86,10 @@ PARAM_LIMITS = {
 }
 '''
 PARAM_LIMITS = {
-    'sigT' : [(-1000.0, 1000.0)]*7,   # parameter 0
-    'sigL' : [(-1000.0, 1000.0)]*7,   # parameter 1
-    'sigLT': [(-1000.0, 1000.0)]*7,  # parameter 2
-    'sigTT': [(-1000.0, 1000.0)]*7   # parameter 3
+    'sigT' : [(-1.0, 1000.0)]*7,   # parameter 0
+    'sigL' : [(-1.0, 1000.0)]*7,   # parameter 1
+    'sigLT': [(-1.0, 10.0)]*7,  # parameter 2
+    'sigTT': [(-1.0, 10.0)]*7   # parameter 3
 }
 
 def adapt_limits(param_name_or_idx, step=0):
