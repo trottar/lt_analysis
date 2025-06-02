@@ -24,7 +24,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       parameter (mn=.93956563)   !mn
       parameter (mn2=.88278357) !mn^2
       parameter (mlamb=1.115683)   !mlamb
-      parameter (mlamb2=1.24474855649) !mlamb^2      
+      parameter (mlamb2=1.244749) !mlamb^2      
       parameter (mK=0.493677)   !mK
       parameter (mK2=0.24387)   !mK2    
 

@@ -142,8 +142,13 @@ c calculate t the same way as in experimental replay
 	pm2_tmp = (vertex%q*vertex%uq%x-vertex%p%P*vertex%up%x)**2 +
      1            (vertex%q*vertex%uq%y-vertex%p%P*vertex%up%y)**2 +
      2            (vertex%q*vertex%uq%z-vertex%p%P*vertex%up%z)**2
-        t = -(mn-mp)**2 +2*targ%Mtar_struck*
-     1          ( sqrt(targ%Mrec_struck**2+pm2_tmp)-targ%Mrec_struck )
+c RLT: Correct for k-lambda
+c       t = -(mn-mp)**2 +2*targ%Mtar_struck*
+c     1          ( sqrt(targ%Mrec_struck**2+pm2_tmp)-targ%Mrec_struck )
+	t = -(targ%Mrec_struck - targ%Mtar_struck)**2 
+     >           + 2*targ%Mtar_struck *
+     >           ( sqrt(targ%Mrec_struck**2 + pm2_tmp) 
+     >           - targ%Mrec_struck )
 
 	t_gev = t/1.d6			!CONVERT TO (GeV/c)**2
 	main%t = t
