@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-04-29 11:28:13 trottar"
+# Time-stamp: "2025-06-02 19:33:37 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trottar.iii@gmail.com>
@@ -101,10 +101,12 @@ for data_type in ["data", "simc"]:
     branch_names = [branch.GetName() for branch in branches]
 
     branch_to_check = f"{mass_var_name}_shift"  # Check if shift already exists for file
-    
+
+    '''
     if branch_to_check in branch_names:
         print(f"\n\nBranch '{branch_to_check}' is in the file already.")
         continue
+    '''
     
     # Define a function for fitting a Gaussian with dynamically determined FWHM range
     def fit_gaussian(hist, x_min, x_max):
