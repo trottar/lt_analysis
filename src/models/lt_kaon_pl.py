@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2024-09-05 10:04:50 trottar"
+# Time-stamp: "2025-06-03 11:17:36 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,6 +30,7 @@ def set_val(inp_LOEPS, inp_HIEPS):
     global LOEPS, HIEPS
     LOEPS = inp_LOEPS
     HIEPS = inp_HIEPS
+    print("Epsilon: ", LOEPS, HIEPS)
 
 ###############################################################################################################################################    
     

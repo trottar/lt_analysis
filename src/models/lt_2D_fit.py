@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:16:36 trottar"
+# Time-stamp: "2025-06-03 11:17:18 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -120,7 +120,7 @@ from lt_active import LT_sep_x_lo_fun, LT_sep_x_lo_fun_unsep, LT_sep_x_hi_fun, L
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
-    # Set HIEPS for lt_active script
+    # Set epsilon for lt_active script
     #set_val(LOEPS, HIEPS)
 
     eps_diff = HIEPS-LOEPS
@@ -170,6 +170,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
     for i in range(0, t_bin_num):    
 
+        # Set epsilon for lt_active script
         set_val(lo_eps_list[i], hi_eps_list[i])
         
         print("\n/*--------------------------------------------------*/")
