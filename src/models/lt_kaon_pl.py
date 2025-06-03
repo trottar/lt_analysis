@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:27:44 trottar"
+# Time-stamp: "2025-06-03 11:38:12 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -18,52 +18,46 @@ import ROOT
 # Define constants
 PI = math.pi
 
-###############################################################################################################################################
-# Need to grab epsilon string values from lt_2D_fit script
-
-# First, define empty strings
-LOEPS = ""
-HIEPS = ""
-
-# Then, set global variables which is called with arguments defined in lt_2D_fit script
-def set_val(inp_LOEPS, inp_HIEPS):
-    global LOEPS, HIEPS
-    LOEPS = inp_LOEPS
-    HIEPS = inp_HIEPS
-    return LOEPS, HIEPS
-
 ###############################################################################################################################################    
     
 # Low epsilon drawing function
-def LT_sep_x_lo_fun(x, par):
-    eps = LOEPS
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
-    return xs
-
+def LT_sep_x_lo_fun_wrapper(inp_eps):
+    def LT_sep_x_lo_fun(x, par):
+        eps = inp_eps
+        xx = x[0]
+        xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
+        return xs
+    return LT_sep_x_lo_fun
+    
 ###############################################################################################################################################
 
 # High epsilon drawing function
-def LT_sep_x_hi_fun(x, par):
-    eps = HIEPS
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
-    return xs
+def LT_sep_x_hi_fun_wrapper(inp_eps):
+    def LT_sep_x_hi_fun(x, par):
+        eps = inp_eps
+        xx = x[0]
+        xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
+        return xs
+    return LT_sep_x_hi_fun
 
 ###############################################################################################################################################
 
 # Low epsilon calculating unseparated cross section
-def LT_sep_x_lo_fun_unsep(x, par):
-    eps = LOEPS
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
-    return xs
+def LT_sep_x_lo_fun_unsep_wrapper(inp_eps):
+    def LT_sep_x_lo_fun_unsep(x, par):
+        eps = inp_eps
+        xx = x[0]
+        xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
+        return xs
+    return LT_sep_x_lo_fun_unsep
 
 ###############################################################################################################################################
 
 # High epsilon calculating unseparated cross section
-def LT_sep_x_hi_fun_unsep(x, par):
-    eps = HIEPS
-    xx = x[0]
-    xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
-    return xs
+def LT_sep_x_hi_fun_unsep_wrapper(inp_eps):
+    def LT_sep_x_hi_fun_unsep(x, par):
+        eps = inp_eps
+        xx = x[0]
+        xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx) + eps * par[3] * ROOT.TMath.Cos(2 * xx)
+        return xs
+    return LT_sep_x_hi_fun_unsep

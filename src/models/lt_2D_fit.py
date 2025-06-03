@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:28:02 trottar"
+# Time-stamp: "2025-06-03 11:40:03 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -114,7 +114,7 @@ def adapt_limits(param_name_or_idx, step=0):
 ###############################################################################################################################################
 
 # Import separated xsects models
-from lt_active import LT_sep_x_lo_fun, LT_sep_x_lo_fun_unsep, LT_sep_x_hi_fun, LT_sep_x_hi_fun_unsep, set_val
+from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
 
 ###############################################################################################################################################
 
@@ -180,10 +180,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        # Set epsilon for lt_active script
-        set_val(lo_eps, hi_eps)
-        print("HERE!!!", set_val(lo_eps, hi_eps))
-
         nlo.Draw("x:phi:dx", tcut, "goff")
 
         glo_tmp = TGraphErrors()
@@ -191,8 +187,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
-        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
-        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
+        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun_wrapper(lo_eps), 0, 360, 4)
+        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep_wrapper(lo_eps), 0, 2*PI, 4)
         
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
@@ -211,8 +207,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
-        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
-        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
+        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun_wrapper(hi_eps), 0, 360, 4)
+        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep_wrapper(hi_eps), 0, 2*PI, 4)
             
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
