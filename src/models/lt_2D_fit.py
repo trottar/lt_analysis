@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:42:47 trottar"
+# Time-stamp: "2025-06-03 11:47:09 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -77,7 +77,7 @@ PI = math.pi
 #   • list/tuple of tuples -> individual limits per step; last entry reused if
 #     the sequence is shorter than the maximum number of steps (7 here).
 #
-'''
+#'''
 PARAM_LIMITS = {
     'sigT' : [(-5.0, 1000.0)]*7,   # parameter 0
     'sigL' : [(-5.0, 1000.0)]*7,   # parameter 1
@@ -91,6 +91,7 @@ PARAM_LIMITS = {
     'sigLT': [(-10.0, 100.0)]*7,  # parameter 2
     'sigTT': [(-10.0, 100.0)]*7   # parameter 3
 }
+'''
 
 def adapt_limits(param_name_or_idx, step=0):
     """
