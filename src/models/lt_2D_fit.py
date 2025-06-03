@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:26:29 trottar"
+# Time-stamp: "2025-06-03 11:26:57 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -181,7 +181,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         hi_eps = hi_eps_list[i]
 
         # Set epsilon for lt_active script
-        set_val(lo_eps, 0.0)        
+        if i == 0:
+            set_val(0.0, 0.0)
+        else:
+            # Set epsilon for lt_active script
+            set_val(lo_eps_list[i], hi_eps_list[i])
+
 
         nlo.Draw("x:phi:dx", tcut, "goff")
 
