@@ -42,10 +42,8 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       if(npol.gt.0) then
          m2=mp
          m22=mp2
-c         m4=mlamb ! Lambda Mass
-c     m42=mlamb2
-         m4=mp
-         m42=mp2
+         m4=mlamb ! Lambda Mass
+         m42=mlamb2
       else
          m2=mn
          m22=mn2
