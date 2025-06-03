@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:19:54 trottar"
+# Time-stamp: "2025-06-03 11:22:42 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -30,7 +30,6 @@ def set_val(inp_LOEPS, inp_HIEPS):
     global LOEPS, HIEPS
     LOEPS = inp_LOEPS
     HIEPS = inp_HIEPS
-    print("Epsilon: ", LOEPS, HIEPS)
 
 ###############################################################################################################################################    
     
@@ -39,6 +38,7 @@ def LT_sep_x_lo_fun(x, par):
     eps = LOEPS
     xx = x[0]
     xs = par[0] + eps * par[1] + ROOT.TMath.Sqrt(2 * eps * (1 + eps)) * par[2] * ROOT.TMath.Cos(xx * PI / 180) + eps * par[3] * ROOT.TMath.Cos(2 * xx * PI / 180)
+    print("HERE!!!")
     return xs
 
 ###############################################################################################################################################
