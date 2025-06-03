@@ -322,7 +322,7 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
          tm=(t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
      &        th_mod,eps_mod)
-         thetacm_only(it)=th_mod
+         thetacm_only(it)=th_mod*180./3.14159
       end do
 
 c     Save data.
@@ -343,7 +343,7 @@ c     Save data.
          write(*,*) 'avet: ', avett(it), errtt(it)
          write(*,*) 'ave Q2: ', aveQ2(it),errQ2(it)
          write(*,*) 'ave W: ', aveW(it),errW(it)
-         write(*,*) 'thetacm: ', thetacm_only(it)*180./3.14159
+         write(*,*) 'thetacm: ', thetacm_only(it)
       end do
       close(77)
       write(*,*)'=========================='      
