@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 11:17:18 trottar"
+# Time-stamp: "2025-06-03 11:26:29 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -169,9 +169,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
     for i in range(0, t_bin_num):    
-
-        # Set epsilon for lt_active script
-        set_val(lo_eps_list[i], hi_eps_list[i])
         
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
@@ -183,6 +180,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
+        # Set epsilon for lt_active script
+        set_val(lo_eps, 0.0)        
+
         nlo.Draw("x:phi:dx", tcut, "goff")
 
         glo_tmp = TGraphErrors()
@@ -192,7 +192,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
-
+        
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
