@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-03 10:02:26 trottar"
+# Time-stamp: "2025-06-03 11:04:38 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -540,7 +540,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
               "sig_lt: ", sig_lt, "sig_tt: ", sig_tt, \
-              "t: ", t_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
+              "t: ", t_list[i], "theta: ", theta_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
               "eps_lo: ", lo_eps_list[i], "eps_hi: ", hi_eps_list[i])
 
         fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(
