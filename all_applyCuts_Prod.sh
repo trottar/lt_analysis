@@ -3,7 +3,7 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-05 08:59:52 trottar"
+# Time-stamp: "2025-06-05 09:09:08 trottar"
 # ================================================================
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
@@ -83,8 +83,8 @@ KIN="Q${Q2}W${W}"
 
 TARGET=("dummy")
 #EPS=("high" "low")
-EPS=("high")
-PHISET=("left" "right")
+EPS=("low")
+PHISET=("center")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
