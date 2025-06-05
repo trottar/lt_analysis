@@ -2,7 +2,8 @@
 # Use this file to define function forms of separated xsect.
 # Used '#' to comment, but using '#' trailing a definition won't work
 # (e.g., wfactor = 1 / ((ww**2) - (mtar**2))**2.0 # This will not work now)
-################################################################################
+# If there is conflicting variables, the first will be chosen!
+################################################################################	
 
 # Define constants
 pi = math.pi
@@ -28,6 +29,7 @@ Qdep_TT = qq * math.exp(-qq)
 #####
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-math.fabs(par2 * tt))
 sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
+#sig_L = (par1 * Qdep_L * ft) * math.exp(-math.fabs(par2 * tt))
 #sig_L = par1 * math.exp(-math.fabs(par2 * tt))
 #sig_L = (par1 * ft) * (par2 / math.fabs(tt))
 #####
@@ -49,8 +51,8 @@ sig_T = par5 / math.fabs(tt)**par6
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #####
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
-#sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
-sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
+#sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * Qdep_L * math.sin(theta_cm)
 #####
 
@@ -64,11 +66,12 @@ sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
 
 # Weight factor
 # 0th
-wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 ####
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
 #wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
-##wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+#wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*w_set+6.52)
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
 # Fixes W=2.2 to 2.25 and W=3.14 to 2.0
 #wfactor = 1 / ((ww**2) - (mtar**2))**(2.871975-(mpipl/mkpl)*ww)
 ####
@@ -168,3 +171,80 @@ wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 #sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**3)
 # Trial 36
 #sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
+
+
+
+##
+## 0th iteration, 2024November12_H23M15S30
+#tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
+## Determined from (tmin, Q2) = [(0.145, 2.115), (0.17, 3.0), (0.3, 4.4), (0.35, 5.5)]
+## 2nd iteration, 
+###tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
+#ftav = (math.fabs(tt) - tav) / tav
+#ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  # pole factor
+#Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+#Qdep_T = (math.exp(-qq**2)) / qq
+#Qdep_TT = qq * math.exp(-qq)
+#
+## Longitudinal cross-section
+## 0th, 1st iteration, (chi2~1.2)
+##sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
+#####
+#sig_L = (Qdep_L * ft) * (par1 * math.exp(-par2 * (math.fabs(tt))) + par3 / math.fabs(tt)**(par4))
+#####  
+#
+## Transverse cross-section
+## 0th, 1st iteration, (chi2~2.6)
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+#####
+##  (chi2)
+##sig_T =  -(math.fabs(tt)) * (par5 * math.exp(-par6 * (math.fabs(tt))) - 1.0) * (Qdep_T**par7)
+#####
+#
+## Longitudinal-Transverse interference term
+## 0th, 1st iteration, (chi2~2.0)
+#sig_LT = (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+####sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+#####
+## 1st iteration, (chi2~0.5)
+##sig_LT =  (par9 * math.exp(-par10 * math.fabs(tt)) + par11 / math.fabs(tt) + par12 * tt**2)
+#####
+#
+## Transverse-Transverse interference term
+## 0th iteration,
+##sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+##
+##sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+## Marco's thesis
+##sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+## Modified Marco's thesis
+##sig_TT = par13 * (math.fabs(tt)**(par14)) * math.exp(-par15*math.fabs(tt)) * 1.0/(1.0 + (qq/par16)**2)
+## Power-law decay
+##sig_TT =  (1.0 + (par13 / math.fabs(tt)**(par14))) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**2)
+## 2nd iteration, (chi2>4.2)
+###sig_TT =   par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+## 2nd iteration, (chi2>2.0)
+##sig_TT =   (par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT * (math.sin(theta_cm)**2)
+##sig_TT =   (par13 * math.fabs(tt) + par14 * (math.exp(-par15 * (math.fabs(tt)**2)) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT
+##
+## Original equation
+##sig_TT = (par13 * math.fabs(tt) + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16))) * Qdep_TT * (math.sin(theta_cm)**2)
+## Modify peak shape with different exponential
+##sig_TT = par13 * (math.fabs(tt) - par14) * math.exp(-par15*math.fabs(tt)**par16) * Qdep_TT * (math.sin(theta_cm)**2)
+#####
+## (chi2>4.2) 12/18 21:55
+#sig_TT = par13 + par14 * (math.exp(-par15*math.fabs(tt)**2) / (1.0 + math.fabs(tt))**(par16)) * Qdep_TT * (math.sin(theta_cm)**2)
+## (chi2>2.8)  Discontinuity in fit
+####sig_TT = (par13 + par14 * (math.exp(-par15 * math.fabs(tt)**2) / ((1.0 + math.fabs(tt)) * (1.0 + par16 * math.fabs(tt)))) * Qdep_TT) * (math.sin(theta_cm)**2)
+#####
+#
+## Weight factor for Q2=3.0, W=3.14
+## 0th iteration, 2024December05_H07M34S41
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+## Q2=3.0, W=3.14
+##wfactor = 1 / ((ww**2) - (mtar**2))**2.25
+## From linear fit of all Q2
+##wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
+## From quadratic fit of all Q2
+## 2nd iteration, 
+##wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
