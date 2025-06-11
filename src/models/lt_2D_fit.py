@@ -71,9 +71,6 @@ PI = math.pi
 
 ###############################################################################################################################################
 
-# Cache last-fit parameters so every new t-bin gets a good seed
-last_pars = [None, None, None, None]   # [σT, σL, σLT, σTT]
-
 # -------------------------  DYNAMIC LIMITS  -------------------------------------------------
 # Edit PARAM_LIMITS below to adjust allowed ranges per fit-step (0-based index).
 # Provide either:
@@ -115,6 +112,7 @@ def adapt_limits(param_name_or_idx, step=0):
         return limdef[-1]
     # Single tuple provided:
     return limdef
+
 # --------------------------------------------------------------------------------------------
 ###############################################################################################################################################
 
@@ -124,6 +122,9 @@ from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT
 ###############################################################################################################################################
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
+
+    # Cache last-fit parameters so every new t-bin gets a good seed
+    last_pars = [None, None, None, None]   # [σT, σL, σLT, σTT]
 
     # Set epsilon for lt_active script
     #set_val(LOEPS, HIEPS)
