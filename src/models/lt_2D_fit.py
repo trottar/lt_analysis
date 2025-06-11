@@ -70,6 +70,10 @@ pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (h
 PI = math.pi
 
 ###############################################################################################################################################
+
+# Cache last-fit parameters so every new t-bin gets a good seed
+last_pars = [None, None, None, None]   # [σT, σL, σLT, σTT]
+
 # -------------------------  DYNAMIC LIMITS  -------------------------------------------------
 # Edit PARAM_LIMITS below to adjust allowed ranges per fit-step (0-based index).
 # Provide either:
@@ -81,8 +85,8 @@ PI = math.pi
 PARAM_LIMITS = {
     'sigT' : [(-5.0, 1000.0)]*7,   # parameter 0
     'sigL' : [(-5.0, 1000.0)]*7,   # parameter 1
-    'sigLT': [(-10.0,  20.0)]*7,  # parameter 2
-    'sigTT': [(-10.0,  20.0)]*7   # parameter 3
+    'sigLT': [(-3.0,  3.0)]*7,  # parameter 2
+    'sigTT': [(-1.5,  1.5)]*7   # parameter 3
 }
 '''
 PARAM_LIMITS = {
@@ -169,7 +173,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
-    for i in range(0, t_bin_num):    
+    for i in range(0, t_bin_num):   
+
+        # Use previous bin’s best values as starting seeds
+        if last_pars[0] is not None:
+            for k, p in enumerate(last_pars):
+                fff2.SetParameter(k, p)          # seed with previous results
+        else:
+            # first bin: use typical Hall-C scale seeds (nb/GeV²)
+            fff2.SetParameters( 80.0, 10.0, 0.5, 0.2 ) 
         
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
@@ -258,16 +270,27 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
-        '''
+        # Pull terms that act like loose Gaussian priors
+        prior_err_LT = 1.0   # nb
+        prior_err_TT = 0.5   # nb
+
+        n = g_plot_err.GetN()
+        g_plot_err.SetPoint     (n, 0.0, 0.0, 0.0)
+        g_plot_err.SetPointError(n, 0.0, 0.0, prior_err_LT)
+        n += 1
+        g_plot_err.SetPoint     (n, 0.0, 0.0, 0.0)
+        g_plot_err.SetPointError(n, 0.0, 0.0, prior_err_TT)
+        
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, 0.0, 1.0)
-        '''
 
+        '''
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, LOEPS-0.1, HIEPS+0.1)
-        
+        '''
+
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
@@ -288,7 +311,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)
         fff2.FixParameter(3, 0.0)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MREQL")
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
@@ -316,7 +339,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         low, high = adapt_limits(2, fit_step)
         fff2.SetParLimits(2, low, high)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MREQL")
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -333,7 +356,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, fff2.GetParameter(2))
         fff2.FixParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MREQL")
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -352,7 +375,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MREQL")
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -369,7 +392,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, fff2.GetParameter(2))
         fff2.FixParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MREQL")
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -387,7 +410,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParameter(2, fff2.GetParameter(2))
         fff2.SetParameter(3, fff2.GetParameter(3))
 
-        g_plot_err.Fit("fff2", "MRQ")
+        g_plot_err.Fit("fff2", "MREQL")
         
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -411,7 +434,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MREQL")
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -494,8 +517,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "MRQ")
-        ghi.Fit(fhi, "MRQ")
+        glo.Fit(flo, "MREQL")
+        ghi.Fit(fhi, "MREQL")
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -567,6 +590,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             
         del g_plot_err
         
+        # Remember converged values for the next t-bin
+        last_pars = [fff2.GetParameter(k) for k in range(4)]
+
         g_sig_l_total.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         g_sig_l_total.GetYaxis().SetTitle("#it{#sigma}_{L} [nb/GeV^{2}]")
         
@@ -733,7 +759,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, "MRQ")
+    g_unsep_mult.Fit(f_lin, "MREQL")
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -769,8 +795,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, "MRQ")
-g_sig_t_total.Fit(f_exp_t, "MRQ")
+g_sig_l_total.Fit(f_exp_l, "MREQL")
+g_sig_t_total.Fit(f_exp_t, "MREQL")
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -806,23 +832,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "MRQ")
+g_sig_l_total.Fit(f_exp, "MREQL")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "MRQ")
+g_sig_t_total.Fit(f_exp, "MREQL")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "MRQ")
+g_sig_lt_total.Fit(f_exp, "MREQL")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "MRQ")
+g_sig_tt_total.Fit(f_exp, "MREQL")
 c_total.Print(outputpdf+')')
 c_total.Clear()
