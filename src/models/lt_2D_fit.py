@@ -287,6 +287,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                    0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
         
+        # Freeze σ_TT to zero for this test
+        fff2.FixParameter(3, 0.0)
+
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
