@@ -369,7 +369,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, fff2.GetParameter(1))
         fff2.FixParameter(2, fff2.GetParameter(2))
 
-        fff2.ReleaseParameter(3)
+        #fff2.ReleaseParameter(3)
         fff2.SetParameter(3, 0.0)
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
@@ -405,7 +405,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, fff2.GetParameter(1))
 
         fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
+        #fff2.ReleaseParameter(3)
         fff2.SetParameter(2, fff2.GetParameter(2))
         fff2.SetParameter(3, fff2.GetParameter(3))
 
@@ -422,7 +422,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(0)
         fff2.ReleaseParameter(1)
         fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
+        #fff2.ReleaseParameter(3)
 
         low, high = adapt_limits(0, fit_step)
         fff2.SetParLimits(0, low, high)
