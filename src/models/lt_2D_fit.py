@@ -417,8 +417,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # If LT or TT hit the hard wall, fix that term to 0 nb
         # and refit once.  No other logic changes.
         # -----------------------------------------------------------
-        LIMIT_LT = adapt_limits('sigLT')[0]
-        LIMIT_TT = adapt_limits('sigTT')[0]
+        LIMIT_LT = adapt_limits('sigLT')[1]
+        LIMIT_TT = adapt_limits('sigTT')[1]
         over_lim = False
 
         if abs(abs(fff2.GetParameter(2)) - LIMIT_LT) < 1e-9:
