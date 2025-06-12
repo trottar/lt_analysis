@@ -421,10 +421,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         LIMIT_TT = adapt_limits('sigTT')[1]
         over_lim = False
 
-        if abs(abs(fff2.GetParameter(2)) - LIMIT_LT) < 1e-9:
+        if abs(abs(fff2.GetParameter(2)) - LIMIT_LT) < 1e-3:
             fff2.FixParameter(2, 0.0)         # σ_LT over_lim → set to 0
             over_lim = True
-        if abs(abs(fff2.GetParameter(3)) - LIMIT_TT) < 1e-9:
+        if abs(abs(fff2.GetParameter(3)) - LIMIT_TT) < 1e-3:
             fff2.FixParameter(3, 0.0)         # σ_TT over_lim → set to 0
             over_lim = True
         if over_lim:
