@@ -258,25 +258,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
         
-        # ------------------------------------------------------------------
-        # Loose Gaussian priors on σ_LT (1 nb) and σ_TT (0.5 nb)
-        # These act like "pull terms" so the fit isn't tempted to park at ±limit
-        # ------------------------------------------------------------------
-        prior_err_LT = 1.0   # nb
-        prior_err_TT = 0.5   # nb
-
-        n = g_plot_err.GetN()                 # current last index
-
-        # σ_LT prior: add a dummy point with only Z error
-        g_plot_err.SetPoint     (n, 0.0, 0.0, 0.0)          # φ = 0°, ε = 0
-        g_plot_err.SetPointError(n, 0.0, 0.0, prior_err_LT) # σ error only
-
-        # σ_TT prior
-        n += 1
-        g_plot_err.SetPoint     (n, 0.0, 0.0, 0.0)
-        g_plot_err.SetPointError(n, 0.0, 0.0, prior_err_TT)
-        # ------------------------------------------------------------------
-
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, 0.0, 1.0)
@@ -287,9 +268,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                    0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
         
-        # Freeze σ_TT to zero for this test
-        fff2.FixParameter(3, 0.0)
-
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
@@ -369,7 +347,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, fff2.GetParameter(1))
         fff2.FixParameter(2, fff2.GetParameter(2))
 
-        #fff2.ReleaseParameter(3)
+        fff2.ReleaseParameter(3)
         fff2.SetParameter(3, 0.0)
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
@@ -405,7 +383,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, fff2.GetParameter(1))
 
         fff2.ReleaseParameter(2)
-        #fff2.ReleaseParameter(3)
+        fff2.ReleaseParameter(3)
         fff2.SetParameter(2, fff2.GetParameter(2))
         fff2.SetParameter(3, fff2.GetParameter(3))
 
@@ -422,7 +400,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(0)
         fff2.ReleaseParameter(1)
         fff2.ReleaseParameter(2)
-        #fff2.ReleaseParameter(3)
+        fff2.ReleaseParameter(3)
 
         low, high = adapt_limits(0, fit_step)
         fff2.SetParLimits(0, low, high)
@@ -434,6 +412,24 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParLimits(3, low, high)
 
         g_plot_err.Fit(fff2, "MRQ")
+
+        # -----------------------------------------------------------
+        # If LT or TT hit the hard wall, fix that term to 0 nb
+        # and refit once.  No other logic changes.
+        # -----------------------------------------------------------
+        LIMIT_LT = adapt_limits('sigLT')[0]
+        LIMIT_TT = adapt_limits('sigTT')[0]
+        over_lim = False
+
+        if abs(abs(fff2.GetParameter(2)) - LIMIT_LT) < 1e-9:
+            fff2.FixParameter(2, 0.0)         # σ_LT over_lim → set to 0
+            over_lim = True
+        if abs(abs(fff2.GetParameter(3)) - LIMIT_TT) < 1e-9:
+            fff2.FixParameter(3, 0.0)         # σ_TT over_lim → set to 0
+            over_lim = True
+        if over_lim:
+            g_plot_err.Fit(fff2, "MRQ")        # one quick refit
+        # -----------------------------------------------------------    
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
