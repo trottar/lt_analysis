@@ -81,8 +81,8 @@ PI = math.pi
 PARAM_LIMITS = {
     'sigT' : [(0.0, 1000.0)]*7,   # parameter 0
     'sigL' : [(0.0, 1000.0)]*7,   # parameter 1
-    'sigLT': [(-3.0,  3.0)]*7,  # parameter 2
-    'sigTT': [(-1.5,  1.5)]*7   # parameter 3
+    'sigLT': [(-5.0,  5.0)]*7,  # parameter 2
+    'sigTT': [(-5.0,  5.0)]*7   # parameter 3
 }
 '''
 PARAM_LIMITS = {
