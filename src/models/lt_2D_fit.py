@@ -425,10 +425,24 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1
 
-        print("DEBUG ❶  fixed?  :", [fff2.IsFixed(i)     for i in range(4)])
-        print("DEBUG ❷  steps   :", [fff2.GetParError(i) for i in range(4)])
-        print("DEBUG ❸  values  :", [fff2.GetParameter(i)for i in range(4)])
-        print("DEBUG ❹  g_plot_err N =", g_plot_err.GetN())
+        print("\n--- Debug snapshot just before Pass-3 Fit ---")
+        for i in range(4):
+            lo, hi = fff2.GetParLimits(i)        # returns a tuple in modern PyROOT
+            try:                                 # fallback for older signature
+                pass
+            except TypeError:
+                lo_ref = ROOT.Double(0.0); hi_ref = ROOT.Double(0.0)
+                fff2.GetParLimits(i, lo_ref, hi_ref)
+                lo, hi = float(lo_ref), float(hi_ref)
+
+            par   = fff2.GetParameter(i)
+            step  = fff2.GetParError(i)
+            fixed = (abs(hi - lo) < 1e-12)       # True if limits identical
+
+            print(f"  par[{i}]  value={par:10.4g}  step={step:8.4g} "
+                f"limits=({lo:6.3g},{hi:6.3g})  fixed={fixed}")
+        print("  graph points =", g_plot_err.GetN())
+        print("--------------------------------------------------\n")
 
         # --- Fit 3: LT & TT ---
         fff2.ReleaseParameter(2)
