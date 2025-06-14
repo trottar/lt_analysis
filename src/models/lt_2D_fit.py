@@ -411,25 +411,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
 
-        g_plot_err.Fit(fff2, "MRQ")
-
-        # -----------------------------------------------------------
-        # If LT or TT hit the hard wall, fix that term to 0 nb
-        # and refit once.  No other logic changes.
-        # -----------------------------------------------------------
-        LIMIT_LT = adapt_limits('sigLT')[1]
-        LIMIT_TT = adapt_limits('sigTT')[1]
-        over_lim = False
-
-        if abs(abs(fff2.GetParameter(2)) - LIMIT_LT) < 1e-3:
-            fff2.FixParameter(2, 0.0)         # σ_LT over_lim → set to 0
-            over_lim = True
-        if abs(abs(fff2.GetParameter(3)) - LIMIT_TT) < 1e-3:
-            fff2.FixParameter(3, 0.0)         # σ_TT over_lim → set to 0
-            over_lim = True
-        if over_lim:
-            g_plot_err.Fit(fff2, "MRQ")        # one quick refit
-        # -----------------------------------------------------------    
+        g_plot_err.Fit(fff2, "MRQ")  
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
