@@ -112,6 +112,18 @@ def adapt_limits(param_name_or_idx, step=0):
     # Single tuple provided:
     return limdef
 # --------------------------------------------------------------------------------------------
+
+def check_sigma_positive(f):
+    """
+    Quick sanity check: require σ(φ,ε) ≥ 0 at four φ and both ε settings.
+    """
+    sigma_min = min(f.Eval(phi, eps)
+                    for phi in (0, 90, 180, 270)
+                    for eps in (LOEPS, HIEPS))
+    if sigma_min < 0:
+        print("WARNING: negative cross-section → interference too large",
+              "(σ_min = {:.3f})".format(sigma_min))
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -289,6 +301,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(3, 0.0)
 
         g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
@@ -317,6 +330,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParLimits(2, low, high)
 
         g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -334,6 +348,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(3, fff2.GetParameter(3))
 
         g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -353,6 +368,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParLimits(3, low, high)
 
         g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -370,6 +386,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(3, fff2.GetParameter(3))
 
         g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -411,7 +428,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
 
-        g_plot_err.Fit(fff2, "MRQ")  
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2)  
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
