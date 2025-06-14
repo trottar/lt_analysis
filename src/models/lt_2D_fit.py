@@ -320,7 +320,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
-        graph.Fit(fff2, "Q0")       # quiet, no redraw
+        g_plot_err.Fit(fff2, "Q0")       # quiet, no redraw
         check_sigma_positive(fff2)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -343,7 +343,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(1)    # σL now floats
         fff2.FixParameter(2, 0.0)
         fff2.FixParameter(3, 0.0)
-        graph.Fit(fff2, "Q0")
+        g_plot_err.Fit(fff2, "Q0")
         check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -364,7 +364,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # --- Fit 3: LT & TT ---
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
-        graph.Fit(fff2, "Q0")
+        g_plot_err.Fit(fff2, "Q0")
         check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
