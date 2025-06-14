@@ -186,9 +186,10 @@ def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
         L_j = limit_map[j]
         minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
 
-    # run Migrad and Hesse (to get covariance for later)
-    minuit.Command("MIGRAD")
-    minuit.Command("HESSE")
+    # run Migrad and Hesse using TMinuit’s dedicated methods
+    minuit.Migrad()   # no return value, so no c_int headache
+    minuit.Hesse()
+
 
     # copy the fitted values back into the TF1
     for j in range(npar):
