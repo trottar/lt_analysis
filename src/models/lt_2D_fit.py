@@ -212,14 +212,14 @@ def run_penalized_fit(graph, tf1, limit_map,
         L_j  = limit_map.get(j, abs(init)*10)
         # DefineParameter(id, name, initVal, step, lower, upper)
         minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
+        
+    # 4) Run MIGRAD and HESSE with an empty argument list
+    arglist = array('d', [])    # zero-length double array
+    ierflg  = array('i', [0])   # one-element int array for the status
 
-    # 4) Run MIGRAD and HESSE via the Python-friendly ExecuteCommand
-    # 4) Run MIGRAD and HESSE via mnexcm using a Python array for the status
-    ier = array('i', [0])
-    minuit.mnexcm("MIGRAD", None, 0, ier)
-    minuit.mnexcm("HESSE",  None, 0, ier)
-    # ier[0] now holds the return code (0 = success)
-
+    minuit.mnexcm("MIGRAD", arglist, 0, ierflg)
+    minuit.mnexcm("HESSE",  arglist, 0, ierflg)
+    # ierflg[0] now holds the return code (0 = success)
 
 
     # 5) Copy best-fit values (and optional errors) back into tf1
