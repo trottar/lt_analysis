@@ -382,6 +382,25 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "Q0")
         check_sigma_positive(fff2, g_plot_err)
 
+        # ------------------------------------------------------------------
+        # Soft prior : expect σ_L ≳ 2 % of σ_T with 100 % uncertainty
+        # ------------------------------------------------------------------
+        prior_frac    = 0.02                         # 2 % of σ_T
+        prior_rel_err = 1.0                          # 100 % → very weak weight
+
+        sigT_guess    = max(fff2.GetParameter(0), 1e-3)    # current σ_T
+        sigL_prior    = prior_frac * sigT_guess
+        sigL_err      = prior_rel_err * sigL_prior         # error = value → 1 χ² unit
+
+        phi_prior  = 999.0                              # outside real φ-range
+        eps_prior  = lo_eps                             # any ε is fine
+
+        # add pseudo-point to the **same** TGraph2DErrors that will be fitted
+        n_prior = g_plot_err.GetN()
+        g_plot_err.SetPoint      (n_prior, phi_prior, eps_prior, sigL_prior)
+        g_plot_err.SetPointError (n_prior, 0.0,       0.0,       sigL_err)
+        # ------------------------------------------------------------------
+
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
         eps_diff   = abs(HIEPS - LOEPS)
         cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
