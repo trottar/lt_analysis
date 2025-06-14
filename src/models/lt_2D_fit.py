@@ -524,28 +524,30 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
         
-        # === COLLECT & SKIP PER-BIN ===
+        # === STEP-6 COLLECT & SKIP PER-BIN (fixed for TGraph2DErrors) ===
         if USE_GLOBAL_FIT:
-            # Two points were just added to g_plot_err (lo_eps then hi_eps).
-            # Extract them and stash in global_pts, then skip the rest of per-bin logic.
             for idx_pt, eps_val in enumerate((lo_eps, hi_eps)):
+                # prepare three C-doubles: x (φ), y (ε), z (σ)
                 x_cd = ctypes.c_double()
                 y_cd = ctypes.c_double()
-                g_plot_err.GetPoint(idx_pt, x_cd, y_cd)
-                # Attempt to get the z-error (σ uncertainty); fallback to Y-error.
-                try:
-                    err_z = g_plot_err.GetErrorZ(idx_pt)
-                except AttributeError:
-                    err_z = g_plot_err.GetErrorY(idx_pt)
+                z_cd = ctypes.c_double()
+
+                # note: four args here
+                g_plot_err.GetPoint(idx_pt, x_cd, y_cd, z_cd)
+
+                # pull the z-error (σ uncertainty)
+                err_z = g_plot_err.GetErrorZ(idx_pt)
+
+                # append (t, ε, φ, σ, σ_err)
                 global_pts.append((
-                    float(t_list[i]),     # t-bin center
-                    eps_val,              # epsilon (lo or hi)
-                    x_cd.value,           # φ in degrees
-                    y_cd.value,           # σ_unsep
-                    err_z                 # σ uncertainty
+                    float(t_list[i]),  # t-bin center
+                    eps_val,           # ε (lo or hi)
+                    x_cd.value,        # φ (deg)
+                    z_cd.value,        # σ_unsep
+                    err_z              # σ uncertainty
                 ))
             continue
-        # ===============================
+        # ================================================================
 
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
