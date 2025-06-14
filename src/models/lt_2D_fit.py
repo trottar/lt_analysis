@@ -421,14 +421,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1
 
-        #fff2.SetParameter(0, 1)
-        low, high = adapt_limits(0, fit_step)
-        fff2.SetParLimits(0, low, high)
-
-        fff2.FixParameter(1, 0.0)
-        fff2.FixParameter(2, 0.0)
-        fff2.FixParameter(3, 0.0)
-
         # --- Fit 3: LT & TT ---
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
