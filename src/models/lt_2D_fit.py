@@ -425,6 +425,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1
 
+        print("DEBUG ❶  fixed?  :", [fff2.IsFixed(i)     for i in range(4)])
+        print("DEBUG ❷  steps   :", [fff2.GetParError(i) for i in range(4)])
+        print("DEBUG ❸  values  :", [fff2.GetParameter(i)for i in range(4)])
+        print("DEBUG ❹  g_plot_err N =", g_plot_err.GetN())
+
         # --- Fit 3: LT & TT ---
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
