@@ -1027,14 +1027,9 @@ g_sig_tt_total = TGraphErrors()
 if USE_GLOBAL_FIT:
     # 1) run the fit
     best, global_errors = run_global_fit(global_pts)
-    
+
     AL, BL, AT, BT, ALT, BLT, ATT, BTT = best
-
-    if USE_MINOS:
-        # global_errors is [(lo0, hi0), (lo1, hi1), …]
-        (al_lo,  al_hi),  (bl_lo,  bl_hi),  … = global_errors
-        # now you can propagate or plot those asymmetric errors
-
+    
     # 2) (Re)initialize the TOTAL graphs so they're empty:
     g_sig_l_total.Reset()
     g_sig_t_total.Reset()
