@@ -79,8 +79,8 @@ PI = math.pi
 #
 #'''
 PARAM_LIMITS = {
-    'sigT' : [(0.0, 1000.0)]*7,   # parameter 0
-    'sigL' : [(0.0, 1000.0)]*7,   # parameter 1
+    'sigT' : [(1e-3, 1000.0)]*7,   # parameter 0
+    'sigL' : [(1e-3, 1000.0)]*7,   # parameter 1
     'sigLT': [(-1.0,  1.0)]*7,  # parameter 2
     'sigTT': [(-1.0,  1.0)]*7,   # parameter 3
     "rho_lt": [(-1.0, 1.0)]*7,   # rho_LT >= -1
@@ -111,14 +111,25 @@ def adapt_limits(param_name_or_idx, step=0):
 
 def check_sigma_positive(f):
     """
-    Quick sanity check: require σ(φ,ε) ≥ 0 at four φ and both ε settings.
+    Returns True if σ(φ,ε) is ≥ 0 for φ = 0,90,180,270° and both ε settings.
+    If not, shrink the ρTT limits by 10 % and re-fit once.
     """
-    sigma_min = min(f.Eval(phi, eps)
-                    for phi in (0, 90, 180, 270)
-                    for eps in (LOEPS, HIEPS))
-    if sigma_min < 0:
-        print("WARNING: negative cross-section → interference too large",
-              "(σ_min = {:.3f})".format(sigma_min))
+    phi_set = (0, 90, 180, 270)
+    eps_set = (LOEPS, HIEPS)
+
+    if min(f.Eval(phi, eps) for phi in phi_set for eps in eps_set) >= 0:
+        return True   # all good
+
+    # positivity violated → pull ρTT inwards and try again
+    print("WARNING: negative σ detected → tightening ρTT limits and refitting")
+
+    lo, hi = f.GetParLimits(3)          # current limits on ρTT
+    shrink = 0.9                        # 10 % inward
+    lo, hi = lo*shrink, hi*shrink
+    f.SetParLimits(3, lo, hi)           # update limits
+    graph.Fit(f, "Q0")                  # immediate quiet refit
+
+    return min(f.Eval(phi, eps) for phi in phi_set for eps in eps_set) >= 0
 
 ###############################################################################################################################################
 
@@ -517,45 +528,38 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # ---------------------------------------------------------------
         # Central values -------------------------------------------------
-        sig_t   = fff2.GetParameter(0)          # σ_T
-        sig_l   = fff2.GetParameter(1)          # σ_L
-        rho_lt  = fff2.GetParameter(2)          # ρ_LT   (dimension-less, -1 … +1)
-        rho_tt  = fff2.GetParameter(3)          # ρ_TT   (dimension-less, -1 … +1)
+        sig_t   = fff2.GetParameter(0)
+        sig_l   = fff2.GetParameter(1)
+        rho_lt  = fff2.GetParameter(2)
+        rho_tt  = fff2.GetParameter(3)
 
-        sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)   # σ_LT  (nb)
-        sig_tt  = rho_tt * sig_t                      # σ_TT  (nb)
+        sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)
+        sig_tt  = rho_tt * sig_t
 
-        # One-sigma parameter errors from MINUIT -------------------------
+        # One-sigma errors ----------------------------------------------
         sig_t_err   = fff2.GetParError(0)
         sig_l_err   = fff2.GetParError(1)
         rho_lt_err  = fff2.GetParError(2)
         rho_tt_err  = fff2.GetParError(3)
 
         # ---------------------------------------------------------------
-        # Uncertainty propagation  (guard against ρ → 0) ----------------
-        _eps = 1e-6                                   # avoid div-by-zero
+        # Error propagation (fully guarded) -----------------------------
+        _eps = 1e-6                           # numerical floor
 
-        _safe_sig_t = max(abs(sig_t), _eps)        # ⟵ new
-        _safe_sig_l = max(abs(sig_l), _eps)        # ⟵ new
+        safe_sig_t  = max(abs(sig_t),  _eps)
+        safe_sig_l  = max(abs(sig_l),  _eps)
+        safe_rho_lt = max(abs(rho_lt), _eps)
 
         sig_lt_err = abs(sig_lt) * math.sqrt(
-            (rho_lt_err / max(abs(rho_lt), _eps))**2
-            + (sig_t_err / (2.0 * _safe_sig_t))**2
-            + (sig_l_err / (2.0 * _safe_sig_l))**2
+            (rho_lt_err / safe_rho_lt)**2
+            + (sig_t_err / (2.0 * safe_sig_t))**2
+            + (sig_l_err / (2.0 * safe_sig_l))**2
         )
 
-        sig_tt_err = math.sqrt(
-            (_safe_sig_t * rho_tt_err)**2
-            + (rho_tt * sig_t_err)**2
-        )
+        sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
+                                rho_tt      * sig_t_err )
+        # ---------------------------------------------------------------
 
-        '''
-        sig_l, sig_t, sig_lt, sig_tt = (fff2.GetParameter(1), fff2.GetParameter(0),
-                                        fff2.GetParameter(2), fff2.GetParameter(3))
-        sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = (fff2.GetParError(1), fff2.GetParError(0),
-                                                        fff2.GetParError(2), fff2.GetParError(3))
-        
-        '''
         print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
               "sig_lt: ", sig_lt, "sig_tt: ", sig_tt, \
               "t: ", t_list[i], "theta: ", theta_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
