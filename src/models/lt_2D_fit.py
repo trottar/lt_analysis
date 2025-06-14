@@ -83,9 +83,11 @@ PARAM_LIMITS = {
     'sigL' : [(0.0, 1000.0)]*7,   # parameter 1
     'sigLT': [(-1.0,  1.0)]*7,  # parameter 2
     'sigTT': [(-1.0,  1.0)]*7,   # parameter 3
-    "rhoLT": [(-1.0, 1.0)]*7,   # rho_LT >= -1
-    "rhoTT": [(-1.0, 1.0)]*7    # rho_TT <= 1
+    "rho_lt": [(-1.0, 1.0)]*7,   # rho_LT >= -1
+    "rho_tt": [(-1.0, 1.0)]*7    # rho_TT <= 1
     }
+
+COND_MAX   = 20.0        # user control, near-singular if κ > 20
 
 def adapt_limits(param_name_or_idx, step=0):
     """
@@ -289,7 +291,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             fff2.ReleaseParameter(k)
 
         # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]       # <-- canonical order
+        par_keys  = ["sigT", "sigL", "rho_lt", "rho_tt"]       # <-- canonical order
         current_i = 0   # or whatever index you use inside PARAM_LIMITS[*][current_i]
 
         for idx, key in enumerate(par_keys):
@@ -345,6 +347,19 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(3, 0.0)
         g_plot_err.Fit(fff2, "Q0")
         check_sigma_positive(fff2)
+
+        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
+        eps_diff   = abs(HIEPS - LOEPS)
+        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
+
+        if cond_num > COND_MAX:
+            # matrix is ill-conditioned → apply soft floor to σ_L
+            sigL     = fff2.GetParameter(1)
+            sigL_err = fff2.GetParError(1)
+            floor    = max(0.25*sigL_err, 1e-3)
+            if sigL < floor:
+                fff2.SetParameter(1, floor)
+
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -500,21 +515,44 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             sig_diff_err = 0.0
             sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)      
 
-        sig_t   = fff2.GetParameter(0)
-        sig_l   = fff2.GetParameter(1)
-        rhoLT  = fff2.GetParameter(2)
-        rhoTT  = fff2.GetParameter(3)
+        # ---------------------------------------------------------------
+        # Central values -------------------------------------------------
+        sig_t   = fff2.GetParameter(0)          # σ_T
+        sig_l   = fff2.GetParameter(1)          # σ_L
+        rho_lt  = fff2.GetParameter(2)          # ρ_LT   (dimension-less, -1 … +1)
+        rho_tt  = fff2.GetParameter(3)          # ρ_TT   (dimension-less, -1 … +1)
 
-        sig_lt  = rhoLT * math.sqrt(sig_t * sig_l)
-        sig_tt  = rhoTT * sig_t
+        sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)   # σ_LT  (nb)
+        sig_tt  = rho_tt * sig_t                      # σ_TT  (nb)
+
+        # One-sigma parameter errors from MINUIT -------------------------
+        sig_t_err   = fff2.GetParError(0)
+        sig_l_err   = fff2.GetParError(1)
+        rho_lt_err  = fff2.GetParError(2)
+        rho_tt_err  = fff2.GetParError(3)
+
+        # ---------------------------------------------------------------
+        # Uncertainty propagation  (guard against ρ → 0) ----------------
+        _eps = 1e-6                                   # avoid div-by-zero
+
+        sig_lt_err = abs(sig_lt) * math.sqrt(
+            (rho_lt_err / max(abs(rho_lt), _eps))**2
+            + (sig_t_err / (2.0 * sig_t))**2
+            + (sig_l_err / (2.0 * sig_l))**2
+        )
+
+        sig_tt_err = math.sqrt(
+            (sig_t * rho_tt_err)**2
+            + (rho_tt * sig_t_err)**2
+        )
 
         '''
         sig_l, sig_t, sig_lt, sig_tt = (fff2.GetParameter(1), fff2.GetParameter(0),
                                         fff2.GetParameter(2), fff2.GetParameter(3))
-        '''
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = (fff2.GetParError(1), fff2.GetParError(0),
                                                         fff2.GetParError(2), fff2.GetParError(3))
-
+        
+        '''
         print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
               "sig_lt: ", sig_lt, "sig_tt: ", sig_tt, \
               "t: ", t_list[i], "theta: ", theta_list[i], "W: ", w_list[i], "Q2:", q2_list[i], \
