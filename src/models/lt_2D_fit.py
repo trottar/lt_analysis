@@ -439,9 +439,18 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("--------------------------------------------------\n")        
 
         # --- Fit 3: LT & TT ---
-        for idx, key in ((2, "rhoLT"), (3, "rhoTT")):
-            fff2.ReleaseParameter(idx)
-            reset_limits_from_table(fff2, idx, key, stage=2)
+        stage_idx = 2
+
+        # parameter map: (parameter index, key in PARAM_LIMITS)
+        for p_idx, p_key in ((1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
+            fff2.ReleaseParameter(p_idx)                       # free the parameter
+            # fetch limits from the master table
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
+            fff2.SetParLimits(p_idx, lo_lim, hi_lim)           # reopen full range
+            # give MINUIT a non-zero first step
+            if fff2.GetParError(p_idx) == 0 or math.isnan(fff2.GetParError(p_idx)):
+                step = 0.02 if p_key.startswith("rho") else 0.05 * (hi_lim - lo_lim)
+                fff2.SetParError(p_idx, step)
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
