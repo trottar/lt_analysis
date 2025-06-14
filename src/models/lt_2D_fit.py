@@ -70,253 +70,6 @@ pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (h
 PI = math.pi
 
 ###############################################################################################################################################
-
-# ------------------------------------------------------------------
-TOL_AT_LIMIT = 1e-3          # how close to the hard wall counts as “at the limit”
-PENALTY_LAMBDA = 1.0e3   # strength of χ² penalty once |p| exceeds its limit
-# --- Adaptive-limit parameters -----------------------------
-HIGH_PULL_FRAC  = 0.85   # when |σ| > 85 % of its limit, consider loosening
-SCALE_UP_FACTOR = 1.30   # enlarge the limit by ×1.3 when it keeps getting hit
-# --- Decorrelation parameters ------------------------------
-CORR_THRESHOLD      = 0.92   # if |ρ(L,T)| > 0.92 ⇒ re-fit in Σ/Δ basis
-MIN_CORR_IMPROVE    = 0.15   # require ≥ 0.15 reduction, else keep old fit
-# --- Gaussian priors (LT & TT) -----------------------------
-# Prior:  χ²_prior = ((p_i – μ_i)/σ_i)²
-PRIOR_SIGMA_LT = 0.10   # nb; adjust to taste / external theory
-PRIOR_SIGMA_TT = 0.10   # nb
-ENFORCE_PRIOR  = True   # quick on/off switch
-# === GLOBAL-FIT CONTROLS ===
-USE_GLOBAL_FIT = True         # True → do one global fit; False → run per-bin fits (Steps 1–5)
-PAR_MODEL      = "exp"        # "exp" for A·e^{B t}, or "poly" for A + B·t
-N_PAR_MODEL    = 2            # number of parameters per σ_i(t) model
-# === MINOS ERROR ANALYSIS ===
-USE_MINOS = True    # True → run Minos on each fit to get asymmetric errors
-# ===================================
-
-# Per-parameter scaling factors (start at 1.0 = “base” limit)
-LIMIT_SCALE = {
-    'sigL' : 1.0,
-    'sigT' : 1.0,
-    'sigLT': 1.0,
-    'sigTT': 1.0,
-}
-
-# Map TF1 parameter index -> key used in adapt_limits
-IDX2KEY = {0: 'sigL', 1: 'sigT', 2: 'sigLT', 3: 'sigTT'}
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def get_scaled_limit(key):
-    """
-    Return the current hard wall for 'sigL', 'sigT', 'sigLT', or 'sigTT',
-    after applying the adaptive SCALE factor.
-    """
-    base_lim = adapt_limits(key)[1]
-    return base_lim * LIMIT_SCALE[key]
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def refit_until_inside_limits(fit_func, graph, limit_map):
-    """
-    Iteratively fixes any parameter that sits on its hard limit and refits
-    until all free parameters lie strictly inside their allowed range.
-    `limit_map` must map parameter index -> (abs_limit_value).
-    """
-    while True:
-        hit_any = False
-        for idx, lim in limit_map.items():
-            # Is this parameter already fixed?  If so, skip.
-            if fit_func.IsParameterFixed(idx):      # or IsFixedPar(idx) on older ROOT
-                continue
-            # Check distance to either +lim or –lim
-            if abs(abs(fit_func.GetParameter(idx)) - lim) < TOL_AT_LIMIT:
-                fit_func.FixParameter(idx, 0.0)
-                hit_any = True
-        if not hit_any:
-            break
-        graph.Fit(fit_func, "MRQ")   # silent refit
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-from ROOT import Math, TF1
-
-def run_penalized_fit(fcn_tf1,
-                      npars,
-                      start_vals,
-                      step_sizes=None,
-                      lower_limits=None,
-                      upper_limits=None):
-    # If no step_sizes provided but limits are, auto-compute them as 1/10 the range
-    if step_sizes is None and lower_limits is not None and upper_limits is not None:
-        step_sizes = [(u - l) * 0.1 for l, u in zip(lower_limits, upper_limits)]
-    elif step_sizes is None:
-        raise ValueError("Must provide either step_sizes or both lower_limits and upper_limits")
-
-    # 1) Create the Minuit/Migrad minimizer
-    minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
-    minimizer.SetMaxFunctionCalls(1_000_000)
-    minimizer.SetMaxIterations(100_000)
-    minimizer.SetTolerance(0.001)
-    minimizer.SetPrintLevel(0)
-
-    # 2) Wrap your TF1 as a multi-dim functor
-    fcn = Math.WrappedMultiTF1(npars, fcn_tf1)
-    minimizer.SetFunction(fcn)
-
-    # 3) Define all parameters (with or without bounds)
-    for i in range(npars):
-        name  = f"p{i}"
-        start = start_vals[i]
-        step  = step_sizes[i]
-        if lower_limits is not None and upper_limits is not None:
-            minimizer.SetLimitedVariable(i, name, start, step,
-                                         lower_limits[i], upper_limits[i])
-        else:
-            minimizer.SetVariable(i, name, start, step)
-
-    # 4) Run the fit
-    minimizer.Minimize()
-    minimizer.Hesse()
-
-    # 5) Return values and errors
-    return minimizer.X(), minimizer.Errors()
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def adapt_limits_after_fit(tf1):
-    """
-    Inspect the final parameters in tf1 and, if a value keeps pressing
-    near its wall, enlarge that wall for future t-bins.
-    """
-    for idx, key in IDX2KEY.items():
-        cur_lim  = get_scaled_limit(key)
-        cur_val  = abs(tf1.GetParameter(idx))
-        if cur_val > HIGH_PULL_FRAC * cur_lim:
-            LIMIT_SCALE[key] *= SCALE_UP_FACTOR
-            # Optional: print a one-line diagnostic
-            print(f"[adaptive-limit] Enlarged {key} to {get_scaled_limit(key):.3g}")
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def lt_correlation(tf2):
-    """
-    Return the correlation coefficient ρ(σ_L, σ_T) for the current TF2 fit.
-    Assumes parameter index 0 ↔ σ_T and 1 ↔ σ_L (the order used in fff2).
-    """
-    cov   = tf2.GetCovarianceMatrix()   # TMatrixDSym
-    var_T = cov(0,0)
-    var_L = cov(1,1)
-    cov_TL= cov(0,1)
-    return cov_TL / math.sqrt(var_T * var_L) if var_T*var_L > 0 else 0.0
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def refit_in_sum_diff_basis(graph, tf2, limit_map):
-    """
-    Perform a second fit in the rotated basis:
-        Σ = σ_L + σ_T        (param [0])
-        Δ = σ_L – σ_T        (param [1])
-        σ_LT, σ_TT unchanged ([2], [3])
-    If the correlation improves by at least MIN_CORR_IMPROVE, keep the
-    rotated result; otherwise revert to the original parameter set.
-    """
-
-    # -- Build a new TF2 with the Σ/Δ parameterisation -------------
-    expr = ("0.5*((1+y)*[0] + (y-1)*[1])"                # Σ/Δ core
-            " + sqrt(2*y*(1+y))*cos(x*0.017453)*[2]"     # σ_LT term
-            " + y*cos(2*x*0.017453)*[3]")                # σ_TT term
-    f_rot = ROOT.TF2("f_rot", expr, 0, 360, 0.0, 1.0)
-
-    # -- Seed parameters from current fit --------------------------
-    sigT = tf2.GetParameter(0)
-    sigL = tf2.GetParameter(1)
-    f_rot.SetParameters(sigL + sigT,          # Σ
-                        sigL - sigT,          # Δ
-                        tf2.GetParameter(2),  # σ_LT
-                        tf2.GetParameter(3))  # σ_TT
-
-    # Re-use *errors* to guide step sizes
-    for i in range(4):
-        f_rot.SetParError(i, tf2.GetParError(i))
-
-    # -- Perform a quick fit with the same penalty limits ----------
-    refit_until_inside_limits(f_rot, graph, limit_map)
-
-    # -- Evaluate whether correlation improved ---------------------
-    rho_before = abs(lt_correlation(tf2))
-    rho_after  = abs(lt_correlation(f_rot))
-
-    if rho_before - rho_after >= MIN_CORR_IMPROVE:
-        # Accept rotated parameters – convert back to L & T
-        sigSum = f_rot.GetParameter(0)
-        sigDiff= f_rot.GetParameter(1)
-        tf2.SetParameter(0, 0.5*(sigSum - sigDiff))   # σ_T
-        tf2.SetParameter(1, 0.5*(sigSum + sigDiff))   # σ_L
-        tf2.SetParameter(2, f_rot.GetParameter(2))    # σ_LT
-        tf2.SetParameter(3, f_rot.GetParameter(3))    # σ_TT
-        print(f"[decorrelate] ρ(L,T) improved {rho_before:.2f} → {rho_after:.2f}")
-    else:
-        print(f"[decorrelate] kept original fit (ρ {rho_before:.2f} → {rho_after:.2f})")
-# ------------------------------------------------------------------
-
-# === GLOBAL FIT FUNCTION ===
-def run_global_fit(global_pts):
-    """
-    Simultaneous χ² fit to ALL (t, eps, φ, σ_unsep, σ_err) in global_pts.
-    Models each σ_i(t) with PAR_MODEL (“exp” or “poly”), 
-    using 2 parameters [A_i, B_i] for i = {L, T, LT, TT}.
-    Returns [A_L, B_L, A_T, B_T, A_LT, B_LT, A_TT, B_TT].
-    """
-    import math
-    from ROOT import Math
-    npar = 4 * N_PAR_MODEL
-
-    # model f(t; A, B)
-    if PAR_MODEL == "exp":
-        f = lambda A,B,t: A * math.exp(B*t)
-    else:
-        f = lambda A,B,t: A + B*t
-
-    # χ² over all points
-    def chi2(params):
-        χ2 = 0.0
-        # unpack in order [A_L,B_L, A_T,B_T, A_LT,B_LT, A_TT,B_TT]
-        for t_val, eps, phi_deg, σ, σ_err in global_pts:
-            AL, BL, AT, BT, ALT, BLT, ATT, BTT = params
-            sigL  = f(AL, BL, t_val)
-            sigT  = f(AT, BT, t_val)
-            sigLT = f(ALT,BLT,t_val)
-            sigTT = f(ATT,BTT,t_val)
-            φ     = math.radians(phi_deg)
-            model = (eps*sigL + sigT
-                     + math.sqrt(2*eps*(1+eps))*sigLT*math.cos(φ)
-                     + eps*sigTT*math.cos(2*φ))
-            χ2   += ((σ - model)/σ_err)**2
-        return χ2
-
-    functor = Math.Functor(chi2, npar)
-    minim   = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-    minim.SetFunction(functor)
-    # initialize parameters
-    for i in range(npar):
-        minim.SetVariable(i, f"p{i}", 0.05, 0.01)
-    minim.Minimize()
-    # === STEP-7 GLOBAL MINOS CALLS ===
-    if USE_MINOS:
-        from ctypes import c_double
-        # prepare containers
-        lo_errs = [c_double(0) for _ in range(4*N_PAR_MODEL)]
-        hi_errs = [c_double(0) for _ in range(4*N_PAR_MODEL)]
-        for ipar in range(4 * N_PAR_MODEL):
-            minim.Minos(ipar, lo_errs[ipar], hi_errs[ipar])
-        # now lo_errs[ipar].value and hi_errs[ipar].value hold the asymmetric errors
-        # you can return them alongside the best-fit parameters if you like
-    # ===================================
-
-    return list(minim.X())
-# ===================================
-
-###############################################################################################################################################
 # -------------------------  DYNAMIC LIMITS  -------------------------------------------------
 # Edit PARAM_LIMITS below to adjust allowed ranges per fit-step (0-based index).
 # Provide either:
@@ -326,8 +79,8 @@ def run_global_fit(global_pts):
 #
 #'''
 PARAM_LIMITS = {
-    'sigT' : [(-5.0, 1000.0)]*7,   # parameter 0
-    'sigL' : [(-5.0, 1000.0)]*7,   # parameter 1
+    'sigT' : [(0.0, 1000.0)]*7,   # parameter 0
+    'sigL' : [(0.0, 1000.0)]*7,   # parameter 1
     'sigLT': [(-5.0,  5.0)]*7,  # parameter 2
     'sigTT': [(-5.0,  5.0)]*7   # parameter 3
 }
@@ -415,11 +168,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     hi_cross_sec = np.zeros(t_bin_num, dtype=float)
     lo_cross_sec_err = np.zeros(t_bin_num, dtype=float)
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
-
-    # === STEP-6 GLOBAL ACCUMULATION ===
-    if USE_GLOBAL_FIT:
-        global_pts = []   # will collect tuples: (t_bin, eps, phi_deg, σ_unsep, σ_err)
-    # ================================
 
     for i in range(0, t_bin_num):    
         
@@ -510,40 +258,16 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
         
-        # === STEP-6 COLLECT & SKIP PER-BIN (fixed for TGraph2DErrors) ===
-        if USE_GLOBAL_FIT:
-            for idx_pt, eps_val in enumerate((lo_eps, hi_eps)):
-                # prepare three C-doubles: x (φ), y (ε), z (σ)
-                x_cd = ctypes.c_double()
-                y_cd = ctypes.c_double()
-                z_cd = ctypes.c_double()
-
-                # note: four args here
-                g_plot_err.GetPoint(idx_pt, x_cd, y_cd, z_cd)
-
-                # pull the z-error (σ uncertainty)
-                err_z = g_plot_err.GetErrorZ(idx_pt)
-
-                # append (t, ε, φ, σ, σ_err)
-                global_pts.append((
-                    float(t_list[i]),  # t-bin center
-                    eps_val,           # ε (lo or hi)
-                    x_cd.value,        # φ (deg)
-                    z_cd.value,        # σ_unsep
-                    err_z              # σ uncertainty
-                ))
-        # ================================================================
-
         fff2 = TF2("fff2",
-                "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                0, 360, 0.0, 1.0)
+                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
+                   0, 360, 0.0, 1.0)
 
         '''
         fff2 = TF2("fff2",
-                "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                0, 360, LOEPS-0.1, HIEPS+0.1)
+                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
+                   0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
-
+        
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
@@ -593,41 +317,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParLimits(2, low, high)
 
         g_plot_err.Fit(fff2, "MRQ")
-
-        # -----------------------------------------------------------
-        # Soft-constraint refinement
-        # -----------------------------------------------------------
-        limit_map = {
-            0: get_scaled_limit('sigL'),
-            1: get_scaled_limit('sigT'),
-            2: get_scaled_limit('sigLT'),
-            3: get_scaled_limit('sigTT'),
-        }
-        # 1) Determine how many parameters you have:
-        npars = fff2.GetNpar()    # returns an int (4 in your case)
-
-        # 2) Grab your initial guesses out of the TF1 (or supply your own):
-        start_vals = [ fff2.GetParameter(i) for i in range(npars) ]
-
-        # 3) Unpack your symmetric limit_map (which maps index→L) into lower/upper lists:
-        #    e.g. if limit_map[0]=5, parameter 0 runs in [-5, +5].
-        keys = list(range(npars))
-        lower_limits = [ -limit_map[k] for k in keys ]
-        upper_limits = [  limit_map[k] for k in keys ]
-
-        '''
-        # Now call with the full signature:
-        fit_vals, fit_errs = run_penalized_fit(
-            fff2,            # the TF2 you’re fitting
-            npars,
-            start_vals,
-            lower_limits=lower_limits,
-            upper_limits=upper_limits
-        )      
-        ''' 
-        print(f"[priors] σ_LT = {fff2.GetParameter(2):+.3f} nb   "
-          f"σ_TT = {fff2.GetParameter(3):+.3f} nb")
-        # -----------------------------------------------------------
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -722,42 +411,34 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         low, high = adapt_limits(3, fit_step)
         fff2.SetParLimits(3, low, high)
 
-        # --- “All-free” fit, now capturing the result ---
-        fitres = g_plot_err.Fit(fff2, "MRQS")   # “S” → store and return TFitResultPtr
-
-        # === PER-BIN MINOS CALLS ===
-        if USE_MINOS:
-            # param order in fff2: 0→σ_T, 1→σ_L, 2→σ_LT, 3→σ_TT
-            # run Minos and grab lower/upper for each
-            sig_t_lo, sig_t_hi   = fitres.LowerError(0), fitres.UpperError(0)
-            sig_l_lo, sig_l_hi   = fitres.LowerError(1), fitres.UpperError(1)
-            sig_lt_lo, sig_lt_hi = fitres.LowerError(2), fitres.UpperError(2)
-            sig_tt_lo, sig_tt_hi = fitres.LowerError(3), fitres.UpperError(3)
-        # ===================================
+        g_plot_err.Fit(fff2, "MRQ")
 
         # -----------------------------------------------------------
-        # Iterative limit enforcement for all four cross-section terms
+        # If LT or TT hit the hard wall, fix that term to 0 nb
+        # and refit once.  No other logic changes.
         # -----------------------------------------------------------
-        limit_map = {
-            0: get_scaled_limit('sigL'),
-            1: get_scaled_limit('sigT'),
-            2: get_scaled_limit('sigLT'),
-            3: get_scaled_limit('sigTT'),
-        }
-        refit_until_inside_limits(fff2, g_plot_err, limit_map)
-        # -----------------------------------------------------------
+        LIMIT_LT = adapt_limits('sigLT')[1]
+        LIMIT_TT = adapt_limits('sigTT')[1]
+        over_lim = False
 
-        # -----------------------------------------------------------
-        # Record pulls and adapt future hard walls
-        # -----------------------------------------------------------
-        adapt_limits_after_fit(fff2)
-        # -----------------------------------------------------------
+        if abs(abs(fff2.GetParameter(2)) - LIMIT_LT) < 1e-3:
+            fff2.FixParameter(2, 0.0)         # σ_LT over_lim → set to 0
+            over_lim = True
+        if abs(abs(fff2.GetParameter(3)) - LIMIT_TT) < 1e-3:
+            fff2.FixParameter(3, 0.0)         # σ_TT over_lim → set to 0
+            over_lim = True
+        if over_lim:
+            g_plot_err.Fit(fff2, "MRQ")        # one quick refit
+        # -----------------------------------------------------------    
 
-        # -----------------------------------------------------------
-        # Re-fit in Σ/Δ basis if L & T are highly correlated
-        # -----------------------------------------------------------
-        if abs(lt_correlation(fff2)) > CORR_THRESHOLD:
-            refit_in_sum_diff_basis(g_plot_err, fff2, limit_map)
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        
+        # -----------------------  remainder of original code  -----------------------
+        # (all canvases, output files, plots, integration, etc. unchanged)
+        # ---------------------------------------------------------------------------
 
         c1 =  TCanvas()
 
@@ -883,12 +564,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             
         sig_l, sig_t, sig_lt, sig_tt = (fff2.GetParameter(1), fff2.GetParameter(0),
                                         fff2.GetParameter(2), fff2.GetParameter(3))
-        #sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = (fff2.GetParError(1), fff2.GetParError(0),
-        #                                                fff2.GetParError(2), fff2.GetParError(3))
-        sig_t_err   = (sig_t_hi + sig_t_lo)/2
-        sig_l_err   = (sig_l_hi + sig_l_lo)/2
-        sig_lt_err  = (sig_lt_hi + sig_lt_lo)/2
-        sig_tt_err  = (sig_tt_hi + sig_tt_lo)/2
+        sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = (fff2.GetParError(1), fff2.GetParError(0),
+                                                        fff2.GetParError(2), fff2.GetParError(3))
 
         print("\nBin {}: Outputting...  ".format(i+1), "sig_l: ", sig_l, "sig_t: ", sig_t, \
               "sig_lt: ", sig_lt, "sig_tt: ", sig_tt, \
@@ -1018,46 +695,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             print("Error writing to file {}.".format(fn_unsep))
 
         del c1, c2, c3, c4, c5
-
-    # === EXECUTE GLOBAL FIT & FILL TOTALS ===
-    if USE_GLOBAL_FIT:
-        # 1) run the fit
-        best = run_global_fit(global_pts)
-        AL, BL, AT, BT, ALT, BLT, ATT, BTT = best
-
-        # 2) (Re)initialize the TOTAL graphs so they're empty:
-        g_sig_l_total.Reset()
-        g_sig_t_total.Reset()
-        g_sig_lt_total.Reset()
-        g_sig_tt_total.Reset()
-
-        # 3) evaluate at each t and fill
-        for i_t, t_val in enumerate(t_list):
-            if PAR_MODEL == "exp":
-                sigL  = AL  * math.exp(BL  * t_val)
-                sigT  = AT  * math.exp(BT  * t_val)
-                sigLT = ALT * math.exp(BLT * t_val)
-                sigTT = ATT * math.exp(BTT * t_val)
-            else:
-                sigL  = AL  + BL  * t_val
-                sigT  = AT  + BT  * t_val
-                sigLT = ALT + BLT * t_val
-                sigTT = ATT + BTT * t_val
-
-            # fill exactly where your per-bin code used to
-            g_sig_l_total.SetPoint(g_sig_l_total.GetN(), float(t_val), sigL)
-            g_sig_l_total.SetPointError(g_sig_l_total.GetN()-1, 0, sig_l_err)   # reuse per-bin err arrays if desired
-
-            g_sig_t_total.SetPoint(g_sig_t_total.GetN(), float(t_val), sigT)
-            g_sig_t_total.SetPointError(g_sig_t_total.GetN()-1, 0, sig_t_err)
-
-            g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), float(t_val), sigLT)
-            g_sig_lt_total.SetPointError(g_sig_lt_total.GetN()-1, 0, sig_lt_err)
-
-            g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), float(t_val), sigTT)
-            g_sig_tt_total.SetPointError(g_sig_tt_total.GetN()-1, 0, sig_tt_err)
-    # ================================================    
-
+            
     return t_list
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(
