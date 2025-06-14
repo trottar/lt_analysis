@@ -138,99 +138,83 @@ def refit_until_inside_limits(fit_func, graph, limit_map):
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
+from iminuit import Minuit
+import numpy as np
+import ROOT
+
 def run_penalized_fit(graph, tf1, limit_map,
                       lam=PENALTY_LAMBDA,
                       enforce_prior=ENFORCE_PRIOR,
                       prior_sigma_lt=PRIOR_SIGMA_LT,
                       prior_sigma_tt=PRIOR_SIGMA_TT):
     """
-    Perform a penalized χ² fit using TMinuit.
-    
-    χ² = Σ[(y_i - f(x_i;p))² / σ_i²]
+    Perform a penalized least-squares fit using iminuit and copy results back into a ROOT TF1.
+
+    χ² = Σ[(y_i - f(x_i; p))² / σ_i²]
          + lam * Σ_j max(0, |p_j| - L_j)²
-         + (optional) Gaussian priors on p[2], p[3]:
-             (p[2]/prior_sigma_lt)² + (p[3]/prior_sigma_tt)²
+         + (optional) Gaussian priors on p[2], p[3]
 
-    - graph:   TGraphErrors or TGraph2DErrors of unseparated σ vs φ
-    - tf1:     TF1 of your φ‐dependent model, with Npar parameters
-    - limit_map: dict idx→limit for each parameter
+    - graph:       TGraphErrors or TGraph2DErrors of unseparated σ vs φ
+    - tf1:         TF1 of your φ-dependent model, with Npar parameters
+    - limit_map:   dict idx→limit for each parameter
+    - lam:         penalty strength
+    - enforce_prior: bool to add Gaussian priors
+    - prior_sigma_lt, prior_sigma_tt: width of priors for parameters 2 & 3
     """
-    from ROOT import TMinuit
-    import ctypes
-
-    npar = tf1.GetNpar()
-
-    # 1) Define the FCN callback
-    def fcn(npar_fcn, gin, f, par, iflag):
-        # copy trial parameters into tf1
-        for j in range(npar_fcn):
-            tf1.SetParameter(j, par[j])
-        # compute data χ²
-        chi2 = 0.0
-        # buffers for GetPoint
-        x_cd = ctypes.c_double()
-        y_cd = ctypes.c_double()
-        # for 2D graphs, also need z_cd
-        has_z = hasattr(graph, "GetErrorZ")
-        z_cd = ctypes.c_double() if has_z else None
-
-        for i in range(graph.GetN()):
-            if has_z:
-                graph.GetPoint(i, x_cd, y_cd, z_cd)
-                yi = z_cd.value
-            else:
-                graph.GetPoint(i, x_cd, y_cd)
-                yi = y_cd.value
+    # Extract data points from the graph
+    x_vals, y_vals, y_errs = [], [], []
+    has_z = isinstance(graph, ROOT.TGraph2DErrors)
+    for i in range(graph.GetN()):
+        x, y = ROOT.Double(0), ROOT.Double(0)
+        if has_z:
+            z = ROOT.Double(0)
+            graph.GetPoint(i, x, y, z)
+            yi = z.value
+            ei = graph.GetErrorZ(i)
+        else:
+            graph.GetPoint(i, x, y)
+            yi = y.value
             ei = graph.GetErrorY(i)
-            if ei <= 0: ei = 1e-9
-            model = tf1.Eval(x_cd.value)
-            chi2 += ((yi - model)/ei)**2
+        if ei <= 0:
+            ei = 1e-9
+        x_vals.append(x.value)
+        y_vals.append(yi)
+        y_errs.append(ei)
 
-        # soft-wall penalty
-        for j, L_j in limit_map.items():
-            excess = abs(par[j]) - L_j
-            if excess > 0:
-                chi2 += lam * (excess**2)
-
-        # Gaussian priors on σ_LT (par[2]) and σ_TT (par[3])
+    # Define the chi-squared function with penalties
+    def chi2_with_penalty(*params):
+        # Model evaluation
+        model = np.array([tf1.Eval(xi, *params) for xi in x_vals])
+        # Base chi2
+        chi2 = np.sum(((np.array(y_vals) - model) / np.array(y_errs))**2)
+        # Soft-wall penalty
+        for j, Lj in limit_map.items():
+            pj = params[j]
+            excess = max(0, abs(pj) - Lj)
+            chi2 += lam * excess**2
+        # Gaussian priors if requested
         if enforce_prior:
-            chi2 += (par[2]/prior_sigma_lt)**2
-            chi2 += (par[3]/prior_sigma_tt)**2
+            chi2 += (params[2] / prior_sigma_lt)**2 + (params[3] / prior_sigma_tt)**2
+        return chi2
 
-        # hand back
-        f[0] = chi2
+    # Initial parameter guesses and steps
+    init_vals  = [tf1.GetParameter(i) for i in range(tf1.GetNpar())]
+    init_steps = [tf1.GetParError(i)   for i in range(tf1.GetNpar())]
 
-    # 2) Set up TMinuit
-    minuit = TMinuit(npar)
-    minuit.SetFCN(fcn)
+    # Perform the minimization with iminuit
+    m = Minuit(chi2_with_penalty, *init_vals, error=init_steps)
+    m.errordef = Minuit.LEAST_SQUARES
+    m.migrad()
+    m.hesse()
 
-    # 3) Define parameters with limits
-    for j in range(npar):
-        name = tf1.GetParName(j).encode('ascii')
-        init = tf1.GetParameter(j)
-        err0 = tf1.GetParError(j) if tf1.GetParError(j) > 0 else 0.1
-        L_j  = limit_map.get(j, abs(init)*10)
-        # DefineParameter(id, name, initVal, step, lower, upper)
-        minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
-        
-    # 4) Run MIGRAD and HESSE with an empty argument list
-    arglist = array('d', [])    # zero-length double array
-    ierflg  = array('i', [0])   # one-element int array for the status
+    # Copy best-fit parameters and errors back into tf1
+    for idx, name in enumerate(m.parameters):
+        val = m.values[name]
+        err = m.errors[name]
+        tf1.SetParameter(idx, val)
+        tf1.SetParError(idx, err)
 
-    minuit.mnexcm("MIGRAD", arglist, 0, ierflg)
-    minuit.mnexcm("HESSE",  arglist, 0, ierflg)
-    # ierflg[0] now holds the return code (0 = success)
-
-
-    # 5) Copy best-fit values (and optional errors) back into tf1
-    for j in range(npar):
-        val = ctypes.c_double(0)
-        err = ctypes.c_double(0)
-        minuit.GetParameter(j, val, err)
-        tf1.SetParameter(j, val.value)
-        # Optional: tf1.SetParError(j, err.value)
-
-    # Done. tf1 holds your penalized, prior-aware fit.
+    return tf1
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
