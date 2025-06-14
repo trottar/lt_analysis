@@ -427,22 +427,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         print("\n--- Debug snapshot just before Pass-3 Fit ---")
         for i in range(4):
-            lo, hi = fff2.GetParLimits(i)        # returns a tuple in modern PyROOT
-            try:                                 # fallback for older signature
-                pass
-            except TypeError:
-                lo_ref = ROOT.Double(0.0); hi_ref = ROOT.Double(0.0)
-                fff2.GetParLimits(i, lo_ref, hi_ref)
-                lo, hi = float(lo_ref), float(hi_ref)
+            lo_ref = ctypes.c_double(0.0)
+            hi_ref = ctypes.c_double(0.0)
+            fff2.GetParLimits(i, lo_ref, hi_ref)     # old signature
 
-            par   = fff2.GetParameter(i)
-            step  = fff2.GetParError(i)
-            fixed = (abs(hi - lo) < 1e-12)       # True if limits identical
+            lo, hi = lo_ref.value, hi_ref.value
+            fixed  = (abs(hi - lo) < 1e-12)          # identical limits ⇒ fixed
+            step   = fff2.GetParError(i)
+            value  = fff2.GetParameter(i)
 
-            print(f"  par[{i}]  value={par:10.4g}  step={step:8.4g} "
+            print(f"  par[{i}]  value={value:10.4g}  step={step:8.4g} "
                 f"limits=({lo:6.3g},{hi:6.3g})  fixed={fixed}")
+
         print("  graph points =", g_plot_err.GetN())
-        print("--------------------------------------------------\n")
+        print("--------------------------------------------------\n")        
 
         # --- Fit 3: LT & TT ---
         fff2.ReleaseParameter(2)
