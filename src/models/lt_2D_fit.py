@@ -14,6 +14,7 @@ import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
 from ROOT import TString, TNtuple, TMinuit
+from ROOT.Math import WrappedMultiDimFunction
 from array import array
 import math
 import ctypes
@@ -178,9 +179,10 @@ def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
         return chi2_data + lam*soft_wall + prior_pen
 
     # -- wrap in a ROOT.Math.Functor so Minuit2 will accept it --
-    minim = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-    # directly give the Python chi2() and its dimensionality
-    minim.SetFunction(chi2, npar)
+    # wrap our Python χ² in a C++ functor
+    fcn_wrapper = WrappedMultiDimFunction(chi2, npar)
+    minim       = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+    minim.SetFunction(fcn_wrapper)
 
     # initial guesses = current TF1 parameters
     for i in range(npar):
