@@ -138,70 +138,95 @@ def refit_until_inside_limits(fit_func, graph, limit_map):
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
-def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
+def run_penalized_fit(graph, tf1, limit_map,
+                      lam=PENALTY_LAMBDA,
+                      enforce_prior=ENFORCE_PRIOR,
+                      prior_sigma_lt=PRIOR_SIGMA_LT,
+                      prior_sigma_tt=PRIOR_SIGMA_TT):
     """
-    Replace the Math.Minimizer approach with TMinuit, which plays nicely
-    with Python callbacks.  This will minimize:
-       χ² = Σ[(y_i - f(x_i; p))²/σ_i²] + lam * Σ max(0, |p_j|-L_j)²
+    Perform a penalized χ² fit using TMinuit.
+    
+    χ² = Σ[(y_i - f(x_i;p))² / σ_i²]
+         + lam * Σ_j max(0, |p_j| - L_j)²
+         + (optional) Gaussian priors on p[2], p[3]:
+             (p[2]/prior_sigma_lt)² + (p[3]/prior_sigma_tt)²
+
+    - graph:   TGraphErrors or TGraph2DErrors of unseparated σ vs φ
+    - tf1:     TF1 of your φ‐dependent model, with Npar parameters
+    - limit_map: dict idx→limit for each parameter
     """
     from ROOT import TMinuit
     import ctypes
 
     npar = tf1.GetNpar()
 
-    # this is the FCN that TMinuit will call
+    # 1) Define the FCN callback
     def fcn(npar_fcn, gin, f, par, iflag):
-        # 1) copy the trial pars into our TF1
+        # copy trial parameters into tf1
         for j in range(npar_fcn):
             tf1.SetParameter(j, par[j])
-        # 2) compute data χ²
+        # compute data χ²
         chi2 = 0.0
+        # buffers for GetPoint
         x_cd = ctypes.c_double()
         y_cd = ctypes.c_double()
-        ey_cd = ctypes.c_double()
+        # for 2D graphs, also need z_cd
+        has_z = hasattr(graph, "GetErrorZ")
+        z_cd = ctypes.c_double() if has_z else None
+
         for i in range(graph.GetN()):
-            graph.GetPoint(i, x_cd, y_cd)
-            ey = graph.GetErrorY(i)
+            if has_z:
+                graph.GetPoint(i, x_cd, y_cd, z_cd)
+                yi = z_cd.value
+            else:
+                graph.GetPoint(i, x_cd, y_cd)
+                yi = y_cd.value
+            ei = graph.GetErrorY(i)
+            if ei <= 0: ei = 1e-9
             model = tf1.Eval(x_cd.value)
-            # protect against zero error
-            if ey <= 0: ey = 1e-9
-            chi2 += ((y_cd.value - model)/ey)**2
-        # 3) add soft‐wall penalty
+            chi2 += ((yi - model)/ei)**2
+
+        # soft-wall penalty
         for j, L_j in limit_map.items():
             excess = abs(par[j]) - L_j
             if excess > 0:
-                chi2 += lam * excess*excess
-        # 4) hand back the result
+                chi2 += lam * (excess**2)
+
+        # Gaussian priors on σ_LT (par[2]) and σ_TT (par[3])
+        if enforce_prior:
+            chi2 += (par[2]/prior_sigma_lt)**2
+            chi2 += (par[3]/prior_sigma_tt)**2
+
+        # hand back
         f[0] = chi2
 
-    # --- set up TMinuit ---
+    # 2) Set up TMinuit
     minuit = TMinuit(npar)
     minuit.SetFCN(fcn)
 
-    # define parameters: (index, name, initVal, step, lower, upper)
+    # 3) Define parameters with limits
     for j in range(npar):
         name = tf1.GetParName(j).encode('ascii')
         init = tf1.GetParameter(j)
-        err0 = tf1.GetParError(j) if tf1.GetParError(j)>0 else 0.1
-        L_j = limit_map[j]
+        err0 = tf1.GetParError(j) if tf1.GetParError(j) > 0 else 0.1
+        L_j  = limit_map.get(j, abs(init)*10)
+        # DefineParameter(id, name, initVal, step, lower, upper)
         minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
 
-    # run Migrad and Hesse (to get covariance for later)
+    # 4) Run MIGRAD and HESSE via mnexcm (null argument list)
     ier = ctypes.c_int(0)
-
-    # run MIGRAD & HESSE with a null argument list
     minuit.mnexcm("MIGRAD", 0, 0, ier)
     minuit.mnexcm("HESSE",  0, 0, ier)
 
-
-    # copy the fitted values back into the TF1
+    # 5) Copy best-fit values (and optional errors) back into tf1
     for j in range(npar):
         val = ctypes.c_double(0)
         err = ctypes.c_double(0)
         minuit.GetParameter(j, val, err)
         tf1.SetParameter(j, val.value)
+        # Optional: tf1.SetParError(j, err.value)
 
-    # done—tf1 now holds the penalized best fit
+    # Done. tf1 holds your penalized, prior-aware fit.
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
