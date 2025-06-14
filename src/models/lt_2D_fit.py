@@ -392,7 +392,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigL_prior    = prior_frac * sigT_guess
         sigL_err      = prior_rel_err * sigL_prior         # error = value → 1 χ² unit
 
-        phi_prior  = 999.0                              # outside real φ-range
+        phi_prior  = 45.0                              # inside 0–360  →  point is INCLUDED
         eps_prior  = lo_eps                             # any ε is fine
 
         # add pseudo-point to the **same** TGraph2DErrors that will be fitted
