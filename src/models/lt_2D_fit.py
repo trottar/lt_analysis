@@ -81,8 +81,12 @@ PI = math.pi
 PARAM_LIMITS = {
     'sigT' : [(0.0, 1000.0)]*7,   # parameter 0
     'sigL' : [(0.0, 1000.0)]*7,   # parameter 1
-    'sigLT': [(-5.0,  5.0)]*7,  # parameter 2
-    'sigTT': [(-5.0,  5.0)]*7   # parameter 3
+    'sigLT': [(-1.0,  1.0)]*7,  # parameter 2
+    'sigTT': [(-1.0,  1.0)]*7   # parameter 3
+    "rhoLT": [(-1.0, 1.0)]*7,   # rho_LT >= -1
+    "rhoTT": [(-1.0, 1.0)]*7    # rho_TT <= 1
+})
+
 }
 '''
 PARAM_LIMITS = {
@@ -269,17 +273,51 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetMarkerColor(ROOT.kRed)
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
-        
-        fff2 = TF2("fff2",
-                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                   0, 360, 0.0, 1.0)
 
         '''
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
+                   0, 360, 0.0, 1.0)
+
+        fff2 = TF2("fff2",
+                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
+        # ------------------------------------------------------------------
+        # Re-parameterised version enforcing |ρ| ≤ 1  ——  physics unchanged
+        # ------------------------------------------------------------------
+        fff2 = ROOT.TF2("fff2",
+            "[0]                                       "      # σ_T
+            "+ y*[1]                                   "      # ε·σ_L
+            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
+            "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
+            "+ y*cos(2*x*0.017453)                     "      # TT
+            "*[3]*[0]"                                         # ρ_TT·σ_T
+            , 0, 360, 0.0, 1.0)
         
+        for k in range(4):
+            fff2.ReleaseParameter(k)
+
+        # ---------------------------------------------------------------
+        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]       # <-- canonical order
+        current_i = 0   # or whatever index you use inside PARAM_LIMITS[*][current_i]
+
+        for idx, key in enumerate(par_keys):
+            # 1) give the parameter its mnemonic name
+            fff2.SetParName(idx, key)
+
+            # 2) fetch the low/high limits from your global table
+            if key in PARAM_LIMITS:
+                lo, hi = PARAM_LIMITS[key][current_i]
+                fff2.SetParLimits(idx, lo, hi)
+            else:
+                raise KeyError(f"{key} not found in PARAM_LIMITS")
+
+            # 3) optional – small first step for the bounded ratios
+            if key.startswith("rho"):
+                fff2.SetParError(idx, 0.02)
+        # ---------------------------------------------------------------
+
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
@@ -560,10 +598,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             sig_diff = 0.0
             sig_diff_g.SetPoint(sig_diff_g.GetN(), float(t_list[i]), sig_diff)
             sig_diff_err = 0.0
-            sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)            
-            
+            sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)      
+
+        sig_t   = fff2.GetParameter(0)
+        sig_l   = fff2.GetParameter(1)
+        rhoLT  = fff2.GetParameter(2)
+        rhoTT  = fff2.GetParameter(3)
+
+        sig_lt  = rhoLT * math.sqrt(sigT * sigL)
+        sig_tt  = rhoTT * sigT
+
+        '''
         sig_l, sig_t, sig_lt, sig_tt = (fff2.GetParameter(1), fff2.GetParameter(0),
                                         fff2.GetParameter(2), fff2.GetParameter(3))
+        '''
         sig_l_err, sig_t_err, sig_lt_err, sig_tt_err = (fff2.GetParError(1), fff2.GetParError(0),
                                                         fff2.GetParError(2), fff2.GetParError(3))
 
