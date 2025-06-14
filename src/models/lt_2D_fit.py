@@ -79,12 +79,10 @@ PI = math.pi
 #
 #'''
 PARAM_LIMITS = {
-    'sigT' : [(1e-3, 1000.0)]*7,   # parameter 0
-    'sigL' : [(1e-3, 1000.0)]*7,   # parameter 1
-    'sigLT': [(-1.0,  1.0)]*7,  # parameter 2
-    'sigTT': [(-1.0,  1.0)]*7,   # parameter 3
-    "rhoLT": [(-1.0, 1.0)]*7,   # rho_LT >= -1
-    "rhoTT": [(-1.0, 1.0)]*7    # rho_TT <= 1
+    'sigT' : [(1e-3, 1000.0)]*3,   # parameter 0
+    'sigL' : [(1e-3, 1000.0)]*3,   # parameter 1
+    "rhoLT": [(-1.0, 1.0)]*3,   # rho_LT >= -1
+    "rhoTT": [(-1.0, 1.0)]*3    # rho_TT <= 1
     }
 
 COND_MAX   = 20.0        # user control, near-singular if κ > 20
