@@ -178,9 +178,9 @@ def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
         return chi2_data + lam*soft_wall + prior_pen
 
     # -- wrap in a ROOT.Math.Functor so Minuit2 will accept it --
-    functor = Math.Functor(chi2, npar)
-    minim   = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-    minim.SetFunction(functor)
+    minim = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
+    # directly give the Python chi2() and its dimensionality
+    minim.SetFunction(chi2, npar)
 
     # initial guesses = current TF1 parameters
     for i in range(npar):
