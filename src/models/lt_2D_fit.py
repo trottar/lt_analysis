@@ -324,25 +324,29 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for k in range(4):
             fff2.ReleaseParameter(k)
 
-        # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rho_lt", "rho_tt"]       # <-- canonical order
-        current_i = 0   # or whatever index you use inside PARAM_LIMITS[*][current_i]
-
+        # ---------------------------------------------------------------  
         for idx, key in enumerate(par_keys):
-            # 1) give the parameter its mnemonic name
             fff2.SetParName(idx, key)
-
-            # 2) fetch the low/high limits from your global table
             if key in PARAM_LIMITS:
                 lo, hi = PARAM_LIMITS[key][current_i]
                 fff2.SetParLimits(idx, lo, hi)
             else:
                 raise KeyError(f"{key} not found in PARAM_LIMITS")
 
-            # 3) optional – small first step for the bounded ratios
+            # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
-                fff2.SetParError(idx, 0.02)
+                fff2.SetParError(idx, 0.02)            # ±0.02 for ρ’s
+            else:
+                step = 0.05 * (hi - lo) if hi > lo else 0.1
+                fff2.SetParError(idx, step)            # 5 % of range for σT, σL  ←★ add this
         # ---------------------------------------------------------------
+
+        # SEED the parameters (otherwise they all start at zero)
+        fff2.SetParameters( 20.0,   # σT  initial guess  (nb)
+                            20.0,   # σL  "
+                            0.0,   # ρLT
+                            0.0)   # ρTT
+
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
