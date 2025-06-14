@@ -595,8 +595,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         rhoLT  = fff2.GetParameter(2)
         rhoTT  = fff2.GetParameter(3)
 
-        sig_lt  = rhoLT * math.sqrt(sigT * sigL)
-        sig_tt  = rhoTT * sigT
+        sig_lt  = rhoLT * math.sqrt(sig_t * sig_l)
+        sig_tt  = rhoTT * sig_t
 
         '''
         sig_l, sig_t, sig_lt, sig_tt = (fff2.GetParameter(1), fff2.GetParameter(0),
