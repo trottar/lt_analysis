@@ -535,14 +535,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Uncertainty propagation  (guard against ρ → 0) ----------------
         _eps = 1e-6                                   # avoid div-by-zero
 
+        _safe_sig_t = max(abs(sig_t), _eps)        # ⟵ new
+        _safe_sig_l = max(abs(sig_l), _eps)        # ⟵ new
+
         sig_lt_err = abs(sig_lt) * math.sqrt(
             (rho_lt_err / max(abs(rho_lt), _eps))**2
-            + (sig_t_err / (2.0 * sig_t))**2
-            + (sig_l_err / (2.0 * sig_l))**2
+            + (sig_t_err / (2.0 * _safe_sig_t))**2
+            + (sig_l_err / (2.0 * _safe_sig_l))**2
         )
 
         sig_tt_err = math.sqrt(
-            (sig_t * rho_tt_err)**2
+            (_safe_sig_t * rho_tt_err)**2
             + (rho_tt * sig_t_err)**2
         )
 
