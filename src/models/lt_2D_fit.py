@@ -79,11 +79,11 @@ PI = math.pi
 #
 #'''
 PARAM_LIMITS = {
-    'sigT' : [(1e-3, 1000.0)]*3,   # parameter 0
-    'sigL' : [(1e-3, 1000.0)]*3,   # parameter 1
-    "rhoLT": [(-1.0, 1.0)]*3,   # rho_LT >= -1
-    "rhoTT": [(-1.0, 1.0)]*3    # rho_TT <= 1
-    }
+    "sigT" : [(0.001, 1e3), (0.001, 1e3), (0.001, 1e3)],
+    "sigL" : [(0.001, 1e3), (0.001, 1e3), (0.001, 1e3)],
+    "rhoLT": [(-1.0, 1.0),  (-1.0, 1.0),  (-1.0, 1.0)],
+    "rhoTT": [(-1.0, 1.0),  (-1.0, 1.0),  (-1.0, 1.0)]
+}
 
 COND_MAX   = 20.0        # user control, near-singular if κ > 20
 
@@ -436,19 +436,26 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("  graph points =", g_plot_err.GetN())
         print("--------------------------------------------------\n")        
 
-        # --- Fit 3: LT & TT ---
-        stage_idx = 2
+        print("TABLE check ρ-limits stage 2:",
+            PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
 
-        # parameter map: (parameter index, key in PARAM_LIMITS)
+        # --- Fit 3: LT & TT ---
+        stage_idx = 2                    # third-pass entry in PARAM_LIMITS
+
+        # (parameter index , key in PARAM_LIMITS)
         for p_idx, p_key in ((1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
-            fff2.ReleaseParameter(p_idx)                       # free the parameter
-            # fetch limits from the master table
+            # 1) un-freeze the parameter
+            fff2.ReleaseParameter(p_idx)
+
+            # 2) pull limits from the master table
             lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
-            fff2.SetParLimits(p_idx, lo_lim, hi_lim)           # reopen full range
-            # give MINUIT a non-zero first step
-            if fff2.GetParError(p_idx) == 0 or math.isnan(fff2.GetParError(p_idx)):
-                step = 0.02 if p_key.startswith("rho") else 0.05 * (hi_lim - lo_lim)
-                fff2.SetParError(p_idx, step)
+            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
+
+            # 3) give MINUIT a non-zero initial step
+            if p_key.startswith("rho"):
+                fff2.SetParError(p_idx, 0.02)                      # small step for ρ’s
+            else:
+                fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))  # 5 % of range for σ_L        
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
