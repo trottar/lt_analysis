@@ -140,7 +140,18 @@ def refit_until_inside_limits(fit_func, graph, limit_map):
 # ------------------------------------------------------------------
 from ROOT import Math, TF1
 
-def run_penalized_fit(fcn_tf1, npars, start_vals, step_sizes, lower_limits=None, upper_limits=None):
+def run_penalized_fit(fcn_tf1,
+                      npars,
+                      start_vals,
+                      step_sizes=None,
+                      lower_limits=None,
+                      upper_limits=None):
+    # If no step_sizes provided but limits are, auto-compute them as 1/10 the range
+    if step_sizes is None and lower_limits is not None and upper_limits is not None:
+        step_sizes = [(u - l) * 0.1 for l, u in zip(lower_limits, upper_limits)]
+    elif step_sizes is None:
+        raise ValueError("Must provide either step_sizes or both lower_limits and upper_limits")
+
     # 1) Create the Minuit/Migrad minimizer
     minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
     minimizer.SetMaxFunctionCalls(1_000_000)
@@ -148,31 +159,27 @@ def run_penalized_fit(fcn_tf1, npars, start_vals, step_sizes, lower_limits=None,
     minimizer.SetTolerance(0.001)
     minimizer.SetPrintLevel(0)
 
-    # 2) Wrap your TF1 (or any multi-dimensional functor) for ROOT::Math
-    #    (fcn_tf1 is your TF1 instance with npars parameters)
+    # 2) Wrap your TF1 as a multi-dim functor
     fcn = Math.WrappedMultiTF1(npars, fcn_tf1)
     minimizer.SetFunction(fcn)
 
-    # 3) Define all the fit parameters
+    # 3) Define all parameters (with or without bounds)
     for i in range(npars):
-        name      = f"p{i}"
-        start     = start_vals[i]
-        step      = step_sizes[i]
-        if lower_limits and upper_limits:
+        name  = f"p{i}"
+        start = start_vals[i]
+        step  = step_sizes[i]
+        if lower_limits is not None and upper_limits is not None:
             minimizer.SetLimitedVariable(i, name, start, step,
                                          lower_limits[i], upper_limits[i])
         else:
             minimizer.SetVariable(i, name, start, step)
 
-    # 4) Do the minimization
+    # 4) Run the fit
     minimizer.Minimize()
-    minimizer.Hesse()   # optional, to fill the error matrix
+    minimizer.Hesse()
 
-    # 5) Extract results
-    result_vals = minimizer.X()       # array of fitted parameter values
-    result_errs = minimizer.Errors()  # array of 1-sigma errors
-
-    return result_vals, result_errs
+    # 5) Return values and errors
+    return minimizer.X(), minimizer.Errors()
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
