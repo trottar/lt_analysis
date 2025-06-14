@@ -187,8 +187,11 @@ def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
         minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
 
     # run Migrad and Hesse (to get covariance for later)
-    minuit.Command("MIGRAD")
-    minuit.Command("HESSE")
+    # run the minimizer & compute the error matrix via mnexcm
+    arglist = array('d')   # empty list of doubles
+    minuit.mnexcm("MIGRAD", len(arglist), arglist)
+    minuit.mnexcm("HESSE",  len(arglist), arglist)
+
 
     # copy the fitted values back into the TF1
     for j in range(npar):
