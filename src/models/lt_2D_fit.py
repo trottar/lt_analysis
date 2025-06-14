@@ -83,8 +83,8 @@ PARAM_LIMITS = {
     'sigL' : [(1e-3, 1000.0)]*7,   # parameter 1
     'sigLT': [(-1.0,  1.0)]*7,  # parameter 2
     'sigTT': [(-1.0,  1.0)]*7,   # parameter 3
-    "rho_lt": [(-1.0, 1.0)]*7,   # rho_LT >= -1
-    "rho_tt": [(-1.0, 1.0)]*7    # rho_TT <= 1
+    "rhoLT": [(-1.0, 1.0)]*7,   # rho_LT >= -1
+    "rhoTT": [(-1.0, 1.0)]*7    # rho_TT <= 1
     }
 
 COND_MAX   = 20.0        # user control, near-singular if κ > 20
