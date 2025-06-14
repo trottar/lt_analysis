@@ -126,7 +126,7 @@ def refit_until_inside_limits(fit_func, graph, limit_map):
         hit_any = False
         for idx, lim in limit_map.items():
             # Is this parameter already fixed?  If so, skip.
-            if fit_func.IsFixed(idx):
+            if fit_func.IsParameterFixed(idx):      # or IsFixedPar(idx) on older ROOT
                 continue
             # Check distance to either +lim or –lim
             if abs(abs(fit_func.GetParameter(idx)) - lim) < TOL_AT_LIMIT:
