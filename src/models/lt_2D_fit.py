@@ -187,8 +187,10 @@ def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
         minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
 
     # run Migrad and Hesse using TMinuit’s dedicated methods
-    minuit.Migrad()   # no return value, so no c_int headache
-    minuit.Hesse()
+    # run the minimizer & compute errors via mnexcm (avoids return-type bugs)
+    # arglist length = 0, iflag = 0
+    minuit.mnexcm("MIGRAD", 0, 0)
+    minuit.mnexcm("HESSE",  0, 0)
 
 
     # copy the fitted values back into the TF1
