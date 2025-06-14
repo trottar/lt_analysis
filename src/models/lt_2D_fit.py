@@ -360,7 +360,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
         g_plot_err.Fit(fff2, "Q0")       # quiet, no redraw
-        check_sigma_positive(fff2)
+        check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
@@ -383,7 +383,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)
         fff2.FixParameter(3, 0.0)
         g_plot_err.Fit(fff2, "Q0")
-        check_sigma_positive(fff2)
+        check_sigma_positive(fff2, g_plot_err)
 
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
         eps_diff   = abs(HIEPS - LOEPS)
@@ -417,7 +417,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
         g_plot_err.Fit(fff2, "Q0")
-        check_sigma_positive(fff2)
+        check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
