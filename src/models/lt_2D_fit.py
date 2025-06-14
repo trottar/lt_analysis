@@ -14,7 +14,6 @@ import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
 from ROOT import TString, TNtuple, TMinuit
-from ROOT.Math import WrappedMultiDimFunction
 from array import array
 import math
 import ctypes
@@ -141,61 +140,64 @@ def refit_until_inside_limits(fit_func, graph, limit_map):
 # ------------------------------------------------------------------
 def run_penalized_fit(graph, tf1, limit_map, lam=PENALTY_LAMBDA):
     """
-    One pass of Minuit2 that minimises
-        χ²_eff = χ²_data  +  lam * Σ max(0, |p_i| - L_i)².
-    It re-uses the current TF1 as the model, updates its parameters
-    in-place, and returns nothing (tf1 now holds the penalised minimum).
+    Replace the Math.Minimizer approach with TMinuit, which plays nicely
+    with Python callbacks.  This will minimize:
+       χ² = Σ[(y_i - f(x_i; p))²/σ_i²] + lam * Σ max(0, |p_j|-L_j)²
     """
-    from ROOT import Math, TVectorD, TArrayD
-    npar     = tf1.GetNpar()
-    # -- build a callable χ² --
-    def chi2(par_vec):
-        # 1) regular χ² from the data points
-        chi2_data = 0.0
-        x  = ctypes.c_double()
-        y  = ctypes.c_double()
-        ex = ctypes.c_double()
-        ey = ctypes.c_double()
-        # copy parameters into the TF1 so EvalPar uses them
-        for i in range(npar):
-            tf1.SetParameter(i, par_vec[i])
+    from ROOT import TMinuit
+    import ctypes
+
+    npar = tf1.GetNpar()
+
+    # this is the FCN that TMinuit will call
+    def fcn(npar_fcn, gin, f, par, iflag):
+        # 1) copy the trial pars into our TF1
+        for j in range(npar_fcn):
+            tf1.SetParameter(j, par[j])
+        # 2) compute data χ²
+        chi2 = 0.0
+        x_cd = ctypes.c_double()
+        y_cd = ctypes.c_double()
+        ey_cd = ctypes.c_double()
         for i in range(graph.GetN()):
-            graph.GetPoint(i, x, y)
+            graph.GetPoint(i, x_cd, y_cd)
             ey = graph.GetErrorY(i)
+            model = tf1.Eval(x_cd.value)
+            # protect against zero error
             if ey <= 0: ey = 1e-9
-            model = tf1.Eval(x.value)
-            chi2_data += ((y.value - model)/ey)**2
-        # 2) quadratic soft wall
-        soft_wall = 0.0
-        for i, L_i in limit_map.items():
-            excess = abs(par_vec[i]) - L_i
-            if excess > 0.0:
-                soft_wall += excess*excess
-        # 3) optional Gaussian priors
-        prior_pen = 0.0
-        if ENFORCE_PRIOR:
-            prior_pen += (par_vec[2] / PRIOR_SIGMA_LT)**2
-            prior_pen += (par_vec[3] / PRIOR_SIGMA_TT)**2
-        return chi2_data + lam*soft_wall + prior_pen
+            chi2 += ((y_cd.value - model)/ey)**2
+        # 3) add soft‐wall penalty
+        for j, L_j in limit_map.items():
+            excess = abs(par[j]) - L_j
+            if excess > 0:
+                chi2 += lam * excess*excess
+        # 4) hand back the result
+        f[0] = chi2
 
-    # -- wrap in a ROOT.Math.Functor so Minuit2 will accept it --
-    # wrap our Python χ² in a C++ functor
-    fcn_wrapper = WrappedMultiDimFunction(chi2, npar)
-    minim       = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-    minim.SetFunction(fcn_wrapper)
+    # --- set up TMinuit ---
+    minuit = TMinuit(npar)
+    minuit.SetFCN(fcn)
 
-    # initial guesses = current TF1 parameters
-    for i in range(npar):
-        minim.SetVariable(i,
-                          tf1.GetParName(i),
-                          tf1.GetParameter(i),
-                          tf1.GetParError(i) if tf1.GetParError(i) > 0 else 0.1)
-    minim.Minimize()
+    # define parameters: (index, name, initVal, step, lower, upper)
+    for j in range(npar):
+        name = tf1.GetParName(j).encode('ascii')
+        init = tf1.GetParameter(j)
+        err0 = tf1.GetParError(j) if tf1.GetParError(j)>0 else 0.1
+        L_j = limit_map[j]
+        minuit.DefineParameter(j, name, init, err0, -L_j, L_j)
 
-    # update the TF1 with the penalised best-fit values
-    best = minim.X()
-    for i in range(npar):
-        tf1.SetParameter(i, best[i])
+    # run Migrad and Hesse (to get covariance for later)
+    minuit.Command("MIGRAD")
+    minuit.Command("HESSE")
+
+    # copy the fitted values back into the TF1
+    for j in range(npar):
+        val = ctypes.c_double(0)
+        err = ctypes.c_double(0)
+        minuit.GetParameter(j, val, err)
+        tf1.SetParameter(j, val.value)
+
+    # done—tf1 now holds the penalized best fit
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
