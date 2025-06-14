@@ -110,51 +110,48 @@ def adapt_limits(param_name_or_idx, step=0):
 # --------------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------
-# Positivity guard + auto-refit
+# Positivity guard + auto-refit (robust version)
 # ---------------------------------------------------------------
 def check_sigma_positive(fcn, graph,
                          phi_set=(0, 90, 180, 270),
                          eps_set=(LOEPS, HIEPS),
                          shrink_factor=0.90):
     """
-    Ensure σ(φ,ε) ≥ 0 for four φ values and both ε settings.
-    If violated: shrink ρTT limits by `shrink_factor` and refit once.
-
-    Parameters
-    ----------
-    fcn   : ROOT.TF2   – current cross-section fit function
-    graph : ROOT.TGraphErrors (or TH2) used in the Fit call
-    phi_set, eps_set  : tuples of sampling points
-    shrink_factor     : 0 < factor < 1, multiplicative tightening
-
-    Returns
-    -------
-    bool  – True if σ ≥ 0 after (re)fit, False otherwise.
+    Ensure σ(φ,ε) ≥ 0 for φ-sample × ε-set.
+    If violated, shrink ρTT limits by `shrink_factor` and refit once.
     """
-    # helper to test positivity
+
     def _is_positive():
         return min(fcn.Eval(phi, eps) for phi in phi_set for eps in eps_set) >= 0
 
+    # early exit if already fine
     if _is_positive():
         return True
 
     print("WARNING: negative σ detected → tightening ρTT limits and refitting")
 
-    # --- fetch current limits on parameter 3 (ρTT) ----------------
-    lo_ref = ROOT.Double(0.0)
-    hi_ref = ROOT.Double(0.0)
-    fcn.GetParLimits(3, lo_ref, hi_ref)          # TF1::GetParLimits
-    lo, hi = float(lo_ref), float(hi_ref)
+    # -----------------------------------------------------------
+    # Fetch current limits on parameter 3 (ρTT)  –  two ways
+    # -----------------------------------------------------------
+    try:
+        lo, hi = fcn.GetParLimits(3)        # modern PyROOT returns tuple
+    except TypeError:
+        # fallback for older signatures that need C-style refs
+        lo_ref = ctypes.c_double(0.0)
+        hi_ref = ctypes.c_double(0.0)
+        fcn.GetParLimits(3, lo_ref, hi_ref)
+        lo, hi = lo_ref.value, hi_ref.value
 
-    # --- tighten and refit once -----------------------------------
+    # tighten limits and refit
     fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
-    graph.Fit(fcn, "Q0")                         # quiet, no redraw
+    graph.Fit(fcn, "Q0")                    # quiet, no redraw
 
-    # --- final check ----------------------------------------------
+    # final check
     if not _is_positive():
         print("WARNING: σ still negative after shrink; "
               "consider excluding this t-bin.")
         return False
+
     return True
 
 ###############################################################################################################################################
