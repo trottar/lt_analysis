@@ -316,19 +316,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ---------------- FIT SEQUENCE ------------------
         fit_step = 0  # counter for adapt_limits
 
-        # --- Fit 1: L & T ---
-        #fff2.SetParameter(0, 1)
-        low, high = adapt_limits(0, fit_step)
-        fff2.SetParLimits(0, low, high)
-
-        #fff2.SetParameter(1, 1)
-        low, high = adapt_limits(1, fit_step)
-        fff2.SetParLimits(1, low, high)
-
-        fff2.FixParameter(2, 0.0)
-        fff2.FixParameter(3, 0.0)
-
-        g_plot_err.Fit(fff2, "MRQ")
+        # --- Fit 1: T ---
+        fff2.FixParameter(1, 0.0)   # σL
+        fff2.FixParameter(2, 0.0)   # ρLT
+        fff2.FixParameter(3, 0.0)   # ρTT
+        graph.Fit(fff2, "Q0")       # quiet, no redraw
         check_sigma_positive(fff2)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -347,17 +339,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1
 
-        # --- Fit 2: LT ---
-        fff2.FixParameter(0, fff2.GetParameter(0))
-        fff2.FixParameter(1, fff2.GetParameter(1))
-        fff2.FixParameter(3, fff2.GetParameter(3))
-
-        fff2.ReleaseParameter(2)
-        fff2.SetParameter(2, 0.0)
-        low, high = adapt_limits(2, fit_step)
-        fff2.SetParLimits(2, low, high)
-
-        g_plot_err.Fit(fff2, "MRQ")
+        # --- Fit 2: L ---
+        fff2.ReleaseParameter(1)    # σL now floats
+        fff2.FixParameter(2, 0.0)
+        fff2.FixParameter(3, 0.0)
+        graph.Fit(fff2, "Q0")
         check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -367,102 +353,26 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1
 
-        # --- Fit 3: L & T again ---
-        fff2.ReleaseParameter(0)
-        fff2.ReleaseParameter(1)
-        fff2.SetParameter(0, fff2.GetParameter(0))
-        fff2.SetParameter(1, fff2.GetParameter(1))
-        fff2.FixParameter(2, fff2.GetParameter(2))
-        fff2.FixParameter(3, fff2.GetParameter(3))
-
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2)
-
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1
-
-        # --- Fit 4: TT ---
-        fff2.FixParameter(0, fff2.GetParameter(0))
-        fff2.FixParameter(1, fff2.GetParameter(1))
-        fff2.FixParameter(2, fff2.GetParameter(2))
-
-        fff2.ReleaseParameter(3)
-        fff2.SetParameter(3, 0.0)
-        low, high = adapt_limits(3, fit_step)
-        fff2.SetParLimits(3, low, high)
-
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2)
-
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1
-
-        # --- Fit 5: L & T once more ---
-        fff2.ReleaseParameter(0)
-        fff2.ReleaseParameter(1)
-        fff2.SetParameter(0, fff2.GetParameter(0))
-        fff2.SetParameter(1, fff2.GetParameter(1))
-        fff2.FixParameter(2, fff2.GetParameter(2))
-        fff2.FixParameter(3, fff2.GetParameter(3))
-
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2)
-
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1
-
-        # --- Fit 6: LT & TT together ---
-        fff2.FixParameter(0, fff2.GetParameter(0))
-        fff2.FixParameter(1, fff2.GetParameter(1))
-
-        fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
-        fff2.SetParameter(2, fff2.GetParameter(2))
-        fff2.SetParameter(3, fff2.GetParameter(3))
-
-        g_plot_err.Fit("fff2", "MRQ")
-        
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1
-
-        # --- Fit 7: All free ---
-        fff2.ReleaseParameter(0)
-        fff2.ReleaseParameter(1)
-        fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
-
+        #fff2.SetParameter(0, 1)
         low, high = adapt_limits(0, fit_step)
         fff2.SetParLimits(0, low, high)
-        low, high = adapt_limits(1, fit_step)
-        fff2.SetParLimits(1, low, high)
-        low, high = adapt_limits(2, fit_step)
-        fff2.SetParLimits(2, low, high)
-        low, high = adapt_limits(3, fit_step)
-        fff2.SetParLimits(3, low, high)
 
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2)  
+        fff2.FixParameter(1, 0.0)
+        fff2.FixParameter(2, 0.0)
+        fff2.FixParameter(3, 0.0)
+
+        # --- Fit 3: LT & TT ---
+        fff2.ReleaseParameter(2)
+        fff2.ReleaseParameter(3)
+        graph.Fit(fff2, "Q0")
+        check_sigma_positive(fff2)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+
+        fit_step += 1
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
