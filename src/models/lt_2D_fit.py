@@ -327,7 +327,7 @@ def run_global_fit(global_pts):
         # you can return them alongside the best-fit parameters if you like
     # ===================================
 
-    return best, [ (lo.value, hi.value) for lo,hi in zip(lo_errs, hi_errs) ]
+    return list(minim.X())
 # ===================================
 
 ###############################################################################################################################################
@@ -1026,10 +1026,9 @@ g_sig_tt_total = TGraphErrors()
 # === EXECUTE GLOBAL FIT & FILL TOTALS ===
 if USE_GLOBAL_FIT:
     # 1) run the fit
-    best, global_errors = run_global_fit(global_pts)
-
+    best = run_global_fit(global_pts)
     AL, BL, AT, BT, ALT, BLT, ATT, BTT = best
-    
+
     # 2) (Re)initialize the TOTAL graphs so they're empty:
     g_sig_l_total.Reset()
     g_sig_t_total.Reset()
