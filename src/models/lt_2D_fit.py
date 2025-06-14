@@ -615,6 +615,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lower_limits = [ -limit_map[k] for k in keys ]
         upper_limits = [  limit_map[k] for k in keys ]
 
+        '''
         # Now call with the full signature:
         fit_vals, fit_errs = run_penalized_fit(
             fff2,            # the TF2 you’re fitting
@@ -622,7 +623,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             start_vals,
             lower_limits=lower_limits,
             upper_limits=upper_limits
-        )       
+        )      
+        ''' 
         print(f"[priors] σ_LT = {fff2.GetParameter(2):+.3f} nb   "
           f"σ_TT = {fff2.GetParameter(3):+.3f} nb")
         # -----------------------------------------------------------
