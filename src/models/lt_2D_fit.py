@@ -138,83 +138,41 @@ def refit_until_inside_limits(fit_func, graph, limit_map):
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
-from iminuit import Minuit
-import numpy as np
-import ROOT
+from ROOT import Math, TF1
 
-def run_penalized_fit(graph, tf1, limit_map,
-                      lam=PENALTY_LAMBDA,
-                      enforce_prior=ENFORCE_PRIOR,
-                      prior_sigma_lt=PRIOR_SIGMA_LT,
-                      prior_sigma_tt=PRIOR_SIGMA_TT):
-    """
-    Perform a penalized least-squares fit using iminuit and copy results back into a ROOT TF1.
+def run_penalized_fit(fcn_tf1, npars, start_vals, step_sizes, lower_limits=None, upper_limits=None):
+    # 1) Create the Minuit/Migrad minimizer
+    minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
+    minimizer.SetMaxFunctionCalls(1_000_000)
+    minimizer.SetMaxIterations(100_000)
+    minimizer.SetTolerance(0.001)
+    minimizer.SetPrintLevel(0)
 
-    χ² = Σ[(y_i - f(x_i; p))² / σ_i²]
-         + lam * Σ_j max(0, |p_j| - L_j)²
-         + (optional) Gaussian priors on p[2], p[3]
+    # 2) Wrap your TF1 (or any multi-dimensional functor) for ROOT::Math
+    #    (fcn_tf1 is your TF1 instance with npars parameters)
+    fcn = Math.WrappedMultiTF1(npars, fcn_tf1)
+    minimizer.SetFunction(fcn)
 
-    - graph:       TGraphErrors or TGraph2DErrors of unseparated σ vs φ
-    - tf1:         TF1 of your φ-dependent model, with Npar parameters
-    - limit_map:   dict idx→limit for each parameter
-    - lam:         penalty strength
-    - enforce_prior: bool to add Gaussian priors
-    - prior_sigma_lt, prior_sigma_tt: width of priors for parameters 2 & 3
-    """
-    # Extract data points from the graph
-    x_vals, y_vals, y_errs = [], [], []
-    has_z = isinstance(graph, ROOT.TGraph2DErrors)
-    for i in range(graph.GetN()):
-        x, y = ROOT.Double(0), ROOT.Double(0)
-        if has_z:
-            z = ROOT.Double(0)
-            graph.GetPoint(i, x, y, z)
-            yi = z.value
-            ei = graph.GetErrorZ(i)
+    # 3) Define all the fit parameters
+    for i in range(npars):
+        name      = f"p{i}"
+        start     = start_vals[i]
+        step      = step_sizes[i]
+        if lower_limits and upper_limits:
+            minimizer.SetLimitedVariable(i, name, start, step,
+                                         lower_limits[i], upper_limits[i])
         else:
-            graph.GetPoint(i, x, y)
-            yi = y.value
-            ei = graph.GetErrorY(i)
-        if ei <= 0:
-            ei = 1e-9
-        x_vals.append(x.value)
-        y_vals.append(yi)
-        y_errs.append(ei)
+            minimizer.SetVariable(i, name, start, step)
 
-    # Define the chi-squared function with penalties
-    def chi2_with_penalty(*params):
-        # Model evaluation
-        model = np.array([tf1.Eval(xi, *params) for xi in x_vals])
-        # Base chi2
-        chi2 = np.sum(((np.array(y_vals) - model) / np.array(y_errs))**2)
-        # Soft-wall penalty
-        for j, Lj in limit_map.items():
-            pj = params[j]
-            excess = max(0, abs(pj) - Lj)
-            chi2 += lam * excess**2
-        # Gaussian priors if requested
-        if enforce_prior:
-            chi2 += (params[2] / prior_sigma_lt)**2 + (params[3] / prior_sigma_tt)**2
-        return chi2
+    # 4) Do the minimization
+    minimizer.Minimize()
+    minimizer.Hesse()   # optional, to fill the error matrix
 
-    # Initial parameter guesses and steps
-    init_vals  = [tf1.GetParameter(i) for i in range(tf1.GetNpar())]
-    init_steps = [tf1.GetParError(i)   for i in range(tf1.GetNpar())]
+    # 5) Extract results
+    result_vals = minimizer.X()       # array of fitted parameter values
+    result_errs = minimizer.Errors()  # array of 1-sigma errors
 
-    # Perform the minimization with iminuit
-    m = Minuit(chi2_with_penalty, *init_vals, error=init_steps)
-    m.errordef = Minuit.LEAST_SQUARES
-    m.migrad()
-    m.hesse()
-
-    # Copy best-fit parameters and errors back into tf1
-    for idx, name in enumerate(m.parameters):
-        val = m.values[name]
-        err = m.errors[name]
-        tf1.SetParameter(idx, val)
-        tf1.SetParError(idx, err)
-
-    return tf1
+    return result_vals, result_errs
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
