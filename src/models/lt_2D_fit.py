@@ -382,25 +382,22 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "Q0")
         check_sigma_positive(fff2, g_plot_err)
 
-        # ------------------------------------------------------------------
-        # Soft prior : expect σ_L ≳ 2 % of σ_T with 100 % uncertainty
-        # ------------------------------------------------------------------
-        prior_frac    = 0.02                         # 2 % of σ_T
-        prior_rel_err = 0.5                          # 50 %  ⇒ penalty ≈ 4 when σL → 0
+        # ---------------------------------------------------------------
+        # Soft prior : expect σL ≳ 2 % of σT  (weak, two-ε pseudo points)
+        # ---------------------------------------------------------------
+        prior_frac     = 0.02
+        prior_rel_err  = 0.5                 # 50 % → still a very soft constraint
+        sigT_guess     = max(fff2.GetParameter(0), 1e-3)
 
-        sigT_guess    = max(fff2.GetParameter(0), 1e-3)    # current σ_T
-        sigL_prior    = prior_frac * sigT_guess
-        sigL_err      = prior_rel_err * sigL_prior
+        sigL_prior     = prior_frac * sigT_guess
+        sigL_err       = prior_rel_err * sigL_prior
 
-        phi_prior  = 45.0                              # inside 0–360  →  point is INCLUDED
-        eps_prior  = lo_eps                             # any ε is fine
-
-        # add pseudo-point to the **same** TGraph2DErrors that will be fitted
-        for eps_prior in (LOEPS, HIEPS):
+        phi_prior = 45.0                     # inside TF2 x-range
+        for eps_prior in (LOEPS, HIEPS):     # add one point at each ε
             n = g_plot_err.GetN()
             g_plot_err.SetPoint      (n, phi_prior, eps_prior, sigL_prior)
             g_plot_err.SetPointError (n, 0.0,       0.0,       sigL_err)
-        # ------------------------------------------------------------------
+        # ---------------------------------------------------------------
 
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
         eps_diff   = abs(HIEPS - LOEPS)
