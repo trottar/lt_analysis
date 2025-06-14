@@ -324,7 +324,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for k in range(4):
             fff2.ReleaseParameter(k)
 
-        # ---------------------------------------------------------------  
+        # ---------------------------------------------------------------
+        par_keys  = ["sigT", "sigL", "rho_lt", "rho_tt"]       # <-- canonical order
+        current_i = 0   # or whatever index you use inside PARAM_LIMITS[*][current_i]
+
         for idx, key in enumerate(par_keys):
             fff2.SetParName(idx, key)
             if key in PARAM_LIMITS:
