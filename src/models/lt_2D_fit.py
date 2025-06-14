@@ -89,24 +89,21 @@ PARAM_LIMITS = {
 
 COND_MAX   = 20.0        # user control, near-singular if κ > 20
 
-def adapt_limits(param_name_or_idx, step=0):
+# ---------------------------------------------------------------
+def reset_limits_from_table(func, idx, key, stage):
     """
-    Return (low, high) limits for a given parameter and step index.
-
-    param_name_or_idx : int 0-3 OR 'sigT'|'sigL'|'sigLT'|'sigTT'
-    step              : 0-based fit pass counter
+    Reset parameter *idx* of TF2 *func* to the lower/upper limits
+    stored in PARAM_LIMITS[key][stage], and give it a non-zero step.
     """
-    name_map = {0:'sigT', 1:'sigL', 2:'sigLT', 3:'sigTT'}
-    pname = name_map.get(param_name_or_idx, param_name_or_idx)
-    limdef = PARAM_LIMITS.get(pname, (0.0, 1.0e6))
+    lo, hi = PARAM_LIMITS[key][stage]
+    func.SetParLimits(idx, lo, hi)
 
-    # If user supplied per-step list:
-    if isinstance(limdef[0], (list, tuple)):
-        if step < len(limdef):
-            return limdef[step]
-        return limdef[-1]
-    # Single tuple provided:
-    return limdef
+    # give MINUIT a first step = 5 % of the allowed range,
+    # or a small absolute step if the range is tiny
+    step = 0.05 * (hi - lo) if hi > lo else 0.02
+    func.SetParError(idx, step)
+# ---------------------------------------------------------------
+
 # --------------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------
@@ -384,8 +381,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # --- Fit 2: L ---
         fff2.ReleaseParameter(1)    # σL now floats
-        fff2.FixParameter(2, 0.0)
-        fff2.FixParameter(3, 0.0)
+        reset_limits_from_table(fff2, 1, "sigL", stage=1)
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
@@ -443,8 +439,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("--------------------------------------------------\n")        
 
         # --- Fit 3: LT & TT ---
-        fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
+        for idx, key in ((2, "rhoLT"), (3, "rhoTT")):
+            fff2.ReleaseParameter(idx)
+            reset_limits_from_table(fff2, idx, key, stage=2)
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
