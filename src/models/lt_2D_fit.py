@@ -109,27 +109,53 @@ def adapt_limits(param_name_or_idx, step=0):
     return limdef
 # --------------------------------------------------------------------------------------------
 
-def check_sigma_positive(f):
+# ---------------------------------------------------------------
+# Positivity guard + auto-refit
+# ---------------------------------------------------------------
+def check_sigma_positive(fcn, graph,
+                         phi_set=(0, 90, 180, 270),
+                         eps_set=(LOEPS, HIEPS),
+                         shrink_factor=0.90):
     """
-    Returns True if σ(φ,ε) is ≥ 0 for φ = 0,90,180,270° and both ε settings.
-    If not, shrink the ρTT limits by 10 % and re-fit once.
+    Ensure σ(φ,ε) ≥ 0 for four φ values and both ε settings.
+    If violated: shrink ρTT limits by `shrink_factor` and refit once.
+
+    Parameters
+    ----------
+    fcn   : ROOT.TF2   – current cross-section fit function
+    graph : ROOT.TGraphErrors (or TH2) used in the Fit call
+    phi_set, eps_set  : tuples of sampling points
+    shrink_factor     : 0 < factor < 1, multiplicative tightening
+
+    Returns
+    -------
+    bool  – True if σ ≥ 0 after (re)fit, False otherwise.
     """
-    phi_set = (0, 90, 180, 270)
-    eps_set = (LOEPS, HIEPS)
+    # helper to test positivity
+    def _is_positive():
+        return min(fcn.Eval(phi, eps) for phi in phi_set for eps in eps_set) >= 0
 
-    if min(f.Eval(phi, eps) for phi in phi_set for eps in eps_set) >= 0:
-        return True   # all good
+    if _is_positive():
+        return True
 
-    # positivity violated → pull ρTT inwards and try again
     print("WARNING: negative σ detected → tightening ρTT limits and refitting")
 
-    lo, hi = f.GetParLimits(3)          # current limits on ρTT
-    shrink = 0.9                        # 10 % inward
-    lo, hi = lo*shrink, hi*shrink
-    f.SetParLimits(3, lo, hi)           # update limits
-    graph.Fit(f, "Q0")                  # immediate quiet refit
+    # --- fetch current limits on parameter 3 (ρTT) ----------------
+    lo_ref = ROOT.Double(0.0)
+    hi_ref = ROOT.Double(0.0)
+    fcn.GetParLimits(3, lo_ref, hi_ref)          # TF1::GetParLimits
+    lo, hi = float(lo_ref), float(hi_ref)
 
-    return min(f.Eval(phi, eps) for phi in phi_set for eps in eps_set) >= 0
+    # --- tighten and refit once -----------------------------------
+    fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
+    graph.Fit(fcn, "Q0")                         # quiet, no redraw
+
+    # --- final check ----------------------------------------------
+    if not _is_positive():
+        print("WARNING: σ still negative after shrink; "
+              "consider excluding this t-bin.")
+        return False
+    return True
 
 ###############################################################################################################################################
 
