@@ -85,7 +85,7 @@ PARAM_LIMITS = {
     'sigTT': [(-1.0,  1.0)]*7,   # parameter 3
     "rhoLT": [(-1.0, 1.0)]*7,   # rho_LT >= -1
     "rhoTT": [(-1.0, 1.0)]*7    # rho_TT <= 1
-}
+    }
 
 def adapt_limits(param_name_or_idx, step=0):
     """
