@@ -396,9 +396,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         eps_prior  = lo_eps                             # any ε is fine
 
         # add pseudo-point to the **same** TGraph2DErrors that will be fitted
-        n_prior = g_plot_err.GetN()
-        g_plot_err.SetPoint      (n_prior, phi_prior, eps_prior, sigL_prior)
-        g_plot_err.SetPointError (n_prior, 0.0,       0.0,       sigL_err)
+        for eps_prior in (LOEPS, HIEPS):
+            n = g_plot_err.GetN()
+            g_plot_err.SetPoint      (n, phi_prior, eps_prior, sigL_prior)
+            g_plot_err.SetPointError (n, 0.0,       0.0,       sigL_err)
         # ------------------------------------------------------------------
 
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
