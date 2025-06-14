@@ -604,10 +604,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             3: get_scaled_limit('sigTT'),
         }
         # 1) Determine how many parameters you have:
-        npars = fff2  
+        npars = fff2.GetNpar()    # returns an int (4 in your case)
 
         # 2) Grab your initial guesses out of the TF1 (or supply your own):
-        start_vals = [ tf1.GetParameter(i) for i in range(npars) ]
+        start_vals = [ fff2.GetParameter(i) for i in range(npars) ]
 
         # 3) Unpack your symmetric limit_map (which maps index→L) into lower/upper lists:
         #    e.g. if limit_map[0]=5, parameter 0 runs in [-5, +5].
@@ -617,12 +617,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Now call with the full signature:
         fit_vals, fit_errs = run_penalized_fit(
-            g_plot_err,          # your TF1-wrapped functor
-            npars,               # number of fit parameters
-            start_vals,          # initial guesses
+            fff2,            # the TF2 you’re fitting
+            npars,
+            start_vals,
             lower_limits=lower_limits,
             upper_limits=upper_limits
-        )        
+        )       
         print(f"[priors] σ_LT = {fff2.GetParameter(2):+.3f} nb   "
           f"σ_TT = {fff2.GetParameter(3):+.3f} nb")
         # -----------------------------------------------------------
