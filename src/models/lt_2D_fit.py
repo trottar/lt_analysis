@@ -386,11 +386,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Soft prior : expect σ_L ≳ 2 % of σ_T with 100 % uncertainty
         # ------------------------------------------------------------------
         prior_frac    = 0.02                         # 2 % of σ_T
-        prior_rel_err = 1.0                          # 100 % → very weak weight
+        prior_rel_err = 0.5                          # 50 %  ⇒ penalty ≈ 4 when σL → 0
 
         sigT_guess    = max(fff2.GetParameter(0), 1e-3)    # current σ_T
         sigL_prior    = prior_frac * sigT_guess
-        sigL_err      = prior_rel_err * sigL_prior         # error = value → 1 χ² unit
+        sigL_err      = prior_rel_err * sigL_prior
 
         phi_prior  = 45.0                              # inside 0–360  →  point is INCLUDED
         eps_prior  = lo_eps                             # any ε is fine
@@ -413,7 +413,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             floor    = max(0.25*sigL_err, 1e-3)
             if sigL < floor:
                 fff2.SetParameter(1, floor)
-
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
