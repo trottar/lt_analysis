@@ -546,19 +546,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                     z_cd.value,        # σ_unsep
                     err_z              # σ uncertainty
                 ))
-            continue
         # ================================================================
 
-        fff2 = TF2("fff2",
-                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                   0, 360, 0.0, 1.0)
+        if not USE_GLOBAL_FIT:
 
-        '''
-        fff2 = TF2("fff2",
-                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                   0, 360, LOEPS-0.1, HIEPS+0.1)
-        '''
-        
+            fff2 = TF2("fff2",
+                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
+                    0, 360, 0.0, 1.0)
+
+            '''
+            fff2 = TF2("fff2",
+                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
+                    0, 360, LOEPS-0.1, HIEPS+0.1)
+            '''
+
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
@@ -1011,47 +1012,47 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         except IOError:
             print("Error writing to file {}.".format(fn_unsep))
 
-        # === EXECUTE GLOBAL FIT & FILL TOTALS ===
-        if USE_GLOBAL_FIT:
-            # 1) run the fit
-            best = run_global_fit(global_pts)
-            AL, BL, AT, BT, ALT, BLT, ATT, BTT = best
-
-            # 2) (Re)initialize the TOTAL graphs so they're empty:
-            g_sig_l_total.Reset()
-            g_sig_t_total.Reset()
-            g_sig_lt_total.Reset()
-            g_sig_tt_total.Reset()
-
-            # 3) evaluate at each t and fill
-            for i_t, t_val in enumerate(t_list):
-                if PAR_MODEL == "exp":
-                    sigL  = AL  * math.exp(BL  * t_val)
-                    sigT  = AT  * math.exp(BT  * t_val)
-                    sigLT = ALT * math.exp(BLT * t_val)
-                    sigTT = ATT * math.exp(BTT * t_val)
-                else:
-                    sigL  = AL  + BL  * t_val
-                    sigT  = AT  + BT  * t_val
-                    sigLT = ALT + BLT * t_val
-                    sigTT = ATT + BTT * t_val
-
-                # fill exactly where your per-bin code used to
-                g_sig_l_total.SetPoint(g_sig_l_total.GetN(), float(t_val), sigL)
-                g_sig_l_total.SetPointError(g_sig_l_total.GetN()-1, 0, sig_l_err)   # reuse per-bin err arrays if desired
-
-                g_sig_t_total.SetPoint(g_sig_t_total.GetN(), float(t_val), sigT)
-                g_sig_t_total.SetPointError(g_sig_t_total.GetN()-1, 0, sig_t_err)
-
-                g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), float(t_val), sigLT)
-                g_sig_lt_total.SetPointError(g_sig_lt_total.GetN()-1, 0, sig_lt_err)
-
-                g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), float(t_val), sigTT)
-                g_sig_tt_total.SetPointError(g_sig_tt_total.GetN()-1, 0, sig_tt_err)
-        # ================================================
-
         del c1, c2, c3, c4, c5
-            
+
+    # === EXECUTE GLOBAL FIT & FILL TOTALS ===
+    if USE_GLOBAL_FIT:
+        # 1) run the fit
+        best = run_global_fit(global_pts)
+        AL, BL, AT, BT, ALT, BLT, ATT, BTT = best
+
+        # 2) (Re)initialize the TOTAL graphs so they're empty:
+        g_sig_l_total.Reset()
+        g_sig_t_total.Reset()
+        g_sig_lt_total.Reset()
+        g_sig_tt_total.Reset()
+
+        # 3) evaluate at each t and fill
+        for i_t, t_val in enumerate(t_list):
+            if PAR_MODEL == "exp":
+                sigL  = AL  * math.exp(BL  * t_val)
+                sigT  = AT  * math.exp(BT  * t_val)
+                sigLT = ALT * math.exp(BLT * t_val)
+                sigTT = ATT * math.exp(BTT * t_val)
+            else:
+                sigL  = AL  + BL  * t_val
+                sigT  = AT  + BT  * t_val
+                sigLT = ALT + BLT * t_val
+                sigTT = ATT + BTT * t_val
+
+            # fill exactly where your per-bin code used to
+            g_sig_l_total.SetPoint(g_sig_l_total.GetN(), float(t_val), sigL)
+            g_sig_l_total.SetPointError(g_sig_l_total.GetN()-1, 0, sig_l_err)   # reuse per-bin err arrays if desired
+
+            g_sig_t_total.SetPoint(g_sig_t_total.GetN(), float(t_val), sigT)
+            g_sig_t_total.SetPointError(g_sig_t_total.GetN()-1, 0, sig_t_err)
+
+            g_sig_lt_total.SetPoint(g_sig_lt_total.GetN(), float(t_val), sigLT)
+            g_sig_lt_total.SetPointError(g_sig_lt_total.GetN()-1, 0, sig_lt_err)
+
+            g_sig_tt_total.SetPoint(g_sig_tt_total.GetN(), float(t_val), sigTT)
+            g_sig_tt_total.SetPointError(g_sig_tt_total.GetN()-1, 0, sig_tt_err)
+    # ================================================    
+
     return t_list
 
 fn_lo =  "{}/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat".format(
