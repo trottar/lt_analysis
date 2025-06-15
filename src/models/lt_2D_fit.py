@@ -421,18 +421,22 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("TABLE check ρ-limits stage 2:",
             PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
 
-        print("Pass-3 limits in effect:",
-            fff2.GetParLimits(2), fff2.GetParLimits(3))
-
         # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
         stage_idx = 2            # third-pass entry in PARAM_LIMITS
 
         for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
             fff2.ReleaseParameter(p_idx)
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-            fff2.SetParError (p_idx, 0.02 if p_key.startswith("rho")
+
+            # give MINUIT a first step
+            fff2.SetParError(p_idx, 0.02 if p_key.startswith("rho")
                                     else 0.05*(hi_lim-lo_lim))
+
+        # --- sanity print (optional) ---
+        print("Pass-3 limits:",
+            get_limits(fff2,2), get_limits(fff2,3))
+
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
