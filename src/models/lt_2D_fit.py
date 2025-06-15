@@ -100,6 +100,20 @@ def reset_limits_from_table(func, idx, key, stage):
     step = 0.05 * (hi - lo) if hi > lo else 0.02
     func.SetParError(idx, step)
 # ---------------------------------------------------------------
+import ctypes
+
+def get_limits(fcn, idx):
+    """
+    Return (lo, hi) limits for parameter *idx* of TF1/TF2 *fcn*.
+    Works with both old (3-arg) and new (tuple) PyROOT signatures.
+    """
+    try:                                        # modern PyROOT (tuple)
+        return fcn.GetParLimits(idx)
+    except TypeError:                           # old signature → use refs
+        lo_ref = ctypes.c_double(0.0)
+        hi_ref = ctypes.c_double(0.0)
+        fcn.GetParLimits(idx, lo_ref, hi_ref)
+        return lo_ref.value, hi_ref.value
 
 # --------------------------------------------------------------------------------------------
 
