@@ -77,12 +77,11 @@ PI = math.pi
 #   • list/tuple of tuples -> individual limits per step; last entry reused if
 #     the sequence is shorter than the maximum number of steps (7 here).
 #
-#'''
 PARAM_LIMITS = {
-    "sigT" : [(0.001, 1e3), (0.001, 1e3), (0.001, 1e3)],
-    "sigL" : [(0.001, 1e3), (0.001, 1e3), (0.001, 1e3)],
-    "rhoLT": [(-1.0, 1.0),  (-1.0, 1.0),  (-1.0, 1.0)],
-    "rhoTT": [(-1.0, 1.0),  (-1.0, 1.0),  (-1.0, 1.0)]
+    "sigT" : [(0.001, 1e3)]*3,
+    "sigL" : [(0.001, 1e3)]*3,
+    "rhoLT": [(-1.0, 1.0)]*3,      #   all three tuples −1 … +1
+    "rhoTT": [(-1.0, 1.0)]*3
 }
 
 COND_MAX   = 20.0        # user control, near-singular if κ > 20
@@ -383,23 +382,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
-        # ---------------------------------------------------------------
-        # Soft prior : expect σL ≳ 2 % of σT  (weak, two-ε pseudo points)
-        # ---------------------------------------------------------------
-        prior_frac     = 0.02
-        prior_rel_err  = 0.5                 # 50 % → still a very soft constraint
-        sigT_guess     = max(fff2.GetParameter(0), 1e-3)
-
-        sigL_prior     = prior_frac * sigT_guess
-        sigL_err       = prior_rel_err * sigL_prior
-
-        phi_prior = 45.0                     # inside TF2 x-range
-        for eps_prior in (LOEPS, HIEPS):     # add one point at each ε
-            n = g_plot_err.GetN()
-            g_plot_err.SetPoint      (n, phi_prior, eps_prior, sigL_prior)
-            g_plot_err.SetPointError (n, 0.0,       0.0,       sigL_err)
-        # ---------------------------------------------------------------
-
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
         eps_diff   = abs(HIEPS - LOEPS)
         cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
@@ -439,23 +421,18 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("TABLE check ρ-limits stage 2:",
             PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
 
-        # --- Fit 3: LT & TT ---
-        stage_idx = 2                    # third-pass entry in PARAM_LIMITS
+        print("Pass-3 limits in effect:",
+            fff2.GetParLimits(2), fff2.GetParLimits(3))
 
-        # (parameter index , key in PARAM_LIMITS)
-        for p_idx, p_key in ((1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
-            # 1) un-freeze the parameter
+        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
+        stage_idx = 2            # third-pass entry in PARAM_LIMITS
+
+        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
             fff2.ReleaseParameter(p_idx)
-
-            # 2) pull limits from the master table
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-
-            # 3) give MINUIT a non-zero initial step
-            if p_key.startswith("rho"):
-                fff2.SetParError(p_idx, 0.02)                      # small step for ρ’s
-            else:
-                fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))  # 5 % of range for σ_L        
+            fff2.SetParError (p_idx, 0.02 if p_key.startswith("rho")
+                                    else 0.05*(hi_lim-lo_lim))
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
