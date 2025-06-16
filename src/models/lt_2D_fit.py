@@ -238,6 +238,14 @@ def dump_fit_summary(t_bin_idx, ffun, graph, label):
     print("        " + pars)
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+def lo_eps_fit_deg(phi_deg, par):
+    return LT_sep_x_lo_fun(phi_deg * PI / 180.0, par)
+
+def hi_eps_fit_deg(phi_deg, par):
+    return LT_sep_x_hi_fun(phi_deg * PI / 180.0, par)
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -296,12 +304,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
     for i in range(0, t_bin_num):    
-
-        if i == 2:                                        # t-bin that looks wrong
-            print("DEBUG  φ=0°  cos wrapper =", math.cos(0))          # = 1
-            print("DEBUG  φ=0°  cosd helper  =", cosd(0))             # = 1
-            print("DEBUG  φ=180° cos wrapper =", math.cos(180))       # = −0.598…
-            print("DEBUG  φ=180° cosd helper  =", cosd(180))          # = −1
         
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
@@ -321,11 +323,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
-        flo = TF1(
-            "lo_eps_fit",
-            lambda phi_deg, par, base=LT_sep_x_lo_fun: base(phi_deg * PI / 180.0, par),
-            0, 360, 4
-        )
+        flo = TF1("lo_eps_fit", lo_eps_fit_deg, 0, 360, 4)
         LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
         
@@ -347,11 +345,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
-        fhi = TF1(
-            "hi_eps_fit",
-            lambda phi_deg, par, base=LT_sep_x_hi_fun: base(phi_deg * PI / 180.0, par),
-            0, 360, 4
-        )
+        fhi = TF1("hi_eps_fit", hi_eps_fit_deg, 0, 360, 4)
         LT_sep_x_hi_fun_unsep = LT_sep_x_hi_fun_unsep_wrapper(hi_eps)
         fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
             
