@@ -149,17 +149,19 @@ def get_limits(fcn, idx):
         return lo_ref.value, hi_ref.value
 
 # --------------------------------------------------------------------------------------------
-def penalty(f):
-    sigT, sigL, rhoLT, rhoTT = (f.GetParameter(i) for i in range(4))
-    p = 0.0
-    # soft quadratic walls once the limits are exceeded
-    if abs(rhoLT) > math.sqrt(max(sigT*sigL,0)):
-        diff = abs(rhoLT) - math.sqrt(max(sigT*sigL,0))
-        p += (diff / rhoLT_err)**2          # scale by current error
-    if abs(rhoTT) > sigT:
-        diff = abs(rhoTT) - sigT
-        p += (diff / rhoTT_err)**2
-    return p
+def penalty(fcn):
+    """Soft quadratic penalty if ρLT, ρTT exceed their |ρ|≤1 bounds."""
+    sigT  = fcn.GetParameter(0)
+    sigL  = fcn.GetParameter(1)
+    rhoLT = fcn.GetParameter(2)
+    rhoTT = fcn.GetParameter(3)
+
+    pen = 0.0
+    if abs(rhoLT) > 1.0:
+        pen += (abs(rhoLT) - 1.0)**2
+    if abs(rhoTT) > 1.0:
+        pen += (abs(rhoTT) - 1.0)**2
+    return pen
 
 # ---------------------------------------------------------------
 # Positivity guard + auto-refit (robust version)
