@@ -501,9 +501,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     
         phi_extrema = np.array([0, 180, 360], float)
         for ang in phi_extrema:
-            model_val = fff2.Eval(ang, lo_eps)  # low-ε curve
-            print(f"φ={ang:3.0f}°  model={model_val:7.2f} nb   "
-                f"data≈{glo.GetMaximum():7.2f} nb")
+            model_val_lo = fff2.Eval(ang, lo_eps)  # low-ε curve
+            model_val_hi = fff2.Eval(ang, hi_eps)  # high-ε curve
+            print(f"φ={ang:3.0f}°  low model={model_val_lo:7.2f} nb   "
+                f"high model={model_val_hi:7.2f} nb")
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
