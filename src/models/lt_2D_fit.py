@@ -414,86 +414,22 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        # ---------------- FIT SEQUENCE ------------------
-        fit_step = 0  # counter for adapt_limits
+        # ────────────────────────────────────────────────────────────────
+        # One-shot simultaneous fit of σT, σL, ρLT, ρTT and Norm
+        # ────────────────────────────────────────────────────────────────
 
-        # --- Fit 1: T ---
-        fff2.FixParameter(1, 0.0)   # σL
-        fff2.FixParameter(2, 0.0)   # ρLT
-        fff2.FixParameter(3, 0.0)   # ρTT
-        fff2.FixParameter(4, 1.0)   # Norm
-        g_plot_err.Fit(fff2, "WMRQ")       # quiet, no redraw
-        check_sigma_positive(fff2, g_plot_err)
+        # 1) seed everything (including Norm=1)
+        fff2.SetParameters(seed_sigT, seed_sigL, 0.0, 0.0, 1.0)
 
-        sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
-        sigL_change.GetXaxis().SetTitle("Fit Step")
-        sigL_change.GetYaxis().SetTitle("#it{#sigma}_{L}")
+        # 2) ensure all five parameters are released
+        for idx in range(5):
+            fff2.ReleaseParameter(idx)
 
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        # 3) run the weighted fit once
+        g_plot_err.Fit(fff2, FIT_OPTS)
 
-        sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
-        sigT_change.GetXaxis().SetTitle("Fit Step")
-        sigT_change.GetYaxis().SetTitle("#it{#sigma}_{T}")
-
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1
-
-        # --- Fit 2: L ---
-        fff2.ReleaseParameter(1)    # σL now floats
-        reset_limits_from_table(fff2, 1, "sigL", stage=1)
-        g_plot_err.Fit(fff2, "WMRQ")
-        check_sigma_positive(fff2, g_plot_err)
-
-        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
-        eps_diff   = abs(HIEPS - LOEPS)
-        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
-
-        if cond_num > COND_MAX:
-            # matrix is ill-conditioned → apply soft floor to σ_L
-            sigL     = fff2.GetParameter(1)
-            sigL_err = fff2.GetParError(1)
-            floor    = max(0.25*sigL_err, 1e-3)
-            if sigL < floor:
-                fff2.SetParameter(1, floor)
-
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1    
-
-        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together --------------------------
-        fff2.FixParameter(0, fff2.GetParameter(0))   # σT fixed
-        fff2.FixParameter(1, fff2.GetParameter(1))   # σL fixed
-        stage_idx = 2            # third-pass entry in PARAM_LIMITS
-
-        # --- Grab a crude statistical error scale for this t-bin -------------
-        # RMS of the Y-errors in the graph is a quick, stable proxy
-        stat_err_estimate = math.sqrt(
-            sum((g_plot_err.GetErrorY(i))**2 for i in range(g_plot_err.GetN()))
-            / max(1, g_plot_err.GetN())
-        )
-        # --------------------------------------------------------------------------
-
-        for p_idx, p_key in ((2,"rhoLT"), (3,"rhoTT"), (4, "Norm")):
-            fff2.ReleaseParameter(p_idx)
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
-            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-
-            # --- Seeding & step size ----------------------------
-            if p_key.startswith("rho"):
-                fff2.SetParameter(p_idx, 0.0)
-                step = max(0.1, 0.6*stat_err_estimate)
-                fff2.SetParError(p_idx, step)
-            else:
-                fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
-            # ---------------------------------------------------------------------
-
-        g_plot_err.Fit(fff2, "WMRQ")
+        # 4) report
+        dump_fit_summary(i, fff2, g_plot_err, "one‐pass")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
