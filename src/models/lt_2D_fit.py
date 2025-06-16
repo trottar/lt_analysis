@@ -86,8 +86,8 @@ PI = math.pi
 #    so the natural, model-independent range is [−1 … +1].
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(0.001, 1e4)]*3,   # σ_T  : transverse
-    "sigL" : [(0.001, 1e4)]*3,   # σ_L  : longitudinal
+    "sigT" : [(5.0, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
@@ -113,11 +113,8 @@ SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is r
 #  we apply the soft floor to σ_L (see Pass-2 code).
 def compute_cond(ε1, ε2):
     return math.sqrt(1+ε1**2)*math.sqrt(1+ε2**2)/abs(ε2 - ε1)
-M = 2.0  # how much error amplification you’ll tolerate
 cond = compute_cond(LOEPS, HIEPS)
-COND_MAX = M
-if cond > COND_MAX:
-    print("Warning: condition number {:.2f} exceeds threshold {:.2f} → applying soft floor to σ_L".format(cond, COND_MAX))
+COND_MAX = cond
 
 # ---------------------------------------------------------------
 def reset_limits_from_table(func, idx, key, stage):
