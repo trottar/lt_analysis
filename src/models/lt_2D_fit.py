@@ -92,8 +92,8 @@ PI = math.pi
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(0.0, 1e4)]*3,   # σ_T  : transverse
-    "sigL" : [(0.0, 1e4)]*3,   # σ_L  : longitudinal
+    "sigT" : [(1e-4, 1e4)]*3,   # σ_T  : transverse
+    "sigL" : [(1e-4, 1e4)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3,     # ρ_TT : σ_TT / σT
     "Norm" : [(0.1, 10.0)]*3          # ← new
