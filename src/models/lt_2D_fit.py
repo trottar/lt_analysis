@@ -239,59 +239,69 @@ def dump_fit_summary(t_bin_idx, ffun, graph, label):
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
-def fit_bin_with_minuit2(phi_deg, eps, sigma_dat, sigma_err,
-                         seeds, limits):
+def fit_bin_with_minuit(phi_arr, eps_arr, sigma_dat, sigma_err,
+                        seeds, limits):
     """
-    φ,ε,σ arrays  →  Minuit2 fit  →  best-fit parameters & χ².
-    • phi_deg, eps, sigma_dat, sigma_err  : 1-D NumPy arrays (same length)
-    • seeds  : list/tuple [σT, σL, ρLT, ρTT]
-    • limits : dict  { "sigT":(lo,hi), "sigL":(lo,hi),
-                       "rhoLT":(lo,hi), "rhoTT":(lo,hi) }
+    Weighted χ² fit with ROOT.TMinuit (Minuit-1).
+
+    Returns  (best_par_list, chi2_min, ndf)
     """
-    npts = len(phi_deg)
+    npts = len(phi_arr)
 
-    # --- wrap the existing model -----------------------------------
-    def model(params, i):
-        sigT, sigL, rhoLT, rhoTT = params
-        phi  = phi_deg[i]
-        eps  = eps_arr[i]          # captured below
-        base = (  sigT
-                + eps * sigL
-                + math.sqrt(2.*eps*(1.+eps))
-                  * cosd(phi) * rhoLT * math.sqrt(sigT*sigL)
-                + eps * cosd(2.*phi) * rhoTT * sigT )
-        # soft-wall penalty
-        pen = 0.0
-        if abs(rhoLT) > math.sqrt(max(sigT*sigL, 0.0)):
-            pen += (abs(rhoLT) - math.sqrt(sigT*sigL))**2
-        if abs(rhoTT) > sigT:
-            pen += (abs(rhoTT) - sigT)**2
-        return base + PENALTY_K * pen
+    # ---- make arrays accessible inside the FCN via default args ----
+    def fcn(npar, gin, f, par, iflag,
+            phi=phi_arr, eps=eps_arr,
+            sig=sigma_dat, err=sigma_err):
+        sigT, sigL, rhoLT, rhoTT = par[0], par[1], par[2], par[3]
+        chi2 = 0.0
+        for i in range(npts):
+            model = (
+                sigT
+                + eps[i] * sigL
+                + math.sqrt(2. * eps[i] * (1. + eps[i]))
+                  * cosd(phi[i]) * rhoLT * math.sqrt(sigT * sigL)
+                + eps[i] * cosd(2. * phi[i]) * rhoTT * sigT
+            )
 
-    # --- Chi² callable ---------------------------------------------
-    eps_arr = eps                 # capture for inner scope
-    def chi2(params):
-        diff = (sigma_dat - np.fromiter(
-                    (model(params, i) for i in range(npts)), float, npts))
-        return np.sum((diff / sigma_err)**2)
+            # soft-wall penalty
+            pen = 0.0
+            if abs(rhoLT) > math.sqrt(max(sigT * sigL, 0.0)):
+                pen += (abs(rhoLT) - math.sqrt(sigT * sigL)) ** 2
+            if abs(rhoTT) > sigT:
+                pen += (abs(rhoTT) - sigT) ** 2
+            model += PENALTY_K * pen
 
-    # --- set up Minuit2 --------------------------------------------
-    fcn  = Math.Functor(chi2, 4)
-    minim = Math.Minimizer("Minuit2", "Migrad")
-    minim.SetFunction(fcn)
+            diff = (sig[i] - model) / err[i]
+            chi2 += diff * diff
+        f[0] = chi2
+
+    # ---- configure Minuit -----------------------------------------
+    m = ROOT.TMinuit(4)
+    m.SetPrintLevel(-1)             # silent; set 0/1 for debugging
+    m.SetFCN(fcn)
 
     par_names = ["sigT", "sigL", "rhoLT", "rhoTT"]
     for i, name in enumerate(par_names):
+        start = seeds[i]
+        step  = 0.05 * start if start != 0 else 0.01
         lo, hi = limits[name]
-        step   = 0.05 * seeds[i] if seeds[i] != 0 else 0.01
-        minim.SetLimitedVariable(i, name, seeds[i], step, lo, hi)
+        m.DefineParameter(i, name, start, step, lo, hi)
 
-    minim.Minimize()
+    # Migrad + Improve
+    m.Migrad()
+    m.Improve()
 
-    best = [minim.X(i) for i in range(4)]
-    chi2_val = minim.MinValue()
-    ndf  = npts - 4
-    return best, chi2_val, ndf
+    # ---- collect results ------------------------------------------
+    best = []
+    for i in range(4):
+        val = ctypes.c_double()
+        err = ctypes.c_double()
+        m.GetParameter(i, val, err)
+        best.append(val.value)
+
+    chi2_min = m.fAmin
+    ndf = npts - 4
+    return best, chi2_min, ndf
 # ------------------------------------------------------------------
 
 ###############################################################################################################################################
@@ -501,6 +511,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2 = ROOT.TF2("fff2", xs_with_guard, 0., 360., 0.0, 1.0, 4)
         # ------------------------------------------------------------------
 
+        
         for k in range(4):
             fff2.ReleaseParameter(k)
 
@@ -538,24 +549,24 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        # ----- gather flattened arrays for Minuit2 -----------------
+        # ---- flatten the graph into NumPy arrays ------------------
         N = g_plot_err.GetN()
-        phi_arr   = np.array([g_plot_err.GetX()[i]  for i in range(N)], dtype=float)
-        eps_arr   = np.array([g_plot_err.GetY()[i]  for i in range(N)], dtype=float)
-        sigma_arr = np.array([g_plot_err.GetZ()[i]  for i in range(N)], dtype=float)
-        err_arr   = np.array([g_plot_err.GetEZ()[i] for i in range(N)], dtype=float)
+        phi_arr   = np.array([g_plot_err.GetX()[i]  for i in range(N)], float)
+        eps_arr   = np.array([g_plot_err.GetY()[i]  for i in range(N)], float)
+        sigma_arr = np.array([g_plot_err.GetZ()[i]  for i in range(N)], float)
+        err_arr   = np.array([g_plot_err.GetEZ()[i] for i in range(N)], float)
 
-        # dynamic seeds & limits already computed just above
         seed_vec = [seed_sigT, seed_sigL, 0.0, 0.0]
         lims = { "sigT": dyn_limits["sigT"],
                  "sigL": dyn_limits["sigL"],
-                 "rhoLT": (-1.0, 1.0),   # keep original broad bounds
+                 "rhoLT": (-1.0, 1.0),
                  "rhoTT": (-1.0, 1.0) }
 
-        best, chi2_val, ndf = fit_bin_with_minuit2(
-            phi_arr, eps_arr, sigma_arr, err_arr, seed_vec, lims )
+        best, chi2_val, ndf = fit_bin_with_minuit(
+            phi_arr, eps_arr, sigma_arr, err_arr,
+            seed_vec, lims )
 
-        # copy results into the TF2 for plotting & later use
+        # copy into fff2 for plotting
         for i, val in enumerate(best):
             fff2.SetParameter(i, val)
 
