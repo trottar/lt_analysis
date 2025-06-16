@@ -473,7 +473,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         )
         # --------------------------------------------------------------------------
 
-        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
+        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT"), (4, "Norm")):
             fff2.ReleaseParameter(p_idx)
             lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
