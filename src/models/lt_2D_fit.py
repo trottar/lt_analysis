@@ -309,6 +309,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         g_plot_err = TGraph2DErrors()
 
+        g_xx, g_yy, g_yy_err = ctypes.c_double(0), ctypes.c_double(0), ctypes.c_double(0)
+
         # --- equalize total weight between low-ε and high-ε stripes ---
         # first compute the full per-point errors for each stripe
         errs_lo = []
