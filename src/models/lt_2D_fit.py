@@ -86,7 +86,7 @@ PI = math.pi
 #    so the natural, model-independent range is [−1 … +1].
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(5.0, 1e3)]*3,   # σ_T  : transverse
+    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
@@ -125,9 +125,9 @@ def reset_limits_from_table(func, idx, key, stage):
     lo, hi = PARAM_LIMITS[key][stage]
     func.SetParLimits(idx, lo, hi)
 
-    # give MINUIT a first step = 1 % of the allowed range,
+    # give MINUIT a first step = 5 % of the allowed range,
     # or a small absolute step if the range is tiny
-    step = 0.01 * (hi - lo) if hi > lo else 0.02
+    step = 0.05 * (hi - lo) if hi > lo else 0.02
     func.SetParError(idx, step)
 # ---------------------------------------------------------------
 
@@ -472,11 +472,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, fff2.GetParameter(1))  # hold σL
         fff2.ReleaseParameter(2)                    # float ρLT
         fff2.ReleaseParameter(3)  # float ρTT
-        # narrow the ρLT limits around current value
-        curr = fff2.GetParameter(2)
-        fff2.SetParLimits(2, curr - 0.2, curr + 0.2)
-        fff2.SetParError(2, 0.02)
-        # fit
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
         # record
