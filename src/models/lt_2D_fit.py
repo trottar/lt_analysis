@@ -84,10 +84,17 @@ PI = math.pi
 #        |σ_LT| ≤ √(σT σL)  →  |ρ_LT| ≤ 1
 #        |σ_TT| ≤    σT     →  |ρ_TT| ≤ 1
 #    so the natural, model-independent range is [−1 … +1].
+#
+#  If you ever run a special kinematic slice (e.g. t near the kaon pole) and
+#  want to *pre-shrink* the search volume at a given pass, just replace the
+#  relevant tuple, e.g.
+#        "sigL": [(0.001, 1e3), (0.001, 500), (0.001, 200)]
+#  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+    #"sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+    "sigL" : [(0.001, 1e3), (0.001, 500), (0.001, 200)],   # σ_L  : longitudinal (pole-dominance at lowest t)
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
@@ -96,8 +103,8 @@ PARAM_LIMITS = {
 # ------------------------------------------------------------------
 # Initial starting values for the fit (nb)
 # ------------------------------------------------------------------
-SEED_SIGT = 10.0      # seed for σ_T  — typical transverse scale
-SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
+SEED_SIGT = 20.0      # seed for σ_T  — typical transverse scale
+SEED_SIGL = 10.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
@@ -111,10 +118,7 @@ SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is r
 #  numerically unstable and MINUIT tends to peg σ_L at its
 #  bound.  We use COND_MAX as the cut-off: when κ > COND_MAX
 #  we apply the soft floor to σ_L (see Pass-2 code).
-def compute_cond(ε1, ε2):
-    return math.sqrt(1+ε1**2)*math.sqrt(1+ε2**2)/abs(ε2 - ε1)
-cond = compute_cond(LOEPS, HIEPS)
-COND_MAX = cond
+COND_MAX   = 20.0
 
 # ---------------------------------------------------------------
 def reset_limits_from_table(func, idx, key, stage):
@@ -305,44 +309,23 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
+        g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
 
-        g_xx, g_yy, g_yy_err = ctypes.c_double(0), ctypes.c_double(0), ctypes.c_double(0)
-
-        # --- equalize total weight between low-ε and high-ε stripes ---
-        # first compute the full per-point errors for each stripe
-        errs_lo = []
         for ii in range(glo.GetN()):
             glo.GetPoint(ii, g_xx, g_yy)
-            err_stat = glo.GetErrorY(ii)
-            err_sys  = pt_to_pt_systematic_error/100 * g_yy.value
-            errs_lo.append(math.hypot(err_stat, err_sys))
+            g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
+            lo_cross_sec_err[i] += 1 / (g_yy_err**2)
+            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
+                                     math.sqrt((glo.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
 
-        errs_hi = []
         for ii in range(ghi.GetN()):
             ghi.GetPoint(ii, g_xx, g_yy)
-            err_stat = ghi.GetErrorY(ii)
-            err_sys  = pt_to_pt_systematic_error/100 * g_yy.value
-            errs_hi.append(math.hypot(err_stat, err_sys))
-
-        # total weight = sum(1 / (total_err)^2)
-        w_lo = sum(1.0 / (e**2) for e in errs_lo)
-        w_hi = sum(1.0 / (e**2) for e in errs_hi)
-        scale_lo = math.sqrt(w_hi / w_lo)
-
-        # now fill the combined graph with correctly scaled errors
-        g_plot_err = TGraph2DErrors()
-        for ii, raw_err_lo in enumerate(errs_lo):
-            glo.GetPoint(ii, g_xx, g_yy)
-            dx_lo = raw_err_lo / scale_lo
-            lo_cross_sec_err[i] += 1.0 / (dx_lo**2)
-            g_plot_err.SetPoint     (g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, dx_lo)
-
-        for ii, raw_err_hi in enumerate(errs_hi):
-            ghi.GetPoint(ii, g_xx, g_yy)
-            hi_cross_sec_err[i] += 1.0 / (raw_err_hi**2)
-            g_plot_err.SetPoint     (g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, raw_err_hi)
+            g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
+            hi_cross_sec_err[i] += 1 / (g_yy_err**2)
+            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
+                                     math.sqrt((ghi.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
@@ -413,96 +396,86 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        # --- improved fit sequence with additional tuning steps ---
-        # fit_step counter remains for tracking
-        fit_step = 0
+        # ---------------- FIT SEQUENCE ------------------
+        fit_step = 0  # counter for adapt_limits
 
-        # --- Fit 1: T only ---
+        # --- Fit 1: T ---
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
-        # float sigmaT initially
-        fff2.ReleaseParameter(0)
-        # perform fit
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+
+        sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
+        sigL_change.GetXaxis().SetTitle("Fit Step")
+        sigL_change.GetYaxis().SetTitle("#it{#sigma}_{L}")
+
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+
+        sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
+        sigT_change.GetXaxis().SetTitle("Fit Step")
+        sigT_change.GetYaxis().SetTitle("#it{#sigma}_{T}")
+        
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+
         fit_step += 1
 
-        # --- Fit 2: σL + ρLT ---
-        # float σL and ρLT, hold ρTT=0
-        fff2.FixParameter(0, fff2.GetParameter(0))  # hold σT
-        fff2.ReleaseParameter(1)    # σL
-        fff2.ReleaseParameter(2)    # ρLT
-        fff2.FixParameter(3, 0.0)   # hold ρTT
-        # reset limits for sigL and rhoLT
+        # --- Fit 2: L ---
+        fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
-        reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
-        # fit
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
 
-        # --- Fit 3: soft-floor σL if ill-conditioned ---
-        eps_diff = abs(HIEPS - LOEPS)
-        cond_num = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
+        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
+        eps_diff   = abs(HIEPS - LOEPS)
+        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
+
         if cond_num > COND_MAX:
-            floor = max(0.25 * fff2.GetParError(1), 1e-3)
-            if fff2.GetParameter(1) < floor:
+            # matrix is ill-conditioned → apply soft floor to σ_L
+            sigL     = fff2.GetParameter(1)
+            sigL_err = fff2.GetParError(1)
+            floor    = max(0.25*sigL_err, 1e-3)
+            if sigL < floor:
                 fff2.SetParameter(1, floor)
-        # record pre-pass 3
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
 
-        # --- Fit 4: refine LT amplitude only ---
-        # hold σT, σL; float ρLT, ρTT
-        fff2.FixParameter(0, fff2.GetParameter(0))  # hold σT
-        fff2.FixParameter(1, fff2.GetParameter(1))  # hold σL
-        fff2.ReleaseParameter(2)                    # float ρLT
-        fff2.ReleaseParameter(3)  # float ρTT
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
 
-        # --- Fit 5: full 4-parameter fit ---
-        # float σT, σL, ρLT, ρTT
-        for p_idx, p_key in ((0, "sigT"), (1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
+        fit_step += 1    
+
+        print("TABLE check ρ-limits stage 2:",
+            PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
+
+        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
+        stage_idx = 2            # third-pass entry in PARAM_LIMITS
+
+        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
             fff2.ReleaseParameter(p_idx)
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-            fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))
-        # perform fit
+
+            # give MINUIT a first step
+            fff2.SetParError(p_idx, 0.02 if p_key.startswith("rho")
+                                    else 0.05*(hi_lim-lo_lim))
+
+        # --- sanity print (optional) ---
+        print("Pass-3 limits:",
+            get_limits(fff2,2), get_limits(fff2,3))
+
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
 
-        # --- Goodness-of-fit logging ---
-        chi2 = fff2.GetChisquare()
-        ndf  = fff2.GetNDF()
-        print(f"t={t_list[i]:.3f}: final χ²/NDF = {chi2:.1f}/{ndf} = {chi2/ndf:.2f}")
-
+        fit_step += 1        
+        
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
         # ---------------------------------------------------------------------------
