@@ -510,20 +510,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ndf  = fff2.GetNDF()
         print(f"t={t_list[i]:.3f}: final χ²/NDF = {chi2:.1f}/{ndf} = {chi2/ndf:.2f}")
 
-        # --- Residuals plot and save ---
-        # build a TGraphErrors of residuals for each point
-        resid_graph = ROOT.TGraphErrors()
-        for ip in range(g_plot_err.GetN()):
-            phi, eps, xsec = ctypes.c_double(), ctypes.c_double(), ctypes.c_double()
-            g_plot_err.GetPoint(ip, phi, eps, xsec)
-            err = g_plot_err.GetErrorY(ip)
-            pred = fff2.Eval(phi, eps)
-            resid = (xsec - pred) / err
-            resid_graph.SetPoint      (ip, phi, resid)
-            resid_graph.SetPointError (ip, 0, 0)  # normalized residual
-        resid_graph.SetTitle(f"Residuals t={t_list[i]:.3f}; φ; (data–fit)/σ")
-        resid_graph.Draw("AP")
-
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
         # ---------------------------------------------------------------------------
