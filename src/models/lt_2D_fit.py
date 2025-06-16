@@ -419,7 +419,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ────────────────────────────────────────────────────────────────
 
         # 1) seed everything (including Norm=1)
-        fff2.SetParameters(seed_sigT, seed_sigL, 0.0, 0.0, 1.0)
+        fff2.SetParameters(SEED_SIGT, SEED_SIGL, 0.0, 0.0, 1.0)
 
         # 2) ensure all five parameters are released
         for idx in range(5):
