@@ -583,12 +583,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # ---------------------------------------------------------------
         # Central values -------------------------------------------------
-        sig_t   = fff2.GetParameter(0)
         sig_l   = fff2.GetParameter(1)
+        sig_t   = fff2.GetParameter(0)
         rho_lt  = fff2.GetParameter(2)
         rho_tt  = fff2.GetParameter(3)
 
-        sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)
+        # ─── avoid math domain error if MINUIT ever dips sig_t·sig_l < 0 ───
+        prod = sig_t * sig_l
+        sig_lt  = rho_lt * math.sqrt(abs(prod))
         sig_tt  = rho_tt * sig_t
 
         # One-sigma errors ----------------------------------------------
