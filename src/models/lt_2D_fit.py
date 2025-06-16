@@ -425,11 +425,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             phi_deg, eps = xx[0], xx[1]
             sigT, sigL, rhoLT, rhoTT = pp[0], pp[1], pp[2], pp[3]
 
-            base = (  sigT
-                    + eps * sigL
-                    + math.sqrt(2. * eps * (1. + eps))
-                    * cosd(phi_deg) * rhoLT * math.sqrt(sigT * sigL)
-                    + eps * cosd(2. * phi_deg) * rhoTT * sigT )
+            base = ( sigT + eps*sigL
+                    + math.sqrt(2.*eps*(1.+eps))*cosd(phi[i])*rhoLT
+                    + eps*cosd(2.*phi[i])*rhoTT )
+
 
             # --- soft quadratic walls  (exactly the old ‘penalty()’) -------
             pen = 0.0
