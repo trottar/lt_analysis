@@ -503,6 +503,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         red_chi2 = chi2 / ndf
         print(f"Reduced χ²: {red_chi2:.2f}")
     
+        print(f"  **Norm = {fff2.GetParameter(4):.3f}**")
+
         phi_extrema = np.array([0, 180, 360], float)
         for ang in phi_extrema:
             model_val_lo = fff2.Eval(ang, lo_eps)  # low-ε curve
