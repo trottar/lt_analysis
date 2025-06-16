@@ -426,7 +426,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             fff2.ReleaseParameter(idx)
 
         # 3) run the weighted fit once
-        g_plot_err.Fit(fff2, FIT_OPTS)
+        g_plot_err.Fit(fff2, "WMRQ")  # WMRQ = weighted, minimised, redraw
 
         # 4) report
         dump_fit_summary(i, fff2, g_plot_err, "one‐pass")
