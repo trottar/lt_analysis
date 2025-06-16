@@ -100,6 +100,12 @@ SEED_SIGT = 20.0      # seed for σ_T  — typical transverse scale
 SEED_SIGL = 50.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------
+# Fit-control parameters
+# ------------------------------------------------------------
+CHI2_GOAL  = 1.5      # desired reduced χ²
+MAX_REFITS = 10       # hard cap on the number of 5-step passes
+
 # ------------------------------------------------------------------
 #  ε-lever-arm quality guard
 #  -------------------------------------------------
@@ -200,6 +206,97 @@ def check_sigma_positive(fcn, graph,
 from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
 
 ###############################################################################################################################################
+
+# ------------------------------------------------------------
+# Helper: run one 5-step LT-separation fit pass
+# ------------------------------------------------------------
+def lt_fit_pass(fff2, g_plot_err, t_val, sigL_change, sigT_change,
+                LOEPS, HIEPS, COND_MAX, PARAM_LIMITS,
+                fit_step_start=0):
+    """
+    Executes the five-step fit sequence once.
+    Returns (next_fit_step, reduced_χ²).
+    *Everything inside the sequence is your original code.*
+    """
+    fit_step = fit_step_start
+
+    # ---------- Fit 1: σT only ----------
+    fff2.FixParameter(1, 0.0)   # σL
+    fff2.FixParameter(2, 0.0)   # ρLT
+    fff2.FixParameter(3, 0.0)   # ρTT
+    fff2.ReleaseParameter(0)    # float σT
+    g_plot_err.Fit(fff2, "MRQ")
+    check_sigma_positive(fff2, g_plot_err)
+    sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+    sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+    sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+    sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+    fit_step += 1
+
+    # ---------- Fit 2: σL + ρLT ----------
+    fff2.ReleaseParameter(1)    # σL
+    fff2.ReleaseParameter(2)    # ρLT
+    fff2.FixParameter   (3, 0.0)# ρTT = 0
+    reset_limits_from_table(fff2, 1, "sigL",  stage=1)
+    reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
+    g_plot_err.Fit(fff2, "MRQ")
+    check_sigma_positive(fff2, g_plot_err)
+    sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+    sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+    sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+    sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+    fit_step += 1
+
+    # ---------- Fit 3: soft-floor σL ----------
+    eps_diff  = abs(HIEPS - LOEPS)
+    cond_num  = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff,1e-6)
+    if cond_num > COND_MAX:
+        floor = max(0.25*fff2.GetParError(1), 1e-3)
+        if fff2.GetParameter(1) < floor:
+            fff2.SetParameter(1, floor)
+    sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+    sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+    sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+    sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+    fit_step += 1
+
+    # ---------- Fit 4: refine ρLT ----------
+    fff2.FixParameter(0, fff2.GetParameter(0))  # σT fixed
+    fff2.FixParameter(1, fff2.GetParameter(1))  # σL fixed
+    fff2.FixParameter(3, fff2.GetParameter(3))  # ρTT fixed
+    fff2.ReleaseParameter(2)                    # float ρLT
+    curr = fff2.GetParameter(2)
+    fff2.SetParLimits(2, curr-0.2, curr+0.2)
+    fff2.SetParError (2, 0.02)
+    g_plot_err.Fit(fff2, "MRQ")
+    check_sigma_positive(fff2, g_plot_err)
+    sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+    sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+    sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+    sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+    fit_step += 1
+
+    # ---------- Fit 5: full 4-parameter ----------
+    for p_idx, p_key in ((0,"sigT"),(1,"sigL"),(2,"rhoLT"),(3,"rhoTT")):
+        fff2.ReleaseParameter(p_idx)
+        lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
+        fff2.SetParLimits(p_idx, lo_lim, hi_lim)
+        fff2.SetParError (p_idx, 0.05*(hi_lim-lo_lim))
+    g_plot_err.Fit(fff2, "MRQ")
+    check_sigma_positive(fff2, g_plot_err)
+    sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+    sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+    sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+    sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+    fit_step += 1
+
+    # ---------- goodness-of-fit ----------
+    chi2  = fff2.GetChisquare()
+    ndf   = fff2.GetNDF()
+    redχ2 = chi2/ndf if ndf>0 else 99.
+    print(f"t={t_val:.3f}: χ²/NDF = {chi2:.1f}/{ndf} = {redχ2:.2f}")
+    return fit_step, redχ2
+# ------------------------------------------------------------------
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
@@ -416,99 +513,30 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        # --- improved fit sequence with additional tuning steps ---
-        # fit_step counter remains for tracking
-        fit_step = 0
+        refits      = 0
+        red_chi2    = 99.      # large dummy
+        fit_step_id = 0        # keeps global step count for the graphs
 
-        # --- Fit 1: T only ---
-        fff2.FixParameter(1, 0.0)   # σL
-        fff2.FixParameter(2, 0.0)   # ρLT
-        fff2.FixParameter(3, 0.0)   # ρTT
-        # float sigmaT initially
-        fff2.ReleaseParameter(0)
-        # perform fit
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
+        while red_chi2 > CHI2_GOAL and refits < MAX_REFITS:
+            # run one 5-step pass
+            fit_step_id, red_chi2 = lt_fit_pass(
+                fff2, g_plot_err, t_val, sigL_change, sigT_change,
+                LOEPS, HIEPS, COND_MAX, PARAM_LIMITS,
+                fit_step_start=fit_step_id
+            )
 
-        # --- Fit 2: σL + ρLT ---
-        # float σL and ρLT, hold ρTT=0
-        fff2.ReleaseParameter(1)    # σL
-        fff2.ReleaseParameter(2)    # ρLT
-        fff2.FixParameter(3, 0.0)   # ρTT
-        # reset limits for sigL and rhoLT
-        reset_limits_from_table(fff2, 1, "sigL", stage=1)
-        reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
-        # fit
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
+            # Optional: widen limits a bit if we’ll try again
+            if red_chi2 > CHI2_GOAL:
+                for p_idx in range(4):
+                    lo, hi = fff2.GetParLimits(p_idx)
+                    span   = hi - lo
+                    fff2.SetParLimits(p_idx, lo - 0.10*span, hi + 0.10*span)
 
-        # --- Fit 3: soft-floor σL if ill-conditioned ---
-        eps_diff = abs(HIEPS - LOEPS)
-        cond_num = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
-        if cond_num > COND_MAX:
-            floor = max(0.25 * fff2.GetParError(1), 1e-3)
-            if fff2.GetParameter(1) < floor:
-                fff2.SetParameter(1, floor)
-        # record pre-pass 3
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
+            refits += 1
 
-        # --- Fit 4: refine LT amplitude only ---
-        # hold σT, σL, ρTT; float ρLT
-        fff2.FixParameter(0, fff2.GetParameter(0))  # hold σT
-        fff2.FixParameter(1, fff2.GetParameter(1))  # hold σL
-        fff2.FixParameter(3, fff2.GetParameter(3))  # hold ρTT
-        fff2.ReleaseParameter(2)                    # float ρLT
-        # narrow the ρLT limits around current value
-        curr = fff2.GetParameter(2)
-        fff2.SetParLimits(2, curr - 0.2, curr + 0.2)
-        fff2.SetParError(2, 0.02)
-        # fit
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
-
-        # --- Fit 5: full 4-parameter fit ---
-        # float σT, σL, ρLT, ρTT
-        for p_idx, p_key in ((0, "sigT"), (1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
-            fff2.ReleaseParameter(p_idx)
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
-            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-            fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))
-        # perform fit
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
-
-        # --- Goodness-of-fit logging ---
-        chi2 = fff2.GetChisquare()
-        ndf  = fff2.GetNDF()
-        print(f"t={t_list[i]:.3f}: final χ²/NDF = {chi2:.1f}/{ndf} = {chi2/ndf:.2f}")
+        if red_chi2 > CHI2_GOAL:
+            print(f"⚠ Warning: t={t_val:.3f} never reached χ²/NDF ≤ {CHI2_GOAL} "
+                f"after {MAX_REFITS} passes (final = {red_chi2:.2f})")
 
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
