@@ -133,8 +133,8 @@ def reset_limits_from_table(func, idx, key, stage):
     # or a small absolute step if the range is tiny
     step = 0.05 * (hi - lo) if hi > lo else 0.02
     func.SetParError(idx, step)
-# ---------------------------------------------------------------
 
+# ---------------------------------------------------------------
 def get_limits(fcn, idx):
     """
     Return (lo, hi) limits for parameter *idx* of TF1/TF2 *fcn*.
@@ -149,6 +149,17 @@ def get_limits(fcn, idx):
         return lo_ref.value, hi_ref.value
 
 # --------------------------------------------------------------------------------------------
+def penalty(f):
+    sigT, sigL, rhoLT, rhoTT = (f.GetParameter(i) for i in range(4))
+    p = 0.0
+    # soft quadratic walls once the limits are exceeded
+    if abs(rhoLT) > math.sqrt(max(sigT*sigL,0)):
+        diff = abs(rhoLT) - math.sqrt(max(sigT*sigL,0))
+        p += (diff / rhoLT_err)**2          # scale by current error
+    if abs(rhoTT) > sigT:
+        diff = abs(rhoTT) - sigT
+        p += (diff / rhoTT_err)**2
+    return p
 
 # ---------------------------------------------------------------
 # Positivity guard + auto-refit (robust version)
@@ -470,7 +481,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1    
 
         # --- Report reduced χ² ---
-        chi2     = fff2.GetChisquare()
+        chi2     = fff2.GetChisquare() + penalty(fff2)
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
         print(f"Reduced χ²: {red_chi2:.2f}")
