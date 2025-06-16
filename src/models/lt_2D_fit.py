@@ -420,94 +420,61 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        for i, t_val in enumerate(t_list):
-            refits   = 0
-            red_chi2 = float('inf')
+        import random
 
-            while red_chi2 > CHI2_GOAL and refits < MAX_REFITS:
-                fit_step = 0
+        # ------------------------------------------------------------
+        # Control parameters
+        CHI2_GOAL   = 1.5    # target reduced χ²
+        MAX_TRIALS  = 20     # how many random combos to try
+        PARAM_IDX   = [0,1,2,3]
+        PARAM_KEYS  = ["sigT","sigL","rhoLT","rhoTT"]
 
-                # --- Fit 1: T only ---
-                fff2.FixParameter(1, 0.0)   # σL
-                fff2.FixParameter(2, 0.0)   # ρLT
-                fff2.FixParameter(3, 0.0)   # ρTT
-                fff2.ReleaseParameter(0)    # σT
-                g_plot_err.Fit(fff2, "MRQ")
-                check_sigma_positive(fff2, g_plot_err)
-                sigL_change.SetPoint(sigL_change.GetN(),   fit_step+1, fff2.GetParameter(1))
-                sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-                sigT_change.SetPoint(sigT_change.GetN(),   fit_step+1, fff2.GetParameter(0))
-                sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-                fit_step += 1
+        best_diff   = float('inf')
+        best_combo  = None
+        best_chi2   = None
 
-                # --- Fit 2: σL + ρLT ---
-                fff2.ReleaseParameter(1)
-                fff2.ReleaseParameter(2)
-                fff2.FixParameter(3, 0.0)
-                reset_limits_from_table(fff2, 1, "sigL",  stage=1)
-                reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
-                g_plot_err.Fit(fff2, "MRQ")
-                check_sigma_positive(fff2, g_plot_err)
-                sigL_change.SetPoint(sigL_change.GetN(),   fit_step+1, fff2.GetParameter(1))
-                sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-                sigT_change.SetPoint(sigT_change.GetN(),   fit_step+1, fff2.GetParameter(0))
-                sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-                fit_step += 1
+        # ------------------------------------------------------------
+        # Helper: fix all params except those in `combo`
+        def apply_combo(fff2, combo, PARAM_LIMITS):
+            for idx, key in zip(PARAM_IDX, PARAM_KEYS):
+                if idx in combo:
+                    # float this parameter
+                    fff2.ReleaseParameter(idx)
+                    lo, hi = PARAM_LIMITS[key][2]
+                    fff2.SetParLimits(idx, lo, hi)
+                    fff2.SetParError(idx, 0.05*(hi-hi_lo))
+                else:
+                    # hold at current value
+                    fff2.FixParameter(idx, fff2.GetParameter(idx))
 
-                # --- Fit 3: soft-floor σL if ill-conditioned ---
-                eps_diff = abs(HIEPS - LOEPS)
-                cond_num = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
-                if cond_num > COND_MAX:
-                    floor = max(0.25 * fff2.GetParError(1), 1e-3)
-                    if fff2.GetParameter(1) < floor:
-                        fff2.SetParameter(1, floor)
-                sigL_change.SetPoint(sigL_change.GetN(),   fit_step+1, fff2.GetParameter(1))
-                sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-                sigT_change.SetPoint(sigT_change.GetN(),   fit_step+1, fff2.GetParameter(0))
-                sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-                fit_step += 1
+        # ------------------------------------------------------------
+        # Random search
+        for trial in range(MAX_TRIALS):
+            # pick a random non-empty subset of {0,1,2,3}
+            k      = random.randint(1, len(PARAM_IDX))
+            combo  = random.sample(PARAM_IDX, k)
 
-                # --- Fit 4: refine LT amplitude only ---
-                fff2.FixParameter(0, fff2.GetParameter(0))
-                fff2.FixParameter(1, fff2.GetParameter(1))
-                fff2.FixParameter(3, fff2.GetParameter(3))
-                fff2.ReleaseParameter(2)
-                curr = fff2.GetParameter(2)
-                fff2.SetParLimits(2, curr - 0.2, curr + 0.2)
-                fff2.SetParError(2, 0.02)
-                g_plot_err.Fit(fff2, "MRQ")
-                check_sigma_positive(fff2, g_plot_err)
-                sigL_change.SetPoint(sigL_change.GetN(),   fit_step+1, fff2.GetParameter(1))
-                sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-                sigT_change.SetPoint(sigT_change.GetN(),   fit_step+1, fff2.GetParameter(0))
-                sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-                fit_step += 1
+            # apply it and fit
+            apply_combo(fff2, combo, PARAM_LIMITS)
+            g_plot_err.Fit(fff2, "MRQ")
+            chi2  = fff2.GetChisquare()
+            ndf   = fff2.GetNDF()
+            redχ2 = chi2/ndf if ndf>0 else float('inf')
 
-                # --- Fit 5: full 4-parameter fit ---
-                for p_idx, p_key in ((0, "sigT"), (1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
-                    fff2.ReleaseParameter(p_idx)
-                    lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
-                    fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-                    fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))
-                g_plot_err.Fit(fff2, "MRQ")
-                check_sigma_positive(fff2, g_plot_err)
-                sigL_change.SetPoint(sigL_change.GetN(),   fit_step+1, fff2.GetParameter(1))
-                sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-                sigT_change.SetPoint(sigT_change.GetN(),   fit_step+1, fff2.GetParameter(0))
-                sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-                fit_step += 1
+            # track the combo that gets us *closest* to CHI2_GOAL
+            diff = abs(redχ2 - CHI2_GOAL)
+            if diff < best_diff:
+                best_diff  = diff
+                best_combo = combo[:]
+                best_chi2  = redχ2
 
-                # --- Goodness-of-fit logging and check ---
-                chi2  = fff2.GetChisquare()
-                ndf   = fff2.GetNDF()
-                red_chi2 = chi2/ndf if ndf>0 else float('inf')
-                print(f"t={t_val:.3f}: final χ²/NDF = {chi2:.1f}/{ndf} = {red_chi2:.2f}")
-
-                refits += 1
-
-            if red_chi2 > CHI2_GOAL:
-                print(f"⚠ t={t_val:.3f} never reached χ²/NDF ≤ {CHI2_GOAL} "
-                    f"after {MAX_REFITS} passes (final = {red_chi2:.2f})")
+        # ------------------------------------------------------------
+        # Re-run the best combo to finalize
+        print(f"Best combo was fitting {best_combo} → χ²/NDF = {best_chi2:.2f}")
+        apply_combo(fff2, best_combo, PARAM_LIMITS)
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+        print("Final fit done with best combo.")
 
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
