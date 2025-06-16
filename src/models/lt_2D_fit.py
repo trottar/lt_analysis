@@ -255,7 +255,11 @@ def penalised_migrad(graph, init, limits, eps_pair,
 
     # FCN -----------------------------------------------------------
     def fcn(npar, gin, f, par, iflag):
-        sigT, sigL, rhoLT, rhoTT = par
+        # --- grab only the first 4 parameters ----------------------
+        sigT  = par[0]
+        sigL  = par[1]
+        rhoLT = par[2]
+        rhoTT = par[3]
         # usual χ² term
         chi2 = np.sum(((sigma - (
             sigT + eps*sigL
