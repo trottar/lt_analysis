@@ -224,6 +224,73 @@ def combined_sigma(stat_err, value):
                      ((pt_to_pt_systematic_error / 100.0) * value)**2)
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+def penalised_migrad(graph, init, limits, eps_pair,
+                     silent=True, penalty_scale=1.0):
+    """
+    Do a 4-parameter MINUIT χ² fit with the positivity penalty
+    built into the FCN.  Returns  (bestPars, bestErrs, redChi2).
+    """
+    # ---------- copy data out of the TGraph2DErrors ---------------
+    n     = graph.GetN()
+    phi   = np.zeros(n)
+    eps   = np.zeros(n)
+    sigma = np.zeros(n)
+    err   = np.zeros(n)
+
+    xx, yy, zz = ctypes.c_double(), ctypes.c_double(), ctypes.c_double()
+    for i in range(n):
+        graph.GetPoint(i, xx, yy, zz)          # (φ, ε, σ)
+        phi[i]   = xx.value
+        eps[i]   = yy.value
+        sigma[i] = zz.value
+        err[i]   = graph.GetEZ()[i]
+
+    # ---------- build MINUIT --------------------------------------
+    m = ROOT.TMinuit(4)
+    m.SetPrintLevel(int(silent))               # -1 => quiet
+
+    # parameter names
+    names = ("sigT", "sigL", "rhoLT", "rhoTT")
+
+    # FCN -----------------------------------------------------------
+    def fcn(npar, gin, f, par, iflag):
+        sigT, sigL, rhoLT, rhoTT = par
+        # usual χ² term
+        chi2 = np.sum(((sigma - (
+            sigT + eps*sigL
+            + np.sqrt(2*eps*(1.-eps))*rhoLT*np.cos(np.deg2rad(phi))
+            + eps*rhoTT*np.cos(2*np.deg2rad(phi))
+        ))/err)**2)
+
+        # positivity penalty ---------------------------------------
+        sig_prod = max(sigT*sigL, 0.0)
+        if sig_prod > 0.0 and abs(rhoLT) > penalty_scale*np.sqrt(sig_prod):
+            diff = abs(rhoLT) - penalty_scale*np.sqrt(sig_prod)
+            chi2 += (diff/err.mean())**2
+        if abs(rhoTT) > penalty_scale*sigT:
+            diff = abs(rhoTT) - penalty_scale*sigT
+            chi2 += (diff/err.mean())**2
+
+        f[0] = chi2
+
+    m.SetFCN(fcn)
+
+    # define params, limits, step sizes ----------------------------
+    for i, nm in enumerate(names):
+        val = init[i]
+        lo, hi = limits[nm]
+        step = 0.05*max(abs(val), 1e-3)
+        m.DefineParameter(i, nm, val, step, lo, hi)
+
+    # run MIGRAD ----------------------------------------------------
+    m.Migrad()
+    best = [m.GetParameter(i)   for i in range(4)]
+    perr = [m.GetParError(i)    for i in range(4)]
+    redχ = m.fAmin / max(1, n-4)
+    return best, perr, redχ
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -531,7 +598,26 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         if abs(curT - lo_lim.value) < 1e-6 or abs(curT - hi_lim.value) < 1e-6:
             fff2.SetParameter(0, 0.5 * (lo_lim.value + hi_lim.value))
 
-        g_plot_err.Fit(fff2, FIT_OPTS)
+        # ----- Penalised global fit ---------------------------------
+        init_vals = [fff2.GetParameter(i) for i in range(4)]
+        par_limits = {
+            "sigT": get_limits(fff2, 0),
+            "sigL": get_limits(fff2, 1),
+            "rhoLT": get_limits(fff2, 2),
+            "rhoTT": get_limits(fff2, 3)
+        }
+
+        best, perr, redχ = penalised_migrad(
+            g_plot_err, init_vals, par_limits,
+            eps_pair=(lo_eps, hi_eps)
+        )
+
+        # put the results back into the TF2 for plotting / output
+        for i, v in enumerate(best):
+            fff2.SetParameter(i, v)
+            fff2.SetParError(i, perr[i])
+
+        print(f"Reduced χ² (penalised): {redχ:.2f}")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
