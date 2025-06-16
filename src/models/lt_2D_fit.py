@@ -329,7 +329,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
-        flo = TF1("lo_eps_fit", lo_eps_fit_deg, 0, 360, 4)
+        flo = TF1("lo_eps_fit", lo_eps_fit_deg(lo_eps), 0, 360, 4)
         LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
         
@@ -351,7 +351,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
-        fhi = TF1("hi_eps_fit", hi_eps_fit_deg, 0, 360, 4)
+        fhi = TF1("hi_eps_fit", hi_eps_fit_deg(hi_eps), 0, 360, 4)
         LT_sep_x_hi_fun_unsep = LT_sep_x_hi_fun_unsep_wrapper(hi_eps)
         fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
             
