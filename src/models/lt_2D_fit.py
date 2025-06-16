@@ -405,8 +405,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             # --- the physics piece ----------------------------------------
             base = (  sigT
                     + eps*sigL
-                    + math.sqrt(2.*eps*(1.+eps))
-                      * math.cos(math.radians(phi_deg)) * rhoLT*math.sqrt(sigT*sigL)
+                    + math.sqrt(2.*eps*(1. + eps))      # ← keep the “+”
+                    * math.cos(math.radians(phi_deg))
+                    * rhoLT*math.sqrt(sigT*sigL)
                     + eps * math.cos(math.radians(2.*phi_deg)) * rhoTT*sigT )
 
             # --- soft quadratic walls  (exactly the old ‘penalty()’) -------
