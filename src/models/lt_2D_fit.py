@@ -92,11 +92,10 @@ PI = math.pi
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(1e-4, 1e4)]*3,   # σ_T  : transverse
-    "sigL" : [(1e-4, 1e4)]*3,   # σ_L  : longitudinal
+    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3,     # ρ_TT : σ_TT / σT
-    "Norm" : [(0.1, 10.0)]*3          # ← new
+    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -149,19 +148,17 @@ def get_limits(fcn, idx):
         return lo_ref.value, hi_ref.value
 
 # --------------------------------------------------------------------------------------------
-def penalty(fcn):
-    """Soft quadratic penalty if ρLT, ρTT exceed their |ρ|≤1 bounds."""
-    sigT  = fcn.GetParameter(0)
-    sigL  = fcn.GetParameter(1)
-    rhoLT = fcn.GetParameter(2)
-    rhoTT = fcn.GetParameter(3)
-
-    pen = 0.0
-    if abs(rhoLT) > 1.0:
-        pen += (abs(rhoLT) - 1.0)**2
-    if abs(rhoTT) > 1.0:
-        pen += (abs(rhoTT) - 1.0)**2
-    return pen
+def penalty(f):
+    sigT, sigL, rhoLT, rhoTT = (f.GetParameter(i) for i in range(4))
+    p = 0.0
+    # soft quadratic walls once the limits are exceeded
+    if abs(rhoLT) > math.sqrt(max(sigT*sigL,0)):
+        diff = abs(rhoLT) - math.sqrt(max(sigT*sigL,0))
+        p += (diff / rhoLT_err)**2          # scale by current error
+    if abs(rhoTT) > sigT:
+        diff = abs(rhoTT) - sigT
+        p += (diff / rhoTT_err)**2
+    return p
 
 # ---------------------------------------------------------------
 # Positivity guard + auto-refit (robust version)
@@ -198,7 +195,7 @@ def check_sigma_positive(fcn, graph,
 
     # tighten limits and refit
     fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
-    graph.Fit(fcn, "WMRQ")                    # quiet, no redraw
+    graph.Fit(fcn, "MRQ")                    # quiet, no redraw
 
     # final check
     if not _is_positive():
@@ -366,25 +363,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
-        fff2 = ROOT.TF2(
-            "fff2",
-            "[4]*("
-            " abs([0])"
-            "+ y*abs([1])"
-            "+ sqrt(2*y*(1.+y))"
-                "* cos(x*0.017453)"
-                "* [2]*sqrt(abs([0])*abs([1]))"
-            "+ y*cos(2*x*0.017453)*[3]*abs([0])"
-            ")",
-            0, 360, 0.0, 1.0
-        )
-        # ------------------------------------------------------------------
+        fff2 = ROOT.TF2("fff2",
+            "[0]                                       "      # σ_T
+            "+ y*[1]                                   "      # ε·σ_L
+            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
+            "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
+            "+ y*cos(2*x*0.017453)                     "      # TT
+            "*[3]*[0]"                                         # ρ_TT·σ_T
+            , 0, 360, 0.0, 1.0)
         
         for k in range(4):
             fff2.ReleaseParameter(k)
 
         # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT", "Norm"]
+        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]
         current_i = 0
 
         for idx, key in enumerate(par_keys):
@@ -397,41 +389,100 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
             # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
-                fff2.SetParError(idx, 0.02)          # ρLT, ρTT  → fixed 0.02
-            elif key == "Norm":                      # ← make sure this is here
-                fff2.SetParError(idx, 0.05)          # Norm      → 5 % step
+                fff2.SetParError(idx, 0.02)            # ±0.02 for ρ’s
             else:
-                # this branch handles sigT and sigL
                 step = 0.05 * (hi - lo) if hi > lo else 0.1
-                fff2.SetParError(idx, step)
-
+                fff2.SetParError(idx, step)            # 5 % of range for σT, σL  ←★ add this
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
         fff2.SetParameters( SEED_SIGT,   # σ_T
                             SEED_SIGL,   # σ_L
                             0.0,         # ρ_LT
-                            0.0,         # ρ_TT
-                            1.0)                # Norm
+                            0.0)         # ρ_TT
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        # ────────────────────────────────────────────────────────────────
-        # One-shot simultaneous fit of σT, σL, ρLT, ρTT and Norm
-        # ────────────────────────────────────────────────────────────────
+        # ---------------- FIT SEQUENCE ------------------
+        fit_step = 0  # counter for adapt_limits
 
-        # 1) seed everything (including Norm=1)
-        fff2.SetParameters(SEED_SIGT, SEED_SIGL, 0.0, 0.0, 1.0)
+        # --- Fit 1: T ---
+        fff2.FixParameter(1, 0.0)   # σL
+        fff2.FixParameter(2, 0.0)   # ρLT
+        fff2.FixParameter(3, 0.0)   # ρTT
+        g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
+        check_sigma_positive(fff2, g_plot_err)
 
-        # 2) ensure all five parameters are released
-        for idx in range(5):
-            fff2.ReleaseParameter(idx)
+        sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
+        sigL_change.GetXaxis().SetTitle("Fit Step")
+        sigL_change.GetYaxis().SetTitle("#it{#sigma}_{L}")
 
-        # 3) run the weighted fit once
-        g_plot_err.Fit(fff2, "WMRQ")  # WMRQ = weighted, minimised, redraw
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+
+        sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
+        sigT_change.GetXaxis().SetTitle("Fit Step")
+        sigT_change.GetYaxis().SetTitle("#it{#sigma}_{T}")
+
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+
+        fit_step += 1
+
+        # --- Fit 2: L ---
+        fff2.ReleaseParameter(1)    # σL now floats
+        reset_limits_from_table(fff2, 1, "sigL", stage=1)
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+
+        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
+        eps_diff   = abs(HIEPS - LOEPS)
+        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
+
+        if cond_num > COND_MAX:
+            # matrix is ill-conditioned → apply soft floor to σ_L
+            sigL     = fff2.GetParameter(1)
+            sigL_err = fff2.GetParError(1)
+            floor    = max(0.25*sigL_err, 1e-3)
+            if sigL < floor:
+                fff2.SetParameter(1, floor)
+
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+
+        fit_step += 1    
+
+        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together --------------------------
+        stage_idx = 2            # third-pass entry in PARAM_LIMITS
+
+        # --- Grab a crude statistical error scale for this t-bin -------------
+        # RMS of the Y-errors in the graph is a quick, stable proxy
+        stat_err_estimate = math.sqrt(
+            sum((g_plot_err.GetErrorY(i))**2 for i in range(g_plot_err.GetN()))
+            / max(1, g_plot_err.GetN())
+        )
+        # --------------------------------------------------------------------------
+
+        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
+            fff2.ReleaseParameter(p_idx)
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
+            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
+
+            # --- Seeding & step size ----------------------------
+            if p_key.startswith("rho"):
+                fff2.SetParameter(p_idx, 0.0)
+                step = max(0.1, 0.6*stat_err_estimate)
+                fff2.SetParError(p_idx, step)
+            else:
+                fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
+            # ---------------------------------------------------------------------
+
+        g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -439,20 +490,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
+        fit_step += 1    
+
         # --- Report reduced χ² ---
         chi2     = fff2.GetChisquare() + penalty(fff2)
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
         print(f"Reduced χ²: {red_chi2:.2f}")
     
-        print(f"  **Norm = {fff2.GetParameter(4):.3f}**")
-
-        phi_extrema = np.array([0, 180, 360], float)
-        for ang in phi_extrema:
-            model_val_lo = fff2.Eval(ang, lo_eps)  # low-ε curve
-            model_val_hi = fff2.Eval(ang, hi_eps)  # high-ε curve
-            print(f"φ={ang:3.0f}°  low model={model_val_lo:7.2f} nb   "
-                f"high model={model_val_hi:7.2f} nb")
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
@@ -531,8 +576,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "WMRQ")
-        ghi.Fit(fhi, "WMRQ")
+        glo.Fit(flo, "MRQ")
+        ghi.Fit(fhi, "MRQ")
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -583,14 +628,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # ---------------------------------------------------------------
         # Central values -------------------------------------------------
-        sig_l   = fff2.GetParameter(1)
         sig_t   = fff2.GetParameter(0)
+        sig_l   = fff2.GetParameter(1)
         rho_lt  = fff2.GetParameter(2)
         rho_tt  = fff2.GetParameter(3)
 
-        # ─── avoid math domain error if MINUIT ever dips sig_t·sig_l < 0 ───
-        prod = sig_t * sig_l
-        sig_lt  = rho_lt * math.sqrt(abs(prod))
+        sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)
         sig_tt  = rho_tt * sig_t
 
         # One-sigma errors ----------------------------------------------
@@ -801,7 +844,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, "WMRQ")
+    g_unsep_mult.Fit(f_lin, "MRQ")
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -837,8 +880,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, "WMRQ")
-g_sig_t_total.Fit(f_exp_t, "WMRQ")
+g_sig_l_total.Fit(f_exp_l, "MRQ")
+g_sig_t_total.Fit(f_exp_t, "MRQ")
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -874,23 +917,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "WMRQ")
+g_sig_l_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "WMRQ")
+g_sig_t_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "WMRQ")
+g_sig_lt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "WMRQ")
+g_sig_tt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf+')')
 c_total.Clear()
