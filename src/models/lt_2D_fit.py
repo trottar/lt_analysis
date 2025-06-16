@@ -421,7 +421,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigTT_change = TGraphErrors()
 
         import itertools, random
-        from ROOT import Double
 
         # control parameters
         CHI2_GOAL  = 1.5
