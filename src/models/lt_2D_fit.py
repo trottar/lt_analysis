@@ -69,7 +69,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
-DEG = "*(PI/180.0)"          # converts x [deg] → radians inside TF1
+DEG = f"*({PI}/180.0)"          # converts x [deg] → radians inside TF1
 
 # ------------------------------------------------------------------
 # ROOT fit options used throughout
