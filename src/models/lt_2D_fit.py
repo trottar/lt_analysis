@@ -520,7 +520,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         while red_chi2 > CHI2_GOAL and refits < MAX_REFITS:
             # run one 5-step pass
             fit_step_id, red_chi2 = lt_fit_pass(
-                fff2, g_plot_err, t_val, sigL_change, sigT_change,
+                fff2, g_plot_err, t_list[i], sigL_change, sigT_change,
                 LOEPS, HIEPS, COND_MAX, PARAM_LIMITS,
                 fit_step_start=fit_step_id
             )
@@ -535,7 +535,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             refits += 1
 
         if red_chi2 > CHI2_GOAL:
-            print(f"⚠ Warning: t={t_val:.3f} never reached χ²/NDF ≤ {CHI2_GOAL} "
+            print(f"⚠ Warning: t={t_list[i]:.3f} never reached χ²/NDF ≤ {CHI2_GOAL} "
                 f"after {MAX_REFITS} passes (final = {red_chi2:.2f})")
 
         # -----------------------  remainder of original code  -----------------------
