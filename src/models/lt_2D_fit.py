@@ -293,8 +293,13 @@ def penalised_migrad(graph, init, limits, eps_pair,
 
     # run MIGRAD ----------------------------------------------------
     m.Migrad()
-    best = [m.GetParameter(i)   for i in range(4)]
-    perr = [m.GetParError(i)    for i in range(4)]
+    # ---- fetch best-fit values & errors from TMinuit -------------
+    best, perr = [], []
+    for i in range(4):
+        cv, ce = ctypes.c_double(), ctypes.c_double()
+        m.GetParameter(i, cv, ce)     # (index, valueRef, errorRef)
+        best.append(cv.value)
+        perr.append(ce.value)
     redχ = m.fAmin / max(1, n-4)
     return best, perr, redχ
 # ------------------------------------------------------------------
