@@ -420,61 +420,72 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        import random
+        import itertools, random
+        from ROOT import Double
 
-        # ------------------------------------------------------------
-        # Control parameters
-        CHI2_GOAL   = 1.5    # target reduced χ²
-        MAX_TRIALS  = 20     # how many random combos to try
-        PARAM_IDX   = [0,1,2,3]
-        PARAM_KEYS  = ["sigT","sigL","rhoLT","rhoTT"]
+        # control parameters
+        CHI2_GOAL  = 1.5
+        MAX_REFITS = 10
 
-        best_diff   = float('inf')
-        best_combo  = None
-        best_chi2   = None
+        # all non-empty subsets of the 4 parameters, by index
+        all_subsets = []
+        for r in range(1,5):
+            for combo in itertools.combinations(range(4), r):
+                all_subsets.append(combo)
 
-        # ------------------------------------------------------------
-        # Helper: fix all params except those in `combo`
-        def apply_combo(fff2, combo, PARAM_LIMITS):
-            for idx, key in zip(PARAM_IDX, PARAM_KEYS):
-                if idx in combo:
-                    # float this parameter
-                    fff2.ReleaseParameter(idx)
-                    lo, hi = PARAM_LIMITS[key][2]
-                    fff2.SetParLimits(idx, lo, hi)
-                    fff2.SetParError(idx, 0.05*(hi-hi_lo))
-                else:
-                    # hold at current value
-                    fff2.FixParameter(idx, fff2.GetParameter(idx))
+        for i, t_val in enumerate(t_list):
+            refits      = 0
+            red_chi2    = float('inf')
+            # start from whatever parameters you already have in fff2
 
-        # ------------------------------------------------------------
-        # Random search
-        for trial in range(MAX_TRIALS):
-            # pick a random non-empty subset of {0,1,2,3}
-            k      = random.randint(1, len(PARAM_IDX))
-            combo  = random.sample(PARAM_IDX, k)
+            while red_chi2 > CHI2_GOAL and refits < MAX_REFITS:
+                best_chi2   = float('inf')
+                best_params = None
+                best_vals   = None
 
-            # apply it and fit
-            apply_combo(fff2, combo, PARAM_LIMITS)
-            g_plot_err.Fit(fff2, "MRQ")
-            chi2  = fff2.GetChisquare()
-            ndf   = fff2.GetNDF()
-            redχ2 = chi2/ndf if ndf>0 else float('inf')
+                # try each subset in a random order
+                for subset in random.sample(all_subsets, len(all_subsets)):
+                    # fix all to current
+                    for p in range(4):
+                        fff2.FixParameter(p, fff2.GetParameter(p))
 
-            # track the combo that gets us *closest* to CHI2_GOAL
-            diff = abs(redχ2 - CHI2_GOAL)
-            if diff < best_diff:
-                best_diff  = diff
-                best_combo = combo[:]
-                best_chi2  = redχ2
+                    # release only those in subset
+                    for p in subset:
+                        fff2.ReleaseParameter(p)
+                        # reset limits from your table if desired:
+                        lo, hi = PARAM_LIMITS[["sigT","sigL","rhoLT","rhoTT"][p]][2]
+                        fff2.SetParLimits(p, lo, hi)
+                        fff2.SetParError(p, 0.05*(hi - lo))
 
-        # ------------------------------------------------------------
-        # Re-run the best combo to finalize
-        print(f"Best combo was fitting {best_combo} → χ²/NDF = {best_chi2:.2f}")
-        apply_combo(fff2, best_combo, PARAM_LIMITS)
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        print("Final fit done with best combo.")
+                    # perform the fit
+                    g_plot_err.Fit(fff2, "MRQ")
+                    check_sigma_positive(fff2, g_plot_err)
+
+                    # compute reduced χ²
+                    chi2 = fff2.GetChisquare()
+                    ndf  = fff2.GetNDF()
+                    rchi = chi2/ndf if ndf>0 else float('inf')
+
+                    # record if it's the best so far
+                    if rchi < best_chi2:
+                        best_chi2 = rchi
+                        best_params = tuple(fff2.GetParameter(p) for p in range(4))
+                        best_vals   = subset
+
+                # after trying all subsets, apply the best one
+                # set fff2 to its best parameters
+                for p, val in enumerate(best_params):
+                    fff2.SetParameter(p, val)
+
+                red_chi2 = best_chi2
+                print(f"t={t_val:.3f}, pass {refits+1}: "
+                    f"best subset {best_vals} → χ²/NDF = {red_chi2:.2f}")
+
+                refits += 1
+
+            if red_chi2 > CHI2_GOAL:
+                print(f"⚠ t={t_val:.3f} never reached χ²/NDF ≤ {CHI2_GOAL} "
+                    f"after {MAX_REFITS} random-subset passes (final = {red_chi2:.2f})")
 
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
