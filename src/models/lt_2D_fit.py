@@ -67,7 +67,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 # Constants
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 #pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
-pt_to_pt_systematic_error = 10.0 # Test
+pt_to_pt_systematic_error = 100.0 # Test
 PI = math.pi
 
 ###############################################################################################################################################
