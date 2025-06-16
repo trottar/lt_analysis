@@ -108,8 +108,8 @@ PENALTY_K = 1.0e3      # strength of the “soft wall” (bigger ⇒ stiffer)
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-    "rhoLT": [(-3.0, 3.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-3.0, 3.0)]*3     # ρ_TT : σ_TT / σT
+    "rhoLT": [(-10.0, 10.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-10.0, 10.0)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
