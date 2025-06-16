@@ -289,8 +289,10 @@ def fit_bin_with_minuit(phi_arr, eps_arr, sigma_dat, sigma_err,
         m.DefineParameter(i, name, start, step, lo, hi)
 
     # Migrad + Improve
-    m.Migrad()
-    m.Improve()
+    m.Migrad()                 # main minimisation pass
+    # if Improve exists, run it; otherwise safely ignore
+    if hasattr(m, "Improve"):
+        m.Improve()
 
     # ---- collect results ------------------------------------------
     best = []
