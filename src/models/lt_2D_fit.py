@@ -244,11 +244,17 @@ def dump_fit_summary(t_bin_idx, ffun, graph, label):
 from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
 
 # ------------------------------------------------------------------
-def lo_eps_fit_deg(phi_deg, par):
-    return LT_sep_x_lo_fun(phi_deg * PI / 180.0, par)
+def lo_eps_fit_deg(lo_eps):
+    rad_fun = LT_sep_x_lo_fun_wrapper(lo_eps)   # expects φ [rad]
+    def deg_fun(phi_deg, par):
+        return rad_fun(phi_deg * PI / 180.0, par)
+    return deg_fun
 
-def hi_eps_fit_deg(phi_deg, par):
-    return LT_sep_x_hi_fun(phi_deg * PI / 180.0, par)
+def hi_eps_fit_deg(hi_eps):
+    rad_fun = LT_sep_x_hi_fun_wrapper(hi_eps)   # expects φ [rad]
+    def deg_fun(phi_deg, par):
+        return rad_fun(phi_deg * PI / 180.0, par)
+    return deg_fun
 # ------------------------------------------------------------------
 
 ###############################################################################################################################################
