@@ -14,7 +14,6 @@ import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
 from ROOT import TString, TNtuple, TMinuit
-from ROOT import Math, Fit   # ROOT’s Minuit2 & fitting utilities
 from array import array
 import math
 import ctypes
@@ -67,21 +66,9 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
+#pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
+pt_to_pt_systematic_error = 10.0 # Test
 PI = math.pi
-
-# ------------------------------------------------------------------
-# ROOT fit options used throughout
-#   W  → weight each point by its individual σ-error
-#   M  → improve MINUIT strategy (migrad + improve)
-#   R  → ignore fit range from function; use graph’s points
-#   Q  → quiet: no fit output spam
-FIT_OPTS = "WMRQ"
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-PENALTY_K = 1.0e3      # strength of the “soft wall” (bigger ⇒ stiffer)
-# ------------------------------------------------------------------
 
 ###############################################################################################################################################
 # ---------------------------  DYNAMIC LIMITS  ---------------------------------
@@ -105,19 +92,11 @@ PENALTY_K = 1.0e3      # strength of the “soft wall” (bigger ⇒ stiffer)
 #        "sigL": [(0.001, 1e3), (0.001, 500), (0.001, 200)]
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
-'''
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
-}
-'''
-PARAM_LIMITS = {
-    "sigT" : [(1e-3, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(1e-3, 1e3)]*3,   # σ_L  : longitudinal
-    "rhoLT": [(-50.0, 50.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-50.0, 50.0)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -169,6 +148,19 @@ def get_limits(fcn, idx):
         fcn.GetParLimits(idx, lo_ref, hi_ref)
         return lo_ref.value, hi_ref.value
 
+# --------------------------------------------------------------------------------------------
+def penalty(f):
+    sigT, sigL, rhoLT, rhoTT = (f.GetParameter(i) for i in range(4))
+    p = 0.0
+    # soft quadratic walls once the limits are exceeded
+    if abs(rhoLT) > math.sqrt(max(sigT*sigL,0)):
+        diff = abs(rhoLT) - math.sqrt(max(sigT*sigL,0))
+        p += (diff / rhoLT_err)**2          # scale by current error
+    if abs(rhoTT) > sigT:
+        diff = abs(rhoTT) - sigT
+        p += (diff / rhoTT_err)**2
+    return p
+
 # ---------------------------------------------------------------
 # Positivity guard + auto-refit (robust version)
 # ---------------------------------------------------------------
@@ -204,7 +196,7 @@ def check_sigma_positive(fcn, graph,
 
     # tighten limits and refit
     fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
-    graph.Fit(fcn, FIT_OPTS)                    # quiet, no redraw
+    graph.Fit(fcn, "MRQ")                    # quiet, no redraw
 
     # final check
     if not _is_positive():
@@ -213,38 +205,6 @@ def check_sigma_positive(fcn, graph,
         return False
 
     return True
-
-# ------------------------------------------------------------------
-def combined_sigma(stat_err, value):
-    """
-    Total per-point uncertainty    σ_tot = √(σ_stat² + (f_sys·value)²)
-    where f_sys  = pt_to_pt_systematic_error / 100  (fractional).
-    """
-    return math.sqrt(stat_err**2 +
-                     ((pt_to_pt_systematic_error / 100.0) * value)**2)
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-DEG_TO_RAD = math.pi / 180.0
-def cosd(theta_deg):  
-    """cos in degrees → radians handled transparently"""
-    return math.cos(theta_deg * DEG_TO_RAD)
-def sind(theta_deg):  
-    """sin in degrees (not used now, but handy)"""
-    return math.sin(theta_deg * DEG_TO_RAD)
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def dump_fit_summary(t_bin_idx, ffun, graph, label):
-    """Print χ²/ndf and current parameter values for quick eyeballing."""
-    ndf   = graph.GetN() - ffun.GetNpar()
-    chi2  = ffun.GetChisquare()
-    print(f"[{label}]  t-bin {t_bin_idx:2d}  χ²/ndf = {chi2:8.2f}/{ndf:2d}"
-          f"  →  {chi2/ndf:6.2f}")
-    pars = ", ".join(f"{ffun.GetParName(i)}={ffun.GetParameter(i):.3f}"
-                     for i in range(ffun.GetNpar()))
-    print("        " + pars)
-# ------------------------------------------------------------------
 
 ###############################################################################################################################################
 
@@ -360,27 +320,23 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
-        g_xx, g_yy = ctypes.c_double(0), ctypes.c_double(0)
+        g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
 
-        # ---------- Low-ε points ----------
         for ii in range(glo.GetN()):
             glo.GetPoint(ii, g_xx, g_yy)
-            stat  = glo.GetErrorY(ii)
-            sigma = combined_sigma(stat, g_yy.value)          # ← new helper
-            lo_cross_sec_err[i] += 1.0 / sigma**2
-
+            g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
+            lo_cross_sec_err[i] += 1 / (g_yy_err**2)
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, sigma)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
+                                     math.sqrt((glo.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
 
-        # ---------- High-ε points ----------
         for ii in range(ghi.GetN()):
             ghi.GetPoint(ii, g_xx, g_yy)
-            stat  = ghi.GetErrorY(ii)
-            sigma = combined_sigma(stat, g_yy.value)          # ← new helper
-            hi_cross_sec_err[i] += 1.0 / sigma**2
-
+            g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
+            hi_cross_sec_err[i] += 1 / (g_yy_err**2)
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, sigma)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
+                                     math.sqrt((ghi.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
@@ -396,25 +352,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
-        # ---------------------------------------------------------------
-        #  Dynamic seeds and limits  (estimate σ_T, σ_L from the two-ε
-        #  averages in THIS t-bin)
-        # ---------------------------------------------------------------
-        Δε = hi_eps - lo_eps
-        if abs(Δε) > 1e-3:
-            seed_sigL = max((ave_sig_hi - ave_sig_lo) / Δε, 1e-3)    # nb
-            seed_sigT = max(ave_sig_lo - lo_eps * seed_sigL, 1e-3)   # nb
-        else:                        # ε’s too close → fall back
-            seed_sigL = SEED_SIGL
-            seed_sigT = SEED_SIGT
-
-        # keep a narrow-ish corridor that still allows 10× excursions
-        dyn_limits = {
-            "sigT": (0.1 * seed_sigT, 10.0 * seed_sigT),
-            "sigL": (0.1 * seed_sigL, 10.0 * seed_sigL)
-        }
-        # ---------------------------------------------------------------
-
         '''
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
@@ -424,33 +361,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
-
         # ------------------------------------------------------------------
-        #  TF2 from a Python callable  → lets us add a χ²-style penalty term
+        # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
-        def xs_with_guard(xx, pp):
-            """Model σ(φ,ε)  +  soft penalty if ρ’s stray outside their bounds."""
-            phi_deg, eps = xx[0], xx[1]
-            sigT, sigL, rhoLT, rhoTT = pp[0], pp[1], pp[2], pp[3]
-            
-            base = ( sigT + eps*sigL
-                    + math.sqrt(2.*eps*(1.+eps))*cosd(phi_deg)*rhoLT
-                    + eps*cosd(2.*phi_deg)*rhoTT)
-
-            # --- soft quadratic walls  (exactly the old ‘penalty()’) -------
-            pen = 0.0
-            if abs(rhoLT) > math.sqrt(max(sigT*sigL, 0.0)):
-                pen += (abs(rhoLT) - math.sqrt(max(sigT*sigL, 0.0)))**2
-            if abs(rhoTT) > sigT:
-                pen += (abs(rhoTT) - sigT)**2
-
-            # scale so it competes on the same footing as the χ² term
-            return base + PENALTY_K * pen
-
-        # the “4” is the number of fit parameters
-        fff2 = ROOT.TF2("fff2", xs_with_guard, 0., 360., 0.0, 1.0, 4)
-        # ------------------------------------------------------------------
-
+        fff2 = ROOT.TF2("fff2",
+            "[0]                                       "      # σ_T
+            "+ y*[1]                                   "      # ε·σ_L
+            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
+            "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
+            "+ y*cos(2*x*0.017453)                     "      # TT
+            "*[3]*[0]"                                         # ρ_TT·σ_T
+            , 0, 360, 0.0, 1.0)
         
         for k in range(4):
             fff2.ReleaseParameter(k)
@@ -461,14 +382,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         for idx, key in enumerate(par_keys):
             fff2.SetParName(idx, key)
-            # first, the broad physical bounds
-            lo, hi = PARAM_LIMITS[key][current_i]
-
-            # then, if this is σ_T or σ_L, tighten around our seed
-            if key in dyn_limits:
-                lo, hi = dyn_limits[key]
-
-            fff2.SetParLimits(idx, lo, hi)
+            if key in PARAM_LIMITS:
+                lo, hi = PARAM_LIMITS[key][current_i]
+                fff2.SetParLimits(idx, lo, hi)
+            else:
+                raise KeyError(f"{key} not found in PARAM_LIMITS")
 
             # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
@@ -479,10 +397,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
-        fff2.SetParameters(seed_sigT,   # σ_T
-                           seed_sigL,   # σ_L
-                           0.0,         # ρ_LT
-                           0.0)         # ρ_TT
+        fff2.SetParameters( SEED_SIGT,   # σ_T
+                            SEED_SIGL,   # σ_L
+                            0.0,         # ρ_LT
+                            0.0)         # ρ_TT
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -496,7 +414,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
-        g_plot_err.Fit(fff2, FIT_OPTS)       # quiet, no redraw
+        g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -516,21 +434,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1
 
         # --- Fit 2: L ---
-        fff2.ReleaseParameter(1)
-
-        # NEW ↓  reset σT limits as well
-        reset_limits_from_table(fff2, 0, "sigT", stage=1)
-
+        fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
-
-        # — gently move σT off a boundary if it sits exactly there —
-        lo_lim, hi_lim = ctypes.c_double(), ctypes.c_double()
-        fff2.GetParLimits(0, lo_lim, hi_lim)
-        curT = fff2.GetParameter(0)
-        if abs(curT - lo_lim.value) < 1e-6 or abs(curT - hi_lim.value) < 1e-6:
-            fff2.SetParameter(0, 0.5 * (lo_lim.value + hi_lim.value))
-
-        g_plot_err.Fit(fff2, FIT_OPTS)
+        g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
@@ -552,26 +458,33 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1    
 
-        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
-        fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
+        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together --------------------------
+        stage_idx = 2            # third-pass entry in PARAM_LIMITS
 
-        # Give σT a final wide corridor for the global fit
-        reset_limits_from_table(fff2, 0, "sigT", stage=2)
-        reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
-        reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
+        # --- Grab a crude statistical error scale for this t-bin -------------
+        # RMS of the Y-errors in the graph is a quick, stable proxy
+        stat_err_estimate = math.sqrt(
+            sum((g_plot_err.GetErrorY(i))**2 for i in range(g_plot_err.GetN()))
+            / max(1, g_plot_err.GetN())
+        )
+        # --------------------------------------------------------------------------
 
-        # (same boundary-nudge trick)
-        lo_lim, hi_lim = ctypes.c_double(), ctypes.c_double()
-        fff2.GetParLimits(0, lo_lim, hi_lim)
-        curT = fff2.GetParameter(0)
-        if abs(curT - lo_lim.value) < 1e-6 or abs(curT - hi_lim.value) < 1e-6:
-            fff2.SetParameter(0, 0.5 * (lo_lim.value + hi_lim.value))
+        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
+            fff2.ReleaseParameter(p_idx)
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
+            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
 
-        g_plot_err.Fit(fff2, FIT_OPTS)
+            # --- Seeding & step size ----------------------------
+            if p_key.startswith("rho"):
+                fff2.SetParameter(p_idx, 0.0)
+                step = max(0.1, 0.6*stat_err_estimate)
+                fff2.SetParError(p_idx, step)
+            else:
+                fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
+            # ---------------------------------------------------------------------
+
+        g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
-
-        dump_fit_summary(i, fff2, g_plot_err, "final")
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -581,10 +494,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1    
 
         # --- Report reduced χ² ---
-        chi2     = fff2.GetChisquare()
+        chi2     = fff2.GetChisquare() + penalty(fff2)
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
-        print(f"Reduced χ²: {red_chi2:.2f}")        
+        print(f"Reduced χ²: {red_chi2:.2f}")
+    
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
@@ -663,8 +577,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, FIT_OPTS)
-        ghi.Fit(fhi, FIT_OPTS)
+        glo.Fit(flo, "MRQ")
+        ghi.Fit(fhi, "MRQ")
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -931,7 +845,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, FIT_OPTS)
+    g_unsep_mult.Fit(f_lin, "MRQ")
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -967,8 +881,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, FIT_OPTS)
-g_sig_t_total.Fit(f_exp_t, FIT_OPTS)
+g_sig_l_total.Fit(f_exp_l, "MRQ")
+g_sig_t_total.Fit(f_exp_t, "MRQ")
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -1004,23 +918,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, FIT_OPTS)
+g_sig_l_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, FIT_OPTS)
+g_sig_t_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, FIT_OPTS)
+g_sig_lt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, FIT_OPTS)
+g_sig_tt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf+')')
 c_total.Clear()
