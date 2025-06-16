@@ -238,6 +238,11 @@ def dump_fit_summary(t_bin_idx, ffun, graph, label):
     print("        " + pars)
 # ------------------------------------------------------------------
 
+###############################################################################################################################################
+
+# Import separated xsects models
+from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
+
 # ------------------------------------------------------------------
 def lo_eps_fit_deg(phi_deg, par):
     return LT_sep_x_lo_fun(phi_deg * PI / 180.0, par)
@@ -245,11 +250,6 @@ def lo_eps_fit_deg(phi_deg, par):
 def hi_eps_fit_deg(phi_deg, par):
     return LT_sep_x_hi_fun(phi_deg * PI / 180.0, par)
 # ------------------------------------------------------------------
-
-###############################################################################################################################################
-
-# Import separated xsects models
-from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
 
 ###############################################################################################################################################
 
