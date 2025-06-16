@@ -78,6 +78,10 @@ PI = math.pi
 FIT_OPTS = "WMRQ"
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+PENALTY_K = 1.0e3      # strength of the “soft wall” (bigger ⇒ stiffer)
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 # ---------------------------  DYNAMIC LIMITS  ---------------------------------
 #  PARAM_LIMITS encodes the *physical* boundaries that each cross-section term
@@ -156,19 +160,6 @@ def get_limits(fcn, idx):
         fcn.GetParLimits(idx, lo_ref, hi_ref)
         return lo_ref.value, hi_ref.value
 
-# --------------------------------------------------------------------------------------------
-def penalty(f):
-    sigT, sigL, rhoLT, rhoTT = (f.GetParameter(i) for i in range(4))
-    p = 0.0
-    # soft quadratic walls once the limits are exceeded
-    if abs(rhoLT) > math.sqrt(max(sigT*sigL,0)):
-        diff = abs(rhoLT) - math.sqrt(max(sigT*sigL,0))
-        p += (diff / rhoLT_err)**2          # scale by current error
-    if abs(rhoTT) > sigT:
-        diff = abs(rhoTT) - sigT
-        p += (diff / rhoTT_err)**2
-    return p
-
 # ---------------------------------------------------------------
 # Positivity guard + auto-refit (robust version)
 # ---------------------------------------------------------------
@@ -222,86 +213,6 @@ def combined_sigma(stat_err, value):
     """
     return math.sqrt(stat_err**2 +
                      ((pt_to_pt_systematic_error / 100.0) * value)**2)
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-def penalised_migrad(graph, init, limits, eps_pair,
-                     silent=True, penalty_scale=1.0):
-    """
-    Do a 4-parameter MINUIT χ² fit with the positivity penalty
-    built into the FCN.  Returns  (bestPars, bestErrs, redChi2).
-    """
-    # ---------- copy data out of the TGraph2DErrors ---------------
-    n     = graph.GetN()
-    phi   = np.zeros(n)
-    eps   = np.zeros(n)
-    sigma = np.zeros(n)
-    err   = np.zeros(n)
-
-    xx, yy, zz = ctypes.c_double(), ctypes.c_double(), ctypes.c_double()
-    for i in range(n):
-        graph.GetPoint(i, xx, yy, zz)          # (φ, ε, σ)
-        phi[i]   = xx.value
-        eps[i]   = yy.value
-        sigma[i] = zz.value
-        err[i]   = graph.GetEZ()[i]
-
-    # ---------- build MINUIT --------------------------------------
-    m = ROOT.TMinuit(4)
-    m.SetPrintLevel(int(silent))               # -1 => quiet
-
-    # parameter names
-    names = ("sigT", "sigL", "rhoLT", "rhoTT")
-
-    # FCN -----------------------------------------------------------
-    def fcn(npar, gin, f, par, iflag):
-        # --- grab only the first 4 parameters ----------------------
-        sigT  = par[0]
-        sigL  = par[1]
-        rhoLT = par[2]
-        rhoTT = par[3]
-        # usual χ² term
-        chi2 = np.sum(((sigma - (
-            sigT + eps*sigL
-            + np.sqrt(2*eps*(1.-eps))*rhoLT*np.cos(np.deg2rad(phi))
-            + eps*rhoTT*np.cos(2*np.deg2rad(phi))
-        ))/err)**2)
-
-        # positivity penalty ---------------------------------------
-        sig_prod = max(sigT*sigL, 0.0)
-        if sig_prod > 0.0 and abs(rhoLT) > penalty_scale*np.sqrt(sig_prod):
-            diff = abs(rhoLT) - penalty_scale*np.sqrt(sig_prod)
-            chi2 += (diff/err.mean())**2
-        if abs(rhoTT) > penalty_scale*sigT:
-            diff = abs(rhoTT) - penalty_scale*sigT
-            chi2 += (diff/err.mean())**2
-
-                # store χ² in the location MINUIT expects
-        try:
-            f[0] = chi2          # works when 'f' behaves like an array
-        except TypeError:
-            f.value = chi2       # fallback: 'f' is a single c_double
-
-    m.SetFCN(fcn)
-
-    # define params, limits, step sizes ----------------------------
-    for i, nm in enumerate(names):
-        val = init[i]
-        lo, hi = limits[nm]
-        step = 0.05*max(abs(val), 1e-3)
-        m.DefineParameter(i, nm, val, step, lo, hi)
-
-    # run MIGRAD ----------------------------------------------------
-    m.Migrad()
-    # ---- fetch best-fit values & errors from TMinuit -------------
-    best, perr = [], []
-    for i in range(4):
-        cv, ce = ctypes.c_double(), ctypes.c_double()
-        m.GetParameter(i, cv, ce)     # (index, valueRef, errorRef)
-        best.append(cv.value)
-        perr.append(ce.value)
-    redχ = m.fAmin / max(1, n-4)
-    return best, perr, redχ
 # ------------------------------------------------------------------
 
 ###############################################################################################################################################
@@ -482,17 +393,36 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
+
         # ------------------------------------------------------------------
-        # Re-parameterised version enforcing |ρ| ≤ 1 
+        #  TF2 from a Python callable  → lets us add a χ²-style penalty term
         # ------------------------------------------------------------------
-        fff2 = ROOT.TF2("fff2",
-            "[0]                                       "      # σ_T
-            "+ y*[1]                                   "      # ε·σ_L
-            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
-            "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
-            "+ y*cos(2*x*0.017453)                     "      # TT
-            "*[3]*[0]"                                         # ρ_TT·σ_T
-            , 0, 360, 0.0, 1.0)
+        def xs_with_guard(xx, pp):
+            """Model σ(φ,ε)  +  soft penalty if ρ’s stray outside their bounds."""
+            phi_deg, eps = xx[0], xx[1]
+            sigT, sigL, rhoLT, rhoTT = pp[0], pp[1], pp[2], pp[3]
+
+            # --- the physics piece ----------------------------------------
+            base = (  sigT
+                    + eps*sigL
+                    + math.sqrt(2.*eps*(1.+eps))
+                      * math.cos(math.radians(phi_deg)) * rhoLT*math.sqrt(sigT*sigL)
+                    + eps * math.cos(math.radians(2.*phi_deg)) * rhoTT*sigT )
+
+            # --- soft quadratic walls  (exactly the old ‘penalty()’) -------
+            pen = 0.0
+            if abs(rhoLT) > math.sqrt(max(sigT*sigL, 0.0)):
+                pen += (abs(rhoLT) - math.sqrt(max(sigT*sigL, 0.0)))**2
+            if abs(rhoTT) > sigT:
+                pen += (abs(rhoTT) - sigT)**2
+
+            # scale so it competes on the same footing as the χ² term
+            return base + PENALTY_K * pen
+
+        # the “4” is the number of fit parameters
+        fff2 = ROOT.TF2("fff2", xs_with_guard, 0., 360., 0.0, 1.0, 4)
+        # ------------------------------------------------------------------
+
         
         for k in range(4):
             fff2.ReleaseParameter(k)
@@ -598,9 +528,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(2)
         fff2.ReleaseParameter(3)
 
-        # NEW ↓  give σT a final wide corridor for the global fit
+        # Give σT a final wide corridor for the global fit
         reset_limits_from_table(fff2, 0, "sigT", stage=2)
-
         reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
         reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
 
@@ -611,26 +540,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         if abs(curT - lo_lim.value) < 1e-6 or abs(curT - hi_lim.value) < 1e-6:
             fff2.SetParameter(0, 0.5 * (lo_lim.value + hi_lim.value))
 
-        # ----- Penalised global fit ---------------------------------
-        init_vals = [fff2.GetParameter(i) for i in range(4)]
-        par_limits = {
-            "sigT": get_limits(fff2, 0),
-            "sigL": get_limits(fff2, 1),
-            "rhoLT": get_limits(fff2, 2),
-            "rhoTT": get_limits(fff2, 3)
-        }
-
-        best, perr, redχ = penalised_migrad(
-            g_plot_err, init_vals, par_limits,
-            eps_pair=(lo_eps, hi_eps)
-        )
-
-        # put the results back into the TF2 for plotting / output
-        for i, v in enumerate(best):
-            fff2.SetParameter(i, v)
-            fff2.SetParError(i, perr[i])
-
-        print(f"Reduced χ² (penalised): {redχ:.2f}")
+        g_plot_err.Fit(fff2, FIT_OPTS)
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -641,7 +551,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1    
 
         # --- Report reduced χ² ---
-        chi2     = fff2.GetChisquare() + penalty(fff2)
+        chi2     = fff2.GetChisquare()
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
         print(f"Reduced χ²: {red_chi2:.2f}")
