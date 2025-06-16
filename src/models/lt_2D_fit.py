@@ -374,6 +374,25 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
+        # ---------------------------------------------------------------
+        #  Dynamic seeds and limits  (estimate σ_T, σ_L from the two-ε
+        #  averages in THIS t-bin)
+        # ---------------------------------------------------------------
+        Δε = hi_eps - lo_eps
+        if abs(Δε) > 1e-3:
+            seed_sigL = max((ave_sig_hi - ave_sig_lo) / Δε, 1e-3)    # nb
+            seed_sigT = max(ave_sig_lo - lo_eps * seed_sigL, 1e-3)   # nb
+        else:                        # ε’s too close → fall back
+            seed_sigL = SEED_SIGL
+            seed_sigT = SEED_SIGT
+
+        # keep a narrow-ish corridor that still allows 10× excursions
+        dyn_limits = {
+            "sigT": (0.1 * seed_sigT, 10.0 * seed_sigT),
+            "sigL": (0.1 * seed_sigL, 10.0 * seed_sigL)
+        }
+        # ---------------------------------------------------------------
+
         '''
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
@@ -404,11 +423,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         for idx, key in enumerate(par_keys):
             fff2.SetParName(idx, key)
-            if key in PARAM_LIMITS:
-                lo, hi = PARAM_LIMITS[key][current_i]
-                fff2.SetParLimits(idx, lo, hi)
-            else:
-                raise KeyError(f"{key} not found in PARAM_LIMITS")
+            # first, the broad physical bounds
+            lo, hi = PARAM_LIMITS[key][current_i]
+
+            # then, if this is σ_T or σ_L, tighten around our seed
+            if key in dyn_limits:
+                lo, hi = dyn_limits[key]
+
+            fff2.SetParLimits(idx, lo, hi)
 
             # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
@@ -419,10 +441,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
-        fff2.SetParameters( SEED_SIGT,   # σ_T
-                            SEED_SIGL,   # σ_L
-                            0.0,         # ρ_LT
-                            0.0)         # ρ_TT
+        fff2.SetParameters(seed_sigT,   # σ_T
+                           seed_sigL,   # σ_L
+                           0.0,         # ρ_LT
+                           0.0)         # ρ_TT
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
