@@ -554,10 +554,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # ---- flatten the graph into NumPy arrays ------------------
         N = g_plot_err.GetN()
-        phi_arr   = np.array([g_plot_err.GetX()[i]  for i in range(N)], float)
-        eps_arr   = np.array([g_plot_err.GetY()[i]  for i in range(N)], float)
-        sigma_arr = np.array([g_plot_err.GetZ()[i]  for i in range(N)], float)
-        err_arr   = np.array([g_plot_err.GetEZ()[i] for i in range(N)], float)
+        phi_arr   = np.array([g_plot_err.GetX()[idx]  for idx in range(N)], float)
+        eps_arr   = np.array([g_plot_err.GetY()[idx]  for idx in range(N)], float)
+        sigma_arr = np.array([g_plot_err.GetZ()[idx]  for idx in range(N)], float)
+        err_arr   = np.array([g_plot_err.GetEZ()[idx] for idx in range(N)], float)
 
         seed_vec = [seed_sigT, seed_sigL, 0.0, 0.0]
         lims = { "sigT": dyn_limits["sigT"],
@@ -570,8 +570,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             seed_vec, lims )
 
         # copy into fff2 for plotting
-        for i, val in enumerate(best):
-            fff2.SetParameter(i, val)
+        for idx, val in enumerate(best):
+            fff2.SetParameter(idx, val)
 
         dump_fit_summary(i, fff2, g_plot_err, "final")
 
