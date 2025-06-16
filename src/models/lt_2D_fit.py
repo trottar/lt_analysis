@@ -225,6 +225,18 @@ def sind(theta_deg):
     return math.sin(theta_deg * DEG_TO_RAD)
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+def dump_fit_summary(t_bin_idx, ffun, graph, label):
+    """Print χ²/ndf and current parameter values for quick eyeballing."""
+    ndf   = graph.GetN() - ffun.GetNpar()
+    chi2  = ffun.GetChisquare()
+    print(f"[{label}]  t-bin {t_bin_idx:2d}  χ²/ndf = {chi2:8.2f}/{ndf:2d}"
+          f"  →  {chi2/ndf:6.2f}")
+    pars = ", ".join(f"{ffun.GetParName(i)}={ffun.GetParameter(i):.3f}"
+                     for i in range(ffun.GetNpar()))
+    print("        " + pars)
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -552,6 +564,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, FIT_OPTS)
         check_sigma_positive(fff2, g_plot_err)
 
+        dump_fit_summary(i, fff2, g_plot_err, "final")
+
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
@@ -563,8 +577,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         chi2     = fff2.GetChisquare()
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
-        print(f"Reduced χ²: {red_chi2:.2f}")
-    
+        print(f"Reduced χ²: {red_chi2:.2f}")        
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
