@@ -98,11 +98,7 @@ PARAM_LIMITS = {
 # ------------------------------------------------------------------
 SEED_SIGT = 20.0      # seed for σ_T  — typical transverse scale
 SEED_SIGL = 50.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
-
 # ------------------------------------------------------------------
-# control parameters
-CHI2_GOAL  = 1.5
-MAX_REFITS = 10
 
 # ------------------------------------------------------------------
 #  ε-lever-arm quality guard
@@ -420,71 +416,100 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        import itertools, random
+        # --- improved fit sequence with additional tuning steps ---
+        # fit_step counter remains for tracking
+        fit_step = 0
 
-        # control parameters
-        CHI2_GOAL  = 1.5
-        MAX_REFITS = 10
+        # --- Fit 1: T only ---
+        fff2.FixParameter(1, 0.0)   # σL
+        fff2.FixParameter(2, 0.0)   # ρLT
+        fff2.FixParameter(3, 0.0)   # ρTT
+        # float sigmaT initially
+        fff2.ReleaseParameter(0)
+        # perform fit
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+        # record
+        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        fit_step += 1
 
-        # all non-empty subsets of the 4 parameters, by index
-        all_subsets = []
-        for r in range(1,5):
-            for combo in itertools.combinations(range(4), r):
-                all_subsets.append(combo)
+        # --- Fit 2: σL + ρLT ---
+        # float σL and ρLT, hold ρTT=0
+        fff2.FixParameter(0, fff2.GetParameter(0))  # hold σT
+        fff2.ReleaseParameter(1)    # σL
+        fff2.ReleaseParameter(2)    # ρLT
+        fff2.FixParameter(3, 0.0)   # hold ρTT
+        # reset limits for sigL and rhoLT
+        reset_limits_from_table(fff2, 1, "sigL", stage=1)
+        reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
+        # fit
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+        # record
+        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        fit_step += 1
 
-        for i, t_val in enumerate(t_list):
-            refits      = 0
-            red_chi2    = float('inf')
-            # start from whatever parameters you already have in fff2
+        # --- Fit 3: soft-floor σL if ill-conditioned ---
+        eps_diff = abs(HIEPS - LOEPS)
+        cond_num = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
+        if cond_num > COND_MAX:
+            floor = max(0.25 * fff2.GetParError(1), 1e-3)
+            if fff2.GetParameter(1) < floor:
+                fff2.SetParameter(1, floor)
+        # record pre-pass 3
+        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        fit_step += 1
 
-            while red_chi2 > CHI2_GOAL and refits < MAX_REFITS:
-                best_chi2   = float('inf')
-                best_params = None
-                best_vals   = None
+        # --- Fit 4: refine LT amplitude only ---
+        # hold σT, σL; float ρLT, ρTT
+        fff2.FixParameter(0, fff2.GetParameter(0))  # hold σT
+        fff2.FixParameter(1, fff2.GetParameter(1))  # hold σL
+        fff2.ReleaseParameter(2)                    # float ρLT
+        fff2.ReleaseParameter(3)  # float ρTT
+        # narrow the ρLT limits around current value
+        curr = fff2.GetParameter(2)
+        fff2.SetParLimits(2, curr - 0.2, curr + 0.2)
+        fff2.SetParError(2, 0.02)
+        # fit
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+        # record
+        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        fit_step += 1
 
-                # try each subset in a random order
-                for subset in random.sample(all_subsets, len(all_subsets)):
-                    # fix all to current
-                    for p in range(4):
-                        fff2.FixParameter(p, fff2.GetParameter(p))
+        # --- Fit 5: full 4-parameter fit ---
+        # float σT, σL, ρLT, ρTT
+        for p_idx, p_key in ((0, "sigT"), (1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
+            fff2.ReleaseParameter(p_idx)
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
+            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
+            fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))
+        # perform fit
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+        # record
+        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        fit_step += 1
 
-                    # release only those in subset
-                    for p in subset:
-                        fff2.ReleaseParameter(p)
-                        # reset limits from your table if desired:
-                        lo, hi = PARAM_LIMITS[["sigT","sigL","rhoLT","rhoTT"][p]][2]
-                        fff2.SetParLimits(p, lo, hi)
-                        fff2.SetParError(p, 0.05*(hi - lo))
-
-                    # perform the fit
-                    g_plot_err.Fit(fff2, "MRQ")
-                    check_sigma_positive(fff2, g_plot_err)
-
-                    # compute reduced χ²
-                    chi2 = fff2.GetChisquare()
-                    ndf  = fff2.GetNDF()
-                    rchi = chi2/ndf if ndf>0 else float('inf')
-
-                    # record if it's the best so far
-                    if rchi < best_chi2:
-                        best_chi2 = rchi
-                        best_params = tuple(fff2.GetParameter(p) for p in range(4))
-                        best_vals   = subset
-
-                # after trying all subsets, apply the best one
-                # set fff2 to its best parameters
-                for p, val in enumerate(best_params):
-                    fff2.SetParameter(p, val)
-
-                red_chi2 = best_chi2
-                print(f"t={t_val:.3f}, pass {refits+1}: "
-                    f"best subset {best_vals} → χ²/NDF = {red_chi2:.2f}")
-
-                refits += 1
-
-            if red_chi2 > CHI2_GOAL:
-                print(f"⚠ t={t_val:.3f} never reached χ²/NDF ≤ {CHI2_GOAL} "
-                    f"after {MAX_REFITS} random-subset passes (final = {red_chi2:.2f})")
+        # --- Goodness-of-fit logging ---
+        chi2 = fff2.GetChisquare()
+        ndf  = fff2.GetNDF()
+        print(f"t={t_list[i]:.3f}: final χ²/NDF = {chi2:.1f}/{ndf} = {chi2/ndf:.2f}")
 
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
