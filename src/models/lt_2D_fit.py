@@ -197,7 +197,7 @@ def check_sigma_positive(fcn, graph,
 
     # tighten limits and refit
     fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
-    graph.Fit(fcn, "MRQ")                    # quiet, no redraw
+    graph.Fit(fcn, "WMRQ")                    # quiet, no redraw
 
     # final check
     if not _is_positive():
@@ -418,7 +418,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
-        g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
+        fff2.FixParameter(4, 1.0)   # Norm
+        g_plot_err.Fit(fff2, "WMRQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -440,7 +441,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # --- Fit 2: L ---
         fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "WMRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
@@ -473,7 +474,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         )
         # --------------------------------------------------------------------------
 
-        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT"), (4, "Norm")):
+        for p_idx, p_key in ((2,"rhoLT"), (3,"rhoTT"), (4, "Norm")):
             fff2.ReleaseParameter(p_idx)
             lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
@@ -487,7 +488,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
             # ---------------------------------------------------------------------
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, "WMRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -589,8 +590,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "MRQ")
-        ghi.Fit(fhi, "MRQ")
+        glo.Fit(flo, "WMRQ")
+        ghi.Fit(fhi, "WMRQ")
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -857,7 +858,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, "MRQ")
+    g_unsep_mult.Fit(f_lin, "WMRQ")
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -893,8 +894,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, "MRQ")
-g_sig_t_total.Fit(f_exp_t, "MRQ")
+g_sig_l_total.Fit(f_exp_l, "WMRQ")
+g_sig_t_total.Fit(f_exp_t, "WMRQ")
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -930,23 +931,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "MRQ")
+g_sig_l_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "MRQ")
+g_sig_t_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "MRQ")
+g_sig_lt_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "MRQ")
+g_sig_tt_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf+')')
 c_total.Clear()
