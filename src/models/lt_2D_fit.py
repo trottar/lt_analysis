@@ -66,8 +66,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 
 # Constants
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
-#pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
-pt_to_pt_systematic_error = 100.0 # Test
+pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
 
 ###############################################################################################################################################
@@ -464,6 +463,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1    
 
         # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together --------------------------
+        fff2.FixParameter(0, fff2.GetParameter(0))   # σT fixed
+        fff2.FixParameter(1, fff2.GetParameter(1))   # σL fixed
         stage_idx = 2            # third-pass entry in PARAM_LIMITS
 
         # --- Grab a crude statistical error scale for this t-bin -------------
