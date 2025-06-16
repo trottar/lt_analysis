@@ -14,6 +14,7 @@ import numpy as np
 import ROOT
 from ROOT import TGraphErrors, TF1, TF2, TGraph2DErrors, TCanvas
 from ROOT import TString, TNtuple, TMinuit
+from ROOT import Math, Fit
 from array import array
 import math
 import ctypes
@@ -237,6 +238,51 @@ def dump_fit_summary(t_bin_idx, ffun, graph, label):
     print("        " + pars)
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+#  ▸▸  ROOT-native χ² fitter that honours per-point z-errors  ◂◂
+# ------------------------------------------------------------------
+
+def fit_bin_with_minuit2(model_func,  # callable σ(φ,ε;pars)
+                         phi, eps, cs, err,  # 1-D python lists
+                         seed, limits, par_names):
+    """
+    Returns (pars, χ², ndf) after a Minuit2 χ² minimisation that weights
+    every point by its own σ-error.
+    """
+    npar = len(seed)
+    npts = len(cs)
+
+    # ---- build Chi² functor ------------------------------------------------
+    def chi2_wrap(par):
+        chi2 = 0.0
+        for i in range(npts):
+            theory = model_func(phi[i], eps[i], par)
+            r = (cs[i] - theory) / err[i]
+            chi2 += r * r
+        return chi2
+
+    fcn = Math.Functor(chi2_wrap, npar)
+
+    # ---- set up the fitter -------------------------------------------------
+    fitter = Fit.Fitter()          # Minuit2 under the hood
+    cfg    = fitter.Config()
+    cfg.ParamsSettings(npar)
+
+    for i in range(npar):
+        ps = cfg.ParSettings(i)
+        ps.SetName(par_names[i])
+        ps.SetValue(seed[i])
+        lo, hi = limits[i]
+        ps.SetLimits(lo, hi)
+
+    fitter.FitFCN(fcn, array('d', seed))
+    result = fitter.Result()
+
+    return (list(result.Parameters()),
+            result.Chi2(),
+            result.Ndf())
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -354,12 +400,21 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_xx, g_yy = ctypes.c_double(0), ctypes.c_double(0)
 
         # ---------- Low-ε points ----------
+        phi_vals, eps_vals, cs_vals, err_vals = [], [], [], []   # NEW
+
+        # ---------- Low-ε points ----------
         for ii in range(glo.GetN()):
             glo.GetPoint(ii, g_xx, g_yy)
             stat  = glo.GetErrorY(ii)
-            sigma = combined_sigma(stat, g_yy.value)          # ← new helper
-            lo_cross_sec_err[i] += 1.0 / sigma**2
+            sigma = combined_sigma(stat, g_yy.value)
 
+            # NEW ↓  keep flat copies for the χ² helper
+            phi_vals.append(g_xx.value)
+            eps_vals.append(lo_eps)
+            cs_vals.append(g_yy.value)
+            err_vals.append(sigma)
+
+            lo_cross_sec_err[i] += 1.0 / sigma**2
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
             g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, sigma)
 
@@ -367,9 +422,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for ii in range(ghi.GetN()):
             ghi.GetPoint(ii, g_xx, g_yy)
             stat  = ghi.GetErrorY(ii)
-            sigma = combined_sigma(stat, g_yy.value)          # ← new helper
-            hi_cross_sec_err[i] += 1.0 / sigma**2
+            sigma = combined_sigma(stat, g_yy.value)
 
+            # NEW ↓  flat copies for χ² minimiser
+            phi_vals.append(g_xx.value)          # 1
+            eps_vals.append(hi_eps)              # 2
+            cs_vals.append(g_yy.value)           # 3
+            err_vals.append(sigma)               # 4
+
+            hi_cross_sec_err[i] += 1.0 / sigma**2
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
             g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, sigma)
 
@@ -482,96 +543,33 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigLT_change = TGraphErrors()
         sigTT_change = TGraphErrors()
 
-        # ---------------- FIT SEQUENCE ------------------
-        fit_step = 0  # counter for adapt_limits
+        # ------------------------------------------------------------------
+        #  Single weighted χ² fit with ROOT::Fit::Fitter (Minuit2)
+        # ------------------------------------------------------------------
+        seed   = [seed_sigT, seed_sigL, 0.0, 0.0]
+        limits = [dyn_limits["sigT"],
+                  dyn_limits["sigL"],
+                  (-1.5*math.sqrt(seed_sigT*seed_sigL),
+                   +1.5*math.sqrt(seed_sigT*seed_sigL)),
+                  (-1.5*seed_sigT, +1.5*seed_sigT)]
+        par_names = ["sigT", "sigL", "rhoLT", "rhoTT"]
 
-        # --- Fit 1: T ---
-        fff2.FixParameter(1, 0.0)   # σL
-        fff2.FixParameter(2, 0.0)   # ρLT
-        fff2.FixParameter(3, 0.0)   # ρTT
-        g_plot_err.Fit(fff2, FIT_OPTS)       # quiet, no redraw
-        check_sigma_positive(fff2, g_plot_err)
+        best, chi2, ndf = fit_bin_with_minuit2(
+            lambda phi, eps, p: xs_with_guard((phi, eps), p),
+            phi_vals, eps_vals, cs_vals, err_vals,
+            seed, limits, par_names)
 
-        sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
-        sigL_change.GetXaxis().SetTitle("Fit Step")
-        sigL_change.GetYaxis().SetTitle("#it{#sigma}_{L}")
-
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-
-        sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
-        sigT_change.GetXaxis().SetTitle("Fit Step")
-        sigT_change.GetYaxis().SetTitle("#it{#sigma}_{T}")
-
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1
-
-        # --- Fit 2: L ---
-        fff2.ReleaseParameter(1)
-
-        # NEW ↓  reset σT limits as well
-        reset_limits_from_table(fff2, 0, "sigT", stage=1)
-
-        reset_limits_from_table(fff2, 1, "sigL", stage=1)
-
-        # — gently move σT off a boundary if it sits exactly there —
-        lo_lim, hi_lim = ctypes.c_double(), ctypes.c_double()
-        fff2.GetParLimits(0, lo_lim, hi_lim)
-        curT = fff2.GetParameter(0)
-        if abs(curT - lo_lim.value) < 1e-6 or abs(curT - hi_lim.value) < 1e-6:
-            fff2.SetParameter(0, 0.5 * (lo_lim.value + hi_lim.value))
-
-        g_plot_err.Fit(fff2, FIT_OPTS)
-        check_sigma_positive(fff2, g_plot_err)
-
-        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
-        eps_diff   = abs(HIEPS - LOEPS)
-        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
-
-        if cond_num > COND_MAX:
-            # matrix is ill-conditioned → apply soft floor to σ_L
-            sigL     = fff2.GetParameter(1)
-            sigL_err = fff2.GetParError(1)
-            floor    = max(0.25*sigL_err, 1e-3)
-            if sigL < floor:
-                fff2.SetParameter(1, floor)
-
-        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1    
-
-        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
-        fff2.ReleaseParameter(2)
-        fff2.ReleaseParameter(3)
-
-        # Give σT a final wide corridor for the global fit
-        reset_limits_from_table(fff2, 0, "sigT", stage=2)
-        reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
-        reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
-
-        # (same boundary-nudge trick)
-        lo_lim, hi_lim = ctypes.c_double(), ctypes.c_double()
-        fff2.GetParLimits(0, lo_lim, hi_lim)
-        curT = fff2.GetParameter(0)
-        if abs(curT - lo_lim.value) < 1e-6 or abs(curT - hi_lim.value) < 1e-6:
-            fff2.SetParameter(0, 0.5 * (lo_lim.value + hi_lim.value))
-
-        g_plot_err.Fit(fff2, FIT_OPTS)
-        check_sigma_positive(fff2, g_plot_err)
-
+        for idx, val in enumerate(best):
+            fff2.SetParameter(idx, val)
+        # keep the TF2 updated for plotting
+        print(f"    ▶ Minuit2 χ²/ndf = {chi2:.2f}/{ndf} → {chi2/ndf:.2f}")
         dump_fit_summary(i, fff2, g_plot_err, "final")
+        # ------------------------------------------------------------------
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-
-        fit_step += 1    
 
         # --- Report reduced χ² ---
         chi2     = fff2.GetChisquare()
