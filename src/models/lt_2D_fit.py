@@ -416,7 +416,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigT_change.GetXaxis().SetTitle("Fit Step")
         sigT_change.GetYaxis().SetTitle("#it{#sigma}_{T}")
-        
+
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
@@ -447,9 +447,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1    
 
-        print("TABLE check ρ-limits stage 2:",
-            PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
-
         # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
         stage_idx = 2            # third-pass entry in PARAM_LIMITS
 
@@ -462,10 +459,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             fff2.SetParError(p_idx, 0.02 if p_key.startswith("rho")
                                     else 0.05*(hi_lim-lo_lim))
 
-        # --- sanity print (optional) ---
-        print("Pass-3 limits:",
-            get_limits(fff2,2), get_limits(fff2,3))
-
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
@@ -474,7 +467,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
-        fit_step += 1        
+        fit_step += 1    
+
+        # --- Report reduced χ² ---
+        chi2     = fff2.GetChisquare()
+        ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
+        red_chi2 = chi2 / ndf
+        print(f"Reduced χ²: {red_chi2:.2f}")
+    
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
