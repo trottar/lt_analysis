@@ -114,10 +114,10 @@ PARAM_LIMITS = {
 }
 '''
 PARAM_LIMITS = {
-    "sigT" : [(-10, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(-10, 1e3)]*3,   # σ_L  : longitudinal
-    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    "sigT" : [(1e-3, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(1e-3, 1e3)]*3,   # σ_L  : longitudinal
+    "rhoLT": [(-0.5, 0.5)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-0.5, 0.5)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
