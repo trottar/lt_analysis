@@ -341,12 +341,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fL = ROOT.TF1("fL","[0] + [1]*cos(x)",0,2*math.pi)
         tgL.Fit(fL,"Q")
 
-        # Seed the global TF2 fit with these
-        fff2.SetParameter(0, fT.GetParameter(0))   # σT
-        fff2.SetParameter(3, fT.GetParameter(1))   # ρTT
-        fff2.SetParameter(1, fL.GetParameter(0))   # σL
-        fff2.SetParameter(2, fL.GetParameter(1))   # ρLT
-
         # --- equalize total weight between low-ε and high-ε stripes ---
         # first compute the full per-point errors for each stripe
         errs_lo = []
