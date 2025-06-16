@@ -93,8 +93,7 @@ PI = math.pi
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    #"sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-    "sigL" : [(0.001, 1e3), (0.001, 500), (0.001, 200)],   # σ_L  : longitudinal (pole-dominance at lowest t)
+    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
@@ -103,8 +102,8 @@ PARAM_LIMITS = {
 # ------------------------------------------------------------------
 # Initial starting values for the fit (nb)
 # ------------------------------------------------------------------
-SEED_SIGT = 20.0      # seed for σ_T  — typical transverse scale
-SEED_SIGL = 10.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
+SEED_SIGT = 10.0      # seed for σ_T  — typical transverse scale
+SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
