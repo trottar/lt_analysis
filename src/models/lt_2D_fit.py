@@ -306,40 +306,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetTitle("t = {:.3f}".format(t_list[i]))
         sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
-
+        
         g_plot_err = TGraph2DErrors()
 
         g_xx, g_yy, g_yy_err = ctypes.c_double(0), ctypes.c_double(0), ctypes.c_double(0)
-
-        # --- Option B: per-φ Rosenbluth seeds ---
-        phi_vals = []
-        sigT_vals = []
-        sigL_vals = []
-        for j in range(glo.GetN()):
-            glo.GetPoint(j, g_xx, g_yy)
-            lo_y   = g_yy.value; lo_err = glo.GetErrorY(j)
-            ghi.GetPoint(j, g_xx, g_yy)
-            hi_y   = g_yy.value; hi_err = ghi.GetErrorY(j)
-            dε     = HIEPS - LOEPS
-            σT_j   = (HIEPS * lo_y - LOEPS * hi_y) / dε
-            σL_j   = (hi_y   - lo_y) / dε
-            phi_vals.append(g_xx.value)
-            sigT_vals.append(σT_j)
-            sigL_vals.append(σL_j)
-
-        # Fit σT(φ) to A + B cos2φ
-        tgT = ROOT.TGraph(len(phi_vals))
-        for idx, φ in enumerate(phi_vals):
-            tgT.SetPoint(idx, φ, sigT_vals[idx])
-        fT = ROOT.TF1("fT","[0] + [1]*cos(2*x)",0,2*math.pi)
-        tgT.Fit(fT,"Q")
-
-        # Fit σL(φ) to C + D cosφ
-        tgL = ROOT.TGraph(len(phi_vals))
-        for idx, φ in enumerate(phi_vals):
-            tgL.SetPoint(idx, φ, sigL_vals[idx])
-        fL = ROOT.TF1("fL","[0] + [1]*cos(x)",0,2*math.pi)
-        tgL.Fit(fL,"Q")
 
         # --- equalize total weight between low-ε and high-ε stripes ---
         # first compute the full per-point errors for each stripe
@@ -399,7 +369,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, LOEPS-0.1, HIEPS+0.1)
-
+        '''
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
@@ -411,12 +381,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             "+ y*cos(2*x*0.017453)                     "      # TT
             "*[3]*[0]"                                         # ρ_TT·σ_T
             , 0, 360, 0.0, 1.0)
-        '''
-
-        # define the fit function once at the top of the bin loop:
-        fff2 = TF2( "lt_tt", lt_tt_wrapper, φ_min, φ_max, ε_min, ε_max, 4 )
-        # set initial seeds here or immediately after Option B
-
+        
         for k in range(4):
             fff2.ReleaseParameter(k)
 
