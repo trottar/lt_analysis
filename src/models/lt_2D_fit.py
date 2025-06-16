@@ -69,6 +69,15 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
 
+# ------------------------------------------------------------------
+# ROOT fit options used throughout
+#   W  → weight each point by its individual σ-error
+#   M  → improve MINUIT strategy (migrad + improve)
+#   R  → ignore fit range from function; use graph’s points
+#   Q  → quiet: no fit output spam
+FIT_OPTS = "WMRQ"
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 # ---------------------------  DYNAMIC LIMITS  ---------------------------------
 #  PARAM_LIMITS encodes the *physical* boundaries that each cross-section term
@@ -195,7 +204,7 @@ def check_sigma_positive(fcn, graph,
 
     # tighten limits and refit
     fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
-    graph.Fit(fcn, "MRQ")                    # quiet, no redraw
+    graph.Fit(fcn, FIT_OPTS)                    # quiet, no redraw
 
     # final check
     if not _is_positive():
@@ -413,7 +422,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
-        g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
+        g_plot_err.Fit(fff2, FIT_OPTS)       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -435,7 +444,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # --- Fit 2: L ---
         fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, FIT_OPTS)
         check_sigma_positive(fff2, g_plot_err)
 
         # ---------- soft floor on σ_L when ε-lever arm is weak -------------
@@ -482,7 +491,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
             # ---------------------------------------------------------------------
 
-        g_plot_err.Fit(fff2, "MRQ")
+        g_plot_err.Fit(fff2, FIT_OPTS)
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -576,8 +585,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "MRQ")
-        ghi.Fit(fhi, "MRQ")
+        glo.Fit(flo, FIT_OPTS)
+        ghi.Fit(fhi, FIT_OPTS)
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -844,7 +853,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, "MRQ")
+    g_unsep_mult.Fit(f_lin, FIT_OPTS)
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -880,8 +889,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, "MRQ")
-g_sig_t_total.Fit(f_exp_t, "MRQ")
+g_sig_l_total.Fit(f_exp_l, FIT_OPTS)
+g_sig_t_total.Fit(f_exp_t, FIT_OPTS)
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -917,23 +926,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "MRQ")
+g_sig_l_total.Fit(f_exp, FIT_OPTS)
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "MRQ")
+g_sig_t_total.Fit(f_exp, FIT_OPTS)
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "MRQ")
+g_sig_lt_total.Fit(f_exp, FIT_OPTS)
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "MRQ")
+g_sig_tt_total.Fit(f_exp, FIT_OPTS)
 c_total.Print(outputpdf+')')
 c_total.Clear()
