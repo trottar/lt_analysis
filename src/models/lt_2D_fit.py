@@ -427,9 +427,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # 3) run the weighted fit once
         g_plot_err.Fit(fff2, "WMRQ")  # WMRQ = weighted, minimised, redraw
-
-        # 4) report
-        dump_fit_summary(i, fff2, g_plot_err, "one‐pass")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
