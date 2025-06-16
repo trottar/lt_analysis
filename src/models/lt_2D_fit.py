@@ -217,9 +217,11 @@ def combined_sigma(stat_err, value):
 
 # ------------------------------------------------------------------
 DEG_TO_RAD = math.pi / 180.0
-def cosd(theta_deg):  """cos in degrees → radians handled transparently"""
+def cosd(theta_deg):  
+    """cos in degrees → radians handled transparently"""
     return math.cos(theta_deg * DEG_TO_RAD)
-def sind(theta_deg):  """sin in degrees (not used now, but handy)"""
+def sind(theta_deg):  
+    """sin in degrees (not used now, but handy)"""
     return math.sin(theta_deg * DEG_TO_RAD)
 # ------------------------------------------------------------------
 
