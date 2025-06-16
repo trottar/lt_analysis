@@ -69,7 +69,6 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
-DEG = f"*({PI}/180.0)"          # converts x [deg] → radians inside TF1
 
 # ------------------------------------------------------------------
 # ROOT fit options used throughout
@@ -109,8 +108,8 @@ PENALTY_K = 1.0e3      # strength of the “soft wall” (bigger ⇒ stiffer)
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    "rhoLT": [(-3.0, 3.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-3.0, 3.0)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -244,20 +243,6 @@ def dump_fit_summary(t_bin_idx, ffun, graph, label):
 # Import separated xsects models
 from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
 
-# ------------------------------------------------------------------
-def lo_eps_fit_deg(lo_eps):
-    rad_fun = LT_sep_x_lo_fun_wrapper(lo_eps)   # expects φ [rad]
-    def deg_fun(phi_deg, par):
-        return rad_fun(phi_deg * PI / 180.0, par)
-    return deg_fun
-
-def hi_eps_fit_deg(hi_eps):
-    rad_fun = LT_sep_x_hi_fun_wrapper(hi_eps)   # expects φ [rad]
-    def deg_fun(phi_deg, par):
-        return rad_fun(phi_deg * PI / 180.0, par)
-    return deg_fun
-# ------------------------------------------------------------------
-
 ###############################################################################################################################################
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
@@ -330,15 +315,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
-        # --- Low-ε separated fit (φ in degrees) --------------------------
-        lo_formula = (
-            "[0] + {eps}*[1] "
-            "+ sqrt(2*{eps}*(1+{eps})) * cos(x{deg}) * [2] "
-            "+ {eps} * cos(2*x{deg}) * [3]"
-        ).format(eps=lo_eps, deg=DEG)
-
-        flo = TF1("lo_eps_fit", lo_formula, 0, 360)
-
+        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
         LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
         
@@ -360,14 +337,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
-        # --- High-ε separated fit ---------------------------------------
-        hi_formula = (
-            "[0] + {eps}*[1] "
-            "+ sqrt(2*{eps}*(1+{eps})) * cos(x{deg}) * [2] "
-            "+ {eps} * cos(2*x{deg}) * [3]"
-        ).format(eps=hi_eps, deg=DEG)
-
-        fhi = TF1("hi_eps_fit", hi_formula, 0, 360)
+        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
         LT_sep_x_hi_fun_unsep = LT_sep_x_hi_fun_unsep_wrapper(hi_eps)
         fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
             
