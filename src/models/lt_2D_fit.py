@@ -528,8 +528,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             # Optional: widen limits a bit if we’ll try again
             if red_chi2 > CHI2_GOAL:
                 for p_idx in range(4):
-                    lo = Double(0.0)
-                    hi = Double(0.0)
+                    lo = ctypes.c_double(0.0)
+                    hi = ctypes.c_double(0.0)
                     fff2.GetParLimits(p_idx, lo, hi)
                     span   = hi - lo
                     fff2.SetParLimits(p_idx, lo - 0.10*span, hi + 0.10*span)
