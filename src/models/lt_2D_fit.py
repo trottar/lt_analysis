@@ -69,6 +69,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
+DEG = "*(PI/180.0)"          # converts x [deg] → radians inside TF1
 
 # ------------------------------------------------------------------
 # ROOT fit options used throughout
@@ -329,7 +330,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
-        flo = TF1("lo_eps_fit", lo_eps_fit_deg(lo_eps), 0, 360, 4)
+        # --- Low-ε separated fit (φ in degrees) --------------------------
+        lo_formula = (
+            "[0] + {eps}*[1] "
+            "+ sqrt(2*{eps}*(1+{eps})) * cos(x{deg}) * [2] "
+            "+ {eps} * cos(2*x{deg}) * [3]"
+        ).format(eps=lo_eps, deg=DEG)
+
+        flo = TF1("lo_eps_fit", lo_formula, 0, 360)
+
         LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
         flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
         
@@ -351,7 +360,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
-        fhi = TF1("hi_eps_fit", hi_eps_fit_deg(hi_eps), 0, 360, 4)
+        # --- High-ε separated fit ---------------------------------------
+        hi_formula = (
+            "[0] + {eps}*[1] "
+            "+ sqrt(2*{eps}*(1+{eps})) * cos(x{deg}) * [2] "
+            "+ {eps} * cos(2*x{deg}) * [3]"
+        ).format(eps=hi_eps, deg=DEG)
+
+        fhi = TF1("hi_eps_fit", hi_formula, 0, 360)
         LT_sep_x_hi_fun_unsep = LT_sep_x_hi_fun_unsep_wrapper(hi_eps)
         fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
             
