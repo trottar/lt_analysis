@@ -318,7 +318,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                    0, 360, LOEPS-0.1, HIEPS+0.1)
         '''
         # ------------------------------------------------------------------
-        # Re-parameterised version enforcing |ρ| ≤ 1  ——  physics unchanged
+        # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
         fff2 = ROOT.TF2("fff2",
             "[0]                                       "      # σ_T
@@ -333,8 +333,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             fff2.ReleaseParameter(k)
 
         # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]       # <-- canonical order
-        current_i = 0   # or whatever index you use inside PARAM_LIMITS[*][current_i]
+        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]
+        current_i = 0
 
         for idx, key in enumerate(par_keys):
             fff2.SetParName(idx, key)
@@ -357,7 +357,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                             20.0,   # σL  "
                             0.0,   # ρLT
                             0.0)   # ρTT
-
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -483,6 +482,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.GetZaxis().SetTitleOffset(1.5)
         if i == 0:
             c1.Print(outputpdf+'(')
+            print("HERE!!!")
         else:
             c1.Print(outputpdf)
         c1.Clear()
