@@ -93,7 +93,7 @@ PI = math.pi
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+    "sigL" : [(10.0, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
@@ -476,7 +476,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             # --- Seeding & step size ----------------------------
             if p_key.startswith("rho"):
                 fff2.SetParameter(p_idx, 0.0)
-                step = max(0.1, 0.6*stat_err_estimate)   #  ← this is the line you asked for
+                step = max(0.1, 0.6*stat_err_estimate)
                 fff2.SetParError(p_idx, step)
             else:
                 fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
