@@ -458,17 +458,30 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1    
 
-        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
+        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together --------------------------
         stage_idx = 2            # third-pass entry in PARAM_LIMITS
+
+        # --- Grab a crude statistical error scale for this t-bin -------------
+        # RMS of the Y-errors in the graph is a quick, stable proxy
+        stat_err_estimate = math.sqrt(
+            sum((g_plot_err.GetErrorY(i))**2 for i in range(g_plot_err.GetN()))
+            / max(1, g_plot_err.GetN())
+        )
+        # --------------------------------------------------------------------------
 
         for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
             fff2.ReleaseParameter(p_idx)
             lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
 
-            # give MINUIT a first step
-            fff2.SetParError(p_idx, 0.02 if p_key.startswith("rho")
-                                    else 0.05*(hi_lim-lo_lim))
+            # --- Seeding & step size ----------------------------
+            if p_key.startswith("rho"):
+                fff2.SetParameter(p_idx, 0.0)
+                step = max(0.1, 0.6*stat_err_estimate)   #  ← this is the line you asked for
+                fff2.SetParError(p_idx, step)
+            else:
+                fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
+            # ---------------------------------------------------------------------
 
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
