@@ -470,10 +470,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print("TABLE check ρ-limits stage 2:",
             PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
 
-        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together ---
+        # --- Fit 3: ρ_LT , ρ_TT all float together ---
         stage_idx = 2            # third-pass entry in PARAM_LIMITS
 
-        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
+        for p_idx, p_key in ((2,"rhoLT"), (3,"rhoTT")):
             fff2.ReleaseParameter(p_idx)
             lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
             fff2.SetParLimits(p_idx, lo_lim, hi_lim)
@@ -494,7 +494,25 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
-        fit_step += 1        
+        fit_step += 1     
+
+        # --- Fit 4: σ_L , σ_L, ρ_=LT, ρ_TT all float together ---
+        reset_limits_from_table(fff2, 0, "sigT", stage=4)
+        reset_limits_from_table(fff2, 1, "sigL", stage=4)
+        reset_limits_from_table(fff2, 2, "rhoLT", stage=4)
+        reset_limits_from_table(fff2, 3, "rhoTT", stage=4)
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+
+        fit_step += 1               
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
