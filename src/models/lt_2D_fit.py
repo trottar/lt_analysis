@@ -96,7 +96,8 @@ PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    "rhoTT": [(-1.0, 1.0)]*3,     # ρ_TT : σ_TT / σT
+    "Norm" : [(0.10, 10.0)]*3          # ← new
 }
 # ------------------------------------------------------------------------------
 
@@ -365,19 +366,19 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
         fff2 = ROOT.TF2("fff2",
-            "[0]                                       "      # σ_T
-            "+ y*[1]                                   "      # ε·σ_L
-            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
-            "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
-            "+ y*cos(2*x*0.017453)                     "      # TT
-            "*[3]*[0]"                                         # ρ_TT·σ_T
-            , 0, 360, 0.0, 1.0)
+            "[4]*( "                              
+            "  [0] + y*[1] "
+            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)*[2]*sqrt([0]*[1]) "
+            "+ y*cos(2*x*0.017453)*[3]*[0] "
+            ")" ,
+            0, 360, 0.0, 1.0)
+        # ------------------------------------------------------------------
         
         for k in range(4):
             fff2.ReleaseParameter(k)
 
         # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]
+        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT", "Norm"]
         current_i = 0
 
         for idx, key in enumerate(par_keys):
@@ -390,17 +391,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
             # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
-                fff2.SetParError(idx, 0.02)            # ±0.02 for ρ’s
+                fff2.SetParError(idx, 0.02)          # ρLT, ρTT  → fixed 0.02
+            elif key == "Norm":
+                fff2.SetParError(idx, 0.05)          # Norm      → 5 % step
             else:
-                step = 0.05 * (hi - lo) if hi > lo else 0.1
-                fff2.SetParError(idx, step)            # 5 % of range for σT, σL  ←★ add this
+                step = 0.05 * (hi - lo) if hi > lo else 0.1      # σT, σL
+                fff2.SetParError(idx, step)
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
         fff2.SetParameters( SEED_SIGT,   # σ_T
                             SEED_SIGL,   # σ_L
                             0.0,         # ρ_LT
-                            0.0)         # ρ_TT
+                            0.0,         # ρ_TT
+                            1.0)                # Norm
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
