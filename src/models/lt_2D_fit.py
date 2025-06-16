@@ -128,9 +128,9 @@ def reset_limits_from_table(func, idx, key, stage):
     lo, hi = PARAM_LIMITS[key][stage]
     func.SetParLimits(idx, lo, hi)
 
-    # give MINUIT a first step = 5 % of the allowed range,
+    # give MINUIT a first step = 1 % of the allowed range,
     # or a small absolute step if the range is tiny
-    step = 0.05 * (hi - lo) if hi > lo else 0.02
+    step = 0.01 * (hi - lo) if hi > lo else 0.02
     func.SetParError(idx, step)
 # ---------------------------------------------------------------
 
