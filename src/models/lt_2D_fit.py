@@ -276,7 +276,11 @@ def penalised_migrad(graph, init, limits, eps_pair,
             diff = abs(rhoTT) - penalty_scale*sigT
             chi2 += (diff/err.mean())**2
 
-        f[0] = chi2
+                # store χ² in the location MINUIT expects
+        try:
+            f[0] = chi2          # works when 'f' behaves like an array
+        except TypeError:
+            f.value = chi2       # fallback: 'f' is a single c_double
 
     m.SetFCN(fcn)
 
