@@ -273,7 +273,8 @@ def fit_bin_with_minuit(phi_arr, eps_arr, sigma_dat, sigma_err,
 
             diff = (sig[i] - model) / err[i]
             chi2 += diff * diff
-        f[0] = chi2
+        f.value = chi2          # ROOT passes f as a c_double “by ref”
+
 
     # ---- configure Minuit -----------------------------------------
     m = ROOT.TMinuit(4)
