@@ -306,6 +306,42 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetTitle("t = {:.3f}".format(t_list[i]))
         sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
+
+        # --- Option B: per-φ Rosenbluth seeds ---
+        phi_vals = []
+        sigT_vals = []
+        sigL_vals = []
+        for j in range(glo.GetN()):
+            glo.GetPoint(j, g_xx, g_yy)
+            lo_y   = g_yy.value; lo_err = glo.GetErrorY(j)
+            ghi.GetPoint(j, g_xx, g_yy)
+            hi_y   = g_yy.value; hi_err = ghi.GetErrorY(j)
+            dε     = HIEPS - LOEPS
+            σT_j   = (HIEPS * lo_y - LOEPS * hi_y) / dε
+            σL_j   = (hi_y   - lo_y) / dε
+            phi_vals.append(g_xx.value)
+            sigT_vals.append(σT_j)
+            sigL_vals.append(σL_j)
+
+        # Fit σT(φ) to A + B cos2φ
+        tgT = ROOT.TGraph(len(phi_vals))
+        for idx, φ in enumerate(phi_vals):
+            tgT.SetPoint(idx, φ, sigT_vals[idx])
+        fT = ROOT.TF1("fT","[0] + [1]*cos(2*x)",0,2*math.pi)
+        tgT.Fit(fT,"Q")
+
+        # Fit σL(φ) to C + D cosφ
+        tgL = ROOT.TGraph(len(phi_vals))
+        for idx, φ in enumerate(phi_vals):
+            tgL.SetPoint(idx, φ, sigL_vals[idx])
+        fL = ROOT.TF1("fL","[0] + [1]*cos(x)",0,2*math.pi)
+        tgL.Fit(fL,"Q")
+
+        # Seed the global TF2 fit with these
+        fff2.SetParameter(0, fT.GetParameter(0))   # σT
+        fff2.SetParameter(3, fT.GetParameter(1))   # ρTT
+        fff2.SetParameter(1, fL.GetParameter(0))   # σL
+        fff2.SetParameter(2, fL.GetParameter(1))   # ρLT
         
         g_plot_err = TGraph2DErrors()
 
@@ -369,7 +405,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2 = TF2("fff2",
                    "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
                    0, 360, LOEPS-0.1, HIEPS+0.1)
-        '''
+
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
@@ -381,7 +417,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             "+ y*cos(2*x*0.017453)                     "      # TT
             "*[3]*[0]"                                         # ρ_TT·σ_T
             , 0, 360, 0.0, 1.0)
-        
+        '''
+
+        # define the fit function once at the top of the bin loop:
+        fff2 = TF2( "lt_tt", lt_tt_wrapper, φ_min, φ_max, ε_min, ε_max, 4 )
+        # set initial seeds here or immediately after Option B
+
         for k in range(4):
             fff2.ReleaseParameter(k)
 
@@ -509,6 +550,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         chi2 = fff2.GetChisquare()
         ndf  = fff2.GetNDF()
         print(f"t={t_list[i]:.3f}: final χ²/NDF = {chi2:.1f}/{ndf} = {chi2/ndf:.2f}")
+
+        # --- Residuals plot and save ---
+        # build a TGraphErrors of residuals for each point
+        resid_graph = ROOT.TGraphErrors()
+        for ip in range(g_plot_err.GetN()):
+            phi, eps, xsec = ctypes.c_double(), ctypes.c_double(), ctypes.c_double()
+            g_plot_err.GetPoint(ip, phi, eps, xsec)
+            err = g_plot_err.GetErrorY(ip)
+            pred = fff2.Eval(phi, eps)
+            resid = (xsec - pred) / err
+            resid_graph.SetPoint      (ip, phi, resid)
+            resid_graph.SetPointError (ip, 0, 0)  # normalized residual
+        resid_graph.SetTitle(f"Residuals t={t_list[i]:.3f}; φ; (data–fit)/σ")
+        resid_graph.Draw("AP")
 
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
