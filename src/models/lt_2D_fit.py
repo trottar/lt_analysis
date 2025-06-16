@@ -307,6 +307,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPoint(sig_hi.GetN(), float(t_list[i]), ave_sig_hi)
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
 
+        g_plot_err = TGraph2DErrors()
+
+        g_xx, g_yy, g_yy_err = ctypes.c_double(0), ctypes.c_double(0), ctypes.c_double(0)
+
         # --- Option B: per-φ Rosenbluth seeds ---
         phi_vals = []
         sigT_vals = []
@@ -342,10 +346,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParameter(3, fT.GetParameter(1))   # ρTT
         fff2.SetParameter(1, fL.GetParameter(0))   # σL
         fff2.SetParameter(2, fL.GetParameter(1))   # ρLT
-        
-        g_plot_err = TGraph2DErrors()
-
-        g_xx, g_yy, g_yy_err = ctypes.c_double(0), ctypes.c_double(0), ctypes.c_double(0)
 
         # --- equalize total weight between low-ε and high-ε stripes ---
         # first compute the full per-point errors for each stripe
