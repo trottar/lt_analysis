@@ -436,7 +436,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
         fit_step += 1
 
-        # --- Fit 2: TL interference (σL + ρLT) ---
+        # --- Fit 2: σL + ρLT ---
         # float σL and ρLT, hold ρTT=0
         fff2.ReleaseParameter(1)    # σL
         fff2.ReleaseParameter(2)    # ρLT
@@ -468,24 +468,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
         fit_step += 1
 
-        # --- Fit 4: full 3-parameter fit ---
-        # float σL, ρLT, ρTT
-        for p_idx, p_key in ((1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
-            fff2.ReleaseParameter(p_idx)
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
-            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-            fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))
-        # perform fit
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
-        # record
-        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
-        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
-        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
-        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
-        fit_step += 1
-
-        # --- Fit 5: refine LT amplitude only ---
+        # --- Fit 4: refine LT amplitude only ---
         # hold σT, σL, ρTT; float ρLT
         fff2.FixParameter(0, fff2.GetParameter(0))  # hold σT
         fff2.FixParameter(1, fff2.GetParameter(1))  # hold σL
@@ -496,6 +479,23 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParLimits(2, curr - 0.2, curr + 0.2)
         fff2.SetParError(2, 0.02)
         # fit
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
+        # record
+        sigL_change.SetPoint(sigL_change.GetN(), fit_step+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), fit_step+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+        fit_step += 1
+
+        # --- Fit 5: full 4-parameter fit ---
+        # float σT, σL, ρLT, ρTT
+        for p_idx, p_key in ((0, "sigT"), (1, "sigL"), (2, "rhoLT"), (3, "rhoTT")):
+            fff2.ReleaseParameter(p_idx)
+            lo_lim, hi_lim = PARAM_LIMITS[p_key][2]
+            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
+            fff2.SetParError(p_idx, 0.05 * (hi_lim - lo_lim))
+        # perform fit
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
         # record
