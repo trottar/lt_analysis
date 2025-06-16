@@ -296,6 +296,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     hi_cross_sec_err = np.zeros(t_bin_num, dtype=float)
 
     for i in range(0, t_bin_num):    
+
+        if i == 2:                                        # t-bin that looks wrong
+            print("DEBUG  φ=0°  cos wrapper =", math.cos(0))          # = 1
+            print("DEBUG  φ=0°  cosd helper  =", cosd(0))             # = 1
+            print("DEBUG  φ=180° cos wrapper =", math.cos(180))       # = −0.598…
+            print("DEBUG  φ=180° cosd helper  =", cosd(180))          # = −1
         
         print("\n/*--------------------------------------------------*/")
         print(" Starting t-bin {0} (t={1:.4f})...".format(i+1, float(t_list[i])))
