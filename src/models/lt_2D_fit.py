@@ -261,7 +261,8 @@ def fit_bin_with_minuit2(model_func,  # callable σ(φ,ε;pars)
             chi2 += r * r
         return chi2
 
-    fcn = Fit.FCNAdapter(chi2_wrap, npar)   # works in PyROOT ≥6.24
+    import ROOT, inspect
+    print([n for n in dir(ROOT.Fit) if "FcnAd" in n])
 
     # ---- set up the fitter -------------------------------------------------
     fitter = Fit.Fitter()          # Minuit2 under the hood
