@@ -434,8 +434,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
-        fit_step += 1    
-
         # --- Report reduced χ² ---
         chi2     = fff2.GetChisquare() + penalty(fff2)
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
