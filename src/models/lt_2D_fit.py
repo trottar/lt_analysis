@@ -100,7 +100,6 @@ def reset_limits_from_table(func, idx, key, stage):
     step = 0.05 * (hi - lo) if hi > lo else 0.02
     func.SetParError(idx, step)
 # ---------------------------------------------------------------
-import ctypes
 
 def get_limits(fcn, idx):
     """
@@ -415,17 +414,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1
 
         print("\n--- Debug snapshot just before Pass-3 Fit ---")
-        for i in range(4):
+        for idx in range(4):
             lo_ref = ctypes.c_double(0.0)
             hi_ref = ctypes.c_double(0.0)
-            fff2.GetParLimits(i, lo_ref, hi_ref)     # old signature
+            fff2.GetParLimits(idx, lo_ref, hi_ref)     # old signature
 
             lo, hi = lo_ref.value, hi_ref.value
             fixed  = (abs(hi - lo) < 1e-12)          # identical limits ⇒ fixed
-            step   = fff2.GetParError(i)
-            value  = fff2.GetParameter(i)
+            step   = fff2.GetParError(idx)
+            value  = fff2.GetParameter(idx)
 
-            print(f"  par[{i}]  value={value:10.4g}  step={step:8.4g} "
+            print(f"  par[{idx}]  value={value:10.4g}  step={step:8.4g} "
                 f"limits=({lo:6.3g},{hi:6.3g})  fixed={fixed}")
 
         print("  graph points =", g_plot_err.GetN())
