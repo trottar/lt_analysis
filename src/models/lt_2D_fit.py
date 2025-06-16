@@ -393,11 +393,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
                 fff2.SetParError(idx, 0.02)          # ρLT, ρTT  → fixed 0.02
-            elif key == "Norm":
+            elif key == "Norm":                      # ← make sure this is here
                 fff2.SetParError(idx, 0.05)          # Norm      → 5 % step
             else:
-                step = 0.05 * (hi - lo) if hi > lo else 0.1      # σT, σL
+                # this branch handles sigT and sigL
+                step = 0.05 * (hi - lo) if hi > lo else 0.1
                 fff2.SetParError(idx, step)
+
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
