@@ -214,6 +214,16 @@ def check_sigma_positive(fcn, graph,
 
     return True
 
+# ------------------------------------------------------------------
+def combined_sigma(stat_err, value):
+    """
+    Total per-point uncertainty    σ_tot = √(σ_stat² + (f_sys·value)²)
+    where f_sys  = pt_to_pt_systematic_error / 100  (fractional).
+    """
+    return math.sqrt(stat_err**2 +
+                     ((pt_to_pt_systematic_error / 100.0) * value)**2)
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -328,23 +338,27 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
-        g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
+        g_xx, g_yy = ctypes.c_double(0), ctypes.c_double(0)
 
+        # ---------- Low-ε points ----------
         for ii in range(glo.GetN()):
             glo.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            lo_cross_sec_err[i] += 1 / (g_yy_err**2)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
-                                     math.sqrt((glo.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
+            stat  = glo.GetErrorY(ii)
+            sigma = combined_sigma(stat, g_yy.value)          # ← new helper
+            lo_cross_sec_err[i] += 1.0 / sigma**2
 
+            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, sigma)
+
+        # ---------- High-ε points ----------
         for ii in range(ghi.GetN()):
             ghi.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            hi_cross_sec_err[i] += 1 / (g_yy_err**2)
+            stat  = ghi.GetErrorY(ii)
+            sigma = combined_sigma(stat, g_yy.value)          # ← new helper
+            hi_cross_sec_err[i] += 1.0 / sigma**2
+
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
-                                     math.sqrt((ghi.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, sigma)
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
