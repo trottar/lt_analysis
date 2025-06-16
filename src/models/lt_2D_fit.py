@@ -539,10 +539,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigTT_change = TGraphErrors()
 
         # ----- gather flattened arrays for Minuit2 -----------------
-        phi_arr   = np.array([g_plot_err.GetX(i) for i in range(g_plot_err.GetN())])
-        eps_arr   = np.array([g_plot_err.GetY(i) for i in range(g_plot_err.GetN())])
-        sigma_arr = np.array([g_plot_err.GetZ(i) for i in range(g_plot_err.GetN())])
-        err_arr   = np.array([g_plot_err.GetEZ(i) for i in range(g_plot_err.GetN())])
+        N = g_plot_err.GetN()
+        phi_arr   = np.array([g_plot_err.GetX()[i]  for i in range(N)], dtype=float)
+        eps_arr   = np.array([g_plot_err.GetY()[i]  for i in range(N)], dtype=float)
+        sigma_arr = np.array([g_plot_err.GetZ()[i]  for i in range(N)], dtype=float)
+        err_arr   = np.array([g_plot_err.GetEZ()[i] for i in range(N)], dtype=float)
 
         # dynamic seeds & limits already computed just above
         seed_vec = [seed_sigT, seed_sigL, 0.0, 0.0]
