@@ -84,17 +84,10 @@ PI = math.pi
 #        |σ_LT| ≤ √(σT σL)  →  |ρ_LT| ≤ 1
 #        |σ_TT| ≤    σT     →  |ρ_TT| ≤ 1
 #    so the natural, model-independent range is [−1 … +1].
-#
-#  If you ever run a special kinematic slice (e.g. t near the kaon pole) and
-#  want to *pre-shrink* the search volume at a given pass, just replace the
-#  relevant tuple, e.g.
-#        "sigL": [(0.001, 1e3), (0.001, 500), (0.001, 200)]
-#  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    #"sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-    "sigL" : [(0.001, 1e3), (0.001, 500), (0.001, 200)],   # σ_L  : longitudinal (pole-dominance at lowest t)
+    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
@@ -104,7 +97,7 @@ PARAM_LIMITS = {
 # Initial starting values for the fit (nb)
 # ------------------------------------------------------------------
 SEED_SIGT = 20.0      # seed for σ_T  — typical transverse scale
-SEED_SIGL = 10.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
+SEED_SIGL = 50.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
@@ -118,7 +111,13 @@ SEED_SIGL = 10.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is re
 #  numerically unstable and MINUIT tends to peg σ_L at its
 #  bound.  We use COND_MAX as the cut-off: when κ > COND_MAX
 #  we apply the soft floor to σ_L (see Pass-2 code).
-COND_MAX   = 20.0
+def compute_cond(ε1, ε2):
+    return math.sqrt(1+ε1**2)*math.sqrt(1+ε2**2)/abs(ε2 - ε1)
+M = 5.0  # how much error amplification you’ll tolerate
+cond = compute_cond(LOEPS, HIEPS)
+COND_MAX = M
+if cond > COND_MAX:
+    print("Warning: condition number {:.2f} exceeds threshold {:.2f} → applying soft floor to σ_L".format(cond, COND_MAX))
 
 # ---------------------------------------------------------------
 def reset_limits_from_table(func, idx, key, stage):
@@ -309,23 +308,42 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_hi.SetPointError(sig_hi.GetN()-1, 0, err_sig_hi)
         
         g_plot_err = TGraph2DErrors()
-        g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
 
+        # --- equalize total weight between low-ε and high-ε stripes ---
+        # first compute the full per-point errors for each stripe
+        errs_lo = []
         for ii in range(glo.GetN()):
             glo.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            lo_cross_sec_err[i] += 1 / (g_yy_err**2)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
-                                     math.sqrt((glo.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
+            err_stat = glo.GetErrorY(ii)
+            err_sys  = pt_to_pt_systematic_error/100 * g_yy.value
+            errs_lo.append(math.hypot(err_stat, err_sys))
 
+        errs_hi = []
         for ii in range(ghi.GetN()):
             ghi.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            hi_cross_sec_err[i] += 1 / (g_yy_err**2)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
-                                     math.sqrt((ghi.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
+            err_stat = ghi.GetErrorY(ii)
+            err_sys  = pt_to_pt_systematic_error/100 * g_yy.value
+            errs_hi.append(math.hypot(err_stat, err_sys))
+
+        # total weight = sum(1 / (total_err)^2)
+        w_lo = sum(1.0 / (e**2) for e in errs_lo)
+        w_hi = sum(1.0 / (e**2) for e in errs_hi)
+        scale_lo = math.sqrt(w_hi / w_lo)
+
+        # now fill the combined graph with correctly scaled errors
+        g_plot_err = TGraph2DErrors()
+        for ii, raw_err_lo in enumerate(errs_lo):
+            glo.GetPoint(ii, g_xx, g_yy)
+            dx_lo = raw_err_lo / scale_lo
+            lo_cross_sec_err[i] += 1.0 / (dx_lo**2)
+            g_plot_err.SetPoint     (g_plot_err.GetN(), g_xx, lo_eps, g_yy)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, dx_lo)
+
+        for ii, raw_err_hi in enumerate(errs_hi):
+            ghi.GetPoint(ii, g_xx, g_yy)
+            hi_cross_sec_err[i] += 1.0 / (raw_err_hi**2)
+            g_plot_err.SetPoint     (g_plot_err.GetN(), g_xx, hi_eps, g_yy)
+            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0, raw_err_hi)
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
