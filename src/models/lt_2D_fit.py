@@ -215,6 +215,14 @@ def combined_sigma(stat_err, value):
                      ((pt_to_pt_systematic_error / 100.0) * value)**2)
 # ------------------------------------------------------------------
 
+# ------------------------------------------------------------------
+DEG_TO_RAD = math.pi / 180.0
+def cosd(theta_deg):  """cos in degrees → radians handled transparently"""
+    return math.cos(theta_deg * DEG_TO_RAD)
+def sind(theta_deg):  """sin in degrees (not used now, but handy)"""
+    return math.sin(theta_deg * DEG_TO_RAD)
+# ------------------------------------------------------------------
+
 ###############################################################################################################################################
 
 # Import separated xsects models
@@ -402,13 +410,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             phi_deg, eps = xx[0], xx[1]
             sigT, sigL, rhoLT, rhoTT = pp[0], pp[1], pp[2], pp[3]
 
-            # --- the physics piece ----------------------------------------
             base = (  sigT
-                    + eps*sigL
-                    + math.sqrt(2.*eps*(1. + eps))      # ← keep the “+”
-                    * math.cos(math.radians(phi_deg))
-                    * rhoLT*math.sqrt(sigT*sigL)
-                    + eps * math.cos(math.radians(2.*phi_deg)) * rhoTT*sigT )
+                    + eps * sigL
+                    + math.sqrt(2. * eps * (1. + eps))
+                    * cosd(phi_deg) * rhoLT * math.sqrt(sigT * sigL)
+                    + eps * cosd(2. * phi_deg) * rhoTT * sigT )
 
             # --- soft quadratic walls  (exactly the old ‘penalty()’) -------
             pen = 0.0
