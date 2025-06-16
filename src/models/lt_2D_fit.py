@@ -70,21 +70,55 @@ pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (h
 PI = math.pi
 
 ###############################################################################################################################################
-# -------------------------  DYNAMIC LIMITS  -------------------------------------------------
-# Edit PARAM_LIMITS below to adjust allowed ranges per fit-step (0-based index).
-# Provide either:
-#   • one tuple  -> same limits every pass
-#   • list/tuple of tuples -> individual limits per step; last entry reused if
-#     the sequence is shorter than the maximum number of steps (7 here).
+# ---------------------------  DYNAMIC LIMITS  ---------------------------------
+#  PARAM_LIMITS encodes the *physical* boundaries that each cross-section term
+#  may occupy and lets you tighten / loosen them at any individual fit-pass.
 #
+#  ▸ 3 fit-passes → index 0,1,2.  Fewer tuples than passes?  The last tuple
+#    is reused for all remaining passes.
+#
+#  ▸ σT  , σL   (nb)        :  must be ≥ 0 by definition; an upper cap of
+#                              1 000 nb is safely above any Hall-C kaon data.
+#
+#  ▸ ρ_LT, ρ_TT (dimension-less ratios) obey positivity:
+#        |σ_LT| ≤ √(σT σL)  →  |ρ_LT| ≤ 1
+#        |σ_TT| ≤    σT     →  |ρ_TT| ≤ 1
+#    so the natural, model-independent range is [−1 … +1].
+#
+#  If you ever run a special kinematic slice (e.g. t near the kaon pole) and
+#  want to *pre-shrink* the search volume at a given pass, just replace the
+#  relevant tuple, e.g.
+#        "sigL": [(0.001, 1e3), (0.001, 500), (0.001, 200)]
+#  to narrow σL after the first pass.
+# ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(0.001, 1e3)]*3,
-    "sigL" : [(0.001, 1e3)]*3,
-    "rhoLT": [(-1.0, 1.0)]*3,      #   all three tuples −1 … +1
-    "rhoTT": [(-1.0, 1.0)]*3
+    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+    #"sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+    "sigL" : [(0.001, 1e3), (0.001, 500), (0.001, 200)],   # σ_L  : longitudinal (pole-dominance at lowest t)
+    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
+# ------------------------------------------------------------------------------
 
-COND_MAX   = 20.0        # user control, near-singular if κ > 20
+# ------------------------------------------------------------------
+# Initial starting values for the fit (nb)
+# ------------------------------------------------------------------
+SEED_SIGT = 20.0      # seed for σ_T  — typical transverse scale
+SEED_SIGL = 10.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+#  ε-lever-arm quality guard
+#  -------------------------------------------------
+#  For two-epsilon LT separation the design matrix is
+#         A = [[1, ε_lo],
+#              [1, ε_hi]] .
+#  Its condition number  κ ≈ 1/|ε_hi – ε_lo|.
+#  If κ grows much beyond ~20 the σ_L extraction becomes
+#  numerically unstable and MINUIT tends to peg σ_L at its
+#  bound.  We use COND_MAX as the cut-off: when κ > COND_MAX
+#  we apply the soft floor to σ_L (see Pass-2 code).
+COND_MAX   = 20.0
 
 # ---------------------------------------------------------------
 def reset_limits_from_table(func, idx, key, stage):
@@ -352,10 +386,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
-        fff2.SetParameters( 20.0,   # σT  initial guess  (nb)
-                            20.0,   # σL  "
-                            0.0,   # ρLT
-                            0.0)   # ρTT
+        fff2.SetParameters( SEED_SIGT,   # σ_T
+                            SEED_SIGL,   # σ_L
+                            0.0,         # ρ_LT
+                            0.0)         # ρ_TT
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -411,24 +445,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
-        fit_step += 1
-
-        print("\n--- Debug snapshot just before Pass-3 Fit ---")
-        for idx in range(4):
-            lo_ref = ctypes.c_double(0.0)
-            hi_ref = ctypes.c_double(0.0)
-            fff2.GetParLimits(idx, lo_ref, hi_ref)     # old signature
-
-            lo, hi = lo_ref.value, hi_ref.value
-            fixed  = (abs(hi - lo) < 1e-12)          # identical limits ⇒ fixed
-            step   = fff2.GetParError(idx)
-            value  = fff2.GetParameter(idx)
-
-            print(f"  par[{idx}]  value={value:10.4g}  step={step:8.4g} "
-                f"limits=({lo:6.3g},{hi:6.3g})  fixed={fixed}")
-
-        print("  graph points =", g_plot_err.GetN())
-        print("--------------------------------------------------\n")        
+        fit_step += 1    
 
         print("TABLE check ρ-limits stage 2:",
             PARAM_LIMITS["rhoLT"][2], PARAM_LIMITS["rhoTT"][2])
@@ -458,6 +475,23 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
 
         fit_step += 1
+
+        print("\n--- Debug snapshot just before Pass-3 Fit ---")
+
+        lo_ref = ctypes.c_double(0.0)
+        hi_ref = ctypes.c_double(0.0)
+        fff2.GetParLimits(i, lo_ref, hi_ref)     # old signature
+
+        lo, hi = lo_ref.value, hi_ref.value
+        fixed  = (abs(hi - lo) < 1e-12)          # identical limits ⇒ fixed
+        step   = fff2.GetParError(i)
+        value  = fff2.GetParameter(i)
+
+        print(f"  par[{i}]  value={value:10.4g}  step={step:8.4g} "
+            f"limits=({lo:6.3g},{hi:6.3g})  fixed={fixed}")
+
+        print("  graph points =", g_plot_err.GetN())
+        print("--------------------------------------------------\n")            
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
@@ -480,7 +514,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.GetZaxis().CenterTitle()
         g_plot_err.GetZaxis().SetTitleOffset(1.5)
 
-        print("HERE!!!", i)
         if i == 0:
             c1.Print(outputpdf+'(')            
         else:
