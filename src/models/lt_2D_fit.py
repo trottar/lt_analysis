@@ -113,7 +113,7 @@ SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is r
 #  we apply the soft floor to σ_L (see Pass-2 code).
 def compute_cond(ε1, ε2):
     return math.sqrt(1+ε1**2)*math.sqrt(1+ε2**2)/abs(ε2 - ε1)
-M = 10.0  # how much error amplification you’ll tolerate
+M = 2.0  # how much error amplification you’ll tolerate
 cond = compute_cond(LOEPS, HIEPS)
 COND_MAX = M
 if cond > COND_MAX:
