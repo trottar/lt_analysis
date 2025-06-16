@@ -480,9 +480,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.GetZaxis().SetTitle("#it{#sigma}")
         g_plot_err.GetZaxis().CenterTitle()
         g_plot_err.GetZaxis().SetTitleOffset(1.5)
+
+        print("HERE!!!", i)
         if i == 0:
-            c1.Print(outputpdf+'(')
-            print("HERE!!!")
+            c1.Print(outputpdf+'(')            
         else:
             c1.Print(outputpdf)
         c1.Clear()
