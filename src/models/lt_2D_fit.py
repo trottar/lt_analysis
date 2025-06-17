@@ -391,14 +391,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         a = 1e-6
         b = 1e6
-        c = 1.0
-        d = 1.0
+        c = 1e6
+        d = 1e6
         
         fff2 = ROOT.TF2(
         "fff2",
         (
-            f"{fff2_normfactor} * ([0]"  # σ_T
-            f"+ y*[1]"                   # ε·σ_L
+            f"{fff2_normfactor} * ( {c} * [0]"  # σ_T
+            f"+ {d} * y*[1]"                   # ε·σ_L
             f"+ {a} * sqrt(2*y*(1.+y))*cos(x*0.017453)*[2]*sqrt([0]*[1])"  # LT
             f"+ {b} * y*cos(2*x*0.017453)*[3]*[0])"  # TT
         ),
