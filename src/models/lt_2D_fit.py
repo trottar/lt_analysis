@@ -393,18 +393,18 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         b = 1e-3
         c = 1.0
         d = 1.0
-
-        del2photo = 1e2
         
-        fff2 = ROOT.TF2("fff2",
-            f"{fff2_normfactor} * ([0]"      # σ_T
-            "+ y*[1]                                   "      # ε·σ_L
-            f"+ {a} * sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
-            "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
-            f"+ {b} * y*cos(2*x*0.017453)                     "      # TT
-            f"*[3]*[0]) * (1 + {del2photo​})"                                         # ρ_TT·σ_T
-            , 0, 360, 0.0, 1.0)
-        
+        fff2 = ROOT.TF2(
+        "fff2",
+        (
+            f"{fff2_normfactor} * ([0]"  # σ_T
+            f"+ y*[1]"                   # ε·σ_L
+            f"+ {a} * sqrt(2*y*(1.+y))*cos(x*0.017453)*[2]*sqrt([0]*[1])"  # LT
+            f"+ {b} * y*cos(2*x*0.017453)*[3]*[0])"  # TT
+        ),
+        0, 360, 0.0, 1.0
+        )
+            
         for k in range(4):
             fff2.ReleaseParameter(k)
 
@@ -538,8 +538,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         c1 =  TCanvas()
 
-        c1.Update()
-                
         # Print plots for c1 canvases
         g_plot_err.Draw("perr")
         g_plot_err.SetTitle("t = {:.3f}".format(t_list[i]))
