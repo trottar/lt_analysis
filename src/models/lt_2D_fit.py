@@ -388,13 +388,18 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2_normfactor_wdep =  (1/w_dep) # change W dependence
         fff2_normfactor_qdep = np.exp(-q2_list[i])
         fff2_normfactor = fff2_normfactor_qdep
+
+        a = 10.0
+        b = 1.0
+        c = 1.0
+        d = 1.0
         
         fff2 = ROOT.TF2("fff2",
             f"{fff2_normfactor} * ([0]"      # σ_T
             "+ y*[1]                                   "      # ε·σ_L
-            "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
+            "+ {a} * sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
-            "+ y*cos(2*x*0.017453)                     "      # TT
+            "+ {b} * y*cos(2*x*0.017453)                     "      # TT
             "*[3]*[0])"                                         # ρ_TT·σ_T
             , 0, 360, 0.0, 1.0)
         
