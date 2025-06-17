@@ -263,19 +263,25 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         xsect_scalefac = 1/10 # scale factor
 
-        # ——— Low-energy graph ———
-        # Draw x vs φ (with φ-error dx) into internal arrays, silent mode
-        nlo.Draw(f"x*{xsect_scalefac}:phi:dx*{xsect_scalefac}", tcut, "goff")
+        # ——— High-energy graph ———
+        print("Drawing high-energy data into internal arrays…")
+        nhi_count = nhi.Draw("x:phi:dx", tcut, "goff")
+        nhi_rows  = nhi.GetSelectedRows()
+        print(f"  → Draw returned: {nhi_count}")
+        print(f"  → Number of high-energy points: {nhi_rows}")
 
-        # Build the low-energy TGraphErrors
-        glo_tmp = ROOT.TGraphErrors()
-        for idx in range(nlo.GetSelectedRows()):
-            x_val    = nlo.GetV2()[idx]   # x-values
-            phi_val  = nlo.GetV1()[idx]   # φ-values
-            dx_error = nlo.GetV3()[idx]   # dx → use as y-error
+        # Build the high-energy TGraphErrors
+        ghi_tmp = ROOT.TGraphErrors()
+        for i in range(nhi_rows):
+            x_val    = nhi.GetV2()[i]   # x-values
+            phi_val  = nhi.GetV1()[i]   # φ-values
+            dx_error = nhi.GetV3()[i]   # dx → use as y-error
 
-            glo_tmp.SetPoint(idx, x_val, phi_val)
-            glo_tmp.SetPointError(idx, 0.0, dx_error)
+            print(f"  [HI] Point {i}: x={x_val:.4f}, φ={phi_val:.4f}, error={dx_error:.4f}")
+            ghi_tmp.SetPoint(i, x_val, phi_val)
+            ghi_tmp.SetPointError(i, 0.0, dx_error)
+
+        print("High-energy graph built.")
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
