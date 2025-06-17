@@ -261,7 +261,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        xsect_scalefac = 1000 # scale factor
+        xsect_scalefac = 1/10 # scale factor
 
         # ——— Low-energy graph ———
         # Draw x vs φ (with φ-error dx) into internal arrays, silent mode
