@@ -331,10 +331,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Fractional point-to-point systematic uncertainty (same in both loops)
         syst_frac = pt_to_pt_systematic_error / 100.0
 
+        #fff2_normfactor = 1.0 # scale factor for the fit function
+
+        w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
+        fff2_normfactor_wdep =  (1/w_dep) # change W dependence
+        fff2_normfactor_qdep = 1e-1 * np.exp(-q2_list[i])
+        fff2_normfactor = fff2_normfactor_qdep
+
         # Loop over low-epsilon points
         for ii in range(glo.GetN()):
             # Fetch (x, y) for this point
-            glo.GetPoint(ii, g_xx, g_yy)
+            glo.GetPoint(ii, fff2_normfactor * g_xx, g_yy)
             # Statistical uncertainty on y
             stat_err = glo.GetErrorY(ii)
             # Total y-error: combine stat + syst in quadrature
@@ -342,7 +349,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             # Accumulate inverse-variance weight
             lo_cross_sec_err[i] += 1.0 / (g_yy_err_val**2)
             # Add the point at (x, ε_lo, y)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
+            g_plot_err.SetPoint(g_plot_err.GetN(), fff2_normfactor * g_xx, lo_eps, g_yy)
             # Combined error bar on y (no x or ε error)
             combined_err = math.sqrt(stat_err**2 + (syst_frac * g_yy.value)**2)
             g_plot_err.SetPointError(g_plot_err.GetN() - 1, 0.0, 0.0, combined_err)
@@ -350,13 +357,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Loop over high-epsilon points
         for ii in range(ghi.GetN()):
             # Fetch (x, y) for this point
-            ghi.GetPoint(ii, g_xx, g_yy)
+            ghi.GetPoint(ii, fff2_normfactor * g_xx, g_yy)
             stat_err = ghi.GetErrorY(ii)
             # Total y-error: combine stat + syst
             g_yy_err_val = math.sqrt((stat_err / g_yy.value)**2 + syst_frac**2) * g_yy.value
             hi_cross_sec_err[i] += 1.0 / (g_yy_err_val**2)
             # Add the point at (x, ε_hi, y)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
+            g_plot_err.SetPoint(g_plot_err.GetN(), fff2_normfactor * g_xx, hi_eps, g_yy)
             # Combined error bar on y
             combined_err = math.sqrt(stat_err**2 + (syst_frac * g_yy.value)**2)
             g_plot_err.SetPointError(g_plot_err.GetN() - 1, 0.0, 0.0, combined_err)
