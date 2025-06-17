@@ -461,6 +461,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
+        reset_limits_from_table(fff2, 0, "sigT", stage=1)
         g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
@@ -531,7 +532,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
         print(f"Reduced χ²: {red_chi2:.2f}")
-    
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
