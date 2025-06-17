@@ -261,17 +261,21 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        # Draw into internal arrays (silent mode) and get number of points
-        n_points = nlo.Draw("x:phi:dx", tcut, "goff")
+        xsect_scalefac = 1000 # scale factor
 
-        # Create a graph of φ vs x with y-errors
-        graph = ROOT.TGraphErrors()
+        # ——— Low-energy graph ———
+        # Draw x vs φ (with φ-error dx) into internal arrays, silent mode
+        nlo.Draw(f"x*{xsect_scalefac}:phi:dx*{xsect_scalefac}", tcut, "goff")
 
-        # Fill the graph: V1→x, V2→φ, V3→dx (used as y-error)
+        # Build the low-energy TGraphErrors
+        glo_tmp = ROOT.TGraphErrors()
         for i in range(nlo.GetSelectedRows()):
-            x_val, phi_val, dx_val = nlo.GetV1()[i], nlo.GetV2()[i], nlo.GetV3()[i]
-            graph.SetPoint(i, x_val, phi_val)
-            graph.SetPointError(i, 0.0, dx_val)
+            x_val    = nlo.GetV2()[i]   # x-values
+            phi_val  = nlo.GetV1()[i]   # φ-values
+            dx_error = nlo.GetV3()[i]   # dx → use as y-error
+
+            glo_tmp.SetPoint(i, x_val, phi_val)
+            glo_tmp.SetPointError(i, 0.0, dx_error)
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
@@ -288,19 +292,19 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
         
+        # ——— High-energy graph ———
         # Draw x vs φ (with φ-error dx) into internal arrays, silent mode
-        n_points = nhi.Draw("x:phi:dx", tcut, "goff")
+        nhi.Draw(f"x*{xsect_scalefac}:phi:dx*{xsect_scalefac}", tcut, "goff")
 
-        # Build a graph of φ vs x with y-errors
-        graph_phi_vs_x = ROOT.TGraphErrors()
-
+        # Build the high-energy TGraphErrors
+        ghi_tmp = ROOT.TGraphErrors()
         for i in range(nhi.GetSelectedRows()):
-            x_val   = nhi.GetV2()[i]  # x
-            phi_val = nhi.GetV1()[i]  # φ
-            err_val = nhi.GetV3()[i]  # dx → y-error
+            x_val    = nhi.GetV2()[i]   # x-values
+            phi_val  = nhi.GetV1()[i]   # φ-values
+            dx_error = nhi.GetV3()[i]   # dx → use as y-error
 
-            graph_phi_vs_x.SetPoint(i, x_val, phi_val)
-            graph_phi_vs_x.SetPointError(i, 0.0, err_val)
+            ghi_tmp.SetPoint(i, x_val, phi_val)
+            ghi_tmp.SetPointError(i, 0.0, dx_error)
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
