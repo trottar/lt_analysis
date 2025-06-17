@@ -207,7 +207,7 @@ from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
-    w_set = float(w_set) # W value
+    w_set = float(w_set.replace("p",".")) # W value
 
     # Set epsilon for lt_active script
     #set_val(LOEPS, HIEPS)
