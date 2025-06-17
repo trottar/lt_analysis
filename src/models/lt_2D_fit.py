@@ -261,7 +261,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        xsect_scalefac = 1 # scale factor
+        xsect_scalefac = 1/100 # scale factor
 
         # ——— Low graph ———
         print("Drawing low data into internal arrays…")
