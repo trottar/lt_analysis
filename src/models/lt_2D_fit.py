@@ -261,7 +261,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        xsect_scalefac = 1/10 # scale factor
+        xsect_scalefac = 1 # scale factor
 
         # ——— Low graph ———
         print("Drawing low data into internal arrays…")
@@ -275,7 +275,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             phi_val  = nlo.GetV1()[i]   # φ-values
             dx_error = nlo.GetV3()[i]   # dx → use as y-error
 
-            print(f"  [LO] Point {i}: x={x_val:.4f}, φ={phi_val:.4f}, error={dx_error:.4f}")
+            print(f"  [LO] Point {i}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
             glo_tmp.SetPoint(i, x_val, phi_val)
             glo_tmp.SetPointError(i, 0.0, dx_error)
 
@@ -308,7 +308,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             phi_val  = nhi.GetV1()[i]   # φ-values
             dx_error = nhi.GetV3()[i]   # dx → use as y-error
 
-            print(f"  [HI] Point {i}: x={x_val:.4f}, φ={phi_val:.4f}, error={dx_error:.4f}")
+            print(f"  [HI] Point {i}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
             ghi_tmp.SetPoint(i, x_val, phi_val)
             ghi_tmp.SetPointError(i, 0.0, dx_error)
 
