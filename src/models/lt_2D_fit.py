@@ -399,8 +399,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         (
             f"{fff2_normfactor} * ( {a} * [0]"  # σ_T
             f"+ {b} * y*[1]"                   # ε·σ_L
-            f"+ {c} * sqrt(2*y*(1.+y))*cos(x*0.017453)*[2]*sqrt([0]*[1])"  # LT
-            f"+ {d} * y*cos(2*x*0.017453)*[3]*[0])"  # TT
+            f"+ {c} * sqrt(2*y*(1.+y))*cos(x)*[2]*sqrt([0]*[1])"  # LT
+            f"+ {d} * y*cos(2*x)*[3]*[0])"  # TT
         ),
         0, 360, 0.0, 1.0
         )
