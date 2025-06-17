@@ -261,7 +261,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        xsect_scalefac = 1/100 # scale factor
+        xsect_scalefac = 1.0 # scale factor
 
         # ——— Low graph ———
         print("Drawing low data into internal arrays…")
@@ -374,13 +374,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
-        fff2 = ROOT.TF2("fff2",
-            "[0]                                       "      # σ_T
+        fff2 = 100*ROOT.TF2("fff2",
+            "([0]                                       "      # σ_T
             "+ y*[1]                                   "      # ε·σ_L
             "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
             "+ y*cos(2*x*0.017453)                     "      # TT
-            "*[3]*[0]"                                         # ρ_TT·σ_T
+            "*[3]*[0])"                                         # ρ_TT·σ_T
             , 0, 360, 0.0, 1.0)
         
         for k in range(4):
