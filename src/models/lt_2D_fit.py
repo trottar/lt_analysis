@@ -374,8 +374,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
-        fff2 = 100*ROOT.TF2("fff2",
-            "([0]                                       "      # σ_T
+
+        fff2_scalefactor = 100.0 # scale factor for the fit function
+
+        fff2 = ROOT.TF2("fff2",
+            f"{fff2_scalefactor} * ([0]                                       "      # σ_T
             "+ y*[1]                                   "      # ε·σ_L
             "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
