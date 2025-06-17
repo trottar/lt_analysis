@@ -263,14 +263,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         xsect_scalefac = 1/10 # scale factor
 
-        # ——— Low-energy graph ———
-        print("Drawing low-energy data into internal arrays…")
-        nlo_count = nlo.Draw("x:phi:dx", tcut, "goff")
+        # ——— Low graph ———
+        print("Drawing low data into internal arrays…")
+        nlo_count = nlo.Draw("phi:x:dx", tcut, "goff")
         nlo_rows  = nlo.GetSelectedRows()
-        print(f"  → Draw returned: {nlo_count}")
-        print(f"  → Number of low-energy points: {nlo_rows}")
 
-        # Build the low-energy TGraphErrors
+        # Build the low TGraphErrors
         glo_tmp = ROOT.TGraphErrors()
         for i in range(nlo_rows):
             x_val    = nlo.GetV2()[i]   # x-values
@@ -281,7 +279,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPoint(i, x_val, phi_val)
             glo_tmp.SetPointError(i, 0.0, dx_error)
 
-        print("Low-energy graph built.\n")
+        print("Low graph built.\n")
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
@@ -298,14 +296,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
         
-        # ——— High-energy graph ———
-        print("Drawing high-energy data into internal arrays…")
-        nhi_count = nhi.Draw("x:phi:dx", tcut, "goff")
+        # ——— High graph ———
+        print("Drawing high data into internal arrays…")
+        nhi_count = nhi.Draw("phi:x:dx", tcut, "goff")
         nhi_rows  = nhi.GetSelectedRows()
-        print(f"  → Draw returned: {nhi_count}")
-        print(f"  → Number of high-energy points: {nhi_rows}")
 
-        # Build the high-energy TGraphErrors
+        # Build the high TGraphErrors
         ghi_tmp = ROOT.TGraphErrors()
         for i in range(nhi_rows):
             x_val    = nhi.GetV2()[i]   # x-values
@@ -316,7 +312,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPoint(i, x_val, phi_val)
             ghi_tmp.SetPointError(i, 0.0, dx_error)
 
-        print("High-energy graph built.")
+        print("High graph built.")
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
