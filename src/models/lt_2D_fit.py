@@ -73,7 +73,6 @@ if polID == "pl":
 else:
     mtar = 0.9395654133 # GeV/c^2, mass of the target (neutron)
 w_set = float(W.replace("p",".")) # W value
-print("W set to: ", w_set, "Type: ", type(w_set))
 
 ###############################################################################################################################################
 # ---------------------------  DYNAMIC LIMITS  ---------------------------------
@@ -207,7 +206,7 @@ from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
-    w_set = float(w_set.replace("p",".")) # W value
+    w_set_num = float(w_set.replace("p",".")) # W value
 
     # Set epsilon for lt_active script
     #set_val(LOEPS, HIEPS)
@@ -384,10 +383,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ------------------------------------------------------------------
 
         #fff2_normfactor = 7e-3 # scale factor for the fit function
-        
-        print(type(w_list[i]), type(mtar), type(w_set))
 
-        w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+        w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
         fff2_normfactor =  (1/w_dep) * 7e-3 # scale factor for the fit function, change W dependence
         
         fff2 = ROOT.TF2("fff2",
