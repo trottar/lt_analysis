@@ -389,8 +389,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2_normfactor_qdep = 1e-1 * np.exp(-q2_list[i])
         fff2_normfactor = fff2_normfactor_qdep
 
-        a = 1e6
-        b = 1e-6
+        a = 1e-6
+        b = 1e6
         c = 1.0
         d = 1.0
         
