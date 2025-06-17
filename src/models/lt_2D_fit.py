@@ -408,7 +408,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             f"+ {c} * sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # LT
             f"+ {d} * y*cos(2*x*({PI}/180))*[3]*[0])"  # TT
         ),
-        0, 360, LOEPS-0.1, HIEPS+0.1
+        0, 2*PI, LOEPS-0.1, HIEPS+0.1
         )
 
         '''
