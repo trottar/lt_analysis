@@ -375,7 +375,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
 
-        fff2_scalefactor = 100.0 # scale factor for the fit function
+        fff2_scalefactor = 1.0/100 # scale factor for the fit function
 
         fff2 = ROOT.TF2("fff2",
             f"{fff2_scalefactor} * ([0]                                       "      # σ_T
