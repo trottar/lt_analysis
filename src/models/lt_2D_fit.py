@@ -391,7 +391,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         a = 1.0
         b = 1.0
-        c = 1.0
+        c = 1e6
         d = 1.0
 
         fff2 = ROOT.TF2(
@@ -484,7 +484,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
+        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
+        eps_diff   = abs(HIEPS - LOEPS)
+        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
 
+        if cond_num > COND_MAX:
+            # matrix is ill-conditioned → apply soft floor to σ_L
+            sigL     = fff2.GetParameter(1)
+            sigL_err = fff2.GetParError(1)
+            floor    = max(0.25*sigL_err, 1e-3)
+            if sigL < floor:
+                fff2.SetParameter(1, floor)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
