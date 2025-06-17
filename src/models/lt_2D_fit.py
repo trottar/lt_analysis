@@ -388,7 +388,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
 
-        fff2_normfactor = 1e-2 # scale factor for the fit function
+        fff2_normfactor = 1e-3 # scale factor for the fit function
 
         w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
         fff2_normfactor_wdep =  (1/w_dep) # change W dependence
