@@ -176,7 +176,7 @@ def check_sigma_positive(fcn, graph,
 
     # tighten limits and refit
     fcn.SetParLimits(3, lo * shrink_factor, hi * shrink_factor)
-    graph.Fit(fcn, "WMRQ")                    # quiet, no redraw
+    graph.Fit(fcn, "MRQ")                    # quiet, no redraw
 
     # final check
     if not _is_positive():
@@ -328,21 +328,38 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err = TGraph2DErrors()
         g_xx, g_yy, g_yy_err = ctypes.c_double(0),ctypes.c_double(0),ctypes.c_double(0)
 
-        for ii in range(glo.GetN()):
-            glo.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((glo.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            lo_cross_sec_err[i] += 1 / (g_yy_err**2)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
-                                     math.sqrt((glo.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
+        # Fractional point-to-point systematic uncertainty (same in both loops)
+        syst_frac = pt_to_pt_systematic_error / 100.0
 
+        # Loop over low-epsilon points
+        for ii in range(glo.GetN()):
+            # Fetch (x, y) for this point
+            glo.GetPoint(ii, g_xx, g_yy)
+            # Statistical uncertainty on y
+            stat_err = glo.GetErrorY(ii)
+            # Total y-error: combine stat + syst in quadrature
+            g_yy_err_val = math.sqrt((stat_err / g_yy.value)**2 + syst_frac**2) * g_yy.value
+            # Accumulate inverse-variance weight
+            lo_cross_sec_err[i] += 1.0 / (g_yy_err_val**2)
+            # Add the point at (x, ε_lo, y)
+            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, lo_eps, g_yy)
+            # Combined error bar on y (no x or ε error)
+            combined_err = math.sqrt(stat_err**2 + (syst_frac * g_yy.value)**2)
+            g_plot_err.SetPointError(g_plot_err.GetN() - 1, 0.0, 0.0, combined_err)
+
+        # Loop over high-epsilon points
         for ii in range(ghi.GetN()):
+            # Fetch (x, y) for this point
             ghi.GetPoint(ii, g_xx, g_yy)
-            g_yy_err = math.sqrt((ghi.GetErrorY(ii) / g_yy.value)**2 + (pt_to_pt_systematic_error/100)**2) * g_yy.value
-            hi_cross_sec_err[i] += 1 / (g_yy_err**2)
+            stat_err = ghi.GetErrorY(ii)
+            # Total y-error: combine stat + syst
+            g_yy_err_val = math.sqrt((stat_err / g_yy.value)**2 + syst_frac**2) * g_yy.value
+            hi_cross_sec_err[i] += 1.0 / (g_yy_err_val**2)
+            # Add the point at (x, ε_hi, y)
             g_plot_err.SetPoint(g_plot_err.GetN(), g_xx, hi_eps, g_yy)
-            g_plot_err.SetPointError(g_plot_err.GetN()-1, 0.0, 0.0,
-                                     math.sqrt((ghi.GetErrorY(ii))**2 + (pt_to_pt_systematic_error/100)**2))
+            # Combined error bar on y
+            combined_err = math.sqrt(stat_err**2 + (syst_frac * g_yy.value)**2)
+            g_plot_err.SetPointError(g_plot_err.GetN() - 1, 0.0, 0.0, combined_err)
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
@@ -371,12 +388,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
 
-        fff2_normfactor = 1.0 # scale factor for the fit function
+        #fff2_normfactor = 1.0 # scale factor for the fit function
 
         w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
         fff2_normfactor_wdep =  (1/w_dep) # change W dependence
-        fff2_normfactor_qdep = np.exp(-q2_list[i])
-        #fff2_normfactor = fff2_normfactor_qdep
+        fff2_normfactor_qdep = 1e-1 * np.exp(-q2_list[i])
+        fff2_normfactor = fff2_normfactor_qdep
 
         a = 1.0
         b = 1.0
@@ -449,7 +466,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
         reset_limits_from_table(fff2, 0, "sigT", stage=1)
-        g_plot_err.Fit(fff2, "WMRQ")       # quiet, no redraw
+        g_plot_err.Fit(fff2, "MRQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -472,7 +489,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
-        g_plot_err.Fit(fff2, "WMRQ")
+        g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -489,7 +506,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(3)    # ρ_TT now floats
         reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
         reset_limits_from_table(fff2, 3, "rhoTT", stage=1)
-        g_plot_err.Fit(fff2, "WMRQ")
+        g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -506,7 +523,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
         reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
         reset_limits_from_table(fff2, 3, "rhoTT", stage=1)
-        g_plot_err.Fit(fff2, "WMRQ")
+        g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)     
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -597,8 +614,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "WMRQ")
-        ghi.Fit(fhi, "WMRQ")
+        glo.Fit(flo, "MRQ")
+        ghi.Fit(fhi, "MRQ")
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -865,7 +882,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, "WMRQ")
+    g_unsep_mult.Fit(f_lin, "MRQ")
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -901,8 +918,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, "WMRQ")
-g_sig_t_total.Fit(f_exp_t, "WMRQ")
+g_sig_l_total.Fit(f_exp_l, "MRQ")
+g_sig_t_total.Fit(f_exp_t, "MRQ")
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -938,23 +955,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "WMRQ")
+g_sig_l_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "WMRQ")
+g_sig_t_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "WMRQ")
+g_sig_lt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "WMRQ")
+g_sig_tt_total.Fit(f_exp, "MRQ")
 c_total.Print(outputpdf+')')
 c_total.Clear()
