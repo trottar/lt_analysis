@@ -276,7 +276,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             dx_error = nlo.GetV3()[idx]   # dx → use as y-error
 
             print(f"  [LO] Point {idx}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
-            glo_tmp.SetPoint(idx, x_val, phi_val)
+            glo_tmp.SetPoint(idx, phi_val, x_val)
             glo_tmp.SetPointError(idx, 0.0, dx_error)
 
         print("#"*25)
@@ -309,7 +309,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             dx_error = nhi.GetV3()[idx]   # dx → use as y-error
 
             print(f"  [HI] Point {idx}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
-            ghi_tmp.SetPoint(idx, x_val, phi_val)
+            ghi_tmp.SetPoint(idx, phi_val, x_val)
             ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
         print("#"*25)
