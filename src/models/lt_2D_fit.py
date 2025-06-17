@@ -446,11 +446,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 fff2.SetParError(idx, step)            # 5 % of range for σT, σL
         # ---------------------------------------------------------------
 
-        # SEED the parameters (otherwise they all start at zero)
-        fff2.SetParameters( SEED_SIGT,   # σ_T
-                            SEED_SIGL,   # σ_L
-                            0.0,         # ρ_LT
-                            0.0)         # ρ_TT
+        # — Dynamic seeds based on our low/high averages ——
+        # ave_sig_lo, ave_sig_hi computed just above
+        eps_diff = HIEPS - LOEPS
+        seed_T = 0.5 * (ave_sig_hi + ave_sig_lo)
+        seed_L = (ave_sig_hi - ave_sig_lo) / eps_diff
+        fff2.SetParameters(
+            seed_T,      # σ_T seed ≃ average cross section
+            seed_L,      # σ_L seed ≃ slope Δσ/Δε
+            0.0,         # ρ_LT
+            0.0          # ρ_TT
+        )
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
