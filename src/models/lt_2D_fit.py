@@ -393,7 +393,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         a = 1.0
         b = 1.0
-        c = 1.0
+        c = math.sin(theta_list[i] * 0.017453)  # convert degrees to radians
         d = 1.0
 
         fff2 = ROOT.TF2(
