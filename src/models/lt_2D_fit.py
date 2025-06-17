@@ -333,7 +333,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Loop over low-epsilon points
         for ii in range(glo.GetN()):
             # Fetch (x, y) for this point
-            glo.GetPoint(ii, g_xx.value, g_yy.value)
+            glo.GetPoint(ii, g_xx, g_yy)
             # Statistical uncertainty on y
             stat_err = glo.GetErrorY(ii)
             # Total y-error: combine stat + syst in quadrature
@@ -349,7 +349,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Loop over high-epsilon points
         for ii in range(ghi.GetN()):
             # Fetch (x, y) for this point
-            ghi.GetPoint(ii, g_xx.value, g_yy.value)
+            ghi.GetPoint(ii, g_xx, g_yy)
             stat_err = ghi.GetErrorY(ii)
             # Total y-error: combine stat + syst
             g_yy_err_val = math.sqrt((stat_err / g_yy.value)**2 + syst_frac**2) * g_yy.value
