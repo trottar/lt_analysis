@@ -269,13 +269,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Build the low-energy TGraphErrors
         glo_tmp = ROOT.TGraphErrors()
-        for i in range(nlo.GetSelectedRows()):
-            x_val    = nlo.GetV2()[i]   # x-values
-            phi_val  = nlo.GetV1()[i]   # φ-values
-            dx_error = nlo.GetV3()[i]   # dx → use as y-error
+        for idx in range(nlo.GetSelectedRows()):
+            x_val    = nlo.GetV2()[idx]   # x-values
+            phi_val  = nlo.GetV1()[idx]   # φ-values
+            dx_error = nlo.GetV3()[idx]   # dx → use as y-error
 
-            glo_tmp.SetPoint(i, x_val, phi_val)
-            glo_tmp.SetPointError(i, 0.0, dx_error)
+            glo_tmp.SetPoint(idx, x_val, phi_val)
+            glo_tmp.SetPointError(idx, 0.0, dx_error)
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
@@ -298,13 +298,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Build the high-energy TGraphErrors
         ghi_tmp = ROOT.TGraphErrors()
-        for i in range(nhi.GetSelectedRows()):
-            x_val    = nhi.GetV2()[i]   # x-values
-            phi_val  = nhi.GetV1()[i]   # φ-values
-            dx_error = nhi.GetV3()[i]   # dx → use as y-error
+        for idx in range(nhi.GetSelectedRows()):
+            x_val    = nhi.GetV2()[idx]   # x-values
+            phi_val  = nhi.GetV1()[idx]   # φ-values
+            dx_error = nhi.GetV3()[idx]   # dx → use as y-error
 
-            ghi_tmp.SetPoint(i, x_val, phi_val)
-            ghi_tmp.SetPointError(i, 0.0, dx_error)
+            ghi_tmp.SetPoint(idx, x_val, phi_val)
+            ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
