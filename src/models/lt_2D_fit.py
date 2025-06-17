@@ -351,7 +351,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
         fff2 = ROOT.TF2("fff2",
-            "10 * ([0]                                       "      # σ_T
+            "1e-3 * ([0]                                       "      # σ_T
             "+ y*[1]                                   "      # ε·σ_L
             "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
