@@ -387,7 +387,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
         fff2_normfactor_wdep =  (1/w_dep) # change W dependence
         fff2_normfactor_qdep = np.exp(-q2_list[i])
-        fff2_normfactor =  1e-5 * fff2_normfactor_wdep * fff2_normfactor_qdep
+        fff2_normfactor = fff2_normfactor_wdep * fff2_normfactor_qdep
         
         fff2 = ROOT.TF2("fff2",
             f"{fff2_normfactor} * ([0]"      # σ_T
