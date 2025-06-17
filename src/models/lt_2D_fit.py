@@ -505,6 +505,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
+        sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
+        sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
+        sigT_change.SetPoint(sigT_change.GetN(), sigT_change.GetN()+1, fff2.GetParameter(0))
+        sigT_change.SetPointError(sigT_change.GetN()-1, 0, fff2.GetParError(0))
+
+        fit_step += 1         
+
         # --- Fit 4: ALL --------------------------
         fff2.ReleaseParameter(0)    # σL now floats
         fff2.ReleaseParameter(1)    # σL now floats
@@ -513,12 +520,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
         reset_limits_from_table(fff2, 3, "rhoTT", stage=1)
         g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)        
-
-        # ---------------------------------------------------------------------
-
-        g_plot_err.Fit(fff2, "MRQ")
-        check_sigma_positive(fff2, g_plot_err)
+        check_sigma_positive(fff2, g_plot_err)     
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
