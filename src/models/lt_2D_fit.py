@@ -385,7 +385,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         #fff2_normfactor = 7e-3 # scale factor for the fit function
 
         w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
-        fff2_normfactor =  (1/w_dep) * 7e-3 # scale factor for the fit function, change W dependence
+        fff2_normfactor =  (1/w_dep) # scale factor for the fit function, change W dependence
         
         fff2 = ROOT.TF2("fff2",
             f"{fff2_normfactor} * ([0]"      # σ_T
