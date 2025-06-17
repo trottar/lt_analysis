@@ -68,6 +68,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
+mtar = 0.493677 # GeV/c^2, mass of the kaon
+w_set = float(W.replace("p",".")) # W value
 
 ###############################################################################################################################################
 # ---------------------------  DYNAMIC LIMITS  ---------------------------------
@@ -375,10 +377,13 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
 
-        fff2_normfactor = 7e-3 # scale factor for the fit function
+        #fff2_normfactor = 7e-3 # scale factor for the fit function
 
+        w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+        fff2_normfactor =  (1/w_dep) * 7e-3 # scale factor for the fit function, change W dependence
+        
         fff2 = ROOT.TF2("fff2",
-            f"{fff2_normfactor} * ([0]                                       "      # σ_T
+            f"{fff2_normfactor} * ([0]"      # σ_T
             "+ y*[1]                                   "      # ε·σ_L
             "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
