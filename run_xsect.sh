@@ -241,7 +241,7 @@ if [ $? -ne 0 ]; then
     echo "       See error above..."
     exit 1
 fi
-
+exit 1
 echo
 echo
 echo "Generating xsect plots..."
