@@ -279,7 +279,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPoint(idx, x_val, phi_val)
             glo_tmp.SetPointError(idx, 0.0, dx_error)
 
-        print("Low graph built.\n")
+        print("#"*25)
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
@@ -312,7 +312,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPoint(idx, x_val, phi_val)
             ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
-        print("High graph built.")
+        print("#"*25)
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
