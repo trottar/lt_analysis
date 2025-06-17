@@ -399,15 +399,20 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         c = 1.0
         d = 1.0
 
-        fff2 = ROOT.TF2(
-        "fff2",
-        (
-            f"{fff2_normfactor} * ( {a} * [0]"  # σ_T
-            f"+ {b} * y*[1]"                   # ε·σ_L
-            f"+ {c} * sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # LT
-            f"+ {d} * y*cos(2*x*({PI}/180))*[3]*[0])"  # TT
-        ),
-        0, 360, LOEPS-0.1, HIEPS+0.1
+        # Re-parameterised LT/TT enforcing |ρ|≤1:
+        # fff2_normfactor, a, b, c, d, PI must be in scope here
+        fff2 = TF2(
+            "fff2",
+            (
+                f"{fff2_normfactor} * ("
+                f"{a} * [0]"                                             # σ_T
+                f"+ {b} * y*[1]"                                        # ε·σ_L
+                f"+ {c} * sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # ρ_LT·√(σₜσₗ)
+                f"+ {d} * y*cos(2*x*({PI}/180))*[3]*[0]"               # ρ_TT·σₜ
+                f")"
+            ),
+            0, 360,
+            LOEPS-0.1, HIEPS+0.1
         )
 
         '''
