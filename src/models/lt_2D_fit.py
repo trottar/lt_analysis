@@ -106,13 +106,6 @@ PARAM_LIMITS = {
 }
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------
-# Initial starting values for the fit (nb)
-# ------------------------------------------------------------------
-SEED_SIGT = 10.0      # seed for σ_T  — typical transverse scale
-SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
-# ------------------------------------------------------------------
-
 # ---------------------------------------------------------------
 def reset_limits_from_table(func, idx, key, stage):
     """
@@ -374,15 +367,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineColor(ROOT.kBlue-3)
         g_plot_err.SetLineWidth(2)
 
-        '''
-        fff2 = TF2("fff2",
-                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                   0, 360, 0.0, 1.0)
-
-        fff2 = TF2("fff2",
-                   "[0] + y*[1] + sqrt(2*y*(1+y))*cos(x*0.017453)*[2] + y*cos(2*x*0.017453)*[3]",
-                   0, 360, LOEPS-0.1, HIEPS+0.1)
-        '''
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
@@ -413,20 +397,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ),
             0, 360,
             LOEPS-0.1, HIEPS+0.1
-        )
-
-        '''
-        fff2 = ROOT.TF2(
-        "fff2",
-        (
-            f"{fff2_normfactor} * ( {a} * [0]"  # σ_T
-            f"+ {b} * y*[1]"                   # ε·σ_L
-            f"+ {c} * sqrt(2*y*(1.+y))*cos(x*0.017453)*[2]*sqrt([0]*[1])"  # LT
-            f"+ {d} * y*cos(2*x*0.017453)*[3]*[0])"  # TT
-        ),
-        0, 360, 0.0, 1.0
-        )
-        '''          
+        )         
 
         for k in range(4):
             fff2.ReleaseParameter(k)
@@ -451,11 +422,16 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 fff2.SetParError(idx, step)            # 5 % of range for σT, σL
         # ---------------------------------------------------------------
 
-        # SEED the parameters (otherwise they all start at zero)
-        fff2.SetParameters( SEED_SIGT,   # σ_T
-                            SEED_SIGL,   # σ_L
-                            0.0,         # ρ_LT
-                            0.0)         # ρ_TT
+        # — Dynamic seeds based on data averages —
+        eps_diff = HIEPS - LOEPS
+        seed_T = 0.5 * (ave_sig_hi + ave_sig_lo)       # midpoint of low/high cross sections
+        seed_L = (ave_sig_hi - ave_sig_lo) / eps_diff  # slope Δσ/Δε
+        fff2.SetParameters(
+            seed_T,      # σ_T
+            seed_L,      # σ_L
+            0.0,         # ρ_LT
+            0.0          # ρ_TT
+        )
         
         # — Give Minuit a finite “kick size” on each parameter —
         # so it can actually move off the seed value:
