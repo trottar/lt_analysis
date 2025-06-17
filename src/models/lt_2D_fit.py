@@ -399,8 +399,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         (
             f"{fff2_normfactor} * ( {a} * [0]"  # σ_T
             f"+ {b} * y*[1]"                   # ε·σ_L
-            f"+ {c} * sqrt(2*y*(1.+y))*cos(x)*[2]*sqrt([0]*[1])"  # LT
-            f"+ {d} * y*cos(2*x)*[3]*[0])"  # TT
+            f"+ {c} * sqrt(2*y*(1.+y))*cos(x*0.017453)*[2]*sqrt([0]*[1])"  # LT
+            f"+ {d} * y*cos(2*x*0.017453)*[3]*[0])"  # TT
         ),
         0, 360, 0.0, 1.0
         )
@@ -433,6 +433,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             else:
                 raise KeyError(f"{key} not found in PARAM_LIMITS")
 
+            # --- give MINUIT a sensible first step ---------------------
+            if key.startswith("rho"):
+                fff2.SetParError(idx, 0.02)            # ±0.02 for ρ’s
+            else:
+                step = 0.05 * (hi - lo) if hi > lo else 0.1
+                fff2.SetParError(idx, step)            # 5 % of range for σT, σL
         # ---------------------------------------------------------------
 
         # SEED the parameters (otherwise they all start at zero)
@@ -478,17 +484,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
 
-        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
-        eps_diff   = abs(HIEPS - LOEPS)
-        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
 
-        if cond_num > COND_MAX:
-            # matrix is ill-conditioned → apply soft floor to σ_L
-            sigL     = fff2.GetParameter(1)
-            sigL_err = fff2.GetParError(1)
-            floor    = max(0.25*sigL_err, 1e-3)
-            if sigL < floor:
-                fff2.SetParameter(1, floor)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
