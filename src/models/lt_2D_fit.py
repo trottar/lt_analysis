@@ -261,12 +261,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        nlo.Draw("x:phi:dx", tcut, "goff")
+        # Draw into internal arrays (silent mode) and get number of points
+        n_points = nlo.Draw("x:phi:dx", tcut, "goff")
 
-        glo_tmp = TGraphErrors()
-        for j in range(nlo.GetSelectedRows()):
-            glo_tmp.SetPoint(j, nlo.GetV2()[j], nlo.GetV1()[j])
-            glo_tmp.SetPointError(j, 0, nlo.GetV3()[j])
+        # Create a graph of φ vs x with y-errors
+        graph = ROOT.TGraphErrors()
+
+        # Fill the graph: V1→x, V2→φ, V3→dx (used as y-error)
+        for i in range(nlo.GetSelectedRows()):
+            x_val, phi_val, dx_val = nlo.GetV1()[i], nlo.GetV2()[i], nlo.GetV3()[i]
+            graph.SetPoint(i, x_val, phi_val)
+            graph.SetPointError(i, 0.0, dx_val)
 
         LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
@@ -283,12 +288,19 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
         sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
         
-        nhi.Draw("x:phi:dx", tcut, "goff")
+        # Draw x vs φ (with φ-error dx) into internal arrays, silent mode
+        n_points = nhi.Draw("x:phi:dx", tcut, "goff")
 
-        ghi_tmp = TGraphErrors()
-        for j in range(nhi.GetSelectedRows()):
-            ghi_tmp.SetPoint(j, nhi.GetV2()[j], nhi.GetV1()[j])
-            ghi_tmp.SetPointError(j, 0, nhi.GetV3()[j])
+        # Build a graph of φ vs x with y-errors
+        graph_phi_vs_x = ROOT.TGraphErrors()
+
+        for i in range(nhi.GetSelectedRows()):
+            x_val   = nhi.GetV2()[i]  # x
+            phi_val = nhi.GetV1()[i]  # φ
+            err_val = nhi.GetV3()[i]  # dx → y-error
+
+            graph_phi_vs_x.SetPoint(i, x_val, phi_val)
+            graph_phi_vs_x.SetPointError(i, 0.0, err_val)
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
@@ -351,12 +363,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
         fff2 = ROOT.TF2("fff2",
-            "1e3 * ([0]                                       "      # σ_T
+            "[0]                                       "      # σ_T
             "+ y*[1]                                   "      # ε·σ_L
             "+ sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
             "+ y*cos(2*x*0.017453)                     "      # TT
-            "*[3]*[0])"                                         # ρ_TT·σ_T
+            "*[3]*[0]"                                         # ρ_TT·σ_T
             , 0, 360, 0.0, 1.0)
         
         for k in range(4):
