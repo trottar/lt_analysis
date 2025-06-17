@@ -394,7 +394,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         c = 1.0
         d = 1.0
 
-        del2photo = 1e3
+        del2photo = 1e-3
         
         fff2 = ROOT.TF2("fff2",
             f"{fff2_normfactor} * ([0]"      # σ_T
