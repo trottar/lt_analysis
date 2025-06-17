@@ -393,6 +393,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         b = 1e-3
         c = 1.0
         d = 1.0
+
+        del2photo = 1e3
         
         fff2 = ROOT.TF2("fff2",
             f"{fff2_normfactor} * ([0]"      # σ_T
@@ -400,7 +402,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             f"+ {a} * sqrt(2*y*(1.+y))*cos(x*0.017453)        "      # LT
             "*[2]*sqrt([0]*[1])                        "      # ρ_LT·√(σ_T σ_L)
             f"+ {b} * y*cos(2*x*0.017453)                     "      # TT
-            "*[3]*[0])"                                         # ρ_TT·σ_T
+            "*[3]*[0]) * (1 + del2photo​)"                                         # ρ_TT·σ_T
             , 0, 360, 0.0, 1.0)
         
         for k in range(4):
