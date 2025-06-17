@@ -263,6 +263,41 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         xsect_scalefac = 1/10 # scale factor
 
+        # ——— Low-energy graph ———
+        print("Drawing low-energy data into internal arrays…")
+        nlo_count = nlo.Draw("x:phi:dx", tcut, "goff")
+        nlo_rows  = nlo.GetSelectedRows()
+        print(f"  → Draw returned: {nlo_count}")
+        print(f"  → Number of low-energy points: {nlo_rows}")
+
+        # Build the low-energy TGraphErrors
+        glo_tmp = ROOT.TGraphErrors()
+        for i in range(nlo_rows):
+            x_val    = nlo.GetV2()[i]   # x-values
+            phi_val  = nlo.GetV1()[i]   # φ-values
+            dx_error = nlo.GetV3()[i]   # dx → use as y-error
+
+            print(f"  [LO] Point {i}: x={x_val:.4f}, φ={phi_val:.4f}, error={dx_error:.4f}")
+            glo_tmp.SetPoint(i, x_val, phi_val)
+            glo_tmp.SetPointError(i, 0.0, dx_error)
+
+        print("Low-energy graph built.\n")
+
+        LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
+        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
+        LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
+        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
+        
+        glo = glo_tmp.Clone("glo")
+        ave_sig_lo = glo.GetMean(2)
+        err_sig_lo = glo.GetRMS(2)
+
+        sig_lo.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
+        sig_lo.GetYaxis().SetTitle("#bar{#it{#sigma}_{Low}}")
+        sig_lo.SetTitle("t = {:.3f}".format(t_list[i]))
+        sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
+        sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
+        
         # ——— High-energy graph ———
         print("Drawing high-energy data into internal arrays…")
         nhi_count = nhi.Draw("x:phi:dx", tcut, "goff")
@@ -282,35 +317,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPointError(i, 0.0, dx_error)
 
         print("High-energy graph built.")
-
-        LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
-        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
-        LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
-        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
-        
-        glo = glo_tmp.Clone("glo")
-        ave_sig_lo = glo.GetMean(2)
-        err_sig_lo = glo.GetRMS(2)
-
-        sig_lo.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
-        sig_lo.GetYaxis().SetTitle("#bar{#it{#sigma}_{Low}}")
-        sig_lo.SetTitle("t = {:.3f}".format(t_list[i]))
-        sig_lo.SetPoint(sig_lo.GetN(), float(t_list[i]), ave_sig_lo)
-        sig_lo.SetPointError(sig_lo.GetN()-1, 0, err_sig_lo)
-        
-        # ——— High-energy graph ———
-        # Draw x vs φ (with φ-error dx) into internal arrays, silent mode
-        nhi.Draw(f"x*{xsect_scalefac}:phi:dx*{xsect_scalefac}", tcut, "goff")
-
-        # Build the high-energy TGraphErrors
-        ghi_tmp = ROOT.TGraphErrors()
-        for idx in range(nhi.GetSelectedRows()):
-            x_val    = nhi.GetV2()[idx]   # x-values
-            phi_val  = nhi.GetV1()[idx]   # φ-values
-            dx_error = nhi.GetV3()[idx]   # dx → use as y-error
-
-            ghi_tmp.SetPoint(idx, x_val, phi_val)
-            ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
         LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
