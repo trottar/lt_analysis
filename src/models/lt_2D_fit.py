@@ -454,8 +454,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         # — Give Minuit a finite “kick size” on each parameter —
         # so it can actually move off the seed value:
-        fff2.SetParError(0, max(1.0, 0.1 * seed_T))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(seed_L)))# σ_L step
+        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step        
 
