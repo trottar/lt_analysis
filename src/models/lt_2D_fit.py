@@ -270,14 +270,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Build the low TGraphErrors
         glo_tmp = ROOT.TGraphErrors()
-        for i in range(nlo_rows):
-            x_val    = nlo.GetV2()[i]   # x-values
-            phi_val  = nlo.GetV1()[i]   # φ-values
-            dx_error = nlo.GetV3()[i]   # dx → use as y-error
+        for idx in range(nlo_rows):
+            x_val    = nlo.GetV2()[idx]   # x-values
+            phi_val  = nlo.GetV1()[idx]   # φ-values
+            dx_error = nlo.GetV3()[idx]   # dx → use as y-error
 
-            print(f"  [LO] Point {i}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
-            glo_tmp.SetPoint(i, x_val, phi_val)
-            glo_tmp.SetPointError(i, 0.0, dx_error)
+            print(f"  [LO] Point {idx}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
+            glo_tmp.SetPoint(idx, x_val, phi_val)
+            glo_tmp.SetPointError(idx, 0.0, dx_error)
 
         print("Low graph built.\n")
 
@@ -303,14 +303,14 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Build the high TGraphErrors
         ghi_tmp = ROOT.TGraphErrors()
-        for i in range(nhi_rows):
-            x_val    = nhi.GetV2()[i]   # x-values
-            phi_val  = nhi.GetV1()[i]   # φ-values
-            dx_error = nhi.GetV3()[i]   # dx → use as y-error
+        for idx in range(nhi_rows):
+            x_val    = nhi.GetV2()[idx]   # x-values
+            phi_val  = nhi.GetV1()[idx]   # φ-values
+            dx_error = nhi.GetV3()[idx]   # dx → use as y-error
 
-            print(f"  [HI] Point {i}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
-            ghi_tmp.SetPoint(i, x_val, phi_val)
-            ghi_tmp.SetPointError(i, 0.0, dx_error)
+            print(f"  [HI] Point {idx}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
+            ghi_tmp.SetPoint(idx, x_val, phi_val)
+            ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
         print("High graph built.")
 
