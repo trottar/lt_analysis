@@ -101,8 +101,8 @@ PARAM_LIMITS = {
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
 #    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
 #    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
-    "rhoLT": [(-1e3, 1e3)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1e3, 1e3)]*3     # ρ_TT : σ_TT / σT
+    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -112,19 +112,6 @@ PARAM_LIMITS = {
 SEED_SIGT = 10.0      # seed for σ_T  — typical transverse scale
 SEED_SIGL = 100.0      # seed for σ_L  — ~50 % of σ_T so pole-dominance is reachable
 # ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-#  ε-lever-arm quality guard
-#  -------------------------------------------------
-#  For two-epsilon LT separation the design matrix is
-#         A = [[1, ε_lo],
-#              [1, ε_hi]] .
-#  Its condition number  κ ≈ 1/|ε_hi – ε_lo|.
-#  If κ grows much beyond ~20 the σ_L extraction becomes
-#  numerically unstable and MINUIT tends to peg σ_L at its
-#  bound.  We use COND_MAX as the cut-off: when κ > COND_MAX
-#  we apply the soft floor to σ_L (see Pass-2 code).
-COND_MAX   = 20.0
 
 # ---------------------------------------------------------------
 def reset_limits_from_table(func, idx, key, stage):
@@ -384,12 +371,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
 
-        #fff2_normfactor = 1.0 # scale factor for the fit function
+        fff2_normfactor = 1.0 # scale factor for the fit function
 
         w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
         fff2_normfactor_wdep =  (1/w_dep) # change W dependence
         fff2_normfactor_qdep = 1e-1 * np.exp(-q2_list[i])
-        fff2_normfactor = fff2_normfactor_qdep
+        #fff2_normfactor = fff2_normfactor_qdep
 
         a = 1.0
         b = 1.0
