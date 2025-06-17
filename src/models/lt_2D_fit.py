@@ -99,8 +99,10 @@ w_set = float(W.replace("p",".")) # W value
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+#    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+#    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    "rhoTT": [(-1e-2, 1e-2)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -392,7 +394,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         a = 1.0
         b = 1.0
         c = 1.0
-        d = 1e-6
+        d = 1.0
 
         fff2 = ROOT.TF2(
         "fff2",
