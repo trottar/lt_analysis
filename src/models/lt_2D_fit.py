@@ -446,17 +446,18 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 fff2.SetParError(idx, step)            # 5 % of range for σT, σL
         # ---------------------------------------------------------------
 
-        # — Dynamic seeds based on our low/high averages ——
-        # ave_sig_lo, ave_sig_hi computed just above
-        eps_diff = HIEPS - LOEPS
-        seed_T = 0.5 * (ave_sig_hi + ave_sig_lo)
-        seed_L = (ave_sig_hi - ave_sig_lo) / eps_diff
-        fff2.SetParameters(
-            seed_T,      # σ_T seed ≃ average cross section
-            seed_L,      # σ_L seed ≃ slope Δσ/Δε
-            0.0,         # ρ_LT
-            0.0          # ρ_TT
-        )
+        # SEED the parameters (otherwise they all start at zero)
+        fff2.SetParameters( SEED_SIGT,   # σ_T
+                            SEED_SIGL,   # σ_L
+                            0.0,         # ρ_LT
+                            0.0)         # ρ_TT
+        
+        # — Give Minuit a finite “kick size” on each parameter —
+        # so it can actually move off the seed value:
+        fff2.SetParError(0, max(1.0, 0.1 * seed_T))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(0.1, 0.1 * abs(seed_L)))# σ_L step
+        fff2.SetParError(2, 0.5)                        # ρ_LT step
+        fff2.SetParError(3, 0.5)                        # ρ_TT step        
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
