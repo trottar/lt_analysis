@@ -68,7 +68,10 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
-mtar = 0.493677 # GeV/c^2, mass of the kaon
+if polID == "pl":
+    mtar = 0.938272046 # GeV/c^2, mass of the target (proton)  
+else:
+    mtar = 0.9395654133 # GeV/c^2, mass of the target (neutron)
 w_set = float(W.replace("p",".")) # W value
 
 ###############################################################################################################################################
@@ -379,7 +382,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         #fff2_normfactor = 7e-3 # scale factor for the fit function
 
-        w_dep = 1/((float(w_list[i])**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+        w_dep = 1/((w_list[i]**2) - (mtar**2))
         fff2_normfactor =  (1/w_dep) * 7e-3 # scale factor for the fit function, change W dependence
         
         fff2 = ROOT.TF2("fff2",
