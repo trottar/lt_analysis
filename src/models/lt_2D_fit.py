@@ -257,11 +257,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         lo_eps = lo_eps_list[i]
         hi_eps = hi_eps_list[i]
 
-        xsect_scalefac = 1e6 # scale factor
+        xsect_scalefac = 1.0 # scale factor
 
         # ——— Low graph ———
         print("Drawing low data into internal arrays…")
-        nlo_count = nlo.Draw("phi:x:dx", tcut, "goff")
+        nlo_count = nlo.Draw("phi:xmod:dx", tcut, "goff")
         nlo_rows  = nlo.GetSelectedRows()
 
         # Build the low TGraphErrors
@@ -294,7 +294,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         # ——— High graph ———
         print("Drawing high data into internal arrays…")
-        nhi_count = nhi.Draw("phi:x:dx", tcut, "goff")
+        nhi_count = nhi.Draw("phi:xmod:dx", tcut, "goff")
         nhi_rows  = nhi.GetSelectedRows()
 
         # Build the high TGraphErrors
