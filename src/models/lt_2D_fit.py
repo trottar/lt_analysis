@@ -391,8 +391,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         a = 1.0
         b = 1.0
-        c = 1e6
-        d = 1.0
+        c = 1.0
+        d = 1e-6
 
         fff2 = ROOT.TF2(
         "fff2",
