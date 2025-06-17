@@ -393,7 +393,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         a = 1.0
         b = 1.0
-        c = 1e9
+        c = 1.0
         d = 1.0
 
         fff2 = ROOT.TF2(
@@ -480,23 +480,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1
 
-        # --- Fit 2: L ---
+        # --- Fit 2: L (fix T) ---
+        fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
-
-        # ---------- soft floor on σ_L when ε-lever arm is weak -------------
-        eps_diff   = abs(HIEPS - LOEPS)
-        cond_num   = math.sqrt(1+LOEPS**2)*math.sqrt(1+HIEPS**2) / max(eps_diff, 1e-6)
-
-        if cond_num > COND_MAX:
-            # matrix is ill-conditioned → apply soft floor to σ_L
-            sigL     = fff2.GetParameter(1)
-            sigL_err = fff2.GetParError(1)
-            floor    = max(0.25*sigL_err, 1e-3)
-            if sigL < floor:
-                fff2.SetParameter(1, floor)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -505,30 +494,27 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1    
 
-        # --- Fit 3: σ_L , ρ_LT , ρ_TT all float together --------------------------
-        stage_idx = 2            # third-pass entry in PARAM_LIMITS
+        # --- Fit 3: ρ_LT , ρ_TT --------------------------
+        fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
+        fff2.FixParameter(1, fff2.GetParameter(1))  # σL now fixed
+        fff2.ReleaseParameter(2)    # ρ_LT now floats
+        fff2.ReleaseParameter(3)    # ρ_TT now floats
+        reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
+        reset_limits_from_table(fff2, 3, "rhoTT", stage=1)
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)
 
-        # --- Grab a crude statistical error scale for this t-bin -------------
-        # RMS of the Y-errors in the graph is a quick, stable proxy
-        stat_err_estimate = math.sqrt(
-            sum((g_plot_err.GetErrorY(i))**2 for i in range(g_plot_err.GetN()))
-            / max(1, g_plot_err.GetN())
-        )
-        # --------------------------------------------------------------------------
+        # --- Fit 4: ALL --------------------------
+        fff2.ReleaseParameter(0)    # σL now floats
+        fff2.ReleaseParameter(1)    # σL now floats
+        reset_limits_from_table(fff2, 0, "sigT", stage=1)
+        reset_limits_from_table(fff2, 1, "sigL", stage=1)
+        reset_limits_from_table(fff2, 2, "rhoLT", stage=1)
+        reset_limits_from_table(fff2, 3, "rhoTT", stage=1)
+        g_plot_err.Fit(fff2, "MRQ")
+        check_sigma_positive(fff2, g_plot_err)        
 
-        for p_idx, p_key in ((1,"sigL"), (2,"rhoLT"), (3,"rhoTT")):
-            fff2.ReleaseParameter(p_idx)
-            lo_lim, hi_lim = PARAM_LIMITS[p_key][stage_idx]
-            fff2.SetParLimits(p_idx, lo_lim, hi_lim)
-
-            # --- Seeding & step size ----------------------------
-            if p_key.startswith("rho"):
-                fff2.SetParameter(p_idx, 0.0)
-                step = max(0.1, 0.6*stat_err_estimate)
-                fff2.SetParError(p_idx, step)
-            else:
-                fff2.SetParError(p_idx, 0.05*(hi_lim - lo_lim))
-            # ---------------------------------------------------------------------
+        # ---------------------------------------------------------------------
 
         g_plot_err.Fit(fff2, "MRQ")
         check_sigma_positive(fff2, g_plot_err)
