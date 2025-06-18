@@ -252,7 +252,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # ——— Low graph ———
         print("Drawing low data into internal arrays…")
-        nlo_count = nlo.Draw("phi:x:dx", tcut, "goff")
+        nlo_count = nlo.Draw("phi:x_mod:dx", tcut, "goff")
         nlo_rows  = nlo.GetSelectedRows()
 
         # Build the low TGraphErrors
