@@ -181,7 +181,7 @@ def check_sigma_positive(fcn, graph,
 ###############################################################################################################################################
 
 # Import separated xsects models
-from lt_active import LT_sep_x_lo_fun_wrapper, LT_sep_x_lo_fun_unsep_wrapper, LT_sep_x_hi_fun_wrapper, LT_sep_x_hi_fun_unsep_wrapper
+from lt_active import LT_sep_x_fun_wrapper, LT_sep_x_fun_unsep_wrapper
 
 ###############################################################################################################################################
 
@@ -269,10 +269,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         print("#"*25)
 
-        LT_sep_x_lo_fun = LT_sep_x_lo_fun_wrapper(lo_eps)
-        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
-        LT_sep_x_lo_fun_unsep = LT_sep_x_lo_fun_unsep_wrapper(lo_eps)
-        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
+        LT_sep_x_lo_fun = LT_sep_x_fun_wrapper(lo_eps)
+        flo = TF1("lo_eps_fit", LT_sep_x_fun, 0, 360, 4)
+        LT_sep_x_lo_fun_unsep = LT_sep_x_fun_unsep_wrapper(lo_eps)
+        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_fun_unsep, 0, 2*PI, 4)
         
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
@@ -302,10 +302,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         print("#"*25)
 
-        LT_sep_x_hi_fun = LT_sep_x_hi_fun_wrapper(hi_eps)
-        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
-        LT_sep_x_hi_fun_unsep = LT_sep_x_hi_fun_unsep_wrapper(hi_eps)
-        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
+        LT_sep_x_hi_fun = LT_sep_x_fun_wrapper(hi_eps)
+        fhi = TF1("hi_eps_fit", LT_sep_x_fun, 0, 360, 4)
+        LT_sep_x_hi_fun_unsep = LT_sep_x_fun_unsep_wrapper(hi_eps)
+        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_fun_unsep, 0, 2*PI, 4)
             
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
@@ -407,11 +407,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 f"{fff2_normfactor} * ("
                 f"{a} * [0]"                                             # σ_T
                 f"+ {b} * y*[1]"                                        # ε·σ_L
-                f"+ {c} * sqrt(2*y*(1.+y))*cos(x)*[2]*sqrt([0]*[1])"  # ρ_LT·√(σₜσₗ)
-                f"+ {d} * y*cos(2*x)*[3]*[0]"               # ρ_TT·σₜ
+                f"+ {c} * sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # ρ_LT·√(σₜσₗ)
+                f"+ {d} * y*cos(2*x*({PI}/180))*[3]*[0]"               # ρ_TT·σₜ
                 f")"
             ),
-            0, 2*PI,
+            0, 360,
             LOEPS-0.1, HIEPS+0.1
         )         
 
