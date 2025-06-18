@@ -726,8 +726,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
                                 rho_tt      * sig_t_err )
         
-        # get the T–L correlation factor
-        corr_lt    = fff2.GetCorrelationFactor(0, 1)
+        # Get the L–T correlation factor
+        # Fetch the underlying fitter and compute covariances → correlation
+        from ROOT import TVirtualFitter
+        fitter = TVirtualFitter.GetFitter()
+        cov_lt = fitter.GetCovarianceMatrixElement(0, 1)
+        corr_lt = cov_lt / (sig_t_err * sig_l_err)
         # ---------------------------------------------------------------
 
         print(f"\n=== Bin {i+1} Summary ===")
