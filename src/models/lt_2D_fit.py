@@ -728,6 +728,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         rho_lt_err  = fff2.GetParError(2)
         rho_tt_err  = fff2.GetParError(3)
 
+        '''
         # ---------------------------------------------------------------
         # Error propagation (fully guarded) -----------------------------
         _eps = 1e-6                           # numerical floor
@@ -745,7 +746,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
                                 rho_tt      * sig_t_err )
         # ---------------------------------------------------------------
-
+        '''
+        sig_lt  = fff2.GetParameter(2)
+        sig_tt  = fff2.GetParameter(3)
+        sig_lt_err  = fff2.GetParError(2)
+        sig_tt_err  = fff2.GetParError(3)
+ 
         print(f"\n=== Bin {i+1} Summary ===")
         print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
         print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
