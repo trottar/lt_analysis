@@ -31,11 +31,11 @@ def LT_sep_x_lo_fun_wrapper(inp_eps):
               + ROOT.TMath.Sqrt(2*eps*(1+eps))
                 * par[2]
                 * ROOT.TMath.Sqrt(par[0] * par[1])
-                * ROOT.TMath.Cos(xx*PI/180)
+                * ROOT.TMath.Cos(xx)
               + eps
                 * par[3]
                 * par[0]
-                * ROOT.TMath.Cos(2*xx*PI/180) )
+                * ROOT.TMath.Cos(2*xx) )
         return xs
     return LT_sep_x_lo_fun
     
@@ -52,11 +52,11 @@ def LT_sep_x_hi_fun_wrapper(inp_eps):
               + ROOT.TMath.Sqrt(2*eps*(1+eps))
                 * par[2]
                 * ROOT.TMath.Sqrt(par[0] * par[1])
-                * ROOT.TMath.Cos(xx*PI/180)
+                * ROOT.TMath.Cos(xx)
               + eps
                 * par[3]
                 * par[0]
-                * ROOT.TMath.Cos(2*xx*PI/180) )
+                * ROOT.TMath.Cos(2*xx) )
         return xs
     return LT_sep_x_hi_fun
 
