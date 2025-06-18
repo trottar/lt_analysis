@@ -97,8 +97,12 @@ w_set = float(W.replace("p",".")) # W value
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+#    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+#    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+    "sigT" : [(-1e3, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(-1e3, 1e3)]*3,   # σ_L  : longitudinal
+    "sigLT": [(-50.0, 50.0)]*3,    # σ_LT
+    "sigTT": [(-50.0, 50.0)]*3,     # σ_TT
     "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
@@ -400,6 +404,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # Re-parameterised LT/TT enforcing |ρ|≤1:
         # fff2_normfactor, a, b, c, d, PI must be in scope here
+        '''
         fff2 = TF2(
             "fff2",
             (
@@ -412,13 +417,28 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ),
             0, 360,
             LOEPS-0.1, HIEPS+0.1
-        )         
+        )      
+        '''
+        fff2 = TF2(
+            "fff2",
+            (
+                f"{fff2_normfactor} * ("
+                f"{a} * [0]"                                             # σ_T
+                f"+ {b} * y*[1]"                                        # ε·σ_L
+                f"+ {c} * sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]"  # ρ_LT·√(σₜσₗ)
+                f"+ {d} * y*cos(2*x*({PI}/180))*[3]"               # ρ_TT·σₜ
+                f")"
+            ),
+            0, 360,
+            LOEPS-0.1, HIEPS+0.1
+        )             
 
         for k in range(4):
             fff2.ReleaseParameter(k)
 
         # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]
+        #par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]
+        par_keys  = ["sigT", "sigL", "sigLT", "sigTT"]
         current_i = 0
 
         for idx, key in enumerate(par_keys):
@@ -469,7 +489,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
         # — Apply limits for all parameters in stage 0 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        #for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(["sigT","sigL","sigLT","sigTT"]):
             reset_limits_from_table(fff2, idx, name, stage=0)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -499,7 +520,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.ReleaseParameter(1)    # σL now floats
         # — Apply limits for all parameters in stage 1 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        #for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(["sigT","sigL","sigLT","sigTT"]):
             reset_limits_from_table(fff2, idx, name, stage=1)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -522,7 +544,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(2)    # ρ_LT now floats
         fff2.ReleaseParameter(3)    # ρ_TT now floats
         # — Apply limits for all parameters in stage 2 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        #for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(["sigT","sigL","sigLT","sigTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -543,7 +566,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(0)    # σL now floats
         fff2.ReleaseParameter(1)    # σL now floats
         # — Apply limits for all parameters in stage 2 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        #for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(["sigT","sigL","sigLT","sigTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -690,6 +714,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             sig_diff_err = 0.0
             sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)      
 
+        '''
         # ---------------------------------------------------------------
         # Central values -------------------------------------------------
         sig_t   = fff2.GetParameter(0)
@@ -723,12 +748,21 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
                                 rho_tt      * sig_t_err )
         # ---------------------------------------------------------------
-
+        '''
+        sig_t   = fff2.GetParameter(0)
+        sig_l   = fff2.GetParameter(1)        
+        sig_lt  = fff2.GetParameter(2)
+        sig_tt  = fff2.GetParameter(3)
+        sig_t_err   = fff2.GetParError(0)
+        sig_l_err   = fff2.GetParError(1)        
+        sig_lt_err  = fff2.GetParError(2)
+        sig_tt_err  = fff2.GetParError(3)
+ 
         print(f"\n=== Bin {i+1} Summary ===")
         print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
         print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
-        print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
-        print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
+        #print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
+        #print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
         print(f"  Reduced χ² = {red_chi2:.2f} (NDF = {ndf})")        
         print(f"  σ_T  = {sig_t:.3f} ± {sig_t_err:.3f}")
         print(f"  σ_L  = {sig_l:.3f} ± {sig_l_err:.3f}")
