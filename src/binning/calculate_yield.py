@@ -418,6 +418,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
         
+    arr_scale_factor = np.zeros((len(t_bins)-1, len(phi_bins)-1))
+
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
@@ -437,6 +439,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)            
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
+
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)],-1)            
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)],-1)            
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
@@ -461,6 +467,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 if scale_factor > 10.0:
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
+
+                arr_scale_factor[j][k] = scale_factor
 
                 # Apply scale factor
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -496,8 +504,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
-                "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)],
-                "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)],
+                "H_MM_SUB_DATA" : hist_bin_dict["H_MM_SUB_DATA_{}_{}".format(j, k)],
+                "H_t_SUB_DATA" : hist_bin_dict["H_t_SUB_DATA_{}_{}".format(j, k)],
+                "scale_factor" : arr_scale_factor[j][k],
             }
 
             # Sort dictionary keys alphabetically
@@ -605,12 +614,12 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
     
     binned_dict = {}
 
-    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
+    # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_sub
     binned_t_data = []
     binned_hist_data = []
-    binned_hist_dummy = []
+    binned_hist_sub = []
     mm_hist_data = []
-    mm_hist_dummy = []
+    mm_hist_sub = []
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -619,16 +628,18 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             H_MM_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DATA"]
             H_t_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DATA"]
 
-            H_MM_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY"]
-            H_t_DUMMY = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DUMMY"]
+            H_MM_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SUB_DATA"]
+            H_t_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SUB_DATA"]
+
+            arr_scale_factor = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"]
 
             mm_hist_data.append(H_MM_DATA.Clone())
-            mm_hist_dummy.append(H_MM_DUMMY.Clone())
+            mm_hist_sub.append(H_MM_SUB_DATA.Clone())
 
-            # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_dummy
+            # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_sub
             tmp_binned_t_data = []
             tmp_binned_hist_data = []
-            tmp_binned_hist_dummy = []
+            tmp_binned_hist_sub = []
 
             tmp_hist_data = [[],[]]
             for i in range(1, H_t_DATA.GetNbinsX() + 1):
@@ -642,23 +653,24 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                 tmp_hist_data[1].append(H_MM_DATA.GetBinContent(i))
             tmp_binned_hist_data.append(tmp_hist_data)
 
-            tmp_hist_dummy = [[],[]]                
-            for i in range(1, H_MM_DUMMY.GetNbinsX() + 1):
-                tmp_hist_dummy[0].append(H_MM_DUMMY.GetBinCenter(i))
-                tmp_hist_dummy[1].append(H_MM_DUMMY.GetBinContent(i))                    
-            tmp_binned_hist_dummy.append(tmp_hist_dummy)
+            tmp_hist_sub = [[],[]]                
+            for i in range(1, H_MM_SUB_DATA.GetNbinsX() + 1):
+                tmp_hist_sub[0].append(H_MM_SUB_DATA.GetBinCenter(i))
+                tmp_hist_sub[1].append(H_MM_SUB_DATA.GetBinContent(i))                    
+            tmp_binned_hist_sub.append(tmp_hist_sub)
 
             binned_t_data.append(tmp_binned_t_data[0]) # Save a list of hists where each one is a t-bin
             binned_hist_data.append(tmp_binned_hist_data[0])
-            binned_hist_dummy.append(tmp_binned_hist_dummy[0])
+            binned_hist_sub.append(tmp_binned_hist_sub[0])
 
             if j+1 == len(t_bins)-1:
                 binned_dict[kin_type] = {
                     "binned_t_data" : binned_t_data,
                     "binned_hist_data" : binned_hist_data,
-                    "binned_hist_dummy" : binned_hist_dummy,
+                    "binned_hist_dummy" : binned_hist_sub,
                     "mm_hist_data" : mm_hist_data,
-                    "mm_hist_dummy" : mm_hist_dummy
+                    "mm_hist_dummy" : mm_hist_sub,
+                    "scale_factor" : arr_scale_factor,
                 }
         
     return binned_dict
@@ -679,52 +691,74 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     binned_t_data = binned_dict[kin_type]["binned_t_data"]
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
-    binned_hist_dummy = binned_dict[kin_type]["binned_hist_dummy"]
+    binned_hist_sub = binned_dict[kin_type]["binned_hist_sub"]
     mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
-    mm_hist_dummy = binned_dict[kin_type]["mm_hist_dummy"]
+    mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
+    arr_scale_factor = binned_dict[kin_type]["scale_factor"]
     
-    yield_hist = []
-    yield_err_hist = []
-    binned_sub_data = [[],[]]
-    i=0 # iter
-    print("-"*25)
-    # Subtract binned_hist_dummy from binned_hist_data element-wise
-    for data, dummy in zip(binned_hist_data, binned_hist_dummy):
-        bin_val_data, hist_val_data = data
-        bin_val_dummy, hist_val_dummy = dummy
-        # Find bin width
-        bin_width_data = np.mean(np.diff(bin_val_data))
-        # Scale the lists before subtraction         
-        #scaled_hist_val_data = [val * normfac_data for val in hist_val_data]
-        #scaled_hist_val_dummy = [val * normfac_dummy for val in hist_val_dummy]
-        # Dummy subtraction
-        #sub_val = np.subtract(scaled_hist_val_data, scaled_hist_val_dummy)
-        sub_val = np.array(hist_val_data)
-        total_count = np.sum(sub_val)/bin_width_data
+    yield_hist      = []
+    yield_err_hist  = []
+    binned_sub_data = [[], []]
+
+    for data, sub in zip(binned_hist_data, binned_hist_sub):
+        # unpack
+        bin_edges, hist_data = data
+        _,         hist_sub   = sub
+
+        # assume uniform binning
+        bin_width = np.mean(np.diff(bin_edges))
+
+        # raw counts
+        arr_data = np.array(hist_data)
+        arr_sub  = np.array(hist_sub)
+        N_data   = np.sum(arr_data)
+        N_sub    = np.sum(arr_sub)
+
         try:
-            yld = total_count # Normalization applied above
-            # Calculate experimental yield error (relative error)
-            #yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(hist_val_data)))**2)
-            yld_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(sub_val/normfac_data)))**2)
-            # Convert to absolute error (required for average_ratio.f)
-            yld_err = yld_err*yld
-        except ZeroDivisionError:
-            yld = 0.0
-            yld_err = 0.0
-        if yld < 0.0:
-            yld = 0.0
-            yld_err = 0.0
-        if math.isnan(yld) or math.isnan(yld_err):
-            yld = 0.0
-            yld_err = 0.0
-        if math.isinf(yld) or math.isinf(yld_err):
-            yld = 0.0
-            yld_err = 0.0
-        yield_hist.append(yld)
-        yield_err_hist.append(yld_err)
-        binned_sub_data[0].append(bin_val_data)
-        binned_sub_data[1].append(sub_val)
-        i+=1
+            # — normalized yields —
+            Y_data = N_data / (normfac_data * bin_width)
+            Y_sub  = N_sub  / (normfac_data * bin_width)
+
+            # — relative errors on each yield —
+            rel_data = np.sqrt(1.0/N_data + data_charge_err**2)
+            rel_sub  = np.sqrt(1.0/N_sub  + data_charge_err**2)
+
+            # — scale factor and its absolute error —
+            s          = Y_sub / Y_data
+            scale_err  = s * np.sqrt(rel_data**2 + rel_sub**2)
+
+            # — split out absolute components of the errors —
+            σ_data_stat   = np.sqrt(N_data) / (normfac_data * bin_width)
+            σ_data_charge = Y_data * data_charge_err
+
+            σ_sub_stat    = np.sqrt(N_sub)  / (normfac_data * bin_width)
+            σ_bkgd_stat   = s * σ_sub_stat
+            σ_bkgd_scale  = Y_sub * scale_err
+
+            # — net yield & total error —
+            y_net = Y_data - (s * Y_sub)
+            σ_net = np.sqrt(
+                σ_data_stat**2
+            + σ_data_charge**2
+            + σ_bkgd_stat**2
+            + σ_bkgd_scale**2
+            )
+
+        except (ZeroDivisionError, ValueError):
+            y_net, σ_net = 0.0, 0.0
+
+        # sanitize negatives/NaNs/infs
+        if y_net < 0 or not np.isfinite(y_net):
+            y_net, σ_net = 0.0, 0.0
+
+        # save results
+        yield_hist.append(y_net)
+        yield_err_hist.append(σ_net)
+
+        # build & store the subtracted histogram
+        subtracted = arr_data - s * arr_sub
+        binned_sub_data[0].append(bin_edges)
+        binned_sub_data[1].append(subtracted)
 
     # Print statements to check sizes
     #print("Size of binned_t_data:", len(binned_t_data))
@@ -1042,45 +1076,47 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     
     binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
 
-    yield_hist = []
-    yield_err_hist = []
-    binned_sub_simc = [[],[]]
-    i=0 # iter
-    print("-"*25)
-    for simc in binned_hist_simc:
-        bin_val_simc, hist_val_simc = simc
-        # Find bin width
-        bin_width_simc = np.mean(np.diff(bin_val_simc))
-        # Scale the lists before subtraction
-        #scaled_hist_val_simc = [val * normfac_simc for val in hist_val_simc]
-        # No dummy subtraction for simc, duh
-        #sub_val = np.array(scaled_hist_val_simc)
-        sub_val = np.array(hist_val_simc)
-        total_count = np.sum(sub_val)/bin_width_simc
+    yield_hist         = []
+    yield_err_hist     = []
+    binned_sub_simc    = [[], []]
+
+    for i, simc in enumerate(binned_hist_simc):
+        # unpack
+        bin_edges, hist_counts = simc
+
+        # — bin width (assume uniform bins) —
+        bin_width = np.mean(np.diff(bin_edges))
+
+        # — array of simc counts (already normalized) —
+        arr_simc = np.array(hist_counts)
+
+        # — compute yield (counts per unit x) —
+        y_simc = np.sum(arr_simc) / bin_width
+
+        # — get number of unweighted events for this bin —
+        N_unw = binned_unweighted_NumEvts_simc[i]
+
         try:
-            yld = total_count # Normalization applied above
-            # Calculate simc yield error (relative error)
-            # No norm_fac, shouldn't normalize non-weighted distribution
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
-            # Convert to absolute error (required for average_ratio.f)
-            yld_err = yld_err*yld
-        except ZeroDivisionError:
-            yld = 0.0
-            yld_err = 0.0
-        if yld < 0.0:
-            yld = 0.0
-            yld_err = 0.0
-        if math.isnan(yld) or math.isnan(yld_err):
-            yld = 0.0
-            yld_err = 0.0
-        if math.isinf(yld) or math.isinf(yld_err):
-            yld = 0.0
-            yld_err = 0.0            
-        yield_hist.append(yld)
-        yield_err_hist.append(yld_err)
-        binned_sub_simc[0].append(bin_val_simc)
-        binned_sub_simc[1].append(sub_val)
-        i+=1
+            # — relative stat error from unweighted MC —
+            rel_err = 1.0 / np.sqrt(N_unw)
+
+            # — absolute error on the yield —
+            σ_simc = rel_err * y_simc
+
+        except (ZeroDivisionError, ValueError):
+            y_simc, σ_simc = 0.0, 0.0
+
+        # — sanitize negatives, NaNs, or infinities —
+        if y_simc < 0 or not np.isfinite(y_simc) or not np.isfinite(σ_simc):
+            y_simc, σ_simc = 0.0, 0.0
+
+        # — store results —
+        yield_hist.append(y_simc)
+        yield_err_hist.append(σ_simc)
+
+        # — store the “subtracted” simc histogram (here just the simc itself) —
+        binned_sub_simc[0].append(bin_edges)
+        binned_sub_simc[1].append(arr_simc)
 
     # Print statements to check sizes
     #print("Size of binned_t_simc:", len(binned_t_simc))
