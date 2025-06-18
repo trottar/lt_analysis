@@ -714,6 +714,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             sig_diff_err = 0.0
             sig_diff_g.SetPointError(sig_diff_g.GetN()-1, 0, sig_diff_err)      
 
+        '''
         # ---------------------------------------------------------------
         # Central values -------------------------------------------------
         sig_t   = fff2.GetParameter(0)
@@ -730,7 +731,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         rho_lt_err  = fff2.GetParError(2)
         rho_tt_err  = fff2.GetParError(3)
 
-        '''
         # ---------------------------------------------------------------
         # Error propagation (fully guarded) -----------------------------
         _eps = 1e-6                           # numerical floor
@@ -749,8 +749,12 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                                 rho_tt      * sig_t_err )
         # ---------------------------------------------------------------
         '''
+        sig_t   = fff2.GetParameter(0)
+        sig_l   = fff2.GetParameter(1)        
         sig_lt  = fff2.GetParameter(2)
         sig_tt  = fff2.GetParameter(3)
+        sig_t_err   = fff2.GetParError(0)
+        sig_l_err   = fff2.GetParError(1)        
         sig_lt_err  = fff2.GetParError(2)
         sig_tt_err  = fff2.GetParError(3)
  
