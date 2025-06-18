@@ -442,8 +442,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         eps_diff = HIEPS - LOEPS
         SEED_SIGT = ((HIEPS * ave_sig_lo) - (LOEPS * ave_sig_hi)) / eps_diff
         SEED_SIGL = (ave_sig_hi - ave_sig_lo) / eps_diff
-        print(f"SEED_SIGT (midpoint) = {SEED_SIGT}")
-        print(f"SEED_SIGL (slope)    = {SEED_SIGL}")
+        print(f"SEED_SIGT = {SEED_SIGT}")
+        print(f"SEED_SIGL   = {SEED_SIGL}")
         fff2.SetParameters(
             SEED_SIGT,      # σ_T
             SEED_SIGL,      # σ_L
