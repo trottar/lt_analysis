@@ -272,6 +272,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)/math.sqrt(glo.GetN())
+        print(f"Epsilon: {lo_eps:.4f} (low)")
         print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")        
 
         print("#"*25)
@@ -306,7 +307,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
         err_sig_hi = ghi.GetRMS(2)/math.sqrt(ghi.GetN())
-        print(f"Average high σ: {ave_sig_hi:.4f} ± {err_sig_hi:.4f}")
+        print(f"Epsilon: {hi_eps:.4f} (high)")
+        print(f"Average high σ: {ave_sig_hi:.4f} ± {err_sig_hi:.4f}")        
 
         print("#"*25)   
 
@@ -438,6 +440,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ---------------------------------------------------------------
 
         # — Dynamic seeds based on data averages —
+        # Equations 1.13 and 1.14 from Bill's thesis
         SEED_SIGT = ((HIEPS * ave_sig_lo) - (LOEPS * ave_sig_hi)) / eps_diff
         SEED_SIGL = (ave_sig_hi - ave_sig_lo) / eps_diff
         print(f"SEED_SIGT = {SEED_SIGT}")
