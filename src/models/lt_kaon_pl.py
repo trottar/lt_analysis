@@ -37,7 +37,7 @@ def LT_sep_x_fun_wrapper(inp_eps):
                 * par[0]
                 * ROOT.TMath.Cos(2*xx*PI/180) )
         return xs
-    return LT_sep_x_lo_fun
+    return LT_sep_x_fun
 
 ###############################################################################################################################################
 
@@ -58,6 +58,6 @@ def LT_sep_x_fun_unsep_wrapper(inp_eps):
                 * par[0]
                 * ROOT.TMath.Cos(2*xx) )
         return xs
-    return LT_sep_x_lo_fun_unsep
+    return LT_sep_x_fun_unsep
 
 ###############################################################################################################################################
