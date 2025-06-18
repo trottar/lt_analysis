@@ -271,7 +271,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
-        err_sig_lo = glo.GetMeanError(2)
+        err_sig_lo = glo.GetRMS(2)/math.sqrt(glo.GetN())
         print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")        
 
         print("#"*25)
@@ -305,7 +305,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
-        err_sig_hi = ghi.GetMeanError(2)
+        err_sig_hi = ghi.GetRMS(2)/math.sqrt(ghi.GetN())
         print(f"Average high σ: {ave_sig_hi:.4f} ± {err_sig_hi:.4f}")
 
         print("#"*25)   
