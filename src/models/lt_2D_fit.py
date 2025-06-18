@@ -277,6 +277,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
+        print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")
 
         sig_lo.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_lo.GetYaxis().SetTitle("#bar{#it{#sigma}_{Low}}")
@@ -310,6 +311,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
         err_sig_hi = ghi.GetRMS(2)
+        print(f"Average high σ: {ave_sig_hi:.4f} ± {err_sig_hi:.4f}")
 
         sig_hi.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_hi.GetYaxis().SetTitle("#bar{#it{#sigma}_{High}}")
