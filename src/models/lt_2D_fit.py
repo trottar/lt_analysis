@@ -256,8 +256,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Build the low TGraphErrors
         glo_tmp = ROOT.TGraphErrors()
         for idx in range(nlo_rows):
+            phi_val  = nlo.GetV1()[idx]   # φ-values            
             x_val    = nlo.GetV2()[idx]   # x-values
-            phi_val  = nlo.GetV1()[idx]   # φ-values
             dx_error = nlo.GetV3()[idx]   # dx → use as y-error
 
             print(f"  [LO] Point {idx}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
@@ -271,7 +271,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
-        err_sig_lo = glo.GetRMS(2)
+        err_sig_lo = glo.GetMeanError(2)
         print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")        
 
         print("#"*25)
@@ -290,8 +290,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Build the high TGraphErrors
         ghi_tmp = ROOT.TGraphErrors()
         for idx in range(nhi_rows):
+            phi_val  = nhi.GetV1()[idx]   # φ-values            
             x_val    = nhi.GetV2()[idx]   # x-values
-            phi_val  = nhi.GetV1()[idx]   # φ-values
             dx_error = nhi.GetV3()[idx]   # dx → use as y-error
 
             print(f"  [HI] Point {idx}: φ={phi_val:.4f}, x={x_val:.4f}, dx_error={dx_error:.4f}")
@@ -305,7 +305,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
-        err_sig_hi = ghi.GetRMS(2)
+        err_sig_hi = ghi.GetMeanError(2)
         print(f"Average high σ: {ave_sig_hi:.4f} ± {err_sig_hi:.4f}")
 
         print("#"*25)   
