@@ -727,7 +727,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                                 rho_tt      * sig_t_err )
         
         # get the T–L correlation factor
-        corr_lt    = f2.GetCorrelationFactor(0, 1)
+        corr_lt    = fff2.GetCorrelationFactor(0, 1)
         # ---------------------------------------------------------------
 
         print(f"\n=== Bin {i+1} Summary ===")
