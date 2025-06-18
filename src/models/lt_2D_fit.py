@@ -97,12 +97,14 @@ w_set = float(W.replace("p",".")) # W value
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-#    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-#    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
-    "rhoLT": [(-1.0, 0.25)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 0.25)]*3     # ρ_TT : σ_TT / σT
+    "sigT" : [(-1e3, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(-1e3, 1e3)]*3,   # σ_L  : longitudinal
+    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+#    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+#    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+#    "rhoLT": [(-1.0, 0.25)]*3,    # ρ_LT : σ_LT / √(σT σL)
+#    "rhoTT": [(-1.0, 0.25)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -267,8 +269,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPoint(idx, phi_val, x_val)
             glo_tmp.SetPointError(idx, 0.0, dx_error)
 
-        print("#"*25)
-
         LT_sep_x_lo_fun = LT_sep_x_fun_wrapper(lo_eps)
         flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
         LT_sep_x_lo_fun_unsep = LT_sep_x_fun_unsep_wrapper(lo_eps)
@@ -278,6 +278,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
         print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")
+
+        print("#"*25)
 
         sig_lo.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_lo.GetYaxis().SetTitle("#bar{#it{#sigma}_{Low}}")
@@ -301,8 +303,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPoint(idx, phi_val, x_val)
             ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
-        print("#"*25)
-
         LT_sep_x_hi_fun = LT_sep_x_fun_wrapper(hi_eps)
         fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
         LT_sep_x_hi_fun_unsep = LT_sep_x_fun_unsep_wrapper(hi_eps)
@@ -312,6 +312,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         ave_sig_hi = ghi.GetMean(2)
         err_sig_hi = ghi.GetRMS(2)
         print(f"Average high σ: {ave_sig_hi:.4f} ± {err_sig_hi:.4f}")
+
+        print("#"*25)   
 
         sig_hi.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
         sig_hi.GetYaxis().SetTitle("#bar{#it{#sigma}_{High}}")
