@@ -725,6 +725,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
                                 rho_tt      * sig_t_err )
+        
+        # get the T–L correlation factor
+        corr_lt    = f2.GetCorrelationFactor(0, 1)
         # ---------------------------------------------------------------
 
         print(f"\n=== Bin {i+1} Summary ===")
@@ -734,7 +737,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print(f"  σ_L  = {sig_l:.3f} ± {sig_l_err:.3f}")
         print(f"  σ_LT = {sig_lt:.3f} ± {sig_lt_err:.3f}")
         print(f"  σ_TT = {sig_tt:.3f} ± {sig_tt_err:.3f}")
-        print(f"  corr(σ_T,σ_L) = {corr_tl:.2f}")
+        print(f"  corr(σ_T,σ_L) = {corr_lt:.2f}")
         print("="*28)
 
         fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(
