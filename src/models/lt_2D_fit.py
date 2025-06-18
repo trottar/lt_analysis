@@ -451,7 +451,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
-        reset_limits_from_table(fff2, 0, "sigT", stage=0)
+        # — Apply limits for all parameters in stage 0 —
+        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+            reset_limits_from_table(fff2, idx, name, stage=0)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
@@ -479,7 +481,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # --- Fit 2: L (fix T) ---
         fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.ReleaseParameter(1)    # σL now floats
-        reset_limits_from_table(fff2, 1, "sigL", stage=1)
+        # — Apply limits for all parameters in stage 1 —
+        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+            reset_limits_from_table(fff2, idx, name, stage=1)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
@@ -500,8 +504,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(1, fff2.GetParameter(1))  # σL now fixed
         fff2.ReleaseParameter(2)    # ρ_LT now floats
         fff2.ReleaseParameter(3)    # ρ_TT now floats
-        reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
-        reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
+        # — Apply limits for all parameters in stage 2 —
+        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+            reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
@@ -520,10 +525,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # --- Fit 4: ALL --------------------------
         fff2.ReleaseParameter(0)    # σL now floats
         fff2.ReleaseParameter(1)    # σL now floats
-        reset_limits_from_table(fff2, 0, "sigT", stage=2)
-        reset_limits_from_table(fff2, 1, "sigL", stage=2)
-        reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
-        reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
+        # — Apply limits for all parameters in stage 0 —
+        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+            reset_limits_from_table(fff2, idx, name, stage=3)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
