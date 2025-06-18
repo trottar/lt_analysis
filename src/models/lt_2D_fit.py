@@ -480,6 +480,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.ReleaseParameter(1)    # σL now floats
         reset_limits_from_table(fff2, 1, "sigL", stage=1)
+        # — Give Minuit a finite “kick size” on each parameter —
+        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(2, 0.5)                        # ρ_LT step
+        fff2.SetParError(3, 0.5)                        # ρ_TT step         
         g_plot_err.Fit(fff2, "WSL")
         check_sigma_positive(fff2, g_plot_err)
 
@@ -497,6 +502,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(3)    # ρ_TT now floats
         reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
         reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
+        # — Give Minuit a finite “kick size” on each parameter —
+        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(2, 0.5)                        # ρ_LT step
+        fff2.SetParError(3, 0.5)                        # ρ_TT step         
         g_plot_err.Fit(fff2, "WSL")
         check_sigma_positive(fff2, g_plot_err)
 
@@ -514,6 +524,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         reset_limits_from_table(fff2, 1, "sigL", stage=2)
         reset_limits_from_table(fff2, 2, "rhoLT", stage=2)
         reset_limits_from_table(fff2, 3, "rhoTT", stage=2)
+        # — Give Minuit a finite “kick size” on each parameter —
+        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(2, 0.5)                        # ρ_LT step
+        fff2.SetParError(3, 0.5)                        # ρ_TT step         
         g_plot_err.Fit(fff2, "WSL")
         check_sigma_positive(fff2, g_plot_err)     
 
