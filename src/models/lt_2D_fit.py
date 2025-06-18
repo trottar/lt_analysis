@@ -440,8 +440,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # — Dynamic seeds based on data averages —
         eps_diff = HIEPS - LOEPS
-        SEED_SIGT = 0.5 * (ave_sig_hi + ave_sig_lo)       # midpoint of low/high cross sections
-        SEED_SIGL = (ave_sig_hi - ave_sig_lo) / eps_diff  # slope Δσ/Δε
+        SEED_SIGT = ((HIEPS * ave_sig_lo) - (LOEPS * ave_sig_hi)) / eps_diff
+        SEED_SIGL = (ave_sig_hi - ave_sig_lo) / eps_diff
         print(f"SEED_SIGT (midpoint) = {SEED_SIGT}")
         print(f"SEED_SIGL (slope)    = {SEED_SIGL}")
         fff2.SetParameters(
