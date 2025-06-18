@@ -153,13 +153,13 @@ def check_sigma_positive(fcn, graph,
     if _is_positive():
         return True
 
-    print("WARNING: negative σ detected → tightening ρTT limits and refitting")
+    print("WARNING: negative σ detected → tightening ρTT and ρLT limits and refitting")
 
     # -----------------------------------------------------------
     # Fetch current limits on parameter 3 (ρTT)  –  two ways
     # -----------------------------------------------------------
     # tighten both ρ_LT (idx=2) and ρ_TT (idx=3) and refit
-    for idx in (0, 1):
+    for idx in (2, 3):
         try:
             lo_i, hi_i = fcn.GetParLimits(idx)
         except TypeError:
@@ -475,7 +475,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step  
-        g_plot_err.Fit(fff2, "MWLSQ")       # quiet, no redraw
+        g_plot_err.Fit(fff2, "WMRQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -505,7 +505,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step         
-        g_plot_err.Fit(fff2, "MWLSQ")
+        g_plot_err.Fit(fff2, "WMRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -528,7 +528,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step         
-        g_plot_err.Fit(fff2, "MWLSQ")
+        g_plot_err.Fit(fff2, "WMRQ")
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -549,7 +549,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step         
-        g_plot_err.Fit(fff2, "MWLSQ")
+        g_plot_err.Fit(fff2, "WMRQ")
         check_sigma_positive(fff2, g_plot_err)     
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -640,8 +640,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fhi_unsep.FixParameter(2, fff2.GetParameter(2))
         fhi_unsep.FixParameter(3, fff2.GetParameter(3))
 
-        glo.Fit(flo, "MWLSQ")
-        ghi.Fit(fhi, "MWLSQ")
+        glo.Fit(flo, "WMRQ")
+        ghi.Fit(fhi, "WMRQ")
         
         flo.SetLineColor(1)
         fhi.SetLineColor(2)
@@ -908,7 +908,7 @@ for i in range(num_events):
     g_unsep_mult.GetXaxis().SetTitleOffset(1.2)
     
     f_lin = ROOT.TF1("f_lin", "[0]*x + [1]", 0, 1)
-    g_unsep_mult.Fit(f_lin, "MWLSQ")
+    g_unsep_mult.Fit(f_lin, "WMRQ")
         
     f_lin.SetLineColor(2)
     f_lin.SetLineWidth(2)    
@@ -944,8 +944,8 @@ g_sig_mult.GetYaxis().SetTitleOffset(1.2)
 g_sig_mult.GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
 g_sig_mult.GetXaxis().SetTitleOffset(1.2)
 
-g_sig_l_total.Fit(f_exp_l, "MWLSQ")
-g_sig_t_total.Fit(f_exp_t, "MWLSQ")
+g_sig_l_total.Fit(f_exp_l, "WMRQ")
+g_sig_t_total.Fit(f_exp_t, "WMRQ")
 
 g_sig_l_total.SetLineColor(1)
 g_sig_l_total.SetMarkerStyle(5)
@@ -981,23 +981,23 @@ f_exp = TF1("f_exp", "[0]*exp(-[1]*x)", 0.0, 2.0)
 c_total = TCanvas()
 
 g_sig_l_total.Draw("A*")
-g_sig_l_total.Fit(f_exp, "MWLSQ")
+g_sig_l_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_t_total.SetMarkerColor(1)
 g_sig_t_total.SetLineColor(1)
 g_sig_t_total.Draw("A*")
-g_sig_t_total.Fit(f_exp, "MWLSQ")
+g_sig_t_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_lt_total.Draw("A*")
-g_sig_lt_total.Fit(f_exp, "MWLSQ")
+g_sig_lt_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf)
 c_total.Clear()
 
 g_sig_tt_total.Draw("A*")
-g_sig_tt_total.Fit(f_exp, "MWLSQ")
+g_sig_tt_total.Fit(f_exp, "WMRQ")
 c_total.Print(outputpdf+')')
 c_total.Clear()
