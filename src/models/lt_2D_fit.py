@@ -566,7 +566,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         chi2     = fff2.GetChisquare()
         ndf      = max(1, fff2.GetNDF())   # avoid divide-by-zero
         red_chi2 = chi2 / ndf
-        print(f"Reduced χ²: {red_chi2:.2f}")
         
         # -----------------------  remainder of original code  -----------------------
         # (all canvases, output files, plots, integration, etc. unchanged)
@@ -725,27 +724,19 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
                                 rho_tt      * sig_t_err )
-        
-        # Get the L–T correlation factor
-        # Fetch the underlying fitter and compute covariances → correlation
-        fit_res = g_plot_err.Fit(fff2, "SEWQ")       # quiet, no redraw
-        # Extract covariance & correlation directly from the result
-        cov_lt  = fit_res.GetCovarianceMatrixElement(0, 1)
-        cov_tt0 = fit_res.GetCovarianceMatrixElement(0, 0)
-        cov_tt1 = fit_res.GetCovarianceMatrixElement(1, 1)
-
-        corr_tl = cov_lt / (cov_tt0**0.5 * cov_tt1**0.5)
         # ---------------------------------------------------------------
 
         print(f"\n=== Bin {i+1} Summary ===")
         print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
         print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
+        print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
+        print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
+        print(f"  Reduced χ² = {red_chi2:.2f} (NDF = {ndf})")        
         print(f"  σ_T  = {sig_t:.3f} ± {sig_t_err:.3f}")
         print(f"  σ_L  = {sig_l:.3f} ± {sig_l_err:.3f}")
         print(f"  σ_LT = {sig_lt:.3f} ± {sig_lt_err:.3f}")
         print(f"  σ_TT = {sig_tt:.3f} ± {sig_tt_err:.3f}")
-        print(f"  corr(σ_T,σ_L) = {corr_lt:.2f}")
-        print("="*28)
+        print("=== End of Bin Summary ===\n")
 
         fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(
             LTANAPATH, ParticleType, polID, Q2.replace("p",""), W.replace("p",""))
