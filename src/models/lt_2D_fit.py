@@ -102,7 +102,7 @@ PARAM_LIMITS = {
 #    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
 #    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
     "rhoLT": [(-1.0, 0.2)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 0.1)]*3     # ρ_TT : σ_TT / σT
+    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -466,8 +466,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step = 0  # counter for adapt_limits
 
         # --- Fit 1: T ---
-        fff2.FixParameter(0, SEED_SIGT)   # σT
-        ##fff2.FixParameter(1, SEED_SIGL)   # σL
+        fff2.FixParameter(1, SEED_SIGL)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
         # — Apply limits for all parameters in stage 0 —
@@ -498,9 +497,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step += 1
 
         # --- Fit 2: L (fix T) ---
-        fff2.ReleaseParameter(0)    # σT now floats
-        ##fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
-        ##fff2.ReleaseParameter(1)    # σL now floats
+        fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
+        fff2.ReleaseParameter(1)    # σL now floats
         # — Apply limits for all parameters in stage 1 —
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=1)
