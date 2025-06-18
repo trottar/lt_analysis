@@ -525,9 +525,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # --- Fit 4: ALL --------------------------
         fff2.ReleaseParameter(0)    # σL now floats
         fff2.ReleaseParameter(1)    # σL now floats
-        # — Apply limits for all parameters in stage 0 —
+        # — Apply limits for all parameters in stage 2 —
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
-            reset_limits_from_table(fff2, idx, name, stage=3)
+            reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
