@@ -464,7 +464,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fit_step = 0  # counter for adapt_limits
 
         # --- Fit 1: T ---
-        fff2.FixParameter(1, 0.0)   # σL
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
         # — Apply limits for all parameters in stage 0 —
