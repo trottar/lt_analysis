@@ -101,8 +101,8 @@ PARAM_LIMITS = {
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
 #    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
 #    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
-    "rhoLT": [(-1.0, 0.1)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 0.1)]*3     # ρ_TT : σ_TT / σT
+    "rhoLT": [(-1.0, 0.2)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-1.0, 0.2)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -440,8 +440,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # — Dynamic seeds based on data averages —
         eps_diff = HIEPS - LOEPS
-        SEED_SIGL = 0.5 * (ave_sig_hi + ave_sig_lo)       # midpoint of low/high cross sections
-        SEED_SIGT = (ave_sig_hi - ave_sig_lo) / eps_diff  # slope Δσ/Δε
+        SEED_SIGT = 0.5 * (ave_sig_hi + ave_sig_lo)       # midpoint of low/high cross sections
+        SEED_SIGL = abs(ave_sig_hi - ave_sig_lo) / eps_diff  # slope Δσ/Δε
         print(f"SEED_SIGT (midpoint) = {SEED_SIGT}")
         print(f"SEED_SIGL (slope)    = {SEED_SIGL}")
         fff2.SetParameters(
