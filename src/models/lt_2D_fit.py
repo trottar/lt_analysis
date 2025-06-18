@@ -97,14 +97,12 @@ w_set = float(W.replace("p",".")) # W value
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(-1e3, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(-1e3, 1e3)]*3,   # σ_L  : longitudinal
-    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
-#    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-#    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-#    "rhoLT": [(-1.0, 0.25)]*3,    # ρ_LT : σ_LT / √(σT σL)
-#    "rhoTT": [(-1.0, 0.25)]*3     # ρ_TT : σ_TT / σT
+    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+#    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+#    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    "rhoLT": [(-1.0, 0.25)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-1.0, 0.25)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -191,9 +189,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
     w_set_num = float(w_set.replace("p",".")) # W value
 
-    # Set epsilon for lt_active script
-    #set_val(LOEPS, HIEPS)
-
     eps_diff = HIEPS-LOEPS
     
     sig_L_g  = TGraphErrors()
@@ -277,7 +272,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
         err_sig_lo = glo.GetRMS(2)
-        print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")
+        print(f"Average low σ: {ave_sig_lo:.4f} ± {err_sig_lo:.4f}")        
 
         print("#"*25)
 
@@ -443,11 +438,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ---------------------------------------------------------------
 
         # — Dynamic seeds based on data averages —
-        eps_diff = HIEPS - LOEPS
         SEED_SIGT = ((HIEPS * ave_sig_lo) - (LOEPS * ave_sig_hi)) / eps_diff
         SEED_SIGL = (ave_sig_hi - ave_sig_lo) / eps_diff
         print(f"SEED_SIGT = {SEED_SIGT}")
-        print(f"SEED_SIGL   = {SEED_SIGL}")
+        print(f"SEED_SIGL = {SEED_SIGL}")
         fff2.SetParameters(
             SEED_SIGT,      # σ_T
             SEED_SIGL,      # σ_L
