@@ -411,7 +411,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 f"+ {d} * y*cos(2*x)*[3]*[0]"               # ρ_TT·σₜ
                 f")"
             ),
-            0, 360,
+            0, 2*PI,
             LOEPS-0.1, HIEPS+0.1
         )         
 
