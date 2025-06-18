@@ -728,8 +728,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         # Get the L–T correlation factor
         # Fetch the underlying fitter and compute covariances → correlation
-        from ROOT import TVirtualFitter
-        fitter = TVirtualFitter.GetFitter()
+        # Extract covariance & correlation directly from the result
+        cov_lt  = fit_res.GetCovarianceMatrixElement(0, 1)
+        cov_tt0 = fit_res.GetCovarianceMatrixElement(0, 0)
+        cov_tt1 = fit_res.GetCovarianceMatrixElement(1, 1)        
         cov_lt = fitter.GetCovarianceMatrixElement(0, 1)
         corr_lt = cov_lt / (sig_t_err * sig_l_err)
         # ---------------------------------------------------------------
