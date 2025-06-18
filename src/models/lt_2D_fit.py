@@ -159,7 +159,7 @@ def check_sigma_positive(fcn, graph,
     # Fetch current limits on parameter 3 (ρTT)  –  two ways
     # -----------------------------------------------------------
     # tighten both ρ_LT (idx=2) and ρ_TT (idx=3) and refit
-    for idx in (2, 3):
+    for idx in (0, 1):
         try:
             lo_i, hi_i = fcn.GetParLimits(idx)
         except TypeError:
