@@ -287,7 +287,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         # ——— High graph ———
         print("Drawing high data into internal arrays…")
-        nhi_count = nhi.Draw("phi:x_mod:dx", tcut, "goff")
+        nhi_count = nhi.Draw("phi:x:dx", tcut, "goff")
         nhi_rows  = nhi.GetSelectedRows()
 
         # Build the high TGraphErrors
