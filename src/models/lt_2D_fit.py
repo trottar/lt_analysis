@@ -728,10 +728,11 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         
         # Get the L–T correlation factor
         # Fetch the underlying fitter and compute covariances → correlation
-        # 2) Extract covariance & correlation directly from the result
-        cov_lt  = fff2.GetCovarianceMatrixElement(0, 1)
-        cov_tt0 = fff2.GetCovarianceMatrixElement(0, 0)
-        cov_tt1 = fff2.GetCovarianceMatrixElement(1, 1)
+        fit_res = g_plot_err.Fit(fff2, "SEWQ")       # quiet, no redraw
+        # Extract covariance & correlation directly from the result
+        cov_lt  = fit_res.GetCovarianceMatrixElement(0, 1)
+        cov_tt0 = fit_res.GetCovarianceMatrixElement(0, 0)
+        cov_tt1 = fit_res.GetCovarianceMatrixElement(1, 1)
 
         corr_tl = cov_lt / (cov_tt0**0.5 * cov_tt1**0.5)
         # ---------------------------------------------------------------
