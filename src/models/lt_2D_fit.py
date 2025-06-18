@@ -323,35 +323,51 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # Fractional point-to-point systematic uncertainty (same in both loops)
         syst_frac = pt_to_pt_systematic_error / 100.0
 
-        # Loop over low-epsilon points
+        # Loop over low-ε points (mapping: φ→x, ε_lo→y-axis coordinate for TF2)
         for ii in range(glo.GetN()):
-            # Fetch (x, y) for this point
+            # Read φ into phi_val, σ into sigma_val
             glo.GetPoint(ii, g_xx, g_yy)
-            # Statistical uncertainty on y
-            stat_err = glo.GetErrorY(ii)
-            # Total y-error: combine stat + syst in quadrature
-            g_yy_err_val = math.sqrt((stat_err / g_yy.value)**2 + syst_frac**2) * g_yy.value
-            # Accumulate inverse-variance weight
-            lo_cross_sec_err[i] += 1.0 / (g_yy_err_val**2)
-            # Add the point at (x, ε_lo, y)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx.value, lo_eps, g_yy.value)
-            # Combined error bar on y (no x or ε error)
-            combined_err = math.sqrt(stat_err**2 + (syst_frac * g_yy.value)**2)
-            g_plot_err.SetPointError(g_plot_err.GetN() - 1, 0.0, 0.0, combined_err)
+            phi_val   = g_xx.value
+            sigma_val = g_yy.value
 
-        # Loop over high-epsilon points
+            # Statistical + systematic uncertainty on σ
+            stat_err   = glo.GetErrorY(ii)
+            syst_err   = syst_frac * sigma_val
+            total_err  = math.sqrt(stat_err**2 + syst_err**2)
+
+            # Accumulate inverse-variance weight
+            lo_cross_sec_err[i] += 1.0 / (total_err**2)
+
+            # Insert into TGraph2DErrors: x=φ, y=ε_lo, z=σ
+            g_plot_err.SetPoint(g_plot_err.GetN(),
+                                phi_val,
+                                lo_eps,
+                                sigma_val)
+            g_plot_err.SetPointError(g_plot_err.GetN() - 1,
+                                     0.0,    # no φ error
+                                     0.0,    # no ε error
+                                     total_err)
+            
+        # Loop over high-ε points (mapping: φ→x, ε_hi→y-axis coordinate for TF2)
         for ii in range(ghi.GetN()):
-            # Fetch (x, y) for this point
             ghi.GetPoint(ii, g_xx, g_yy)
-            stat_err = ghi.GetErrorY(ii)
-            # Total y-error: combine stat + syst
-            g_yy_err_val = math.sqrt((stat_err / g_yy.value)**2 + syst_frac**2) * g_yy.value
-            hi_cross_sec_err[i] += 1.0 / (g_yy_err_val**2)
-            # Add the point at (x, ε_hi, y)
-            g_plot_err.SetPoint(g_plot_err.GetN(), g_xx.value, hi_eps, g_yy.value)
-            # Combined error bar on y
-            combined_err = math.sqrt(stat_err**2 + (syst_frac * g_yy.value)**2)
-            g_plot_err.SetPointError(g_plot_err.GetN() - 1, 0.0, 0.0, combined_err)
+            phi_val   = g_xx.value
+            sigma_val = g_yy.value
+
+            stat_err  = ghi.GetErrorY(ii)
+            syst_err  = syst_frac * sigma_val
+            total_err = math.sqrt(stat_err**2 + syst_err**2)
+
+            hi_cross_sec_err[i] += 1.0 / (total_err**2)
+
+            g_plot_err.SetPoint(g_plot_err.GetN(),
+                                phi_val,
+                                hi_eps,
+                                sigma_val)
+            g_plot_err.SetPointError(g_plot_err.GetN() - 1,
+                                     0.0,
+                                     0.0,
+                                     total_err)
 
         try:
             lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
