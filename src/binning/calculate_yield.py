@@ -477,8 +477,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
   
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
+                #hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
+                #hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
             # Fit background and subtract
             background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
@@ -494,9 +494,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         for k in range(len(phi_bins)-1):
             
             # Dummy subtraction
-            #hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
-            #hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)
-
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)
+            
             # Print the contents of the histograms for debugging
             print("H_t_DATA_{}_{}:".format(j, k), [hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].GetBinContent(i) for i in range(1, hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].GetNbinsX()+1)])
             print("H_MM_DATA_{}_{}:".format(j, k), [hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].GetBinContent(i) for i in range(1, hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].GetNbinsX()+1)])
