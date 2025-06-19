@@ -101,6 +101,15 @@ def rand_sub(phi_setting, inpDict):
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
+    sys.path.append("normalize")
+    from get_eff_charge import get_eff_charge
+
+    # Upate hist dictionary with effective charge
+    get_eff_charge(histDict, inpDict, all_data=False)
+
+    norm_factor_data = inpDict["normfac_data"]
+    norm_factor_dummy = inpDict["normfac_dummy"]    
+
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
@@ -1458,6 +1467,118 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
+
+    ###
+    # Data Normalization
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Scaler(norm_factor_data)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scaler(norm_factor_data)
+    P_hgcer_xAtCer_vs_MM_DATA.Scaler(norm_factor_data)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scaler(norm_factor_data)
+    P_hgcer_yAtCer_vs_MM_DATA.Scaler(norm_factor_data)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scaler(norm_factor_data)
+    MM_vs_CoinTime_DATA.Scaler(norm_factor_data)
+    CoinTime_vs_beta_DATA.Scaler(norm_factor_data)
+    MM_vs_beta_DATA.Scaler(norm_factor_data)
+    MM_vs_H_cer_DATA.Scaler(norm_factor_data)
+    MM_vs_H_cal_DATA.Scaler(norm_factor_data)
+    MM_vs_P_cal_DATA.Scaler(norm_factor_data)
+    MM_vs_P_hgcer_DATA.Scaler(norm_factor_data)
+    MM_vs_P_aero_DATA.Scaler(norm_factor_data)
+    phiq_vs_t_DATA.Scaler(norm_factor_data)
+    Q2_vs_W_DATA.Scaler(norm_factor_data)
+    Q2_vs_t_DATA.Scaler(norm_factor_data)
+    W_vs_t_DATA.Scaler(norm_factor_data)
+    EPS_vs_t_DATA.Scaler(norm_factor_data)
+    MM_vs_t_DATA.Scaler(norm_factor_data)
+    H_ssxfp_DATA.Scaler(norm_factor_data)
+    H_ssyfp_DATA.Scaler(norm_factor_data)
+    H_ssxpfp_DATA.Scaler(norm_factor_data)
+    H_ssypfp_DATA.Scaler(norm_factor_data)
+    H_hsxfp_DATA.Scaler(norm_factor_data)
+    H_hsyfp_DATA.Scaler(norm_factor_data)
+    H_hsxpfp_DATA.Scaler(norm_factor_data)
+    H_hsypfp_DATA.Scaler(norm_factor_data)
+    H_ssxptar_DATA.Scaler(norm_factor_data)
+    H_ssyptar_DATA.Scaler(norm_factor_data)
+    H_hsxptar_DATA.Scaler(norm_factor_data)
+    H_hsyptar_DATA.Scaler(norm_factor_data)
+    H_ssdelta_DATA.Scaler(norm_factor_data)
+    H_hsdelta_DATA.Scaler(norm_factor_data)
+    H_ph_q_DATA.Scaler(norm_factor_data)
+    H_th_q_DATA.Scaler(norm_factor_data)
+    H_ph_recoil_DATA.Scaler(norm_factor_data)
+    H_th_recoil_DATA.Scaler(norm_factor_data)
+    H_Q2_DATA.Scaler(norm_factor_data)
+    H_W_DATA.Scaler(norm_factor_data)
+    H_t_DATA.Scaler(norm_factor_data)
+    H_epsilon_DATA.Scaler(norm_factor_data)
+    H_MM_DATA.Scaler(norm_factor_data)
+    H_MM_nosub_DATA.Scaler(norm_factor_data)
+    H_pmiss_DATA.Scaler(norm_factor_data)
+    H_emiss_DATA.Scaler(norm_factor_data)
+    H_pmx_DATA.Scaler(norm_factor_data)
+    H_pmy_DATA.Scaler(norm_factor_data)
+    H_pmz_DATA.Scaler(norm_factor_data)
+    H_ct_DATA.Scaler(norm_factor_data)
+
+    ###
+    # Dummy Normalization
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY.Scaler(norm_factor_dummy)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Scaler(norm_factor_dummy)
+    P_hgcer_xAtCer_vs_MM_DUMMY.Scaler(norm_factor_dummy)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Scaler(norm_factor_dummy)
+    P_hgcer_yAtCer_vs_MM_DUMMY.Scaler(norm_factor_dummy)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_CoinTime_DUMMY.Scaler(norm_factor_dummy)
+    CoinTime_vs_beta_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_beta_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_H_cer_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_H_cal_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_P_cal_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_P_hgcer_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_P_aero_DUMMY.Scaler(norm_factor_dummy)
+    phiq_vs_t_DUMMY.Scaler(norm_factor_dummy)
+    Q2_vs_W_DUMMY.Scaler(norm_factor_dummy)
+    Q2_vs_t_DUMMY.Scaler(norm_factor_dummy)
+    W_vs_t_DUMMY.Scaler(norm_factor_dummy)
+    EPS_vs_t_DUMMY.Scaler(norm_factor_dummy)
+    MM_vs_t_DUMMY.Scaler(norm_factor_dummy)
+    H_ssxfp_DUMMY.Scaler(norm_factor_dummy)
+    H_ssyfp_DUMMY.Scaler(norm_factor_dummy)
+    H_ssxpfp_DUMMY.Scaler(norm_factor_dummy)
+    H_ssypfp_DUMMY.Scaler(norm_factor_dummy)
+    H_hsxfp_DUMMY.Scaler(norm_factor_dummy)
+    H_hsyfp_DUMMY.Scaler(norm_factor_dummy)
+    H_hsxpfp_DUMMY.Scaler(norm_factor_dummy)
+    H_hsypfp_DUMMY.Scaler(norm_factor_dummy)
+    H_ssxptar_DUMMY.Scaler(norm_factor_dummy)
+    H_ssyptar_DUMMY.Scaler(norm_factor_dummy)
+    H_hsxptar_DUMMY.Scaler(norm_factor_dummy)
+    H_hsyptar_DUMMY.Scaler(norm_factor_dummy)
+    H_ssdelta_DUMMY.Scaler(norm_factor_dummy)
+    H_hsdelta_DUMMY.Scaler(norm_factor_dummy)
+    H_ph_q_DUMMY.Scaler(norm_factor_dummy)
+    H_th_q_DUMMY.Scaler(norm_factor_dummy)
+    H_ph_recoil_DUMMY.Scaler(norm_factor_dummy)
+    H_th_recoil_DUMMY.Scaler(norm_factor_dummy)
+    H_Q2_DUMMY.Scaler(norm_factor_dummy)
+    H_W_DUMMY.Scaler(norm_factor_dummy)
+    H_t_DUMMY.Scaler(norm_factor_dummy)
+    H_epsilon_DUMMY.Scaler(norm_factor_dummy)
+    H_MM_DUMMY.Scaler(norm_factor_dummy)
+    H_MM_nosub_DUMMY.Scaler(norm_factor_dummy)
+    H_pmiss_DUMMY.Scaler(norm_factor_dummy)
+    H_emiss_DUMMY.Scaler(norm_factor_dummy)
+    H_pmx_DUMMY.Scaler(norm_factor_dummy)
+    H_pmy_DUMMY.Scaler(norm_factor_dummy)
+    H_pmz_DUMMY.Scaler(norm_factor_dummy)
+    H_ct_DUMMY.Scaler(norm_factor_dummy)
     
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -1488,7 +1609,7 @@ def rand_sub(phi_setting, inpDict):
             # Enforce that kaon_amp never exceeds pion_background_amp (and avoid divide-by-zero)
             if kaon_amp == 0:
                 scale_factor = 0.0
-            elif kaon_amp > pion_background_amp:
+            elif kaon_amp < pion_background_amp:
                 scale_factor = (kaon_amp / pion_background_amp) * 0.05
             else:
                 scale_factor = (kaon_amp / pion_background_amp) * 0.85
@@ -1660,7 +1781,63 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DATA.Add(background_fit[0], -1)
     H_pmz_DATA.Add(background_fit[0], -1)
     H_ct_DATA.Add(background_fit[0], -1)
-        
+
+    ###
+    # Dummy subtraction
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer_DUMMY,-1)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY,-1)
+    P_hgcer_xAtCer_vs_MM_DATA.Add(P_hgcer_xAtCer_vs_MM_DUMMY,-1)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(P_hgcer_nohole_xAtCer_vs_MM_DUMMY,-1)
+    P_hgcer_yAtCer_vs_MM_DATA.Add(P_hgcer_yAtCer_vs_MM_DUMMY,-1)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(P_hgcer_nohole_yAtCer_vs_MM_DUMMY,-1)                
+    MM_vs_CoinTime_DATA.Add(MM_vs_CoinTime_DUMMY,-1)
+    CoinTime_vs_beta_DATA.Add(CoinTime_vs_beta_DUMMY,-1)
+    MM_vs_beta_DATA.Add(MM_vs_beta_DUMMY,-1)
+    MM_vs_H_cer_DATA.Add(MM_vs_H_cer_DUMMY,-1)
+    MM_vs_H_cal_DATA.Add(MM_vs_H_cal_DUMMY,-1)
+    MM_vs_P_cal_DATA.Add(MM_vs_P_cal_RAND,-1)    
+    MM_vs_P_hgcer_DATA.Add(MM_vs_P_hgcer_DUMMY,-1)
+    MM_vs_P_aero_DATA.Add(MM_vs_P_aero_DUMMY,-1)    
+    phiq_vs_t_DATA.Add(phiq_vs_t_DUMMY,-1)
+    Q2_vs_W_DATA.Add(Q2_vs_W_DUMMY,-1)
+    Q2_vs_t_DATA.Add(Q2_vs_t_DUMMY,-1)
+    W_vs_t_DATA.Add(W_vs_t_DUMMY,-1)
+    EPS_vs_t_DATA.Add(EPS_vs_t_DUMMY,-1)
+    MM_vs_t_DATA.Add(MM_vs_t_DUMMY,-1)
+    H_ssxfp_DATA.Add(H_ssxfp_DUMMY,-1)
+    H_ssyfp_DATA.Add(H_ssyfp_DUMMY,-1)
+    H_ssxpfp_DATA.Add(H_ssxpfp_DUMMY,-1)
+    H_ssypfp_DATA.Add(H_ssypfp_DUMMY,-1)
+    H_hsxfp_DATA.Add(H_hsxfp_DUMMY,-1)
+    H_hsyfp_DATA.Add(H_hsyfp_DUMMY,-1)
+    H_hsxpfp_DATA.Add(H_hsxpfp_DUMMY,-1)
+    H_hsypfp_DATA.Add(H_hsypfp_DUMMY,-1)
+    H_ssxptar_DATA.Add(H_ssxptar_DUMMY,-1)
+    H_ssyptar_DATA.Add(H_ssyptar_DUMMY,-1)
+    H_hsxptar_DATA.Add(H_hsxptar_DUMMY,-1)
+    H_hsyptar_DATA.Add(H_hsyptar_DUMMY,-1)
+    H_ssdelta_DATA.Add(H_ssdelta_DUMMY,-1)
+    H_hsdelta_DATA.Add(H_hsdelta_DUMMY,-1)
+    H_ph_q_DATA.Add(H_ph_q_DUMMY,-1)
+    H_th_q_DATA.Add(H_th_q_DUMMY,-1)
+    H_ph_recoil_DATA.Add(H_ph_recoil_DUMMY,-1)
+    H_th_recoil_DATA.Add(H_th_recoil_DUMMY,-1)    
+    H_Q2_DATA.Add(H_Q2_DUMMY,-1)
+    H_W_DATA.Add(H_W_DUMMY,-1)
+    H_t_DATA.Add(H_t_DUMMY,-1)
+    H_epsilon_DATA.Add(H_epsilon_DUMMY,-1)
+    H_MM_DATA.Add(H_MM_DUMMY,-1)
+    H_MM_nosub_DATA.Add(H_MM_nosub_DUMMY,-1)
+    H_pmiss_DATA.Add(H_pmiss_DUMMY,-1)
+    H_emiss_DATA.Add(H_emiss_DUMMY,-1)
+    H_pmx_DATA.Add(H_pmx_DUMMY,-1)
+    H_pmy_DATA.Add(H_pmy_DUMMY,-1)
+    H_pmz_DATA.Add(H_pmz_DUMMY,-1)
+    H_ct_DATA.Add(H_ct_DUMMY,-1)    
+
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
     histDict["phi_setting"] = phi_setting
