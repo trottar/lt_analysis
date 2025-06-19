@@ -227,6 +227,11 @@ def get_eff_charge(hist, inpDict, all_data=True):
     histDict["normfac_dummy"] = normfac_dummy
     if all_data:
         histDict["normfac_simc"] = normfac_simc
+
+    inpDict["normfac_data"] = normfac_data
+    inpDict["normfac_dummy"] = normfac_dummy
+    if all_data:
+        inpDict["normfac_simc"] = normfac_simc        
     
     return histDict
 

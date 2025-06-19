@@ -548,12 +548,6 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":
         P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND = TH2D("P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND", "Y vs MM (no hole cut); Y; MM", 50, -30, 30, 50, 0, 2)        
 
-    sys.path.append("normalize")
-    from get_eff_charge import get_eff_charge
-
-    # Upate hist dictionary with effective charge
-    get_eff_charge(histDict, inpDict, all_data=False)
-
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":        
         
