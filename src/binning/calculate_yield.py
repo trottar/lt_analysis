@@ -479,6 +479,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
 
+                print("HERE"*25,scale_factor)
                 arr_scale_factor.append(scale_factor)
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
