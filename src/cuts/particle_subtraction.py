@@ -62,12 +62,6 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
-    sys.path.append("normalize")
-    from get_eff_charge import get_eff_charge
-
-    # Upate hist dictionary with effective charge
-    for hist in histlist:
-        hist.update(get_eff_charge(hist, inpDict))
 
     norm_factor_data = inpDict["normfac_data"]
     norm_factor_dummy = inpDict["normfac_dummy"]
