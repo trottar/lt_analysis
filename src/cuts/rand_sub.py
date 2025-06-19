@@ -111,16 +111,7 @@ def rand_sub(phi_setting, inpDict):
     # Define return dictionary of data
     histDict = {}
 
-    histDict["phi_setting"] = phi_setting
-
-    sys.path.append("normalize")
-    from get_eff_charge import get_eff_charge
-
-    # Upate hist dictionary with effective charge
-    get_eff_charge(histDict, inpDict, all_data=False)
-
-    norm_factor_data = inpDict["normfac_data"]
-    norm_factor_dummy = inpDict["normfac_dummy"]    
+    histDict["phi_setting"] = phi_setting  
 
     ################################################################################################################################################
     # Import function to define cut bools
@@ -305,6 +296,15 @@ def rand_sub(phi_setting, inpDict):
     RandomWindows[1] = PromptPeak - (BunchSpacing/2) - CoinOffset - (nSkip*BunchSpacing)
     RandomWindows[2] = PromptPeak + (BunchSpacing/2) + CoinOffset + (nSkip*BunchSpacing)
     RandomWindows[3] = PromptPeak + (BunchSpacing/2) + CoinOffset + (nSkip*BunchSpacing) + ((nWindows/2)*BunchSpacing)
+
+    sys.path.append("normalize")
+    from get_eff_charge import get_eff_charge
+
+    # Upate hist dictionary with effective charge
+    get_eff_charge(histDict, inpDict, all_data=False)
+
+    norm_factor_data = inpDict["normfac_data"]
+    norm_factor_dummy = inpDict["normfac_dummy"]  
 
     ################################################################################################################################################
     # Plot definitions
