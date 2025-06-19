@@ -473,6 +473,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     scale_factor = 0.0
                 '''  
                 arr_scale_factor.append(scale_factor)
+                print("tbin {j:.3e} phibin {k:.3e} | Scale factor: {scale_factor:.3e}")
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
