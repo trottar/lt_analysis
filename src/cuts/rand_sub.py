@@ -101,9 +101,6 @@ def rand_sub(phi_setting, inpDict):
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
 
-    norm_factor_data = inpDict["normfac_data"]    
-    norm_factor_dummy = inpDict["normfac_dummy"]
-    
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
@@ -1236,117 +1233,7 @@ def rand_sub(phi_setting, inpDict):
           
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
-    # Normalize data by effective charge
-
-    # Data Normalization
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
-    if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
-    P_hgcer_xAtCer_vs_MM_DATA.Scale(norm_factor_data)
-    if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(norm_factor_data)
-    P_hgcer_yAtCer_vs_MM_DATA.Scale(norm_factor_data)
-    if ParticleType == "kaon":
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(norm_factor_data)        
-    MM_vs_CoinTime_DATA.Scale(norm_factor_data)
-    CoinTime_vs_beta_DATA.Scale(norm_factor_data)
-    MM_vs_beta_DATA.Scale(norm_factor_data)
-    MM_vs_H_cer_DATA.Scale(norm_factor_data)
-    MM_vs_H_cal_DATA.Scale(norm_factor_data)
-    MM_vs_P_cal_DATA.Scale(norm_factor_data)
-    MM_vs_P_hgcer_DATA.Scale(norm_factor_data)
-    MM_vs_P_aero_DATA.Scale(norm_factor_data)
-    phiq_vs_t_DATA.Scale(norm_factor_data)
-    Q2_vs_W_DATA.Scale(norm_factor_data)
-    Q2_vs_t_DATA.Scale(norm_factor_data)
-    W_vs_t_DATA.Scale(norm_factor_data)
-    EPS_vs_t_DATA.Scale(norm_factor_data)
-    MM_vs_t_DATA.Scale(norm_factor_data)    
-    H_ct_DATA.Scale(norm_factor_data)
-    H_ssxfp_DATA.Scale(norm_factor_data)
-    H_ssyfp_DATA.Scale(norm_factor_data)
-    H_ssxpfp_DATA.Scale(norm_factor_data)
-    H_ssypfp_DATA.Scale(norm_factor_data)
-    H_hsxfp_DATA.Scale(norm_factor_data)
-    H_hsyfp_DATA.Scale(norm_factor_data)
-    H_hsxpfp_DATA.Scale(norm_factor_data)
-    H_hsypfp_DATA.Scale(norm_factor_data)
-    H_ssxptar_DATA.Scale(norm_factor_data)
-    H_ssyptar_DATA.Scale(norm_factor_data)
-    H_hsxptar_DATA.Scale(norm_factor_data)
-    H_hsyptar_DATA.Scale(norm_factor_data)
-    H_ssdelta_DATA.Scale(norm_factor_data)
-    H_hsdelta_DATA.Scale(norm_factor_data)
-    H_ph_q_DATA.Scale(norm_factor_data)
-    H_th_q_DATA.Scale(norm_factor_data)
-    H_ph_recoil_DATA.Scale(norm_factor_data)
-    H_th_recoil_DATA.Scale(norm_factor_data)
-    H_Q2_DATA.Scale(norm_factor_data)
-    H_W_DATA.Scale(norm_factor_data)    
-    H_t_DATA.Scale(norm_factor_data)
-    H_epsilon_DATA.Scale(norm_factor_data)
-    H_MM_DATA.Scale(norm_factor_data)
-    H_MM_nosub_DATA.Scale(norm_factor_data)
-    H_pmiss_DATA.Scale(norm_factor_data)
-    H_emiss_DATA.Scale(norm_factor_data)
-    H_pmx_DATA.Scale(norm_factor_data)
-    H_pmy_DATA.Scale(norm_factor_data)
-    H_pmz_DATA.Scale(norm_factor_data)   
-    
-    # Dummy Normalization
-    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_dummy)
-    if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_dummy)
-    P_hgcer_xAtCer_vs_MM_DATA.Scale(norm_factor_dummy)
-    if ParticleType == "kaon":
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(norm_factor_dummy)
-    P_hgcer_yAtCer_vs_MM_DATA.Scale(norm_factor_dummy)
-    if ParticleType == "kaon":
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(norm_factor_dummy)        
-    MM_vs_CoinTime_DATA.Scale(norm_factor_dummy)
-    CoinTime_vs_beta_DATA.Scale(norm_factor_dummy)
-    MM_vs_beta_DATA.Scale(norm_factor_dummy)
-    MM_vs_H_cer_DATA.Scale(norm_factor_dummy)
-    MM_vs_H_cal_DATA.Scale(norm_factor_dummy)
-    MM_vs_P_cal_DATA.Scale(norm_factor_dummy)
-    MM_vs_P_hgcer_DATA.Scale(norm_factor_dummy)
-    MM_vs_P_aero_DATA.Scale(norm_factor_dummy)
-    phiq_vs_t_DATA.Scale(norm_factor_dummy)
-    Q2_vs_W_DATA.Scale(norm_factor_dummy)
-    Q2_vs_t_DATA.Scale(norm_factor_dummy)
-    W_vs_t_DATA.Scale(norm_factor_dummy)
-    EPS_vs_t_DATA.Scale(norm_factor_dummy)
-    MM_vs_t_DATA.Scale(norm_factor_dummy)    
-    H_ct_DATA.Scale(norm_factor_dummy)
-    H_ssxfp_DATA.Scale(norm_factor_dummy)
-    H_ssyfp_DATA.Scale(norm_factor_dummy)
-    H_ssxpfp_DATA.Scale(norm_factor_dummy)
-    H_ssypfp_DATA.Scale(norm_factor_dummy)
-    H_hsxfp_DATA.Scale(norm_factor_dummy)
-    H_hsyfp_DATA.Scale(norm_factor_dummy)
-    H_hsxpfp_DATA.Scale(norm_factor_dummy)
-    H_hsypfp_DATA.Scale(norm_factor_dummy)
-    H_ssxptar_DATA.Scale(norm_factor_dummy)
-    H_ssyptar_DATA.Scale(norm_factor_dummy)
-    H_hsxptar_DATA.Scale(norm_factor_dummy)
-    H_hsyptar_DATA.Scale(norm_factor_dummy)
-    H_ssdelta_DATA.Scale(norm_factor_dummy)
-    H_hsdelta_DATA.Scale(norm_factor_dummy)
-    H_ph_q_DATA.Scale(norm_factor_dummy)
-    H_th_q_DATA.Scale(norm_factor_dummy)
-    H_ph_recoil_DATA.Scale(norm_factor_dummy)
-    H_th_recoil_DATA.Scale(norm_factor_dummy)
-    H_Q2_DATA.Scale(norm_factor_dummy)
-    H_W_DATA.Scale(norm_factor_dummy)    
-    H_t_DATA.Scale(norm_factor_dummy)
-    H_epsilon_DATA.Scale(norm_factor_dummy)
-    H_MM_DATA.Scale(norm_factor_dummy)
-    H_MM_nosub_DATA.Scale(norm_factor_dummy)
-    H_pmiss_DATA.Scale(norm_factor_dummy)
-    H_emiss_DATA.Scale(norm_factor_dummy)
-    H_pmx_DATA.Scale(norm_factor_dummy)
-    H_pmy_DATA.Scale(norm_factor_dummy)
-    H_pmz_DATA.Scale(norm_factor_dummy)      
+    # Normalize data by effective charge    
 
     # Data Random subtraction window
     P_hgcer_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
