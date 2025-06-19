@@ -487,11 +487,11 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 '''
 
 sys.path.append("normalize")
-from get_eff_charge import get_eff_charge
+from get_eff_charge import find_events
 
 # Upate hist dictionary with effective charge
 for hist in histlist:
-    hist.update(get_eff_charge(hist, inpDict))
+    hist.update(find_events(hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
