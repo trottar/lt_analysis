@@ -291,7 +291,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
+                            print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
                             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
@@ -461,7 +461,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         pi_mm_min, pi_mm_max,
                         show_fit=False
                     )[2]
-                    print("HERE"*25, j, k, " : ", kaon_amp, "/",pion_background_amp)
+                    print("HERE"*25, j, k, " : ", kaon_amp, "/", pion_background_amp)
                     # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
                     if kaon_amp == 0:
                         scale_factor = 0.0
