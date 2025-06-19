@@ -418,7 +418,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
         
-    arr_scale_factor = []
+    # Initialize list saving scaled pion values    
+    n_t = len(t_bins) - 1
+    n_φ = len(phi_bins) - 1
+    arr_scale_factor = [[0.0 for _ in range(n_φ)] for _ in range(n_t)]
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -472,7 +475,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
                 '''  
-                arr_scale_factor.append(scale_factor)
+                arr_scale_factor[j][k] = scale_factor
                 print(f"tbin {j:.3e} phibin {k:.3e} | Scale factor: {scale_factor:.3e}")
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -507,16 +510,13 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1): 
-
-            nphi  = len(phi_bins) - 1
-            idx   = j*nphi + k          # unique (t,φ) index
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
-                "scale_factor" : arr_scale_factor[idx],
+                "scale_factor" : arr_scale_factor[j][k],
             }
 
             # Sort dictionary keys alphabetically
