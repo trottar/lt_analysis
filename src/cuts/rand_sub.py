@@ -1470,7 +1470,7 @@ def rand_sub(phi_setting, inpDict):
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
-        particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg)
+        particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
         try:
             ##############

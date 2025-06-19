@@ -49,7 +49,7 @@ from utility import open_root_file
 
 ################################################################################################################################################
 
-def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
+def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -62,6 +62,11 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
+    sys.path.append("normalize")
+    from get_eff_charge import get_eff_charge
+
+    # Upate hist dictionary with effective charge
+    histDict.update(get_eff_charge(histDict, inpDict, all_data=False))
 
     norm_factor_data = inpDict["normfac_data"]
     norm_factor_dummy = inpDict["normfac_dummy"]
