@@ -450,13 +450,13 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 pi_mm_max = 0.92 + MM_offset_DATA
                 # Fit amplitudes: pion background (from raw DATA) and kaon (from SUB_DATA)
                 kaon_amp = fit_gaussian(
-                    hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                    hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
                     pi_mm_min, pi_mm_max,
                     show_fit=False
                 )[2]
 
                 pion_background_amp = fit_gaussian(
-                    subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                    subDict[f"H_MM_nosub_SUB_DATA_{j}"],
                     pi_mm_min, pi_mm_max,
                     show_fit=False
                 )[2]
@@ -464,10 +464,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
                 if kaon_amp == 0:
                     scale_factor = 0.0
-                elif kaon_amp > pion_background_amp:
+                elif kaon_amp < pion_background_amp:
                     scale_factor = (kaon_amp / pion_background_amp) * 0.05
                 else:
-                    scale_factor = (kaon_amp / pion_background_amp) * 0.85       
+                    scale_factor = (kaon_amp / pion_background_amp) * 0.85                               
                 ##############
                 ##############
                 ##############                
