@@ -476,7 +476,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     scale_factor = 0.0
                 '''  
                 arr_scale_factor[j][k] = scale_factor
-                print(f"tbin {j} phibin {k} | Scale factor: {scale_factor:.3e}")
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -645,7 +644,6 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             H_t_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SUB_DATA"]
 
             arr_scale_factor[j][k] = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"]
-            print(f"2 | tbin {j} phibin {k} | Scale factor: {arr_scale_factor[j][k]:.3e}")
 
             mm_hist_data.append(H_MM_DATA.Clone())
             mm_hist_sub.append(H_MM_SUB_DATA.Clone())
@@ -718,7 +716,6 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
             arr_scale_factor[j][k] = binned_dict[kin_type]["scale_factor"][j][k]
-            print(f"Scale factor: {arr_scale_factor[j][k]:.3e}")
 
     nφ = len(phi_bins) - 1
     yield_hist = []
@@ -738,7 +735,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         arr_sub = np.array(hist_val_sub)
         try:
             yld = np.sum(arr_data)/bin_width_data
-            print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
+            #print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
             # Calculate experimental yield error (relative error)
             # Divide by norm factor to cancel out since we need raw counts            
             yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
@@ -749,8 +746,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
                 yld_sub_err = 0.0            
             # Convert to absolute error (required for average_ratio.f)
             yld_err = (yld_data_err**2 + (arr_scale_factor[j][k] * yld_sub_err)**2) * yld
-            print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")
-            print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {arr_scale_factor[j][k]:.3e}")            
+            #print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")
+            #print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {arr_scale_factor[j][k]:.3e}")            
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
