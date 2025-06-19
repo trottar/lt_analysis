@@ -347,9 +347,6 @@ if Q2 == "5p5" and W == "3p02":
 ##############
 ##############
 
-sys.path.append("normalize")
-from get_eff_charge import get_eff_charge
-
 # DATA
 sys.path.append("cuts")
 from rand_sub import rand_sub
@@ -360,10 +357,6 @@ from rand_sub import rand_sub
 histlist = []
 for phiset in phisetlist:
     histlist.append(rand_sub(phiset,inpDict))
-
-# Upate hist dictionary with effective charge
-for hist in histlist:
-    hist.update(get_eff_charge(hist, inpDict))
 
 print("\n\n")
 
