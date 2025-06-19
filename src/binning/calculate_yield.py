@@ -664,7 +664,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                     "binned_hist_sub" : binned_hist_sub,
                     "mm_hist_data" : mm_hist_data,
                     "mm_hist_sub" : mm_hist_sub,
-                    "scale_factor" : scale_factor[j+k],
+                    "scale_factor" : scale_factor,
                 }
         
     return binned_dict
