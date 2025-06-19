@@ -478,12 +478,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 )[2]
 
                 # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
-                if kaon_amp == 0:
+                if pion_background_amp == 0:
                     scale_factor = 0.0
-                elif kaon_amp < pion_background_amp:
-                    scale_factor = (kaon_amp / pion_background_amp) * 0.05
                 else:
-                    scale_factor = (kaon_amp / pion_background_amp) * 0.85                               
+                    scale_factor = (kaon_amp / pion_background_amp) * 0.85                              
                 ##############
                 ##############
                 ##############                

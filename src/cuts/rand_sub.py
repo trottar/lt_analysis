@@ -1663,11 +1663,9 @@ def rand_sub(phi_setting, inpDict):
                 show_fit=False
             )[2]
 
-            # Enforce that kaon_amp never exceeds pion_background_amp (and avoid divide-by-zero)
-            if kaon_amp == 0:
+            # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
+            if pion_background_amp == 0:
                 scale_factor = 0.0
-            elif kaon_amp < pion_background_amp:
-                scale_factor = (kaon_amp / pion_background_amp) * 0.05
             else:
                 scale_factor = (kaon_amp / pion_background_amp) * 0.85
             ##############
