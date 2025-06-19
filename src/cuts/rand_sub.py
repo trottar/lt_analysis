@@ -111,6 +111,8 @@ def rand_sub(phi_setting, inpDict):
     # Define return dictionary of data
     histDict = {}
 
+    histDict["phi_setting"] = phi_setting
+
     ################################################################################################################################################
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
