@@ -461,12 +461,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         pi_mm_min, pi_mm_max,
                         show_fit=False
                     )[2]
-                    
-                    # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
-                    if pion_background_amp == 0:
-                        scale_factor = 0.0
-                    else:
-                        scale_factor = (kaon_amp / pion_background_amp) * 0.85
+                    scale_factor = (kaon_amp / pion_background_amp) * 0.85
                     ##############
                     ##############
                     ##############
@@ -725,9 +720,13 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld = np.sum(arr_data)/bin_width_data
             print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
             # Calculate experimental yield error (relative error)
-            # Divide by norm factor to cancel out since we need raw counts
+            # Divide by norm factor to cancel out since we need raw counts            
             yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
+            if math.isnan(yld_data_err) or math.isinf(yld_data_err):
+                yld_data_err = 0.0
             yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
+            if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
+                yld_sub_err = 0.0            
             # Convert to absolute error (required for average_ratio.f)
             yld_err = (yld_data_err**2 + (scale_factor * yld_sub_err)**2) * yld
             print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")

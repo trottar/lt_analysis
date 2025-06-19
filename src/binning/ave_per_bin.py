@@ -460,12 +460,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     pi_mm_min, pi_mm_max,
                     show_fit=False
                 )[2]
-
-                # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
-                if pion_background_amp == 0:
-                    scale_factor = 0.0
-                else:
-                    scale_factor = (kaon_amp / pion_background_amp) * 0.85                              
+                scale_factor = (kaon_amp / pion_background_amp) * 0.85                              
                 ##############
                 ##############
                 ##############                
@@ -512,7 +507,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)   
-        
+
         # Dummy subtraction
         hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(hist_bin_dict["H_Q2_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_{}".format(j)], -1)
