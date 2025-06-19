@@ -357,7 +357,7 @@ from rand_sub import rand_sub
 histlist = []
 for phiset in phisetlist:
     histlist.append(rand_sub(phiset,inpDict))
-
+    
 print("\n\n")
 
 settingList = []
@@ -485,6 +485,13 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 ** Once unseparated cross sections are achieved with good parameterization, cross section separation can be performed.
 
 '''
+
+sys.path.append("normalize")
+from get_eff_charge import get_eff_charge
+
+# Upate hist dictionary with effective charge
+for hist in histlist:
+    hist.update(get_eff_charge(hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc

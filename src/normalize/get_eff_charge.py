@@ -50,15 +50,17 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_eff_charge(hist, inpDict):    
+def get_eff_charge(hist, inpDict, all_data=False):    
 
     phi_setting = hist["phi_setting"]
-    simc_normfactor = hist["simc_normfactor"]
-    simc_nevents = hist["simc_nevents"]
+    if all_data:
+        simc_normfactor = hist["simc_normfactor"]
+        simc_nevents = hist["simc_nevents"]
     NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
     NumEvts_MM_DUMMY = hist["NumEvts_MM_DUMMY"]
-    NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]
-    NumEvts_MM_unweighted_SIMC = hist["NumEvts_MM_unweighted_SIMC"]
+    if all_data:    
+        NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]
+        NumEvts_MM_unweighted_SIMC = hist["NumEvts_MM_unweighted_SIMC"]
     
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
@@ -203,23 +205,28 @@ def get_eff_charge(hist, inpDict):
     if phi_setting == "Right":
         normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
         normfac_data = 1/(data_charge_right)
-        normfac_simc = (simc_normfactor)/(simc_nevents)
+        if all_data:
+            normfac_simc = (simc_normfactor)/(simc_nevents)
     if phi_setting == "Left":
         normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
         normfac_data = 1/(data_charge_left)
-        normfac_simc = (simc_normfactor)/(simc_nevents)
+        if all_data:
+            normfac_simc = (simc_normfactor)/(simc_nevents)
     if phi_setting == "Center":
         normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
         normfac_data = 1/(data_charge_center)
-        normfac_simc = (simc_normfactor)/(simc_nevents)
+        if all_data:
+            normfac_simc = (simc_normfactor)/(simc_nevents)
         
     print("\n\n{} data total number of events: {:.3e}".format(phi_setting, NumEvts_MM_DATA))
     print("{} dummy total number of events: {:.3e}".format(phi_setting, NumEvts_MM_DUMMY))
-    print("{} simc weighted total number of events: {:.3e}".format(phi_setting, NumEvts_MM_SIMC))
-    print("{} simc unweighted total number of events: {:.3e}".format(phi_setting, NumEvts_MM_unweighted_SIMC))
+    if all_data:    
+        print("{} simc weighted total number of events: {:.3e}".format(phi_setting, NumEvts_MM_SIMC))
+        print("{} simc unweighted total number of events: {:.3e}".format(phi_setting, NumEvts_MM_unweighted_SIMC))
     print("\n\n{} data normalization: {:.3e}".format(phi_setting, normfac_data))
     print("{} dummy normalization: {:.3e}".format(phi_setting, normfac_dummy))
-    print("{} simc normalization: {:.3e}".format(phi_setting, normfac_simc))
+    if all_data:
+        print("{} simc normalization: {:.3e}".format(phi_setting, normfac_simc))
 
     ################################################################################################################################################        
 
@@ -228,13 +235,11 @@ def get_eff_charge(hist, inpDict):
     histDict["G_data_eff"] = G_data_eff
     histDict["normfac_data"] = normfac_data
     histDict["normfac_dummy"] = normfac_dummy
-    histDict["normfac_simc"] = normfac_simc
+    if all_data:
+        histDict["normfac_simc"] = normfac_simc
     histDict["NumEvts_MM_DATA"] = NumEvts_MM_DATA    
     histDict["NumEvts_MM_DUMMY"] = NumEvts_MM_DUMMY
-    histDict["NumEvts_MM_SIMC"] = NumEvts_MM_SIMC
-
-    inpDict["normfac_data"] = normfac_data
-    inpDict["normfac_dummy"] = normfac_dummy
-    inpDict["normfac_simc"] = normfac_simc
+    if all_data:
+        histDict["NumEvts_MM_SIMC"] = NumEvts_MM_SIMC
     
     return histDict
