@@ -1478,7 +1478,7 @@ def rand_sub(phi_setting, inpDict):
                 fit_gaussian(H_MM_nosub_DATA, pi_mm_min, pi_mm_max, show_fit=False)[2]
                 / 
                 fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max, show_fit=False)[2]
-            ) * 0.85
+            ) * 0.75
             ##############
             ##############
             ##############
