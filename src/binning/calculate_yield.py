@@ -599,8 +599,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
-
-
             
     return processed_dict
 
@@ -627,7 +625,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             H_MM_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SUB_DATA"]
             H_t_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SUB_DATA"]
 
-            arr_scale_factor = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"]
+            scale_factor = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"]
 
             mm_hist_data.append(H_MM_DATA.Clone())
             mm_hist_sub.append(H_MM_SUB_DATA.Clone())
@@ -666,7 +664,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                     "binned_hist_sub" : binned_hist_sub,
                     "mm_hist_data" : mm_hist_data,
                     "mm_hist_sub" : mm_hist_sub,
-                    "scale_factor" : arr_scale_factor,
+                    "scale_factor" : scale_factor,
                 }
         
     return binned_dict
@@ -690,7 +688,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_sub = binned_dict[kin_type]["binned_hist_sub"]
     mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
-    arr_scale_factor = binned_dict[kin_type]["scale_factor"]
+    scale_factor = binned_dict[kin_type]["scale_factor"]
     
     yield_hist = []
     yield_err_hist = []
@@ -698,7 +696,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     i=0 # iter
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
-    for data, sub, scale in zip(binned_hist_data, binned_hist_sub, arr_scale_factor):
+    for data, sub in zip(binned_hist_data, binned_hist_sub):
         bin_val_data, hist_val_data = data
         bin_val_sub, hist_val_sub = sub
         bin_width_data = np.mean(np.diff(bin_val_data))
@@ -712,7 +710,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
             yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = np.sqrt(yld_data_err**2 + (scale * yld_sub_err)**2) * yld
+            yld_err = np.sqrt(yld_data_err**2 + (scale_factor[i] * yld_sub_err)**2) * yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
