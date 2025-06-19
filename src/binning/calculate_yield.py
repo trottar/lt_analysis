@@ -496,8 +496,15 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Dummy subtraction
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)
-            print("HERE"*25, hist_bin_dict["H_t_DATA_{}_{}".format(j, k)])
-            
+            # Print the contents of the histograms for debugging
+            print("H_t_DATA_{}_{}:".format(j, k), [hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].GetBinContent(i) for i in range(1, hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].GetNbinsX()+1)])
+            print("H_MM_DATA_{}_{}:".format(j, k), [hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].GetBinContent(i) for i in range(1, hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].GetNbinsX()+1)])
+            if "H_MM_SUB_DATA_{}_{}".format(j, k) in subDict:
+                print("H_MM_SUB_DATA_{}_{}:".format(j, k), [subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].GetBinContent(i) for i in range(1, subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].GetNbinsX()+1)])
+            if "H_t_SUB_DATA_{}_{}".format(j, k) in subDict:
+                print("H_t_SUB_DATA_{}_{}:".format(j, k), [subDict["H_t_SUB_DATA_{}_{}".format(j, k)].GetBinContent(i) for i in range(1, subDict["H_t_SUB_DATA_{}_{}".format(j, k)].GetNbinsX()+1)])
+            print("scale_factor for t_bin{}phi_bin{}:".format(j+1, k+1), arr_scale_factor[j+k] if len(arr_scale_factor) > (j+k) else None)
+
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
