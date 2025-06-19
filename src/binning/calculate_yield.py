@@ -291,7 +291,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
-                            print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
+                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
                             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
