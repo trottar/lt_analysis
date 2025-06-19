@@ -123,7 +123,6 @@ def get_eff_charge(hist, inpDict, all_data=True):
                                 break                                
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
-                continue
         InData_efficiency = np.array([float(x) for x in InData_efficiency_right.split(' ')], dtype='float64')
         InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_right.split(' ')], dtype='float64')
         
@@ -145,7 +144,6 @@ def get_eff_charge(hist, inpDict, all_data=True):
                                 break                                
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
-                continue
         InData_efficiency = np.array([float(x) for x in InData_efficiency_left.split(' ')], dtype='float64')
         InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_left.split(' ')], dtype='float64')
         
@@ -167,7 +165,6 @@ def get_eff_charge(hist, inpDict, all_data=True):
                                 break                                
             else:
                 print("WARNING: Run {} does not have a valid PID log!".format(run))
-                continue
         InData_efficiency = np.array([float(x) for x in InData_efficiency_center.split(' ')], dtype='float64')
         InData_error_efficiency = np.array([float(x) for x in InData_error_efficiency_center.split(' ')], dtype='float64')
 
