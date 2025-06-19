@@ -1486,10 +1486,12 @@ def rand_sub(phi_setting, inpDict):
             )[2]
 
             # Enforce that kaon_amp never exceeds pion_background_amp (and avoid divide-by-zero)
-            if kaon_amp == 0 or kaon_amp > pion_background_amp:
+            if kaon_amp == 0:
                 scale_factor = 0.0
+            elif kaon_amp > pion_background_amp:
+                scale_factor = (kaon_amp / pion_background_amp) * 0.05
             else:
-                scale_factor = (pion_background_amp / kaon_amp) * 0.85
+                scale_factor = (kaon_amp / pion_background_amp) * 0.85
             ##############
             ##############
             ##############
