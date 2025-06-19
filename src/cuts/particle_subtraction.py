@@ -62,6 +62,9 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
+    norm_factor_data = inpDict["normfac_data"]
+    norm_factor_dummy = inpDict["normfac_dummy"]
+
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
 
@@ -1056,6 +1059,118 @@ def particle_subtraction_cuts(subDict, inpDict, SubtractedParticle, hgcer_cutg=N
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
     ###
+    # Data Normalization 
+    P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
+    P_hgcer_xAtCer_vs_MM_DATA.Scale(norm_factor_data)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(norm_factor_data)
+    P_hgcer_yAtCer_vs_MM_DATA.Scale(norm_factor_data)
+    if ParticleType == "kaon":    
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(norm_factor_data)
+    MM_vs_CoinTime_DATA.Scale(norm_factor_data)
+    CoinTime_vs_beta_DATA.Scale(norm_factor_data)
+    MM_vs_beta_DATA.Scale(norm_factor_data)
+    MM_vs_H_cer_DATA.Scale(norm_factor_data)
+    MM_vs_H_cal_DATA.Scale(norm_factor_data)
+    MM_vs_P_cal_DATA.Scale(norm_factor_data)
+    MM_vs_P_hgcer_DATA.Scale(norm_factor_data)
+    MM_vs_P_aero_DATA.Scale(norm_factor_data)
+    phiq_vs_t_DATA.Scale(norm_factor_data)
+    Q2_vs_W_DATA.Scale(norm_factor_data)
+    Q2_vs_t_DATA.Scale(norm_factor_data)
+    W_vs_t_DATA.Scale(norm_factor_data)
+    EPS_vs_t_DATA.Scale(norm_factor_data)
+    MM_vs_t_DATA.Scale(norm_factor_data)
+    H_ssxfp_DATA.Scale(norm_factor_data)
+    H_ssyfp_DATA.Scale(norm_factor_data)
+    H_ssxpfp_DATA.Scale(norm_factor_data)
+    H_ssypfp_DATA.Scale(norm_factor_data)
+    H_hsxfp_DATA.Scale(norm_factor_data)
+    H_hsyfp_DATA.Scale(norm_factor_data)
+    H_hsxpfp_DATA.Scale(norm_factor_data)
+    H_hsypfp_DATA.Scale(norm_factor_data)
+    H_ssxptar_DATA.Scale(norm_factor_data)
+    H_ssyptar_DATA.Scale(norm_factor_data)
+    H_hsxptar_DATA.Scale(norm_factor_data)
+    H_hsyptar_DATA.Scale(norm_factor_data)
+    H_ssdelta_DATA.Scale(norm_factor_data)
+    H_hsdelta_DATA.Scale(norm_factor_data)
+    H_ph_q_DATA.Scale(norm_factor_data)
+    H_th_q_DATA.Scale(norm_factor_data)
+    H_ph_recoil_DATA.Scale(norm_factor_data)
+    H_th_recoil_DATA.Scale(norm_factor_data)
+    H_Q2_DATA.Scale(norm_factor_data)
+    H_W_DATA.Scale(norm_factor_data)
+    H_t_DATA.Scale(norm_factor_data)
+    H_epsilon_DATA.Scale(norm_factor_data)
+    H_MM_DATA.Scale(norm_factor_data)
+    H_MM_nosub_DATA.Scale(norm_factor_data)
+    H_pmiss_DATA.Scale(norm_factor_data)
+    H_emiss_DATA.Scale(norm_factor_data)
+    H_pmx_DATA.Scale(norm_factor_data)
+    H_pmy_DATA.Scale(norm_factor_data)
+    H_pmz_DATA.Scale(norm_factor_data)
+    H_ct_DATA.Scale(norm_factor_data)
+
+    ###
+    # Dummy Normalization 
+    P_hgcer_xAtCer_vs_yAtCer_DUMMY.Scale(norm_factor_dummy)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Scale(norm_factor_dummy)
+    P_hgcer_xAtCer_vs_MM_DUMMY.Scale(norm_factor_dummy)
+    if ParticleType == "kaon":
+        P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Scale(norm_factor_dummy)
+    P_hgcer_yAtCer_vs_MM_DUMMY.Scale(norm_factor_dummy)
+    if ParticleType == "kaon":    
+        P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_CoinTime_DUMMY.Scale(norm_factor_dummy)
+    CoinTime_vs_beta_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_beta_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_H_cer_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_H_cal_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_P_cal_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_P_hgcer_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_P_aero_DUMMY.Scale(norm_factor_dummy)
+    phiq_vs_t_DUMMY.Scale(norm_factor_dummy)
+    Q2_vs_W_DUMMY.Scale(norm_factor_dummy)
+    Q2_vs_t_DUMMY.Scale(norm_factor_dummy)
+    W_vs_t_DUMMY.Scale(norm_factor_dummy)
+    EPS_vs_t_DUMMY.Scale(norm_factor_dummy)
+    MM_vs_t_DUMMY.Scale(norm_factor_dummy)
+    H_ssxfp_DUMMY.Scale(norm_factor_dummy)
+    H_ssyfp_DUMMY.Scale(norm_factor_dummy)
+    H_ssxpfp_DUMMY.Scale(norm_factor_dummy)
+    H_ssypfp_DUMMY.Scale(norm_factor_dummy)
+    H_hsxfp_DUMMY.Scale(norm_factor_dummy)
+    H_hsyfp_DUMMY.Scale(norm_factor_dummy)
+    H_hsxpfp_DUMMY.Scale(norm_factor_dummy)
+    H_hsypfp_DUMMY.Scale(norm_factor_dummy)
+    H_ssxptar_DUMMY.Scale(norm_factor_dummy)
+    H_ssyptar_DUMMY.Scale(norm_factor_dummy)
+    H_hsxptar_DUMMY.Scale(norm_factor_dummy)
+    H_hsyptar_DUMMY.Scale(norm_factor_dummy)
+    H_ssdelta_DUMMY.Scale(norm_factor_dummy)
+    H_hsdelta_DUMMY.Scale(norm_factor_dummy)
+    H_ph_q_DUMMY.Scale(norm_factor_dummy)
+    H_th_q_DUMMY.Scale(norm_factor_dummy)
+    H_ph_recoil_DUMMY.Scale(norm_factor_dummy)
+    H_th_recoil_DUMMY.Scale(norm_factor_dummy)
+    H_Q2_DUMMY.Scale(norm_factor_dummy)
+    H_W_DUMMY.Scale(norm_factor_dummy)
+    H_t_DUMMY.Scale(norm_factor_dummy)
+    H_epsilon_DUMMY.Scale(norm_factor_dummy)
+    H_MM_DUMMY.Scale(norm_factor_dummy)
+    H_MM_nosub_DUMMY.Scale(norm_factor_dummy)
+    H_pmiss_DUMMY.Scale(norm_factor_dummy)
+    H_emiss_DUMMY.Scale(norm_factor_dummy)
+    H_pmx_DUMMY.Scale(norm_factor_dummy)
+    H_pmy_DUMMY.Scale(norm_factor_dummy)
+    H_pmz_DUMMY.Scale(norm_factor_dummy)
+    H_ct_DUMMY.Scale(norm_factor_dummy)
+
+    ###
     # Data dummy subtraction
     P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer_DUMMY,-1)
     if ParticleType == "kaon":
@@ -1125,6 +1240,9 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
+
+    norm_factor_data = inpDict["normfac_data"]
+    norm_factor_dummy = inpDict["normfac_dummy"]   
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
@@ -1454,6 +1572,24 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)],-1)    
 
         ###
+        # Data Normalization
+        hist_dict["H_Q2_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_dict["H_W_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_dict["H_t_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_dict["H_epsilon_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_dict["H_MM_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_dict["H_MM_nosub_DATA_{}".format(j)].Scale(norm_factor_data)
+
+        ###
+        # Dummy Normalization
+        hist_dict["H_Q2_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_dict["H_W_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_dict["H_t_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_dict["H_epsilon_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_dict["H_MM_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+
+        ###
         # Data dummy subtraction
         hist_dict["H_Q2_DATA_{}".format(j)].Add(hist_dict["H_Q2_DUMMY_{}".format(j)],-1)
         hist_dict["H_W_DATA_{}".format(j)].Add(hist_dict["H_W_DUMMY_{}".format(j)],-1)
@@ -1476,6 +1612,9 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
+
+    norm_factor_data = inpDict["normfac_data"]
+    norm_factor_dummy = inpDict["normfac_dummy"]
 
     nWindows = subDict["nWindows"]
     phi_setting = subDict["phi_setting"]
@@ -1805,7 +1944,19 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)    
 
             ###
-            # Data Random subtraction
-            hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_RAND_{}_{}".format(j, k)],-1)
-            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
-            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)],-1)                                    
+            # Data Normalization
+            hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+
+            ###
+            # Dummy Normalization
+            hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+            hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+            hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+                                    
+            ###
+            # Data Dummy subtraction
+            hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_{}_{}".format(j, k)],-1)
+            hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)],-1)
+            hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)],-1)                                    
