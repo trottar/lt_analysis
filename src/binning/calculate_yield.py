@@ -710,7 +710,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
             yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = np.sqrt(yld_data_err**2 + (scale_factor[i] * yld_sub_err)**2) * yld
+            yld_err = np.sqrt(yld_data_err**2 + (scale_factor * yld_sub_err)**2) * yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
