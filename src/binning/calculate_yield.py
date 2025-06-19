@@ -467,7 +467,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         pi_mm_min, pi_mm_max,
                         show_fit=False
                     )[2]
-                    
+
                     print("HERE"*25, j, k, " : ", kaon_amp, "/", pion_background_amp)
                     # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
                     if pion_background_amp == 0:
@@ -486,8 +486,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 '''  
                 arr_scale_factor.append(scale_factor)
 
-                subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                #subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                #subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
   
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
