@@ -502,7 +502,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
-                "scale_factor" : arr_scale_factor[j][k],
+                "scale_factor" : arr_scale_factor[j+k],
             }
 
             # Sort dictionary keys alphabetically
