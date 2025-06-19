@@ -717,7 +717,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
-            arr_scale_factor[i][j] = binned_dict[kin_type]["scale_factor"]
+            arr_scale_factor[j][k] = binned_dict[kin_type]["scale_factor"]
 
     scale_factor = arr_scale_factor.flatten()
     print(f"Scale factor: {scale_factor:.3e}")
