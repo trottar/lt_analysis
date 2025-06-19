@@ -1468,6 +1468,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+    '''
     ###
     # Data Normalization
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
@@ -1635,7 +1636,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)      
-    
+    '''
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         subDict["nWindows"] = nWindows

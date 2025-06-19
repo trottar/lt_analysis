@@ -1064,6 +1064,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
+    '''
     ###
     # Data Normalization 
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
@@ -1231,7 +1232,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)
-
+    '''
 ################################################################################################################################################
 
 def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
