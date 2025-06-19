@@ -625,7 +625,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             H_MM_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SUB_DATA"]
             H_t_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SUB_DATA"]
 
-            scale_factor = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"]
+            scale_factor = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"][j+k]
 
             mm_hist_data.append(H_MM_DATA.Clone())
             mm_hist_sub.append(H_MM_SUB_DATA.Clone())
@@ -664,7 +664,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                     "binned_hist_sub" : binned_hist_sub,
                     "mm_hist_data" : mm_hist_data,
                     "mm_hist_sub" : mm_hist_sub,
-                    "scale_factor" : scale_factor,
+                    "scale_factor" : scale_factor[j+k],
                 }
         
     return binned_dict
