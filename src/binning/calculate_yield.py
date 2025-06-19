@@ -418,7 +418,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
         
-    arr_scale_factor = np.zeros((len(t_bins)-1, len(phi_bins)-1))
+    arr_scale_factor = np.zeros((len(t_bins)-1 + len(phi_bins)-1))
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -438,11 +438,13 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)            
-            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)        
 
-            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)],-1)
-            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)],-1)            
-            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)],-1)            
+            # Normalize for yields
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
+            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
@@ -468,7 +470,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
 
-                arr_scale_factor[j][k] = scale_factor
+                arr_scale_factor[j+k] = scale_factor
 
                 # Apply scale factor
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -490,12 +492,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
-
-            # Normalize for yields
-            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
-            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
-            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
-            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             
             # Dummy subtraction
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
@@ -504,8 +500,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
-                "H_MM_SUB_DATA" : hist_bin_dict["H_MM_SUB_DATA_{}_{}".format(j, k)],
-                "H_t_SUB_DATA" : hist_bin_dict["H_t_SUB_DATA_{}_{}".format(j, k)],
+                "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
+                "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
                 "scale_factor" : arr_scale_factor[j][k],
             }
 
@@ -667,9 +663,9 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                 binned_dict[kin_type] = {
                     "binned_t_data" : binned_t_data,
                     "binned_hist_data" : binned_hist_data,
-                    "binned_hist_dummy" : binned_hist_sub,
+                    "binned_hist_sub" : binned_hist_sub,
                     "mm_hist_data" : mm_hist_data,
-                    "mm_hist_dummy" : mm_hist_sub,
+                    "mm_hist_sub" : mm_hist_sub,
                     "scale_factor" : arr_scale_factor,
                 }
         
@@ -700,7 +696,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     yield_err_hist  = []
     binned_sub_data = [[], []]
 
-    for data, sub in zip(binned_hist_data, binned_hist_sub):
+    for data, sub, scale in zip(binned_hist_data, binned_hist_sub, arr_scale_factor):
         # unpack
         bin_edges, hist_data = data
         _,         hist_sub   = sub
@@ -716,22 +712,22 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
         try:
             # — normalized yields —
-            Y_data = N_data / (normfac_data * bin_width)
-            Y_sub  = N_sub  / (normfac_data * bin_width)
+            Y_data = N_data / (bin_width)
+            Y_sub  = N_sub  / (bin_width)
 
             # — relative errors on each yield —
             rel_data = np.sqrt(1.0/N_data + data_charge_err**2)
             rel_sub  = np.sqrt(1.0/N_sub  + data_charge_err**2)
 
             # — scale factor and its absolute error —
-            s          = Y_sub / Y_data
+            s          = scale
             scale_err  = s * np.sqrt(rel_data**2 + rel_sub**2)
 
             # — split out absolute components of the errors —
-            σ_data_stat   = np.sqrt(N_data) / (normfac_data * bin_width)
+            σ_data_stat   = np.sqrt(N_data) / (bin_width)
             σ_data_charge = Y_data * data_charge_err
 
-            σ_sub_stat    = np.sqrt(N_sub)  / (normfac_data * bin_width)
+            σ_sub_stat    = np.sqrt(N_sub)  / (bin_width)
             σ_bkgd_stat   = s * σ_sub_stat
             σ_bkgd_scale  = Y_sub * scale_err
 
