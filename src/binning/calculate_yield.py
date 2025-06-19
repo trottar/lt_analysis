@@ -502,7 +502,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
-                "scale_factor" : arr_scale_factor,
+                "scale_factor" : arr_scale_factor[j+k],
             }
 
             # Sort dictionary keys alphabetically
@@ -692,69 +692,44 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
     arr_scale_factor = binned_dict[kin_type]["scale_factor"]
     
-    yield_hist      = []
-    yield_err_hist  = []
-    binned_sub_data = [[], []]
-
+    yield_hist = []
+    yield_err_hist = []
+    binned_sub_data = [[],[]]
+    i=0 # iter
+    print("-"*25)
+    # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, sub, scale in zip(binned_hist_data, binned_hist_sub, arr_scale_factor):
-        # unpack
-        bin_edges, hist_data = data
-        _,         hist_sub   = sub
-
-        # assume uniform binning
-        bin_width = np.mean(np.diff(bin_edges))
-
-        # raw counts
-        arr_data = np.array(hist_data)
-        arr_sub  = np.array(hist_sub)
-        N_data   = np.sum(arr_data)
-        N_sub    = np.sum(arr_sub)
-
+        bin_val_data, hist_val_data = data
+        bin_val_sub, hist_val_sub = sub
+        bin_width_data = np.mean(np.diff(bin_val_data))
+        arr_data = np.array(hist_val_data)
+        bin_width_sub = np.mean(np.diff(bin_val_sub))
+        arr_sub = np.array(hist_val_sub)
         try:
-            # — normalized yields —
-            Y_data = N_data / (bin_width)
-            Y_sub  = N_sub  / (bin_width)
-
-            # — relative errors on each yield —
-            rel_data = np.sqrt(1.0/N_data + data_charge_err**2)
-            rel_sub  = np.sqrt(1.0/N_sub  + data_charge_err**2)
-
-            # — scale factor and its absolute error —
-            s          = scale
-            scale_err  = s * np.sqrt(rel_data**2 + rel_sub**2)
-
-            # — split out absolute components of the errors —
-            σ_data_stat   = np.sqrt(N_data) / (bin_width)
-            σ_data_charge = Y_data * data_charge_err
-
-            σ_sub_stat    = np.sqrt(N_sub)  / (bin_width)
-            σ_bkgd_stat   = s * σ_sub_stat
-            σ_bkgd_scale  = Y_sub * scale_err
-
-            # — net yield & total error —
-            y_net = Y_data - (s * Y_sub)
-            σ_net = np.sqrt(
-                σ_data_stat**2
-            + σ_data_charge**2
-            + σ_bkgd_stat**2
-            + σ_bkgd_scale**2
-            )
-
-        except (ZeroDivisionError, ValueError):
-            y_net, σ_net = 0.0, 0.0
-
-        # sanitize negatives/NaNs/infs
-        if y_net < 0 or not np.isfinite(y_net):
-            y_net, σ_net = 0.0, 0.0
-
-        # save results
-        yield_hist.append(y_net)
-        yield_err_hist.append(σ_net)
-
-        # build & store the subtracted histogram
-        subtracted = arr_data - s * arr_sub
-        binned_sub_data[0].append(bin_edges)
-        binned_sub_data[1].append(subtracted)
+            yld = np.sum(arr_data)/bin_width_data
+            # Calculate experimental yield error (relative error)
+            # Divide by norm factor to cancel out since we need raw counts
+            yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
+            yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
+            # Convert to absolute error (required for average_ratio.f)
+            yld_err = np.sqrt(yld_data_err**2 + (scale * yld_sub_err)**2) * yld
+        except ZeroDivisionError:
+            yld = 0.0
+            yld_err = 0.0
+        if yld < 0.0:
+            yld = 0.0
+            yld_err = 0.0
+        if math.isnan(yld) or math.isnan(yld_err):
+            yld = 0.0
+            yld_err = 0.0
+        if math.isinf(yld) or math.isinf(yld_err):
+            yld = 0.0
+            yld_err = 0.0
+        yield_hist.append(yld)
+        yield_err_hist.append(yld_err)
+        binned_sub_data[0].append(bin_val_data)
+        binned_sub_data[1].append(arr_data)
+        i+=1
 
     # Print statements to check sizes
     #print("Size of binned_t_data:", len(binned_t_data))
@@ -1072,47 +1047,40 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     
     binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
 
-    yield_hist         = []
-    yield_err_hist     = []
-    binned_sub_simc    = [[], []]
-
-    for i, simc in enumerate(binned_hist_simc):
-        # unpack
-        bin_edges, hist_counts = simc
-
-        # — bin width (assume uniform bins) —
-        bin_width = np.mean(np.diff(bin_edges))
-
-        # — array of simc counts (already normalized) —
-        arr_simc = np.array(hist_counts)
-
-        # — compute yield (counts per unit x) —
-        y_simc = np.sum(arr_simc) / bin_width
-
-        # — get number of unweighted events for this bin —
-        N_unw = binned_unweighted_NumEvts_simc[i]
-
+    yield_hist = []
+    yield_err_hist = []
+    binned_sub_simc = [[],[]]
+    i=0 # iter
+    print("-"*25)
+    for simc in binned_hist_simc:
+        bin_val_simc, hist_val_simc = simc
+        bin_width_simc = np.mean(np.diff(bin_val_simc))
+        arr_simc = np.array(hist_val_simc)
+        total_count = np.sum(arr_simc)/bin_width_simc
         try:
-            # — relative stat error from unweighted MC —
-            rel_err = 1.0 / np.sqrt(N_unw)
-
-            # — absolute error on the yield —
-            σ_simc = rel_err * y_simc
-
-        except (ZeroDivisionError, ValueError):
-            y_simc, σ_simc = 0.0, 0.0
-
-        # — sanitize negatives, NaNs, or infinities —
-        if y_simc < 0 or not np.isfinite(y_simc) or not np.isfinite(σ_simc):
-            y_simc, σ_simc = 0.0, 0.0
-
-        # — store results —
-        yield_hist.append(y_simc)
-        yield_err_hist.append(σ_simc)
-
-        # — store the “subtracted” simc histogram (here just the simc itself) —
-        binned_sub_simc[0].append(bin_edges)
+            yld = total_count # Normalization applied above
+            # Calculate simc yield error (relative error)
+            # No norm_fac, shouldn't normalize non-weighted distribution
+            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
+            # Convert to absolute error (required for average_ratio.f)
+            yld_err = yld_err*yld
+        except ZeroDivisionError:
+            yld = 0.0
+            yld_err = 0.0
+        if yld < 0.0:
+            yld = 0.0
+            yld_err = 0.0
+        if math.isnan(yld) or math.isnan(yld_err):
+            yld = 0.0
+            yld_err = 0.0
+        if math.isinf(yld) or math.isinf(yld_err):
+            yld = 0.0
+            yld_err = 0.0            
+        yield_hist.append(yld)
+        yield_err_hist.append(yld_err)
+        binned_sub_simc[0].append(bin_val_simc)
         binned_sub_simc[1].append(arr_simc)
+        i+=1
 
     # Print statements to check sizes
     #print("Size of binned_t_simc:", len(binned_t_simc))
