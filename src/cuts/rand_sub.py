@@ -1471,14 +1471,25 @@ def rand_sub(phi_setting, inpDict):
             # HARD CODED #
             ##############
             pi_mm_min = 0.88 + MM_offset_DATA
-            pi_mm_max = 0.92 + MM_offset_DATA
-            
+            pi_mm_max = 0.92 + MM_offset_DATA            
             # Scale pion to kaon data
-            scale_factor = (
-                fit_gaussian(H_MM_nosub_DATA, pi_mm_min, pi_mm_max, show_fit=False)[2]
-                / 
-                fit_gaussian(subDict["H_MM_nosub_SUB_DATA"], pi_mm_min, pi_mm_max, show_fit=False)[2]
-            ) * 0.25
+            pion_background_amp = fit_gaussian(
+                H_MM_nosub_DATA,
+                pi_mm_min, pi_mm_max,
+                show_fit=False
+            )[2]
+
+            kaon_amp = fit_gaussian(
+                subDict["H_MM_nosub_SUB_DATA"],
+                pi_mm_min, pi_mm_max,
+                show_fit=False
+            )[2]
+
+            # Enforce that kaon_amp never exceeds pion_background_amp (and avoid divide-by-zero)
+            if kaon_amp == 0 or kaon_amp > pion_background_amp:
+                scale_factor = 0.0
+            else:
+                scale_factor = (pion_background_amp / kaon_amp) * 0.85
             ##############
             ##############
             ##############
