@@ -1,4 +1,4 @@
-#! /usr/bin/python
+rnp#! /usr/bin/python
 
 #
 # Description:
@@ -1470,8 +1470,8 @@ def rand_sub(phi_setting, inpDict):
             ##############
             # HARD CODED #
             ##############
-            pi_mm_min = 0.90 + MM_offset_DATA
-            pi_mm_max = 0.94 + MM_offset_DATA
+            pi_mm_min = 0.88 + MM_offset_DATA
+            pi_mm_max = 0.92 + MM_offset_DATA
             
             # Scale pion to kaon data
             scale_factor = (

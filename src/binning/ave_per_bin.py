@@ -446,8 +446,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 ##############
                 # HARD CODED #
                 ##############
-                pi_mm_min = 0.90 + MM_offset_DATA
-                pi_mm_max = 0.94 + MM_offset_DATA
+                pi_mm_min = 0.88 + MM_offset_DATA
+                pi_mm_max = 0.92 + MM_offset_DATA
                 scale_factor = (
                     fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], pi_mm_min, pi_mm_max, show_fit=False)[2]
                     /
