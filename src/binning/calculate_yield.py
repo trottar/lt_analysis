@@ -724,7 +724,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         for i in range(len(arr_scale_factor))
         for j in range(len(arr_scale_factor[0]))
     ]
-    print(f"Scale factor: {scale_factor:.3e}")
+    print(f"Scale factor: {scale_factor}")
     
     yield_hist = []
     yield_err_hist = []
