@@ -452,7 +452,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     fit_gaussian(hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], pi_mm_min, pi_mm_max, show_fit=False)[2]
                     /
                     fit_gaussian(subDict["H_MM_nosub_SUB_DATA_{}".format(j)], pi_mm_min, pi_mm_max, show_fit=False)[2]
-                ) * 0.5                
+                ) * 0.25                
                 ##############
                 ##############
                 ##############                
