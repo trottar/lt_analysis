@@ -462,7 +462,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         show_fit=False
                     )[2]
                     
-                    print("HERE"*25, j, k, " : ", kaon_amp, "/", pion_background_amp)
                     # If the kaon amplitude is zero or exceeds the pion background, zero out the scale
                     if pion_background_amp == 0:
                         scale_factor = 0.0
@@ -490,7 +489,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
-            
+
             # Normalize for yields
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
@@ -556,6 +555,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
                         if ParticleType == "kaon":
+                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
                             subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
                             subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
                         background_fit[0].SetLineColor(3)
