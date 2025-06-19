@@ -476,7 +476,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     scale_factor = 0.0
                 '''  
                 arr_scale_factor[j][k] = scale_factor
-                print(f"tbin {j:.3e} phibin {k:.3e} | Scale factor: {scale_factor:.3e}")
+                print(f"tbin {j} phibin {k} | Scale factor: {scale_factor:.3e}")
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -640,6 +640,8 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             H_t_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SUB_DATA"]
 
             scale_factor = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["scale_factor"]
+            print(f"2 | tbin {j} phibin {k} | Scale factor: {scale_factor:.3e}")
+
             mm_hist_data.append(H_MM_DATA.Clone())
             mm_hist_sub.append(H_MM_SUB_DATA.Clone())
 
@@ -702,6 +704,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
     scale_factor = binned_dict[kin_type]["scale_factor"]
+
+    print(f"3 | tbin {j} phibin {k} | Scale factor: {scale_factor:.3e}")
     
     yield_hist = []
     yield_err_hist = []
