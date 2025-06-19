@@ -454,13 +454,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)   
-
-        # Dummy subtraction
-        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(hist_bin_dict["H_Q2_DUMMY_{}".format(j)], -1)
-        hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_{}".format(j)], -1)
-        hist_bin_dict["H_t_DATA_{}".format(j)].Add(hist_bin_dict["H_t_DUMMY_{}".format(j)], -1)
-        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)], -1)
-        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_{}".format(j)], -1)  
         
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
@@ -496,11 +489,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 ##############                
             except ZeroDivisionError:
                 scale_factor = 0.0
-
+            '''
             if scale_factor > 10.0:
                 print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                 scale_factor = 0.0
-                
+            '''  
             # Scale pion to subtraction proper peak
             subDict["H_Q2_SUB_DATA_{}".format(j)].Scale(scale_factor)
             subDict["H_W_SUB_DATA_{}".format(j)].Scale(scale_factor)
@@ -521,7 +514,14 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DATA_{}".format(j)].Add(background_data_fit[0], -1)
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(background_data_fit[0], -1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)                
-            
+
+        # Dummy subtraction
+        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(hist_bin_dict["H_Q2_DUMMY_{}".format(j)], -1)
+        hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_{}".format(j)], -1)
+        hist_bin_dict["H_t_DATA_{}".format(j)].Add(hist_bin_dict["H_t_DUMMY_{}".format(j)], -1)
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)], -1)
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_{}".format(j)], -1)  
+
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
             "H_W_DATA" : hist_bin_dict["H_W_DATA_{}".format(j)],

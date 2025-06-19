@@ -444,11 +444,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
-            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
-
-            # Dummy subtraction
-            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
-            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)            
+            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)          
             
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
@@ -484,11 +480,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     ##############
                 except ZeroDivisionError:
                     scale_factor = 0.0
-
+                '''
                 if scale_factor > 10.0:
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
-                
+                '''  
                 arr_scale_factor.append(scale_factor)
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -502,13 +498,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
 
+            # Dummy subtraction
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
+            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)             
+
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
     total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)]))-1 # '-1' to remove t-phi bin edges
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
-        for k in range(len(phi_bins)-1):
+        for k in range(len(phi_bins)-1): 
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
