@@ -552,7 +552,7 @@ def rand_sub(phi_setting, inpDict):
     from get_eff_charge import get_eff_charge
 
     # Upate hist dictionary with effective charge
-    get_eff_charge(histDict, inpDict, True)
+    get_eff_charge(histDict, inpDict, all_data=False)
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":        

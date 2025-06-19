@@ -50,7 +50,7 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_eff_charge(hist, inpDict, all_data=False):    
+def get_eff_charge(hist, inpDict, all_data=True):    
 
     phi_setting = hist["phi_setting"]
     if all_data:
