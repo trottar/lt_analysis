@@ -719,13 +719,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         for k in range(len(phi_bins)-1):
             arr_scale_factor[j][k] = binned_dict[kin_type]["scale_factor"]
 
-    scale_factor = [
-        (i, j, arr_scale_factor[i][j])
-        for i in range(len(arr_scale_factor))
-        for j in range(len(arr_scale_factor[0]))
-    ]
-    print(f"Scale factor: {scale_factor}")
-    
+    nφ = len(phi_bins) - 1
     yield_hist = []
     yield_err_hist = []
     binned_sub_data = [[],[]]
@@ -733,6 +727,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, sub in zip(binned_hist_data, binned_hist_sub):
+        j = i // nφ
+        k = i %  nφ
         bin_val_data, hist_val_data = data
         bin_val_sub, hist_val_sub = sub
         bin_width_data = np.mean(np.diff(bin_val_data))
@@ -751,9 +747,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
                 yld_sub_err = 0.0            
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = (yld_data_err**2 + (scale_factor[i] * yld_sub_err)**2) * yld
+            yld_err = (yld_data_err**2 + (arr_scale_factor[j][k] * yld_sub_err)**2) * yld
             print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")
-            print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {scale_factor[i]:.3e}")            
+            print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {arr_scale_factor[j][k]:.3e}")            
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
