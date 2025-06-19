@@ -438,22 +438,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)],-1)   
-
-        # Data Normalization
-        hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(norm_factor_data)
-        hist_bin_dict["H_W_DATA_{}".format(j)].Scale(norm_factor_data)
-        hist_bin_dict["H_t_DATA_{}".format(j)].Scale(norm_factor_data)
-        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(norm_factor_data)
-        hist_bin_dict["H_MM_DATA_{}".format(j)].Scale(norm_factor_data)
-        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Scale(norm_factor_data)
-
-        # Dummy Normalization
-        hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
-        hist_bin_dict["H_W_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
-        hist_bin_dict["H_t_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
-        hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
-        hist_bin_dict["H_MM_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
-        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)   
         
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
@@ -511,8 +495,24 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_W_DATA_{}".format(j)].Add(background_data_fit[0], -1)
         hist_bin_dict["H_t_DATA_{}".format(j)].Add(background_data_fit[0], -1)
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(background_data_fit[0], -1)
-        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)                
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)  
 
+        # Data Normalization
+        hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_bin_dict["H_W_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_bin_dict["H_t_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Scale(norm_factor_data)
+
+        # Dummy Normalization
+        hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_bin_dict["H_W_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_bin_dict["H_t_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_bin_dict["H_MM_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)   
+        
         # Dummy subtraction
         hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(hist_bin_dict["H_Q2_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_{}".format(j)], -1)
