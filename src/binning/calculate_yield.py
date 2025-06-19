@@ -481,7 +481,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                
+
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
   
@@ -511,13 +511,16 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1): 
+
+            nphi  = len(phi_bins) - 1
+            idx   = j*nphi + k          # unique (t,φ) index
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
-                "scale_factor" : arr_scale_factor[j+k],
+                "scale_factor" : arr_scale_factor[idx],
             }
 
             # Sort dictionary keys alphabetically
@@ -720,6 +723,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         arr_sub = np.array(hist_val_sub)
         try:
             yld = np.sum(arr_data)/bin_width_data
+            print(f"Yield: {yld:.3f} =  NumEvts: {np.sum(arr_data):.3f} / BinWidth: {bin_width_data:.3f}")
             # Calculate experimental yield error (relative error)
             # Divide by norm factor to cancel out since we need raw counts
             yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
