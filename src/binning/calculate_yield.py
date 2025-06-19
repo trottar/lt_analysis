@@ -496,6 +496,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Dummy subtraction
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1)
+            print("HERE"*25, hist_bin_dict["H_t_DATA_{}_{}".format(j, k)])
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
@@ -710,7 +711,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
             yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = np.sqrt(yld_data_err**2 + (scale_factor * yld_sub_err)**2) * yld
+            yld_err = (yld_data_err**2 + (scale_factor * yld_sub_err)**2) * yld
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
@@ -1054,9 +1055,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         bin_val_simc, hist_val_simc = simc
         bin_width_simc = np.mean(np.diff(bin_val_simc))
         arr_simc = np.array(hist_val_simc)
-        total_count = np.sum(arr_simc)/bin_width_simc
         try:
-            yld = total_count # Normalization applied above
+            yld = np.sum(arr_simc)/bin_width_simc
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
