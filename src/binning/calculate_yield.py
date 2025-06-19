@@ -705,7 +705,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
     scale_factor = binned_dict[kin_type]["scale_factor"]
 
-    print(f"3 | tbin {j} phibin {k} | Scale factor: {scale_factor:.3e}")
+    print(f"Scale factor: {scale_factor:.3e}")
     
     yield_hist = []
     yield_err_hist = []
