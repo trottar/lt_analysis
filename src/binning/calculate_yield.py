@@ -719,7 +719,11 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         for k in range(len(phi_bins)-1):
             arr_scale_factor[j][k] = binned_dict[kin_type]["scale_factor"]
 
-    scale_factor = arr_scale_factor.flatten()
+    scale_factor = [
+        (i, j, arr_scale_factor[i][j])
+        for i in range(len(arr_scale_factor))
+        for j in range(len(arr_scale_factor[0]))
+    ]
     print(f"Scale factor: {scale_factor:.3e}")
     
     yield_hist = []
