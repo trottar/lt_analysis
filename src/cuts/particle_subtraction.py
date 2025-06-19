@@ -66,7 +66,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     from get_eff_charge import get_eff_charge
 
     # Upate hist dictionary with effective charge
-    histDict.update(get_eff_charge(histDict, inpDict, all_data=False))
+    get_eff_charge(histDict, inpDict, all_data=False)
 
     norm_factor_data = inpDict["normfac_data"]
     norm_factor_dummy = inpDict["normfac_dummy"]
