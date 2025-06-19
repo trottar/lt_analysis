@@ -708,8 +708,18 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_sub = binned_dict[kin_type]["binned_hist_sub"]
     mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
-    scale_factor = binned_dict[kin_type]["scale_factor"]
 
+    # Initialize list saving scaled pion values    
+    n_t = len(t_bins) - 1
+    n_φ = len(phi_bins) - 1
+    arr_scale_factor = [[0.0 for _ in range(n_φ)] for _ in range(n_t)]
+
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+        for k in range(len(phi_bins)-1):
+            arr_scale_factor[i][j] = binned_dict[kin_type]["scale_factor"]
+
+    scale_factor = arr_scale_factor.flatten()
     print(f"Scale factor: {scale_factor:.3e}")
     
     yield_hist = []
@@ -737,9 +747,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
                 yld_sub_err = 0.0            
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = (yld_data_err**2 + (scale_factor * yld_sub_err)**2) * yld
+            yld_err = (yld_data_err**2 + (scale_factor[i] * yld_sub_err)**2) * yld
             print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")
-            print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {scale_factor:.3e}")            
+            print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {scale_factor[i]:.3e}")            
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
