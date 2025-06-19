@@ -232,5 +232,9 @@ def get_eff_charge(hist, inpDict):
     histDict["NumEvts_MM_DATA"] = NumEvts_MM_DATA    
     histDict["NumEvts_MM_DUMMY"] = NumEvts_MM_DUMMY
     histDict["NumEvts_MM_SIMC"] = NumEvts_MM_SIMC
+
+    inpDict["normfac_data"] = normfac_data
+    inpDict["normfac_dummy"] = normfac_dummy
+    inpDict["normfac_simc"] = normfac_simc
     
     return histDict
