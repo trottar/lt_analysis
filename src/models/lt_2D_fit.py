@@ -385,29 +385,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # ------------------------------------------------------------------
         # Re-parameterised version enforcing |ρ| ≤ 1 
         # ------------------------------------------------------------------
-
-        fff2_normfactor = 1.0 # scale factor for the fit function
-
-        w_dep = 1/((w_list[i]**2) - (mtar**2))**(0.85*(w_set_num**2) - 5.97*w_set_num + 12.68)
-        fff2_normfactor_wdep =  (1/w_dep) # change W dependence
-        fff2_normfactor_qdep = 1e-1 * np.exp(-q2_list[i])
-        #fff2_normfactor = fff2_normfactor_qdep
-
-        a = 1.0
-        b = 1.0
-        c = 1.0
-        d = 1.0
-
         # Re-parameterised LT/TT enforcing |ρ|≤1:
-        # fff2_normfactor, a, b, c, d, PI must be in scope here
         fff2 = TF2(
             "fff2",
             (
-                f"{fff2_normfactor} * ("
-                f"{a} * [0]"                                             # σ_T
-                f"+ {b} * y*[1]"                                        # ε·σ_L
-                f"+ {c} * sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # ρ_LT·√(σₜσₗ)
-                f"+ {d} * y*cos(2*x*({PI}/180))*[3]*[0]"               # ρ_TT·σₜ
+                f"("
+                f"[0]"                                             # σ_T
+                f"+ y*[1]"                                        # ε·σ_L
+                f"+ sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # ρ_LT·√(σₜσₗ)
+                f"+ y*cos(2*x*({PI}/180))*[3]*[0]"               # ρ_TT·σₜ
                 f")"
             ),
             0, 360,
@@ -743,7 +729,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             with open(fn_sep, mode) as f:
                 f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
                     sig_l, sig_l_err, sig_t, sig_t_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
-                    fff2.GetChisquare(), t_list[i], w_list[i], q2_list[i], theta_list[i]))
+                    red_chi2, t_list[i], w_list[i], q2_list[i], theta_list[i]))
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
             
@@ -859,6 +845,18 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             print("Error writing to file {}.".format(fn_unsep))
 
         del c1, c2, c3, c4, c5
+
+        print(f"\n=== Bin {i+1} Summary ===")
+        print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
+        print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
+        print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
+        print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
+        print(f"  Reduced χ² = {red_chi2:.2f} (NDF = {ndf})")        
+        print(f"  σ_T  = {sig_t:.3f} ± {sig_t_err:.3f}")
+        print(f"  σ_L  = {sig_l:.3f} ± {sig_l_err:.3f}")
+        print(f"  σ_LT = {sig_lt:.3f} ± {sig_lt_err:.3f}")
+        print(f"  σ_TT = {sig_tt:.3f} ± {sig_tt_err:.3f}")
+        print("=== End of Bin Summary ===\n")
             
     return t_list
 
