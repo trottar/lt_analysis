@@ -845,18 +845,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             print("Error writing to file {}.".format(fn_unsep))
 
         del c1, c2, c3, c4, c5
-
-        print(f"\n=== Bin {i+1} Summary ===")
-        print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
-        print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
-        print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
-        print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
-        print(f"  Reduced χ² = {red_chi2:.2f} (NDF = {ndf})")        
-        print(f"  σ_T  = {sig_t:.3f} ± {sig_t_err:.3f}")
-        print(f"  σ_L  = {sig_l:.3f} ± {sig_l_err:.3f}")
-        print(f"  σ_LT = {sig_lt:.3f} ± {sig_lt_err:.3f}")
-        print(f"  σ_TT = {sig_tt:.3f} ± {sig_tt_err:.3f}")
-        print("=== End of Bin Summary ===\n")
             
     return t_list
 
