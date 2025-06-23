@@ -97,8 +97,8 @@ w_set = float(W.replace("p",".")) # W value
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
 PARAM_LIMITS = {
-    "sigT" : [(-1e3, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(-1e3, 1e3)]*3,   # σ_L  : longitudinal
+    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
     "rhoLT": [(-100.0, 100.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
     "rhoTT": [(-100.0, 100.0)]*3     # ρ_TT : σ_TT / σT
 }
