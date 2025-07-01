@@ -411,26 +411,14 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 	   Qdep_T=(exp(-Q2_g**2))/Q2_g
 	   Qdep_TT=Q2_g*(exp(-Q2_g))
 
-C       Testing functions, works for all Q2 but bad ratios
-	   sigL=(fitpar(1)*Qdep_L*ft)*exp(-fitpar(2)*(abs(t_gev)))
+c 	Best for Q2=4.4, W=2.74 (No Q2 dependence), after CS xsect fit
+	   sigL=(fitpar(1)*ft)*exp(-fitpar(2)*(abs(t_gev)))
 
-	   sigT=(fitpar(5)*exp(-fitpar(6)*(abs(t_gev)))+fitpar(7)*(abs(t_gev)))
-     >          *(Qdep_T**fitpar(8))
+	   sigT=(fitpar(5) / abs(tt)**fitpar(6)) * exp(-abs(fitpar(7) * tt))
 	   
-	   siglt=(fitpar(9)*exp(fitpar(10)*abs(t_gev))
-     >           +fitpar(11)/abs(t_gev))*sin(thetacm)	   
+	   siglt=(fitpar(9) / abs(tt))	   
 
-	   sigtt=(fitpar(13)*Q2_g*exp(-Q2_g))*ft*sin(thetacm)**2
-
-C       Best for Q2=4.4, 5.5 (No Q2 dependence)
-c	   sigL=(fitpar(1)*ft)*exp(-fitpar(2)*(abs(t_gev)))
-c
-c	   sigT=(fitpar(5)/(abs(t_gev)**fitpar(6)))
-c	   
-c	   siglt=fitpar(9)*exp(fitpar(10)*abs(t_gev))
-c    >           *sin(thetacm)
-c
-c	   sigtt=(fitpar(13)/(abs(t_gev)**fitpar(14)))*sin(thetacm)**2
+	   sigtt=(fitpar(13) / abs(tt)**fitpar(14)) * exp(-abs(fitpar(15) * tt))
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
@@ -439,7 +427,9 @@ c       now convert to different W
 c       W dependence given by 1/(W^2-M^2)^2
 c       factor 15.333 is value of (w**2-ami**2)**2 at W=2.19
 	   
-	  wfactor=1.D0/(s_gev-mtar_gev**2)**2
+c	  wfactor=1.D0/(s_gev-mtar_gev**2)**2
+	  wfactor=1.D0/(s_gev-mtar_gev**2)
+     >		**(0.85*(w_set**2) - 5.97*w_set + 12.68)
 	  sig=sig219*wfactor
 	  sigl=sigl*wfactor
 	  sigt=sigt*wfactor
