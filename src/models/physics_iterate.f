@@ -36,7 +36,7 @@ c	real*8 efer			!energy of target particle
 	real*8 pkx,pky,pkz		!kaon momentum in lab.
 	real*8 zero
 
-*       RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+*       RLT (7/11/2024): Redefined functional forms of L, T, LT, t_gev
 *       that incorporates Q2-dep based of pi FF
 	real Qdep_L, Qdep_T, Qdep_LT, Qdep_TT
 	
@@ -80,8 +80,8 @@ c Variables calculated in transformation to gamma-NUCLEON center of mass.
 *=====================================================================
 c       Fit parameters.
 	integer npar,ipar
-*       RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/TT) for
-*                       the xfit_in_t.py script to work. LT/TT are zeros	
+*       RLT (1/2/2024): Need to have 16 parameters (4 for L/T/LT/t_gev) for
+*                       the xfit_in_t.py script to work. LT/t_gev are zeros	
 	parameter (npar=16)	!number of fit parameters for H, k+ and D, k-
 	real*8 fitpar(npar),par,par_er
 	save fitpar
@@ -414,11 +414,11 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 c 	Best for Q2=4.4, W=2.74 (No Q2 dependence), after CS xsect fit
 	   sigL=(fitpar(1)*ft)*exp(-fitpar(2)*(abs(t_gev)))
 
-	   sigT=(fitpar(5) / abs(tt)**fitpar(6)) * exp(-abs(fitpar(7) * tt))
+	   sigT=(fitpar(5) / abs(t_gev)**fitpar(6)) * exp(-abs(fitpar(7) * t_gev))
 	   
-	   siglt=(fitpar(9) / abs(tt))	   
+	   siglt=(fitpar(9) / abs(t_gev))	   
 
-	   sigtt=(fitpar(13) / abs(tt)**fitpar(14)) * exp(-abs(fitpar(15) * tt))
+	   sigtt=(fitpar(13) / abs(t_gev)**fitpar(14)) * exp(-abs(fitpar(15) * t_gev))
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
