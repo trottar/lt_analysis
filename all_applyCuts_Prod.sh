@@ -69,22 +69,22 @@ grab_runs () {
 #Q2="3p0"
 #W="3p14"
 # DONE
-#Q2="4p4"
-#W="2p74"
+Q2="4p4"
+W="2p74"
 # TODO
-Q2="5p5"
-W="3p02"
+#Q2="5p5"
+#W="3p02"
 
 KIN="Q${Q2}W${W}"
 
+'''
 TARGET=("LH2" "dummy")
 EPS=("high" "low")
 PHISET=("center" "left" "right")
-
-#TARGET=("dummy")
-#EPS=("high" "low")
-#EPS=("low")
-#PHISET=("center")
+'''
+TARGET=("LH2")
+EPS=("high" "low")
+PHISET=("center" "left" "right")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
@@ -128,6 +128,7 @@ for t in "${TARGET[@]}"; do
 			    cd "${LTANAPATH}"
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
 			    ./applyCuts_Prod.sh -pm ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
+				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
 			done
 			break ;;
 		    [Nn]* ) 

@@ -103,10 +103,11 @@ for data_type in ["simc"]:
 
     branch_to_check = f"{mass_var_name}_shift"  # Check if shift already exists for file
     
+    '''
     if branch_to_check in branch_names:
         print(f"\n\nBranch '{branch_to_check}' is in the file already.")
         continue
-    
+    '''
     # Define a function for fitting a Gaussian with dynamically determined FWHM range
     def fit_gaussian(hist, x_min, x_max):
 
