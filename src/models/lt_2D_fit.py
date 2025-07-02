@@ -1050,6 +1050,7 @@ for i in range(n):
 g_rho_lt = TGraphErrors(n, t_arr, rhoLT_arr, err_t_arr, errRhoLT_arr)
 g_rho_tt = TGraphErrors(n, t_arr, rhoTT_arr, err_t_arr, errRhoTT_arr)
 
+ROOT.gStyle.SetOptTitle(0)
 ROOT.gStyle.SetOptFit(1)
 ROOT.gStyle.SetStatW(0.15)
 ROOT.gStyle.SetStatH(0.15)
