@@ -81,7 +81,8 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # True - Set range of parameter search from +/- max_param_bounds
     # False - Set range of parameter search from current_params +/- off*abs(current_params) (off = 0.1, 10% param value)
     full_optimization = True
-    #full_optimization = False
+
+    skip_optimization = True # Set to True to skip optimization and use fixed parameters
 
     # Fixed separated xsect parameterization
     if skip_optimization:
