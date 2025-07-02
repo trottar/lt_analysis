@@ -1050,13 +1050,17 @@ for i in range(n):
 g_rho_lt = TGraphErrors(n, t_arr, rhoLT_arr, err_t_arr, errRhoLT_arr)
 g_rho_tt = TGraphErrors(n, t_arr, rhoTT_arr, err_t_arr, errRhoTT_arr)
 
+ROOT.gStyle.SetOptFit(1)
+ROOT.gStyle.SetStatW(0.15)
+ROOT.gStyle.SetStatH(0.15)
+
 # Style and draw rho_LT
-c_rho = TCanvas("c_rho_lt","rho_LT vs t",800,600)
+c_rho = TCanvas()
 g_rho_lt.SetMarkerStyle(21)
 g_rho_lt.SetMarkerColor(ROOT.kBlue)
 g_rho_lt.GetXaxis().SetTitle("-t [GeV^{2}]")
 g_rho_lt.GetYaxis().SetTitle("#rho_{LT}")
-g_rho_lt.Draw("AP")
+g_rho_lt.Draw("A*")
 c_rho.Print(outputpdf)
 c_rho.Clear()
 
@@ -1065,6 +1069,6 @@ g_rho_tt.SetMarkerStyle(22)
 g_rho_tt.SetMarkerColor(ROOT.kRed)
 g_rho_tt.GetXaxis().SetTitle("-t [GeV^{2}]")
 g_rho_tt.GetYaxis().SetTitle("#rho_{TT}")
-g_rho_tt.Draw("AP")
+g_rho_tt.Draw("A*")
 c_rho.Print(outputpdf+')')
 c_rho.Clear()
