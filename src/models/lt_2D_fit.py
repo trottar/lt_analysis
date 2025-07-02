@@ -1057,8 +1057,7 @@ ROOT.gStyle.SetStatH(0.15)
 
 # Style and draw rho_LT
 c_rho = TCanvas()
-g_rho_lt.SetMarkerStyle(21)
-g_rho_lt.SetMarkerColor(ROOT.kBlue)
+g_rho_lt.SetMarkerColor(1)
 g_rho_lt.GetXaxis().SetTitle("-t [GeV^{2}]")
 g_rho_lt.GetYaxis().SetTitle("#rho_{LT}")
 g_rho_lt.Draw("A*")
@@ -1066,8 +1065,7 @@ c_rho.Print(outputpdf)
 c_rho.Clear()
 
 # Style and draw rho_TT
-g_rho_tt.SetMarkerStyle(22)
-g_rho_tt.SetMarkerColor(ROOT.kRed)
+g_rho_tt.SetMarkerColor(1)
 g_rho_tt.GetXaxis().SetTitle("-t [GeV^{2}]")
 g_rho_tt.GetYaxis().SetTitle("#rho_{TT}")
 g_rho_tt.Draw("A*")
