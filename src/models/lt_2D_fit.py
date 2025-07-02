@@ -996,7 +996,7 @@ c_total.Print(outputpdf)
 c_total.Clear()
 
 # --- Compute rho_LT and rho_TT vs t ---
-# Assume g_sig_l_total, g_sig_t_total, g_sig_lt_total, g_sig_tt_total are ROOT.TGraphErrors
+# assume g_sig_l_total, g_sig_t_total, g_sig_lt_total, g_sig_tt_total are TGraphErrors
 n = g_sig_l_total.GetN()
 
 t_arr     = array('d', [0.0]*n)
@@ -1011,26 +1011,26 @@ TT_arr    = array('d', [0.0]*n)
 errTT_arr = array('d', [0.0]*n)
 
 for i in range(n):
-    x, y = ROOT.Double(), ROOT.Double()
-    g_sig_l_total.GetPoint(i, x, y)
-    t_arr[i]     = float(x)
-    L_arr[i]     = float(y)
+    x, y = g_sig_l_total.GetPoint(i)
+    t_arr[i]     = x
+    L_arr[i]     = y
     errL_arr[i]  = g_sig_l_total.GetErrorY(i)
     err_t_arr[i] = g_sig_l_total.GetErrorX(i)
 
-    g_sig_t_total.GetPoint(i, x, y)
-    T_arr[i]     = float(y)
+    _, y = g_sig_t_total.GetPoint(i)
+    T_arr[i]     = y
     errT_arr[i]  = g_sig_t_total.GetErrorY(i)
 
-    g_sig_lt_total.GetPoint(i, x, y)
-    LT_arr[i]    = float(y)
+    _, y = g_sig_lt_total.GetPoint(i)
+    LT_arr[i]    = y
     errLT_arr[i] = g_sig_lt_total.GetErrorY(i)
 
-    g_sig_tt_total.GetPoint(i, x, y)
-    TT_arr[i]    = float(y)
+    _, y = g_sig_tt_total.GetPoint(i)
+    TT_arr[i]    = y
     errTT_arr[i] = g_sig_tt_total.GetErrorY(i)
 
-# Calculate rho and propagate errors
+# now compute rhoLT and rhoTT as before…
+
 rhoLT_arr    = array('d', [0.0]*n)
 errRhoLT_arr = array('d', [0.0]*n)
 rhoTT_arr    = array('d', [0.0]*n)
@@ -1039,28 +1039,19 @@ errRhoTT_arr = array('d', [0.0]*n)
 for i in range(n):
     if T_arr[i]*L_arr[i] > 0:
         rhoLT_arr[i] = LT_arr[i] / math.sqrt(T_arr[i]*L_arr[i])
-        # error propagation for rho_LT
         errRhoLT_arr[i] = math.sqrt(
             (errLT_arr[i]/math.sqrt(T_arr[i]*L_arr[i]))**2 +
             (0.5*LT_arr[i]*errT_arr[i]/(T_arr[i]*math.sqrt(T_arr[i]*L_arr[i])))**2 +
             (0.5*LT_arr[i]*errL_arr[i]/(L_arr[i]*math.sqrt(T_arr[i]*L_arr[i])))**2
         )
-    else:
-        rhoLT_arr[i]    = 0.0
-        errRhoLT_arr[i] = 0.0
-
     if T_arr[i] > 0:
         rhoTT_arr[i]    = TT_arr[i] / T_arr[i]
-        # error propagation for rho_TT
         errRhoTT_arr[i] = math.sqrt(
             (errTT_arr[i]/T_arr[i])**2 +
             (TT_arr[i]*errT_arr[i]/(T_arr[i]**2))**2
         )
-    else:
-        rhoTT_arr[i]    = 0.0
-        errRhoTT_arr[i] = 0.0
 
-# Create graphs
+# build and draw your TGraphErrors exactly as before…
 g_rho_lt = ROOT.TGraphErrors(n, t_arr, rhoLT_arr, err_t_arr, errRhoLT_arr)
 g_rho_tt = ROOT.TGraphErrors(n, t_arr, rhoTT_arr, err_t_arr, errRhoTT_arr)
 
