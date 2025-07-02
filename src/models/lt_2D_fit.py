@@ -1047,13 +1047,13 @@ for i in range(n):
         )
 
 # build and draw your TGraphErrors as before…
-g_rho_lt = ROOT.TGraphErrors(n, t_arr, rhoLT_arr, err_t_arr, errRhoLT_arr)
-g_rho_tt = ROOT.TGraphErrors(n, t_arr, rhoTT_arr, err_t_arr, errRhoTT_arr)
+g_rho_lt = TGraphErrors(n, t_arr, rhoLT_arr, err_t_arr, errRhoLT_arr)
+g_rho_tt = TGraphErrors(n, t_arr, rhoTT_arr, err_t_arr, errRhoTT_arr)
 
 # Style and draw rho_LT
-c_rho = ROOT.TCanvas("c_rho_lt","rho_LT vs t",800,600)
+c_rho = TCanvas("c_rho_lt","rho_LT vs t",800,600)
 g_rho_lt.SetMarkerStyle(21)
-g_rho_lt.SetMarkerColor(ROOT.kBlue)
+g_rho_lt.SetMarkerColor(kBlue)
 g_rho_lt.GetXaxis().SetTitle("-t [GeV^{2}]")
 g_rho_lt.GetYaxis().SetTitle("#rho_{LT}")
 g_rho_lt.Draw("AP")
@@ -1062,7 +1062,7 @@ c_rho.Clear()
 
 # Style and draw rho_TT
 g_rho_tt.SetMarkerStyle(22)
-g_rho_tt.SetMarkerColor(ROOT.kRed)
+g_rho_tt.SetMarkerColor(kRed)
 g_rho_tt.GetXaxis().SetTitle("-t [GeV^{2}]")
 g_rho_tt.GetYaxis().SetTitle("#rho_{TT}")
 g_rho_tt.Draw("AP")
