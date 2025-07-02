@@ -996,41 +996,36 @@ c_total.Print(outputpdf)
 c_total.Clear()
 
 # --- Compute rho_LT and rho_TT vs t ---
-# assume g_sig_l_total, g_sig_t_total, g_sig_lt_total, g_sig_tt_total are TGraphErrors
-n = g_sig_l_total.GetN()
+n        = g_sig_l_total.GetN()
+x_vals_L = g_sig_l_total.GetX()
+y_vals_L = g_sig_l_total.GetY()
+x_err_L  = g_sig_l_total.GetEX()   # alias for GetErrorX
+y_err_L  = g_sig_l_total.GetEY()   # alias for GetErrorY
 
-t_arr     = array('d', [0.0]*n)
-err_t_arr = array('d', [0.0]*n)
-L_arr     = array('d', [0.0]*n)
-errL_arr  = array('d', [0.0]*n)
-T_arr     = array('d', [0.0]*n)
-errT_arr  = array('d', [0.0]*n)
-LT_arr    = array('d', [0.0]*n)
-errLT_arr = array('d', [0.0]*n)
-TT_arr    = array('d', [0.0]*n)
-errTT_arr = array('d', [0.0]*n)
+x_vals_T = g_sig_t_total.GetX()
+y_vals_T = g_sig_t_total.GetY()
+y_err_T  = g_sig_t_total.GetEY()
 
-for i in range(n):
-    x, y = g_sig_l_total.GetPoint(i)
-    t_arr[i]     = x
-    L_arr[i]     = y
-    errL_arr[i]  = g_sig_l_total.GetErrorY(i)
-    err_t_arr[i] = g_sig_l_total.GetErrorX(i)
+x_vals_LT = g_sig_lt_total.GetX()
+y_vals_LT = g_sig_lt_total.GetY()
+y_err_LT  = g_sig_lt_total.GetEY()
 
-    _, y = g_sig_t_total.GetPoint(i)
-    T_arr[i]     = y
-    errT_arr[i]  = g_sig_t_total.GetErrorY(i)
+x_vals_TT = g_sig_tt_total.GetX()
+y_vals_TT = g_sig_tt_total.GetY()
+y_err_TT  = g_sig_tt_total.GetEY()
 
-    _, y = g_sig_lt_total.GetPoint(i)
-    LT_arr[i]    = y
-    errLT_arr[i] = g_sig_lt_total.GetErrorY(i)
+t_arr     = array('d', [x_vals_L[i]   for i in range(n)])
+err_t_arr = array('d', [x_err_L[i]    for i in range(n)])
+L_arr     = array('d', [y_vals_L[i]   for i in range(n)])
+errL_arr  = array('d', [y_err_L[i]    for i in range(n)])
+T_arr     = array('d', [y_vals_T[i]   for i in range(n)])
+errT_arr  = array('d', [y_err_T[i]    for i in range(n)])
+LT_arr    = array('d', [y_vals_LT[i]  for i in range(n)])
+errLT_arr = array('d', [y_err_LT[i]   for i in range(n)])
+TT_arr    = array('d', [y_vals_TT[i]  for i in range(n)])
+errTT_arr = array('d', [y_err_TT[i]   for i in range(n)])
 
-    _, y = g_sig_tt_total.GetPoint(i)
-    TT_arr[i]    = y
-    errTT_arr[i] = g_sig_tt_total.GetErrorY(i)
-
-# now compute rhoLT and rhoTT as before…
-
+# now calculate rho and its error exactly as before…
 rhoLT_arr    = array('d', [0.0]*n)
 errRhoLT_arr = array('d', [0.0]*n)
 rhoTT_arr    = array('d', [0.0]*n)
@@ -1038,20 +1033,20 @@ errRhoTT_arr = array('d', [0.0]*n)
 
 for i in range(n):
     if T_arr[i]*L_arr[i] > 0:
-        rhoLT_arr[i] = LT_arr[i] / math.sqrt(T_arr[i]*L_arr[i])
+        rhoLT_arr[i] = LT_arr[i]/math.sqrt(T_arr[i]*L_arr[i])
         errRhoLT_arr[i] = math.sqrt(
             (errLT_arr[i]/math.sqrt(T_arr[i]*L_arr[i]))**2 +
             (0.5*LT_arr[i]*errT_arr[i]/(T_arr[i]*math.sqrt(T_arr[i]*L_arr[i])))**2 +
             (0.5*LT_arr[i]*errL_arr[i]/(L_arr[i]*math.sqrt(T_arr[i]*L_arr[i])))**2
         )
     if T_arr[i] > 0:
-        rhoTT_arr[i]    = TT_arr[i] / T_arr[i]
+        rhoTT_arr[i] = TT_arr[i]/T_arr[i]
         errRhoTT_arr[i] = math.sqrt(
             (errTT_arr[i]/T_arr[i])**2 +
             (TT_arr[i]*errT_arr[i]/(T_arr[i]**2))**2
         )
 
-# build and draw your TGraphErrors exactly as before…
+# build and draw your TGraphErrors as before…
 g_rho_lt = ROOT.TGraphErrors(n, t_arr, rhoLT_arr, err_t_arr, errRhoLT_arr)
 g_rho_tt = ROOT.TGraphErrors(n, t_arr, rhoTT_arr, err_t_arr, errRhoTT_arr)
 
