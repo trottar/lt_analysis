@@ -108,7 +108,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     #num_optimizations = 5
     #num_optimizations = 10
 
-    # Initial max/min bounds of finding parameter values (only used for iter=1)
+    # Initial max/min bounds of finding parameter values
     #initial_param_bounds = 1e2
     #initial_param_bounds = 1e4
     initial_param_bounds = 1e6
