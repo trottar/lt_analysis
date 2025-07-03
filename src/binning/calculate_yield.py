@@ -464,7 +464,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         pi_mm_min, pi_mm_max,
                         show_fit=False
                     )[2]
-                    scale_factor = (kaon_amp / pion_background_amp) * 0.85
+                    scale_factor = (kaon_amp / pion_background_amp) * 0.25
                     ##############
                     ##############
                     ##############

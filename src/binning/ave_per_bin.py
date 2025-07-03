@@ -460,7 +460,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     pi_mm_min, pi_mm_max,
                     show_fit=False
                 )[2]
-                scale_factor = (kaon_amp / pion_background_amp) * 0.85                              
+                scale_factor = (kaon_amp / pion_background_amp) * 0.25                              
                 ##############
                 ##############
                 ##############                
