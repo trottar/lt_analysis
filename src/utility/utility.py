@@ -1285,6 +1285,33 @@ def select_valid_parameter(sig_name, elements):
 
 ##################################################################################################################################################            
 
+def integrate_hist_range(hist: ROOT.TH1F, x_min: float, x_max: float) -> float:
+    """
+    Integrates a TH1F histogram between x_min and x_max.
+
+    Parameters:
+    hist (ROOT.TH1F): The input histogram.
+    x_min (float): Lower bound of the integration range.
+    x_max (float): Upper bound of the integration range.
+
+    Returns:
+    float: The integral (number of events) in the specified range.
+    """
+    # Get bin numbers corresponding to x_min and x_max
+    bin_min = hist.FindBin(x_min)
+    bin_max = hist.FindBin(x_max)
+
+    # Make sure the range is within histogram limits
+    bin_min = max(1, bin_min)
+    bin_max = min(hist.GetNbinsX(), bin_max)
+
+    # Integrate using ROOT's integral method (includes overflow if specified)
+    integral = hist.Integral(bin_min, bin_max)
+
+    return integral
+
+##################################################################################################################################################            
+
 # Define a function for fitting a Gaussian with dynamically determined FWHM range
 def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 

@@ -52,7 +52,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, remove_bad_bins, create_polar_plot, fit_gaussian
+from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -1651,17 +1651,15 @@ def rand_sub(phi_setting, inpDict):
             pi_mm_min = 0.88 + MM_offset_DATA
             pi_mm_max = 0.92 + MM_offset_DATA            
             # Scale pion to kaon data
-            kaon_amp = fit_gaussian(
+            kaon_amp = integrate_hist_range(
                 H_MM_nosub_DATA,
-                pi_mm_min, pi_mm_max,
-                show_fit=False
-            )[2]
+                pi_mm_min, pi_mm_max
+            )
 
-            pion_background_amp = fit_gaussian(
+            pion_background_amp = integrate_hist_range(
                 subDict["H_MM_nosub_SUB_DATA"],
-                pi_mm_min, pi_mm_max,
-                show_fit=False
-            )[2]
+                pi_mm_min, pi_mm_max
+            )
             scale_factor = (kaon_amp / pion_background_amp) * 0.25
             ##############
             ##############

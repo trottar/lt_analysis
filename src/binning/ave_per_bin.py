@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_bad_bins, get_centroid, fit_gaussian
+from utility import remove_bad_bins, get_centroid, integrate_hist_range
 
 ##################################################################################################################################################
 
@@ -449,17 +449,15 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 pi_mm_min = 0.88 + MM_offset_DATA
                 pi_mm_max = 0.92 + MM_offset_DATA
                 # Fit amplitudes: pion background (from raw DATA) and kaon (from SUB_DATA)
-                kaon_amp = fit_gaussian(
+                kaon_amp = integrate_hist_range(
                     hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
-                    pi_mm_min, pi_mm_max,
-                    show_fit=False
-                )[2]
+                    pi_mm_min, pi_mm_max
+                )
 
-                pion_background_amp = fit_gaussian(
+                pion_background_amp = integrate_hist_range(
                     subDict[f"H_MM_nosub_SUB_DATA_{j}"],
-                    pi_mm_min, pi_mm_max,
-                    show_fit=False
-                )[2]
+                    pi_mm_min, pi_mm_max
+                )
                 scale_factor = (kaon_amp / pion_background_amp) * 0.25                              
                 ##############
                 ##############
