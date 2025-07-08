@@ -1064,7 +1064,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
-    #'''
+    '''
     ###
     # Data Normalization 
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
@@ -1232,7 +1232,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)
-    #'''
+    '''
 ################################################################################################################################################
 
 def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
@@ -1578,7 +1578,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_MM_DUMMY_{}".format(j)].Add(hist_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
         hist_dict["H_MM_nosub_DUMMY_{}".format(j)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)],-1)    
 
-        #'''
+        '''
         ###
         # Data Normalization
         hist_dict["H_Q2_DATA_{}".format(j)].Scale(norm_factor_data)
@@ -1605,7 +1605,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         hist_dict["H_epsilon_DATA_{}".format(j)].Add(hist_dict["H_epsilon_DUMMY_{}".format(j)],-1)
         hist_dict["H_MM_DATA_{}".format(j)].Add(hist_dict["H_MM_DUMMY_{}".format(j)],-1)
         hist_dict["H_MM_nosub_DATA_{}".format(j)].Add(hist_dict["H_MM_nosub_DUMMY_{}".format(j)],-1)
-        #'''
+        '''
 ################################################################################################################################################
 
 def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
@@ -1951,7 +1951,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)    
 
-            #'''
+            '''
             ###
             # Data Normalization
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
@@ -1969,4 +1969,4 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)],-1)
-            #'''
+            '''

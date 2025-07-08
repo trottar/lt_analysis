@@ -475,14 +475,19 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 '''  
                 arr_scale_factor[j][k] = scale_factor
 
+                # Scale pion to subtraction proper peak
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
   
+                # Apply pion subtraction
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
+
+                # Pion normalization
+                subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+                subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+                subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
 
             # Fit background and subtract
             background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
