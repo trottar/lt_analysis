@@ -1648,8 +1648,8 @@ def rand_sub(phi_setting, inpDict):
             ##############
             # HARD CODED #
             ##############
-            pi_mm_min = 0.89 + MM_offset_DATA
-            pi_mm_max = 0.91 + MM_offset_DATA            
+            pi_mm_min = 0.88 + MM_offset_DATA
+            pi_mm_max = 0.94 + MM_offset_DATA            
             # Scale pion to kaon data
             kaon_amp = integrate_hist_range(
                 H_MM_nosub_DATA,
