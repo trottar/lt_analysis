@@ -1469,6 +1469,9 @@ def rand_sub(phi_setting, inpDict):
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
     '''
+    ################################################################################################################################################
+    # These are applied later, see plotting/data_vs_simc.py
+    ###################################################################################################################################
     ###
     # Data Normalization
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
