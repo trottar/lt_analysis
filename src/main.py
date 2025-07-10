@@ -109,7 +109,7 @@ else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)
 
-if EPSSET == "low":
+if EPSSET == "high":
     EPSVAL = LOEPS
 else:
     EPSVAL = HIEPS
@@ -413,7 +413,7 @@ from find_bins import find_bins, check_bins
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
-if EPSSET == "low":
+if EPSSET == "high":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
@@ -452,7 +452,7 @@ for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
 
-if EPSSET == "high":
+if EPSSET == "low":
     check_bins(histlist, inpDict)
 
 print("\n")
@@ -673,7 +673,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 * Calculate the unseparated cross section
 '''
 
-if EPSSET == "high":
+if EPSSET == "low":
     
     # Save fortran scripts that contain iteration functional form of parameterization
     py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
@@ -749,7 +749,7 @@ if EPSSET == "high":
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
-if EPSSET == "high":
+if EPSSET == "low":
     
     print("\n\n")
 
@@ -831,7 +831,7 @@ for hist in histlist:
     print("{} keys: {}".format(hist["phi_setting"],key_str))
 '''    
 
-if EPSSET == "high":
+if EPSSET == "low":
     print("\n\n\nWould you like to save iteration to cache?")
     if request_yn_response(string=f"Updating {new_dir_cache} with {new_dir}..."):
         # List the contents of new_dir
