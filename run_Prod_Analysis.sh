@@ -697,9 +697,11 @@ done
 #MissMassMin=0.7
 #MissMassMax=1.5
 # MM cut (kaon)
-MissMassMin=1.08
-#MissMassMax=1.16
-MissMassMax=1.14
+##MissMassMin=1.08
+##MissMassMax=1.16
+####MissMassMax=1.14
+MissMassMin=1.10
+MissMassMax=1.13
 # MM cut (pion, Vijay)
 #MissMassMin=0.91
 #MissMassMax=0.98
