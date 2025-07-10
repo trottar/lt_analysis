@@ -178,7 +178,8 @@ def find_bins(histlist, inpDict):
         #bad_bins_threshold = 200 # Q2=5.5, W=3.02 
         #bad_bins_threshold = 500
         #bad_bins_threshold = 1000
-        bad_bins_threshold = 2500
+        bad_bins_threshold = 2000
+        #bad_bins_threshold = 2500
         ##############
         ##############
         ##############
