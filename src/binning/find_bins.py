@@ -123,9 +123,10 @@ def find_bins(histlist, inpDict):
         ##############
         # Set minimum threhold number of events per bin
         # Aim for >100 events
-        bad_bins_threshold = 25
+        #bad_bins_threshold = 25
         #bad_bins_threshold = 50
         #bad_bins_threshold = 75
+        bad_bins_threshold = 100
         ##############
         ##############
         ##############
@@ -176,8 +177,8 @@ def find_bins(histlist, inpDict):
         # Aim for >1000 events
         #bad_bins_threshold = 200 # Q2=5.5, W=3.02 
         #bad_bins_threshold = 500
-        bad_bins_threshold = 1000
-        #bad_bins_threshold = 2500
+        #bad_bins_threshold = 1000
+        bad_bins_threshold = 2500
         ##############
         ##############
         ##############
