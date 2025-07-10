@@ -413,7 +413,7 @@ from find_bins import find_bins, check_bins
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
-if EPSSET == "high":
+if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
 try:
@@ -452,7 +452,7 @@ for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
 
-if EPSSET == "low":
+if EPSSET == "high":
     check_bins(histlist, inpDict)
 
 print("\n")
@@ -673,7 +673,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 * Calculate the unseparated cross section
 '''
 
-if EPSSET == "low":
+if EPSSET == "high":
     
     # Save fortran scripts that contain iteration functional form of parameterization
     py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
@@ -749,7 +749,7 @@ if EPSSET == "low":
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
-if EPSSET == "low":
+if EPSSET == "high":
     
     print("\n\n")
 
@@ -831,7 +831,7 @@ for hist in histlist:
     print("{} keys: {}".format(hist["phi_setting"],key_str))
 '''    
 
-if EPSSET == "low":
+if EPSSET == "high":
     print("\n\n\nWould you like to save iteration to cache?")
     if request_yn_response(string=f"Updating {new_dir_cache} with {new_dir}..."):
         # List the contents of new_dir
