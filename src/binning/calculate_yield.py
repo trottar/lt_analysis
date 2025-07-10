@@ -450,10 +450,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     ##############
                     # HARD CODED #
                     ##############
-                    pi_mm_min = 0.88 + MM_offset_DATA
-                    pi_mm_max = 0.94 + MM_offset_DATA
-                    ###pi_mm_min = 0.91 + MM_offset_DATA
-                    ###pi_mm_max = 0.98 + MM_offset_DATA
+                    #pi_mm_min = 0.88 + MM_offset_DATA
+                    #pi_mm_max = 0.94 + MM_offset_DATA
+                    pi_mm_min = 0.91 + MM_offset_DATA
+                    pi_mm_max = 0.98 + MM_offset_DATA
                     # Fit amplitudes: pion background (from raw DATA) and kaon (from SUB_DATA)
                     kaon_amp = integrate_hist_range(
                         hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
