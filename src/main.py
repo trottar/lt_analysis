@@ -109,7 +109,7 @@ else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)
 
-if EPSSET == "high":
+if EPSSET == "low":
     EPSVAL = LOEPS
 else:
     EPSVAL = HIEPS
