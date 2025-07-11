@@ -375,78 +375,78 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
 
-##########
-# your existing setup here…
+    ##########
+    # your existing setup here…
 
-# functional form in φ [degrees]
-def R_model(phi_deg, A, B, C):
-    phi = np.deg2rad(phi_deg)
-    return A + B * np.cos(phi) + C * np.cos(2*phi)
+    # functional form in φ [degrees]
+    def R_model(phi_deg, A, B, C):
+        phi = np.deg2rad(phi_deg)
+        return A + B * np.cos(phi) + C * np.cos(2*phi)
 
-# Loop through t bins and plot data + fits
-for k in range(NumtBins):
-    fig, ax = plt.subplots(figsize=(12, 8))
-    ax.set_title(
-        "t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(
-            t_bin_centers[k],
-            float(Q2.replace("p",".")),
-            float(W.replace("p","."))
-        ),
-        fontsize=24
-    )
-
-    for i, df_key in enumerate(['aver_loeps','aver_hieps']):
-        df = file_df_dict[df_key]
-        epsilon_label = "High $\epsilon$" if "hi" in df_key else "Low $\epsilon$"
-
-        mask = (df['tbin'] == (k+1))
-        φ  = phi_bin_centers[df['phibin'][mask]]
-        R  = df['ratio'][mask]
-        dR = df['dratio'][mask]
-        good = (R != 0) & (dR != 0)
-        φ, R, dR = φ[good], R[good], dR[good]
-
-        # plot the data points
-        ax.errorbar(
-            φ, R, yerr=dR,
-            marker=markers[i], linestyle='None',
-            label=epsilon_label,
-            color=colors[i], markeredgecolor=colors[i],
-            markerfacecolor='none', capsize=2
+    # Loop through t bins and plot data + fits
+    for k in range(NumtBins):
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.set_title(
+            "t={:.3f}, $Q^2$={:.1f}, W={:.2f}".format(
+                t_bin_centers[k],
+                float(Q2.replace("p",".")),
+                float(W.replace("p","."))
+            ),
+            fontsize=24
         )
 
-        if len(R) >= 3:   # need at least 3 points to fit A,B,C
-            # do the weighted fit
-            popt, pcov = curve_fit(
-                R_model, φ, R,
-                sigma=dR, absolute_sigma=True,
-                p0=[1.0, 0.1, 0.1]
-            )
-            A, B, C = popt
-            # smooth curve for plotting
-            φ_smooth = np.linspace(-180, 180, 361)
-            R_smooth = R_model(φ_smooth, A, B, C)
+        for i, df_key in enumerate(['aver_loeps','aver_hieps']):
+            df = file_df_dict[df_key]
+            epsilon_label = "High $\epsilon$" if "hi" in df_key else "Low $\epsilon$"
 
-            # plot the fit curve
-            fit_label = f"Fit {epsilon_label}: A={A:.3f}, B={B:.3f}, C={C:.3f}"
-            ax.plot(
-                φ_smooth, R_smooth,
-                linestyle='-',
-                color=colors[i],
-                label=fit_label
+            mask = (df['tbin'] == (k+1))
+            φ  = phi_bin_centers[df['phibin'][mask]]
+            R  = df['ratio'][mask]
+            dR = df['dratio'][mask]
+            good = (R != 0) & (dR != 0)
+            φ, R, dR = φ[good], R[good], dR[good]
+
+            # plot the data points
+            ax.errorbar(
+                φ, R, yerr=dR,
+                marker=markers[i], linestyle='None',
+                label=epsilon_label,
+                color=colors[i], markeredgecolor=colors[i],
+                markerfacecolor='none', capsize=2
             )
 
-    # rest of your formatting
-    ax.axhline(1.0, color='gray', linestyle='--')
-    ax.set_xlabel('$\phi$ (deg)', fontsize=24)
-    ax.set_ylabel('Ratio', fontsize=24)
-    ax.set_xlim(-185, 185)
-    ax.set_ylim(0.0, 2.0)
-    ax.tick_params(axis='both', labelsize=16)
-    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
-    ax.legend(fontsize=14)
-    plt.tight_layout(rect=[0,0,1,0.96])
-    pdf.savefig(fig, bbox_inches='tight')
+            if len(R) >= 3:   # need at least 3 points to fit A,B,C
+                # do the weighted fit
+                popt, pcov = curve_fit(
+                    R_model, φ, R,
+                    sigma=dR, absolute_sigma=True,
+                    p0=[1.0, 0.1, 0.1]
+                )
+                A, B, C = popt
+                # smooth curve for plotting
+                φ_smooth = np.linspace(-180, 180, 361)
+                R_smooth = R_model(φ_smooth, A, B, C)
+
+                # plot the fit curve
+                fit_label = f"Fit {epsilon_label}: A={A:.3f}, B={B:.3f}, C={C:.3f}"
+                ax.plot(
+                    φ_smooth, R_smooth,
+                    linestyle='-',
+                    color=colors[i],
+                    label=fit_label
+                )
+
+        # rest of your formatting
+        ax.axhline(1.0, color='gray', linestyle='--')
+        ax.set_xlabel('$\phi$ (deg)', fontsize=24)
+        ax.set_ylabel('Ratio', fontsize=24)
+        ax.set_xlim(-185, 185)
+        ax.set_ylim(0.0, 2.0)
+        ax.tick_params(axis='both', labelsize=16)
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        ax.legend(fontsize=14)
+        plt.tight_layout(rect=[0,0,1,0.96])
+        pdf.savefig(fig, bbox_inches='tight')
 
     ##########
 
