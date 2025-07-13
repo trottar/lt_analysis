@@ -464,7 +464,7 @@ with PdfPages(outputpdf) as pdf:
     def f_exponential(t, a, b): return a * np.exp(-abs(b * t))
     def f_inverse(t, a, b):     return a + b / t
     #def f_custom1(t, a, b, c):      return a * (t/(t + 0.493677**2)**2 + 1/abs(t**c)) * np.exp(-abs(b * t))
-    def f_custom1(t, a, b, c):      return a * (t/(t + 0.493677**2)**2 + 1.0) * np.exp(-abs(b * t))
+    def f_custom1(t, a, b, c):      return a * (t/(t + 0.493677**2)**2 + t) * np.exp(-abs(b * t))
     #def f_custom2(t, a, b):      return (a/t) * np.exp(-abs(b * t))
     def f_custom2(t, a, b):      return (a * t) * np.exp(-abs(b * t**2))
 
