@@ -472,7 +472,7 @@ with PdfPages(outputpdf) as pdf:
         #'Exponential': (f_exponential, '--', 0.95),
         #'1/t':         (f_inverse,     ':',  0.95),
         'Custom1':      (f_custom1,      '-',  1.00),
-        'Custom2':      (f_custom2,      '-',  0.95) 
+        'Custom2':      (f_custom2,      '--',  0.95) 
     }
 
     # first high-ε, then low-ε so the PDF order is exactly as requested
