@@ -463,7 +463,7 @@ with PdfPages(outputpdf) as pdf:
     def f_linear(t, a, b):      return a + b * t
     def f_exponential(t, a, b): return a * np.exp(-abs(b * t))
     def f_inverse(t, a, b):     return a + b / t
-    def f_custom(t, a, b):      return (t/(t + 0.493677**2)**2) * np.exp(-abs(b * t))
+    def f_custom(t, a, b):      return (t/(t + 0.493677**2)**2 + b/t) * np.exp(-abs(b * t))
 
     component_labels = ['A', 'B', 'C']
     fit_styles = {
