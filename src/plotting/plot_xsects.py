@@ -383,6 +383,14 @@ with PdfPages(outputpdf) as pdf:
     def R_model(phi_deg, A, B, C):
         phi = np.deg2rad(phi_deg)
         return A + B * np.cos(phi) + C * np.cos(2*phi)
+    
+    # containers for the coefficients we’ll harvest inside your φ-loop
+    coeffs = defaultdict(lambda: {'t': [], 'A': [], 'B': [], 'C': []})
+
+    # analytic t-dependence models
+    def f_linear(t, a, b):      return a + b * t
+    def f_exponential(t, a, b): return a * np.exp(-abs(b * t))
+    def f_inverse(t, a, b):     return a + b / t    
 
     # Loop through t bins and plot data + fits
     for k in range(NumtBins):
@@ -424,6 +432,10 @@ with PdfPages(outputpdf) as pdf:
                     p0=[1.0, 0.1, 0.1]
                 )
                 A, B, C = popt
+                coeffs[df_key]['t'].append(t_bin_centers[k])
+                coeffs[df_key]['A'].append(A)
+                coeffs[df_key]['B'].append(B)
+                coeffs[df_key]['C'].append(C)                
                 # smooth curve for plotting
                 φ_smooth = np.linspace(-180, 180, 361)
                 R_smooth = R_model(φ_smooth, A, B, C)
@@ -451,110 +463,56 @@ with PdfPages(outputpdf) as pdf:
 
     ##########
     # Plot the fit parameters A, B, C vs t and fit them with three models
-
-    # --- t-dependence models ---
-    def f_linear(t, a, b):       return a + b * t
-    def f_exponential(t, a, b):  return a * np.exp(b * t)
-    def f_inverse(t, a, b):      return a + b / t
-
-    # --- where we will accumulate the φ-fit parameters ---
-    coeffs = defaultdict(lambda: {'t': [], 'A': [], 'B': [], 'C': []})
-    # keys will be 'aver_loeps' and 'aver_hieps'
-
-    # ----------------------------------------------------
-    # Your original φ-loop (only **three** tiny additions)
-    # ----------------------------------------------------
-    for k in range(NumtBins):
-        fig, ax = plt.subplots(figsize=(12, 8))
-        # ...  (all your existing formatting) ...
-
-        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
-            df = file_df_dict[df_key]
-            # -- unchanged masking code --
-            mask = df['tbin'] == (k + 1)
-            φ  = phi_bin_centers[df['phibin'][mask]]
-            R  = df['ratio'][mask]
-            dR = df['dratio'][mask]
-            good = (R != 0) & (dR != 0)
-            φ, R, dR = φ[good], R[good], dR[good]
-
-            # -- plotting data points (unchanged) --
-            ax.errorbar(φ, R, yerr=dR,
-                        marker=markers[i], linestyle='None',
-                        label=("High $\epsilon$" if "hi" in df_key else "Low $\epsilon$"),
-                        color=colors[i], markeredgecolor=colors[i],
-                        markerfacecolor='none', capsize=2)
-
-            if len(R) >= 3:                 # your original condition
-                popt, _ = curve_fit(R_model, φ, R, sigma=dR,
-                                    absolute_sigma=True, p0=[1.0, 0.1, 0.1])
-                A, B, C = popt                               # <-- NEW
-                coeffs[df_key]['t'].append(t_bin_centers[k]) # <-- NEW
-                coeffs[df_key]['A'].append(A)                # <-- NEW
-                coeffs[df_key]['B'].append(B)
-                coeffs[df_key]['C'].append(C)
-
-                # smooth φ curve (unchanged) ...
-                φ_smooth = np.linspace(-180, 180, 361)
-                ax.plot(φ_smooth, R_model(φ_smooth, *popt),
-                        linestyle='-', color=colors[i],
-                        label=f"Fit {'High' if 'hi' in df_key else 'Low'} ε: "
-                            f"A={A:.3f}, B={B:.3f}, C={C:.3f}")
-
-        # ... your existing cosmetics ...
-        pdf.savefig(fig, bbox_inches='tight')
-        plt.close(fig)   # keep memory footprint low
-
-    # ------------------------------------------------------------------
-    # --------  NEW BLOCK:  plot A, B, C vs t and save to the PDF -------
-    # ------------------------------------------------------------------
+    
     component_labels = ['A', 'B', 'C']
+    fit_styles = {
+        'Linear':      (f_linear,      '-',  1.00),
+        'Exponential': (f_exponential, '--', 0.95),
+        '1/t':         (f_inverse,     ':',  0.95),
+    }
+
+    # first high-ε, then low-ε so the PDF order is exactly as requested
+    page_order = [('aver_hieps', 'High ε', colors[1]),
+                ('aver_loeps', 'Low ε',  colors[0])]
+
     t_dense = np.linspace(min(t_bin_centers), max(t_bin_centers), 400)
 
-    for j, comp in enumerate(component_labels):
-        fig, ax = plt.subplots(figsize=(12, 8))
+    for df_key, eps_label, base_color in page_order:
+        if not coeffs[df_key]['t']:         # skip if that ε-sample had no fits
+            continue
 
-        for i, df_key in enumerate(['aver_loeps', 'aver_hieps']):
+        fig, axes = plt.subplots(
+            3, 1, figsize=(11, 13), sharex=True,
+            gridspec_kw=dict(hspace=0.30)
+        )
+
+        for ax, comp in zip(axes, component_labels):
             t_arr = np.array(coeffs[df_key]['t'])
             y_arr = np.array(coeffs[df_key][comp])
 
-            # scatter of the raw points
-            ax.scatter(t_arr, y_arr, marker=markers[i], color=colors[i],
-                    facecolors='none',
-                    label=('High ε' if 'hi' in df_key else 'Low ε') + f' data')
+            # scatter points
+            ax.scatter(t_arr, y_arr, marker='o', s=70,
+                    facecolors='none', edgecolors=base_color,
+                    label='data')
 
-            # ---- fits (skip if <2 points) ----
-            if len(t_arr) >= 2:
-                # Linear
-                p_lin, _ = curve_fit(f_linear, t_arr, y_arr)
-                ax.plot(t_dense, f_linear(t_dense, *p_lin),
-                        linestyle='-', color=colors[i],
-                        alpha=0.8 if i == 0 else 0.5,
-                        label=f"{'High' if 'hi' in df_key else 'Low'} ε linear")
+            if len(t_arr) >= 2:             # need ≥2 points to fit in t
+                for name, (func, style, alpha) in fit_styles.items():
+                    try:
+                        p, _ = curve_fit(func, t_arr, y_arr, maxfev=6000)
+                        ax.plot(t_dense, func(t_dense, *p),
+                                linestyle=style, linewidth=2,
+                                color=base_color, alpha=alpha,
+                                label=f'{name}: {p[0]:.3g}, {p[1]:.3g}')
+                    except RuntimeError:
+                        pass    # silently ignore failed model
 
-                # Exponential  (guard against overflow by offsetting if needed)
-                try:
-                    p_exp, _ = curve_fit(f_exponential, t_arr, y_arr, maxfev=8000)
-                    ax.plot(t_dense, f_exponential(t_dense, *p_exp),
-                            linestyle='--', color=colors[i],
-                            alpha=0.8 if i == 0 else 0.5,
-                            label=f"{'High' if 'hi' in df_key else 'Low'} ε exp")
-                except RuntimeError:
-                    pass  # skip if it diverged
+            ax.set_ylabel(comp, fontsize=15)
+            ax.grid(True, linestyle='--', linewidth=0.6, alpha=0.7)
+            ax.legend(fontsize=9)
 
-                # Inverse  (avoid t=0)
-                if np.all(t_arr):
-                    p_inv, _ = curve_fit(f_inverse, t_arr, y_arr)
-                    ax.plot(t_dense, f_inverse(t_dense, *p_inv),
-                            linestyle=':', color=colors[i],
-                            alpha=0.8 if i == 0 else 0.5,
-                            label=f"{'High' if 'hi' in df_key else 'Low'} ε 1/t")
+        axes[0].set_title(f'{eps_label} coefficients vs $t$', fontsize=19, pad=10)
+        axes[-1].set_xlabel('$t$', fontsize=15)
 
-        ax.set_xlabel('t', fontsize=22)
-        ax.set_ylabel(comp, fontsize=22)
-        ax.set_title(f'{comp} vs t with three functional fits', fontsize=24)
-        ax.grid(True, linestyle='--', linewidth=0.6)
-        ax.legend(fontsize=12)
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
