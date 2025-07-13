@@ -385,12 +385,7 @@ with PdfPages(outputpdf) as pdf:
         return A + B * np.cos(phi) + C * np.cos(2*phi)
     
     # containers for the coefficients we’ll harvest inside your φ-loop
-    coeffs = defaultdict(lambda: {'t': [], 'A': [], 'B': [], 'C': []})
-
-    # analytic t-dependence models
-    def f_linear(t, a, b):      return a + b * t
-    def f_exponential(t, a, b): return a * np.exp(-abs(b * t))
-    def f_inverse(t, a, b):     return a + b / t    
+    coeffs = defaultdict(lambda: {'t': [], 'A': [], 'B': [], 'C': []})   
 
     # Loop through t bins and plot data + fits
     for k in range(NumtBins):
@@ -463,12 +458,19 @@ with PdfPages(outputpdf) as pdf:
 
     ##########
     # Plot the fit parameters A, B, C vs t and fit them with three models
-    
+
+    # analytic t-dependence models
+    def f_linear(t, a, b):      return a + b * t
+    def f_exponential(t, a, b): return a * np.exp(-abs(b * t))
+    def f_inverse(t, a, b):     return a + b / t
+    def f_custom(t, a, b):      return (t/(t + 0.493677**2)**2) * np.exp(-abs(b * t))
+
     component_labels = ['A', 'B', 'C']
     fit_styles = {
-        'Linear':      (f_linear,      '-',  1.00),
+        #'Linear':      (f_linear,      '-',  1.00),
         'Exponential': (f_exponential, '--', 0.95),
         '1/t':         (f_inverse,     ':',  0.95),
+        'Custom':      (f_custom,      '-',  1.00),
     }
 
     # first high-ε, then low-ε so the PDF order is exactly as requested
