@@ -465,7 +465,7 @@ with PdfPages(outputpdf) as pdf:
     def f_inverse(t, a, b):     return a + b / t
     def f_custom1(t, a, b, c):      return a * (t/(t + 0.493677**2)**2 + 1/(t**abs(c))) * np.exp(-abs(b * t**2))
     #def f_custom2(t, a, b):      return (a/t) * np.exp(-abs(b * t))
-    def f_custom2(t, a, b, c):      return (a/t**abs(c)) * np.exp(-abs(b * t**2))
+    def f_custom2(t, a, b, c):      return (a/t**abs(c)) * np.exp(-abs(b * t))
 
     component_labels = ['A', 'B', 'C']
     fit_styles = {
