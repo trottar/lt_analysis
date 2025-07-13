@@ -463,14 +463,16 @@ with PdfPages(outputpdf) as pdf:
     def f_linear(t, a, b):      return a + b * t
     def f_exponential(t, a, b): return a * np.exp(-abs(b * t))
     def f_inverse(t, a, b):     return a + b / t
-    def f_custom(t, a, b):      return (t/(t + 0.493677**2)**2 + b/t) * np.exp(-abs(b * t))
+    def f_custom1(t, a, b, c):      return (t/(t + 0.493677**2)**2 + a/t**c) * np.exp(-abs(b * t))
+    def f_custom2(t, a, b):      return (a/t) * np.exp(-abs(b * t))
 
     component_labels = ['A', 'B', 'C']
     fit_styles = {
         #'Linear':      (f_linear,      '-',  1.00),
-        'Exponential': (f_exponential, '--', 0.95),
-        '1/t':         (f_inverse,     ':',  0.95),
-        'Custom':      (f_custom,      '-',  1.00),
+        #'Exponential': (f_exponential, '--', 0.95),
+        #'1/t':         (f_inverse,     ':',  0.95),
+        'Custom1':      (f_custom1,      '-',  1.00),
+        'Custom2':      (f_custom2,      '-',  0.95) 
     }
 
     # first high-ε, then low-ε so the PDF order is exactly as requested
