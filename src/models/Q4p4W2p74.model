@@ -69,8 +69,8 @@ sig_LT = (par9 / math.fabs(tt)**par10) * math.sin(theta_cm)
 #####
 #sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 #sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
-##sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
-sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
+sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
+#sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
 #sig_TT = (par13 / ((math.fabs(tt)**par14) + par15)) * math.exp(-math.fabs(par16 * tt)) * (math.sin(theta_cm)**2)
 ###sig_TT = (par13 / math.fabs(tt)) * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm))
 #####
