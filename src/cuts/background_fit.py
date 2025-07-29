@@ -141,8 +141,7 @@ def bg_fit(phi_setting, inpDict, hist):
 
     norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
 
-    #bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
-    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
     # No background fit
     #bg_factor = 0.0
 
