@@ -115,11 +115,11 @@ bg_dict ={
     #"Q3p0W3p14Left_lowe" : 500,
     #"Q3p0W3p14Center_lowe" : 500,    
     # Q2=4p4, W=2p74
-    "Q4p4W2p74Right_highe" : 10, # Background value divided by number of events, check number of events of MM
-    "Q4p4W2p74Left_highe" : 10,
-    "Q4p4W2p74Center_highe" : 15,
-    "Q4p4W2p74Left_lowe" : 20,
-    "Q4p4W2p74Center_lowe" : 15,    
+    "Q4p4W2p74Right_highe" : 40, # Background value divided by number of events, check number of events of MM
+    "Q4p4W2p74Left_highe" : 50,
+    "Q4p4W2p74Center_highe" : 50,
+    "Q4p4W2p74Left_lowe" : 150,
+    "Q4p4W2p74Center_lowe" : 100,    
 }
 
 ##############
