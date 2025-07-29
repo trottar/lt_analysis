@@ -1782,8 +1782,7 @@ def rand_sub(phi_setting, inpDict):
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
 
     # Fit background and subtract
-    #inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
-    inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_DATA.GetEntries()
+    inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
     background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
     # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
     #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)

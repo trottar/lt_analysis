@@ -137,11 +137,13 @@ def bg_fit(phi_setting, inpDict, hist):
     mm_min = inpDict["mm_min"]
     mm_max = inpDict["mm_max"]
 
+    norm_factor_data = inpDict["normfac_data"]
+
     num_evts = hist.GetEntries()
 
     norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
 
-    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts*norm_factor_data
     # No background fit
     #bg_factor = 0.0
 
