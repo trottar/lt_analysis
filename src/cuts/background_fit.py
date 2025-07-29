@@ -114,6 +114,12 @@ bg_dict ={
     #"Q3p0W3p14Center_highe" : 500,
     #"Q3p0W3p14Left_lowe" : 500,
     #"Q3p0W3p14Center_lowe" : 500,    
+    # Q2=4p4, W=2p74
+    "Q4p4W2p74Right_highe" : 10, # Background value divided by number of events, check number of events of MM
+    "Q4p4W2p74Left_highe" : 10,
+    "Q4p4W2p74Center_highe" : 15,
+    "Q4p4W2p74Left_lowe" : 20,
+    "Q4p4W2p74Center_lowe" : 15,    
 }
 
 ##############
@@ -136,8 +142,9 @@ def bg_fit(phi_setting, inpDict, hist):
     norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
 
     #bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]
     # No background fit
-    bg_factor = 0.0
+    #bg_factor = 0.0
 
     fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
     
