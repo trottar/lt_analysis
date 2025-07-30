@@ -143,8 +143,7 @@ def bg_fit(phi_setting, inpDict, hist):
 
     norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
 
-    bg_factor = (bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]/num_evts) * norm_factor_data
-    #bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts*norm_factor_data
+    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
     # No background fit
     #bg_factor = 0.0
 
@@ -155,7 +154,7 @@ def bg_fit(phi_setting, inpDict, hist):
     hist.Fit("fit_func", "Q")
     
     # Get the fitted constant value and its uncertainties
-    bg_par = fit_func.GetParameter(0)
+    bg_par = fit_func.GetParameter(0) * norm_factor_data
     bg_err = fit_func.GetParError(0)
 
     if num_evts == 0:
