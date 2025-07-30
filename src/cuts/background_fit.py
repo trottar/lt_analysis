@@ -90,11 +90,10 @@ def bg_fit(phi_setting, inpDict, hist):
     bg_err  = abs(fit_func.GetParError(0)) * (sig_hi - sig_lo) / bin_w
 
     # --------------------------------------------------------------
-    # *** NEW ***  – scale the background to the π‑subtracted stats
-    # The driver has already put the scaling factor in
-    #   inpDict["normfac_data"]  (see rand_sub() ~ line 2800).
+    # Scale the fitted background to the stats that remain after
+    # random, dummy, pion subtraction and MM cuts (set in rand_sub.py)
     # --------------------------------------------------------------
-    scale = inpDict["normfac_data"]
+    scale = inpDict["bg_stat_scale"]
     if scale != 1.0:
         for ip in range(fit_func.GetNpar()):
             fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)

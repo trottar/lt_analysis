@@ -1782,7 +1782,17 @@ def rand_sub(phi_setting, inpDict):
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
 
     # Fit background and subtract
+    # --------------------------------------------------------------
+    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
+    # --------------------------------------------------------------
     inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
+
+    bg_stat_scale = 1.0
+    if H_MM_nosub_DATA.GetEntries():                     # protect /0
+        bg_stat_scale = H_MM_DATA.GetEntries() / H_MM_nosub_DATA.GetEntries()
+
+    inpDict["bg_stat_scale"] = bg_stat_scale            # pass to bg_fit()
+
     background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
     # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
     #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
