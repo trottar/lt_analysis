@@ -43,25 +43,6 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-##############
-# HARD CODED #
-##############
-
-bg_dict ={
-    # Q2=4p4, W=2p74
-    "Q4p4W2p74Right_highe" : 40, # Background value divided by number of events, check number of events of MM
-    "Q4p4W2p74Left_highe" : 50,
-    "Q4p4W2p74Center_highe" : 50,
-    "Q4p4W2p74Left_lowe" : 150,
-    "Q4p4W2p74Center_lowe" : 100,    
-}
-
-##############
-##############
-##############
-
-################################################################################################################################################
-
 def bg_fit(phi_setting, inpDict, hist):
     
     W = inpDict["W"] 
@@ -71,30 +52,42 @@ def bg_fit(phi_setting, inpDict, hist):
     mm_min = inpDict["mm_min"]
     mm_max = inpDict["mm_max"]
 
-    norm_factor_data = inpDict["normfac_data"]
+    # ------------------------------------------------------------------
+    # Dynamic side‑band background estimate (Chebyshev, order‑2)
+    # ------------------------------------------------------------------
+    #
+    #  Signal window (Λ peak)   : 1.107 – 1.123 GeV/c²
+    #  Side‑bands               : 1.070 – 1.095 GeV/c²  and  1.135 – 1.180 GeV/c²
+    #
+    #  The function returns:
+    #     fit_func  – the TF1 that describes the background shape
+    #     bg_par    – the **integrated** background counts under the Λ window
+    #
 
     num_evts = hist.GetEntries()
 
-    norm_tot_evts = num_evts/inpDict["bg_tot_num_evts_{}".format(phi_setting)]
+    # ---- build a copy that keeps only side‑band bins ----
+    sig_lo, sig_hi = 1.107, 1.123
+    sb_left  = (1.070, 1.095)
+    sb_right = (1.135, 1.180)
 
-    bg_factor = bg_dict["Q{}W{}{}_{}e".format(Q2, W, phi_setting, EPSSET)]*norm_tot_evts
-    # No background fit
-    #bg_factor = 0.0
+    h_sb = hist.Clone(hist.GetName() + "_sb")
+    for ib in range(1, h_sb.GetNbinsX() + 1):
+        x = h_sb.GetBinCenter(ib)
+        if sig_lo <= x <= sig_hi:
+            h_sb.SetBinContent(ib, 0)
+            h_sb.SetBinError  (ib, 0)
 
-    fit_func = TF1("fit_func", "[0]", mm_min, mm_max)
-    
-    fit_func.FixParameter(0, bg_factor) 
+    # ---- Chebyshev (pol2) fit to the side‑bands only ----
+    fit_func = TF1("fit_func", "pol2", mm_min, mm_max)
+    h_sb.Fit(fit_func, "Q0")         # quiet, no draw
 
-    hist.Fit("fit_func", "Q")
-    
-    # Get the fitted constant value and its uncertainties
-    bg_par = fit_func.GetParameter(0)
-    bg_err = fit_func.GetParError(0)
+    # ---- integrate background under the signal window ----
+    bin_w   = h_sb.GetBinWidth(1)
+    bg_par  = fit_func.Integral(sig_lo, sig_hi) / bin_w
 
-    if num_evts == 0:
-        return fit_func, bg_par
-    else:
-        # Removes function from histogram
-        hist.GetFunction("fit_func").Delete()
-    
-        return fit_func, bg_par
+    # simple error estimate: propagate the constant‑term uncertainty
+    bg_err  = abs(fit_func.GetParError(0)) * (sig_hi - sig_lo) / bin_w
+
+    # ---- done ----
+    return fit_func, bg_par
