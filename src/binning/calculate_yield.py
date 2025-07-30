@@ -492,7 +492,19 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
 
             # Fit background and subtract
-            background_fit = bg_fit(phi_setting, inpDict, hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
+            # ---- Statistic‑scale for this (t,φ) bin ----------------
+            bg_stat_scale = (
+                hist_bin_dict[f"H_MM_DATA_{j}_{k}"].GetEntries() /
+                hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"].GetEntries()
+            ) if hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"].GetEntries() else 1.0
+            inpDict["bg_stat_scale"] = bg_stat_scale  # <‑‑ pass to bg_fit
+            # ----------------------------------------------------------------
+
+            # Fit background and subtract
+            background_fit = bg_fit(phi_setting,
+                                    inpDict,
+                                    hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"])
+
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
 

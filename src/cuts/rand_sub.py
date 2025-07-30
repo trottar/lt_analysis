@@ -1787,13 +1787,17 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_nosub_DATA.GetEntries()
 
-    bg_stat_scale = 1.0
-    if H_MM_nosub_DATA.GetEntries():                     # protect /0
-        bg_stat_scale = H_MM_DATA.GetEntries() / H_MM_nosub_DATA.GetEntries()
-
-    inpDict["bg_stat_scale"] = bg_stat_scale            # pass to bg_fit()
+    # --------------------------------------------------------------
+    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
+    # --------------------------------------------------------------
+    bg_stat_scale = (H_MM_DATA.GetEntries() /
+                    H_MM_nosub_DATA.GetEntries()) if H_MM_nosub_DATA.GetEntries() else 1.0
+    inpDict["bg_stat_scale"] = bg_stat_scale
 
     background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
+    # background_fit[0] : scaled function   (use for subtraction)
+    # background_fit[1] : original function (use for drawing only)
+
     # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
     #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
     #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
@@ -1996,8 +2000,8 @@ def rand_sub(phi_setting, inpDict):
     if ParticleType == "kaon":        
         histDict["H_MM_nosub_SUB_DATA"].SetLineColor(2)
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
-    background_fit[0].SetLineColor(3)
-    background_fit[0].Draw("same")
+    background_fit[1].SetLineColor(3)
+    background_fit[1].Draw("same")
 
     CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     

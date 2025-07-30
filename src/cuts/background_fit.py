@@ -90,15 +90,22 @@ def bg_fit(phi_setting, inpDict, hist):
     bg_err  = abs(fit_func.GetParError(0)) * (sig_hi - sig_lo) / bin_w
 
     # --------------------------------------------------------------
-    # Scale the fitted background to the stats that remain after
-    # random, dummy, pion subtraction and MM cuts (set in rand_sub.py)
+    # Keep the ORIGINAL fit to draw on H_MM_nosub_DATA
     # --------------------------------------------------------------
-    scale = inpDict["bg_stat_scale"]
+    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+
+    # --------------------------------------------------------------
+    # Create a STAT‑MATCHED copy to subtract from H_MM_DATA
+    # The calling code puts the scale in  inpDict["bg_stat_scale"].
+    # --------------------------------------------------------------
+    scale = inpDict.get("bg_stat_scale", 1.0)
     if scale != 1.0:
         for ip in range(fit_func.GetNpar()):
-            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
+            fit_func.SetParameter(ip,
+                                  fit_func.GetParameter(ip) * scale)
         bg_par *= scale
         bg_err *= scale
 
     # ---- done ----
-    return fit_func, bg_par
+    # Return (scaled_function, visual_function, background_counts)
+    return fit_func, fit_vis, bg_par
