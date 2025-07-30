@@ -89,5 +89,17 @@ def bg_fit(phi_setting, inpDict, hist):
     # simple error estimate: propagate the constant‑term uncertainty
     bg_err  = abs(fit_func.GetParError(0)) * (sig_hi - sig_lo) / bin_w
 
+    # --------------------------------------------------------------
+    # *** NEW ***  – scale the background to the π‑subtracted stats
+    # The driver has already put the scaling factor in
+    #   inpDict["normfac_data"]  (see rand_sub() ~ line 2800).
+    # --------------------------------------------------------------
+    scale = inpDict["normfac_data"]
+    if scale != 1.0:
+        for ip in range(fit_func.GetNpar()):
+            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
+        bg_par *= scale
+        bg_err *= scale
+
     # ---- done ----
     return fit_func, bg_par
