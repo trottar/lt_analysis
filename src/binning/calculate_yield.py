@@ -497,7 +497,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 hist_bin_dict[f"H_MM_DATA_{j}_{k}"].GetEntries() /
                 hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"].GetEntries()
             ) if hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"].GetEntries() else 1.0
-            inpDict["bg_stat_scale"] = bg_stat_scale  # <‑‑ pass to bg_fit
+            inpDict["bg_stat_scale"] = bg_stat_scale * 0.85 # <‑‑ pass to bg_fit
             # ----------------------------------------------------------------
 
             # Fit background and subtract

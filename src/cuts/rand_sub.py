@@ -1792,7 +1792,7 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     bg_stat_scale = (H_MM_DATA.GetEntries() /
                     H_MM_nosub_DATA.GetEntries()) if H_MM_nosub_DATA.GetEntries() else 1.0
-    inpDict["bg_stat_scale"] = bg_stat_scale
+    inpDict["bg_stat_scale"] = bg_stat_scale * 0.85
 
     background_fit = bg_fit(phi_setting, inpDict, H_MM_nosub_DATA)
     # background_fit[0] : scaled function   (use for subtraction)
