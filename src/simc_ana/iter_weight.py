@@ -350,7 +350,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
           # After 7/31/2025
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)          
+                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsiloni, evt.thetapqi, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)          
 
           iter_lst = iterWeight(inp_param)
 
@@ -385,7 +385,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
           # After 7/31/2025
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)                    
+                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsiloni, evt.thetapqi, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)                    
 
           iter_lst = iterWeight(inp_param)
 
