@@ -43,7 +43,18 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
+no_bg_subtract=True
+#no_bg_subtract=False
+
 def bg_fit(phi_setting, inpDict, hist):
+
+    if no_bg_subtract:
+        # Create a zero function over the fit range
+        fit_func = TF1("fit_func_zero", "0", inpDict["mm_min"], inpDict["mm_max"])
+        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+        bg_par   = 0
+        # Return zero fit, visual fit, and zero background
+        return fit_func, fit_vis, bg_par    
     
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
