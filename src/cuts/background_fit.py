@@ -94,31 +94,44 @@ def bg_fit(phi_setting, inpDict, hist):
     #     bg_par    – the **integrated** background counts under the Λ window
     #
 
-    num_evts = hist.GetEntries()
+    # ---- Dynamically define signal and sideband regions (relative to Lambda peak) ----
+    lambda_peak = 1.115
 
-    sig_lo, sig_hi  = mm_min, mm_max
-    tail_gap        = 0.022
+    # Grab window widths/gaps from inpDict if available, else use defaults (in GeV)
+    sig_width = inpDict.get("sig_width", 0.016)    # default: 16 MeV signal window
+    sb_width  = inpDict.get("sb_width",  0.025)    # default: 25 MeV per sideband
+    sb_gap    = inpDict.get("sb_gap",    0.012)    # default: 12 MeV sideband guard
 
-    sb_left         = (mm_min,  mm_max)
-    sb_right_start  = sig_hi + tail_gap
-    sb_right_end    = mm_max
-    sb_right        = (max(sb_right_start, mm_min), sb_right_end)
+    # Signal window: centered on Lambda
+    sig_lo = max(lambda_peak - sig_width/2, mm_min)
+    sig_hi = min(lambda_peak + sig_width/2, mm_max)
+
+    # Left sideband: to left of signal, separated by guard band
+    sb_left_lo = max(lambda_peak - sb_gap - sig_width/2 - sb_width, mm_min)
+    sb_left_hi = min(lambda_peak - sb_gap - sig_width/2, mm_max)
+    sb_left = (sb_left_lo, sb_left_hi)
+
+    # Right sideband: to right of signal, separated by guard band
+    sb_right_lo = max(lambda_peak + sb_gap + sig_width/2, mm_min)
+    sb_right_hi = min(lambda_peak + sb_gap + sig_width/2 + sb_width, mm_max)
+    sb_right = (sb_right_lo, sb_right_hi)
 
     # --- Diagnostics ---
-    print("Sideband left:", sb_left)
-    print("Sideband right:", sb_right)
+    print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
+    print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
+    print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
 
     # ---- build a copy that keeps only the side‑bands ----
     h_sb = hist.Clone(hist.GetName() + "_sb")
 
-    # Helper to check if sideband has width
+    # Helper to check if sideband has nonzero width
     def is_valid_sideband(sb):
         return sb[1] > sb[0]
 
     n_sb_bins = 0
     for ib in range(1, h_sb.GetNbinsX() + 1):
         x = h_sb.GetBinCenter(ib)
-        in_sb_left = is_valid_sideband(sb_left) and (sb_left[0] <= x <= sb_left[1])
+        in_sb_left  = is_valid_sideband(sb_left)  and (sb_left[0]  <= x <= sb_left[1])
         in_sb_right = is_valid_sideband(sb_right) and (sb_right[0] <= x <= sb_right[1])
         if not (in_sb_left or in_sb_right):
             h_sb.SetBinContent(ib, 0.0)
@@ -159,7 +172,7 @@ def bg_fit(phi_setting, inpDict, hist):
     if scale != 1.0:
         for ip in range(fit_func.GetNpar()):
             fit_func.SetParameter(ip,
-                                  fit_func.GetParameter(ip) * scale)
+                                fit_func.GetParameter(ip) * scale)
         bg_par *= scale
         bg_err *= scale
 
