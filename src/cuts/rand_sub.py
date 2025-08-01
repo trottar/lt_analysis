@@ -2015,9 +2015,6 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_pisub_DATA"].SetFillColor(kBlack)  # Set fill color to black
     #histDict["H_MM_pisub_DATA"].Draw("same, E1")
     histDict["H_MM_pisub_DATA"].Draw("hist same")
-    if ParticleType == "kaon":        
-        histDict["H_MM_pisub_SUB_DATA"].SetLineColor(2)
-        histDict["H_MM_pisub_SUB_DATA"].Draw("same, E1")
     background_fit[1].SetLineColor(3)
     background_fit[1].Draw("same")
 
