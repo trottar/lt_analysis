@@ -96,20 +96,22 @@ def bg_fit(phi_setting, inpDict, hist):
 
     num_evts = hist.GetEntries()
 
-    # ------------------------------------------------------------------
-    #  Signal window  : 1.107 – 1.123 GeV/c²
-    #  Rad‑tail guard : 22 MeV to the right of the peak (skip real Λ)
-    #  Side‑bands     : 1.070 – 1.095  and  1.145 – 1.180 GeV/c²
-    # ------------------------------------------------------------------
-    sig_lo, sig_hi  = 1.107, 1.123
-    tail_gap        = 0.022                       # 22 MeV guard band
-    sb_left         = (1.070, 1.095)
-    sb_right        = (sig_hi + tail_gap, 1.180)  # starts at 1.145
+    sig_lo, sig_hi  = max(1.107, mm_min), min(1.123, mm_max)
+    tail_gap        = 0.022
+
+    sb_left         = (max(1.070, mm_min), min(1.095, mm_max))
+    sb_right_start  = sig_hi + tail_gap
+    sb_right_end    = min(1.180, mm_max)
+    sb_right        = (max(sb_right_start, mm_min), sb_right_end)
 
     # ---- build a copy that keeps only the side‑bands ----
     h_sb = hist.Clone(hist.GetName() + "_sb")
     for ib in range(1, h_sb.GetNbinsX() + 1):
         x = h_sb.GetBinCenter(ib)
+        
+        # Only consider if within mm_min <= x <= mm_max
+        if not (mm_min <= x <= mm_max):
+            continue        
 
         # kill: signal region  +  radiative tail guard
         if (sig_lo <= x <= sig_hi + tail_gap):
