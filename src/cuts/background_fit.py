@@ -96,12 +96,12 @@ def bg_fit(phi_setting, inpDict, hist):
 
     num_evts = hist.GetEntries()
 
-    sig_lo, sig_hi  = max(1.107, mm_min), min(1.123, mm_max)
+    sig_lo, sig_hi  = mm_min, mm_max
     tail_gap        = 0.022
 
-    sb_left         = (max(1.070, mm_min), min(1.095, mm_max))
+    sb_left         = (mm_min,  mm_max)
     sb_right_start  = sig_hi + tail_gap
-    sb_right_end    = min(1.180, mm_max)
+    sb_right_end    = mm_max
     sb_right        = (max(sb_right_start, mm_min), sb_right_end)
 
     # --- Diagnostics ---
