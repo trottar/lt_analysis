@@ -1789,7 +1789,7 @@ def rand_sub(phi_setting, inpDict):
         H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
         H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
         H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
-        H_MM_pisub_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
+        H_MM_pisub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
         H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
         H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
         H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)
@@ -1806,9 +1806,7 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    bg_stat_scale = (H_MM_DATA.GetEntries() /
-                    H_MM_pisub_DATA.GetEntries()) if H_MM_pisub_DATA.GetEntries() else 1.0
-    inpDict["bg_stat_scale"] = bg_stat_scale * 0.5
+    inpDict["bg_stat_scale"] = 0.85
 
     background_fit = bg_fit(phi_setting, inpDict, H_MM_pisub_DATA)
     # background_fit[0] : scaled function   (use for subtraction)
@@ -1857,6 +1855,7 @@ def rand_sub(phi_setting, inpDict):
     H_W_DATA.Add(background_fit[0], -1)
     H_t_DATA.Add(background_fit[0], -1)
     H_epsilon_DATA.Add(background_fit[0], -1)
+    H_MM_pisub_DATA.Add(background_fit[0], -1)
     H_MM_DATA.Add(background_fit[0], -1)
     H_pmiss_DATA.Add(background_fit[0], -1)
     H_emiss_DATA.Add(background_fit[0], -1)
