@@ -43,6 +43,25 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
+def get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max):
+    """
+    Create a histogram from fit_func matching 'hist', but zero outside [mm_min, mm_max].
+    """
+    h_fit = hist.Clone(hist.GetName() + "_fit_inrange")
+    h_fit.Reset()  # Clear bin contents and errors
+
+    for ibin in range(1, h_fit.GetNbinsX() + 1):
+        x = h_fit.GetBinCenter(ibin)
+        if mm_min <= x <= mm_max:
+            h_fit.SetBinContent(ibin, fit_func.Eval(x))
+            # Set error if needed; left as 0 by default
+        else:
+            h_fit.SetBinContent(ibin, 0.0)
+            h_fit.SetBinError(ibin, 0.0)
+    return h_fit
+
+################################################################################################################################################
+
 #no_bg_subtract=True
 no_bg_subtract=False
 
@@ -129,6 +148,6 @@ def bg_fit(phi_setting, inpDict, hist):
         bg_par *= scale
         bg_err *= scale
 
-    # ---- done ----
+    fit_hist_inrange = get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max)
     # Return (scaled_function, visual_function, background_counts)
-    return fit_func, fit_vis, bg_par
+    return fit_hist_inrange, fit_vis, bg_par
