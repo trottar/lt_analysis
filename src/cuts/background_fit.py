@@ -43,8 +43,8 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-no_bg_subtract=True
-#no_bg_subtract=False
+#no_bg_subtract=True
+no_bg_subtract=False
 
 def bg_fit(phi_setting, inpDict, hist):
 

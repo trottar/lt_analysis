@@ -1801,11 +1801,6 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_tot_num_evts_{}".format(phi_setting)] = H_MM_pisub_DATA.GetEntries()
-
-    # --------------------------------------------------------------
-    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
-    # --------------------------------------------------------------
     inpDict["bg_stat_scale"] = 0.85
 
     background_fit = bg_fit(phi_setting, inpDict, H_MM_pisub_DATA)
@@ -1855,7 +1850,6 @@ def rand_sub(phi_setting, inpDict):
     H_W_DATA.Add(background_fit[0], -1)
     H_t_DATA.Add(background_fit[0], -1)
     H_epsilon_DATA.Add(background_fit[0], -1)
-    H_MM_pisub_DATA.Add(background_fit[0], -1)
     H_MM_DATA.Add(background_fit[0], -1)
     H_pmiss_DATA.Add(background_fit[0], -1)
     H_emiss_DATA.Add(background_fit[0], -1)

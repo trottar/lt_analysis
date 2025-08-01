@@ -160,18 +160,22 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         for k in range(len(phi_bins)-1):
 
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_DATA_{}_{}".format(j, k),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DATA_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DATA_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)]       = TH1D("H_t_DATA_{}_{}".format(j, k),"-t", 200, inpDict["tmin"], inpDict["tmax"])
 
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_RAND_{}_{}".format(j, k),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_RAND_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_RAND_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)]       = TH1D("H_t_RAND_{}_{}".format(j, k),"-t", 200, inpDict["tmin"], inpDict["tmax"])
 
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_{}_{}".format(j, k),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DUMMY_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_{}_{}".format(j, k),"-t", 200, inpDict["tmin"], inpDict["tmax"])
 
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_RAND_{}_{}".format(j, k),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k),"MM", 200, 0.7, 1.5)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_RAND_{}_{}".format(j, k),"-t", 200, inpDict["tmin"], inpDict["tmax"])
 
@@ -238,6 +242,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
         
         if(ALLCUTS):
@@ -291,7 +296,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
+                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)             
                             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
@@ -344,7 +350,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
+                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])   
+                            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)].Fill(adj_MM)             
                             hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
@@ -398,6 +405,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])                
+                            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
 
         if(ALLCUTS):                
@@ -428,18 +436,22 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         for k in range(len(phi_bins)-1):
                             
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Scale(1/nWindows)            
             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)],-1)            
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_RAND_{}_{}".format(j, k)],-1)
 
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)            
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
 
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)            
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)        
 
@@ -493,23 +505,20 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,φ) bin ----------------
-            bg_stat_scale = (
-                hist_bin_dict[f"H_MM_DATA_{j}_{k}"].GetEntries() /
-                hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"].GetEntries()
-            ) if hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"].GetEntries() else 1.0
-            inpDict["bg_stat_scale"] = bg_stat_scale * 0.5 # <‑‑ pass to bg_fit
+            inpDict["bg_stat_scale"] = 0.85
             # ----------------------------------------------------------------
 
             # Fit background and subtract
             background_fit = bg_fit(phi_setting,
                                     inpDict,
-                                    hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"])
+                                    hist_bin_dict[f"H_MM_pisub_DATA_{j}_{k}"])
 
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
 
             # Normalize for yields
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
@@ -576,8 +585,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         if ParticleType == "kaon":
                             subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
                             subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        background_fit[0].SetLineColor(3)
-                        background_fit[0].Draw("same")
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
                         
                         # Ensure correct PDF opening and closing
@@ -594,6 +601,30 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             
                         # Close the canvas2 to free up memory
                         canvas2.Close()
+
+                        # Create a new canvas for each plot
+                        canvas3 = ROOT.TCanvas("canvas3_{}".format(canvas_iter), "Canvas", 800, 600)
+                        
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw()
+                        background_fit[0].SetLineColor(3)
+                        background_fit[0].Draw("same")
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
+                        
+                        # Ensure correct PDF opening and closing
+                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+
+                        if is_absolute_first:
+                            print("(")
+                            canvas3.Print(pdf_name + '(')
+                        elif is_absolute_last:
+                            print(")")
+                            canvas3.Print(pdf_name + ')')
+                        else:
+                            canvas3.Print(pdf_name)
+                            
+                        # Close the canvas2 to free up memory
+                        canvas3.Close()                        
 
                     # Create a new canvas for each plot
                     canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
