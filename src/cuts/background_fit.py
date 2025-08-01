@@ -98,9 +98,9 @@ def bg_fit(phi_setting, inpDict, hist):
     lambda_peak = 1.115
 
     # Grab window widths/gaps from inpDict if available, else use defaults (in GeV)
-    sig_width = inpDict.get("sig_width", 0.016)    # default: 16 MeV signal window
-    sb_width  = inpDict.get("sb_width",  0.025)    # default: 25 MeV per sideband
-    sb_gap    = inpDict.get("sb_gap",    0.012)    # default: 12 MeV sideband guard
+    sig_width = inpDict.get("sig_width", 0.012)    # default: 16 MeV signal window
+    sb_width  = inpDict.get("sb_width",  0.010)    # default: 25 MeV per sideband
+    sb_gap    = inpDict.get("sb_gap",    0.008)    # default: 12 MeV sideband guard
 
     # Signal window: centered on Lambda
     sig_lo = max(lambda_peak - sig_width/2, mm_min)
