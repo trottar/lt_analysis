@@ -43,18 +43,26 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_fit_histogram_full_range(fit_func, hist):
+def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=1):
     """
-    Create a histogram from fit_func matching 'hist', with fit value everywhere.
+    Fill the fit in all bins, then zero it only outside
+    [mm_min - n_pad*binw , mm_max + n_pad*binw ].
+    That moves the step one (or n_pad) bins beyond the analysis window.
     """
-    h_fit = hist.Clone(hist.GetName() + "_fit_fullrange")
-    h_fit.Reset()
-    for ibin in range(1, h_fit.GetNbinsX() + 1):
-        x = h_fit.GetBinCenter(ibin)
-        h_fit.SetBinContent(ibin, fit_func.Eval(x))
-        # (Optional) Set error
-    return h_fit
+    bin_w  = hist.GetBinWidth(1)
+    lo_cut = mm_min - n_pad * bin_w
+    hi_cut = mm_max + n_pad * bin_w
 
+    h_fit = hist.Clone(hist.GetName() + "_fit_pad")
+    h_fit.Reset()
+    for ib in range(1, h_fit.GetNbinsX() + 1):
+        x = h_fit.GetBinCenter(ib)
+        if lo_cut <= x <= hi_cut:
+            h_fit.SetBinContent(ib, fit_func.Eval(x))
+        else:
+            h_fit.SetBinContent(ib, 0.0)
+            h_fit.SetBinError(ib, 0.0)
+    return h_fit
 
 ################################################################################################################################################
 
@@ -123,5 +131,5 @@ def bg_fit(phi_setting, inpDict, hist):
             fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
         bg_par *= scale
 
-    fit_hist_fullrange = get_fit_histogram_full_range(fit_func, hist)
-    return fit_hist_fullrange, fit_vis, bg_par
+    fit_hist_inrange = get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max)
+    return fit_hist_inrange, fit_vis, bg_par
