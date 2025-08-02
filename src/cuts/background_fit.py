@@ -43,25 +43,50 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=1):
+def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0):
     """
-    Fill the fit in all bins, then zero it only outside
-    [mm_min - n_pad*binw , mm_max + n_pad*binw ].
-    That moves the step one (or n_pad) bins beyond the analysis window.
-    """
-    bin_w  = hist.GetBinWidth(1)
-    lo_cut = mm_min - n_pad * bin_w
-    hi_cut = mm_max + n_pad * bin_w
+    Clone *hist*, fill it with the fitted function, then keep the
+    contents only in the window [mm_min, mm_max] extended by *n_pad*
+    extra **bins** on each side.  Everything outside that window is
+    forced to zero (contents *and* errors).
 
-    h_fit = hist.Clone(hist.GetName() + "_fit_pad")
+    Parameters
+    ----------
+    fit_func : ROOT.TF1
+        The background-fit function you want to visualise / subtract.
+    hist : ROOT.TH1
+        The template histogram that defines the binning.
+    mm_min, mm_max : float
+        Nominal physics window (in the same units as the histogram X-axis).
+    n_pad : int, optional
+        How many whole bins to pad on each side.  Default is **0**
+        so the function is strictly limited to [mm_min, mm_max] unless
+        you explicitly ask for padding.
+    """
+    # --- determine bin numbers instead of working in x so that
+    #     we cannot straddle a bin edge by accident ------------------------
+    ax   = hist.GetXaxis()
+    i_lo = ax.FindBin(mm_min)            # first bin INSIDE the signal region
+    i_hi = ax.FindBin(mm_max)            # last  bin INSIDE the signal region
+
+    # expand by the requested padding (but keep within histogram bounds)
+    i_lo = max(1,                 i_lo - n_pad)
+    i_hi = min(hist.GetNbinsX(),  i_hi + n_pad)
+
+    # --- build the padded-fit histogram ----------------------------------
+    h_fit = hist.Clone(hist.GetName() + "_bg_fit_pad")
     h_fit.Reset()
+
     for ib in range(1, h_fit.GetNbinsX() + 1):
-        x = h_fit.GetBinCenter(ib)
-        if lo_cut <= x <= hi_cut:
-            h_fit.SetBinContent(ib, fit_func.Eval(x))
+        if i_lo <= ib <= i_hi:
+            x = h_fit.GetBinCenter(ib)
+            y = fit_func.Eval(x)
+            h_fit.SetBinContent(ib, y)
+            h_fit.SetBinError  (ib, 0.0)      # or propagate your own errors
         else:
             h_fit.SetBinContent(ib, 0.0)
-            h_fit.SetBinError(ib, 0.0)
+            h_fit.SetBinError  (ib, 0.0)
+
     return h_fit
 
 ################################################################################################################################################
@@ -132,5 +157,4 @@ def bg_fit(phi_setting, inpDict, hist):
         bg_par *= scale
 
     fit_hist_inrange = get_fit_histogram_padded(fit_func, hist, mm_min, mm_max)
-    #return fit_hist_inrange, fit_vis, bg_par
-    return fit_func, fit_vis, bg_par
+    return fit_hist_inrange, fit_vis, bg_par
