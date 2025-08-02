@@ -132,4 +132,5 @@ def bg_fit(phi_setting, inpDict, hist):
         bg_par *= scale
 
     fit_hist_inrange = get_fit_histogram_padded(fit_func, hist, mm_min, mm_max)
-    return fit_hist_inrange, fit_vis, bg_par
+    #return fit_hist_inrange, fit_vis, bg_par
+    return fit_func, fit_vis, bg_par
