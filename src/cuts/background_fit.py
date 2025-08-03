@@ -145,8 +145,8 @@ def bg_fit(phi_setting, inpDict, hist):
     fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")
 
-    bin_w = h_sb.GetBinWidth(1)
-    bg_par = fit_func.Integral(sig_lo, sig_hi) / bin_w
+    bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
+    bg_par = max(0.0, bg_par)  # physical prior
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
 
     scale = inpDict.get("bg_stat_scale", 1.0)
