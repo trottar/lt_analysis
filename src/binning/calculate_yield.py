@@ -429,8 +429,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
-    n_φ = len(phi_bins) - 1
-    arr_scale_factor = [[0.0 for _ in range(n_φ)] for _ in range(n_t)]
+    n_phi = len(phi_bins) - 1
+    arr_scale_factor = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -520,7 +520,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(normfac_data)
 
             # Fit background and subtract
-            # ---- Statistic‑scale for this (t,φ) bin ----------------
+            # ---- Statistic‑scale for this (t,phi) bin ----------------
             inpDict["bg_stat_scale"] = 1.25
             # ----------------------------------------------------------------
 
@@ -687,8 +687,8 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
 
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
-    n_φ = len(phi_bins) - 1
-    arr_scale_factor = [[0.0 for _ in range(n_φ)] for _ in range(n_t)]
+    n_phi = len(phi_bins) - 1
+    arr_scale_factor = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -766,15 +766,15 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
-    n_φ = len(phi_bins) - 1
-    arr_scale_factor = [[0.0 for _ in range(n_φ)] for _ in range(n_t)]
+    n_phi = len(phi_bins) - 1
+    arr_scale_factor = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
             arr_scale_factor[j][k] = binned_dict[kin_type]["scale_factor"][j][k]
 
-    nφ = len(phi_bins) - 1
+    nphi = len(phi_bins) - 1
     yield_hist = []
     yield_err_hist = []
     binned_sub_data = [[],[]]
@@ -782,8 +782,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     print("-"*25)
     # Subtract binned_hist_dummy from binned_hist_data element-wise
     for data, sub in zip(binned_hist_data, binned_hist_sub):
-        j = i // nφ
-        k = i %  nφ
+        j = i // nphi
+        k = i %  nphi
         bin_val_data, hist_val_data = data
         bin_val_sub, hist_val_sub = sub
         bin_width_data = np.mean(np.diff(bin_val_data))
