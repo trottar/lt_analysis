@@ -1803,7 +1803,10 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     inpDict["bg_stat_scale"] = 0.85
 
-    background_fit = bg_fit(phi_setting, inpDict, H_MM_pisub_DATA)
+    background_fit = bg_fit(phi_setting,
+                            inpDict,
+                            H_MM_pisub_DATA,   # wide / no-cut
+                            H_MM_DATA)         # cut-window axis
     # background_fit[0] : scaled function   (use for subtraction)
     # background_fit[1] : original function (use for drawing only)
 
