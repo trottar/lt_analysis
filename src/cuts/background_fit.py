@@ -72,38 +72,54 @@ def project_fit_onto(hist_src, hist_dst, fit_func,
     return h
 ####################################################################
 
-def bg_fit(phi_setting, inpDict, full_hist, cut_hist):
+def bg_fit(phi_setting, inpDict, full_hist):
     """
-    *full_hist*  : TH1 that still spans the two sidebands.
-    *cut_hist*   : TH1 after you've applied  mm_min/mm_max  for plotting or
-                   yield extraction.  Must have identical binning.
-    """
-    mm_min = inpDict["mm_min"]
-    mm_max = inpDict["mm_max"]
+    full_hist : TH1 that still contains *both* sidebands
+                (e.g. 0.70–1.50 GeV for H(e,e′K⁺) on hydrogen)
 
-    # ❶  --- fit on the *full* histogram ---------------------------
+    Returns
+    --------
+    h_bg_cut  : TH1 – background shape but *only* inside
+                        [mm_min, mm_max] (zeros elsewhere)
+    bg_int    : float – background counts in the signal window
+    bg_err    : float – propagated uncertainty on that integral
+    """
+    mm_min, mm_max = inpDict["mm_min"], inpDict["mm_max"]
+
+    # -----------------------------------------------------------------
+    # 1) Fit polynomial to the two sidebands on the full histogram
+    # -----------------------------------------------------------------
     sb_left  = inpDict.get("sb_left",  (1.070, 1.095))
     sb_right = inpDict.get("sb_right", (1.135, 1.180))
 
-    fit_func = TF1("bg", "pol1", sb_left[0], sb_right[1])
+    bg_func = ROOT.TF1("bg", "pol1", sb_left[0], sb_right[1])
 
-    # Fit left, then right, so both ranges contribute with equal weight
-    full_hist.Fit(fit_func, "Q0R", "", sb_left[0] , sb_left[1])
-    full_hist.Fit(fit_func, "Q0R+", "", sb_right[0], sb_right[1])
+    # Fit left band, then add the right band (equal bin weights)
+    full_hist.Fit(bg_func, "Q0R",  "", sb_left[0],  sb_left[1])
+    full_hist.Fit(bg_func, "Q0R+", "", sb_right[0], sb_right[1])
 
-    # ❷ --- project that function onto the *cut* histogram ----------
-    h_bg_cut = project_fit_onto(full_hist, cut_hist, fit_func)
+    # -----------------------------------------------------------------
+    # 2) Project that function onto the Λ window only
+    #    (bins outside the window → 0)
+    # -----------------------------------------------------------------
+    h_bg_cut = get_fit_histogram_padded(bg_func,
+                                        full_hist,
+                                        mm_min, mm_max,
+                                        n_pad=0, allow_negative=False)
 
-    # ❸ --- background integral & error in the signal window --------
+    # -----------------------------------------------------------------
+    # 3) Background integral and error in the same window
+    # -----------------------------------------------------------------
     sig_lo = max(1.107, mm_min)
     sig_hi = min(1.123, mm_max)
 
-    pars   = np.array([fit_func.GetParameter(i) for i in range(fit_func.GetNpar())])
-    cov    = np.zeros((fit_func.GetNpar(), fit_func.GetNpar()))
-    fit_func.GetCovarianceMatrix(cov.flatten().tolist())
+    pars  = np.array([bg_func.GetParameter(i) for i in range(bg_func.GetNpar())])
+    cov   = np.zeros((bg_func.GetNpar(), bg_func.GetNpar()))
+    bg_func.GetCovarianceMatrix(cov.flatten().tolist())
 
-    bg_int     = fit_func.Integral(     sig_lo, sig_hi) / full_hist.GetBinWidth(1)
-    bg_int_err = fit_func.IntegralError(sig_lo, sig_hi,
-                                        pars, cov.flatten().tolist()) / full_hist.GetBinWidth(1)
+    bw      = full_hist.GetBinWidth(1)
+    bg_int  =  bg_func.Integral(     sig_lo, sig_hi) / bw
+    bg_err  =  bg_func.IntegralError(sig_lo, sig_hi,
+                                     pars, cov.flatten().tolist()) / bw
 
-    return h_bg_cut, bg_int, bg_int_err
+    return h_bg_cut, bg_int, bg_err
