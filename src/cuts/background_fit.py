@@ -43,94 +43,116 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-# ------------------------------------------------------------------
-# Helper: generate a TH1 whose contents are the fitted background
-#         but ONLY inside [lo, hi]  (plus an optional pad of n_pad bins)
-# ------------------------------------------------------------------
-def get_fit_histogram_padded(fit_func, tmpl_hist,
-                             lo, hi, n_pad=0, allow_negative=False):
+def get_fit_histogram_padded(fit_func, hist,
+                             mm_min, mm_max,
+                             n_pad=0,
+                             allow_negative=False,
+                             use_bin_integral=True):
     """
+    Build a TH1 containing the fitted background inside
+    [mm_min, mm_max] (plus ± n_pad bins of padding).
+
     Parameters
     ----------
-    fit_func  : ROOT.TF1   – fitted background function
-    tmpl_hist : ROOT.TH1   – provides axis & binning for the output
-    lo, hi    : float      – edges of the window you keep
-    n_pad     : int        – extra bins to include on each side
-    allow_negative : bool  – clamp negative values to zero if False
-
-    Returns
-    -------
-    ROOT.TH1 – same binning as tmpl_hist, but filled only between
-               lo-pad and hi+pad with the function values
+    fit_func : ROOT.TF1   – the function you already fitted
+    hist     : ROOT.TH1   – the *data* histogram whose binning we want
+    mm_min, mm_max : float
+    n_pad    : int        – padding in *bins*
+    allow_negative : bool – clamp <0 values to zero if False
+    use_bin_integral : bool – integrate over the bin instead of sampling
     """
-    h = tmpl_hist.Clone(tmpl_hist.GetName() + "_bg_cut")
-    h.Reset("ICES")                      # clear contents & errors
+    ax   = hist.GetXaxis()
+    nb   = ax.GetNbins()
 
-    ax  = h.GetXaxis()
-    nb  = ax.GetNbins()
-    i_lo = max(1, ax.FindBin(lo) - n_pad)
-    i_hi = min(nb, ax.FindBin(hi) + n_pad)
+    i_lo = max(1, ax.FindBin(mm_min) - n_pad)
+    i_hi = min(nb, ax.FindBin(mm_max) + n_pad)
+
+    # fresh empty clone – also clears Sumw2
+    h_fit = hist.Clone(hist.GetName() + "_bg_fit_pad")
+    h_fit.Reset("ICES")                 # I: contents, C: errors, E: entries, S: sumw2
 
     for ib in range(i_lo, i_hi + 1):
-        x = ax.GetBinCenter(ib)
-        y = fit_func.Eval(x)
+        x_low, x_up = ax.GetBinLowEdge(ib), ax.GetBinUpEdge(ib)
+        if use_bin_integral:
+            y = fit_func.Integral(x_low, x_up) / (x_up - x_low)
+        else:
+            y = fit_func.Eval(0.5*(x_low + x_up))
+
         if not allow_negative and y < 0.0:
             y = 0.0
-        h.SetBinContent(ib, y)
-        h.SetBinError  (ib, 0.0)
 
-    return h
+        h_fit.SetBinContent(ib, y)
+        h_fit.SetBinError  (ib, 0.0)    # or propagate param errors if you want
 
-####################################################################
+    # bins outside the padded window are already zero, so no loop needed
+    return h_fit
 
-def bg_fit(phi_setting, inpDict, full_hist):
-    """
-    full_hist : TH1 that still contains *both* sidebands
-                (e.g. 0.70–1.50 GeV for H(e,e′K⁺) on hydrogen)
+################################################################################################################################################
 
-    Returns
-    --------
-    h_bg_cut  : TH1 – background shape but *only* inside
-                        [mm_min, mm_max] (zeros elsewhere)
-    bg_int    : float – background counts in the signal window
-    bg_err    : float – propagated uncertainty on that integral
-    """
-    mm_min, mm_max = inpDict["mm_min"], inpDict["mm_max"]
+#no_bg_subtract=True
+no_bg_subtract=False
 
-    # -----------------------------------------------------------------
-    # 1) Fit polynomial to the two sidebands on the full histogram
-    # -----------------------------------------------------------------
-    sb_left  = inpDict.get("sb_left",  (1.070, 1.095))
+def bg_fit(phi_setting, inpDict, hist):
+
+    if no_bg_subtract:
+        fit_func = TF1("fit_func_zero", "0", inpDict["mm_min"], inpDict["mm_max"])
+        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+        bg_par   = 0
+        return fit_func, fit_vis, bg_par    
+    
+    mm_min = inpDict["mm_min"]
+    mm_max = inpDict["mm_max"]
+
+    # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
+    sb_left = inpDict.get("sb_left", (1.070, 1.095))
     sb_right = inpDict.get("sb_right", (1.135, 1.180))
-
-    bg_func = ROOT.TF1("bg", "pol1", sb_left[0], sb_right[1])
-
-    # Fit left band, then add the right band (equal bin weights)
-    full_hist.Fit(bg_func, "Q0R",  "", sb_left[0],  sb_left[1])
-    full_hist.Fit(bg_func, "Q0R+", "", sb_right[0], sb_right[1])
-
-    # -----------------------------------------------------------------
-    # 2) Project that function onto the Λ window only
-    #    (bins outside the window → 0)
-    # -----------------------------------------------------------------
-    h_bg_cut = get_fit_histogram_padded(bg_func,
-                                        full_hist,
-                                        mm_min, mm_max,
-                                        n_pad=0, allow_negative=False)
-
-    # -----------------------------------------------------------------
-    # 3) Background integral and error in the same window
-    # -----------------------------------------------------------------
     sig_lo = max(1.107, mm_min)
     sig_hi = min(1.123, mm_max)
 
-    pars  = np.array([bg_func.GetParameter(i) for i in range(bg_func.GetNpar())])
-    cov   = np.zeros((bg_func.GetNpar(), bg_func.GetNpar()))
-    bg_func.GetCovarianceMatrix(cov.flatten().tolist())
+    print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
+    print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
+    print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
 
-    bw      = full_hist.GetBinWidth(1)
-    bg_int  =  bg_func.Integral(     sig_lo, sig_hi) / bw
-    bg_err  =  bg_func.IntegralError(sig_lo, sig_hi,
-                                     pars, cov.flatten().tolist()) / bw
+    h_sb = hist.Clone(hist.GetName() + "_sb")
 
-    return h_bg_cut, bg_int, bg_err
+    def is_valid_sideband(sb):
+        return sb[1] > sb[0]
+
+    n_sb_bins = 0
+    for ib in range(1, h_sb.GetNbinsX() + 1):
+        x = h_sb.GetBinCenter(ib)
+        in_sb_left  = is_valid_sideband(sb_left)  and (sb_left[0]  <= x <= sb_left[1])
+        in_sb_right = is_valid_sideband(sb_right) and (sb_right[0] <= x <= sb_right[1])
+        if not (in_sb_left or in_sb_right):
+            h_sb.SetBinContent(ib, 0.0)
+            h_sb.SetBinError(ib, 0.0)
+        else:
+            n_sb_bins += 1
+
+    print("Nonzero bins in h_sb after masking:", n_sb_bins)
+
+    if n_sb_bins < 2:
+        print("[WARNING] All sideband bins are empty after masking! Fit will be flat zero.")
+        fit_func = TF1("fit_func_zero", "0", mm_min, mm_max)
+        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+        bg_par   = 0
+        fit_hist_inrange = get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max)
+        return fit_hist_inrange, fit_vis, bg_par
+
+    fit_min = sb_left[0]
+    fit_max = sb_right[1]
+    fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
+    h_sb.Fit(fit_func, "Q0")
+
+    bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
+    bg_par = max(0.0, bg_par)  # physical prior
+    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+
+    scale = inpDict.get("bg_stat_scale", 1.0)
+    if scale != 1.0:
+        for ip in range(fit_func.GetNpar()):
+            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
+        bg_par *= scale
+
+    fit_hist_inrange = get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0)
+    return fit_hist_inrange, fit_vis, bg_par
