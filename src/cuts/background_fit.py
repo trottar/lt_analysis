@@ -43,117 +43,67 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0, allow_negative=False):
+####################################################################
+# added helper -----------------------------------------------------
+def project_fit_onto(hist_src, hist_dst, fit_func,
+                     allow_negative=False, n_pad=0):
     """
-    Fill a histogram from fit_func but keep contents only within
-    [mm_min, mm_max] extended by n_pad *bins* on each side.
-
-    Parameters
-    ----------
-    fit_func : ROOT.TF1
-    hist     : ROOT.TH1
-    mm_min, mm_max : float
-    n_pad    : int   (padding in *bins*, default 0)
-    allow_negative : bool (if False, clamp fit values at 0)
+    Return a clone of *hist_dst* whose bin contents are filled with the
+    values of *fit_func* **in the dst range only**.
     """
-    ax   = hist.GetXaxis()
-    nb   = hist.GetNbinsX()
+    h = hist_dst.Clone(hist_dst.GetName() + "_bg_from_full")
+    h.Reset()
 
-    # Nudge edges *inside* the axis range to avoid overflow/underflow from exact-edge values
-    xmin, xmax = ax.GetXmin(), ax.GetXmax()
-    lo_edge = max(xmin, np.nextafter(mm_min,  np.inf))
-    hi_edge = min(xmax, np.nextafter(mm_max, -np.inf))
+    ax_src = hist_src.GetXaxis()
+    ax_dst = hist_dst.GetXaxis()
+    nb_dst = ax_dst.GetNbins()
 
-    # Convert to bin indices and apply integer padding
-    i_lo = ax.FindBin(lo_edge)
-    i_hi = ax.FindBin(hi_edge)
-    i_lo = max(1, i_lo - n_pad)
-    i_hi = min(nb, i_hi + n_pad)
+    # Source bin width is what TH1::Fit used
+    bw_src = ax_src.GetBinWidth(1)
 
-    # Build the histogram
-    h_fit = hist.Clone(hist.GetName() + "_bg_fit_pad")
-    h_fit.Reset()
+    for ib in range(1, nb_dst + 1):
+        x = ax_dst.GetBinCenter(ib)
+        y = fit_func.Eval(x)
+        if not allow_negative and y < 0.0:
+            y = 0.0
+        h.SetBinContent(ib, y)
+        h.SetBinError  (ib, 0.0)
 
-    for ib in range(1, nb + 1):
-        if i_lo <= ib <= i_hi:
-            x = h_fit.GetBinCenter(ib)
-            y = fit_func.Eval(x)
-            if not allow_negative and y < 0.0:
-                y = 0.0
-            h_fit.SetBinContent(ib, y)
-            h_fit.SetBinError(ib, 0.0)  # define explicitly; replace if you propagate param errors
-        else:
-            h_fit.SetBinContent(ib, 0.0)
-            h_fit.SetBinError(ib, 0.0)
+    return h
+####################################################################
 
-    return h_fit
-
-################################################################################################################################################
-
-#no_bg_subtract=True
-no_bg_subtract=False
-
-def bg_fit(phi_setting, inpDict, hist):
-
-    if no_bg_subtract:
-        fit_func = TF1("fit_func_zero", "0", inpDict["mm_min"], inpDict["mm_max"])
-        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
-        bg_par   = 0
-        return fit_func, fit_vis, bg_par    
-    
+def bg_fit(phi_setting, inpDict, full_hist, cut_hist):
+    """
+    *full_hist*  : TH1 that still spans the two sidebands.
+    *cut_hist*   : TH1 after you've applied  mm_min/mm_max  for plotting or
+                   yield extraction.  Must have identical binning.
+    """
     mm_min = inpDict["mm_min"]
     mm_max = inpDict["mm_max"]
 
-    # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
-    sb_left = inpDict.get("sb_left", (1.070, 1.095))
+    # ❶  --- fit on the *full* histogram ---------------------------
+    sb_left  = inpDict.get("sb_left",  (1.070, 1.095))
     sb_right = inpDict.get("sb_right", (1.135, 1.180))
+
+    fit_func = TF1("bg", "pol1", sb_left[0], sb_right[1])
+
+    # Fit left, then right, so both ranges contribute with equal weight
+    full_hist.Fit(fit_func, "Q0R", "", sb_left[0] , sb_left[1])
+    full_hist.Fit(fit_func, "Q0R+", "", sb_right[0], sb_right[1])
+
+    # ❷ --- project that function onto the *cut* histogram ----------
+    h_bg_cut = project_fit_onto(full_hist, cut_hist, fit_func)
+
+    # ❸ --- background integral & error in the signal window --------
     sig_lo = max(1.107, mm_min)
     sig_hi = min(1.123, mm_max)
 
-    print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
-    print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
-    print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
+    pars   = np.array([fit_func.GetParameter(i) for i in range(fit_func.GetNpar())])
+    cov    = np.zeros((fit_func.GetNpar(), fit_func.GetNpar()))
+    fit_func.GetCovarianceMatrix(cov.flatten().tolist())
 
-    h_sb = hist.Clone(hist.GetName() + "_sb")
+    bg_int     = fit_func.Integral(     sig_lo, sig_hi) / full_hist.GetBinWidth(1)
+    bg_int_err = fit_func.IntegralError(sig_lo, sig_hi,
+                                        pars, cov.flatten().tolist()) / full_hist.GetBinWidth(1)
 
-    def is_valid_sideband(sb):
-        return sb[1] > sb[0]
-
-    n_sb_bins = 0
-    for ib in range(1, h_sb.GetNbinsX() + 1):
-        x = h_sb.GetBinCenter(ib)
-        in_sb_left  = is_valid_sideband(sb_left)  and (sb_left[0]  <= x <= sb_left[1])
-        in_sb_right = is_valid_sideband(sb_right) and (sb_right[0] <= x <= sb_right[1])
-        if not (in_sb_left or in_sb_right):
-            h_sb.SetBinContent(ib, 0.0)
-            h_sb.SetBinError(ib, 0.0)
-        else:
-            n_sb_bins += 1
-
-    print("Nonzero bins in h_sb after masking:", n_sb_bins)
-
-    if n_sb_bins < 2:
-        print("[WARNING] All sideband bins are empty after masking! Fit will be flat zero.")
-        fit_func = TF1("fit_func_zero", "0", mm_min, mm_max)
-        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
-        bg_par   = 0
-        fit_hist_inrange = get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max)
-        return fit_hist_inrange, fit_vis, bg_par
-
-    fit_min = sb_left[0]
-    fit_max = sb_right[1]
-    fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
-    h_sb.Fit(fit_func, "Q0")
-
-    bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
-    bg_par = max(0.0, bg_par)  # physical prior
-    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
-
-    scale = inpDict.get("bg_stat_scale", 1.0)
-    if scale != 1.0:
-        for ip in range(fit_func.GetNpar()):
-            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
-        bg_par *= scale
-
-    fit_hist_inrange = get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0)
-    return fit_hist_inrange, fit_vis, bg_par
+    return h_bg_cut, bg_int, bg_int_err
