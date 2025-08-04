@@ -43,26 +43,36 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-####################################################################
-# added helper -----------------------------------------------------
-def project_fit_onto(hist_src, hist_dst, fit_func,
-                     allow_negative=False, n_pad=0):
+# ------------------------------------------------------------------
+# Helper: generate a TH1 whose contents are the fitted background
+#         but ONLY inside [lo, hi]  (plus an optional pad of n_pad bins)
+# ------------------------------------------------------------------
+def get_fit_histogram_padded(fit_func, tmpl_hist,
+                             lo, hi, n_pad=0, allow_negative=False):
     """
-    Return a clone of *hist_dst* whose bin contents are filled with the
-    values of *fit_func* **in the dst range only**.
+    Parameters
+    ----------
+    fit_func  : ROOT.TF1   – fitted background function
+    tmpl_hist : ROOT.TH1   – provides axis & binning for the output
+    lo, hi    : float      – edges of the window you keep
+    n_pad     : int        – extra bins to include on each side
+    allow_negative : bool  – clamp negative values to zero if False
+
+    Returns
+    -------
+    ROOT.TH1 – same binning as tmpl_hist, but filled only between
+               lo-pad and hi+pad with the function values
     """
-    h = hist_dst.Clone(hist_dst.GetName() + "_bg_from_full")
-    h.Reset()
+    h = tmpl_hist.Clone(tmpl_hist.GetName() + "_bg_cut")
+    h.Reset("ICES")                      # clear contents & errors
 
-    ax_src = hist_src.GetXaxis()
-    ax_dst = hist_dst.GetXaxis()
-    nb_dst = ax_dst.GetNbins()
+    ax  = h.GetXaxis()
+    nb  = ax.GetNbins()
+    i_lo = max(1, ax.FindBin(lo) - n_pad)
+    i_hi = min(nb, ax.FindBin(hi) + n_pad)
 
-    # Source bin width is what TH1::Fit used
-    bw_src = ax_src.GetBinWidth(1)
-
-    for ib in range(1, nb_dst + 1):
-        x = ax_dst.GetBinCenter(ib)
+    for ib in range(i_lo, i_hi + 1):
+        x = ax.GetBinCenter(ib)
         y = fit_func.Eval(x)
         if not allow_negative and y < 0.0:
             y = 0.0
@@ -70,6 +80,7 @@ def project_fit_onto(hist_src, hist_dst, fit_func,
         h.SetBinError  (ib, 0.0)
 
     return h
+
 ####################################################################
 
 def bg_fit(phi_setting, inpDict, full_hist):
