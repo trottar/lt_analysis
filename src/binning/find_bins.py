@@ -78,8 +78,27 @@ def find_bins(histlist, inpDict):
     H_phi_Right = np.array([])
     H_phi_Left = np.array([])
     H_phi_Center = np.array([])
+
+    # Create an empty list to store copied histograms
+    histlist_copy = []
+
+    # Check if the value of the dictionary is a TObject that can use .Clone()
+    for hist in histlist:
+        hist_copy = {}
+        for key, val in hist.items():
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
+                # Clone the TObject if it has the 'Clone' method
+                hist_copy[key] = val.Clone()
+            else:
+                # Otherwise, just copy the value
+                hist_copy[key] = val
+        # Append the copied histogram dictionary to the new list
+        histlist_copy.append(hist_copy)
     
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
+
+        hist["H_t_DATA"].Scale(1.0 / hist["normfac_data"])
+        hist["H_ph_q_DATA"].Scale(1.0 / hist["normfac_data"])
         
         t = flatten_hist(hist["H_t_DATA"])
         phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
@@ -333,8 +352,24 @@ def check_bins(histlist, inpDict):
     tmin = inpDict["tmin"]
     tmax = inpDict["tmax"]
 
-    t_bins = histlist[0]["t_bins"]
-    phi_bins = histlist[0]["phi_bins"]
+    # Create an empty list to store copied histograms
+    histlist_copy = []
+
+    # Check if the value of the dictionary is a TObject that can use .Clone()
+    for hist in histlist:
+        hist_copy = {}
+        for key, val in hist.items():
+            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
+                # Clone the TObject if it has the 'Clone' method
+                hist_copy[key] = val.Clone()
+            else:
+                # Otherwise, just copy the value
+                hist_copy[key] = val
+        # Append the copied histogram dictionary to the new list
+        histlist_copy.append(hist_copy)
+
+    t_bins = histlist_copy[0]["t_bins"]
+    phi_bins = histlist_copy[0]["phi_bins"]
 
     ################################################################################################################################################
     # Define root file trees of interest
@@ -348,7 +383,7 @@ def check_bins(histlist, inpDict):
     H_phi_Left = np.array([])
     H_phi_Center = np.array([])
     
-    for i,hist in enumerate(histlist):
+    for i,hist in enumerate(histlist_copy):
         
         t = flatten_hist(hist["H_t_DATA"])
         phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]

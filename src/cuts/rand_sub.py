@@ -1480,214 +1480,6 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
 
-    # Pion subtraction by scaling simc to peak size
-    if ParticleType == "kaon":
-        subDict["nWindows"] = nWindows
-        subDict["phi_setting"] = phi_setting
-        subDict["MM_offset_DATA"] = MM_offset_DATA
-        particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
-        
-        try:
-            ##############
-            # HARD CODED #
-            ##############
-            pi_mm_min = 0.88 + MM_offset_DATA
-            pi_mm_max = 0.94 + MM_offset_DATA 
-            ###pi_mm_min = 0.91 + MM_offset_DATA
-            ###pi_mm_max = 0.98 + MM_offset_DATA                       
-            # Scale pion to kaon data
-            kaon_amp = integrate_hist_range(
-                H_MM_nosub_DATA,
-                pi_mm_min, pi_mm_max
-            )
-
-            pion_background_amp = integrate_hist_range(
-                subDict["H_MM_nosub_SUB_DATA"],
-                pi_mm_min, pi_mm_max
-            )
-            scale_factor = (kaon_amp / pion_background_amp) * 0.85 # Scale factor to adjust pion background to kaon peak size
-            ##############
-            ##############
-            ##############
-        except ZeroDivisionError:
-            scale_factor = 0.0
-        '''
-        if scale_factor > 10.0:
-            print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
-            scale_factor = 0.0
-        '''            
-        # Apply scale factor
-        subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_CoinTime_SUB_DATA"].Scale(scale_factor)
-        subDict["CoinTime_vs_beta_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_beta_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_H_cer_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_H_cal_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_P_cal_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_P_hgcer_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_P_aero_SUB_DATA"].Scale(scale_factor)
-        subDict["phiq_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["Q2_vs_W_SUB_DATA"].Scale(scale_factor)
-        subDict["Q2_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["W_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["EPS_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ct_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssxfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssyfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssxpfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssypfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsxfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsyfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsxpfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsypfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssxptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssyptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsxptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsyptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssdelta_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsdelta_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ph_q_SUB_DATA"].Scale(scale_factor)
-        subDict["H_th_q_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ph_recoil_SUB_DATA"].Scale(scale_factor)
-        subDict["H_th_recoil_SUB_DATA"].Scale(scale_factor)
-        subDict["H_Q2_SUB_DATA"].Scale(scale_factor)
-        subDict["H_W_SUB_DATA"].Scale(scale_factor)
-        subDict["H_t_SUB_DATA"].Scale(scale_factor)
-        subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
-        subDict["H_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["H_MM_nosub_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
-        subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmy_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmz_SUB_DATA"].Scale(scale_factor)
-        histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
-        histDict["H_MM_nosub_SUB_DATA"] = subDict["H_MM_nosub_SUB_DATA"]
-
-        # Subtract pion
-        P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
-        P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"],-1)
-        P_hgcer_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"],-1)
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"],-1)        
-        MM_vs_CoinTime_DATA.Add(subDict["MM_vs_CoinTime_SUB_DATA"],-1)
-        CoinTime_vs_beta_DATA.Add(subDict["CoinTime_vs_beta_SUB_DATA"],-1)
-        MM_vs_beta_DATA.Add(subDict["MM_vs_beta_SUB_DATA"],-1)
-        MM_vs_H_cer_DATA.Add(subDict["MM_vs_H_cer_SUB_DATA"],-1)
-        MM_vs_H_cal_DATA.Add(subDict["MM_vs_H_cal_SUB_DATA"],-1)
-        MM_vs_P_cal_DATA.Add(subDict["MM_vs_P_cal_SUB_DATA"],-1)    
-        MM_vs_P_hgcer_DATA.Add(subDict["MM_vs_P_hgcer_SUB_DATA"],-1)
-        MM_vs_P_aero_DATA.Add(subDict["MM_vs_P_aero_SUB_DATA"],-1)
-        phiq_vs_t_DATA.Add(subDict["phiq_vs_t_SUB_DATA"],-1)
-        Q2_vs_W_DATA.Add(subDict["Q2_vs_W_SUB_DATA"],-1)
-        Q2_vs_t_DATA.Add(subDict["Q2_vs_t_SUB_DATA"],-1)
-        W_vs_t_DATA.Add(subDict["W_vs_t_SUB_DATA"],-1)
-        EPS_vs_t_DATA.Add(subDict["EPS_vs_t_SUB_DATA"],-1)
-        MM_vs_t_DATA.Add(subDict["MM_vs_t_SUB_DATA"],-1)    
-        H_ssxfp_DATA.Add(subDict["H_ssxfp_SUB_DATA"],-1)
-        H_ssyfp_DATA.Add(subDict["H_ssyfp_SUB_DATA"],-1)
-        H_ssxpfp_DATA.Add(subDict["H_ssxpfp_SUB_DATA"],-1)
-        H_ssypfp_DATA.Add(subDict["H_ssypfp_SUB_DATA"],-1)
-        H_hsxfp_DATA.Add(subDict["H_hsxfp_SUB_DATA"],-1)
-        H_hsyfp_DATA.Add(subDict["H_hsyfp_SUB_DATA"],-1)
-        H_hsxpfp_DATA.Add(subDict["H_hsxpfp_SUB_DATA"],-1)
-        H_hsypfp_DATA.Add(subDict["H_hsypfp_SUB_DATA"],-1)
-        H_ssxptar_DATA.Add(subDict["H_ssxptar_SUB_DATA"],-1)
-        H_ssyptar_DATA.Add(subDict["H_ssyptar_SUB_DATA"],-1)
-        H_hsxptar_DATA.Add(subDict["H_hsxptar_SUB_DATA"],-1)
-        H_hsyptar_DATA.Add(subDict["H_hsyptar_SUB_DATA"],-1)
-        H_ssdelta_DATA.Add(subDict["H_ssdelta_SUB_DATA"],-1)
-        H_hsdelta_DATA.Add(subDict["H_hsdelta_SUB_DATA"],-1)
-        H_ph_q_DATA.Add(subDict["H_ph_q_SUB_DATA"],-1)
-        H_th_q_DATA.Add(subDict["H_th_q_SUB_DATA"],-1)
-        H_ph_recoil_DATA.Add(subDict["H_ph_recoil_SUB_DATA"],-1)
-        H_th_recoil_DATA.Add(subDict["H_th_recoil_SUB_DATA"],-1)
-        H_Q2_DATA.Add(subDict["H_Q2_SUB_DATA"],-1)
-        H_W_DATA.Add(subDict["H_W_SUB_DATA"],-1)
-        H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
-        H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
-        H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
-        H_MM_pisub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
-        H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
-        H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
-        H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)
-        H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
-        H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
-        H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
-
-    # Fit background and subtract
-    # --------------------------------------------------------------
-    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
-    # --------------------------------------------------------------
-    #inpDict["bg_stat_scale"] = 0.85
-    inpDict["bg_stat_scale"] = 1.25
-
-    background_fit = bg_fit(phi_setting,
-                            inpDict,
-                            H_MM_pisub_DATA,   # wide / no-cut
-                            H_MM_DATA)         # cut-window axis
-    # background_fit[0] : scaled function   (use for subtraction)
-    # background_fit[1] : original function (use for drawing only)
-
-    # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
-    #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-    #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-    #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
-    #CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
-    #MM_vs_beta_DATA.Add(background_fit[0], -1)
-    #MM_vs_H_cer_DATA.Add(background_fit[0], -1)
-    #MM_vs_H_cal_DATA.Add(background_fit[0], -1)
-    #MM_vs_P_cal_DATA.Add(background_fit[0], -1)
-    #MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
-    #MM_vs_P_aero_DATA.Add(background_fit[0], -1)
-    #phiq_vs_t_DATA.Add(background_fit[0], -1)
-    #Q2_vs_W_DATA.Add(background_fit[0], -1)
-    #Q2_vs_t_DATA.Add(background_fit[0], -1)
-    #W_vs_t_DATA.Add(background_fit[0], -1)
-    #EPS_vs_t_DATA.Add(background_fit[0], -1)
-    #MM_vs_t_DATA.Add(background_fit[0], -1)
-    H_ssxfp_DATA.Add(background_fit[0], -1)
-    H_ssyfp_DATA.Add(background_fit[0], -1)
-    H_ssxpfp_DATA.Add(background_fit[0], -1)
-    H_ssypfp_DATA.Add(background_fit[0], -1)
-    H_hsxfp_DATA.Add(background_fit[0], -1)
-    H_hsyfp_DATA.Add(background_fit[0], -1)
-    H_hsxpfp_DATA.Add(background_fit[0], -1)
-    H_hsypfp_DATA.Add(background_fit[0], -1)
-    H_ssxptar_DATA.Add(background_fit[0], -1)
-    H_ssyptar_DATA.Add(background_fit[0], -1)
-    H_hsxptar_DATA.Add(background_fit[0], -1)
-    H_hsyptar_DATA.Add(background_fit[0], -1)
-    H_ssdelta_DATA.Add(background_fit[0], -1)
-    H_hsdelta_DATA.Add(background_fit[0], -1)
-    H_ph_q_DATA.Add(background_fit[0], -1)
-    H_th_q_DATA.Add(background_fit[0], -1)
-    H_ph_recoil_DATA.Add(background_fit[0], -1)
-    H_th_recoil_DATA.Add(background_fit[0], -1)
-    H_Q2_DATA.Add(background_fit[0], -1)
-    H_W_DATA.Add(background_fit[0], -1)
-    H_t_DATA.Add(background_fit[0], -1)
-    H_epsilon_DATA.Add(background_fit[0], -1)
-    H_MM_DATA.Add(background_fit[0], -1)
-    H_pmiss_DATA.Add(background_fit[0], -1)
-    H_emiss_DATA.Add(background_fit[0], -1)
-    H_pmx_DATA.Add(background_fit[0], -1)
-    H_pmy_DATA.Add(background_fit[0], -1)
-    H_pmz_DATA.Add(background_fit[0], -1)
-    H_ct_DATA.Add(background_fit[0], -1)  
-
-    '''
     ###################################################################################################################################
     # These are applied later, see plotting/data_vs_simc.py
     # These must be applied after to find proper t-bins
@@ -1853,16 +1645,222 @@ def rand_sub(phi_setting, inpDict):
     H_W_DATA.Add(H_W_DUMMY,-1)
     H_t_DATA.Add(H_t_DUMMY,-1)
     H_epsilon_DATA.Add(H_epsilon_DUMMY,-1)
-    H_MM_DATA.Add(H_MM_DUMMY,-1)
-    H_MM_pisub_DATA.Add(H_MM_pisub_DUMMY,-1)
     H_MM_nosub_DATA.Add(H_MM_nosub_DUMMY,-1)
+    H_MM_pisub_DATA.Add(H_MM_pisub_DUMMY,-1)
+    H_MM_DATA.Add(H_MM_DUMMY,-1)    
     H_pmiss_DATA.Add(H_pmiss_DUMMY,-1)
     H_emiss_DATA.Add(H_emiss_DUMMY,-1)
     H_pmx_DATA.Add(H_pmx_DUMMY,-1)
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)      
-    '''
+
+    # Pion subtraction by scaling simc to peak size
+    if ParticleType == "kaon":
+        subDict["nWindows"] = nWindows
+        subDict["phi_setting"] = phi_setting
+        subDict["MM_offset_DATA"] = MM_offset_DATA
+        particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
+        
+        try:
+            ##############
+            # HARD CODED #
+            ##############
+            pi_mm_min = 0.88 + MM_offset_DATA
+            pi_mm_max = 0.94 + MM_offset_DATA 
+            ###pi_mm_min = 0.91 + MM_offset_DATA
+            ###pi_mm_max = 0.98 + MM_offset_DATA                       
+            # Scale pion to kaon data
+            kaon_amp = integrate_hist_range(
+                H_MM_nosub_DATA,
+                pi_mm_min, pi_mm_max
+            )
+
+            pion_background_amp = integrate_hist_range(
+                subDict["H_MM_nosub_SUB_DATA"],
+                pi_mm_min, pi_mm_max
+            )
+            scale_factor = (kaon_amp / pion_background_amp) * 0.85 # Scale factor to adjust pion background to kaon peak size
+            ##############
+            ##############
+            ##############
+        except ZeroDivisionError:
+            scale_factor = 0.0
+        '''
+        if scale_factor > 10.0:
+            print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
+            scale_factor = 0.0
+        '''            
+        # Apply scale factor
+        subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_CoinTime_SUB_DATA"].Scale(scale_factor)
+        subDict["CoinTime_vs_beta_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_beta_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_H_cer_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_H_cal_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_P_cal_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_P_hgcer_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_P_aero_SUB_DATA"].Scale(scale_factor)
+        subDict["phiq_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["Q2_vs_W_SUB_DATA"].Scale(scale_factor)
+        subDict["Q2_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["W_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["EPS_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["MM_vs_t_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ct_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssxfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssyfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssxpfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssypfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsxfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsyfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsxpfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsypfp_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssxptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssyptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsxptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsyptar_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ssdelta_SUB_DATA"].Scale(scale_factor)
+        subDict["H_hsdelta_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ph_q_SUB_DATA"].Scale(scale_factor)
+        subDict["H_th_q_SUB_DATA"].Scale(scale_factor)
+        subDict["H_ph_recoil_SUB_DATA"].Scale(scale_factor)
+        subDict["H_th_recoil_SUB_DATA"].Scale(scale_factor)
+        subDict["H_Q2_SUB_DATA"].Scale(scale_factor)
+        subDict["H_W_SUB_DATA"].Scale(scale_factor)
+        subDict["H_t_SUB_DATA"].Scale(scale_factor)
+        subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
+        subDict["H_MM_SUB_DATA"].Scale(scale_factor)
+        subDict["H_MM_nosub_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
+        subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmy_SUB_DATA"].Scale(scale_factor)
+        subDict["H_pmz_SUB_DATA"].Scale(scale_factor)
+        histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
+        histDict["H_MM_nosub_SUB_DATA"] = subDict["H_MM_nosub_SUB_DATA"]
+
+        # Subtract pion
+        P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
+        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
+        P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
+        P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"],-1)
+        P_hgcer_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"],-1)
+        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"],-1)        
+        MM_vs_CoinTime_DATA.Add(subDict["MM_vs_CoinTime_SUB_DATA"],-1)
+        CoinTime_vs_beta_DATA.Add(subDict["CoinTime_vs_beta_SUB_DATA"],-1)
+        MM_vs_beta_DATA.Add(subDict["MM_vs_beta_SUB_DATA"],-1)
+        MM_vs_H_cer_DATA.Add(subDict["MM_vs_H_cer_SUB_DATA"],-1)
+        MM_vs_H_cal_DATA.Add(subDict["MM_vs_H_cal_SUB_DATA"],-1)
+        MM_vs_P_cal_DATA.Add(subDict["MM_vs_P_cal_SUB_DATA"],-1)    
+        MM_vs_P_hgcer_DATA.Add(subDict["MM_vs_P_hgcer_SUB_DATA"],-1)
+        MM_vs_P_aero_DATA.Add(subDict["MM_vs_P_aero_SUB_DATA"],-1)
+        phiq_vs_t_DATA.Add(subDict["phiq_vs_t_SUB_DATA"],-1)
+        Q2_vs_W_DATA.Add(subDict["Q2_vs_W_SUB_DATA"],-1)
+        Q2_vs_t_DATA.Add(subDict["Q2_vs_t_SUB_DATA"],-1)
+        W_vs_t_DATA.Add(subDict["W_vs_t_SUB_DATA"],-1)
+        EPS_vs_t_DATA.Add(subDict["EPS_vs_t_SUB_DATA"],-1)
+        MM_vs_t_DATA.Add(subDict["MM_vs_t_SUB_DATA"],-1)    
+        H_ssxfp_DATA.Add(subDict["H_ssxfp_SUB_DATA"],-1)
+        H_ssyfp_DATA.Add(subDict["H_ssyfp_SUB_DATA"],-1)
+        H_ssxpfp_DATA.Add(subDict["H_ssxpfp_SUB_DATA"],-1)
+        H_ssypfp_DATA.Add(subDict["H_ssypfp_SUB_DATA"],-1)
+        H_hsxfp_DATA.Add(subDict["H_hsxfp_SUB_DATA"],-1)
+        H_hsyfp_DATA.Add(subDict["H_hsyfp_SUB_DATA"],-1)
+        H_hsxpfp_DATA.Add(subDict["H_hsxpfp_SUB_DATA"],-1)
+        H_hsypfp_DATA.Add(subDict["H_hsypfp_SUB_DATA"],-1)
+        H_ssxptar_DATA.Add(subDict["H_ssxptar_SUB_DATA"],-1)
+        H_ssyptar_DATA.Add(subDict["H_ssyptar_SUB_DATA"],-1)
+        H_hsxptar_DATA.Add(subDict["H_hsxptar_SUB_DATA"],-1)
+        H_hsyptar_DATA.Add(subDict["H_hsyptar_SUB_DATA"],-1)
+        H_ssdelta_DATA.Add(subDict["H_ssdelta_SUB_DATA"],-1)
+        H_hsdelta_DATA.Add(subDict["H_hsdelta_SUB_DATA"],-1)
+        H_ph_q_DATA.Add(subDict["H_ph_q_SUB_DATA"],-1)
+        H_th_q_DATA.Add(subDict["H_th_q_SUB_DATA"],-1)
+        H_ph_recoil_DATA.Add(subDict["H_ph_recoil_SUB_DATA"],-1)
+        H_th_recoil_DATA.Add(subDict["H_th_recoil_SUB_DATA"],-1)
+        H_Q2_DATA.Add(subDict["H_Q2_SUB_DATA"],-1)
+        H_W_DATA.Add(subDict["H_W_SUB_DATA"],-1)
+        H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
+        H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
+        H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
+        H_MM_pisub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
+        H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
+        H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
+        H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)
+        H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
+        H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
+        H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1) 
+
+    # Fit background and subtract
+    # --------------------------------------------------------------
+    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
+    # --------------------------------------------------------------
+    #inpDict["bg_stat_scale"] = 0.85
+    inpDict["bg_stat_scale"] = 1.25
+
+    background_fit = bg_fit(phi_setting,
+                            inpDict,
+                            H_MM_pisub_DATA,   # wide / no-cut
+                            H_MM_DATA)         # cut-window axis
+    # background_fit[0] : scaled function   (use for subtraction)
+    # background_fit[1] : original function (use for drawing only)
+
+    # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
+    #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
+    #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
+    #MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
+    #CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
+    #MM_vs_beta_DATA.Add(background_fit[0], -1)
+    #MM_vs_H_cer_DATA.Add(background_fit[0], -1)
+    #MM_vs_H_cal_DATA.Add(background_fit[0], -1)
+    #MM_vs_P_cal_DATA.Add(background_fit[0], -1)
+    #MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
+    #MM_vs_P_aero_DATA.Add(background_fit[0], -1)
+    #phiq_vs_t_DATA.Add(background_fit[0], -1)
+    #Q2_vs_W_DATA.Add(background_fit[0], -1)
+    #Q2_vs_t_DATA.Add(background_fit[0], -1)
+    #W_vs_t_DATA.Add(background_fit[0], -1)
+    #EPS_vs_t_DATA.Add(background_fit[0], -1)
+    #MM_vs_t_DATA.Add(background_fit[0], -1)
+    H_ssxfp_DATA.Add(background_fit[0], -1)
+    H_ssyfp_DATA.Add(background_fit[0], -1)
+    H_ssxpfp_DATA.Add(background_fit[0], -1)
+    H_ssypfp_DATA.Add(background_fit[0], -1)
+    H_hsxfp_DATA.Add(background_fit[0], -1)
+    H_hsyfp_DATA.Add(background_fit[0], -1)
+    H_hsxpfp_DATA.Add(background_fit[0], -1)
+    H_hsypfp_DATA.Add(background_fit[0], -1)
+    H_ssxptar_DATA.Add(background_fit[0], -1)
+    H_ssyptar_DATA.Add(background_fit[0], -1)
+    H_hsxptar_DATA.Add(background_fit[0], -1)
+    H_hsyptar_DATA.Add(background_fit[0], -1)
+    H_ssdelta_DATA.Add(background_fit[0], -1)
+    H_hsdelta_DATA.Add(background_fit[0], -1)
+    H_ph_q_DATA.Add(background_fit[0], -1)
+    H_th_q_DATA.Add(background_fit[0], -1)
+    H_ph_recoil_DATA.Add(background_fit[0], -1)
+    H_th_recoil_DATA.Add(background_fit[0], -1)
+    H_Q2_DATA.Add(background_fit[0], -1)
+    H_W_DATA.Add(background_fit[0], -1)
+    H_t_DATA.Add(background_fit[0], -1)
+    H_epsilon_DATA.Add(background_fit[0], -1)
+    H_MM_DATA.Add(background_fit[0], -1)
+    H_pmiss_DATA.Add(background_fit[0], -1)
+    H_emiss_DATA.Add(background_fit[0], -1)
+    H_pmx_DATA.Add(background_fit[0], -1)
+    H_pmy_DATA.Add(background_fit[0], -1)
+    H_pmz_DATA.Add(background_fit[0], -1)
+    H_ct_DATA.Add(background_fit[0], -1) 
 
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
