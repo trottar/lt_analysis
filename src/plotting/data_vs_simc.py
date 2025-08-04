@@ -123,6 +123,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     
     for hist in histlist_copy:
                 
+        '''
         hist["H_hsdelta_SIMC"].Scale(hist["normfac_simc"])
         hist["H_hsxptar_SIMC"].Scale(hist["normfac_simc"])
         hist["H_hsyptar_SIMC"].Scale(hist["normfac_simc"])
@@ -253,7 +254,8 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["H_pmz_DATA"].Add(hist["H_pmz_DUMMY"],-1)
         hist["H_W_DATA"].Add(hist["H_W_DUMMY"],-1)
         hist["H_ct_DATA"].Add(hist["H_ct_DUMMY"],-1)
-
+        '''
+        
         ##############
         # HARD CODED #
         ##############
