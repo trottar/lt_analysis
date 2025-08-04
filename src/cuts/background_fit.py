@@ -114,9 +114,9 @@ def bg_fit(phi_setting, inpDict, hist, hist_mm_cut=None):
     sig_lo = max(1.107, mm_min)
     sig_hi = min(1.123, mm_max)
 
-    print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
-    print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
-    print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
+    #print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
+    #print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
+    #print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
 
     h_sb = hist.Clone(hist.GetName() + "_sb")
 
@@ -134,15 +134,7 @@ def bg_fit(phi_setting, inpDict, hist, hist_mm_cut=None):
         else:
             n_sb_bins += 1
 
-    print("Nonzero bins in h_sb after masking:", n_sb_bins)
-
-    if n_sb_bins < 2:
-        print("[WARNING] All sideband bins are empty after masking! Fit will be flat zero.")
-        fit_func = TF1("fit_func_zero", "0", mm_min, mm_max)
-        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
-        bg_par   = 0
-        fit_hist_inrange = get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max)
-        return fit_hist_inrange, fit_vis, bg_par
+    #print("Nonzero bins in h_sb after masking:", n_sb_bins)
 
     fit_min = sb_left[0]
     fit_max = sb_right[1]
