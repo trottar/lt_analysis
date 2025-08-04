@@ -496,6 +496,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
   
                 # Apply pion subtraction
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
+                hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
 
                 # Pion normalization
@@ -505,13 +506,16 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,φ) bin ----------------
-            inpDict["bg_stat_scale"] = 0.85
+            inpDict["bg_stat_scale"] = 1.25
             # ----------------------------------------------------------------
 
             # Fit background and subtract
-            background_fit = bg_fit(phi_setting,
-                                    inpDict,
-                                    hist_bin_dict[f"H_MM_pisub_DATA_{j}_{k}"])
+            background_fit = bg_fit(
+                phi_setting,
+                inpDict,
+                hist_bin_dict[f"H_MM_pisub_DATA_{j}_{k}"],   # wide / no-MM-cut
+                hist_bin_dict[f"H_MM_DATA_{j}_{k}"]          # cut-window axis   ← NEW arg
+            )
 
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(background_fit[0], -1)
@@ -607,8 +611,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw()
-                        background_fit[0].SetLineColor(3)
-                        background_fit[0].Draw("same")
+                        background_fit[1].SetLineColor(3)
+                        background_fit[1].Draw("same")
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
                         
                         # Ensure correct PDF opening and closing
