@@ -517,7 +517,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             subDict["H_t_SUB_DATA_{}".format(j)].Scale(scale_factor)
             subDict["H_epsilon_SUB_DATA_{}".format(j)].Scale(scale_factor)
             subDict["H_MM_SUB_DATA_{}".format(j)].Scale(scale_factor)
-                
+
             # Apply pion subtraction
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA_{}".format(j)],-1)
@@ -525,13 +525,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(subDict["H_epsilon_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(subDict["H_MM_nosub_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA_{}".format(j)],-1)
-
-            # Pion normalization
-            subDict["H_Q2_SUB_DATA_{}".format(j)].Scale(norm_factor_data)
-            subDict["H_W_SUB_DATA_{}".format(j)].Scale(norm_factor_data)
-            subDict["H_t_SUB_DATA_{}".format(j)].Scale(norm_factor_data)
-            subDict["H_epsilon_SUB_DATA_{}".format(j)].Scale(norm_factor_data)
-            subDict["H_MM_SUB_DATA_{}".format(j)].Scale(norm_factor_data)
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
