@@ -154,6 +154,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         from particle_subtraction import particle_subtraction_ave
         SubtractedParticle = "pion"
         subDict = {}
+        fitDict = {}
 
     # Fit background and subtract
     from background_fit import bg_fit
@@ -509,7 +510,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # ---- Statistic‑scale for this (t,φ) bin ----------------
         inpDict["bg_stat_scale"] = 1.25
         
-        background_data_fit = bg_fit(
+        fitDict["background_data_fit_{}".format(j)] = bg_fit(
             phi_setting,
             inpDict,
             hist_bin_dict[f"H_MM_pisub_DATA_{j}"],   # wide / no–MM-cut
@@ -517,11 +518,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         )
         # ----------------------------------------------------------------
 
-        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(background_data_fit[0], -1)
-        hist_bin_dict["H_W_DATA_{}".format(j)].Add(background_data_fit[0], -1)
-        hist_bin_dict["H_t_DATA_{}".format(j)].Add(background_data_fit[0], -1)
-        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(background_data_fit[0], -1)
-        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(background_data_fit[0], -1)  
+        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
+        hist_bin_dict["H_W_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
+        hist_bin_dict["H_t_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)  
 
         # Data Normalization
         hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(norm_factor_data)
