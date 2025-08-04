@@ -43,91 +43,50 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_fit_histogram_padded(fit_func,
-                             hist,
-                             mm_min,
-                             mm_max,
-                             n_pad: int = 0,
-                             allow_negative: bool = False,
-                             sb_left:  tuple = (1.070, 1.095),
-                             sb_right: tuple = (1.135, 1.180)):
+def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0, allow_negative=False):
     """
-    Return a background histogram derived from *fit_func* but with
-    • correct normalisation for the *cut* spectrum ``hist``
-    • content only inside [mm_min, mm_max] (± n_pad bins).
+    Fill a histogram from fit_func but keep contents only within
+    [mm_min, mm_max] extended by n_pad *bins* on each side.
 
-    The only real changes from your original helper are the two
-    lines marked ### ① and ### ②.
+    Parameters
+    ----------
+    fit_func : ROOT.TF1
+    hist     : ROOT.TH1
+    mm_min, mm_max : float
+    n_pad    : int   (padding in *bins*, default 0)
+    allow_negative : bool (if False, clamp fit values at 0)
     """
+    ax   = hist.GetXaxis()
+    nb   = hist.GetNbinsX()
 
-    # ---------------------------------------------------------------
-    # ① Renormalise:   observed counts  =  predicted counts
-    #                  in the **cut** histogram’s side-bands
-    # ---------------------------------------------------------------
-    obs_sb  = hist.Integral(hist.FindBin(sb_left[0]),  hist.FindBin(sb_left[1])) \
-            + hist.Integral(hist.FindBin(sb_right[0]), hist.FindBin(sb_right[1]))
+    # Nudge edges *inside* the axis range to avoid overflow/underflow from exact-edge values
+    xmin, xmax = ax.GetXmin(), ax.GetXmax()
+    lo_edge = max(xmin, np.nextafter(mm_min,  np.inf))
+    hi_edge = min(xmax, np.nextafter(mm_max, -np.inf))
 
-    pred_sb = fit_func.Integral(*sb_left) + fit_func.Integral(*sb_right)  # counts (no /bw!)
+    # Convert to bin indices and apply integer padding
+    i_lo = ax.FindBin(lo_edge)
+    i_hi = ax.FindBin(hi_edge)
+    i_lo = max(1, i_lo - n_pad)
+    i_hi = min(nb, i_hi + n_pad)
 
-    if pred_sb > 0.0:
-        scale = obs_sb / pred_sb
-        for ip in range(fit_func.GetNpar()):
-            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
-    # if pred_sb==0 leave the fit untouched (rare, empty side-bands)
+    # Build the histogram
+    h_fit = hist.Clone(hist.GetName() + "_bg_fit_pad")
+    h_fit.Reset()
 
-    # ---------------------------------------------------------------
-    # prepare an empty clone (wipe contents, errors & stats)
-    # ---------------------------------------------------------------
-    h_bg = hist.Clone(hist.GetName() + "_bg_fit_pad")
-    h_bg.Reset("ICES")                      # clean slate, keeps Sumw2
-
-    ax  = h_bg.GetXaxis()
-    nb  = h_bg.GetNbinsX()
-    bw  = ax.GetBinWidth(1)
-
-    i_lo = max(1,  ax.FindBin(mm_min) - n_pad)
-    i_hi = min(nb, ax.FindBin(mm_max) + n_pad)
-
-    # ---------------------------------------------------------------
-    # ② Fill with    density × bin-width   (true counts per bin)
-    # ---------------------------------------------------------------
     for ib in range(1, nb + 1):
         if i_lo <= ib <= i_hi:
-            y = fit_func.Eval(ax.GetBinCenter(ib)) * bw  # density → counts/bin
+            x = h_fit.GetBinCenter(ib)
+            y = fit_func.Eval(x)
             if not allow_negative and y < 0.0:
                 y = 0.0
-            h_bg.SetBinContent(ib, y)
-            h_bg.SetBinError  (ib, 0.0)
+            h_fit.SetBinContent(ib, y)
+            h_fit.SetBinError(ib, 0.0)  # define explicitly; replace if you propagate param errors
         else:
-            h_bg.SetBinContent(ib, 0.0)
-            h_bg.SetBinError  (ib, 0.0)
+            h_fit.SetBinContent(ib, 0.0)
+            h_fit.SetBinError(ib, 0.0)
 
-    return h_bg
-
-# ----------------------------------------------------------------------
-# compute a single scale factor that brings the TF1 integral in the
-# side-bands into agreement with the *cut* histogram’s side-band counts
-# ----------------------------------------------------------------------
-def sideband_scale(sb_ranges, tf1, h_cut):
-    """Return multiplicative scale factor for *tf1*."""
-    bw   = h_cut.GetBinWidth(1)           # constant in your spectra
-    obs  = 0.0
-    pred = 0.0
-    for lo, hi in sb_ranges:
-        # observed counts (already per-bin, no bin-width factor)
-        obs  += h_cut.Integral(h_cut.FindBin(lo), h_cut.FindBin(hi))
-        # predicted counts from the fit (density → counts)
-        pred += tf1.Integral(lo, hi) / bw
-    return 1.0 if pred <= 0.0 else obs / pred
-
-
-# ----------------------------------------------------------------------
-# convenience: apply that scale factor to *all* TF1 parameters
-# ----------------------------------------------------------------------
-def rescale_tf1(tf1, scale):
-    """Multiply every parameter of *tf1* by *scale* (in-place)."""
-    for ip in range(tf1.GetNpar()):
-        tf1.SetParameter(ip, tf1.GetParameter(ip) * scale)
+    return h_fit
 
 ################################################################################################################################################
 
@@ -148,8 +107,8 @@ def bg_fit(phi_setting, inpDict, hist):
     # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
     sb_left = inpDict.get("sb_left", (1.070, 1.095))
     sb_right = inpDict.get("sb_right", (1.135, 1.180))
-    sig_lo = max(1.107, mm_min)
-    sig_hi = min(1.123, mm_max)
+    sig_lo = mm_min
+    sig_hi = mm_max
 
     print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
     print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
@@ -185,13 +144,6 @@ def bg_fit(phi_setting, inpDict, hist):
     fit_max = sb_right[1]
     fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")
-
-    # ---------------------------------------------------------------
-    # renormalise the already-fitted function to the *cut* histogram
-    # ---------------------------------------------------------------
-    sb_list = [sb_left, sb_right]
-    scale   = sideband_scale(sb_list, fit_func, hist)   # <-- hist is the *cut* one
-    rescale_tf1(fit_func, scale)
 
     bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
     bg_par = max(0.0, bg_par)  # physical prior
