@@ -49,50 +49,47 @@ def get_fit_histogram_padded(fit_func,
                              mm_max,
                              n_pad: int = 0,
                              allow_negative: bool = False,
-                             refit_order: str = "pol1",
-                             n_points: int = 200):
+                             sb_left : tuple = (1.070, 1.095),
+                             sb_right: tuple = (1.135, 1.180)):
     """
-    Build a background histogram that
+    1.  Scale *fit_func* so that its integral in the side-bands equals the
+        counts that survive in *hist* **after all cuts**.
 
-        • uses `fit_func` (the *wide* fit) for its initial shape  
-        • re-fits that shape *only* inside [mm_min , mm_max]  
-        • sets every bin outside the padded window to zero.
+    2.  Copy that (now re-normalised) function into a fresh histogram, but keep
+        only bins inside [mm_min , mm_max] (± n_pad).  Everything else is zero.
 
     Parameters
     ----------
-    fit_func : ROOT.TF1        – the first, wide-range fit you already trust
-    hist     : ROOT.TH1        – histogram (after cuts) whose binning we copy
-    mm_min, mm_max : float     – limits of the physics signal window
-    n_pad    : int             – keep this many extra *bins* on each side
-    allow_negative : bool      – clamp negatives to 0 if False (default)
-    refit_order : str          – any TF1 formula understood by ROOT, defaults to
-                                 the same `"pol1"` you have been using
-    n_points : int             – how finely to sample the original function
-                                 inside the window before the second fit
+    fit_func   : ROOT.TF1  – result of the wide fit on the uncut MM spectrum
+    hist       : ROOT.TH1  – the **cut** histogram (same binning)
+    mm_min/max : float     – signal window
+    n_pad      : int       – keep this many extra *bins* on each side
+    allow_negative : bool  – if False (default) clamp negative predictions to 0
+    sb_left/right          – tuples that define the two side-band ranges
     """
     # ------------------------------------------------------------------
-    # 1.  sample the original function inside the signal window
+    # 1.   compute the scale factor   (counts_observed / counts_predicted)
     # ------------------------------------------------------------------
-    import ROOT
-    g = ROOT.TGraph(n_points)
-    lo = mm_min
-    hi = mm_max
-    step = (hi - lo) / (n_points - 1)
-    for i in range(n_points):
-        x = lo + i * step
-        g.SetPoint(i, x, fit_func.Eval(x))
+    # observed counts (per bin, so just plain Integral)
+    obs_sb = ( hist.Integral(hist.FindBin(sb_left [0]), hist.FindBin(sb_left [1]))
+             + hist.Integral(hist.FindBin(sb_right[0]), hist.FindBin(sb_right[1])) )
+
+    # predicted counts:  integral of density → counts, so *divide* by bin-width
+    bw      = hist.GetBinWidth(1)
+    pred_sb = ( fit_func.Integral(*sb_left ) + fit_func.Integral(*sb_right) ) / bw
+
+    if pred_sb > 0.0:
+        scale = obs_sb / pred_sb                       # <<<<<<<<<<<<<<<<<<  key line
+        for ip in range(fit_func.GetNpar()):
+            fit_func.SetParameter(ip,
+                                  fit_func.GetParameter(ip) * scale)
+    # If pred_sb ≤ 0 leave the function untouched (rare: empty side-bands)
 
     # ------------------------------------------------------------------
-    # 2.  re-fit those samples with the same (or user-chosen) formula
-    # ------------------------------------------------------------------
-    fit_window = ROOT.TF1("fit_window", refit_order, lo, hi)
-    g.Fit(fit_window, "Q0")           # quiet, no graphics
-
-    # ------------------------------------------------------------------
-    # 3.  build the padded histogram
+    # 2.   build the padded histogram
     # ------------------------------------------------------------------
     h_bg = hist.Clone(hist.GetName() + "_bg_fit_pad")
-    h_bg.Reset("ICES")                # clean slate
+    h_bg.Reset("ICES")                            # clean slate (inc. Sumw2)
 
     ax  = h_bg.GetXaxis()
     nb  = h_bg.GetNbinsX()
@@ -102,11 +99,11 @@ def get_fit_histogram_padded(fit_func,
 
     for ib in range(1, nb + 1):
         if i_lo <= ib <= i_hi:
-            y = fit_window.Eval(ax.GetBinCenter(ib))
+            y = fit_func.Eval(ax.GetBinCenter(ib))   # already counts / bin
             if not allow_negative and y < 0.0:
                 y = 0.0
             h_bg.SetBinContent(ib, y)
-            h_bg.SetBinError  (ib, 0.0)
+            h_bg.SetBinError  (ib, 0.0)              # add param errors if wanted
         else:
             h_bg.SetBinContent(ib, 0.0)
             h_bg.SetBinError  (ib, 0.0)
