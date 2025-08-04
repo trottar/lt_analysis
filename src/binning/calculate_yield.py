@@ -502,7 +502,19 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                     scale_factor = 0.0
                 '''  
-                arr_scale_factor[j][k] = scale_factor
+
+                if phi_setting == "Center":
+                    phi_scale = 0.95
+                elif phi_setting == "Left":
+                    phi_scale = 0.75
+                elif phi_setting == "Right":
+                    phi_scale = 0.75
+                else:
+                    raise ValueError("Invalid phi_setting: {}".format(phi_setting))
+                
+                scale_factor = scale_factor * phi_scale
+
+                arr_scale_factor[j][k] = scale_factor * phi_scale
 
                 # Scale pion to subtraction proper peak
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)

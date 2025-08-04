@@ -1690,7 +1690,19 @@ def rand_sub(phi_setting, inpDict):
         if scale_factor > 10.0:
             print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
             scale_factor = 0.0
-        '''            
+        '''          
+
+        if phi_setting == "Center":
+            phi_scale = 0.95
+        elif phi_setting == "Left":
+            phi_scale = 0.75
+        elif phi_setting == "Right":
+            phi_scale = 0.75
+        else:
+            raise ValueError("Invalid phi_setting: {}".format(phi_setting))
+        
+        scale_factor = scale_factor * phi_scale        
+
         # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
         subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
