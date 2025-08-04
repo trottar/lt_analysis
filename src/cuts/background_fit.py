@@ -105,8 +105,8 @@ def bg_fit(phi_setting, inpDict, hist):
     mm_max = inpDict["mm_max"]
 
     # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
-    sb_left = inpDict.get("sb_left", (1.070, 1.095))
-    sb_right = inpDict.get("sb_right", (1.135, 1.180))
+    sb_left = inpDict.get("sb_left", (1.070, mm_min))
+    sb_right = inpDict.get("sb_right", (1.135, mm_max))
     sig_lo = mm_min
     sig_hi = mm_max
 
