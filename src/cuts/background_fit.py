@@ -46,53 +46,43 @@ OUTPATH=lt.OUTPATH
 def get_fit_histogram_padded(fit_func,
                              hist,
                              mm_min, mm_max,
-                             n_pad: int = 0,
-                             allow_negative: bool = False,
-                             ref_binwidth: float | None = None):
+                             n_pad=0,
+                             allow_negative=False,
+                             ref_binwidth=None):
     """
-    Return a histogram that contains the background function *fit_func*
-    inside [mm_min , mm_max] (± n_pad *bins*).  Outside that window the
-    contents – and errors – are forced to zero.
-
-    Parameters
-    ----------
-    fit_func      : ROOT.TF1      – function already fitted on the **wide** MM spectrum
-    hist          : ROOT.TH1      – histogram whose axis you want to copy
-    mm_min, mm_max: float         – MM window limits
-    n_pad         : int           – extra *bins* to keep on each side (default 0)
-    allow_negative: bool          – if False, clamp negative predictions to 0
-    ref_binwidth  : float | None  – bin-width used to normalise *fit_func*.
-                                    • Pass the wide-spectrum bin-width (recommended).
-                                    • If None, fall back to hist’s own bin-width.
+    Build a background histogram from *fit_func*.
+    • Only bins inside [mm_min, mm_max] (± n_pad bins) are filled.
+    • Everything outside that window is set to 0.
+    • *ref_binwidth* must be the bin-width of the wide/full MM histogram
+      that was used to fit *fit_func*.
+      If you pass None, the routine falls back to hist’s own bin-width.
     """
     ax  = hist.GetXaxis()
     nb  = hist.GetNbinsX()
 
-    # use the caller-supplied reference width or fall back to this axis
+    # if caller did not supply a reference width, fall back to this axis
     if ref_binwidth is None:
         ref_binwidth = ax.GetBinWidth(1)
 
-    # translate physics window → bin indices, include optional padding
-    i_lo = max(1, ax.FindBin(mm_min) - n_pad)
+    # translate physics window → bin indices, add optional padding
+    i_lo = max(1,  ax.FindBin(mm_min) - n_pad)
     i_hi = min(nb, ax.FindBin(mm_max) + n_pad)
 
-    # fresh empty clone (keeps binning, titles, Sumw2 array)
+    # make a clean clone for the background
     h_bg = hist.Clone(hist.GetName() + "_bg_fit_pad")
-    h_bg.Reset("ICES")                         # clean slate, keep Sumw2
+    h_bg.Reset("ICES")                     # wipe contents, keep Sumw2
 
-    # fill background only where requested
+    # fill background
     for ib in range(1, nb + 1):
         if i_lo <= ib <= i_hi:
-            # exact integral of the density across the bin, then convert to counts
             x_lo = ax.GetBinLowEdge(ib)
             x_hi = x_lo + ax.GetBinWidth(ib)
+            # integral of density across the bin → counts
             y_pred = fit_func.Integral(x_lo, x_hi) / ref_binwidth
-
-            if not allow_negative and y_pred < 0.0:
+            if (not allow_negative) and (y_pred < 0.0):
                 y_pred = 0.0
-
             h_bg.SetBinContent(ib, y_pred)
-            h_bg.SetBinError  (ib, 0.0)       # param-error propagation goes here if desired
+            h_bg.SetBinError  (ib, 0.0)
         else:
             h_bg.SetBinContent(ib, 0.0)
             h_bg.SetBinError  (ib, 0.0)
