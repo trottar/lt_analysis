@@ -609,8 +609,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         # Create a new canvas for each plot
                         canvas3 = ROOT.TCanvas("canvas3_{}".format(canvas_iter), "Canvas", 800, 600)
                         
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw()
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw("hist same")
                         background_fit[1].SetLineColor(3)
                         background_fit[1].Draw("same")
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
