@@ -44,35 +44,55 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 
 def get_fit_histogram_padded(fit_func,
-                             hist_axis_ref,        # usually H_MM_DATA
+                             hist,
                              mm_min, mm_max,
-                             n_pad=0,
-                             allow_negative=False,
-                             ref_binwidth=None):   # ← NEW ----------------
+                             n_pad: int = 0,
+                             allow_negative: bool = False,
+                             ref_binwidth: float | None = None):
+    """
+    Return a histogram that contains the background function *fit_func*
+    inside [mm_min , mm_max] (± n_pad *bins*).  Outside that window the
+    contents – and errors – are forced to zero.
 
-    ax  = hist_axis_ref.GetXaxis()
-    nb  = hist_axis_ref.GetNbinsX()
+    Parameters
+    ----------
+    fit_func      : ROOT.TF1      – function already fitted on the **wide** MM spectrum
+    hist          : ROOT.TH1      – histogram whose axis you want to copy
+    mm_min, mm_max: float         – MM window limits
+    n_pad         : int           – extra *bins* to keep on each side (default 0)
+    allow_negative: bool          – if False, clamp negative predictions to 0
+    ref_binwidth  : float | None  – bin-width used to normalise *fit_func*.
+                                    • Pass the wide-spectrum bin-width (recommended).
+                                    • If None, fall back to hist’s own bin-width.
+    """
+    ax  = hist.GetXaxis()
+    nb  = hist.GetNbinsX()
 
-    # if the caller did not provide a reference width, fall back to this axis
+    # use the caller-supplied reference width or fall back to this axis
     if ref_binwidth is None:
-        ref_binwidth = ax.GetBinWidth(1)           # NEW
+        ref_binwidth = ax.GetBinWidth(1)
 
-    h_bg = hist_axis_ref.Clone(hist_axis_ref.GetName() + "_bg_fit_pad")
-    h_bg.Reset("ICES")
-
+    # translate physics window → bin indices, include optional padding
     i_lo = max(1, ax.FindBin(mm_min) - n_pad)
     i_hi = min(nb, ax.FindBin(mm_max) + n_pad)
 
+    # fresh empty clone (keeps binning, titles, Sumw2 array)
+    h_bg = hist.Clone(hist.GetName() + "_bg_fit_pad")
+    h_bg.Reset("ICES")                         # clean slate, keep Sumw2
+
+    # fill background only where requested
     for ib in range(1, nb + 1):
         if i_lo <= ib <= i_hi:
-            # integrate over the actual bin
+            # exact integral of the density across the bin, then convert to counts
             x_lo = ax.GetBinLowEdge(ib)
             x_hi = x_lo + ax.GetBinWidth(ib)
-            y    = fit_func.Integral(x_lo, x_hi) / ref_binwidth   # ← NEW
-            if not allow_negative and y < 0.0:
-                y = 0.0
-            h_bg.SetBinContent(ib, y)
-            h_bg.SetBinError  (ib, 0.0)
+            y_pred = fit_func.Integral(x_lo, x_hi) / ref_binwidth
+
+            if not allow_negative and y_pred < 0.0:
+                y_pred = 0.0
+
+            h_bg.SetBinContent(ib, y_pred)
+            h_bg.SetBinError  (ib, 0.0)       # param-error propagation goes here if desired
         else:
             h_bg.SetBinContent(ib, 0.0)
             h_bg.SetBinError  (ib, 0.0)
@@ -84,37 +104,76 @@ def get_fit_histogram_padded(fit_func,
 #no_bg_subtract=True
 no_bg_subtract=False
 
-def bg_fit(phi_setting,
-           inpDict,
-           hist_full,         # H_MM_pisub_DATA  (wide axis, *no* MM cut)
-           hist_cut=None):    # H_MM_DATA        (narrow axis, with cut)
+def bg_fit(phi_setting, inpDict, hist, hist_mm_cut=None):
 
-    if hist_cut is None:      # keep old calls working
-        hist_cut = hist_full
+    if hist_mm_cut is None:
+         hist_mm_cut = hist
 
+    if no_bg_subtract:
+        fit_func = TF1("fit_func_zero", "0", inpDict["mm_min"], inpDict["mm_max"])
+        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+        bg_par   = 0
+        return fit_func, fit_vis, bg_par    
+    
     mm_min = inpDict["mm_min"]
     mm_max = inpDict["mm_max"]
 
-    # ---------- side-band mask & wide fit (unchanged) ----------
-    sb_left  = inpDict.get("sb_left",  (1.070, 1.095))
+    # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
+    sb_left = inpDict.get("sb_left", (1.070, 1.095))
     sb_right = inpDict.get("sb_right", (1.135, 1.180))
+    sig_lo = max(1.107, mm_min)
+    sig_hi = min(1.123, mm_max)
 
-    h_sb = hist_full.Clone(hist_full.GetName() + "_sb")
-    ...
-    fit_func = ROOT.TF1("fit_func", "pol1", sb_left[0], sb_right[1])
+    print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
+    print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
+    print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
+
+    h_sb = hist.Clone(hist.GetName() + "_sb")
+
+    def is_valid_sideband(sb):
+        return sb[1] > sb[0]
+
+    n_sb_bins = 0
+    for ib in range(1, h_sb.GetNbinsX() + 1):
+        x = h_sb.GetBinCenter(ib)
+        in_sb_left  = is_valid_sideband(sb_left)  and (sb_left[0]  <= x <= sb_left[1])
+        in_sb_right = is_valid_sideband(sb_right) and (sb_right[0] <= x <= sb_right[1])
+        if not (in_sb_left or in_sb_right):
+            h_sb.SetBinContent(ib, 0.0)
+            h_sb.SetBinError(ib, 0.0)
+        else:
+            n_sb_bins += 1
+
+    print("Nonzero bins in h_sb after masking:", n_sb_bins)
+
+    if n_sb_bins < 2:
+        print("[WARNING] All sideband bins are empty after masking! Fit will be flat zero.")
+        fit_func = TF1("fit_func_zero", "0", mm_min, mm_max)
+        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+        bg_par   = 0
+        fit_hist_inrange = get_fit_histogram_in_range(fit_func, hist, mm_min, mm_max)
+        return fit_hist_inrange, fit_vis, bg_par
+
+    fit_min = sb_left[0]
+    fit_max = sb_right[1]
+    fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")
 
-    # ---------- build background on the cut axis ----------
-    ref_bw = hist_full.GetXaxis().GetBinWidth(1)      # ← the *wide* bin-width
+    bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
+    bg_par = max(0.0, bg_par)  # physical prior
+    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+
+    scale = inpDict.get("bg_stat_scale", 1.0)
+    if scale != 1.0:
+        for ip in range(fit_func.GetNpar()):
+            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
+        bg_par *= scale
 
     fit_hist_inrange = get_fit_histogram_padded(
-                           fit_func,
-                           hist_cut,                  # axis to copy
-                           mm_min, mm_max,
-                           n_pad=0,
-                           allow_negative=False,
-                           ref_binwidth=ref_bw)       # ← pass it in
+                       fit_func,
+                       hist_mm_cut,                         # use the cut axis
+                       mm_min, mm_max,
+                       n_pad=0,
+                       ref_binwidth=hist.GetXaxis().GetBinWidth(1))  # wide Δx
 
-    fit_vis = fit_func.Clone(f"{hist_cut.GetName()}_bg_vis")
-    bg_par  = fit_func.Integral(mm_min, mm_max) / ref_bw
     return fit_hist_inrange, fit_vis, bg_par
