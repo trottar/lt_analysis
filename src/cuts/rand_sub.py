@@ -1687,8 +1687,10 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DATA.Add(background_fit[0], -1)
     H_ct_DATA.Add(background_fit[0], -1)  
 
+    '''
     ###################################################################################################################################
     # These are applied later, see plotting/data_vs_simc.py
+    # These must be applied after to find proper t-bins
     ###################################################################################################################################
     ###
     # Data Normalization
@@ -1860,6 +1862,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)      
+    '''
 
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
