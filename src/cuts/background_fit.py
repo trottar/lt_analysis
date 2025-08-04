@@ -43,49 +43,89 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_fit_histogram_padded(fit_func, hist,
-                             mm_min, mm_max,
-                             n_pad=0,
-                             allow_negative=False,
-                             use_bin_integral=True):
+def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0, allow_negative=False):
     """
-    Build a TH1 containing the fitted background inside
-    [mm_min, mm_max] (plus ± n_pad bins of padding).
+    Fill a histogram from fit_func but keep contents only within
+    [mm_min, mm_max] extended by n_pad *bins* on each side.
 
     Parameters
     ----------
-    fit_func : ROOT.TF1   – the function you already fitted
-    hist     : ROOT.TH1   – the *data* histogram whose binning we want
+    fit_func : ROOT.TF1
+    hist     : ROOT.TH1
     mm_min, mm_max : float
-    n_pad    : int        – padding in *bins*
-    allow_negative : bool – clamp <0 values to zero if False
-    use_bin_integral : bool – integrate over the bin instead of sampling
+    n_pad    : int   (padding in *bins*, default 0)
+    allow_negative : bool (if False, clamp fit values at 0)
     """
     ax   = hist.GetXaxis()
-    nb   = ax.GetNbins()
+    nb   = hist.GetNbinsX()
 
-    i_lo = max(1, ax.FindBin(mm_min) - n_pad)
-    i_hi = min(nb, ax.FindBin(mm_max) + n_pad)
+    # Nudge edges *inside* the axis range to avoid overflow/underflow from exact-edge values
+    xmin, xmax = ax.GetXmin(), ax.GetXmax()
+    lo_edge = max(xmin, np.nextafter(mm_min,  np.inf))
+    hi_edge = min(xmax, np.nextafter(mm_max, -np.inf))
 
-    # fresh empty clone – also clears Sumw2
+    # Convert to bin indices and apply integer padding
+    i_lo = ax.FindBin(lo_edge)
+    i_hi = ax.FindBin(hi_edge)
+    i_lo = max(1, i_lo - n_pad)
+    i_hi = min(nb, i_hi + n_pad)
+
+    # Build the histogram
     h_fit = hist.Clone(hist.GetName() + "_bg_fit_pad")
-    h_fit.Reset("ICES")                 # I: contents, C: errors, E: entries, S: sumw2
+    h_fit.Reset()
 
-    for ib in range(i_lo, i_hi + 1):
-        x_low, x_up = ax.GetBinLowEdge(ib), ax.GetBinUpEdge(ib)
-        if use_bin_integral:
-            y = fit_func.Integral(x_low, x_up) / (x_up - x_low)
+    for ib in range(1, nb + 1):
+        if i_lo <= ib <= i_hi:
+            x = h_fit.GetBinCenter(ib)
+            y = fit_func.Eval(x)
+            if not allow_negative and y < 0.0:
+                y = 0.0
+            h_fit.SetBinContent(ib, y)
+            h_fit.SetBinError(ib, 0.0)  # define explicitly; replace if you propagate param errors
         else:
-            y = fit_func.Eval(0.5*(x_low + x_up))
+            h_fit.SetBinContent(ib, 0.0)
+            h_fit.SetBinError(ib, 0.0)
 
-        if not allow_negative and y < 0.0:
-            y = 0.0
-
-        h_fit.SetBinContent(ib, y)
-        h_fit.SetBinError  (ib, 0.0)    # or propagate param errors if you want
-
-    # bins outside the padded window are already zero, so no loop needed
     return h_fit
+
+################################################################################################################################################
+
+def renormalise_tf1_to_hist(sb_ranges, tf1, hist):
+    """
+    Multiply *tf1* by a factor so that its integral in all side-band ranges
+    equals the observed counts in *hist*.
+
+    Parameters
+    ----------
+    sb_ranges : list[tuple[float,float]]
+        List of (lo,hi) ranges that define the side-bands.
+    tf1 : ROOT.TF1
+    hist : ROOT.TH1
+        Histogram that already has your *analysis cuts* applied.
+
+    Returns
+    -------
+    float
+        The scale factor that was applied to *tf1*.
+    """
+    h_bw = hist.GetBinWidth(1)              # constant bin width
+
+    obs, exp = 0.0, 0.0
+    for lo, hi in sb_ranges:
+        # observed counts
+        obs += hist.Integral(hist.FindBin(lo), hist.FindBin(hi))
+
+        # expected counts from the fit (density → counts)
+        exp += tf1.Integral(lo, hi) / h_bw
+
+    if exp <= 0:
+        return 1.0                           # nothing to do / avoid div-by-zero
+
+    scale = obs / exp
+    for ip in range(tf1.GetNpar()):
+        tf1.SetParameter(ip, tf1.GetParameter(ip) * scale)
+
+    return scale
 
 ################################################################################################################################################
 
@@ -141,8 +181,14 @@ def bg_fit(phi_setting, inpDict, hist):
 
     fit_min = sb_left[0]
     fit_max = sb_right[1]
+
+    # ---------------- fit polynomial on the *uncut* spectrum ----------------
     fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")
+
+    # ---------------- renormalise to the *cut* histogram --------------------
+    sb_list = [sb_left, sb_right]            # reuse the same windows
+    renormalise_tf1_to_hist(sb_list, fit_func, hist)
 
     bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
     bg_par = max(0.0, bg_par)  # physical prior
