@@ -88,44 +88,30 @@ def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0, allow_nega
 
     return h_fit
 
-################################################################################################################################################
-
-def renormalise_tf1_to_hist(sb_ranges, tf1, hist):
-    """
-    Multiply *tf1* by a factor so that its integral in all side-band ranges
-    equals the observed counts in *hist*.
-
-    Parameters
-    ----------
-    sb_ranges : list[tuple[float,float]]
-        List of (lo,hi) ranges that define the side-bands.
-    tf1 : ROOT.TF1
-    hist : ROOT.TH1
-        Histogram that already has your *analysis cuts* applied.
-
-    Returns
-    -------
-    float
-        The scale factor that was applied to *tf1*.
-    """
-    h_bw = hist.GetBinWidth(1)              # constant bin width
-
-    obs, exp = 0.0, 0.0
+# ----------------------------------------------------------------------
+# compute a single scale factor that brings the TF1 integral in the
+# side-bands into agreement with the *cut* histogram’s side-band counts
+# ----------------------------------------------------------------------
+def sideband_scale(sb_ranges, tf1, h_cut):
+    """Return multiplicative scale factor for *tf1*."""
+    bw   = h_cut.GetBinWidth(1)           # constant in your spectra
+    obs  = 0.0
+    pred = 0.0
     for lo, hi in sb_ranges:
-        # observed counts
-        obs += hist.Integral(hist.FindBin(lo), hist.FindBin(hi))
+        # observed counts (already per-bin, no bin-width factor)
+        obs  += h_cut.Integral(h_cut.FindBin(lo), h_cut.FindBin(hi))
+        # predicted counts from the fit (density → counts)
+        pred += tf1.Integral(lo, hi) / bw
+    return 1.0 if pred <= 0.0 else obs / pred
 
-        # expected counts from the fit (density → counts)
-        exp += tf1.Integral(lo, hi) / h_bw
 
-    if exp <= 0:
-        return 1.0                           # nothing to do / avoid div-by-zero
-
-    scale = obs / exp
+# ----------------------------------------------------------------------
+# convenience: apply that scale factor to *all* TF1 parameters
+# ----------------------------------------------------------------------
+def rescale_tf1(tf1, scale):
+    """Multiply every parameter of *tf1* by *scale* (in-place)."""
     for ip in range(tf1.GetNpar()):
         tf1.SetParameter(ip, tf1.GetParameter(ip) * scale)
-
-    return scale
 
 ################################################################################################################################################
 
@@ -181,14 +167,15 @@ def bg_fit(phi_setting, inpDict, hist):
 
     fit_min = sb_left[0]
     fit_max = sb_right[1]
-
-    # ---------------- fit polynomial on the *uncut* spectrum ----------------
     fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")
 
-    # ---------------- renormalise to the *cut* histogram --------------------
-    sb_list = [sb_left, sb_right]            # reuse the same windows
-    renormalise_tf1_to_hist(sb_list, fit_func, hist)
+    # ---------------------------------------------------------------
+    # renormalise the already-fitted function to the *cut* histogram
+    # ---------------------------------------------------------------
+    sb_list = [sb_left, sb_right]
+    scale   = sideband_scale(sb_list, fit_func, hist)   # <-- hist is the *cut* one
+    rescale_tf1(fit_func, scale)
 
     bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
     bg_par = max(0.0, bg_par)  # physical prior
@@ -201,5 +188,4 @@ def bg_fit(phi_setting, inpDict, hist):
         bg_par *= scale
 
     fit_hist_inrange = get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0)
-    #return fit_hist_inrange, fit_vis, bg_par
-    return fit_func, fit_vis, bg_par
+    return fit_hist_inrange, fit_vis, bg_par
