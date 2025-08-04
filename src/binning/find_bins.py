@@ -98,8 +98,8 @@ def find_bins(histlist, inpDict):
     for i,hist in enumerate(histlist_copy):
 
         # Unscale data to get raw number of events
-        hist["H_t_DATA"].Scale(1.0 / hist["normfac_data"])
-        hist["H_ph_q_DATA"].Scale(1.0 / hist["normfac_data"])
+        hist["H_t_DATA"].Scale(1.0 / inpDict["normfac_data"])
+        hist["H_ph_q_DATA"].Scale(1.0 / inpDict["normfac_data"])
         
         t = flatten_hist(hist["H_t_DATA"])
         phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
