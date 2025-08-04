@@ -43,50 +43,75 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def get_fit_histogram_padded(fit_func, hist, mm_min, mm_max, n_pad=0, allow_negative=False):
+def get_fit_histogram_padded(fit_func,
+                             hist,
+                             mm_min,
+                             mm_max,
+                             n_pad: int = 0,
+                             allow_negative: bool = False,
+                             refit_order: str = "pol1",
+                             n_points: int = 200):
     """
-    Fill a histogram from fit_func but keep contents only within
-    [mm_min, mm_max] extended by n_pad *bins* on each side.
+    Build a background histogram that
+
+        • uses `fit_func` (the *wide* fit) for its initial shape  
+        • re-fits that shape *only* inside [mm_min , mm_max]  
+        • sets every bin outside the padded window to zero.
 
     Parameters
     ----------
-    fit_func : ROOT.TF1
-    hist     : ROOT.TH1
-    mm_min, mm_max : float
-    n_pad    : int   (padding in *bins*, default 0)
-    allow_negative : bool (if False, clamp fit values at 0)
+    fit_func : ROOT.TF1        – the first, wide-range fit you already trust
+    hist     : ROOT.TH1        – histogram (after cuts) whose binning we copy
+    mm_min, mm_max : float     – limits of the physics signal window
+    n_pad    : int             – keep this many extra *bins* on each side
+    allow_negative : bool      – clamp negatives to 0 if False (default)
+    refit_order : str          – any TF1 formula understood by ROOT, defaults to
+                                 the same `"pol1"` you have been using
+    n_points : int             – how finely to sample the original function
+                                 inside the window before the second fit
     """
-    ax   = hist.GetXaxis()
-    nb   = hist.GetNbinsX()
+    # ------------------------------------------------------------------
+    # 1.  sample the original function inside the signal window
+    # ------------------------------------------------------------------
+    import ROOT
+    g = ROOT.TGraph(n_points)
+    lo = mm_min
+    hi = mm_max
+    step = (hi - lo) / (n_points - 1)
+    for i in range(n_points):
+        x = lo + i * step
+        g.SetPoint(i, x, fit_func.Eval(x))
 
-    # Nudge edges *inside* the axis range to avoid overflow/underflow from exact-edge values
-    xmin, xmax = ax.GetXmin(), ax.GetXmax()
-    lo_edge = max(xmin, np.nextafter(mm_min,  np.inf))
-    hi_edge = min(xmax, np.nextafter(mm_max, -np.inf))
+    # ------------------------------------------------------------------
+    # 2.  re-fit those samples with the same (or user-chosen) formula
+    # ------------------------------------------------------------------
+    fit_window = ROOT.TF1("fit_window", refit_order, lo, hi)
+    g.Fit(fit_window, "Q0")           # quiet, no graphics
 
-    # Convert to bin indices and apply integer padding
-    i_lo = ax.FindBin(lo_edge)
-    i_hi = ax.FindBin(hi_edge)
-    i_lo = max(1, i_lo - n_pad)
-    i_hi = min(nb, i_hi + n_pad)
+    # ------------------------------------------------------------------
+    # 3.  build the padded histogram
+    # ------------------------------------------------------------------
+    h_bg = hist.Clone(hist.GetName() + "_bg_fit_pad")
+    h_bg.Reset("ICES")                # clean slate
 
-    # Build the histogram
-    h_fit = hist.Clone(hist.GetName() + "_bg_fit_pad")
-    h_fit.Reset()
+    ax  = h_bg.GetXaxis()
+    nb  = h_bg.GetNbinsX()
+
+    i_lo = max(1,  ax.FindBin(mm_min) - n_pad)
+    i_hi = min(nb, ax.FindBin(mm_max) + n_pad)
 
     for ib in range(1, nb + 1):
         if i_lo <= ib <= i_hi:
-            x = h_fit.GetBinCenter(ib)
-            y = fit_func.Eval(x)
+            y = fit_window.Eval(ax.GetBinCenter(ib))
             if not allow_negative and y < 0.0:
                 y = 0.0
-            h_fit.SetBinContent(ib, y)
-            h_fit.SetBinError(ib, 0.0)  # define explicitly; replace if you propagate param errors
+            h_bg.SetBinContent(ib, y)
+            h_bg.SetBinError  (ib, 0.0)
         else:
-            h_fit.SetBinContent(ib, 0.0)
-            h_fit.SetBinError(ib, 0.0)
+            h_bg.SetBinContent(ib, 0.0)
+            h_bg.SetBinError  (ib, 0.0)
 
-    return h_fit
+    return h_bg
 
 ################################################################################################################################################
 
@@ -105,10 +130,10 @@ def bg_fit(phi_setting, inpDict, hist):
     mm_max = inpDict["mm_max"]
 
     # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
-    sb_left = inpDict.get("sb_left", (1.070, mm_min))
-    sb_right = inpDict.get("sb_right", (1.135, mm_max))
-    sig_lo = mm_min
-    sig_hi = mm_max
+    sb_left = inpDict.get("sb_left", (1.070, 1.095))
+    sb_right = inpDict.get("sb_right", (1.135, 1.180))
+    sig_lo = max(1.107, mm_min)
+    sig_hi = min(1.123, mm_max)
 
     print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
     print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
