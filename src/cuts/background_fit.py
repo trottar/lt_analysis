@@ -51,8 +51,12 @@ BG_MODELS = {
     "linear": {
         "func_expr": "pol1",          # Linear
         "n_par":      2,
-        "sidebands":  {"left":  (1.070, 1.095),
-                       "right": (1.135, 1.180)},
+        "sidebands":  {
+            #"left":  (1.070, 1.095),
+            #"right": (1.135, 1.180)
+            "left":  (1.070, 1.095),
+            "right": (1.11, 1.14)
+            },
     },
 
     # --- 2nd-order Chebyshev with *tighter* SBs ---------------------------
@@ -125,7 +129,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="cheb2",   # ← just pick a key from BG_MODELS
+        model_key="linear",   # ← just pick a key from BG_MODELS
         no_bg_subtract=False         # keep the old switch
 ):
     """

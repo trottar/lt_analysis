@@ -500,8 +500,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     subDict[f"H_MM_nosub_SUB_DATA_{j}"],
                     pi_mm_min, pi_mm_max
                 )
-                scale_factor = (kaon_amp / pion_background_amp) * 0.85 # Scale factor to adjust pion background to kaon peak size
-                ##############
+                scale_factor = (kaon_amp / pion_background_amp)
                 ##############
                 ##############                
             except ZeroDivisionError:

@@ -1680,7 +1680,7 @@ def rand_sub(phi_setting, inpDict):
                 subDict["H_MM_nosub_SUB_DATA"],
                 pi_mm_min, pi_mm_max
             )
-            scale_factor = (kaon_amp / pion_background_amp) * 0.85 # Scale factor to adjust pion background to kaon peak size
+            scale_factor = (kaon_amp / pion_background_amp)
             ##############
             ##############
             ##############
