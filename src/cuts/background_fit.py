@@ -43,6 +43,31 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
+# -------------------------------------------------------------------------
+# Catalogue of background-shape models and their default side-bands
+# -------------------------------------------------------------------------
+BG_MODELS = {
+    # --- textbook linear background, wide physics-motivated SBs -----------
+    "linear": {
+        "func_expr": "pol1",          # Linear
+        "n_par":      2,
+        "sidebands":  {"left":  (1.070, 1.095),
+                       "right": (1.135, 1.180)},
+    },
+
+    # --- 2nd-order Chebyshev with *tighter* SBs ---------------------------
+    "cheb2": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            "left":  (1.00, 1.06),
+            "right": (1.14, 1.20), 
+        }
+    },
+}
+
+################################################################################################################################################
+
 def get_fit_histogram_padded(fit_func,
                              hist,
                              mm_min, mm_max,
@@ -94,69 +119,84 @@ def get_fit_histogram_padded(fit_func,
 #no_bg_subtract=True
 no_bg_subtract=False
 
-def bg_fit(phi_setting, inpDict, hist, hist_mm_cut=None):
+def bg_fit(
+        phi_setting,
+        inpDict,
+        hist,
+        hist_mm_cut=None,
+        *,
+        model_key="cheb2",   # ← just pick a key from BG_MODELS
+        no_bg_subtract=False         # keep the old switch
+):
+    """
+    Generic side-band fit and background subtraction.
 
-    if hist_mm_cut is None:
-         hist_mm_cut = hist
-
-    if no_bg_subtract:
-        fit_func = TF1("fit_func_zero", "0", inpDict["mm_min"], inpDict["mm_max"])
-        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
-        bg_par   = 0
-        return fit_func, fit_vis, bg_par    
-    
+    Parameters
+    ----------
+    model_key : str
+        Which entry in BG_MODELS to use.
+        Every model supplies the TF1 expression and its default side-bands.
+    All other parameters are unchanged compared to the legacy version.
+    """
+    # ------------------------------- setup --------------------------------
+    model = BG_MODELS[model_key]                 # raises KeyError if wrong
     mm_min = inpDict["mm_min"]
     mm_max = inpDict["mm_max"]
 
-    # --- Use physics-motivated wide sidebands for fitting, NOT just mm_min/mm_max ---
-    sb_left = inpDict.get("sb_left", (1.070, 1.095))
-    sb_right = inpDict.get("sb_right", (1.135, 1.180))
-    sig_lo = max(1.107, mm_min)
-    sig_hi = min(1.123, mm_max)
+    # allow user to override SBs ad-hoc via inpDict; otherwise fall back to
+    # the defaults stored in the model definition
+    sb_left  = inpDict.get("sb_left",  model["sidebands"]["left"])
+    sb_right = inpDict.get("sb_right", model["sidebands"]["right"])
 
-    #print(f"Signal window: [{sig_lo:.3f}, {sig_hi:.3f}]")
-    #print(f"Sideband left: [{sb_left[0]:.3f}, {sb_left[1]:.3f}]")
-    #print(f"Sideband right: [{sb_right[0]:.3f}, {sb_right[1]:.3f}]")
+    # signal window: keep the physics defaults unless over-ridden
+    sig_lo = max(inpDict.get("sig_lo", 1.107), mm_min)
+    sig_hi = min(inpDict.get("sig_hi", 1.123), mm_max)
 
+    # ---------------------------------------------------------------------
+    if hist_mm_cut is None:
+        hist_mm_cut = hist
+
+    if no_bg_subtract:
+        fit_func = TF1("fit_func_zero", "0", mm_min, mm_max)
+        return fit_func, fit_func.Clone(f"{hist.GetName()}_bg_vis"), 0.0
+
+    # -------------------------- mask to side-bands ------------------------
     h_sb = hist.Clone(hist.GetName() + "_sb")
+    h_sb.ResetStats()  # avoids ROOT complaints about negative stats
 
-    def is_valid_sideband(sb):
-        return sb[1] > sb[0]
+    def in_any_sb(x):
+        return (sb_left[0]  <= x <= sb_left[1]) or \
+               (sb_right[0] <= x <= sb_right[1])
 
-    n_sb_bins = 0
     for ib in range(1, h_sb.GetNbinsX() + 1):
-        x = h_sb.GetBinCenter(ib)
-        in_sb_left  = is_valid_sideband(sb_left)  and (sb_left[0]  <= x <= sb_left[1])
-        in_sb_right = is_valid_sideband(sb_right) and (sb_right[0] <= x <= sb_right[1])
-        if not (in_sb_left or in_sb_right):
+        if not in_any_sb(h_sb.GetBinCenter(ib)):
             h_sb.SetBinContent(ib, 0.0)
             h_sb.SetBinError(ib, 0.0)
-        else:
-            n_sb_bins += 1
 
-    #print("Nonzero bins in h_sb after masking:", n_sb_bins)
+    # ------------------------------ fit -----------------------------------
+    fit_min, fit_max = sb_left[0], sb_right[1]
+    fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
+    h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    fit_min = sb_left[0]
-    fit_max = sb_right[1]
-    #fit_func = TF1("fit_func", "pol1", fit_min, fit_max) # Linear fit
-    fit_func = TF1("fit_func", "cheb2", fit_min, fit_max) # Chebyshev polynomial fit (degree 2)
-    h_sb.Fit(fit_func, "Q0")
+    # integral of background under the signal window, per-bin normalised
+    bg_par = max(0.0, fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1))
 
-    bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
-    bg_par = max(0.0, bg_par)  # physical prior
-    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
-
+    # global scaling of stat errors if user supplied it
     scale = inpDict.get("bg_stat_scale", 1.0)
     if scale != 1.0:
         for ip in range(fit_func.GetNpar()):
             fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
         bg_par *= scale
 
+    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+
+    # produce a histogram of the fit on the same binning as (hist_mm_cut)
     fit_hist_inrange = get_fit_histogram_padded(
-                       fit_func,
-                       hist_mm_cut,                         # use the cut axis
-                       mm_min, mm_max,
-                       n_pad=0,
-                       ref_binwidth=hist.GetXaxis().GetBinWidth(1))  # wide Δx
+        fit_func,
+        hist_mm_cut,
+        mm_min, mm_max,
+        n_pad=0,
+        ref_binwidth=hist.GetXaxis().GetBinWidth(1)
+    )
 
     return fit_hist_inrange, fit_vis, bg_par
