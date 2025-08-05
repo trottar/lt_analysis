@@ -353,6 +353,10 @@ def check_bins(histlist, inpDict):
     tmin = inpDict["tmin"]
     tmax = inpDict["tmax"]
 
+    t_bins = histlist[0]["t_bins"]
+    phi_bins = histlist[0]["phi_bins"]
+
+
     # Create an empty list to store copied histograms
     histlist_copy = []
 
@@ -368,9 +372,6 @@ def check_bins(histlist, inpDict):
                 hist_copy[key] = val
         # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
-
-    t_bins = histlist_copy[0]["t_bins"]
-    phi_bins = histlist_copy[0]["phi_bins"]
 
     ################################################################################################################################################
     # Define root file trees of interest
