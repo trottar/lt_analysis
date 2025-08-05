@@ -595,6 +595,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         canvas2 = ROOT.TCanvas("canvas2_{}".format(canvas_iter), "Canvas", 800, 600)
                         
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
+                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
+                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
                         hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
                         if ParticleType == "kaon":
                             subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)

@@ -138,7 +138,8 @@ def bg_fit(phi_setting, inpDict, hist, hist_mm_cut=None):
 
     fit_min = sb_left[0]
     fit_max = sb_right[1]
-    fit_func = TF1("fit_func", "pol1", fit_min, fit_max)
+    #fit_func = TF1("fit_func", "pol1", fit_min, fit_max) # Linear fit
+    fit_func = TF1("fit_func", "cheb2", fit_min, fit_max) # Chebyshev polynomial fit (degree 2)
     h_sb.Fit(fit_func, "Q0")
 
     bg_par = fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1)
