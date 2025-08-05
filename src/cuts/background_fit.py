@@ -64,8 +64,10 @@ BG_MODELS = {
         "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
         "n_par":      3,
         "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
             "left":  (1.00, 1.06),
-            "right": (1.14, 1.20), 
+            "right": (1.2, 1.22), 
         }
     },
 }
@@ -129,7 +131,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="linear",   # ← just pick a key from BG_MODELS
+        model_key="cheb2",   # ← just pick a key from BG_MODELS
         no_bg_subtract=False         # keep the old switch
 ):
     """
