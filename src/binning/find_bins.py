@@ -353,10 +353,6 @@ def check_bins(histlist, inpDict):
     tmin = inpDict["tmin"]
     tmax = inpDict["tmax"]
 
-    t_bins = histlist[0]["t_bins"]
-    phi_bins = histlist[0]["phi_bins"]
-
-
     # Create an empty list to store copied histograms
     histlist_copy = []
 
@@ -373,6 +369,9 @@ def check_bins(histlist, inpDict):
         # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
 
+    t_bins = histlist_copy[0]["t_bins"]
+    phi_bins = histlist_copy[0]["phi_bins"]
+
     ################################################################################################################################################
     # Define root file trees of interest
 
@@ -386,6 +385,10 @@ def check_bins(histlist, inpDict):
     H_phi_Center = np.array([])
     
     for i,hist in enumerate(histlist_copy):
+
+        # Unscale data to get raw number of events
+        hist["H_t_DATA"].Scale(1.0 / inpDict["normfac_data"])
+        hist["H_ph_q_DATA"].Scale(1.0 / inpDict["normfac_data"])
         
         t = flatten_hist(hist["H_t_DATA"])
         phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
