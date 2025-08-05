@@ -346,11 +346,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
                       #.format(Q2, W, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
           # After 8/28/2024
-          #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
-          # After 7/31/2025
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)          
+                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
+          # After 7/31/2025
+          #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
+                      #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetapq, evt.phipqi, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)          
 
           iter_lst = iterWeight(inp_param)
 
@@ -381,11 +381,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
                       #.format(Q2, W, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
           # After 8/28/2024
-          #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
-          # After 7/31/2025
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)                    
+                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          # After 7/31/2025
+          #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
+                      #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetapq, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)                    
 
           iter_lst = iterWeight(inp_param)
 
