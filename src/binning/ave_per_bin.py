@@ -539,7 +539,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale"] = 1.25
+        inpDict["bg_stat_scale"] = 1.00
         
         fitDict["background_data_fit_{}".format(j)] = bg_fit(
             phi_setting,
