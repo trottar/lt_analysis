@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_bad_bins, get_centroid, integrate_hist_range
+from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist
 
 ##################################################################################################################################################
 
@@ -479,6 +479,25 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_{}".format(j)], -1)  
 
+        # Remove histograms with less than event_threshold entries
+        event_threshold = 10
+        prune_hist(
+            hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], 
+            event_threshold
+        )
+        prune_hist(
+            hist_bin_dict["H_MM_pisub_DATA_{}".format(j)],
+            event_threshold
+        )
+        prune_hist(
+            hist_bin_dict["H_MM_DATA_{}_".format(j)],
+            event_threshold
+        )
+        prune_hist(
+            hist_bin_dict["H_t_DATA_{}".format(j)],
+            event_threshold
+        )
+
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
             
@@ -529,7 +548,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             subDict["H_epsilon_SUB_DATA_{}".format(j)].Scale(scale_factor)
             subDict["H_MM_SUB_DATA_{}".format(j)].Scale(scale_factor)
 
-            '''
             # Apply pion subtraction
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(subDict["H_Q2_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA_{}".format(j)],-1)
@@ -537,8 +555,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(subDict["H_epsilon_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(subDict["H_MM_nosub_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA_{}".format(j)],-1)
-            '''
-            
+
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
         inpDict["bg_stat_scale"] = 1.00

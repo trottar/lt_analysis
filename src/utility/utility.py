@@ -1371,6 +1371,29 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
         return [0.0, 0.0, 0.0]
 
+##################################################################################################################################################            
+
+def prune_hist(hist, threshold: int = 10):
+    """
+    Empty a ROOT TH1* in place if it contains ≤ *threshold* entries.
+
+    Parameters
+    ----------
+    hist : ROOT.TH1  (TH1F, TH1D, etc.)
+        The histogram to inspect.
+    threshold : int, optional
+        Minimum number of entries required to keep the contents
+        (default = 10).
+
+    Notes
+    -----
+    • Works entirely in place, so **do not** re-assign the dictionary entry.
+    • Keeps axis titles, binning, fits, and styling—only the bin contents
+      and statistics are reset.
+    """
+    if hist.GetEntries() <= threshold:
+        hist.Reset()          # zeroes all bins & stats
+
 ##################################################################################################################################################
 
 def adapt_limits(f, nsig=5, hard_lo=None, hard_hi=None, min_width=1e-3):
