@@ -490,7 +490,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             event_threshold
         )
         prune_hist(
-            hist_bin_dict["H_MM_DATA_{}_".format(j)],
+            hist_bin_dict["H_MM_DATA_{}".format(j)],
             event_threshold
         )
         prune_hist(
