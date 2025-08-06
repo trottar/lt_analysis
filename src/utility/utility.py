@@ -1375,24 +1375,22 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
 def prune_hist(hist, threshold: int = 10):
     """
-    Empty a ROOT TH1* in place if it contains ≤ *threshold* entries.
+    Empty a ROOT TH1* in place when it is effectively unusable.
+
+    Conditions for zeroing
+    ----------------------
+    1. Total filled entries ≤ *threshold*  (default: 10)
+    2. Histogram integral ≤ 0              (handles negative-weighted samples)
 
     Parameters
     ----------
-    hist : ROOT.TH1  (TH1F, TH1D, etc.)
+    hist : ROOT.TH1 (TH1F, TH1D, …)
         The histogram to inspect.
     threshold : int, optional
-        Minimum number of entries required to keep the contents
-        (default = 10).
-
-    Notes
-    -----
-    • Works entirely in place, so **do not** re-assign the dictionary entry.
-    • Keeps axis titles, binning, fits, and styling—only the bin contents
-      and statistics are reset.
+        Minimum number of entries required to keep the contents.
     """
-    if hist.GetEntries() <= threshold:
-        hist.Reset()          # zeroes all bins & stats
+    if hist.GetEntries() <= threshold or hist.Integral() <= 0:
+        hist.Reset()   # clears contents & statistics while keeping axes/title
 
 ##################################################################################################################################################
 
