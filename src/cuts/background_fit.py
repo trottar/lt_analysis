@@ -175,7 +175,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="pol3",   # ← just pick a key from BG_MODELS
+        model_key="linear",   # ← just pick a key from BG_MODELS
         no_bg_subtract=False         # no background subtraction
 ):
     """
