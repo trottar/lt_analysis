@@ -71,7 +71,7 @@ BG_MODELS = {
         }
     },
 
-    # --- Crystal-Ball (Gaussian + tail) -----------------
+    # --- Crystal-Ball (Gaussian + tail) *** NEEED TO FIX SIDEBANDS *** -----------------
     "crystalball": {
         "func_expr": "crystalball",  # TMath::CrystalBall(x; m, σ, α, n)
         "n_par":      5,
@@ -172,7 +172,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="crystalball",   # ← just pick a key from BG_MODELS
+        model_key="argus",   # ← just pick a key from BG_MODELS
         no_bg_subtract=False         # no background subtraction
 ):
     """
