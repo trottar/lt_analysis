@@ -470,7 +470,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)], -1) 
 
-            # Remove histograms with less than event_threshold entries
+            # Remove histograms with less than event_threshold entries and negative integrals
             event_threshold = 10
             prune_hist(
                 hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], 
@@ -561,7 +561,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit_{}_{}".format(j, k)][0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit_{}_{}".format(j, k)][0], -1)            
 
-            # Remove histograms with less than event_threshold entries
+            # Remove histograms with less than event_threshold entries and negative integrals
             prune_hist(
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 event_threshold
@@ -619,59 +619,64 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 if is_hist(val):
                     
-                    if "MM_DATA" in key:
-                        # Create a new canvas for each plot
-                        canvas2 = ROOT.TCanvas("canvas2_{}".format(canvas_iter), "Canvas", 800, 600)
-                        
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
-                        if ParticleType == "kaon":
-                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
-                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
-                        
-                        # Ensure correct PDF opening and closing
-                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+                    if "MM_DATA" in key:                        
 
-                        if is_absolute_first:
-                            print("(")
-                            canvas2.Print(pdf_name + '(')
-                        elif is_absolute_last:
-                            print(")")
-                            canvas2.Print(pdf_name + ')')
-                        else:
-                            canvas2.Print(pdf_name)
+                        if hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetEntries() > 0:
+
+                            # Create a new canvas for each plot
+                            canvas2 = ROOT.TCanvas("canvas2_{}".format(canvas_iter), "Canvas", 800, 600)
                             
-                        # Close the canvas2 to free up memory
-                        canvas2.Close()
-
-                        # Create a new canvas for each plot
-                        canvas3 = ROOT.TCanvas("canvas3_{}".format(canvas_iter), "Canvas", 800, 600)
-                        
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw("hist same")
-                        fitDict["background_fit_{}_{}".format(j, k)][1].SetLineColor(3)
-                        fitDict["background_fit_{}_{}".format(j, k)][1].Draw("same")
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
-                        
-                        # Ensure correct PDF opening and closing
-                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
-
-                        if is_absolute_first:
-                            print("(")
-                            canvas3.Print(pdf_name + '(')
-                        elif is_absolute_last:
-                            print(")")
-                            canvas3.Print(pdf_name + ')')
-                        else:
-                            canvas3.Print(pdf_name)
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
+                            if ParticleType == "kaon":
+                                subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
+                                subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
+                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
                             
-                        # Close the canvas2 to free up memory
-                        canvas3.Close()                        
+                            # Ensure correct PDF opening and closing
+                            pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+
+                            if is_absolute_first:
+                                print("(")
+                                canvas2.Print(pdf_name + '(')
+                            elif is_absolute_last:
+                                print(")")
+                                canvas2.Print(pdf_name + ')')
+                            else:
+                                canvas2.Print(pdf_name)
+                                
+                            # Close the canvas2 to free up memory
+                            canvas2.Close()
+
+                        if hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetEntries() > 0:
+
+                            # Create a new canvas for each plot
+                            canvas3 = ROOT.TCanvas("canvas3_{}".format(canvas_iter), "Canvas", 800, 600)
+                            
+                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
+                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
+                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
+                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw("hist same")
+                            fitDict["background_fit_{}_{}".format(j, k)][1].SetLineColor(3)
+                            fitDict["background_fit_{}_{}".format(j, k)][1].Draw("same")
+                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
+                            
+                            # Ensure correct PDF opening and closing
+                            pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+
+                            if is_absolute_first:
+                                print("(")
+                                canvas3.Print(pdf_name + '(')
+                            elif is_absolute_last:
+                                print(")")
+                                canvas3.Print(pdf_name + ')')
+                            else:
+                                canvas3.Print(pdf_name)
+                                
+                            # Close the canvas2 to free up memory
+                            canvas3.Close()                        
 
                     # Create a new canvas for each plot
                     canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)

@@ -479,7 +479,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_{}".format(j)], -1)  
 
-        # Remove histograms with less than event_threshold entries
+        # Remove histograms with less than event_threshold entries and negative integrals
         event_threshold = 10
         prune_hist(
             hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], 
@@ -574,7 +574,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)  
 
-        # Remove histograms with less than event_threshold entries
+        # Remove histograms with less than event_threshold entries and negative integrals
         prune_hist(
             hist_bin_dict["H_MM_DATA_{}".format(j)],
             event_threshold
