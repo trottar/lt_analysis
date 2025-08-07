@@ -113,18 +113,6 @@ BG_MODELS = {
         }
     },
 
-    # --- ARGUS threshold shape --------------------------
-    "argus": {
-        # N · x · √(1 – (x/χ)²) · exp[c · (1 – (x/χ)²)]
-        # p[0]=N (norm), p[1]=χ (cut-off), p[2]=c (slope)
-        "func_expr": "[0]*x*sqrt(1 - pow(x/[1],2))*exp([2]*(1 - pow(x/[1],2)))",
-        "n_par": 3,
-        "sidebands": {
-            "left":  (1.00, 1.06),
-            "right": (1.20, 1.22),
-        }
-    },    
-
 }
 
 ################################################################################################################################################
@@ -186,7 +174,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="landau",   # ← just pick a key from BG_MODELS
+        model_key="exppol2",   # ← just pick a key from BG_MODELS
         no_bg_subtract=False         # no background subtraction
 ):
     """
