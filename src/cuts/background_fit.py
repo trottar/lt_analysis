@@ -91,6 +91,16 @@ BG_MODELS = {
         }
     },
 
+    # --- Landau distribution ----------------------------
+    "landau": {
+        "func_expr": "landau",      # p[0]·Landau(x; mpv, σ)
+        "n_par": 3,
+        "sidebands": {
+            "left":  (1.00, 1.06),
+            "right": (1.20, 1.22),
+        }
+    },
+
     # --- Exponential × quadratic polynomial -------------
     "exppol2": {
         "func_expr": "[0]*exp([1]*x)*(1+[2]*x+[3]*x*x)",  # norm·e^(slope·x)·(1 + c1·x + c2·x²)
