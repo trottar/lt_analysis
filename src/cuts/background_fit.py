@@ -71,16 +71,16 @@ BG_MODELS = {
         }
     },
 
-    # --- Exponential × quadratic polynomial -------------
-    "exppol2": {
-        "func_expr": "[0]*exp([1]*x)*(1+[2]*x+[3]*x*x)",  # norm·e^(slope·x)·(1 + c1·x + c2·x²)
-        "n_par":      4,
+    # --- Crystal-Ball (Gaussian + tail) -----------------
+    "crystalball": {
+        "func_expr": "crystalball",  # TMath::CrystalBall(x; m, σ, α, n)
+        "n_par":      5,
         "sidebands": {
             "left":  (1.00, 1.06),
             "right": (1.20, 1.22),
         }
     },
-
+    
     # --- ARGUS threshold shape --------------------------
     "argus": {
         "func_expr": "argus",   # built-in TMath::Argus(x; c, χ)
@@ -91,19 +91,19 @@ BG_MODELS = {
         }
     },
 
-    # --- Crystal-Ball (Gaussian + tail) -----------------
-    "crystalball": {
-        "func_expr": "crystalball",  # TMath::CrystalBall(x; m, σ, α, n)
-        "n_par":      5,
+    # --- 3rd-order polynomial ---------------------------
+    "pol3": {
+        "func_expr": "pol3",    # a0 + a1·x + a2·x² + a3·x³
+        "n_par":      4,
         "sidebands": {
             "left":  (1.00, 1.06),
             "right": (1.20, 1.22),
         }
     },
 
-    # --- 3rd-order polynomial ---------------------------
-    "pol3": {
-        "func_expr": "pol3",    # a0 + a1·x + a2·x² + a3·x³
+    # --- Exponential × quadratic polynomial -------------
+    "exppol2": {
+        "func_expr": "[0]*exp([1]*x)*(1+[2]*x+[3]*x*x)",  # norm·e^(slope·x)·(1 + c1·x + c2·x²)
         "n_par":      4,
         "sidebands": {
             "left":  (1.00, 1.06),
@@ -172,8 +172,8 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="cheb2",   # ← just pick a key from BG_MODELS
-        no_bg_subtract=False         # keep the old switch
+        model_key="crystalball",   # ← just pick a key from BG_MODELS
+        no_bg_subtract=False         # no background subtraction
 ):
     """
     Generic side-band fit and background subtraction.
