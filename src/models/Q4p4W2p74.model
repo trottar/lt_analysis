@@ -56,10 +56,10 @@ sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt))
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
 #sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = (par9 / math.fabs(tt))
+##sig_LT = (par9 / math.fabs(tt))
 #sig_LT = (par9 /((math.fabs(tt)**par10) + par11)) * math.exp(-math.fabs(par12 * tt)) * math.sin(theta_cm)
 #sig_LT = (par9 / math.fabs(tt)**par10) * math.sin(theta_cm)
-###sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
 #sig_LT = par9 * ft * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * Qdep_L * math.sin(theta_cm)
 #####
@@ -81,8 +81,8 @@ sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
 #wfactor = 1 / ((ww**2) - (mtar**2))**2.0
 ####
 #wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
-###wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
-wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
+##wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
 # Fixes W=2.2 to 2.25 and W=3.14 to 2.0
 #wfactor = 1 / ((ww**2) - (mtar**2))**(2.871975-(mpipl/mkpl)*ww)
 ####
