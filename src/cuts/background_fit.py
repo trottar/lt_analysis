@@ -174,7 +174,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
-        model_key="exppol2",   # ← just pick a key from BG_MODELS
+        model_key="cheb2",   # ← just pick a key from BG_MODELS
         no_bg_subtract=False         # no background subtraction
 ):
     """
