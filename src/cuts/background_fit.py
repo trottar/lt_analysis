@@ -86,8 +86,10 @@ BG_MODELS = {
         "func_expr": "pol3",    # a0 + a1·x + a2·x² + a3·x³
         "n_par":      4,
         "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.20, 1.22),
             "left":  (1.00, 1.06),
-            "right": (1.20, 1.22),
+            "right": (1.20, 1.25),
         }
     },
 
