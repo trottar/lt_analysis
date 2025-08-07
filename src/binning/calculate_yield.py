@@ -561,6 +561,16 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit_{}_{}".format(j, k)][0], -1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit_{}_{}".format(j, k)][0], -1)            
 
+            # Remove histograms with less than event_threshold entries
+            prune_hist(
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
+                event_threshold
+            )
+            prune_hist(
+                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
+                event_threshold
+            )
+
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
     total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)]))-1 # '-1' to remove t-phi bin edges

@@ -574,6 +574,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)  
 
+        # Remove histograms with less than event_threshold entries
+        prune_hist(
+            hist_bin_dict["H_MM_DATA_{}".format(j)],
+            event_threshold
+        )
+        prune_hist(
+            hist_bin_dict["H_t_DATA_{}".format(j)],
+            event_threshold
+        )
+
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
             "H_W_DATA" : hist_bin_dict["H_W_DATA_{}".format(j)],
