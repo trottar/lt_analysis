@@ -47,7 +47,7 @@ OUTPATH=lt.OUTPATH
 # Catalogue of background-shape models and their default side-bands
 # -------------------------------------------------------------------------
 BG_MODELS = {
-    # --- textbook linear background, wide physics-motivated SBs -----------
+    # --- linear background -----------
     "linear": {
         "func_expr": "pol1",          # Linear
         "n_par":      2,
@@ -59,7 +59,7 @@ BG_MODELS = {
             },
     },
 
-    # --- 2nd-order Chebyshev with *tighter* SBs ---------------------------
+    # --- 2nd-order Chebyshev ---------------------------
     "cheb2": {
         "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
         "n_par":      3,
@@ -70,6 +70,47 @@ BG_MODELS = {
             "right": (1.2, 1.22), 
         }
     },
+
+    # --- Exponential × quadratic polynomial -------------
+    "exppol2": {
+        "func_expr": "[0]*exp([1]*x)*(1+[2]*x+[3]*x*x)",  # norm·e^(slope·x)·(1 + c1·x + c2·x²)
+        "n_par":      4,
+        "sidebands": {
+            "left":  (1.00, 1.06),
+            "right": (1.20, 1.22),
+        }
+    },
+
+    # --- ARGUS threshold shape --------------------------
+    "argus": {
+        "func_expr": "argus",   # built-in TMath::Argus(x; c, χ)
+        "n_par":      3,
+        "sidebands": {
+            "left":  (1.00, 1.06),
+            "right": (1.20, 1.22),
+        }
+    },
+
+    # --- Crystal-Ball (Gaussian + tail) -----------------
+    "crystalball": {
+        "func_expr": "crystalball",  # TMath::CrystalBall(x; m, σ, α, n)
+        "n_par":      5,
+        "sidebands": {
+            "left":  (1.00, 1.06),
+            "right": (1.20, 1.22),
+        }
+    },
+
+    # --- 3rd-order polynomial ---------------------------
+    "pol3": {
+        "func_expr": "pol3",    # a0 + a1·x + a2·x² + a3·x³
+        "n_par":      4,
+        "sidebands": {
+            "left":  (1.00, 1.06),
+            "right": (1.20, 1.22),
+        }
+    },
+
 }
 
 ################################################################################################################################################
