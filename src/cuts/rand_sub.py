@@ -1716,9 +1716,7 @@ def rand_sub(phi_setting, inpDict):
         else:
             raise ValueError("Invalid phi_setting: {}".format(phi_setting))
         
-        scale_factor = scale_factor * phi_scale  
-
-        scale_factor = 0.0 # Debugging line to set scale_factor to zero      
+        scale_factor = scale_factor * phi_scale   
 
         # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
