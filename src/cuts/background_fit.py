@@ -84,14 +84,14 @@ BG_MODELS = {
     },
 
     # --- Sigma peak 2nd-order Chebyshev ---------------------------
-    "sigma_peak_cheb2": {
+    "sigma_peak": {
         "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
         "n_par":      3,
         "sidebands": {
             #"left":  (1.00, 1.06),
             #"right": (1.14, 1.20),
-            "left":  (1.16, 1.18),
-            "right": (1.21, 1.25), 
+            "left":  (1.17, 1.20),
+            "right": (1.20, 1.23), 
         }
     },    
 
