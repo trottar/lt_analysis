@@ -1834,7 +1834,8 @@ def rand_sub(phi_setting, inpDict):
     background_fit1 = bg_fit(phi_setting,
                             inpDict,
                             H_MM_pisub_DATA,   # wide / no-cut
-                            H_MM_DATA)         # cut-window axis
+                            H_MM_DATA,         # cut-window axis
+                            model_key="cheb2")
     # background_fit1[0] : scaled function   (use for subtraction)
     # background_fit1[1] : original function (use for drawing only)
 
@@ -1899,7 +1900,8 @@ def rand_sub(phi_setting, inpDict):
     background_fit2 = bg_fit(phi_setting,
                             inpDict,
                             H_MM_fit1sub_DATA,   # wide / no-cut
-                            H_MM_DATA)         # cut-window axis
+                            H_MM_DATA,         # cut-window axis
+                            model_key="sigma_peak_cheb2")
     # background_fit2[0] : scaled function   (use for subtraction)
     # background_fit2[1] : original function (use for drawing only)
 
