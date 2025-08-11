@@ -83,6 +83,18 @@ BG_MODELS = {
         }
     },
 
+    # --- Sigma peak 2nd-order Chebyshev ---------------------------
+    "sigma_peak_cheb2": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
+            "left":  (1.00, 1.06),
+            "right": (1.2, 1.22), 
+        }
+    },    
+
     # Next functions all look similar to Chebyshev order 2
     # --- Crystal-Ball (Gaussian + tail) *** NEEED TO FIX SIDEBANDS *** -----------------
     "crystalball": {

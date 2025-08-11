@@ -329,6 +329,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DATA       = TH1D("H_t_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DATA  = TH1D("H_MM_DATA",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_fit1sub_DATA  = TH1D("H_MM_fit1sub_DATA",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_pisub_DATA  = TH1D("H_MM_pisub_DATA",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_nosub_DATA  = TH1D("H_MM_nosub_DATA",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 100, -0.1, 0.1)
@@ -369,6 +370,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])  
     H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY  = TH1D("H_MM_DUMMY",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_fit1sub_DUMMY  = TH1D("H_MM_fit1sub_DUMMY",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_pisub_DUMMY  = TH1D("H_MM_pisub_DUMMY",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_nosub_DUMMY  = TH1D("H_MM_nosub_DUMMY",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 100, -0.1, 0.1)
@@ -404,6 +406,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_RAND       = TH1D("H_t_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_RAND  = TH1D("H_MM_RAND",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_fit1sub_RAND  = TH1D("H_MM_fit1sub_RAND",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_pisub_RAND  = TH1D("H_MM_pisub_RAND",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_nosub_RAND  = TH1D("H_MM_nosub_RAND",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 100, -0.1, 0.1)
@@ -439,6 +442,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_fit1sub_DUMMY_RAND  = TH1D("H_MM_fit1sub_DUMMY_RAND",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_pisub_DUMMY_RAND  = TH1D("H_MM_pisub_DUMMY_RAND",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_MM_nosub_DUMMY_RAND  = TH1D("H_MM_nosub_DUMMY_RAND",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
@@ -850,6 +854,7 @@ def rand_sub(phi_setting, inpDict):
             NOMMCUTS = apply_data_sub_cuts(evt)
             
         if(NOMMCUTS):
+            H_MM_fit1sub_DATA.Fill(adj_MM)
             H_MM_pisub_DATA.Fill(adj_MM)
             H_MM_nosub_DATA.Fill(adj_MM)
             
@@ -968,6 +973,7 @@ def rand_sub(phi_setting, inpDict):
             NOMMCUTS = apply_data_sub_cuts(evt)
             
         if(NOMMCUTS):
+            H_MM_fit1sub_DUMMY.Fill(adj_MM) 
             H_MM_pisub_DUMMY.Fill(adj_MM) 
             H_MM_nosub_DUMMY.Fill(adj_MM)            
             
@@ -1078,6 +1084,7 @@ def rand_sub(phi_setting, inpDict):
             NOMMCUTS = apply_data_sub_cuts(evt)
             
         if(NOMMCUTS):
+            H_MM_fit1sub_RAND.Fill(adj_MM)
             H_MM_pisub_RAND.Fill(adj_MM)
             H_MM_nosub_RAND.Fill(adj_MM)
             
@@ -1184,6 +1191,7 @@ def rand_sub(phi_setting, inpDict):
             NOMMCUTS = apply_data_sub_cuts(evt)
             
         if(NOMMCUTS):
+            H_MM_fit1sub_DUMMY_RAND.Fill(adj_MM)
             H_MM_pisub_DUMMY_RAND.Fill(adj_MM)
             H_MM_nosub_DUMMY_RAND.Fill(adj_MM)
             
@@ -1302,6 +1310,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_RAND.Scale(1/nWindows)
     H_epsilon_RAND.Scale(1/nWindows)
     H_MM_RAND.Scale(1/nWindows)
+    H_MM_fit1sub_RAND.Scale(1/nWindows)
     H_MM_pisub_RAND.Scale(1/nWindows)
     H_MM_nosub_RAND.Scale(1/nWindows)
     H_pmiss_RAND.Scale(1/nWindows)
@@ -1357,6 +1366,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY_RAND.Scale(1/nWindows)
     H_epsilon_DUMMY_RAND.Scale(1/nWindows)
     H_MM_DUMMY_RAND.Scale(1/nWindows)
+    H_MM_fit1sub_DUMMY_RAND.Scale(1/nWindows)
     H_MM_pisub_DUMMY_RAND.Scale(1/nWindows)
     H_MM_nosub_DUMMY_RAND.Scale(1/nWindows)
     H_pmiss_DUMMY_RAND.Scale(1/nWindows)
@@ -1414,6 +1424,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DATA.Add(H_t_RAND,-1)
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
     H_MM_DATA.Add(H_MM_RAND,-1)
+    H_MM_fit1sub_DATA.Add(H_MM_fit1sub_RAND,-1)
     H_MM_pisub_DATA.Add(H_MM_pisub_RAND,-1)
     H_MM_nosub_DATA.Add(H_MM_nosub_RAND,-1)
     H_pmiss_DATA.Add(H_pmiss_RAND,-1)
@@ -1471,6 +1482,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY.Add(H_t_DUMMY_RAND,-1)
     H_epsilon_DUMMY.Add(H_epsilon_DUMMY_RAND,-1)
     H_MM_DUMMY.Add(H_MM_DUMMY_RAND,-1)
+    H_MM_fit1sub_DUMMY.Add(H_MM_fit1sub_DUMMY_RAND,-1)
     H_MM_pisub_DUMMY.Add(H_MM_pisub_DUMMY_RAND,-1)
     H_MM_nosub_DUMMY.Add(H_MM_nosub_DUMMY_RAND,-1)
     H_pmiss_DUMMY.Add(H_pmiss_DUMMY_RAND,-1)
@@ -1532,6 +1544,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DATA.Scale(norm_factor_data)
     H_epsilon_DATA.Scale(norm_factor_data)
     H_MM_DATA.Scale(norm_factor_data)
+    H_MM_fit1sub_DATA.Scale(norm_factor_data)
     H_MM_pisub_DATA.Scale(norm_factor_data)
     H_MM_nosub_DATA.Scale(norm_factor_data)
     H_pmiss_DATA.Scale(norm_factor_data)
@@ -1589,6 +1602,7 @@ def rand_sub(phi_setting, inpDict):
     H_t_DUMMY.Scale(norm_factor_dummy)
     H_epsilon_DUMMY.Scale(norm_factor_dummy)
     H_MM_DUMMY.Scale(norm_factor_dummy)
+    H_MM_fit1sub_DUMMY.Scale(norm_factor_dummy)
     H_MM_pisub_DUMMY.Scale(norm_factor_dummy)
     H_MM_nosub_DUMMY.Scale(norm_factor_dummy)
     H_pmiss_DUMMY.Scale(norm_factor_dummy)
@@ -1645,8 +1659,9 @@ def rand_sub(phi_setting, inpDict):
     H_W_DATA.Add(H_W_DUMMY,-1)
     H_t_DATA.Add(H_t_DUMMY,-1)
     H_epsilon_DATA.Add(H_epsilon_DUMMY,-1)
-    H_MM_nosub_DATA.Add(H_MM_nosub_DUMMY,-1)
+    H_MM_fit1sub_DATA.Add(H_MM_fit1sub_DUMMY,-1)
     H_MM_pisub_DATA.Add(H_MM_pisub_DUMMY,-1)
+    H_MM_nosub_DATA.Add(H_MM_nosub_DUMMY,-1)
     H_MM_DATA.Add(H_MM_DUMMY,-1)    
     H_pmiss_DATA.Add(H_pmiss_DUMMY,-1)
     H_emiss_DATA.Add(H_emiss_DUMMY,-1)
@@ -1802,8 +1817,9 @@ def rand_sub(phi_setting, inpDict):
         H_W_DATA.Add(subDict["H_W_SUB_DATA"],-1)
         H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
         H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
-        H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
+        H_MM_fit1sub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
         H_MM_pisub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
+        H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
         H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
         H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
         H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)
@@ -1817,63 +1833,128 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     inpDict["bg_stat_scale"] = 1.00
 
-    background_fit = bg_fit(phi_setting,
+    background_fit1 = bg_fit(phi_setting,
                             inpDict,
                             H_MM_pisub_DATA,   # wide / no-cut
                             H_MM_DATA)         # cut-window axis
-    # background_fit[0] : scaled function   (use for subtraction)
-    # background_fit[1] : original function (use for drawing only)
+    # background_fit1[0] : scaled function   (use for subtraction)
+    # background_fit1[1] : original function (use for drawing only)
 
     # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
-    #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-    #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit[0], -1)
-    #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit[0], -1)
-    #MM_vs_CoinTime_DATA.Add(background_fit[0], -1)
-    #CoinTime_vs_beta_DATA.Add(background_fit[0], -1)
-    #MM_vs_beta_DATA.Add(background_fit[0], -1)
-    #MM_vs_H_cer_DATA.Add(background_fit[0], -1)
-    #MM_vs_H_cal_DATA.Add(background_fit[0], -1)
-    #MM_vs_P_cal_DATA.Add(background_fit[0], -1)
-    #MM_vs_P_hgcer_DATA.Add(background_fit[0], -1)
-    #MM_vs_P_aero_DATA.Add(background_fit[0], -1)
-    #phiq_vs_t_DATA.Add(background_fit[0], -1)
-    #Q2_vs_W_DATA.Add(background_fit[0], -1)
-    #Q2_vs_t_DATA.Add(background_fit[0], -1)
-    #W_vs_t_DATA.Add(background_fit[0], -1)
-    #EPS_vs_t_DATA.Add(background_fit[0], -1)
-    #MM_vs_t_DATA.Add(background_fit[0], -1)
-    H_ssxfp_DATA.Add(background_fit[0], -1)
-    H_ssyfp_DATA.Add(background_fit[0], -1)
-    H_ssxpfp_DATA.Add(background_fit[0], -1)
-    H_ssypfp_DATA.Add(background_fit[0], -1)
-    H_hsxfp_DATA.Add(background_fit[0], -1)
-    H_hsyfp_DATA.Add(background_fit[0], -1)
-    H_hsxpfp_DATA.Add(background_fit[0], -1)
-    H_hsypfp_DATA.Add(background_fit[0], -1)
-    H_ssxptar_DATA.Add(background_fit[0], -1)
-    H_ssyptar_DATA.Add(background_fit[0], -1)
-    H_hsxptar_DATA.Add(background_fit[0], -1)
-    H_hsyptar_DATA.Add(background_fit[0], -1)
-    H_ssdelta_DATA.Add(background_fit[0], -1)
-    H_hsdelta_DATA.Add(background_fit[0], -1)
-    H_ph_q_DATA.Add(background_fit[0], -1)
-    H_th_q_DATA.Add(background_fit[0], -1)
-    H_ph_recoil_DATA.Add(background_fit[0], -1)
-    H_th_recoil_DATA.Add(background_fit[0], -1)
-    H_Q2_DATA.Add(background_fit[0], -1)
-    H_W_DATA.Add(background_fit[0], -1)
-    H_t_DATA.Add(background_fit[0], -1)
-    H_epsilon_DATA.Add(background_fit[0], -1)
-    H_MM_DATA.Add(background_fit[0], -1)
-    H_pmiss_DATA.Add(background_fit[0], -1)
-    H_emiss_DATA.Add(background_fit[0], -1)
-    H_pmx_DATA.Add(background_fit[0], -1)
-    H_pmy_DATA.Add(background_fit[0], -1)
-    H_pmz_DATA.Add(background_fit[0], -1)
-    H_ct_DATA.Add(background_fit[0], -1) 
+    #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit1[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit1[0], -1)
+    #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit1[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit1[0], -1)
+    #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit1[0], -1)
+    #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit1[0], -1)
+    #MM_vs_CoinTime_DATA.Add(background_fit1[0], -1)
+    #CoinTime_vs_beta_DATA.Add(background_fit1[0], -1)
+    #MM_vs_beta_DATA.Add(background_fit1[0], -1)
+    #MM_vs_H_cer_DATA.Add(background_fit1[0], -1)
+    #MM_vs_H_cal_DATA.Add(background_fit1[0], -1)
+    #MM_vs_P_cal_DATA.Add(background_fit1[0], -1)
+    #MM_vs_P_hgcer_DATA.Add(background_fit1[0], -1)
+    #MM_vs_P_aero_DATA.Add(background_fit1[0], -1)
+    #phiq_vs_t_DATA.Add(background_fit1[0], -1)
+    #Q2_vs_W_DATA.Add(background_fit1[0], -1)
+    #Q2_vs_t_DATA.Add(background_fit1[0], -1)
+    #W_vs_t_DATA.Add(background_fit1[0], -1)
+    #EPS_vs_t_DATA.Add(background_fit1[0], -1)
+    #MM_vs_t_DATA.Add(background_fit1[0], -1)
+    H_ssxfp_DATA.Add(background_fit1[0], -1)
+    H_ssyfp_DATA.Add(background_fit1[0], -1)
+    H_ssxpfp_DATA.Add(background_fit1[0], -1)
+    H_ssypfp_DATA.Add(background_fit1[0], -1)
+    H_hsxfp_DATA.Add(background_fit1[0], -1)
+    H_hsyfp_DATA.Add(background_fit1[0], -1)
+    H_hsxpfp_DATA.Add(background_fit1[0], -1)
+    H_hsypfp_DATA.Add(background_fit1[0], -1)
+    H_ssxptar_DATA.Add(background_fit1[0], -1)
+    H_ssyptar_DATA.Add(background_fit1[0], -1)
+    H_hsxptar_DATA.Add(background_fit1[0], -1)
+    H_hsyptar_DATA.Add(background_fit1[0], -1)
+    H_ssdelta_DATA.Add(background_fit1[0], -1)
+    H_hsdelta_DATA.Add(background_fit1[0], -1)
+    H_ph_q_DATA.Add(background_fit1[0], -1)
+    H_th_q_DATA.Add(background_fit1[0], -1)
+    H_ph_recoil_DATA.Add(background_fit1[0], -1)
+    H_th_recoil_DATA.Add(background_fit1[0], -1)
+    H_Q2_DATA.Add(background_fit1[0], -1)
+    H_W_DATA.Add(background_fit1[0], -1)
+    H_t_DATA.Add(background_fit1[0], -1)
+    H_epsilon_DATA.Add(background_fit1[0], -1)
+    H_MM_fit1sub_DATA.Add(background_fit1[1], -1)
+    H_MM_DATA.Add(background_fit1[0], -1)
+    H_pmiss_DATA.Add(background_fit1[0], -1)
+    H_emiss_DATA.Add(background_fit1[0], -1)
+    H_pmx_DATA.Add(background_fit1[0], -1)
+    H_pmy_DATA.Add(background_fit1[0], -1)
+    H_pmz_DATA.Add(background_fit1[0], -1)
+    H_ct_DATA.Add(background_fit1[0], -1) 
+
+    # Fit background and subtract
+    # --------------------------------------------------------------
+    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
+    # --------------------------------------------------------------
+    inpDict["bg_stat_scale"] = 1.00
+
+    background_fit2 = bg_fit(phi_setting,
+                            inpDict,
+                            H_MM_fit1sub_DATA,   # wide / no-cut
+                            H_MM_DATA)         # cut-window axis
+    # background_fit2[0] : scaled function   (use for subtraction)
+    # background_fit2[1] : original function (use for drawing only)
+
+    # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
+    #P_hgcer_xAtCer_vs_yAtCer_DATA.Add(background_fit2[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(background_fit2[0], -1)
+    #P_hgcer_xAtCer_vs_MM_DATA.Add(background_fit2[0], -1)
+    #P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(background_fit2[0], -1)
+    #P_hgcer_yAtCer_vs_MM_DATA.Add(background_fit2[0], -1)
+    #P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(background_fit2[0], -1)
+    #MM_vs_CoinTime_DATA.Add(background_fit2[0], -1)
+    #CoinTime_vs_beta_DATA.Add(background_fit2[0], -1)
+    #MM_vs_beta_DATA.Add(background_fit2[0], -1)
+    #MM_vs_H_cer_DATA.Add(background_fit2[0], -1)
+    #MM_vs_H_cal_DATA.Add(background_fit2[0], -1)
+    #MM_vs_P_cal_DATA.Add(background_fit2[0], -1)
+    #MM_vs_P_hgcer_DATA.Add(background_fit2[0], -1)
+    #MM_vs_P_aero_DATA.Add(background_fit2[0], -1)
+    #phiq_vs_t_DATA.Add(background_fit2[0], -1)
+    #Q2_vs_W_DATA.Add(background_fit2[0], -1)
+    #Q2_vs_t_DATA.Add(background_fit2[0], -1)
+    #W_vs_t_DATA.Add(background_fit2[0], -1)
+    #EPS_vs_t_DATA.Add(background_fit2[0], -1)
+    #MM_vs_t_DATA.Add(background_fit2[0], -1)
+    H_ssxfp_DATA.Add(background_fit2[0], -1)
+    H_ssyfp_DATA.Add(background_fit2[0], -1)
+    H_ssxpfp_DATA.Add(background_fit2[0], -1)
+    H_ssypfp_DATA.Add(background_fit2[0], -1)
+    H_hsxfp_DATA.Add(background_fit2[0], -1)
+    H_hsyfp_DATA.Add(background_fit2[0], -1)
+    H_hsxpfp_DATA.Add(background_fit2[0], -1)
+    H_hsypfp_DATA.Add(background_fit2[0], -1)
+    H_ssxptar_DATA.Add(background_fit2[0], -1)
+    H_ssyptar_DATA.Add(background_fit2[0], -1)
+    H_hsxptar_DATA.Add(background_fit2[0], -1)
+    H_hsyptar_DATA.Add(background_fit2[0], -1)
+    H_ssdelta_DATA.Add(background_fit2[0], -1)
+    H_hsdelta_DATA.Add(background_fit2[0], -1)
+    H_ph_q_DATA.Add(background_fit2[0], -1)
+    H_th_q_DATA.Add(background_fit2[0], -1)
+    H_ph_recoil_DATA.Add(background_fit2[0], -1)
+    H_th_recoil_DATA.Add(background_fit2[0], -1)
+    H_Q2_DATA.Add(background_fit2[0], -1)
+    H_W_DATA.Add(background_fit2[0], -1)
+    H_t_DATA.Add(background_fit2[0], -1)
+    H_epsilon_DATA.Add(background_fit2[0], -1)
+    H_MM_DATA.Add(background_fit2[0], -1)
+    H_pmiss_DATA.Add(background_fit2[0], -1)
+    H_emiss_DATA.Add(background_fit2[0], -1)
+    H_pmx_DATA.Add(background_fit2[0], -1)
+    H_pmy_DATA.Add(background_fit2[0], -1)
+    H_pmz_DATA.Add(background_fit2[0], -1)
+    H_ct_DATA.Add(background_fit2[0], -1)     
 
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
@@ -1900,6 +1981,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_t_DUMMY"] =     H_t_DUMMY
     histDict["H_epsilon_DUMMY"] =     H_epsilon_DUMMY
     histDict["H_MM_DUMMY"] =     H_MM_DUMMY
+    histDict["H_MM_fit1sub_DUMMY"] =     H_MM_fit1sub_DUMMY
     histDict["H_MM_pisub_DUMMY"] =     H_MM_pisub_DUMMY
     histDict["H_MM_nosub_DUMMY"] =     H_MM_nosub_DUMMY
     histDict["H_th_DUMMY"] =     H_th_DUMMY
@@ -1939,6 +2021,7 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_t_DATA"] =     H_t_DATA
     histDict["H_epsilon_DATA"] =     H_epsilon_DATA
     histDict["H_MM_DATA"] =     H_MM_DATA
+    histDict["H_MM_fit1sub_DATA"] =     H_MM_fit1sub_DATA
     histDict["H_MM_pisub_DATA"] =     H_MM_pisub_DATA
     histDict["H_MM_nosub_DATA"] =     H_MM_nosub_DATA
     histDict["H_th_DATA"] =     H_th_DATA
@@ -2018,6 +2101,20 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # MM sub plots    
+    CMMfit1sub = TCanvas()
+
+    histDict["H_MM_fit1sub_DATA"].SetLineColor(1)
+    histDict["H_MM_fit1sub_DATA"].SetFillStyle(3001)  # Set fill style to dots
+    histDict["H_MM_fit1sub_DATA"].SetFillColor(kBlack)  # Set fill color to black
+    #histDict["H_MM_fit1sub_DATA"].Draw("same, E1")
+    histDict["H_MM_fit1sub_DATA"].Draw("hist same")
+    background_fit2[1].SetLineColor(3)
+    background_fit2[1].Draw("same")
+
+    CMMfit1sub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    ###
+    # MM sub plots    
     CMMpisub = TCanvas()
 
     histDict["H_MM_pisub_DATA"].SetLineColor(1)
@@ -2025,8 +2122,8 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_pisub_DATA"].SetFillColor(kBlack)  # Set fill color to black
     #histDict["H_MM_pisub_DATA"].Draw("same, E1")
     histDict["H_MM_pisub_DATA"].Draw("hist same")
-    background_fit[1].SetLineColor(3)
-    background_fit[1].Draw("same")
+    background_fit1[1].SetLineColor(3)
+    background_fit1[1].Draw("same")
 
     CMMpisub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
