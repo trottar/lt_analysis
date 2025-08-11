@@ -167,6 +167,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DATA_{}".format(j)]       = TH1D("H_t_DATA_{}".format(j),"-t", 200, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_DATA_{}".format(j)]  = TH1D("H_epsilon_DATA_{}".format(j),"epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_DATA_{}".format(j)]       = TH1D("H_MM_DATA_{}".format(j),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+        hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)]       = TH1D("H_MM_fit1sub_DATA_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_pisub_DATA_{}".format(j)]       = TH1D("H_MM_pisub_DATA_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_nosub_DATA_{}".format(j)]       = TH1D("H_MM_nosub_DATA_{}".format(j),"MM", 200, 0.7, 1.5)
 
@@ -175,6 +176,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_RAND_{}".format(j)]       = TH1D("H_t_RAND_{}".format(j),"-t", 200, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_RAND_{}".format(j)]  = TH1D("H_epsilon_RAND_{}".format(j),"epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_RAND_{}".format(j)]       = TH1D("H_MM_RAND_{}".format(j),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+        hist_bin_dict["H_MM_fit1sub_RAND_{}".format(j)]       = TH1D("H_MM_fit1sub_RAND_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_pisub_RAND_{}".format(j)]       = TH1D("H_MM_pisub_RAND_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_nosub_RAND_{}".format(j)]       = TH1D("H_MM_nosub_RAND_{}".format(j),"MM", 200, 0.7, 1.5)
 
@@ -183,6 +185,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DUMMY_{}".format(j)]       = TH1D("H_t_DUMMY_{}".format(j),"-t", 200, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)]  = TH1D("H_epsilon_DUMMY_{}".format(j),"epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_DUMMY_{}".format(j)]       = TH1D("H_MM_DUMMY_{}".format(j),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+        hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)]       = TH1D("H_MM_fit1sub_DUMMY_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)]       = TH1D("H_MM_pisub_DUMMY_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)]       = TH1D("H_MM_nosub_DUMMY_{}".format(j),"MM", 200, 0.7, 1.5)
 
@@ -191,6 +194,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)]       = TH1D("H_t_DUMMY_RAND_{}".format(j),"-t", 200, inpDict["tmin"], inpDict["tmax"])
         hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)]  = TH1D("H_epsilon_DUMMY_RAND_{}".format(j),"epsilon", 200, inpDict["Epsmin"], inpDict["Epsmax"])
         hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)]       = TH1D("H_MM_DUMMY_RAND_{}".format(j),"MM", 200, inpDict["mm_min"], inpDict["mm_max"])
+        hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(j)]       = TH1D("H_MM_fit1sub_DUMMY_RAND_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(j)]       = TH1D("H_MM_pisub_DUMMY_RAND_{}".format(j),"MM", 200, 0.7, 1.5)
         hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)]       = TH1D("H_MM_nosub_DUMMY_RAND_{}".format(j),"MM", 200, 0.7, 1.5)
 
@@ -257,6 +261,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
                 if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
+                    hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Fill(adj_MM)
                     hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Fill(adj_MM) 
                     hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(adj_MM)          
 
@@ -303,7 +308,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:   
+                    hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)].Fill(adj_MM)             
                     hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)].Fill(adj_MM)
                     hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(adj_MM)            
 
@@ -349,7 +355,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:       
+                    hist_bin_dict["H_MM_fit1sub_RAND_{}".format(j)].Fill(adj_MM)         
                     hist_bin_dict["H_MM_pisub_RAND_{}".format(j)].Fill(adj_MM) 
                     hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(adj_MM)           
 
@@ -395,7 +402,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:                
+                if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:         
+                    hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)       
                     hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
                     hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)            
 
@@ -425,6 +433,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_epsilon_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_bin_dict["H_MM_fit1sub_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_pisub_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Scale(1/nWindows)        
 
@@ -433,6 +442,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DATA_{}".format(j)].Add(hist_bin_dict["H_t_RAND_{}".format(j)],-1)
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(hist_bin_dict["H_epsilon_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_fit1sub_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_pisub_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_RAND_{}".format(j)],-1)        
 
@@ -441,6 +451,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
+        hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)
         hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(j)].Scale(1/nWindows) 
         hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Scale(1/nWindows)        
 
@@ -449,6 +460,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DUMMY_{}".format(j)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)],-1)
+        hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(j)],-1)
         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)],-1)   
         
@@ -458,6 +470,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DATA_{}".format(j)].Scale(norm_factor_data)
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(norm_factor_data)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Scale(norm_factor_data)
+        hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Scale(norm_factor_data)
         hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Scale(norm_factor_data)
         hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Scale(norm_factor_data)
 
@@ -467,6 +480,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_t_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
+        hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)
         hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Scale(norm_factor_dummy)   
 
@@ -475,9 +489,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_W_DATA_{}".format(j)].Add(hist_bin_dict["H_W_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_t_DATA_{}".format(j)].Add(hist_bin_dict["H_t_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(hist_bin_dict["H_epsilon_DUMMY_{}".format(j)], -1)
-        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)], -1)
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_{}".format(j)], -1)
+        hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)], -1)
         hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)], -1)
-        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_DUMMY_{}".format(j)], -1)  
+        hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Add(hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)], -1)  
 
         # Remove histograms with less than event_threshold entries and negative integrals
         event_threshold = 10
@@ -485,6 +500,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], 
             event_threshold
         )
+        prune_hist(
+            hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
+            event_threshold
+        )        
         prune_hist(
             hist_bin_dict["H_MM_pisub_DATA_{}".format(j)],
             event_threshold
@@ -555,6 +574,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             hist_bin_dict["H_W_DATA_{}".format(j)].Add(subDict["H_W_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_t_DATA_{}".format(j)].Add(subDict["H_t_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(subDict["H_epsilon_SUB_DATA_{}".format(j)],-1)
+            hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(subDict["H_MM_nosub_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(subDict["H_MM_nosub_SUB_DATA_{}".format(j)],-1)
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA_{}".format(j)],-1)
 
@@ -562,7 +582,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # ---- Statistic‑scale for this (t,φ) bin ----------------
         inpDict["bg_stat_scale"] = 1.00
         
-        fitDict["background_data_fit_{}".format(j)] = bg_fit(
+        fitDict["background_data_fit1_{}".format(j)] = bg_fit(
             phi_setting,
             inpDict,
             hist_bin_dict[f"H_MM_pisub_DATA_{j}"],   # wide / no–MM-cut
@@ -570,11 +590,44 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         )
         # ----------------------------------------------------------------
 
-        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
-        hist_bin_dict["H_W_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
-        hist_bin_dict["H_t_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
-        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)
-        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit_{}".format(j)][0], -1)  
+        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)
+        hist_bin_dict["H_W_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)
+        hist_bin_dict["H_t_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)
+        hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][1], -1)
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)  
+
+        # Remove histograms with less than event_threshold entries and negative integrals
+        prune_hist(
+            hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
+            event_threshold
+        )        
+        prune_hist(
+            hist_bin_dict["H_MM_DATA_{}".format(j)],
+            event_threshold
+        )
+        prune_hist(
+            hist_bin_dict["H_t_DATA_{}".format(j)],
+            event_threshold
+        )
+
+        # Fit background and subtract
+        # ---- Statistic‑scale for this (t,φ) bin ----------------
+        inpDict["bg_stat_scale"] = 1.00
+        
+        fitDict["background_data_fit2_{}".format(j)] = bg_fit(
+            phi_setting,
+            inpDict,
+            hist_bin_dict[f"H_MM_fit1sub_DATA_{j}"],   # wide / no–MM-cut
+            hist_bin_dict[f"H_MM_DATA_{j}"]          # cut-window axis
+        )
+        # ----------------------------------------------------------------
+
+        hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)
+        hist_bin_dict["H_W_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)
+        hist_bin_dict["H_t_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)
+        hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)
+        hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)  
 
         # Remove histograms with less than event_threshold entries and negative integrals
         prune_hist(
@@ -584,7 +637,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         prune_hist(
             hist_bin_dict["H_t_DATA_{}".format(j)],
             event_threshold
-        )
+        )        
 
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
