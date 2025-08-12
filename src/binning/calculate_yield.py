@@ -539,8 +539,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 
                 scale_factor = scale_factor * phi_scale
 
-                scale_factor = 0.0 # Debugging line to set scale_factor to zero
-
                 arr_scale_factor[j][k] = scale_factor * phi_scale
 
                 # Scale pion to subtraction proper peak
