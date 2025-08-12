@@ -574,7 +574,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             phi_setting,
             inpDict,
             hist_bin_dict[f"H_MM_pisub_DATA_{j}"],   # wide / no–MM-cut
-            hist_bin_dict[f"H_MM_DATA_{j}"]          # cut-window axis
+            hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
+            model_key="cheb2"
         )
         # ----------------------------------------------------------------
 
@@ -603,7 +604,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             phi_setting,
             inpDict,
             hist_bin_dict[f"H_MM_fit1sub_DATA_{j}"],   # wide / no–MM-cut
-            hist_bin_dict[f"H_MM_DATA_{j}"]          # cut-window axis
+            hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
+            model_key="sigma_peak"
         )
         # ----------------------------------------------------------------
 

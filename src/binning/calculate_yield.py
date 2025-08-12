@@ -564,7 +564,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 phi_setting,
                 inpDict,
                 hist_bin_dict[f"H_MM_pisub_DATA_{j}_{k}"],   # wide / no-MM-cut
-                hist_bin_dict[f"H_MM_DATA_{j}_{k}"]          # cut-window axis 
+                hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis 
+                model_key="cheb2"
             )
 
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][0], -1)
@@ -591,7 +592,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 phi_setting,
                 inpDict,
                 hist_bin_dict[f"H_MM_fit1sub_DATA_{j}_{k}"],   # wide / no-MM-cut
-                hist_bin_dict[f"H_MM_DATA_{j}_{k}"]          # cut-window axis 
+                hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis 
+                model_key="sigma_peak"
             )
 
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit2_{}_{}".format(j, k)][0], -1)
