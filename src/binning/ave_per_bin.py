@@ -597,11 +597,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][1], -1)
         hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)  
 
-        # Remove histograms with less than event_threshold entries and negative integrals
-        prune_hist(
-            hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
-            event_threshold
-        )        
+        # Remove histograms with less than event_threshold entries and negative integrals       
         prune_hist(
             hist_bin_dict["H_MM_DATA_{}".format(j)],
             event_threshold
