@@ -1710,9 +1710,9 @@ def rand_sub(phi_setting, inpDict):
         if phi_setting == "Center":
             phi_scale = 0.95
         elif phi_setting == "Left":
-            phi_scale = 0.75
+            phi_scale = 0.65
         elif phi_setting == "Right":
-            phi_scale = 0.75
+            phi_scale = 0.65
         else:
             raise ValueError("Invalid phi_setting: {}".format(phi_setting))
         
@@ -1829,7 +1829,7 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale"] = 1.00
+    inpDict["bg_stat_scale"] = 0.50
 
     background_fit1 = bg_fit(phi_setting,
                             inpDict,
@@ -1895,7 +1895,7 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale"] = 1.00
+    inpDict["bg_stat_scale"] = 0.50
 
     background_fit2 = bg_fit(phi_setting,
                             inpDict,

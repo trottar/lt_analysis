@@ -540,9 +540,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             if phi_setting == "Center":
                 phi_scale = 0.95
             elif phi_setting == "Left":
-                phi_scale = 0.75
+                phi_scale = 0.65
             elif phi_setting == "Right":
-                phi_scale = 0.75
+                phi_scale = 0.65
             else:
                 raise ValueError("Invalid phi_setting: {}".format(phi_setting))
             
@@ -566,7 +566,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale"] = 1.00
+        inpDict["bg_stat_scale"] = 0.50
         
         fitDict["background_data_fit1_{}".format(j)] = bg_fit(
             phi_setting,
@@ -596,7 +596,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale"] = 1.00
+        inpDict["bg_stat_scale"] = 0.50
         
         fitDict["background_data_fit2_{}".format(j)] = bg_fit(
             phi_setting,
