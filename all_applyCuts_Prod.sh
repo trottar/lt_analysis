@@ -128,7 +128,7 @@ for t in "${TARGET[@]}"; do
 			    cd "${LTANAPATH}"
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
 			    ./applyCuts_Prod.sh -pm ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
-				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
+				./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
 			done
 			break ;;
 		    [Nn]* ) 
