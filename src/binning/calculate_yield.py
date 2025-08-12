@@ -487,18 +487,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Remove histograms with less than event_threshold entries and negative integrals
             event_threshold = 10
             prune_hist(
-                hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], 
-                event_threshold
-            )
-            prune_hist(
-                hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
-                event_threshold
-            )
-            prune_hist(
-                hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
-                event_threshold
-            )
-            prune_hist(
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 event_threshold
             )
