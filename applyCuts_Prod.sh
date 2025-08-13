@@ -517,7 +517,7 @@ if [[ $p_flag = "true" ]]; then
 	rm -f ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log
 	if [[ $m_flag = "true" ]]; then
-	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi
 	echo
     fi
@@ -543,7 +543,7 @@ if [[ $p_flag = "true" ]]; then
 	rm -f ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log	
 	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log
 	if [[ $m_flag = "true" ]]; then
-	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	fi	
     fi
 
@@ -602,7 +602,7 @@ else
 	    rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
 	    if [[ $m_flag = "true" ]]; then
-		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+			python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
 	    echo
 	fi
@@ -628,7 +628,7 @@ else
 	    rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
 	    if [[ $m_flag = "true" ]]; then
-		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+			python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
 	fi
 
@@ -653,7 +653,7 @@ else
 	    rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
 	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
 	    if [[ $m_flag = "true" ]]; then
-		python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+			python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
 	    fi
 	fi
     done
