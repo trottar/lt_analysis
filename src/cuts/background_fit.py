@@ -70,7 +70,72 @@ BG_MODELS = {
             #"right": (1.20, 1.25), 
             "right": (1.20, 1.22),
         }
-    },
+    },  
+
+    # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
+    "cheb2_Center_lowe": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
+            "left":  (1.05, 1.10),
+            "right": (1.20, 1.25), 
+            #"right": (1.20, 1.22),
+        }
+    },   
+
+    # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
+    "cheb2_Left_lowe": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
+            "left":  (1.05, 1.10),
+            #"right": (1.20, 1.25), 
+            "right": (1.20, 1.22),
+        }
+    },     
+
+    # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
+    "cheb2_Center_highe": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
+            "left":  (1.05, 1.10),
+            "right": (1.20, 1.25), 
+            #"right": (1.20, 1.22),
+        }
+    },     
+
+    # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
+    "cheb2_Left_highe": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
+            "left":  (1.05, 1.10),
+            #"right": (1.20, 1.25), 
+            "right": (1.20, 1.22),
+        }
+    },      
+
+        # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
+    "cheb2_Right_highe": {
+        "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+        "n_par":      3,
+        "sidebands": {
+            #"left":  (1.00, 1.06),
+            #"right": (1.14, 1.20),
+            "left":  (1.05, 1.10),
+            "right": (1.20, 1.25), 
+            #"right": (1.20, 1.22),
+        }
+    },   
 
     # --- ** GOOD ** 3rd-order polynomial ---------------------------
     "pol3": {
