@@ -1373,24 +1373,93 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
 ##################################################################################################################################################            
 
-def prune_hist(hist, threshold: int = 10):
-    """
-    Empty a ROOT TH1* in place when it is effectively unusable.
+from typing import Iterable, List, Tuple
 
-    Conditions for zeroing
-    ----------------------
-    1. Total filled entries ≤ *threshold*  (default: 10)
-    2. Histogram integral ≤ 0              (handles negative-weighted samples)
+def _median(xs: List[float]) -> float:
+    xs = sorted(xs)
+    n = len(xs)
+    mid = n // 2
+    return xs[mid] if n % 2 else 0.5 * (xs[mid - 1] + xs[mid])
 
-    Parameters
-    ----------
-    hist : ROOT.TH1 (TH1F, TH1D, …)
-        The histogram to inspect.
-    threshold : int, optional
-        Minimum number of entries required to keep the contents.
+def _reset_bins_with_large_uncertainty(hist,
+                                       factor: float = 3.5,
+                                       include_overflow: bool = False,
+                                       return_bins: bool = False) -> Iterable[int] | int:
     """
+    Zero bins whose statistical uncertainty is significantly larger than the rest,
+    using a robust MAD-based cutoff: cutoff = median_err + factor * (1.4826 * MAD).
+
+    Returns either the count (default) or the iterable of bin indices if return_bins=True.
+    """
+    nb = hist.GetNbinsX()
+    idxs = list(range(1, nb + 1))
+    if include_overflow:
+        idxs = [0] + idxs + [nb + 1]
+
+    errs = [hist.GetBinError(i) for i in idxs]
+    if not errs:
+        return [] if return_bins else 0
+
+    med = _median(errs)
+    mad = _median([abs(e - med) for e in errs])
+    robust_sigma = 1.4826 * mad  # MAD -> sigma (normal assumption)
+
+    to_reset: List[int] = []
+    if robust_sigma > 0:
+        cutoff = med + factor * robust_sigma
+        to_reset = [i for i, e in zip(idxs, errs) if e > cutoff]
+    elif med > 0:
+        ratio_cut = factor * med
+        to_reset = [i for i, e in zip(idxs, errs) if e > ratio_cut]
+    else:
+        # All errors ~0 → nothing stands out
+        to_reset = []
+
+    for i in to_reset:
+        hist.SetBinContent(i, 0.0)
+        hist.SetBinError(i, 0.0)
+
+    return (to_reset if return_bins else len(to_reset))
+
+def prune_hist(hist,
+               threshold: int = 10,
+               factor: float = 3.5,
+               include_overflow: bool = False,
+               debug: bool = False) -> int:
+    """
+    Main pruning function (Python).
+
+    Steps:
+      1) Reset bins with abnormally large statistical uncertainties (MAD rule).
+      2) If the histogram is effectively unusable, reset it entirely.
+
+    Full reset conditions:
+      - hist.GetEntries() <= threshold
+      - OR hist.Integral() <= 0
+
+    Returns
+    -------
+    int
+        Number of bins reset due to large uncertainties.
+    """
+    if debug:
+        to_reset = _reset_bins_with_large_uncertainty(
+            hist, factor=factor, include_overflow=include_overflow, return_bins=True
+        )
+        if to_reset:
+            print(f"[prune_hist] Reset bins (high σ): {to_reset}")
+        n_reset = len(to_reset)
+    else:
+        n_reset = _reset_bins_with_large_uncertainty(
+            hist, factor=factor, include_overflow=include_overflow, return_bins=False
+        )
+
     if hist.GetEntries() <= threshold or hist.Integral() <= 0:
-        hist.Reset()   # clears contents & statistics while keeping axes/title
+        if debug:
+            print("[prune_hist] Full reset: entries<=threshold or integral<=0")
+        hist.Reset()
+
+    return n_reset
 
 ##################################################################################################################################################
 
