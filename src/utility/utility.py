@@ -1373,7 +1373,7 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
 ##################################################################################################################################################            
 
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Union
 
 def _median(xs: List[float]) -> float:
     xs = sorted(xs)
@@ -1384,12 +1384,14 @@ def _median(xs: List[float]) -> float:
 def _reset_bins_with_large_uncertainty(hist,
                                        factor: float = 3.5,
                                        include_overflow: bool = False,
-                                       return_bins: bool = False) -> Iterable[int] | int:
+                                       return_bins: bool = False) -> Union[Iterable[int], int]:
     """
     Zero bins whose statistical uncertainty is significantly larger than the rest,
     using a robust MAD-based cutoff: cutoff = median_err + factor * (1.4826 * MAD).
 
-    Returns either the count (default) or the iterable of bin indices if return_bins=True.
+    Returns either:
+      - int : count of bins reset  (default)
+      - Iterable[int] : bin indices reset (if return_bins=True)
     """
     nb = hist.GetNbinsX()
     idxs = list(range(1, nb + 1))
@@ -1402,7 +1404,7 @@ def _reset_bins_with_large_uncertainty(hist,
 
     med = _median(errs)
     mad = _median([abs(e - med) for e in errs])
-    robust_sigma = 1.4826 * mad  # MAD -> sigma (normal assumption)
+    robust_sigma = 1.4826 * mad  # MAD -> sigma
 
     to_reset: List[int] = []
     if robust_sigma > 0:
@@ -1411,15 +1413,13 @@ def _reset_bins_with_large_uncertainty(hist,
     elif med > 0:
         ratio_cut = factor * med
         to_reset = [i for i, e in zip(idxs, errs) if e > ratio_cut]
-    else:
-        # All errors ~0 → nothing stands out
-        to_reset = []
+    # else: all errors ~0 → nothing to reset
 
     for i in to_reset:
         hist.SetBinContent(i, 0.0)
         hist.SetBinError(i, 0.0)
 
-    return (to_reset if return_bins else len(to_reset))
+    return to_reset if return_bins else len(to_reset)
 
 def prune_hist(hist,
                threshold: int = 10,
@@ -1427,20 +1427,14 @@ def prune_hist(hist,
                include_overflow: bool = False,
                debug: bool = False) -> int:
     """
-    Main pruning function (Python).
+    Main pruning function.
 
     Steps:
-      1) Reset bins with abnormally large statistical uncertainties (MAD rule).
+      1) Reset bins with abnormally large statistical uncertainties.
       2) If the histogram is effectively unusable, reset it entirely.
 
-    Full reset conditions:
-      - hist.GetEntries() <= threshold
-      - OR hist.Integral() <= 0
-
-    Returns
-    -------
-    int
-        Number of bins reset due to large uncertainties.
+    Returns:
+      int : number of bins reset due to large uncertainties.
     """
     if debug:
         to_reset = _reset_bins_with_large_uncertainty(
