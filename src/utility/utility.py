@@ -1373,53 +1373,50 @@ def fit_gaussian(hist_original, x_min, x_max, show_fit=True):
 
 ##################################################################################################################################################            
 
-from typing import Iterable, List, Tuple, Union
+from typing import List
 
 def _median(xs: List[float]) -> float:
     xs = sorted(xs)
     n = len(xs)
-    mid = n // 2
-    return xs[mid] if n % 2 else 0.5 * (xs[mid - 1] + xs[mid])
+    m = n // 2
+    return xs[m] if n % 2 else 0.5 * (xs[m - 1] + xs[m])
 
-def _reset_bins_with_large_uncertainty(hist,
-                                       factor: float = 3.5,
-                                       include_overflow: bool = False,
-                                       return_bins: bool = False) -> Union[Iterable[int], int]:
+def _find_outlier_bins_by_frac_err(hist,
+                                   factor: float = 3.5,
+                                   include_overflow: bool = False,
+                                   tiny: float = 1e-300) -> List[int]:
     """
-    Zero bins whose statistical uncertainty is significantly larger than the rest,
-    using a robust MAD-based cutoff: cutoff = median_err + factor * (1.4826 * MAD).
-
-    Returns either:
-      - int : count of bins reset  (default)
-      - Iterable[int] : bin indices reset (if return_bins=True)
+    Identify bins with unusually large fractional uncertainty = err / max(|content|, tiny).
+    Uses a robust cutoff: median + factor * (1.4826 * MAD).
     """
     nb = hist.GetNbinsX()
     idxs = list(range(1, nb + 1))
     if include_overflow:
         idxs = [0] + idxs + [nb + 1]
 
-    errs = [hist.GetBinError(i) for i in idxs]
-    if not errs:
-        return [] if return_bins else 0
+    fracs = []
+    for i in idxs:
+        y = hist.GetBinContent(i)
+        e = hist.GetBinError(i)
+        fracs.append(e / max(abs(y), tiny))
 
-    med = _median(errs)
-    mad = _median([abs(e - med) for e in errs])
-    robust_sigma = 1.4826 * mad  # MAD -> sigma
+    if not fracs:
+        return []
 
-    to_reset: List[int] = []
-    if robust_sigma > 0:
+    med = _median(fracs)
+    mad = _median([abs(f - med) for f in fracs])
+    robust_sigma = 1.4826 * mad
+
+    if robust_sigma > 0.0:
         cutoff = med + factor * robust_sigma
-        to_reset = [i for i, e in zip(idxs, errs) if e > cutoff]
-    elif med > 0:
-        ratio_cut = factor * med
-        to_reset = [i for i, e in zip(idxs, errs) if e > ratio_cut]
-    # else: all errors ~0 → nothing to reset
-
-    for i in to_reset:
-        hist.SetBinContent(i, 0.0)
-        hist.SetBinError(i, 0.0)
-
-    return to_reset if return_bins else len(to_reset)
+        return [i for i, f in zip(idxs, fracs) if f > cutoff]
+    else:
+        # Degenerate spread: fall back to a simple multiple of the median
+        if med > 0.0:
+            cutoff = factor * med
+            return [i for i, f in zip(idxs, fracs) if f > cutoff]
+        # Everything is zero-ish; nothing stands out
+        return []
 
 def prune_hist(hist,
                threshold: int = 10,
@@ -1427,33 +1424,38 @@ def prune_hist(hist,
                include_overflow: bool = False,
                debug: bool = False) -> int:
     """
-    Main pruning function.
+    Main pruning function (mutates `hist`).
 
     Steps:
-      1) Reset bins with abnormally large statistical uncertainties.
+      1) Detect and ZERO bins with abnormally large fractional uncertainty (err/|content|).
       2) If the histogram is effectively unusable, reset it entirely.
 
-    Returns:
-      int : number of bins reset due to large uncertainties.
+    Full-reset conditions:
+      - hist.GetEntries() <= threshold
+      - OR hist.Integral() <= 0
+
+    Returns
+    -------
+    int
+        Number of bins zeroed due to large fractional uncertainties.
     """
-    if debug:
-        to_reset = _reset_bins_with_large_uncertainty(
-            hist, factor=factor, include_overflow=include_overflow, return_bins=True
-        )
-        if to_reset:
-            print(f"[prune_hist] Reset bins (high σ): {to_reset}")
-        n_reset = len(to_reset)
-    else:
-        n_reset = _reset_bins_with_large_uncertainty(
-            hist, factor=factor, include_overflow=include_overflow, return_bins=False
-        )
+    outliers = _find_outlier_bins_by_frac_err(
+        hist, factor=factor, include_overflow=include_overflow
+    )
+
+    for i in outliers:
+        hist.SetBinContent(i, 0.0)
+        hist.SetBinError(i, 0.0)
+
+    if debug and outliers:
+        print(f"[prune_hist] Zeroed high-frac-σ bins: {outliers}")
 
     if hist.GetEntries() <= threshold or hist.Integral() <= 0:
         if debug:
             print("[prune_hist] Full reset: entries<=threshold or integral<=0")
         hist.Reset()
 
-    return n_reset
+    return len(outliers)
 
 ##################################################################################################################################################
 
