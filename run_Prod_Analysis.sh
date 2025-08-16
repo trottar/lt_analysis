@@ -701,7 +701,7 @@ done
 ##MissMassMax=1.16
 MissMassMin=1.10
 #MissMassMax=1.14
-MissMassMax=1.16
+MissMassMax=1.15
 # MM cut (pion, Vijay)
 #MissMassMin=0.91
 #MissMassMax=0.98
