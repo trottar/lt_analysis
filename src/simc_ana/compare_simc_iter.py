@@ -64,6 +64,8 @@ ROOT.gStyle.SetOptStat(0)
 def compare_simc(rootFileSimc, hist, inpDict):
     
     phi_setting = hist["phi_setting"]
+
+    normfac_simc = hist["normfac_simc"]
     
     kinematics = inpDict["kinematics"]
     W = inpDict["W"]
@@ -285,6 +287,39 @@ def compare_simc(rootFileSimc, hist, inpDict):
           #H_MM_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
           H_MM_unweighted_SIMC.Fill(adj_missmass)
               
+    H_hsdelta_SIMC.Scale(normfac_simc)
+    H_hsxptar_SIMC.Scale(normfac_simc)
+    H_hsyptar_SIMC.Scale(normfac_simc)
+    H_ssxfp_SIMC.Scale(normfac_simc)
+    H_ssyfp_SIMC.Scale(normfac_simc)
+    H_ssxpfp_SIMC.Scale(normfac_simc)
+    H_ssypfp_SIMC.Scale(normfac_simc)
+    H_hsxfp_SIMC.Scale(normfac_simc)
+    H_hsyfp_SIMC.Scale(normfac_simc)
+    H_hsxpfp_SIMC.Scale(normfac_simc)
+    H_hsypfp_SIMC.Scale(normfac_simc)
+    H_ssdelta_SIMC.Scale(normfac_simc)
+    H_ssxptar_SIMC.Scale(normfac_simc)
+    H_ssyptar_SIMC.Scale(normfac_simc)
+    H_q_SIMC.Scale(normfac_simc)
+    H_Q2_SIMC.Scale(normfac_simc)
+    H_t_SIMC.Scale(normfac_simc)
+    H_epsilon_SIMC.Scale(normfac_simc)
+    H_MM_SIMC.Scale(normfac_simc)
+    H_MM_unweighted_SIMC.Scale(normfac_simc)
+    H_th_SIMC.Scale(normfac_simc)
+    H_ph_SIMC.Scale(normfac_simc)
+    H_ph_q_SIMC.Scale(normfac_simc)
+    H_th_q_SIMC.Scale(normfac_simc)
+    H_ph_recoil_SIMC.Scale(normfac_simc)
+    H_th_recoil_SIMC.Scale(normfac_simc)
+    H_pmiss_SIMC.Scale(normfac_simc)
+    H_emiss_SIMC.Scale(normfac_simc)
+    H_pmx_SIMC.Scale(normfac_simc)
+    H_pmy_SIMC.Scale(normfac_simc)
+    H_pmz_SIMC.Scale(normfac_simc)
+    H_W_SIMC.Scale(normfac_simc)          
+
     ################################################################################################################################################    
 
     histDict["InFile_SIMC"] = InFile_SIMC
