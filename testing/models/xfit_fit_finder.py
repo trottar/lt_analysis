@@ -183,21 +183,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
                 start_time = time.time()
 
-                # Data lines from nsep => build g_sig => fill graphs_sig_fit[it]
-                g_sig = TGraphErrors()
-                for i_data in range(nsep.GetSelectedRows()):
-                    x_val = nsep.GetV2()[i_data]
-                    y_val = nsep.GetV1()[i_data]
-                    y_err = nsep.GetV3()[i_data]
-                    g_sig.SetPoint(i_data, x_val, y_val)
-                    g_sig.SetPointError(i_data, 0, y_err)
-
-                for i_pt in range(len(w_vec)):
-                    sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt]) / 1e3
-                    sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt]) / 1e3
-                    graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
-                    graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)                
-
                 # -----------------------------------------------------------------------------
                 # 4. Outer loop => multiple runs => helps avoid local minima
                 # -----------------------------------------------------------------------------
@@ -244,6 +229,20 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         sys.stdout.flush()
 
                         try:
+                            # Data lines from nsep => build g_sig => fill graphs_sig_fit[it]
+                            g_sig = TGraphErrors()
+                            for i_data in range(nsep.GetSelectedRows()):
+                                x_val = nsep.GetV2()[i_data]
+                                y_val = nsep.GetV1()[i_data]
+                                y_err = nsep.GetV3()[i_data]
+                                g_sig.SetPoint(i_data, x_val, y_val)
+                                g_sig.SetPointError(i_data, 0, y_err)
+
+                            for i_pt in range(len(w_vec)):
+                                sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt]) / 1e3
+                                sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt]) / 1e3
+                                graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
+                                graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)
 
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                             for i_par in range(num_params):
