@@ -2,44 +2,30 @@
 # -*- coding: utf-8 -*-
 
 """
-Produce ONE file per setting (all t-bins appended), where the setting name used
-in the filenames is defined by TWO OPTIONAL CSV COLUMNS supplied by you:
+Produce ONE file per setting (all t-bins appended). Filenames are defined
+EXCLUSIVELY by two REQUIRED CSV columns you provide:
 
-    Q2_token , W_token
+  Q2_token , W_token   (strings like: 16 for 1.6, 222 for 2.22, 44 for 4.4, 274 for 2.74)
 
-If present, these string tokens are used verbatim in the filenames:
-    averages/avek.Q<Q2_token>W<W_token>.dat
-    xsects/x_sep.<pol>_Q<Q2_token>W<W_token>.dat
+Example outputs:
+  averages/avek.Q44W274.dat
+  xsects/x_sep.pl_Q44W274.dat
 
-If Q2_token / W_token are NOT present, the script falls back to the
-"decimal-removed" style derived from the numeric values:
-    1.6  -> '16'
-    2.22 -> '222'
-
-INPUT CSV (one row per t-bin), case-insensitive column names accepted:
-    Required:
-      Q2, dQ2, W, dW, t, dt,
-      sigL, dsigL, sigT, dsigT, sigLT, dsigLT, sigTT, dsigTT, chi2
-    Optional:
-      tbin        (int; if absent auto-numbered 1..N per setting)
-      Q2_token    (str; filename token override for Q^2)
-      W_token     (str; filename token override for W)
-
-OUTPUT (per setting):
-  - averages/avek.Q<Q2_token_or_auto>W<W_token_or_auto>.dat
-        Columns per line:
-            W  dW  Q2  dQ2  t  dt  theta*  t-bin
-  - xsects/x_sep.<pol>_Q<Q2_token_or_auto>W<W_token_or_auto>.dat
-        Columns per line:
-            sigL  dsigL  sigT  dsigT  sigLT  dsigLT  sigTT  dsigTT  chi2  t  W  Q2  theta*
+INPUT CSV (one row per t-bin) — column names are case-insensitive:
+  Required:
+    Q2, dQ2, W, dW, t, dt,
+    sigL, dsigL, sigT, dsigT, sigLT, dsigLT, sigTT, dsigTT, chi2,
+    Q2_token, W_token
+  Optional:
+    tbin  (if absent, bins will be auto-numbered 1..N per setting)
 
 CLI:
-  --ptype {pion,pionlt,kaon,kaonlt}   # sets final-state masses (π⁺n or K⁺Λ)
-  --pol   {pl,mn}                     # tag embedded in x_sep filename
+  --ptype {pion,pionlt,kaon,kaonlt}  # sets final-state masses (π⁺n or K⁺Λ) for θ*
+  --pol   {pl,mn}                    # tag embedded in x_sep filename
 
 Physics:
-  theta* (deg) is computed in the γ*–p CM frame from (Q^2, W, t).
-  t may be provided as t (<0) or −t (>0); sign is handled automatically.
+  θ* (deg) is computed in the γ*–p CM frame from (Q², W, t). The CSV may
+  provide either t (<0) or −t (>0); sign is handled automatically.
 """
 
 import argparse
@@ -49,14 +35,14 @@ from typing import Tuple
 
 import pandas as pd
 
-# --------- Physical constants (GeV) ----------
+# ---- Physical constants (GeV) ----
 MP  = 0.9382720813
 MN  = 0.9395654133
 MPI = 0.13957039
 MK  = 0.493677
 ML  = 1.115683  # Lambda^0
 
-# --------- Helpers ----------
+# ---- Helpers ----
 def kallen(x: float, y: float, z: float) -> float:
     return x*x + y*y + z*z - 2.0*(x*y + x*z + y*z)
 
@@ -67,7 +53,7 @@ def cm_energy_momentum(s: float, m1sq: float, m2sq: float, W: float) -> Tuple[fl
 
 def theta_cm_deg(Q2: float, W: float, t_or_tneg: float, m_mes: float, m_baryon: float) -> float:
     """
-    Compute theta* [deg] for γ*(Q2)+p -> meson + baryon from (Q^2, W, t).
+    Compute θ* [deg] for γ*(Q2)+p -> meson + baryon from (Q^2, W, t).
     Accepts either t (<0) or -t (>0) as the third argument.
     """
     # Interpret input as either t (<0) or -t (>0)
@@ -89,31 +75,7 @@ def theta_cm_deg(Q2: float, W: float, t_or_tneg: float, m_mes: float, m_baryon: 
     cos_th = max(-1.0, min(1.0, num / den))
     return math.degrees(math.acos(cos_th))
 
-def fmt_number_token(x: float, decimals: int = 3) -> str:
-    """Format a float with up to `decimals` decimals, trimming trailing zeros/dot."""
-    s = f"{x:.{decimals}f}".rstrip("0").rstrip(".")
-    return s
-
-def token_no_dot_from_float(x: float) -> str:
-    """Number token with decimal point removed: 1.6 -> '16', 2.22 -> '222'."""
-    return fmt_number_token(x).replace(".", "")
-
-def token_no_dot_from_any(x) -> str:
-    """
-    Make a safe token from an arbitrary CSV field:
-      - If it's a string: strip spaces, replace '.' with nothing.
-      - If it's numeric: use token_no_dot_from_float.
-    """
-    if isinstance(x, str):
-        return x.strip().replace(".", "")
-    try:
-        xf = float(x)
-        return token_no_dot_from_float(xf)
-    except Exception:
-        # Fallback: keep as-is without dots/spaces
-        return str(x).strip().replace(".", "")
-
-# --------- Core ----------
+# ---- Core ----
 def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     # Channel masses
     ptype_l = ptype.lower()
@@ -124,34 +86,32 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     else:
         raise ValueError("Unknown --ptype (use: pion, pionlt, kaon, kaonlt)")
 
-    # Canonicalize column lookup (case-insensitive)
+    # Canonicalize (case-insensitive) column lookup
     canon = {c.lower(): c for c in df.columns}
 
+    # Required columns
     required = {
-        "Q2", "dQ2", "W", "dW", "t", "dt",
-        "sigL", "dsigL", "sigT", "dsigT", "sigLT", "dsigLT", "sigTT", "dsigTT", "chi2"
+        "Q2","dQ2","W","dW","t","dt",
+        "sigL","dsigL","sigT","dsigT","sigLT","dsigLT","sigTT","dsigTT","chi2",
+        "q2_token","w_token"
     }
-    missing = [k for k in required if k.lower() not in canon]
+    missing = [k for k in required if k not in canon]
     if missing:
         raise ValueError(f"Input CSV is missing required columns: {missing}")
 
-    def C(name): return canon[name.lower()]
+    def C(name): return canon[name]
 
-    # Optional token overrides
-    qtok_col = canon.get("q2_token")
-    wtok_col = canon.get("w_token")
-
-    # t-bin labels; if absent, create per setting
+    # Ensure tbin labels; if absent, create per setting
     tbin_col = canon.get("tbin")
     if tbin_col is None:
         df["tbin"] = None
         tbin_col = "tbin"
 
-    # Compute theta*
+    # Compute θ* for each row
     df["theta_cm_deg"] = [
         theta_cm_deg(
-            Q2=row[C("Q2")],
-            W=row[C("W")],
+            Q2=row[C("q2")],
+            W=row[C("w")],
             t_or_tneg=row[C("t")],
             m_mes=m_mes,
             m_baryon=m_baryon,
@@ -159,30 +119,18 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
         for _, row in df.iterrows()
     ]
 
-    # Prepare tokens row-wise (use provided tokens if present, else fallback)
-    if qtok_col is None:
-        df["_Qtok"] = [token_no_dot_from_float(v) for v in df[C("Q2")]]
-    else:
-        df["_Qtok"] = [token_no_dot_from_any(v) for v in df[qtok_col]]
-
-    if wtok_col is None:
-        df["_Wtok"] = [token_no_dot_from_float(v) for v in df[C("W")]]
-    else:
-        df["_Wtok"] = [token_no_dot_from_any(v) for v in df[wtok_col]]
-
-    # If tbin missing, populate 1..N per setting (as defined by tokens)
-    if canon.get("tbin") is None:
-        for (qt, wt), idx in df.groupby(["_Qtok", "_Wtok"]).groups.items():
-            df.loc[idx, "tbin"] = range(1, len(idx) + 1)
-
     # Prepare output dirs
     os.makedirs("averages", exist_ok=True)
     os.makedirs("xsects", exist_ok=True)
 
-    # Group by the *tokens* to define a setting; write ONE file per setting
-    for (qtok, wtok), sub in df.groupby(["_Qtok", "_Wtok"], sort=False):
-        # Keep each t-bin line; sort by t for readability
-        sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
+    # Group strictly by the provided tokens → ONE file per setting
+    for (qtok, wtok), sub in df.groupby([C("q2_token"), C("w_token")], sort=False):
+        # If tbin absent, enumerate 1..N within this setting
+        if canon.get("tbin") is None:
+            sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
+            sub["tbin"] = range(1, len(sub) + 1)
+        else:
+            sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
 
         avek_path = os.path.join("averages", f"avek.Q{qtok}W{wtok}.dat")
         x_path    = os.path.join("xsects",  f"x_sep.{pol_tag}_Q{qtok}W{wtok}.dat")
@@ -191,31 +139,31 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
         with open(avek_path, "w") as f:
             for _, r in sub.iterrows():
                 f.write(
-                    f"{r[C('W')]:.6f} {r[C('dW')]:.6f} "
-                    f"{r[C('Q2')]:.6f} {r[C('dQ2')]:.6f} "
+                    f"{r[C('w')]:.6f} {r[C('dw')]:.6f} "
+                    f"{r[C('q2')]:.6f} {r[C('dq2')]:.6f} "
                     f"{r[C('t')]:.6f} {r[C('dt')]:.6f} "
-                    f"{r['theta_cm_deg']:.6f} {int(r[tbin_col])}\n"
+                    f"{r['theta_cm_deg']:.2f} {int(r['tbin'])}\n"
                 )
 
         # --- cross sections file (all t-bins appended) ---
         with open(x_path, "w") as f:
             for _, r in sub.iterrows():
                 f.write(
-                    f"{r[C('sigL')]:.6f} {r[C('dsigL')]:.6f} "
-                    f"{r[C('sigT')]:.6f} {r[C('dsigT')]:.6f} "
-                    f"{r[C('sigLT')]:.6f} {r[C('dsigLT')]:.6f} "
-                    f"{r[C('sigTT')]:.6f} {r[C('dsigTT')]:.6f} "
+                    f"{r[C('sigl')]:.6f} {r[C('dsigl')]:.6f} "
+                    f"{r[C('sigt')]:.6f} {r[C('dsigt')]:.6f} "
+                    f"{r[C('siglt')]:.6f} {r[C('dsiglt')]:.6f} "
+                    f"{r[C('sigtt')]:.6f} {r[C('dsigtt')]:.6f} "
                     f"{r[C('chi2')]:.6f} "
-                    f"{r[C('t')]:.6f} {r[C('W')]:.6f} {r[C('Q2')]:.6f} {r['theta_cm_deg']:.6f}\n"
+                    f"{r[C('t')]:.6f} {r[C('w')]:.6f} {r[C('q2')]:.6f} {r['theta_cm_deg']:.2f}\n"
                 )
 
         print(f"Wrote (all t-bins): {avek_path}")
         print(f"Wrote (all t-bins): {x_path}")
 
-# --------- CLI ----------
+# ---- CLI ----
 def main():
     ap = argparse.ArgumentParser(
-        description="Produce per-setting files using CSV-provided Q2_token/W_token (or numeric fallbacks)."
+        description="Produce per-setting files using CSV-provided Q2_token/W_token. One file per setting; all t-bins appended."
     )
     ap.add_argument("csv", help="Path to input CSV with per-bin kinematics and separated cross sections")
     ap.add_argument("--ptype", required=True, choices=["pion", "pionlt", "kaon", "kaonlt"],
