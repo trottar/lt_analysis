@@ -50,4 +50,10 @@ OutFilename="Testing_${KIN}"
 # - `%d` extracts the day of the month.
 formatted_date=$(date +%Y%B%d_H%HM%MS%S) 
 
+echo "Running fitting algorithm for ${ParticleType} at Kinematics: ${KIN} with POL: ${POL}"
+echo "Output will be saved to: ${OutFilename}"
+echo "Current time and date: ${formatted_date}"
+echo "DEBUG mode is: ${DEBUG}"
+
+cd "${LTANAPATH}/testing"
 python3 main.py ${KIN} ${W} ${Q2} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} ${ParticleType} ${POL} ${OutFilename} ${formatted_date} ${DEBUG}
