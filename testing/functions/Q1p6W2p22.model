@@ -46,8 +46,9 @@ sig_TT = (par13 / (qq**2)) * (-math.fabs(tt) / ((-math.fabs(tt) + (mpipl**2))**2
 
 # Weight factor
 # Fpi2
-#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
-wfactor = (((1.95**2) - (mtar**2)) / ((ww**2) - (mtar**2)))**2.0
+wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+# Correcting for W=1.95 of parameterization
+##wfactor = (((1.95**2) - (mtar**2)) / ((ww**2) - (mtar**2)))**2.0
 ####
 ##wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
 ####
