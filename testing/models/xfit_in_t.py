@@ -162,8 +162,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     '''
 
     prv_par_vec = []
-    para_file_in =  "{}/testing/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, q2_set, w_set, dir_iter, \
-                                                                            pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    para_file_in =  "{}/testing/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     
     print("Reading {}...".format(para_file_in))
     try:
