@@ -34,8 +34,8 @@ LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 #ParticleType="kaon"
 Q2="1p6"
 W="2p22"
-TMIN=0.400
-TMAX=0.750
+TMIN=0.050
+TMAX=0.250
 ParticleType="pion"
 POL="+1" # All KaonLT is positive polarity
 
