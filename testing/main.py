@@ -96,6 +96,8 @@ else:
 new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
 create_dir(new_dir)
 
+TEMP_CACHEPATH = new_dir
+
 closest_date = formatted_date
 print("\n\n")
 print("="*50)
@@ -116,6 +118,7 @@ inpDict = {
     "ParticleType" : ParticleType,
     "POL" : POL,
     "formatted_date" : formatted_date,
+    "TEMP_CACHEPATH" : TEMP_CACHEPATH
 }
 
 # Add closest and formatted dates to inpDict (used in plot comparison)

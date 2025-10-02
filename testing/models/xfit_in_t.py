@@ -39,8 +39,6 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
-TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
-
 ##################################################################################################################################################
 # Importing utility functions
 
@@ -66,6 +64,8 @@ from xfit_active import set_val
 
 # dir_iter = closest_date
 def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_file_lst, skip_optimization=False):
+
+    TEMP_CACHEPATH = inpDict["TEMP_CACHEPATH"]
 
     tmin_range = inpDict["tmin"]
     tmax_range = inpDict["tmax"]
