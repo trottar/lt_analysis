@@ -43,7 +43,7 @@ TMAX=0.300
 #TMIN=0.100
 #TMAX=0.600
 ParticleType="pion"
-POL="+1" # All KaonLT is positive polarity
+POL="+1" # Positive polarity
 
 DEBUG="False" # Flag for no plot splash
 #DEBUG="True" # Flag for plot splash
