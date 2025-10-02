@@ -2,38 +2,44 @@
 # -*- coding: utf-8 -*-
 
 """
-Build per-(Q2,W) output files from an input CSV of Fpi2-like bins.
+Produce ONE file per setting (all t-bins appended), where the setting name used
+in the filenames is defined by TWO OPTIONAL CSV COLUMNS supplied by you:
 
-INPUT CSV (one row per t-bin) must contain at least these columns:
-    Q2, dQ2, W, dW, t, dt,
-    sigL, dsigL, sigT, dsigT, sigLT, dsigLT, sigTT, dsigTT, chi2
-Optional:
-    tbin  (integer label for the t-bin; if absent it will be 1..N)
+    Q2_token , W_token
 
-OUTPUT (created per unique (Q2,W)):
-  - averages/avek.Q<Q2val>W<Wval>.dat
-        Columns:  W  dW  Q2  dQ2  t  dt  theta*  t-bin
-  - xsects/x_sep.<pol>_Q<Q2valstring>W<Wvalstring>.dat
-        Columns:  sigL  dsigL  sigT  dsigT  sigLT  dsigLT  sigTT  dsigTT  chi2  t  W  Q2  theta*
+If present, these string tokens are used verbatim in the filenames:
+    averages/avek.Q<Q2_token>W<W_token>.dat
+    xsects/x_sep.<pol>_Q<Q2_token>W<W_token>.dat
 
-Filename tokens:
-  - <Q2val>/<Wval>           : decimal point removed (1.6 → "16", 2.22 → "222")
-  - <Q2valstring>/<Wvalstring>: '.' replaced by 'p' (1.6 → "1p6", 2.22 → "2p22")
+If Q2_token / W_token are NOT present, the script falls back to the
+"decimal-removed" style derived from the numeric values:
+    1.6  -> '16'
+    2.22 -> '222'
 
-Particle/channel selection:
-  --ptype {pion,pionlt,kaon,kaonlt}
-    * pion / pionlt :  γ* p → π+ n   (mπ, m_n)
-    * kaon / kaonlt :  γ* p → K+ Λ   (mK, m_Λ)
-The “lt” suffix is only for your convenience in naming; physics masses are the same.
-If --pol is not given, the filename <pol> tag defaults to --ptype.
+INPUT CSV (one row per t-bin), case-insensitive column names accepted:
+    Required:
+      Q2, dQ2, W, dW, t, dt,
+      sigL, dsigL, sigT, dsigT, sigLT, dsigLT, sigTT, dsigTT, chi2
+    Optional:
+      tbin        (int; if absent auto-numbered 1..N per setting)
+      Q2_token    (str; filename token override for Q^2)
+      W_token     (str; filename token override for W)
 
-theta* (deg) is computed in the γ*–p CM frame using two-body kinematics:
-    m_γ*^2 = −Q^2, target = proton, final = meson + baryon (per --ptype).
-The third argument may be either t (<0) or −t (>0); sign handled internally.
+OUTPUT (per setting):
+  - averages/avek.Q<Q2_token_or_auto>W<W_token_or_auto>.dat
+        Columns per line:
+            W  dW  Q2  dQ2  t  dt  theta*  t-bin
+  - xsects/x_sep.<pol>_Q<Q2_token_or_auto>W<W_token_or_auto>.dat
+        Columns per line:
+            sigL  dsigL  sigT  dsigT  sigLT  dsigLT  sigTT  dsigTT  chi2  t  W  Q2  theta*
 
-Usage examples:
-  python build_products.py fpi2_table.csv --ptype pionlt
-  python build_products.py kaon_table.csv --ptype kaonlt --pol sep
+CLI:
+  --ptype {pion,pionlt,kaon,kaonlt}   # sets final-state masses (π⁺n or K⁺Λ)
+  --pol   {pl,mn}                     # tag embedded in x_sep filename
+
+Physics:
+  theta* (deg) is computed in the γ*–p CM frame from (Q^2, W, t).
+  t may be provided as t (<0) or −t (>0); sign is handled automatically.
 """
 
 import argparse
@@ -76,7 +82,6 @@ def theta_cm_deg(Q2: float, W: float, t_or_tneg: float, m_mes: float, m_baryon: 
     E1, p1 = cm_energy_momentum(s, m1sq, m2sq, W)
     E3, p3 = cm_energy_momentum(s, m3sq, m4sq, W)
 
-    # t = m1^2 + m3^2 - 2(E1 E3 - p1 p3 cosθ*)
     den = 2.0 * p1 * p3
     if den == 0.0:
         return 0.0
@@ -85,14 +90,28 @@ def theta_cm_deg(Q2: float, W: float, t_or_tneg: float, m_mes: float, m_baryon: 
     return math.degrees(math.acos(cos_th))
 
 def fmt_number_token(x: float, decimals: int = 3) -> str:
+    """Format a float with up to `decimals` decimals, trimming trailing zeros/dot."""
     s = f"{x:.{decimals}f}".rstrip("0").rstrip(".")
     return s
 
-def token_no_dot(x: float) -> str:
+def token_no_dot_from_float(x: float) -> str:
+    """Number token with decimal point removed: 1.6 -> '16', 2.22 -> '222'."""
     return fmt_number_token(x).replace(".", "")
 
-def token_p_dot(x: float) -> str:
-    return fmt_number_token(x).replace(".", "p")
+def token_no_dot_from_any(x) -> str:
+    """
+    Make a safe token from an arbitrary CSV field:
+      - If it's a string: strip spaces, replace '.' with nothing.
+      - If it's numeric: use token_no_dot_from_float.
+    """
+    if isinstance(x, str):
+        return x.strip().replace(".", "")
+    try:
+        xf = float(x)
+        return token_no_dot_from_float(xf)
+    except Exception:
+        # Fallback: keep as-is without dots/spaces
+        return str(x).strip().replace(".", "")
 
 # --------- Core ----------
 def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
@@ -105,29 +124,30 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     else:
         raise ValueError("Unknown --ptype (use: pion, pionlt, kaon, kaonlt)")
 
-    # Required columns (case-insensitive)
+    # Canonicalize column lookup (case-insensitive)
+    canon = {c.lower(): c for c in df.columns}
+
     required = {
         "Q2", "dQ2", "W", "dW", "t", "dt",
         "sigL", "dsigL", "sigT", "dsigT", "sigLT", "dsigLT", "sigTT", "dsigTT", "chi2"
     }
-    # Build lower->actual name map
-    canon_map = {c.lower(): c for c in df.columns}
-    missing = [c for c in required if c.lower() not in canon_map]
+    missing = [k for k in required if k.lower() not in canon]
     if missing:
         raise ValueError(f"Input CSV is missing required columns: {missing}")
 
-    # Helper to access with canonical names regardless of input case
-    def C(name): return canon_map[name.lower()]
+    def C(name): return canon[name.lower()]
 
-    # Ensure t-bin labels; if absent create per (Q2,W) group
-    tbin_col = canon_map.get("tbin")
+    # Optional token overrides
+    qtok_col = canon.get("q2_token")
+    wtok_col = canon.get("w_token")
+
+    # t-bin labels; if absent, create per setting
+    tbin_col = canon.get("tbin")
     if tbin_col is None:
         df["tbin"] = None
-        for (_, _), idx in df.groupby([C("Q2"), C("W")]).groups.items():
-            df.loc[idx, "tbin"] = range(1, len(idx) + 1)
         tbin_col = "tbin"
 
-    # Compute theta* for each row
+    # Compute theta*
     df["theta_cm_deg"] = [
         theta_cm_deg(
             Q2=row[C("Q2")],
@@ -139,21 +159,35 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
         for _, row in df.iterrows()
     ]
 
+    # Prepare tokens row-wise (use provided tokens if present, else fallback)
+    if qtok_col is None:
+        df["_Qtok"] = [token_no_dot_from_float(v) for v in df[C("Q2")]]
+    else:
+        df["_Qtok"] = [token_no_dot_from_any(v) for v in df[qtok_col]]
+
+    if wtok_col is None:
+        df["_Wtok"] = [token_no_dot_from_float(v) for v in df[C("W")]]
+    else:
+        df["_Wtok"] = [token_no_dot_from_any(v) for v in df[wtok_col]]
+
+    # If tbin missing, populate 1..N per setting (as defined by tokens)
+    if canon.get("tbin") is None:
+        for (qt, wt), idx in df.groupby(["_Qtok", "_Wtok"]).groups.items():
+            df.loc[idx, "tbin"] = range(1, len(idx) + 1)
+
     # Prepare output dirs
     os.makedirs("averages", exist_ok=True)
     os.makedirs("xsects", exist_ok=True)
 
-    # Group by (Q2,W) and write files
-    for (Q2val, Wval), sub in df.groupby([C("Q2"), C("W")], sort=False):
+    # Group by the *tokens* to define a setting; write ONE file per setting
+    for (qtok, wtok), sub in df.groupby(["_Qtok", "_Wtok"], sort=False):
+        # Keep each t-bin line; sort by t for readability
         sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
 
-        q_token_num = token_no_dot(Q2val)
-        w_token_num = token_no_dot(Wval)
-        q_token_str = token_p_dot(Q2val)
-        w_token_str = token_p_dot(Wval)
+        avek_path = os.path.join("averages", f"avek.Q{qtok}W{wtok}.dat")
+        x_path    = os.path.join("xsects",  f"x_sep.{pol_tag}_Q{qtok}W{wtok}.dat")
 
-        # --- averages file ---
-        avek_path = os.path.join("averages", f"avek.Q{q_token_num}W{w_token_num}.dat")
+        # --- averages file (all t-bins appended) ---
         with open(avek_path, "w") as f:
             for _, r in sub.iterrows():
                 f.write(
@@ -163,9 +197,7 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
                     f"{r['theta_cm_deg']:.6f} {int(r[tbin_col])}\n"
                 )
 
-        # --- cross sections file ---
-        pol = pol_tag if pol_tag else ptype_l   # default <pol> tag from --ptype
-        x_path = os.path.join("xsects", f"x_sep.{pol}_Q{q_token_str}W{w_token_str}.dat")
+        # --- cross sections file (all t-bins appended) ---
         with open(x_path, "w") as f:
             for _, r in sub.iterrows():
                 f.write(
@@ -177,20 +209,19 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
                     f"{r[C('t')]:.6f} {r[C('W')]:.6f} {r[C('Q2')]:.6f} {r['theta_cm_deg']:.6f}\n"
                 )
 
-        print(f"Wrote: {avek_path}")
-        print(f"Wrote: {x_path}")
+        print(f"Wrote (all t-bins): {avek_path}")
+        print(f"Wrote (all t-bins): {x_path}")
 
 # --------- CLI ----------
 def main():
     ap = argparse.ArgumentParser(
-        description="Produce averages/xsects files with computed theta* from a Fpi2-style CSV."
+        description="Produce per-setting files using CSV-provided Q2_token/W_token (or numeric fallbacks)."
     )
     ap.add_argument("csv", help="Path to input CSV with per-bin kinematics and separated cross sections")
     ap.add_argument("--ptype", required=True, choices=["pion", "pionlt", "kaon", "kaonlt"],
-                    help="Particle/channel type: sets masses (π+n or K+Λ). "
-                         "Filename <pol> tag defaults to this value unless --pol is given.")
-    ap.add_argument("--pol", default="pl", choices=["pl", "mn"],
-                    help="Optional tag to use in x_sep.<pol>_Q...W... filename (default: use --ptype)")
+                    help="Particle/channel type: sets masses (π+n or K+Λ).")
+    ap.add_argument("--pol", required=True, choices=["pl", "mn"],
+                    help="Tag used in x_sep.<pol>_Q...W... filename (e.g., pl or mn).")
     args = ap.parse_args()
 
     df = pd.read_csv(args.csv)
