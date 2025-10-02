@@ -261,9 +261,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                         current_params[i_par] + off*abs(current_params[i_par])
                                     )
 
-                            # Fit
-                            r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
-
                             # Evaluate cost
                             current_cost, lambda_reg = calculate_cost(
                                 fits_sig[it], g_sig, current_params,

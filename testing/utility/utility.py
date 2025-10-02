@@ -877,6 +877,7 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
     lambda_min = 1e-6
     lambda_max = 100.0
 
+    '''
     def calculate_residuals():
         residuals = []
         for i in range(num_events):
@@ -886,6 +887,19 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
             residual = (observed - expected) / (error if error != 0 else 1.0)
             residuals.append(residual)
         return np.array(residuals)
+    '''
+    def calculate_residuals():
+        n = int(g_sig.GetN())
+        if n <= 0:
+            return np.array([np.inf], dtype=float)  # force a huge cost
+        ys  = [g_sig.GetY()[i]  for i in range(n)]
+        xs  = [g_sig.GetX()[i]  for i in range(n)]
+        es  = [g_sig.GetEY()[i] for i in range(n)]
+        res = []
+        for i in range(n):
+            e = es[i] if es[i] not in (None, 0.0) else 1.0
+            res.append( (ys[i] - f_sig.Eval(xs[i])) / e )
+        return np.array(res, dtype=float)
 
     residuals = calculate_residuals()
     
@@ -900,6 +914,7 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
         if num_events <= num_params:
             cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
         else:
+            '''
             chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
             # Safeguard against division by very small nu:
@@ -909,6 +924,15 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
                 cost = (chi_square) / nu
             else:
                 cost = (chi_square + lambda_val * l2_reg) / nu
+            '''
+            # Compute chi-square directly from residuals (valid without Fit)
+            chi_square = float(np.sum(np.square(residuals)))
+            # Use N - p for degrees of freedom
+            n_points = int(g_sig.GetN())
+            nu = max(1, n_points - int(num_params))
+            base = chi_square if lambda_reg == 0 else (chi_square + lambda_val * l2_reg)
+            cost = base / float(nu)            
+
         return cost
 
     if num_events <= num_params:
