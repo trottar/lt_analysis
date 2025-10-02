@@ -2,30 +2,27 @@
 # -*- coding: utf-8 -*-
 
 """
-Produce ONE file per setting (all t-bins appended). Filenames are defined
-EXCLUSIVELY by two REQUIRED CSV columns you provide:
+Make per-setting data files from a CSV of t-bins.
 
-  Q2_token , W_token   (strings like: 16 for 1.6, 222 for 2.22, 44 for 4.4, 274 for 2.74)
-
-Example outputs:
-  averages/avek.Q44W274.dat
-  xsects/x_sep.pl_Q44W274.dat
-
-INPUT CSV (one row per t-bin) — column names are case-insensitive:
-  Required:
+REQUIREMENTS (case-insensitive; leading/trailing spaces in headers are OK):
+  Required columns:
     Q2, dQ2, W, dW, t, dt,
     sigL, dsigL, sigT, dsigT, sigLT, dsigLT, sigTT, dsigTT, chi2,
     Q2_token, W_token
   Optional:
-    tbin  (if absent, bins will be auto-numbered 1..N per setting)
+    tbin  (if absent, bins are auto-numbered 1..N within each setting)
+
+Filenames are defined exclusively by the CSV tokens:
+  averages/avek.Q<Q2_token>W<W_token>.dat
+  xsects/x_sep.<pol>_Q<Q2_token>W<W_token>.dat
 
 CLI:
-  --ptype {pion,pionlt,kaon,kaonlt}  # sets final-state masses (π⁺n or K⁺Λ) for θ*
-  --pol   {pl,mn}                    # tag embedded in x_sep filename
+  --ptype {pion,pionlt,kaon,kaonlt}   # sets channel masses for θ*
+  --pol   {pl,mn}                     # tag embedded in x_sep filename
 
 Physics:
-  θ* (deg) is computed in the γ*–p CM frame from (Q², W, t). The CSV may
-  provide either t (<0) or −t (>0); sign is handled automatically.
+  θ* (deg) computed in the γ*–p CM frame from (Q², W, t).
+  t may be provided as t (<0) or −t (>0); the sign is handled internally.
 """
 
 import argparse
@@ -86,33 +83,30 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     else:
         raise ValueError("Unknown --ptype (use: pion, pionlt, kaon, kaonlt)")
 
-    # Canonicalize (case-insensitive) column lookup
-    canon = {c.lower(): c for c in df.columns}
+    # Normalize column names: strip spaces, lowercase
+    df = df.copy()
+    df.columns = [c.strip().lower() for c in df.columns]
 
-    # Required columns
-    required = {
-        "Q2_token","W_token",
-        "Q2","dQ2","W","dW","t","dt",
-        "sigL","dsigL","sigT","dsigT","sigLT","dsigLT","sigTT","dsigTT","chi2"        
-    }
-    missing = [k for k in required if k not in canon]
+    # Required columns (lowercase)
+    required = [
+        "q2","dq2","w","dw","t","dt",
+        "sigl","dsigl","sigt","dsigt","siglt","dsiglt","sigtt","dsigtt","chi2",
+        "q2_token","w_token"
+    ]
+    missing = [c for c in required if c not in df.columns]
     if missing:
         raise ValueError(f"Input CSV is missing required columns: {missing}")
 
-    def C(name): return canon[name]
-
-    # Ensure tbin labels; if absent, create per setting
-    tbin_col = canon.get("tbin")
-    if tbin_col is None:
+    # Ensure tbin labels; if absent create per setting
+    if "tbin" not in df.columns:
         df["tbin"] = None
-        tbin_col = "tbin"
 
     # Compute θ* for each row
     df["theta_cm_deg"] = [
         theta_cm_deg(
-            Q2=row[C("q2")],
-            W=row[C("w")],
-            t_or_tneg=row[C("t")],
+            Q2=row["q2"],
+            W=row["w"],
+            t_or_tneg=row["t"],
             m_mes=m_mes,
             m_baryon=m_baryon,
         )
@@ -123,25 +117,23 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     os.makedirs("averages", exist_ok=True)
     os.makedirs("xsects", exist_ok=True)
 
-    # Group strictly by the provided tokens → ONE file per setting
-    for (qtok, wtok), sub in df.groupby([C("Q2_token"), C("W_token")], sort=False):
-        # If tbin absent, enumerate 1..N within this setting
-        if canon.get("tbin") is None:
-            sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
+    # Group strictly by provided tokens → ONE file per setting (all t-bins)
+    for (qtok, wtok), sub in df.groupby(["q2_token", "w_token"], sort=False):
+        # Sort by t; auto-enumerate tbin if needed
+        sub = sub.sort_values(by=["t"]).reset_index(drop=True)
+        if df["tbin"].isna().any():
             sub["tbin"] = range(1, len(sub) + 1)
-        else:
-            sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
 
-        avek_path = os.path.join("averages", f"avek.Q{qtok}W{wtok}.dat")
-        x_path    = os.path.join("xsects",  f"x_sep.{pol_tag}_Q{qtok}W{wtok}.dat")
+        avek_path = os.path.join("averages", f"avek.Q{str(qtok).strip()}W{str(wtok).strip()}.dat")
+        x_path    = os.path.join("xsects",  f"x_sep.{pol_tag}_Q{str(qtok).strip()}W{str(wtok).strip()}.dat")
 
         # --- averages file (all t-bins appended) ---
         with open(avek_path, "w") as f:
             for _, r in sub.iterrows():
                 f.write(
-                    f"{r[C('w')]:.6f} {r[C('dw')]:.6f} "
-                    f"{r[C('q2')]:.6f} {r[C('dq2')]:.6f} "
-                    f"{r[C('t')]:.6f} {r[C('dt')]:.6f} "
+                    f"{r['w']:.6f} {r['dw']:.6f} "
+                    f"{r['q2']:.6f} {r['dq2']:.6f} "
+                    f"{r['t']:.6f} {r['dt']:.6f} "
                     f"{r['theta_cm_deg']:.2f} {int(r['tbin'])}\n"
                 )
 
@@ -149,12 +141,12 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
         with open(x_path, "w") as f:
             for _, r in sub.iterrows():
                 f.write(
-                    f"{r[C('sigl')]:.6f} {r[C('dsigl')]:.6f} "
-                    f"{r[C('sigt')]:.6f} {r[C('dsigt')]:.6f} "
-                    f"{r[C('siglt')]:.6f} {r[C('dsiglt')]:.6f} "
-                    f"{r[C('sigtt')]:.6f} {r[C('dsigtt')]:.6f} "
-                    f"{r[C('chi2')]:.6f} "
-                    f"{r[C('t')]:.6f} {r[C('w')]:.6f} {r[C('q2')]:.6f} {r['theta_cm_deg']:.2f}\n"
+                    f"{r['sigl']:.6f} {r['dsigl']:.6f} "
+                    f"{r['sigt']:.6f} {r['dsigt']:.6f} "
+                    f"{r['siglt']:.6f} {r['dsiglt']:.6f} "
+                    f"{r['sigtt']:.6f} {r['dsigtt']:.6f} "
+                    f"{r['chi2']:.6f} "
+                    f"{r['t']:.6f} {r['w']:.6f} {r['q2']:.6f} {r['theta_cm_deg']:.2f}\n"
                 )
 
         print(f"Wrote (all t-bins): {avek_path}")
@@ -162,8 +154,9 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
 
 # ---- CLI ----
 def main():
+    import sys
     ap = argparse.ArgumentParser(
-        description="Produce per-setting files using CSV-provided Q2_token/W_token. One file per setting; all t-bins appended."
+        description="Produce per-setting files using CSV-provided Q2_token/W_token (robust to header spacing/case)."
     )
     ap.add_argument("csv", help="Path to input CSV with per-bin kinematics and separated cross sections")
     ap.add_argument("--ptype", required=True, choices=["pion", "pionlt", "kaon", "kaonlt"],
