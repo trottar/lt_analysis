@@ -175,4 +175,4 @@ if DEBUG:
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
-new_param_file = '{}/testing/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
+new_param_file = '{}/testing/parameters/new_par.{}_Q{}W{}.dat'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
