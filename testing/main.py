@@ -90,19 +90,19 @@ else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)    
 
-# Create a new directory for each iteration in cache
-new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
-create_dir(new_dir)
-
-TEMP_CACHEPATH = new_dir
-
 closest_date = formatted_date
 print("\n\n")
 print("="*50)
 iter_num = 1 # Default iteration number
 print("\n\tIteration number", iter_num)
 print("="*50)
-print("\n\n")
+print("\n\n")    
+
+# Create a new directory for each iteration in cache
+new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, closest_date)
+create_dir(new_dir)
+
+TEMP_CACHEPATH = new_dir
 
 inpDict = {
     "kinematics" : kinematics,
