@@ -27,13 +27,16 @@ SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 # Define global variables for lt_analysis scripts
-Q2="4p4"
-W="2p74"
-NumtBins=4
-NumPhiBins=12
+#Q2="4p4"
+#W="2p74"
+#TMIN=0.400
+#TMAX=0.750
+#ParticleType="kaon"
+Q2="1p6"
+W="2p22"
 TMIN=0.400
 TMAX=0.750
-ParticleType="kaon"
+ParticleType="pion"
 POL="+1" # All KaonLT is positive polarity
 
 DEBUG="False" # Flag for no plot splash
@@ -60,4 +63,4 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo
 
 cd "${LTANAPATH}/testing"
-python3 main.py ${KIN} ${W} ${Q2} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} ${ParticleType} ${POL} ${OutFilename} ${formatted_date} ${DEBUG}
+python3 main.py ${KIN} ${W} ${Q2} ${TMIN} ${TMAX} ${ParticleType} ${POL} ${OutFilename} ${formatted_date} ${DEBUG}

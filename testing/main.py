@@ -24,13 +24,11 @@ W = sys.argv[2]
 Q2 = sys.argv[3]
 tmin = float(sys.argv[4])
 tmax = float(sys.argv[5])
-NumtBins = int(sys.argv[6])
-NumPhiBins = int(sys.argv[7])
-ParticleType = sys.argv[8]
-POL = sys.argv[9]
-OutFilename = sys.argv[10]
-formatted_date = sys.argv[11]
-inp_debug =  sys.argv[12]
+ParticleType = sys.argv[6]
+POL = sys.argv[7]
+OutFilename = sys.argv[8]
+formatted_date = sys.argv[9]
+inp_debug =  sys.argv[10]
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -41,8 +39,8 @@ from utility import show_pdf_with_evince, create_dir
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
 
-if len(sys.argv)-1!=12:
-    print("!!!!! ERROR !!!!!\n Expected 12 arguments\n Usage is with - KIN W Q2 TMIN TMAX NumtBins NumPhiBins ParticleType POL OutFilename formatted_date inp_debug\n!!!!! ERROR !!!!!")
+if len(sys.argv)-1!=10:
+    print("!!!!! ERROR !!!!!\n Expected 12 arguments\n Usage is with - KIN W Q2 TMIN TMAX ParticleType POL OutFilename formatted_date inp_debug\n!!!!! ERROR !!!!!")
     sys.exit(1)
 
 ##################################################################################################################################################    
@@ -113,8 +111,6 @@ inpDict = {
     "OutFilename" : OutFilename,
     "tmin" : tmin,
     "tmax" : tmax,   
-    "NumtBins" : NumtBins,
-    "NumPhiBins" : NumPhiBins,
     "ParticleType" : ParticleType,
     "POL" : POL,
     "formatted_date" : formatted_date,
