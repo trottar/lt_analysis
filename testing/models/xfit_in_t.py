@@ -246,7 +246,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         output_file_lst.append(outputpdf)
 
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
-        
+
     else:
             
         # Define output file name
@@ -299,17 +299,17 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
     
-        # Check if parameter values changed and print changes to terminal
-        for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
-            if old != new:
-                print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
+    # Check if parameter values changed and print changes to terminal
+    for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
+        if old != new:
+            print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
 
-        para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-        print("\nWriting {}...".format(para_file_out))
-        with open(para_file_out, 'w') as f:
-            for i in range(len(par_vec)):
-                f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-                print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+    para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    print("\nWriting {}...".format(para_file_out))
+    with open(para_file_out, 'w') as f:
+        for i in range(len(par_vec)):
+            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+            print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
 
     print("\n\n")
     
