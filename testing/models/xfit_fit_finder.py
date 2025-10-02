@@ -355,12 +355,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         graph_sig_aic.SetPoint(total_iteration, total_iteration, 0)
                         graph_sig_bic.SetPoint(total_iteration, total_iteration, 0)
 
-                        total_iteration += 1
-
-                    # Seed TF1 with best params
-                    for i_par in range(num_params):
-                        fits_sig[it].SetParameter(i_par, best_params[i_par])
-                    r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ0")  # polish once                    
+                        total_iteration += 1                
                     
                     # end while iteration <= max_iterations
                     print(f"\nBest Cost: {best_overall_cost:.3f}")
