@@ -422,9 +422,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     margin = 0.1 * (y_max - y_min)
                     graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
                     r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
+                    fits_sig[it].Draw("same")
                 except OverflowError:
-                    print("WARNING: OverflowError during final fit drawing. Skipping fit overlay. Likely due to no t-dependence in model.")
-                fits_sig[it].Draw("same")
+                    print("WARNING: OverflowError during final fit drawing. Skipping fit overlay. Likely due to no t-dependence in model.")                
                 f_sig_status = "Fit Successful" if fits_sig[it].GetNDF() != 0 else "Fit Failed"
                 fit_status = TText()
                 fit_status.SetTextSize(0.04)
