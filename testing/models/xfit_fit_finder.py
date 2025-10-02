@@ -22,7 +22,8 @@ from utility import (
     adaptive_regularization, calculate_cost, adaptive_cooling,
     simulated_annealing, acceptance_probability, adjust_params, 
     local_search, select_valid_parameter, get_central_value, 
-    calculate_information_criteria, sanitize_params
+    calculate_information_criteria, sanitize_params, rms_residual,
+    update_random_shrinking_window
 )
 
 ##################################################################################################################################################
@@ -111,8 +112,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     # -----------------------------------------------------------------------------
     for it, (sig_name, val) in enumerate(fit_params.items()):
 
-        for b in [0]: # Q2=5.5
-        #for b in [2]: # Q2=4.4
+        # --- Global best across bins (initialize once per signal) ---
+        best_overall_params    = None
+        best_overall_errors    = None
+        best_overall_cost      = float('inf')
+        best_overall_bin       = None
+        best_overall_temp      = None
+        best_overall_prob      = None
+        best_overall_residual  = None
+        best_overall_ic_aic    = float('inf')
+        best_overall_ic_bic    = float('inf')
+        # -------------------------------------------------------------
+
+        for b in range(len(t_vec)):
             if sig_name not in fixed_params:
 
                 num_params, init_params, equation_str = inpDict["initial_params"](sig_name, val)
@@ -131,17 +143,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Parameters: ({param_str})")
                 print(equation_str)
                 print("/*--------------------------------------------------*/")
-
-                # Track best across all runs
-                best_overall_params   = None
-                best_overall_errors   = None
-                best_overall_cost     = float('inf')
-                best_overall_bin      = None
-                best_overall_temp     = float('inf')
-                best_overall_prob     = 1.0
-                best_overall_residual= float('inf')
-                best_overall_ic_aic  = float('inf')
-                best_overall_ic_bic  = float('inf')
 
                 total_iteration = 0
                 lambda_reg = 0.01
@@ -200,6 +201,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                     max_param_bounds = initial_param_bounds
 
+                    # --- windowed, stochastic shrinking phase space around current/best params ---
+                    window = float(initial_param_bounds)
+                    param_lower = [-window] * num_params
+                    param_upper = [ window] * num_params                    
+
                     # Random initialization in ± max_param_bounds
                     current_params = [
                         random.uniform(-max_param_bounds, max_param_bounds)
@@ -224,7 +230,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                         # using the current 'temperature'
                         # -----------------------------------------------------------------
                         current_params = [simulated_annealing(p, temperature)
-                                          for p in current_params]
+                                          for p in current_params]      
+
+                        # Clamp proposals to the current shrinking window
+                        for i_par in range(num_params):
+                            if current_params[i_par] < param_lower[i_par]:
+                                current_params[i_par] = param_lower[i_par]
+                            elif current_params[i_par] > param_upper[i_par]:
+                                current_params[i_par] = param_upper[i_par]                                      
 
                         sys.stdout.write(f"\rSearching for best parameters...({iteration}/{max_iterations})")
                         sys.stdout.flush()
@@ -239,7 +252,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 g_sig.SetPoint(i_data, x_val, y_val)
                                 g_sig.SetPointError(i_data, 0, y_err)
 
-                            for i_pt in range(len(w_vec)):
+                            nrows = nsep.GetSelectedRows()
+                            for i_pt in range(nrows):
                                 sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt]) / 1e3
                                 sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt]) / 1e3
                                 graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
@@ -252,36 +266,22 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 if abs(current_params[i_par]) < 1e-15:
                                     current_params[i_par] = 0.0
                                 fits_sig[it].SetParameter(i_par, current_params[i_par])
-                                if set_optimization:
-                                    fits_sig[it].SetParLimits(i_par, -max_param_bounds, max_param_bounds)
-                                else:
-                                    off = param_offsets[i_par]
-                                    fits_sig[it].SetParLimits(
-                                        i_par,
-                                        current_params[i_par] - off*abs(current_params[i_par]),
-                                        current_params[i_par] + off*abs(current_params[i_par])
-                                    )
+                                # Use the shrinking window for the optimizer’s bounds
+                                fits_sig[it].SetParLimits(i_par, param_lower[i_par], param_upper[i_par])
 
                             # Fit
                             r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
 
+                            nrows = nsep.GetSelectedRows()
+
                             # Evaluate cost
                             current_cost, lambda_reg = calculate_cost(
                                 fits_sig[it], g_sig, current_params,
-                                num_events, num_params, lambda_reg
+                                nrows, num_params, lambda_reg
                             )
 
                             # Simple residual from last data point
-                            residual = 0.0
-                            for i_pt2 in range(num_events):
-                                x_pt = g_sig.GetX()[i_pt2]
-                                y_data = g_sig.GetY()[i_pt2]
-                                y_err  = g_sig.GetEY()[i_pt2]
-                                y_fit  = fits_sig[it].Eval(x_pt)
-                                if y_err != 0:
-                                    residual = (y_data - y_fit)/y_err
-                                else:
-                                    residual = (y_data - y_fit)
+                            residual = rms_residual(g_sig, fits_sig[it])
 
                             cost_history.append(current_cost)
                             if len(cost_history) >= 2:
@@ -295,13 +295,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             # Accept or not
                             if accept_prob > random.random():
+                                improved = (current_cost < best_cost)
                                 best_params = list(current_params)
                                 best_cost   = current_cost
                                 best_errors = list(current_errors)
+                                stagnation_count = 0 if improved else (stagnation_count + 1)
                                 if debug and iteration % 50 == 0:
-                                    print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, iteration={iteration}")
-                                if current_cost > best_overall_cost:
-                                    stagnation_count += 1
+                                    print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, iteration={iteration}, "
+                                        f"improved={improved}, stagnation={stagnation_count}")
                             else:
                                 stagnation_count += 1
 
@@ -311,11 +312,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                             # If stalling
                             if stagnation_count > 5:
-                                # re-random
+                                # Reseed inside the current window (not full global bounds)
                                 current_params = [
-                                    random.uniform(-max_param_bounds, max_param_bounds)
-                                    for _ in range(num_params)
+                                    random.uniform(param_lower[i], param_upper[i])
+                                    for i in range(num_params)
                                 ]
+                                # Immediately “shrink a bit more” after a reseed to force progress
+                                window, param_lower, param_upper = update_random_shrinking_window(
+                                    window, temperature, initial_temperature, stagnation_count,
+                                    best_params, current_params
+                                )                                
                                 stagnation_count = 0
                                 if debug:
                                     print(f"[DEBUG] Stalling => re-random => params={current_params}")
@@ -324,18 +330,26 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                             current_params = list(best_params)
                             # Adjust temperature with your adaptive_cooling
                             temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                            max_param_bounds = random.uniform(100.0, initial_param_bounds)
+                            # Shrink the phase space window stochastically around best/current
+                            window, param_lower, param_upper = update_random_shrinking_window(
+                                window, temperature, initial_temperature, stagnation_count,
+                                best_params, current_params
+                            )
                             iteration += 1
 
                         except (TypeError, ZeroDivisionError, OverflowError) as e:
                             # On error => re-random
                             if debug:
                                 print(f"[DEBUG] Exception => {str(e)}, re-randomizing.")
-                            max_param_bounds = random.uniform(100.0, initial_param_bounds)
+                            # Keep reseeds bounded by the current window
                             current_params = [
-                                random.uniform(-max_param_bounds, max_param_bounds)
-                                for _ in range(num_params)
-                            ]                        
+                                random.uniform(param_lower[i], param_upper[i])
+                                for i in range(num_params)
+                            ]
+                            window, param_lower, param_upper = update_random_shrinking_window(
+                                window, temperature, initial_temperature, stagnation_count,
+                                best_params, current_params
+                            )                      
                             iteration += 1
                             continue
 
@@ -553,7 +567,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     y_err = nsep.GetV3()[i_data]
                     g_sig.SetPoint(i_data, x_val, y_val)
                     g_sig.SetPointError(i_data, 0, y_err)
-                for i_pt in range(len(w_vec)):
+                nrows = nsep.GetSelectedRows()
+                for i_pt in range(nrows):
                     sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt]) / 1e3
                     sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt]) / 1e3
                     graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
@@ -627,6 +642,64 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             c6.Update()
             c7.Update()
             c8.Update()
+        
+        # === FINALIZE PER SIGNAL USING best_overall_bin ===
+        if best_overall_bin is None:
+            raise RuntimeError("No bin produced a valid fit (best_overall_bin is None).")
+
+        # Build the TF1 for the best bin
+        if sig_name == "L":
+            fun_best = fun_Sig_L_wrapper(
+                g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                w_vec[best_overall_bin], th_vec[best_overall_bin]
+            )
+        elif sig_name == "T":
+            fun_best = fun_Sig_T_wrapper(
+                g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                w_vec[best_overall_bin], th_vec[best_overall_bin]
+            )
+        elif sig_name == "LT":
+            fun_best = fun_Sig_LT_wrapper(
+                g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                w_vec[best_overall_bin], th_vec[best_overall_bin]
+            )
+        elif sig_name == "TT":
+            fun_best = fun_Sig_TT_wrapper(
+                g_vec[best_overall_bin], q2_vec[best_overall_bin],
+                w_vec[best_overall_bin], th_vec[best_overall_bin]
+            )
+        else:
+            raise ValueError("Unknown signal name")
+
+        for i_par, val in enumerate(best_overall_params):
+            fun_best.SetParameter(i_par, val)
+
+        print("\n=== Best bin summary ===")
+        print(f"Sig={sig_name}, bin={best_overall_bin}, "
+              f"t={t_vec[best_overall_bin]:.3f}, Q2={q2_vec[best_overall_bin]:.3f}, "
+              f"W={w_vec[best_overall_bin]:.3f}, th={th_vec[best_overall_bin]:.3f}")
+        print(f"Best cost: {best_overall_cost:.6f}, residual={best_overall_residual}")
+
+        # Redraw the data for the best bin and overlay fun_best
+        nsep.Draw(f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e", "", "goff")
+        g_best = TGraphErrors()
+        for i_data in range(nsep.GetSelectedRows()):
+            x_val = nsep.GetV2()[i_data]
+            y_val = nsep.GetV1()[i_data]
+            y_err = nsep.GetV3()[i_data]
+            g_best.SetPoint(i_data, x_val, y_val)
+            g_best.SetPointError(i_data, 0, y_err)
+
+        # Fit fun_best to g_best (presentation only; params already set)
+        g_best.Fit(fun_best, "S0Q")  # silent, no draw, no re-optimization needed    
+
+        c2.cd(it+1).SetLeftMargin(0.12)
+        g_best.SetTitle(f"Sigma {sig_name} (best bin)")
+        g_best.Draw("AP")
+        fun_best.SetLineColor(kRed)
+        fun_best.Draw("SAME")
+        c2.Update()    
+        
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
         c3.Print(outputpdf)

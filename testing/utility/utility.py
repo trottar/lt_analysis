@@ -1478,3 +1478,42 @@ def adapt_limits(f, nsig=5, hard_lo=None, hard_hi=None, min_width=1e-3):
         f.SetParLimits(i, lo, hi)
 
 ##################################################################################################################################################
+
+def rms_residual(graph, f_eval):
+    n = graph.GetN()
+    if n == 0:
+        return float('inf')
+    acc = 0.0
+    for i in range(n):
+        x = graph.GetX()[i]
+        y = graph.GetY()[i]
+        e = graph.GetEY()[i] or 1.0
+        r = (y - f_eval.Eval(x)) / e
+        acc += r*r
+    return math.sqrt(acc / n)
+
+##################################################################################################################################################
+
+def update_random_shrinking_window(window, temperature, initial_temperature,
+                                   stagnation_count, best_params, current_params,
+                                   min_window=1e-6):
+    """
+    Returns (new_window, param_lower[], param_upper[]) where window randomly shrinks,
+    guided by temperature and stagnation, centered on best_params if available.
+    """
+    # stochastic factor (never >1.0)
+    rand_scale = random.uniform(0.90, 0.99)
+    # annealing factor: as temperature drops, this reduces less
+    temp_scale = 0.5 + 0.5 * (temperature / max(initial_temperature, 1e-12))
+    # if we’re stagnating, encourage a bit stronger shrink
+    if stagnation_count > 10:
+        rand_scale *= 0.95
+
+    new_window = max(min_window, window * rand_scale * temp_scale)
+
+    center = best_params if (best_params is not None) else current_params
+    param_lower = [c - new_window for c in center]
+    param_upper = [c + new_window for c in center]
+    return new_window, param_lower, param_upper
+
+##################################################################################################################################################
