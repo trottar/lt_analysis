@@ -1114,7 +1114,7 @@ def check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations
 
 def load_equations(filename='variables.inp'):
     equations = {}
-    full_path = f"{LTANAPATH}/testing/models/{filename}"
+    full_path = f"{LTANAPATH}/testing/functions/{filename}"
     
     if not os.path.exists(full_path):
         raise FileNotFoundError(f"The file {full_path} does not exist.")
