@@ -412,15 +412,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     fits_sig[it].FixParameter(i, best_overall_params[i])
-                n_points = 100
-                fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
-                fit_y_min = min(fit_y_values)
-                fit_y_max = max(fit_y_values)
-                y_min = min(y_min, fit_y_min)
-                y_max = max(y_max, fit_y_max)
-                margin = 0.1 * (y_max - y_min)
-                graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
+                try:
+                    n_points = 100
+                    fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+                    fit_y_min = min(fit_y_values)
+                    fit_y_max = max(fit_y_values)
+                    y_min = min(y_min, fit_y_min)
+                    y_max = max(y_max, fit_y_max)
+                    margin = 0.1 * (y_max - y_min)
+                    graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
+                    r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
+                except OverflowError:
+                    print("WARNING: OverflowError during final fit drawing. Skipping fit overlay. Likely due to no t-dependence in model.")
                 fits_sig[it].Draw("same")
                 f_sig_status = "Fit Successful" if fits_sig[it].GetNDF() != 0 else "Fit Failed"
                 fit_status = TText()
