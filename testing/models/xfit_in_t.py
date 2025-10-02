@@ -39,7 +39,7 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
-TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
+TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -149,7 +149,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     lt0, lt1, lt2, lt3 = 0, 0, 0, 0
     tt0, tt1, tt2, tt3 = 0, 0, 0, 0
 
-    fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    fn_sep = "{}/testing/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:w:q2:thetacm")
     nsep.ReadFile(fn_sep)
 
@@ -162,7 +162,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     '''
 
     prv_par_vec = []
-    para_file_in =  "{}/{}/Q{}W{}/{}/parameters/par.{}_Q{}W{}.dat".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set, dir_iter, \
+    para_file_in =  "{}/{}/Q{}W{}/parameters/par.{}_Q{}W{}.dat".format(TEMP_CACHEPATH, q2_set, w_set, dir_iter, \
                                                                             pol_str, q2_set.replace("p",""), w_set.replace("p",""))
     
     print("Reading {}...".format(para_file_in))
@@ -186,7 +186,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # Load equations from model of given setting
     equations = load_equations(f"Q{q2_set}W{w_set}.model")
     
-    ave_file_in = "{}/src/{}/averages/avek.Q{}W{}.dat".format(LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
+    ave_file_in = "{}/testing/averages/avek.Q{}W{}.dat".format(LTANAPATH, q2_set.replace("p",""), w_set.replace("p",""))
     # Redefine strings for retrieving equation defintions
     q2_set = float(q2_set.replace("p","."))
     w_set = float(w_set.replace("p","."))
@@ -233,7 +233,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         "iter_num" : iter_num,
         "fit_params" : fit_params,
         "chi2_threshold" : chi2_threshold,
-        "xfit_log" : "{}/{}_xfit_in_t_Q{}W{}.log".format(OUTPATH, ParticleType, q2_set, w_set)
+        "xfit_log" : "{}/{}_xfit_in_t_Q{}W{}.log".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set)
     }
 
     par_vec = prv_par_vec
@@ -243,7 +243,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     if skip_optimization:
 
         # Define output file name
-        outputpdf  = "{}/{}_lt_fit_in_t_Q{}W{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+        outputpdf  = "{}/{}_lt_fit_in_t_Q{}W{}.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
 
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
@@ -251,7 +251,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     else:
             
         # Define output file name
-        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Start.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Start.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
 
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
@@ -269,7 +269,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             print(f"\n\nChi2 above threshold of {chi2_threshold}! Check ({i} / {max_checks})...")
 
             # Define output file name
-            outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(OUTPATH, ParticleType, q2_set, w_set, i)
+            outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set, i)
             output_file_lst.append(outputpdf)
 
             parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
@@ -293,7 +293,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         prv_chi2_vec = par_chi2_vec
 
         # Define output file name
-        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
+        outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
 
         # Update plots with best chi2
@@ -305,20 +305,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             if old != new:
                 print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
 
-        para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+        para_file_out = "{}/testing/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
         print("\nWriting {}...".format(para_file_out))
         with open(para_file_out, 'w') as f:
             for i in range(len(par_vec)):
                 f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
                 print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
 
-    '''
-    print("\n\nWould you like to continue with the analysis?\n")
-    if not request_yn_response():
-        print("-"*25)
-        print("Exiting script...")
-        print("-"*25)
-        sys.exit(2)
-    '''
     print("\n\n")
     
