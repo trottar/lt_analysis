@@ -189,7 +189,7 @@ def main():
     ap.add_argument("--ptype", required=True, choices=["pion", "pionlt", "kaon", "kaonlt"],
                     help="Particle/channel type: sets masses (π+n or K+Λ). "
                          "Filename <pol> tag defaults to this value unless --pol is given.")
-    ap.add_argument("--pol", default="",
+    ap.add_argument("--pol", default="pl", choices=["pl", "mn"]
                     help="Optional tag to use in x_sep.<pol>_Q...W... filename (default: use --ptype)")
     args = ap.parse_args()
 
