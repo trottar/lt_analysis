@@ -28,7 +28,7 @@ LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 
 # Define global variables for lt_analysis scripts
 Q2="4p4"
-W="2p32"
+W="2p74"
 NumtBins=4
 NumPhiBins=12
 TMIN=0.400
