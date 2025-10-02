@@ -111,13 +111,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     # -----------------------------------------------------------------------------
     for it, (sig_name, val) in enumerate(fit_params.items()):
 
-
-        print("\n/*--------------------------------------------------*/")
-        print(f"Fit for Sig {sig_name} ({num_params} parameters)")
-        print(f"Initial Parameters: ({param_str})")
-        print(equation_str)
-        print("/*--------------------------------------------------*/")
-
         # Track best across all runs
         best_overall_params   = None
         best_overall_errors   = None
@@ -146,6 +139,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 total_iteration = 0
                 lambda_reg = 0.01
                 cost_history = []
+
+                print("\n/*--------------------------------------------------*/")
+                print(f"Fit for Sig {sig_name} ({num_params} parameters)")
+                print(f"Initial Parameters: ({param_str})")
+                print(equation_str)
+                print("/*--------------------------------------------------*/")
 
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
