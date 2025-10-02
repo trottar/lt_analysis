@@ -36,7 +36,7 @@ inp_debug =  sys.argv[12]
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import show_pdf_with_evince
+from utility import show_pdf_with_evince, create_dir
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -91,6 +91,10 @@ elif int(POL) == -1:
 else:
     print("ERROR: Invalid polarity...must be +1 or -1")
     sys.exit(2)    
+
+# Create a new directory for each iteration in cache
+new_dir = "{}/{}/Q{}W{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W)
+create_dir(new_dir)
 
 closest_date = formatted_date
 print("\n\n")
