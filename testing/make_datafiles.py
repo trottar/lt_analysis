@@ -93,7 +93,7 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     required = {
         "Q2","dQ2","W","dW","t","dt",
         "sigL","dsigL","sigT","dsigT","sigLT","dsigLT","sigTT","dsigTT","chi2",
-        "q2_token","w_token"
+        "Q2_token","W_token"
     }
     missing = [k for k in required if k not in canon]
     if missing:
@@ -124,7 +124,7 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
     os.makedirs("xsects", exist_ok=True)
 
     # Group strictly by the provided tokens → ONE file per setting
-    for (qtok, wtok), sub in df.groupby([C("q2_token"), C("w_token")], sort=False):
+    for (qtok, wtok), sub in df.groupby([C("Q2_token"), C("W_token")], sort=False):
         # If tbin absent, enumerate 1..N within this setting
         if canon.get("tbin") is None:
             sub = sub.sort_values(by=[C("t")]).reset_index(drop=True)
