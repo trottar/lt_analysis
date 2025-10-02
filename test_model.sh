@@ -49,3 +49,5 @@ OutFilename="Testing_${KIN}"
 # - `+%B` extracts the full month name.
 # - `%d` extracts the day of the month.
 formatted_date=$(date +%Y%B%d_H%HM%MS%S) 
+
+python3 main.py ${KIN} ${W} ${Q2} ${TMIN} ${TMAX} ${NumtBins} ${NumPhiBins} ${ParticleType} ${POL} ${OutFilename} ${formatted_date} ${DEBUG}
