@@ -91,9 +91,9 @@ def build_outputs(df: pd.DataFrame, pol_tag: str, ptype: str) -> None:
 
     # Required columns
     required = {
+        "Q2_token","W_token",
         "Q2","dQ2","W","dW","t","dt",
-        "sigL","dsigL","sigT","dsigT","sigLT","dsigLT","sigTT","dsigTT","chi2",
-        "Q2_token","W_token"
+        "sigL","dsigL","sigT","dsigT","sigLT","dsigLT","sigTT","dsigTT","chi2"        
     }
     missing = [k for k in required if k not in canon]
     if missing:
