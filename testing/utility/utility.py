@@ -325,7 +325,7 @@ def replace_line(file_path, line_number, new_line):
 def create_dir(dir_name):
     # Check if dir exists
     if not os.path.exists(dir_name):
-        os.mkdir(dir_name)
+        os.makedirs(dir_name, exist_ok=True)
 
 ################################################################################################################################################        
         
