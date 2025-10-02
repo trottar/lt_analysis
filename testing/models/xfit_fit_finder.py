@@ -412,41 +412,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     fits_sig[it].FixParameter(i, best_overall_params[i])
-
-                # ---- Clamp the TF1 domain to the data (prevents exp overflow during sampling)
-                # You already computed x_min/x_max just above via graphs_sig_fit[it]
-                tmin = float(x_min)
-                tmax = float(x_max)
-                fits_sig[it].SetRange(tmin, tmax)
-
-                # ---- Sample safely for plotting
                 n_points = 100
-                tgrid = np.linspace(tmin, tmax, n_points)
-
-                def _eval_safe(f, x):
-                    try:
-                        y = float(f.Eval(float(x)))
-                        return y if np.isfinite(y) else float('nan')
-                    except OverflowError:
-                        return float('nan')
-
-                fit_y_values = np.array([_eval_safe(fits_sig[it], x) for x in tgrid])
-                finite_vals = fit_y_values[np.isfinite(fit_y_values)]
-                if finite_vals.size > 0:
-                    fit_y_min = float(finite_vals.min())
-                    fit_y_max = float(finite_vals.max())
-                    y_min = min(y_min, fit_y_min)
-                    y_max = max(y_max, fit_y_max)
-                # (If all NaN, we just leave y_min/y_max unchanged)
+                fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
+                fit_y_min = min(fit_y_values)
+                fit_y_max = max(fit_y_values)
+                y_min = min(y_min, fit_y_min)
+                y_max = max(y_max, fit_y_max)
                 margin = 0.1 * (y_max - y_min)
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-                # clamp TF1 evaluation to the graph's x-range (prevents exp overflow during Fit)
-                x_min = float(min(graphs_sig_fit[it].GetX()))
-                x_max = float(max(graphs_sig_fit[it].GetX()))
-                fits_sig[it].SetRange(x_min, x_max)
-                # (optional) fewer internal samples while fitting
-                fits_sig[it].SetNpx(200)                
-                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQR")
+                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
                 fits_sig[it].Draw("same")
                 f_sig_status = "Fit Successful" if fits_sig[it].GetNDF() != 0 else "Fit Failed"
                 fit_status = TText()
