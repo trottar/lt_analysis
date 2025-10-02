@@ -440,7 +440,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 # (If all NaN, we just leave y_min/y_max unchanged)
                 margin = 0.1 * (y_max - y_min)
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
+                # clamp TF1 evaluation to the graph's x-range (prevents exp overflow during Fit)
+                x_min = float(min(graphs_sig_fit[it].GetX()))
+                x_max = float(max(graphs_sig_fit[it].GetX()))
+                fits_sig[it].SetRange(x_min, x_max)
+                # (optional) fewer internal samples while fitting
+                fits_sig[it].SetNpx(200)                
+                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQR")
                 fits_sig[it].Draw("same")
                 f_sig_status = "Fit Successful" if fits_sig[it].GetNDF() != 0 else "Fit Failed"
                 fit_status = TText()
