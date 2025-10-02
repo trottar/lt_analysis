@@ -13,6 +13,7 @@
 *_0_-1
 Tmp*
 *.log
+.~lock.*
 
 # Data files
 list.*
