@@ -17,7 +17,7 @@ from ROOT import gErrorIgnoreLevel, kError, kFatal
 gErrorIgnoreLevel = kError
 # Also silence Minuit/Math backends
 import ROOT
-ROOT.Math.MinimizerOptions.SetPrintLevel(0)
+ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(0)
 import sys, math, time, random
 import warnings
 warnings.filterwarnings("ignore")          # blanket ignore (tune if you want)
