@@ -50,7 +50,7 @@ TMAX = 0.60
 file_str           = "pl_Q1p6-2p4W2p22"
 AVG_OUTFILE        = f"{LTANAPATH}/testing/parameters/new_par.{file_str}.dat"               # original fixed-effects output (preserved)
 BEST_OUTFILE       = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_best.dat"          # newly selected "best" (FE or RE)
-DIAG_CSV_OUTFILE   = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_diagnostics.csv"   # diagnostics table
+DIAG_CSV_OUTFILE   = f"{LTANAPATH}/testing/{file_str}_diagnostics.csv"   # diagnostics table
 AVG_ROW_CHI2       = 3.0  # default chi2 for every parameter row in the saved files
 
 ###############################################################################################################################################
