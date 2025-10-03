@@ -49,7 +49,7 @@ TEMP_CACHEPATH = f"{OUTPATH}/testing_env"
 ##################################################################################################################################################
 # Importing utility functions
 
-sys.path.append("../utility")
+sys.path.append("utility")
 from utility import load_equations, prepare_equations, fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
 
 ##################################################################################################################################################
