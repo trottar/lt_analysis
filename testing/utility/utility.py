@@ -1161,61 +1161,97 @@ def extract_values(filename):
 ################################################################################################################################################
 
 def prepare_equations(equations, sig_type):
+    """
+    Build vector-safe optimized callables with a uniform signature:
+
+        sig_*_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p1, p2, p3, p4)
+
+    Fixes:
+      - Uses NumPy ufuncs (by binding `math` -> numpy) so expressions like math.exp/log work on arrays.
+      - Vector-safe guards for qq, ww, tt, theta_cm via np.where (no ambiguous truth values).
+      - Keeps scalar guards for parameter values (par1..par16).
+    """
+    import numpy as np
+    import math as _math  # only to access constants if needed
+
     tiny_offset = 1e-15  # Define a tiny offset to avoid division by zero
 
     if sig_type == "sig_L":
-        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4):\n"
-        func_str += "        par1 = par1 if par1 > 1e-15 else par1 + tiny_offset\n"
-        func_str += "        par2 = par2 if par2 > 1e-15 else par2 + tiny_offset\n"
-        func_str += "        par3 = par3 if par3 > 1e-15 else par3 + tiny_offset\n"
-        func_str += "        par4 = par4 if par4 > 1e-15 else par4 + tiny_offset\n"
+        eq_lst = [f"{k} = {v}" for k, v in equations.items()
+                  if k not in ('sig_T', 'sig_LT', 'sig_TT', 'wfactor')]
+        func_str = (
+            f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4):\n"
+            "        par1 = par1 if par1 > 1e-15 else par1 + tiny_offset\n"
+            "        par2 = par2 if par2 > 1e-15 else par2 + tiny_offset\n"
+            "        par3 = par3 if par3 > 1e-15 else par3 + tiny_offset\n"
+            "        par4 = par4 if par4 > 1e-15 else par4 + tiny_offset\n"
+        )
     elif sig_type == "sig_T":
-        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8):\n"
-        func_str += "        par5 = par5 if par5 > 1e-15 else par5 + tiny_offset\n"
-        func_str += "        par6 = par6 if par6 > 1e-15 else par6 + tiny_offset\n"
-        func_str += "        par7 = par7 if par7 > 1e-15 else par7 + tiny_offset\n"
-        func_str += "        par8 = par8 if par8 > 1e-15 else par8 + tiny_offset\n"
+        eq_lst = [f"{k} = {v}" for k, v in equations.items()
+                  if k not in ('sig_L', 'sig_LT', 'sig_TT', 'wfactor')]
+        func_str = (
+            f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8):\n"
+            "        par5 = par5 if par5 > 1e-15 else par5 + tiny_offset\n"
+            "        par6 = par6 if par6 > 1e-15 else par6 + tiny_offset\n"
+            "        par7 = par7 if par7 > 1e-15 else par7 + tiny_offset\n"
+            "        par8 = par8 if par8 > 1e-15 else par8 + tiny_offset\n"
+        )
     elif sig_type == "sig_LT":
-        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
-        func_str += "        par9 = par9 if par9 > 1e-15 else par9 + tiny_offset\n"
-        func_str += "        par10 = par10 if par10 > 1e-15 else par10 + tiny_offset\n"
-        func_str += "        par11 = par11 if par11 > 1e-15 else par11 + tiny_offset\n"
-        func_str += "        par12 = par12 if par12 > 1e-15 else par12 + tiny_offset\n"
+        eq_lst = [f"{k} = {v}" for k, v in equations.items()
+                  if k not in ('sig_L', 'sig_T', 'sig_TT', 'wfactor')]
+        func_str = (
+            f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12):\n"
+            "        par9  = par9  if par9  > 1e-15 else par9  + tiny_offset\n"
+            "        par10 = par10 if par10 > 1e-15 else par10 + tiny_offset\n"
+            "        par11 = par11 if par11 > 1e-15 else par11 + tiny_offset\n"
+            "        par12 = par12 if par12 > 1e-15 else par12 + tiny_offset\n"
+        )
     elif sig_type == "sig_TT":
-        eq_lst = [f"{k} = {v}" for k, v in equations.items() if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
-        func_str += "        par13 = par13 if par13 > 1e-15 else par13 + tiny_offset\n"
-        func_str += "        par14 = par14 if par14 > 1e-15 else par14 + tiny_offset\n"
-        func_str += "        par15 = par15 if par15 > 1e-15 else par15 + tiny_offset\n"
-        func_str += "        par16 = par16 if par16 > 1e-15 else par16 + tiny_offset\n"
+        eq_lst = [f"{k} = {v}" for k, v in equations.items()
+                  if k not in ('sig_L', 'sig_T', 'sig_LT', 'wfactor')]
+        func_str = (
+            f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16):\n"
+            "        par13 = par13 if par13 > 1e-15 else par13 + tiny_offset\n"
+            "        par14 = par14 if par14 > 1e-15 else par14 + tiny_offset\n"
+            "        par15 = par15 if par15 > 1e-15 else par15 + tiny_offset\n"
+            "        par16 = par16 if par16 > 1e-15 else par16 + tiny_offset\n"
+        )
     elif sig_type == "wfactor":
         eq_lst = [f"{k} = {v}" for k, v in equations.items() if k in ('wfactor', 'mtar', 'mpipl', 'mkpl')]
-        func_str = f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
-        # Need to initialize since isn't an argument
-        func_str += "        theta_cm = 0.0\n"        
+        func_str = (
+            f"def {sig_type}_optimized(q2_set, w_set, qq, ww, tt):\n"
+            "        theta_cm = 0.0\n"
+        )
     else:
         print(f"ERROR: Unrecognized sig_type '{sig_type}'!")
         sys.exit(2)
 
+    # confirm we have an expression for this sig_type
     matches = list(filter(lambda e: sig_type in e, eq_lst))
     if not matches:
         print(f"ERROR: Issue with function {sig_type}! Check input model file...")
         sys.exit(2)
 
-    # Add checks to avoid zero values
-    func_str += "        qq       = np.where(qq       > 1e-15, qq,       qq + tiny_offset)\n"
-    func_str += "        ww       = np.where(ww       > 1e-15, ww,       ww + tiny_offset)\n"
-    func_str += "        tt       = np.where(tt       > 1e-15, tt,       tt + tiny_offset)\n"
-    func_str += "        theta_cm = np.where(theta_cm > 1e-15, theta_cm, theta_cm + tiny_offset)\n"
+    # ---------- Vector-safe guards (use np.where so arrays are fine) ----------
+    func_str += (
+        "        qq       = np.where(qq       > 1e-15, qq,       qq + tiny_offset)\n"
+        "        ww       = np.where(ww       > 1e-15, ww,       ww + tiny_offset)\n"
+        "        tt       = np.where(tt       > 1e-15, tt,       tt + tiny_offset)\n"
+        "        theta_cm = np.where(theta_cm > 1e-15, theta_cm, theta_cm + tiny_offset)\n"
+    )
 
-    # Build function body with equations
+    # ---------- Build the function body and return the requested symbol ----------
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
     func_str += f"        return {sig_type}\n"
 
-    exec_globals = {'__builtins__': None, 'math': math, 'np': np, 'tiny_offset': tiny_offset}
+    # IMPORTANT: bind 'math' to numpy so 'math.exp/log/...'
+    # in the equation strings work on arrays (np.exp, np.log, np.pi, etc.)
+    exec_globals = {
+        '__builtins__': None,
+        'np': np,
+        'math': np,          # <-- redirect all math.* to numpy ufuncs
+        'tiny_offset': tiny_offset,
+    }
     exec(func_str, exec_globals)
     return exec_globals[f'{sig_type}_optimized']
 
