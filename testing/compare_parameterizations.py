@@ -59,7 +59,7 @@ TMIN = 0.02
 TMAX = 0.60
 
 # Output filename for averaged parameters
-AVG_OUTFILE = "new_par.pl_Q1p6-2p4W2p22.dat"
+AVG_OUTFILE = f"{LTANAPATH}/testing/parameters/new_par.pl_Q1p6-2p4W2p22.dat"
 AVG_ROW_CHI2 = 3.0  # default chi2 for every parameter row in the saved file
 
 ###############################################################################################################################################
@@ -192,7 +192,8 @@ def make_four_panel(datasets, npts=1200, theta_cm=math.pi/2):
             ax.legend()
     fig.suptitle("Comparison of $\\sigma_L,\\sigma_T,\\sigma_{LT},\\sigma_{TT}$")
     fig.tight_layout(rect=[0,0,1,0.96])
-    plt.show()
+    fig.savefig(f"{TEMP_CACHEPATH}/fits_pl_Q1p6-2p4W2p22.pdf")   # <-- save instead of show
+    plt.close(fig)
 
 # ---------- Main ----------
 def main(argv):
