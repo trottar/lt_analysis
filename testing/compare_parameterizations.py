@@ -1,4 +1,5 @@
 #! /usr/bin/python
+# -*- coding: utf-8 -*-
 
 #
 # Description:
@@ -7,62 +8,50 @@ Read two parameter files (new_par.pl_Q??W??.dat), parse par1..par16 + errors + c
 parse Q^2 and W from the path, then plot a 4-panel comparison:
   - Set A
   - Set B
-  - Weighted average of A and B (using errors + chi2):
-      w_k^(f) = (1/chi2_f) * (1/err_{k,f}^2)
-      pbar_k  = sum_f w_k^(f) p_{k,f} / sum_f w_k^(f)
-      sbar_k  = 1 / sqrt(sum_f w_k^(f))
-Also writes the averaged parameters to:
-  new_par.pl_Q1p6-2p4W2p22.dat
-with the same spacing/columns as the inputs and a default chi2 of 3.0 per row.
+  - Combined "best" parameter set judged from the two inputs
+    (fixed-effects if compatible; otherwise random-effects with error inflation).
+We also quantify the compatibility (per-parameter pulls, global Q, I^2, and a quality label).
+If the combination is poor, that’s a flag the functional form likely needs adapting.
+
+We **preserve all current functionality**:
+- Original weighted-average output is still written (fixed-effects w = (1/chi2)*(1/err^2)).
+- Same 4-panel plot (now includes the selected “Best” set).
+- New diagnostics are printed and saved.
 
 Defaults (used if no args):
   <OUTPATH>/testing_env/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat
   <OUTPATH>/testing_env/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat
 """
 # ================================================================
-# Time-stamp: "2025-10-01 08:44:00 trottar"
+# Time-stamp: "2025-10-03"
 # ================================================================
 #
-# Author:  Richard L. Trotta III <trotta@cua.edu>
+# Author:  Richard L. Trotta III
 #
 ###############################################################################################################################################
 
-import sys,os
-import re
-import math
+import sys, os, re, math, csv
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-###############################################################################################################################################
-# ltsep package import and pathing definitions
-
+# ---------- ltsep paths ----------
 from ltsep import Root
-from ltsep import Misc
-
-lt=Root(os.path.realpath(__file__),"Plot_LTSep")
-
-USER=lt.USER
-HOST=lt.HOST
-REPLAYPATH=lt.REPLAYPATH
-UTILPATH=lt.UTILPATH
-LTANAPATH=lt.LTANAPATH
-ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
-CACHEPATH=lt.CACHEPATH
-
+lt = Root(os.path.realpath(__file__), "Plot_LTSep")
+USER=lt.USER; HOST=lt.HOST; REPLAYPATH=lt.REPLAYPATH; UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH; ANATYPE=lt.ANATYPE; OUTPATH=lt.OUTPATH; CACHEPATH=lt.CACHEPATH
 TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
 
-###############################################################################################################################################
-# t-range
+# ---------- t-range ----------
 TMIN = 0.02
 TMAX = 0.60
 
-file_str = "pl_Q1p6-2p4W2p22"
-
-# Output filename for averaged parameters
-AVG_OUTFILE = f"{LTANAPATH}/testing/parameters/new_par.{file_str}.dat"
-AVG_ROW_CHI2 = 3.0  # default chi2 for every parameter row in the saved file
+# Output filenames
+file_str           = "pl_Q1p6-2p4W2p22"
+AVG_OUTFILE        = f"{LTANAPATH}/testing/parameters/new_par.{file_str}.dat"               # original fixed-effects output (preserved)
+BEST_OUTFILE       = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_best.dat"          # newly selected "best" (FE or RE)
+DIAG_CSV_OUTFILE   = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_diagnostics.csv"   # diagnostics table
+AVG_ROW_CHI2       = 3.0  # default chi2 for every parameter row in the saved files
 
 ###############################################################################################################################################
 # ---------- Constants ----------
@@ -114,10 +103,8 @@ def parse_Q2_W_from_path(p: Path):
         return q2, w
     raise ValueError(f"Could not parse Q^2 and W from path: {p}")
 
-def read_pars_file(par_path: Path):
-    values = {}
-    errors = {}
-    chi2_list = []
+def read_params_file(par_path: Path):
+    values, errors, chi2_list = {}, {}, []
     with open(par_path, 'r') as f:
         for line in f:
             line = line.strip()
@@ -143,8 +130,15 @@ def read_pars_file(par_path: Path):
 
     errs = np.clip(errs, 1e-18, None)
     chi2 = max(chi2, 1e-18)
-
     return vals, errs, chi2
+
+def write_params_file(filename, values, errors, chi2_per_row=3.0):
+    with open(filename, "w") as f:
+        for idx in range(1, 17):
+            v = values[idx-1]
+            e = errors[idx-1]
+            line = f"{v: .8e}   {e: .8e}   {idx:2d}          {chi2_per_row:.1f}\n"
+            f.write(line)
 
 def weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B):
     wA = (1.0/chi2A) * (1.0/np.square(errsA))
@@ -153,19 +147,6 @@ def weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B):
     pbar = (wA*valsA + wB*valsB) / wsum
     sbar = 1.0 / np.sqrt(wsum)
     return pbar, sbar
-
-def write_params_file(filename, values, errors, chi2_per_row=3.0):
-    """
-    Write lines with the same spacing/columns as your inputs:
-      <value>   <error>   <index>          <chi2>
-    Using scientific notation and aligned columns.
-    """
-    with open(filename, "w") as f:
-        for idx in range(1, 17):
-            v = values[idx-1]
-            e = errors[idx-1]
-            line = f"{v: .8e}   {e: .8e}   {idx:2d}          {chi2_per_row:.1f}\n"
-            f.write(line)
 
 # ---------- Plotting ----------
 def make_four_panel(datasets, npts=1200, theta_cm=math.pi/2):
@@ -195,61 +176,19 @@ def make_four_panel(datasets, npts=1200, theta_cm=math.pi/2):
     fig.savefig(f"{TEMP_CACHEPATH}/fits_{file_str}.pdf")
     plt.close(fig)
 
-# ---------- Main ----------
-def main(argv):
-    default_files = [
-        f"{TEMP_CACHEPATH}/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat",
-        f"{TEMP_CACHEPATH}/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat"
-    ]
-
-    if len(argv) == 1:
-        files = default_files
-        print("No input files provided, using defaults:")
-        for f in files:
-            print("  ", f)
-    elif len(argv) == 3:
-        files = argv[1:3]
-    else:
-        print("Usage: python3 script.py <fileA> <fileB>")
-        sys.exit(2)
-
-    A_path = Path(files[0]); B_path = Path(files[1])
-    q2A, wA = parse_Q2_W_from_path(A_path)
-    q2B, wB = parse_Q2_W_from_path(B_path)
-
-    valsA, errsA, chi2A = read_pars_file(A_path)
-    valsB, errsB, chi2B = read_pars_file(B_path)
-
-    avg_vals, avg_errs = weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B)
-    q2_avg = 0.5*(q2A + q2B)
-    w_avg  = 0.5*(wA  + wB )
-
-    print("\nWeighted-average parameters (w = (1/chi2)*(1/err^2)):")
-    for i, (v, s) in enumerate(zip(avg_vals, avg_errs), start=1):
-        print(f"  par{i:02d} = {v:+.8e}   +/- {s:.3e}")
-
-    write_params_file(AVG_OUTFILE, avg_vals, avg_errs, chi2_per_row=AVG_ROW_CHI2)
-    print(f"\nWrote averaged parameters to: {AVG_OUTFILE}")
-    print(f"  (Q^2_avg={q2_avg:.3g}, W_avg={w_avg:.3g}, chi2 per row written = {AVG_ROW_CHI2:.1f})")
-
-    datasets = [
-        {"name": "Set A",           "pars": valsA,    "qq": q2A,    "ww": wA},
-        {"name": "Set B",           "pars": valsB,    "qq": q2B,    "ww": wB},
-        {"name": "Avg (weighted)",  "pars": avg_vals, "qq": q2_avg, "ww": w_avg},
-    ]
-
-    make_four_panel(datasets)
-
-if __name__ == "__main__":
-    main(sys.argv)
-
-# ========================= ADDED UTILITIES =========================
+###############################################################################################################################################
+# ========================= ADDED UTILITIES: diagnostics + robust combination =========================
 def param_pulls(valsA, errsA, valsB, errsB):
+    """Per-parameter pulls: z_k = (A - B) / sqrt(sA^2 + sB^2)."""
     denom = np.sqrt(np.square(errsA) + np.square(errsB))
     denom = np.clip(denom, 1e-18, None)
     return (valsA - valsB) / denom
 
 def dersimonian_laird_tau2(vA, sA, vB, sB, chi2A=None, chi2B=None):
+    """
+    Method-of-moments tau^2 per parameter. If chi2A/B provided, we honor the script's
+    1/chi2 down-weight by inflating within-fit variances before computing tau^2.
+    """
     if chi2A is not None and chi2B is not None:
         sA2 = np.square(sA) * chi2A
         sB2 = np.square(sB) * chi2B
@@ -277,15 +216,125 @@ def random_effects_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B):
     sbar = np.sqrt(1.0 / wsum)
     return pbar, sbar, pulls, tau2
 
-def combine_params(valsA, errsA, chi2A, valsB, errsB, chi2B, mode="auto", pull_thresh=2.0, verbose=True):
+def global_heterogeneity_stats(pulls):
+    """
+    With two studies per parameter, df=1 for each parameter's Q.
+    Sum Q over parameters => Q_total with df_total = 16.
+    I^2 per parameter: max(0, (Q-1)/Q); we report mean I^2.
+    """
+    # For two-study case, Q_k = z_k^2 (since df=1)
+    Q_per = np.square(pulls)
+    Q_tot = float(np.sum(Q_per))
+    df_tot = len(pulls)  # 16
+    I2_per = np.maximum(0.0, (Q_per - 1.0) / np.clip(Q_per, 1e-18, None))
+    I2_mean = float(np.mean(I2_per))
+    # p-value for Q_tot with df_tot via scipy if available; else None
+    pval = None
+    try:
+        from scipy.stats import chi2 as _chi2
+        pval = float(_chi2.sf(Q_tot, df_tot))
+    except Exception:
+        pval = None
+    return Q_per, Q_tot, df_tot, I2_per, I2_mean, pval
+
+def quality_label(pulls, I2_mean, pval):
+    """
+    A simple, transparent rule-of-thumb classifier to tell you if the single-parameter
+    set “works for both”:
+      - GOOD:  max|z| ≤ 2 and I2_mean < 0.25 and (pval is None or pval > 0.05)
+      - OK:    max|z| ≤ 3 and I2_mean < 0.50
+      - BAD:   otherwise  (likely functional form mismatch across Q^2)
+    """
+    max_abs_z = float(np.max(np.abs(pulls))) if len(pulls) else 0.0
+    good_p = (pval is None) or (pval > 0.05)
+    if (max_abs_z <= 2.0) and (I2_mean < 0.25) and good_p:
+        return "GOOD", max_abs_z
+    if (max_abs_z <= 3.0) and (I2_mean < 0.50):
+        return "OK", max_abs_z
+    return "BAD", max_abs_z
+
+###############################################################################################################################################
+# ---------- Main (adapted) ----------
+def main(argv):
+    # Original defaults preserved
+    default_files = [
+        f"{TEMP_CACHEPATH}/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat",
+        f"{TEMP_CACHEPATH}/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat"
+    ]
+
+    if len(argv) == 1:
+        files = default_files
+        print("No input files provided, using defaults:")
+        for f in files:
+            print("  ", f)
+    elif len(argv) == 3:
+        files = argv[1:3]
+    else:
+        print("Usage: python3 script.py <fileA> <fileB>")
+        sys.exit(2)
+
+    A_path = Path(files[0]); B_path = Path(files[1])
+    q2A, wA = parse_Q2_W_from_path(A_path)
+    q2B, wB = parse_Q2_W_from_path(B_path)
+    q2_avg = 0.5*(q2A + q2B)
+    w_avg  = 0.5*(wA  + wB )
+
+    valsA, errsA, chi2A = read_params_file(A_path)
+    valsB, errsB, chi2B = read_params_file(B_path)
+
+    # ---- 1) Original fixed-effects average (preserved) ----
     fe_vals, fe_errs = weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B)
-    if mode == "fe":
-        return fe_vals, fe_errs, None
+    write_params_file(AVG_OUTFILE, fe_vals, fe_errs, chi2_per_row=AVG_ROW_CHI2)
+    print(f"\n[FE] Wrote original fixed-effects average to: {AVG_OUTFILE}")
+
+    # ---- 2) Random-effects alternative + diagnostics ----
     re_vals, re_errs, pulls, tau2 = random_effects_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B)
-    if mode == "re":
-        return re_vals, re_errs, {"pulls":pulls, "tau2":tau2}
-    use_re = np.abs(pulls) > float(pull_thresh)
-    avg_vals = np.where(use_re, re_vals, fe_vals)
-    avg_errs = np.where(use_re, re_errs, fe_errs)
-    return avg_vals, avg_errs, {"pulls":pulls, "tau2":tau2, "use_re":use_re}
-# ========================= END ADDED UTILITIES =========================
+    Q_per, Q_tot, df_tot, I2_per, I2_mean, pval = global_heterogeneity_stats(pulls)
+    label, max_abs_z = quality_label(pulls, I2_mean, pval)
+
+    # Selection rule: if compatible -> fixed-effects; else random-effects
+    compatible = (label == "GOOD")
+    best_vals, best_errs = (fe_vals, fe_errs) if compatible else (re_vals, re_errs)
+    write_params_file(BEST_OUTFILE, best_vals, best_errs, chi2_per_row=AVG_ROW_CHI2)
+    print(f"[BEST] Selected {'FIXED-EFFECTS' if compatible else 'RANDOM-EFFECTS'} based on diagnostics.")
+    print(f"[BEST] Wrote selected parameters to: {BEST_OUTFILE}")
+
+    # ---- 3) Print concise diagnostics ----
+    print("\n=== Combination diagnostics ===")
+    if pval is None:
+        print(f"Global Q = {Q_tot:.2f} (df={df_tot}), mean I^2 = {I2_mean:.3f}, max|z| = {max_abs_z:.2f}")
+        print("p-value not available (scipy not found).")
+    else:
+        print(f"Global Q = {Q_tot:.2f} (df={df_tot}), p = {pval:.3f}, mean I^2 = {I2_mean:.3f}, max|z| = {max_abs_z:.2f}")
+    print(f"Quality label: {label}")
+    if label == "BAD":
+        print("Note: Significant tension between fits. Likely the **functional form** needs adaptation for Q^2 evolution.")
+
+    # ---- 4) Save diagnostics CSV for offline inspection ----
+    try:
+        with open(DIAG_CSV_OUTFILE, "w", newline="") as fcsv:
+            w = csv.writer(fcsv)
+            w.writerow(["par_index","pull_z","Q=z^2","tau2","I2"])
+            for k in range(16):
+                w.writerow([k+1, pulls[k], Q_per[k], tau2[k], I2_per[k]])
+            # global summary row
+            w.writerow([])
+            w.writerow(["GLOBAL","Q_total",Q_tot,"df_total",df_tot])
+            w.writerow(["GLOBAL","p_value (NaN if no scipy)", (float('nan') if pval is None else pval)])
+            w.writerow(["GLOBAL","I2_mean",I2_mean,"max|z|",max_abs_z])
+            w.writerow(["BEST_CHOICE","mode", ("FE" if compatible else "RE")])
+        print(f"Saved diagnostics to: {DIAG_CSV_OUTFILE}")
+    except Exception as e:
+        print("Warning: could not write diagnostics CSV:", e)
+
+    # ---- 5) Make the plot including the selected 'Best' set ----
+    datasets = [
+        {"name": "Set A",           "pars": valsA,     "qq": q2A,     "ww": wA},
+        {"name": "Set B",           "pars": valsB,     "qq": q2B,     "ww": wB},
+        {"name": "Avg (weighted)",  "pars": fe_vals,   "qq": q2_avg,  "ww": w_avg},  # preserved
+        {"name": "Best (selected)", "pars": best_vals, "qq": q2_avg,  "ww": w_avg},
+    ]
+    make_four_panel(datasets)
+
+if __name__ == "__main__":
+    main(sys.argv)
