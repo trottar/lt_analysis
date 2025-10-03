@@ -376,61 +376,72 @@ def per_function_chi2_from_rows(chi2_rows):
 
 def per_function_decision(group_name, pulls, I2_per, parsA, parsB, q2A, q2B, w, chi2_data=None):
     """
-    Decide FE/RE/BAD for a parameter group.
-    Inputs:
-      - group_name in {"L","T","LT","TT"} or "OTHER"
-      - pulls, I2_per: per-parameter arrays (length 16)
-      - parsA/parsB: full parameter vectors from the two fits
-      - q2A, q2B, w: kinematics
-      - chi2_data: optional dict of data-level χ² per function (e.g., {"T":1.0, "TT":0.95})
-
-    Rules (more leeway):
-      1) Small-tension override (protect small-signal cases): if zmax ≤ Z_SMALL and I2_mean ≤ I2_SMALL → FE.
-      2) If chi2_data provided and chi2_data[group] ≤ CHI2_DATA_FE_MAX → FE.
-      3) For OTHER (no σ-model): decide based on pulls/I² only using FE/RE thresholds.
-      4) For L/T/LT/TT: use pulls/I² + robust ΔRMS with relaxed FE/RE thresholds.
-      5) BAD only if outside relaxed RE region (i.e., truly incompatible shapes/pars).
+    Decide FE/RE/BAD for a parameter group with sensible gating:
+      - Always compute robust dRMS first for physics groups.
+      - Primary decision from (zmax, I2_mean, dRMS) with relaxed thresholds.
+      - Data-χ² override can upgrade at most one level (BAD→RE or RE→FE),
+        and only when tension/shape are not extreme.
     """
-    ZS, IS = float(TUNABLES["Z_SMALL"]), float(TUNABLES["I2_SMALL"])
-    ZF, IF, DF = float(TUNABLES["Z_FE"]), float(TUNABLES["I2_FE"]), float(TUNABLES["DRMS_FE"])
-    ZR, IR, DR = float(TUNABLES["Z_RE"]), float(TUNABLES["I2_RE"]), float(TUNABLES["DRMS_RE"])
-    CHI2_FE_MAX = float(TUNABLES["CHI2_DATA_FE_MAX"])
 
+    # ---------- Tunables (use your TUNABLES dict if present) ----------
+    ZS, IS = 1.8, 0.15        # small-tension override
+    ZF, IF, DF = 2.5, 0.35, 0.50   # FE thresholds
+    ZR, IR, DR = 4.0, 0.75, 0.90   # RE thresholds
+    CHI2_FE_MAX = 1.25             # data-chi2 "good" threshold
+
+    # "extreme tension" guardrails to block χ² override
+    Z_EXTREME   = 6.0   # if zmax exceeds this, do not upgrade
+    DRMS_EXTREME= 1.5   # if dRMS exceeds this, do not upgrade (clearly different shapes)
+
+    # ---------- Pull/I^2 for this group ----------
     idxs = PARAM_GROUPS[group_name]
     z = pulls[idxs]
     I2 = I2_per[idxs]
     zmax = float(np.max(np.abs(z))) if len(z) else 0.0
     I2m  = float(np.mean(I2)) if len(I2) else 0.0
 
-    # 1) Small-tension override
+    # ---------- Compute dRMS BEFORE any decision (physics groups only) ----------
+    dRMS = model_delta_rms(group_name, parsA, parsB, q2A, q2B, w)  # NaN for OTHER
+
+    # ---------- 0) Small-tension override (protect tiny-signal cases) ----------
+    # Only applies if both tension metrics are tiny; independent of dRMS.
     if (zmax <= ZS) and (I2m <= IS):
-        return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+        return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
 
-    # 2) Data-χ² override (when available)
-    if (chi2_data is not None) and (group_name in chi2_data):
-        try:
-            if float(chi2_data[group_name]) <= CHI2_FE_MAX:
-                return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
-        except Exception:
-            pass  # ignore malformed chi2_data
-
-    # 3) OTHER group: no σ-model → decide using pulls/I² only
-    dRMS = model_delta_rms(group_name, parsA, parsB, q2A, q2B, w)
+    # ---------- 1) Primary decision from thresholds ----------
+    # OTHER group: no sigma model → ignore dRMS (it's NaN), use z/I2 only
     if np.isnan(dRMS):
         if (zmax <= ZF) and (I2m < IF):
-            return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
-        if (zmax <= ZR) and (I2m < IR):
-            return "RE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
-        return "BAD", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+            primary = "FE"
+        elif (zmax <= ZR) and (I2m < IR):
+            primary = "RE"
+        else:
+            primary = "BAD"
+    else:
+        if (zmax <= ZF) and (I2m < IF) and (dRMS < DF):
+            primary = "FE"
+        elif (zmax <= ZR) and (I2m < IR) and (dRMS < DR):
+            primary = "RE"
+        else:
+            primary = "BAD"
 
-    # 4) Physics functions: include robust shape metric
-    if (zmax <= ZF) and (I2m < IF) and (dRMS < DF):
-        return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
-    if (zmax <= ZR) and (I2m < IR) and (dRMS < DR):
-        return "RE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
+    # ---------- 2) Gated χ² override (at most one-level upgrade) ----------
+    # Only consider if we actually have per-function chi2.
+    if (chi2_data is not None) and (group_name in chi2_data):
+        chi2v = chi2_data[group_name]
+        if (chi2v == chi2v) and (chi2v <= CHI2_FE_MAX):
+            # Allow upgrade only if not extreme tension/shape
+            not_extreme = (zmax <= Z_EXTREME) and (np.isnan(dRMS) or dRMS <= DRMS_EXTREME)
 
-    # 5) Truly outside relaxed region
-    return "BAD", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
+            if not_extreme:
+                if primary == "BAD":
+                    primary = "RE"  # upgrade BAD→RE
+                elif primary == "RE":
+                    primary = "FE"  # upgrade RE→FE
+                # if FE already, keep FE
+            # else: keep primary (no upgrade in extreme cases)
+
+    return primary, {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
 
 # ---------- Main (adapted; preserves original outputs and adds per-function selection) ----------
 def main(argv):
