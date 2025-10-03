@@ -48,7 +48,7 @@ CACHEPATH=lt.CACHEPATH
 TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
 
 ###############################################################################################################################################
-# Easy-to-change t-range
+# t-range
 TMIN = 0.020
 TMAX = 0.600
 
