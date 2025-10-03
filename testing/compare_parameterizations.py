@@ -18,8 +18,6 @@ Default files (used if no arguments are provided):
 #
 # Author:  Richard L. Trotta III <trotta@cua.edu>
 #
-# Copyright (c) trottar
-#
 ###############################################################################################################################################
 
 import sys,os
@@ -121,7 +119,7 @@ def read_pars_file(par_path: Path):
     return np.array([values.get(i, 0.0) for i in range(1, 17)], dtype=float)
 
 # ---------- Plotting ----------
-def make_four_panel(datasets, tmin=0.001, tmax=0.60, npts=1200, theta_cm=math.pi/2):
+def make_four_panel(datasets, tmin=0.01, tmax=0.60, npts=1200, theta_cm=math.pi/2):
     obs = {
         "L":  (sigma_L,  r'$\sigma_L$'),
         "T":  (sigma_T,  r'$\sigma_T$'),
@@ -147,7 +145,7 @@ def make_four_panel(datasets, tmin=0.001, tmax=0.60, npts=1200, theta_cm=math.pi
     fig.tight_layout(rect=[0,0,1,0.96])
     plt.show()
 
-def make_tt_zoom(datasets, tmin=0.001, tmax=0.60, npts=1200, theta_cm=math.pi/2, exclude=0.004):
+def make_tt_zoom(datasets, tmin=0.01, tmax=0.60, npts=1200, theta_cm=math.pi/2, exclude=0.004):
     t_neg = -np.linspace(tmin, tmax, npts)
     tpos  = -t_neg
     t_sing = mpipl**2
