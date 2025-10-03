@@ -120,12 +120,35 @@ def eval_sigma(group_name, pars, q2_set, w_set, qq, ww, tt, theta_cm):
     Always call the prepared functions via this dispatcher:
 
         sig_*_optimized(q2_set, w_set, qq, ww, tt, theta_cm, p1, p2, p3, p4)
+
+    Returns a 1D numpy array with the SAME length as `tt` (broadcasting scalars if needed).
     """
     if group_name not in OPT_FUNCS:
         raise KeyError(f"Missing optimized function for {group_name}")
     f = OPT_FUNCS[group_name]
     p1, p2, p3, p4 = _slice_pars(group_name, pars)
-    return f(q2_set, w_set, qq, ww, tt, theta_cm, p1, p2, p3, p4)
+
+    # Call the optimized function
+    y = f(q2_set, w_set, qq, ww, tt, theta_cm, p1, p2, p3, p4)
+
+    # --- Shape normalization (critical for plotting) ---
+    tt_arr = np.asarray(tt)
+    y_arr  = np.asarray(y)
+
+    # If scalar or 0-d, broadcast to tt shape
+    if y_arr.ndim == 0:
+        y_arr = np.full_like(tt_arr, float(y_arr), dtype=float)
+
+    # If (1,) or otherwise not matching tt length, try broadcasting
+    elif y_arr.shape[0] != tt_arr.shape[0]:
+        try:
+            y_arr = np.broadcast_to(y_arr, tt_arr.shape)
+        except ValueError:
+            # Fallback: force to same length with uniform fill of first element
+            y_arr = np.full_like(tt_arr, float(np.ravel(y_arr)[0]), dtype=float)
+
+    # Ensure 1D vector
+    return np.ravel(y_arr)
 
 # ---------- Helpers ----------
 def parse_Q2_W_from_path(p: Path):
