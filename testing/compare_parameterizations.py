@@ -178,8 +178,8 @@ def make_tt_zoom(datasets, tmin=0.001, tmax=0.60, npts=1200, theta_cm=math.pi/2,
 # ---------- Main ----------
 def main(argv):
     default_files = [
-        "{TEMP_CACHEPATH}/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat",
-        "{TEMP_CACHEPATH}/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat"
+        f"{TEMP_CACHEPATH}/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat",
+        f"{TEMP_CACHEPATH}/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat"
     ]
 
     if len(argv) == 1:
