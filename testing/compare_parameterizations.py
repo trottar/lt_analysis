@@ -20,6 +20,14 @@ Default files (used if no arguments are provided):
 #
 # Copyright (c) trottar
 #
+###############################################################################################################################################
+
+import sys,os
+import re
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
 
 ###############################################################################################################################################
 # ltsep package import and pathing definitions
@@ -44,13 +52,6 @@ CACHEPATH=lt.CACHEPATH
 TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
 
 ###############################################################################################################################################
-
-import sys
-import re
-import math
-import numpy as np
-import matplotlib.pyplot as plt
-from pathlib import Path
 
 # ---------- Constants ----------
 mtar  = 0.93827231
