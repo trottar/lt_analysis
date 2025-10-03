@@ -891,7 +891,7 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
     
     # If any residual is non-finite, return a very large cost.
     if not np.all(np.isfinite(residuals)):
-        print("Non-finite residual detected. Parameters:", current_params)
+        #print("Non-finite residual detected. Parameters:", current_params)
         return 1e12, lambda_reg
 
     def compute_cost(lambda_val, residuals):

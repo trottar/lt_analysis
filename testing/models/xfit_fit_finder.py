@@ -14,14 +14,6 @@ import numpy as np
 from ROOT import TGraph, TGraphErrors, TF1, TCanvas, TText, TLatex, TLegend, kRed, kBlue, kGreen, kMagenta, kBlack
 import sys, math, time, random
 
-from ROOT import gErrorIgnoreLevel, kError, kFatal
-gErrorIgnoreLevel = kError  # or kFatal if you want total silence
-import ROOT
-ROOT.Math.MinimizerOptions.SetDefaultPrintLevel(0)
-import warnings, numpy as np
-warnings.filterwarnings("ignore")
-np.seterr(all="ignore")
-
 ##################################################################################################################################################
 # Importing utility functions
 
