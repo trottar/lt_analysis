@@ -263,36 +263,65 @@ def global_heterogeneity_stats(pulls):
     return Q_per, Q_tot, df_tot, I2_per, I2_mean, pval
 
 def model_delta_rms(per_func, parsA, parsB, q2A, q2B, w, npts=400, theta_cm=math.pi/2):
-    """Relative ΔRMS between model predictions from A and B across t, averaged over both Q² points."""
-    t = -np.linspace(TMIN, TMAX, npts)
+    """
+    Relative ΔRMS between model predictions from A and B across t, averaged over both Q² points.
+    Only defined for the physical structure functions {L, T, LT, TT}. For any other group,
+    returns np.nan so higher-level logic can fall back to pulls/I²-based decisions.
+    """
     funcs = {"L": sigma_L, "T": sigma_T, "LT": sigma_LT, "TT": sigma_TT}
+    if per_func not in funcs:
+        return float("nan")  # e.g., "OTHER" group has no direct σ-model
+
+    t = -np.linspace(TMIN, TMAX, npts)
     f = funcs[per_func]
     yA1, yB1 = f(parsA, q2A, t, theta_cm, w), f(parsB, q2A, t, theta_cm, w)
     yA2, yB2 = f(parsA, q2B, t, theta_cm, w), f(parsB, q2B, t, theta_cm, w)
-    def rel_rms(a,b):
-        denom = 0.5*(np.abs(a)+np.abs(b))
+
+    def rel_rms(a, b):
+        denom = 0.5 * (np.abs(a) + np.abs(b))
         denom = np.clip(denom, 1e-18, None)
-        r = (a-b)/denom
-        return float(np.sqrt(np.mean(r*r)))
-    return 0.5*(rel_rms(yA1,yB1) + rel_rms(yA2,yB2))
+        r = (a - b) / denom
+        return float(np.sqrt(np.mean(r * r)))
+
+    return 0.5 * (rel_rms(yA1, yB1) + rel_rms(yA2, yB2))
+
 
 def per_function_decision(group_name, pulls, I2_per, parsA, parsB, q2A, q2B, w):
-    """Return ('FE' or 'RE' or 'BAD', metrics dict)."""
+    """
+    Return ('FE' or 'RE' or 'BAD', metrics dict) for a parameter group.
+    For L/T/LT/TT: use pulls, I², and ΔRMS(shape) across t.
+    For any other group (e.g., "OTHER"): base on pulls/I² only (ΔRMS=NaN).
+    """
     idxs = PARAM_GROUPS[group_name]
     z = pulls[idxs]
     I2 = I2_per[idxs]
     zmax = float(np.max(np.abs(z))) if len(z) else 0.0
     I2m  = float(np.mean(I2)) if len(I2) else 0.0
+
     dRMS = model_delta_rms(group_name, parsA, parsB, q2A, q2B, w)
+
+    if np.isnan(dRMS):
+        # No model mapping (e.g., OTHER): decide from pulls/I² only.
+        # Conservative, transparent rules:
+        #   zmax<=2 and I2m<0.25 -> FE
+        #   zmax<=3 and I2m<0.50 -> RE
+        #   else -> BAD (but we will still pick RE downstream to inflate errors)
+        if (zmax <= 2.0) and (I2m < 0.25):
+            return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+        if (zmax <= 3.0) and (I2m < 0.50):
+            return "RE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+        return "BAD", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+
+    # For the four physical functions, include ΔRMS shape info.
     # Rules of thumb (tunable):
-    # GOOD if zmax<=2 and I2m<0.25 and dRMS<0.25 → FE
-    # OK   if zmax<=3 and I2m<0.50 and dRMS<0.40 → RE
-    # BAD  otherwise
-    if (zmax<=2.0) and (I2m<0.25) and (dRMS<0.25):
-        return "FE", {"zmax":zmax,"I2_mean":I2m,"dRMS":dRMS}
-    if (zmax<=3.0) and (I2m<0.50) and (dRMS<0.40):
-        return "RE", {"zmax":zmax,"I2_mean":I2m,"dRMS":dRMS}
-    return "BAD", {"zmax":zmax,"I2_mean":I2m,"dRMS":dRMS}
+    #   GOOD: zmax<=2, I2m<0.25, dRMS<0.25  -> FE
+    #   OK:   zmax<=3, I2m<0.50, dRMS<0.40  -> RE
+    #   BAD:  otherwise
+    if (zmax <= 2.0) and (I2m < 0.25) and (dRMS < 0.25):
+        return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
+    if (zmax <= 3.0) and (I2m < 0.50) and (dRMS < 0.40):
+        return "RE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
+    return "BAD", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
 
 # ---------- Main (adapted; preserves original outputs and adds per-function selection) ----------
 def main(argv):
@@ -365,7 +394,8 @@ def main(argv):
     print(" func  | decision | max|z|  |  I2_mean  |  ΔRMS(A vs B) ")
     print("-------+----------+--------+-----------+---------------")
     for func, choice, zmax, I2m, dR in perfunc_summary:
-        print(f" {func:5s} | {choice:8s} | {zmax:6.2f} | {I2m:9.3f} | {dR:13.3f}")
+        dR_str = f"{dR: .3f}" if (dR == dR) else "   NaN"  # NaN-safe formatting
+        print(f" {func:5s} | {choice:8s} | {zmax:6.2f} | {I2m:9.3f} | {dR_str:>13s}")    
     # Guidance:
     if any(c=="BAD" for _,c,_,_,_ in perfunc_summary):
         print("\nNOTE: One or more functions are marked BAD — parameters disagree beyond tolerance and model shapes differ (ΔRMS high).")
