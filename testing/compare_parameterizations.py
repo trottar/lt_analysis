@@ -84,18 +84,16 @@ def wfactor(ww):
 
 def sigma_L(pars, qq, t, theta_cm, ww):
     par1, par2, par3, par4 = pars[0], pars[1], pars[2], pars[3]
-    return (wfactor(ww)
-            * (par1 * qq / (1 + par2*qq + 0.05*(qq**2))**2)
+    return ((par1 * qq / (1 + par2*qq + 0.05*(qq**2))**2)
             * np.exp((par3 - par4*np.log(qq)) * -np.abs(t)))
 
 def sigma_T(pars, qq, t, theta_cm, ww):
     par5, par6 = pars[4], pars[5]
-    return wfactor(ww) * ((par5 / qq) + (par6 / (qq**2))) * np.ones_like(t)
+    return ((par5 / qq) + (par6 / (qq**2))) * np.ones_like(t)
 
 def sigma_LT(pars, qq, t, theta_cm, ww):
     par9, par10, par11, par12 = pars[8], pars[9], pars[10], pars[11]
-    return (wfactor(ww)
-            * (np.exp(par9 + (par10 / np.sqrt(qq)) * -np.abs(t)) + par11 - (par12 / (qq**2)))
+    return ((np.exp(par9 + (par10 / np.sqrt(qq)) * -np.abs(t)) + par11 - (par12 / (qq**2)))
             * np.sin(theta_cm))
 
 def sigma_TT(pars, qq, t, theta_cm, ww):
@@ -103,8 +101,7 @@ def sigma_TT(pars, qq, t, theta_cm, ww):
     abs_t = np.abs(t)
     denom = (-abs_t + mpipl**2)**2
     denom = np.clip(denom, 1e-18, None)
-    return (wfactor(ww)
-            * (par13 / (qq**2))
+    return ((par13 / (qq**2))
             * (-abs_t / denom)
             * (np.sin(theta_cm)**2))
 
