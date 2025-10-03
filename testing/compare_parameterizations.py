@@ -334,8 +334,9 @@ def model_delta_rms(per_func, parsA, parsB, q2A, q2B, w, npts=400, theta_cm=math
     eps_frac = float(TUNABLES["EPS_FRAC"])
 
     def nrmse_at_q2(q2):
+        print("!!!!!!!!!!!!!!!", parsA)
         A = f(1.6, 2.22, q2, w, t, theta_cm, parsA[0], parsA[1], parsA[2], parsA[3])
-        B = f(1.6, 2.22, q2, w, t, theta_cm, parsB[0], parsB[1], parsB[2], parsB[3])
+        B = f(2.45, 2.22, q2, w, t, theta_cm, parsB[0], parsB[1], parsB[2], parsB[3])
         avg_mag = 0.5 * (np.abs(A) + np.abs(B))
         # robust scale for masking + denominator scaling
         ref = np.percentile(avg_mag, 75)  # upper-mid scale
