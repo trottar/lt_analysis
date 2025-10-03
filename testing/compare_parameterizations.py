@@ -145,34 +145,6 @@ def make_four_panel(datasets, tmin=0.01, tmax=0.60, npts=1200, theta_cm=math.pi/
     fig.tight_layout(rect=[0,0,1,0.96])
     plt.show()
 
-def make_tt_zoom(datasets, tmin=0.01, tmax=0.60, npts=1200, theta_cm=math.pi/2, exclude=0.004):
-    t_neg = -np.linspace(tmin, tmax, npts)
-    tpos  = -t_neg
-    t_sing = mpipl**2
-
-    all_vals = []
-    for data in datasets:
-        y = sigma_TT(data["pars"], data["qq"], t_neg, theta_cm, data["ww"])
-        mask = (np.abs(tpos - t_sing) > exclude)
-        all_vals.append(y[mask])
-    finite_vals = np.concatenate(all_vals)
-    ymax = np.nanpercentile(np.abs(finite_vals), 99.5)
-
-    plt.figure(figsize=(7,5))
-    for data in datasets:
-        y = sigma_TT(data["pars"], data["qq"], t_neg, theta_cm, data["ww"])
-        plt.plot(tpos, y, label=f'{data["name"]}  (Q^2={data["qq"]}, W={data["ww"]})')
-    plt.axvline(t_sing, linestyle=':', linewidth=2, label=r'Singularity at $-t=m_\pi^2$')
-    plt.ylim(-ymax, ymax)
-    plt.xlim(tmin, tmax)
-    plt.xlabel(r'$-t\ \mathrm{[GeV^2]}$')
-    plt.ylabel(r'$\sigma_{TT}$ (arb.)')
-    plt.title(r'$\sigma_{TT}$ zoomed (singularity marked)$\,$')
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-
 # ---------- Main ----------
 def main(argv):
     default_files = [
@@ -205,7 +177,6 @@ def main(argv):
         })
 
     make_four_panel(datasets)
-    make_tt_zoom(datasets)
 
 if __name__ == "__main__":
     main(sys.argv)
