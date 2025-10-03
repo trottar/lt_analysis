@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#! /usr/bin/python
+
+#
+# Description:
 """
 Read two parameter files (new_par.pl_Q??W??.dat), parse par1..par16, parse Q^2 and W
 from the pathname (e.g., Q1p6W2p22/...), then plot:
@@ -9,6 +12,38 @@ Default files (used if no arguments are provided):
   Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat
   Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat
 """
+# ================================================================
+# Time-stamp: "2025-10-01 08:44:00 trottar"
+# ================================================================
+#
+# Author:  Richard L. Trotta III <trotta@cua.edu>
+#
+# Copyright (c) trottar
+#
+
+###############################################################################################################################################
+# ltsep package import and pathing definitions
+
+# Import package for cuts
+from ltsep import Root
+# Import package for progress bar
+from ltsep import Misc
+
+lt=Root(os.path.realpath(__file__),"Plot_LTSep")
+
+# Add this to all files for more dynamic pathing
+USER=lt.USER # Grab user info for file finding
+HOST=lt.HOST
+REPLAYPATH=lt.REPLAYPATH
+UTILPATH=lt.UTILPATH
+LTANAPATH=lt.LTANAPATH
+ANATYPE=lt.ANATYPE
+OUTPATH=lt.OUTPATH
+CACHEPATH=lt.CACHEPATH
+
+TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
+
+###############################################################################################################################################
 
 import sys
 import re
@@ -142,8 +177,8 @@ def make_tt_zoom(datasets, tmin=0.001, tmax=0.60, npts=1200, theta_cm=math.pi/2,
 # ---------- Main ----------
 def main(argv):
     default_files = [
-        "Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat",
-        "Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat"
+        "{TEMP_CACHEPATH}/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat",
+        "{TEMP_CACHEPATH}/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat"
     ]
 
     if len(argv) == 1:
