@@ -276,11 +276,20 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 x_pt = g_sig.GetX()[i_pt2]
                                 y_data = g_sig.GetY()[i_pt2]
                                 y_err  = g_sig.GetEY()[i_pt2]
-                                y_fit  = fits_sig[it].Eval(x_pt)
-                                if y_err != 0:
-                                    residual = (y_data - y_fit)/y_err
-                                else:
-                                    residual = (y_data - y_fit)
+                                try:
+                                    y_fit  = fits_sig[it].Eval(x_pt)
+                                    if not np.isfinite(y_fit):
+                                        continue  # skip non-finite fits
+                                    if y_err != 0:
+                                        test_resid = (y_data - y_fit) / y_err
+                                    else:
+                                        test_resid = (y_data - y_fit)
+                                    if np.isfinite(test_resid):
+                                        residual = test_resid
+                                except Exception as e:
+                                    if debug:
+                                        print(f"[DEBUG] Residual calc failed: {e}")
+                                    continue
 
                             cost_history.append(current_cost)
                             if len(cost_history) >= 2:
