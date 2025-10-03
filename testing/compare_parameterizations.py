@@ -55,6 +55,7 @@ from utility import load_equations, prepare_equations
 ###############################################################################################################################################
 # Import separated xsects models
 
+sys.path.append("models")
 from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
 
 ##################################################################################################################################################
