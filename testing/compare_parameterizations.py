@@ -55,6 +55,27 @@ BEST_OUTFILE       = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_best.da
 DIAG_CSV_OUTFILE   = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_diagnostics.csv"   # NEW: diagnostics
 AVG_ROW_CHI2       = 3.0  # default chi2 for every parameter row in saved files
 
+# ========================= Tunables: give the model more leeway =========================
+TUNABLES = {
+    # If parameter tension is tiny, call it FE regardless of shape metric (protects small-signal cases)
+    "Z_SMALL":   1.8,   # was 1.5
+    "I2_SMALL":  0.15,  # was 0.10
+
+    # FE region (GOOD): be more permissive
+    "Z_FE":      2.5,   # was 2.0
+    "I2_FE":     0.35,  # was 0.25
+    "DRMS_FE":   0.50,  # was 0.35
+
+    # RE region (OK): still acceptable, just inflate errors
+    "Z_RE":      4.0,   # was 3.0
+    "I2_RE":     0.75,  # was 0.50
+    "DRMS_RE":   0.90,  # was 0.60
+
+    # Robust ΔRMS settings
+    "TAU_MASK":  1e-3,  # mask t-points where both predictions are below tau * scale
+    "EPS_FRAC":  1e-6,  # additive stabilizer fraction of signal scale
+}
+
 # ======================= Function → parameter index mapping (explicit) =======================
 # Indices are 0-based here. Adjust these lists if you change functional forms.
 # Mapped based on use in sigma_* below:
@@ -265,11 +286,9 @@ def model_delta_rms(per_func, parsA, parsB, q2A, q2B, w, npts=400, theta_cm=math
       dRMS = 0.5 * [ NRMSE(q2A) + NRMSE(q2B) ]
     where NRMSE(x) = sqrt(mean((A-B)^2 over valid t)) / (RMS( (|A|+|B|)/2 over valid t ) + eps)
 
-    We also:
-      - mask points where both |A| and |B| are below a noise floor (tau * ref),
-      - set eps using a small fraction of the signal scale so we don't blow up at zero.
-
-    Returns np.nan for non-physical groups (e.g., "OTHER").
+    - Masks t-points where both predictions are below a scale-dependent floor.
+    - Uses an additive stabilizer eps to avoid division blowups.
+    - Returns np.nan for non-σ groups (e.g., "OTHER").
     """
     funcs = {"L": sigma_L, "T": sigma_T, "LT": sigma_LT, "TT": sigma_TT}
     if per_func not in funcs:
@@ -277,66 +296,85 @@ def model_delta_rms(per_func, parsA, parsB, q2A, q2B, w, npts=400, theta_cm=math
 
     f = funcs[per_func]
     t = -np.linspace(TMIN, TMAX, npts)
+    tau = float(TUNABLES["TAU_MASK"])
+    eps_frac = float(TUNABLES["EPS_FRAC"])
 
     def nrmse_at_q2(q2):
         A = f(parsA, q2, t, theta_cm, w)
         B = f(parsB, q2, t, theta_cm, w)
         avg_mag = 0.5 * (np.abs(A) + np.abs(B))
-        # Noise floor based on a robust scale of avg_mag
-        ref = np.percentile(avg_mag, 75)  # upper mid-scale
-        tau = 1e-3                         # mask threshold (tunable)
+        # robust scale for masking + denominator scaling
+        ref = np.percentile(avg_mag, 75)  # upper-mid scale
         mask = avg_mag > (tau * max(ref, 1e-18))
-
         if not np.any(mask):
-            return 0.0  # if everything is tiny, treat as no meaningful shape tension
+            return 0.0  # everything is tiny → no meaningful shape tension
 
         A_m, B_m = A[mask], B[mask]
         avg_mag_m = avg_mag[mask]
 
         num = np.sqrt(np.mean((A_m - B_m)**2))
         denom_scale = np.sqrt(np.mean(avg_mag_m**2))
-        eps = 1e-6 * max(denom_scale, 1.0)  # small additive stabilizer, scale-aware
+        eps = eps_frac * max(denom_scale, 1.0)  # scale-aware stabilizer
         return float(num / (denom_scale + eps))
 
     return 0.5 * (nrmse_at_q2(q2A) + nrmse_at_q2(q2B))
 
-def per_function_decision(group_name, pulls, I2_per, parsA, parsB, q2A, q2B, w):
+def per_function_decision(group_name, pulls, I2_per, parsA, parsB, q2A, q2B, w, chi2_data=None):
     """
-    Return ('FE' or 'RE' or 'BAD', metrics dict) for a parameter group.
-    For L/T/LT/TT: use pulls, I², and robust ΔRMS across t.
-    For OTHER: use pulls/I² only (ΔRMS = NaN).
+    Decide FE/RE/BAD for a parameter group.
+    Inputs:
+      - group_name in {"L","T","LT","TT"} or "OTHER"
+      - pulls, I2_per: per-parameter arrays (length 16)
+      - parsA/parsB: full parameter vectors from the two fits
+      - q2A, q2B, w: kinematics
+      - chi2_data: optional dict of data-level χ² per function (e.g., {"T":1.0, "TT":0.95})
 
-    Override: if zmax ≤ 1.5 and I2_mean ≤ 0.10 -> FE (GOOD), regardless of ΔRMS (handles TT/T small-signal cases).
+    Rules (more leeway):
+      1) Small-tension override (protect small-signal cases): if zmax ≤ Z_SMALL and I2_mean ≤ I2_SMALL → FE.
+      2) If chi2_data provided and chi2_data[group] ≤ CHI2_DATA_FE_MAX → FE.
+      3) For OTHER (no σ-model): decide based on pulls/I² only using FE/RE thresholds.
+      4) For L/T/LT/TT: use pulls/I² + robust ΔRMS with relaxed FE/RE thresholds.
+      5) BAD only if outside relaxed RE region (i.e., truly incompatible shapes/pars).
     """
+    ZS, IS = float(TUNABLES["Z_SMALL"]), float(TUNABLES["I2_SMALL"])
+    ZF, IF, DF = float(TUNABLES["Z_FE"]), float(TUNABLES["I2_FE"]), float(TUNABLES["DRMS_FE"])
+    ZR, IR, DR = float(TUNABLES["Z_RE"]), float(TUNABLES["I2_RE"]), float(TUNABLES["DRMS_RE"])
+    CHI2_FE_MAX = float(TUNABLES["CHI2_DATA_FE_MAX"])
+
     idxs = PARAM_GROUPS[group_name]
     z = pulls[idxs]
     I2 = I2_per[idxs]
     zmax = float(np.max(np.abs(z))) if len(z) else 0.0
     I2m  = float(np.mean(I2)) if len(I2) else 0.0
 
+    # 1) Small-tension override
+    if (zmax <= ZS) and (I2m <= IS):
+        return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+
+    # 2) Data-χ² override (when available)
+    if (chi2_data is not None) and (group_name in chi2_data):
+        try:
+            if float(chi2_data[group_name]) <= CHI2_FE_MAX:
+                return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
+        except Exception:
+            pass  # ignore malformed chi2_data
+
+    # 3) OTHER group: no σ-model → decide using pulls/I² only
     dRMS = model_delta_rms(group_name, parsA, parsB, q2A, q2B, w)
-
-    # --- Small-tension override (data-like agreement) ---
-    if (zmax <= 1.5) and (I2m <= 0.10):
-        return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
-
-    # OTHER group: no σ-model, base on pulls/I² only
     if np.isnan(dRMS):
-        if (zmax <= 2.0) and (I2m < 0.25):
+        if (zmax <= ZF) and (I2m < IF):
             return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
-        if (zmax <= 3.0) and (I2m < 0.50):
+        if (zmax <= ZR) and (I2m < IR):
             return "RE", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
         return "BAD", {"zmax": zmax, "I2_mean": I2m, "dRMS": float("nan")}
 
-    # Physics functions: use robust dRMS
-    # Tunable thresholds:
-    #   GOOD: zmax≤2, I2m<0.25, dRMS<0.35 → FE
-    #   OK:   zmax≤3, I2m<0.50, dRMS<0.60 → RE
-    #   BAD:  otherwise
-    if (zmax <= 2.0) and (I2m < 0.25) and (dRMS < 0.35):
+    # 4) Physics functions: include robust shape metric
+    if (zmax <= ZF) and (I2m < IF) and (dRMS < DF):
         return "FE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
-    if (zmax <= 3.0) and (I2m < 0.50) and (dRMS < 0.60):
+    if (zmax <= ZR) and (I2m < IR) and (dRMS < DR):
         return "RE", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
+
+    # 5) Truly outside relaxed region
     return "BAD", {"zmax": zmax, "I2_mean": I2m, "dRMS": dRMS}
 
 # ---------- Main (adapted; preserves original outputs and adds per-function selection) ----------
