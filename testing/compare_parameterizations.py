@@ -42,8 +42,8 @@ sys.path.append("utility")
 from utility import load_equations, prepare_equations
 
 # ---------- t-range ----------
-TMIN = 0.02
-TMAX = 0.60
+TMIN = 0.025
+TMAX = 0.600
 
 # Output filenames
 file_str           = "pl_Q1p6-2p4W2p22"
