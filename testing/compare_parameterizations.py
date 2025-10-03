@@ -37,12 +37,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+##################################################################################################################################################
+
 # ---------- ltsep paths ----------
 from ltsep import Root
 lt = Root(os.path.realpath(__file__), "Plot_LTSep")
 OUTPATH   = lt.OUTPATH
 LTANAPATH = lt.LTANAPATH
 TEMP_CACHEPATH = f"{OUTPATH}/testing_env"
+
+##################################################################################################################################################
+# Importing utility functions
+
+sys.path.append("../utility")
+from utility import load_equations, prepare_equations, fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
+
+##################################################################################################################################################
 
 # ---------- t-range ----------
 TMIN = 0.02
@@ -54,6 +64,9 @@ AVG_OUTFILE        = f"{LTANAPATH}/testing/parameters/new_par.{file_str}.dat"   
 BEST_OUTFILE       = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_best.dat"          # NEW: per-function FE/RE mix
 DIAG_CSV_OUTFILE   = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_diagnostics.csv"   # NEW: diagnostics
 AVG_ROW_CHI2       = 3.0  # default chi2 for every parameter row in saved files
+
+# Load equations from model of given setting
+equations = load_equations("Q1p6W2p22.model")
 
 # ========================= Tunables: give the model more leeway =========================
 TUNABLES = {
@@ -102,31 +115,11 @@ mtar  = 0.93827231
 mpipl = 0.139570
 
 # ---------- Physics pieces ----------
-def wfactor(ww):
-    return 1.0 / ((ww**2) - (mtar**2))**2.0
-
-def sigma_L(pars, qq, t, theta_cm, ww):
-    par1, par2, par3, par4 = pars[0], pars[1], pars[2], pars[3]
-    return ((par1 * qq / (1 + par2*qq + 0.05*(qq**2))**2)
-            * np.exp((par3 - par4*np.log(qq)) * -np.abs(t)))
-
-def sigma_T(pars, qq, t, theta_cm, ww):
-    par5, par6 = pars[4], pars[5]
-    return ((par5 / qq) + (par6 / (qq**2))) * np.ones_like(t)
-
-def sigma_LT(pars, qq, t, theta_cm, ww):
-    par9, par10, par11, par12 = pars[8], pars[9], pars[10], pars[11]
-    return ((np.exp(par9 + (par10 / np.sqrt(qq)) * -np.abs(t)) + par11 - (par12 / (qq**2)))
-            * np.sin(theta_cm))
-
-def sigma_TT(pars, qq, t, theta_cm, ww):
-    par13 = float(pars[12])
-    abs_t = np.abs(t)
-    denom = (-abs_t + mpipl**2)**2
-    denom = np.clip(denom, 1e-18, None)
-    return ((par13 / (qq**2))
-            * (-abs_t / denom)
-            * (np.sin(theta_cm)**2))
+wfactor = prepare_equations(equations, 'wfactor')
+sigma_L = prepare_equations(equations, 'sig_L')
+sigma_T = prepare_equations(equations, 'sig_T')
+sigma_LT = prepare_equations(equations, 'sig_LT')
+sigma_TT = prepare_equations(equations, 'sig_TT')
 
 # ---------- Group utilities ----------
 def function_slices(pars, group_name):
