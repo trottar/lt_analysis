@@ -1206,16 +1206,16 @@ def prepare_equations(equations, sig_type):
         sys.exit(2)
 
     # Add checks to avoid zero values
-    func_str += "        qq = qq if qq > 1e-15 else qq + tiny_offset\n"
-    func_str += "        ww = ww if ww > 1e-15 else ww + tiny_offset\n"
-    func_str += "        tt = tt if tt > 1e-15 else tt + tiny_offset\n"
-    func_str += "        theta_cm = theta_cm if theta_cm > 1e-15 else theta_cm + tiny_offset\n"
+    func_str += "        qq       = np.where(qq       > 1e-15, qq,       qq + tiny_offset)\n"
+    func_str += "        ww       = np.where(ww       > 1e-15, ww,       ww + tiny_offset)\n"
+    func_str += "        tt       = np.where(tt       > 1e-15, tt,       tt + tiny_offset)\n"
+    func_str += "        theta_cm = np.where(theta_cm > 1e-15, theta_cm, theta_cm + tiny_offset)\n"
 
     # Build function body with equations
     func_str += "        " + "\n        ".join(eq_lst) + "\n"
     func_str += f"        return {sig_type}\n"
 
-    exec_globals = {'__builtins__': None, 'math': math, 'tiny_offset': tiny_offset}
+    exec_globals = {'__builtins__': None, 'math': math, 'np': np, 'tiny_offset': tiny_offset}
     exec(func_str, exec_globals)
     return exec_globals[f'{sig_type}_optimized']
 
