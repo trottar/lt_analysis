@@ -4,14 +4,20 @@
 # Description:
 """
 Read two parameter files (new_par.pl_Q??W??.dat), parse par1..par16 + errors + chi2,
-parse Q^2 and W from the path, then plot:
-  4-panel comparison (sigma_L, sigma_T, sigma_LT, sigma_TT) for:
-    - Set A
-    - Set B
-    - Weighted average of A and B (using errors + chi2)
-Default files (used if no arguments are provided):
-  Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat
-  Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat
+parse Q^2 and W from the path, then plot a 4-panel comparison:
+  - Set A
+  - Set B
+  - Weighted average of A and B (using errors + chi2):
+      w_k^(f) = (1/chi2_f) * (1/err_{k,f}^2)
+      pbar_k  = sum_f w_k^(f) p_{k,f} / sum_f w_k^(f)
+      sbar_k  = 1 / sqrt(sum_f w_k^(f))
+Also writes the averaged parameters to:
+  new_par.pl_Q1p6-2p4W2p22.dat
+with the same spacing/columns as the inputs and a default chi2 of 3.0 per row.
+
+Defaults (used if no args):
+  <OUTPATH>/testing_env/pion/Q1p6W2p22/2025October02_H12M16S29/new_par.pl_Q16W222.dat
+  <OUTPATH>/testing_env/pion/Q2p4W2p22/2025October02_H13M02S25/new_par.pl_Q24W222.dat
 """
 # ================================================================
 # Time-stamp: "2025-10-01 08:44:00 trottar"
@@ -49,8 +55,12 @@ TEMP_CACHEPATH=f"{OUTPATH}/testing_env"
 
 ###############################################################################################################################################
 # t-range
-TMIN = 0.020
-TMAX = 0.600
+TMIN = 0.02
+TMAX = 0.60
+
+# Output filename for averaged parameters
+AVG_OUTFILE = "new_par.pl_Q1p6-2p4W2p22.dat"
+AVG_ROW_CHI2 = 3.0  # default chi2 for every parameter row in the saved file
 
 ###############################################################################################################################################
 # ---------- Constants ----------
@@ -142,6 +152,21 @@ def weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B):
     sbar = 1.0 / np.sqrt(wsum)
     return pbar, sbar
 
+def write_params_file(filename, values, errors, chi2_per_row=3.0):
+    """
+    Write lines with the same spacing/columns as your inputs:
+      <value>   <error>   <index>          <chi2>
+    Using scientific notation and aligned columns.
+    """
+    with open(filename, "w") as f:
+        for idx in range(1, 17):
+            v = values[idx-1]
+            e = errors[idx-1]
+            # Align fields to mimic your samples
+            # value, error -> width 13 with scientific notation; index width 2; 10 spaces before chi2
+            line = f"{v: .8e}   {e: .8e}   {idx:2d}          {chi2_per_row:.1f}\n"
+            f.write(line)
+
 # ---------- Plotting ----------
 def make_four_panel(datasets, npts=1200, theta_cm=math.pi/2):
     obs = {
@@ -198,9 +223,15 @@ def main(argv):
     q2_avg = 0.5*(q2A + q2B)
     w_avg  = 0.5*(wA  + wB )
 
+    # Print averaged parameters to stdout
     print("\nWeighted-average parameters (w = (1/chi2)*(1/err^2)):")
     for i, (v, s) in enumerate(zip(avg_vals, avg_errs), start=1):
         print(f"  par{i:02d} = {v:+.8e}   +/- {s:.3e}")
+
+    # Save averaged parameters to file in the requested format
+    write_params_file(AVG_OUTFILE, avg_vals, avg_errs, chi2_per_row=AVG_ROW_CHI2)
+    print(f"\nWrote averaged parameters to: {AVG_OUTFILE}")
+    print(f"  (Q^2_avg={q2_avg:.3g}, W_avg={w_avg:.3g}, chi2 per row written = {AVG_ROW_CHI2:.1f})")
 
     datasets = [
         {"name": "Set A",           "pars": valsA,    "qq": q2A,    "ww": wA},
