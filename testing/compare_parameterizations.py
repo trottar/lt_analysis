@@ -164,8 +164,6 @@ def write_params_file(filename, values, errors, chi2_per_row=3.0):
         for idx in range(1, 17):
             v = values[idx-1]
             e = errors[idx-1]
-            # Align fields to mimic your samples
-            # value, error -> width 13 with scientific notation; index width 2; 10 spaces before chi2
             line = f"{v: .8e}   {e: .8e}   {idx:2d}          {chi2_per_row:.1f}\n"
             f.write(line)
 
@@ -194,7 +192,7 @@ def make_four_panel(datasets, npts=1200, theta_cm=math.pi/2):
             ax.legend()
     fig.suptitle("Comparison of $\\sigma_L,\\sigma_T,\\sigma_{LT},\\sigma_{TT}$")
     fig.tight_layout(rect=[0,0,1,0.96])
-    fig.savefig(f"{TEMP_CACHEPATH}/fits_{file_str}.pdf")   # <-- save instead of show
+    fig.savefig(f"{TEMP_CACHEPATH}/fits_{file_str}.pdf")
     plt.close(fig)
 
 # ---------- Main ----------
@@ -226,12 +224,10 @@ def main(argv):
     q2_avg = 0.5*(q2A + q2B)
     w_avg  = 0.5*(wA  + wB )
 
-    # Print averaged parameters to stdout
     print("\nWeighted-average parameters (w = (1/chi2)*(1/err^2)):")
     for i, (v, s) in enumerate(zip(avg_vals, avg_errs), start=1):
         print(f"  par{i:02d} = {v:+.8e}   +/- {s:.3e}")
 
-    # Save averaged parameters to file in the requested format
     write_params_file(AVG_OUTFILE, avg_vals, avg_errs, chi2_per_row=AVG_ROW_CHI2)
     print(f"\nWrote averaged parameters to: {AVG_OUTFILE}")
     print(f"  (Q^2_avg={q2_avg:.3g}, W_avg={w_avg:.3g}, chi2 per row written = {AVG_ROW_CHI2:.1f})")
@@ -246,3 +242,50 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
+
+# ========================= ADDED UTILITIES =========================
+def param_pulls(valsA, errsA, valsB, errsB):
+    denom = np.sqrt(np.square(errsA) + np.square(errsB))
+    denom = np.clip(denom, 1e-18, None)
+    return (valsA - valsB) / denom
+
+def dersimonian_laird_tau2(vA, sA, vB, sB, chi2A=None, chi2B=None):
+    if chi2A is not None and chi2B is not None:
+        sA2 = np.square(sA) * chi2A
+        sB2 = np.square(sB) * chi2B
+    else:
+        sA2 = np.square(sA)
+        sB2 = np.square(sB)
+    wA = 1.0 / np.clip(sA2, 1e-18, None)
+    wB = 1.0 / np.clip(sB2, 1e-18, None)
+    wsum = np.clip(wA + wB, 1e-18, None)
+    m = (wA * vA + wB * vB) / wsum
+    Q = wA * np.square(vA - m) + wB * np.square(vB - m)
+    denom = wsum - (np.square(wA) + np.square(wB)) / wsum
+    tau2 = np.maximum((Q - 1.0) / np.clip(denom, 1e-18, None), 0.0)
+    return tau2
+
+def random_effects_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B):
+    pulls = param_pulls(valsA, errsA, valsB, errsB)
+    tau2 = dersimonian_laird_tau2(valsA, errsA, valsB, errsB, chi2A, chi2B)
+    varA = np.square(errsA) * chi2A + tau2
+    varB = np.square(errsB) * chi2B + tau2
+    wA = 1.0 / np.clip(varA, 1e-18, None)
+    wB = 1.0 / np.clip(varB, 1e-18, None)
+    wsum = np.clip(wA + wB, 1e-18, None)
+    pbar = (wA * valsA + wB * valsB) / wsum
+    sbar = np.sqrt(1.0 / wsum)
+    return pbar, sbar, pulls, tau2
+
+def combine_params(valsA, errsA, chi2A, valsB, errsB, chi2B, mode="auto", pull_thresh=2.0, verbose=True):
+    fe_vals, fe_errs = weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B)
+    if mode == "fe":
+        return fe_vals, fe_errs, None
+    re_vals, re_errs, pulls, tau2 = random_effects_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B)
+    if mode == "re":
+        return re_vals, re_errs, {"pulls":pulls, "tau2":tau2}
+    use_re = np.abs(pulls) > float(pull_thresh)
+    avg_vals = np.where(use_re, re_vals, fe_vals)
+    avg_errs = np.where(use_re, re_errs, fe_errs)
+    return avg_vals, avg_errs, {"pulls":pulls, "tau2":tau2, "use_re":use_re}
+# ========================= END ADDED UTILITIES =========================
