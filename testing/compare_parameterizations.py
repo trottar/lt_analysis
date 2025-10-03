@@ -74,6 +74,8 @@ TUNABLES = {
     # Robust ΔRMS settings
     "TAU_MASK":  1e-3,  # mask t-points where both predictions are below tau * scale
     "EPS_FRAC":  1e-6,  # additive stabilizer fraction of signal scale
+
+    "CHI2_DATA_FE_MAX": 1.25,  # treat function as FE if its data χ² (from rows) ≤ this
 }
 
 # ======================= Function → parameter index mapping (explicit) =======================
@@ -153,6 +155,45 @@ def parse_Q2_W_from_path(p: Path):
         w  = float(m.group(2)) / 100.0
         return q2, w
     raise ValueError(f"Could not parse Q^2 and W from path: {p}")
+
+def read_params_file_rows(par_path: Path):
+    """
+    Returns:
+      vals:      (16,) parameter central values
+      errs:      (16,) parameter 1σ errors (second column)
+      chi2_g:    scalar (global) = median of row χ² (last column)
+      chi2_rows: (16,) per-parameter row χ² (order 1..16)
+    """
+    values, errors, chi2_rows = {}, {}, {}
+    chi2_list = []
+    with open(par_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            parts = line.split()
+            if len(parts) < 4:
+                continue
+            try:
+                val   = float(parts[0])
+                err   = float(parts[1])
+                idx   = int(float(parts[2]))
+                chi2v = float(parts[3])   # last column
+            except ValueError:
+                continue
+            values[idx]    = val
+            errors[idx]    = err
+            chi2_rows[idx] = chi2v
+            chi2_list.append(chi2v)
+
+    vals       = np.array([values.get(i, 0.0) for i in range(1, 17)], dtype=float)
+    errs       = np.array([errors.get(i, 1.0) for i in range(1, 17)], dtype=float)
+    chi2_rowsV = np.array([chi2_rows.get(i, 1.0) for i in range(1, 17)], dtype=float)
+    chi2_g     = float(np.median(chi2_list)) if chi2_list else 1.0
+
+    errs   = np.clip(errs, 1e-18, None)
+    chi2_g = max(chi2_g, 1e-18)
+    return vals, errs, chi2_g, chi2_rowsV
 
 def read_params_file(par_path: Path):
     values, errors, chi2_list = {}, {}, []
@@ -319,6 +360,20 @@ def model_delta_rms(per_func, parsA, parsB, q2A, q2B, w, npts=400, theta_cm=math
 
     return 0.5 * (nrmse_at_q2(q2A) + nrmse_at_q2(q2B))
 
+def per_function_chi2_from_rows(chi2_rows):
+    """
+    Build {"L": χ²_L, "T": χ²_T, "LT": χ²_LT, "TT": χ²_TT, "OTHER": χ²_other?}
+    using the median χ² of the parameters belonging to each group.
+    """
+    def med(arr, idxs):
+        if not idxs:
+            return float("nan")
+        return float(np.median(arr[idxs]))
+    out = {}
+    for g, idxs in PARAM_GROUPS.items():
+        out[g] = med(chi2_rows, idxs)
+    return out
+
 def per_function_decision(group_name, pulls, I2_per, parsA, parsB, q2A, q2B, w, chi2_data=None):
     """
     Decide FE/RE/BAD for a parameter group.
@@ -397,12 +452,27 @@ def main(argv):
     A_path = Path(files[0]); B_path = Path(files[1])
     q2A, wA = parse_Q2_W_from_path(A_path)
     q2B, wB = parse_Q2_W_from_path(B_path)
-    # W is fixed and the same across sets per your note; average defensively:
     q2_avg = 0.5*(q2A + q2B)
     w_avg  = 0.5*(wA  + wB )
 
-    valsA, errsA, chi2A = read_params_file(A_path)
-    valsB, errsB, chi2B = read_params_file(B_path)
+    # NEW: Read both parameter files WITH per-row chi2
+    valsA, errsA, chi2A, chi2A_rows = read_params_file_rows(A_path)
+    valsB, errsB, chi2B, chi2B_rows = read_params_file_rows(B_path)
+
+    # Compute per-function chi2 for each file (median within each group)
+    chi2A_func = per_function_chi2_from_rows(chi2A_rows)
+    chi2B_func = per_function_chi2_from_rows(chi2B_rows)
+
+    # Combine per-function chi2 across datasets; conservative max(A,B)
+    chi2_data = {}
+    for g in PARAM_GROUPS.keys():
+        a = chi2A_func.get(g, float("nan"))
+        b = chi2B_func.get(g, float("nan"))
+        chi2_data[g] = max(a, b) if (a == a and b == b) else (a if a == a else b)
+
+    print("\nPer-function χ² (max of A,B medians over that group's parameter rows):")
+    for g in sorted(chi2_data.keys()):
+        print(f"  {g:5s}: {chi2_data[g]:.3f}")
 
     # ---- Original fixed-effects average (preserved) ----
     fe_vals, fe_errs = weighted_average_two_fits(valsA, errsA, chi2A, valsB, errsB, chi2B)
@@ -425,7 +495,9 @@ def main(argv):
     best_errs = np.array(fe_errs, dtype=float)
     perfunc_summary = []
     for func in ["L","T","LT","TT"] + (["OTHER"] if "OTHER" in PARAM_GROUPS else []):
-        choice, mets = per_function_decision(func, pulls, I2_per, valsA, valsB, q2A, q2B, w_avg)
+        choice, mets = per_function_decision(func, pulls, I2_per,
+                                            valsA, valsB, q2A, q2B, w_avg,
+                                            chi2_data=chi2_data)
         idxs = PARAM_GROUPS[func]
         if choice == "FE":
             # keep FE (already in best_*)
