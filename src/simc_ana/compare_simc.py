@@ -134,25 +134,7 @@ def compare_simc(hist, inpDict):
 
     InFile_SIMC = open_root_file(rootFileSimc)
 
-    TBRANCH_SIMC  = InFile_SIMC.Get("h10")
-
-    ###############################################################################################################################################
-
-    # Grabs simc number of events and normalizaton factor
-    simc_hist = rootFileSimc.replace('.root','.hist')
-    f_simc = open(simc_hist)
-    for line in f_simc:
-        #print(line)
-        if "Ncontribute" in line:
-            val = line.split("=")
-            simc_nevents = int(val[1])
-        if "normfac" in line:
-            val = line.split("=")
-            simc_normfactor = float(val[1])
-    if 'simc_nevents' and 'simc_normfactor' not in locals():
-        print("\n\nERROR: Invalid simc hist file %s\n\n" % simc_hist)
-        sys.exit(1)
-    f_simc.close()    
+    TBRANCH_SIMC  = InFile_SIMC.Get("h10")   
 
     ################################################################################################################################################
     # Plot definitions
@@ -319,8 +301,6 @@ def compare_simc(hist, inpDict):
     ################################################################################################################################################    
 
     histDict["InFile_SIMC"] = InFile_SIMC
-    histDict["simc_normfactor"] = simc_normfactor
-    histDict["simc_nevents"] = simc_nevents
     histDict["H_Weight_SIMC"] =     H_Weight_SIMC
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC

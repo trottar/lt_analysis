@@ -430,5 +430,7 @@ def find_events(hist, inpDict):
     histDict["normfac_data"] = normfac_data
     histDict["normfac_dummy"] = normfac_dummy
     histDict["normfac_simc"] = normfac_simc
+    histDict["simc_normfactor"] = simc_normfactor
+    histDict["simc_nevents"] = simc_nevents
     
     return histDict
