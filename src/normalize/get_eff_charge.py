@@ -290,6 +290,31 @@ def find_events(hist, inpDict):
     # Define return dictionary of data
     histDict = {}
 
+    ###############################################################################################################################################
+
+    # Names don't match so need to do some string rearrangement
+    InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
+    rootFileSimc = OUTPATH+"/"+InSIMCFilename
+    if not os.path.isfile(rootFileSimc):
+        print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
+        return histDict
+    
+    # Grabs simc number of events and normalizaton factor
+    simc_hist = rootFileSimc.replace('.root','.hist')
+    f_simc = open(simc_hist)
+    for line in f_simc:
+        #print(line)
+        if "Ncontribute" in line:
+            val = line.split("=")
+            simc_nevents = int(val[1])
+        if "normfac" in line:
+            val = line.split("=")
+            simc_normfactor = float(val[1])
+    if 'simc_nevents' and 'simc_normfactor' not in locals():
+        print("\n\nERROR: Invalid simc hist file %s\n\n" % simc_hist)
+        sys.exit(1)
+    f_simc.close() 
+
     ################################################################################################################################################
     # Grabs PID cut string
 
