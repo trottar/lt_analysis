@@ -238,8 +238,6 @@ def get_eff_charge(hist, inpDict, all_data=True):
 def find_events(hist, inpDict):    
 
     phi_setting = hist["phi_setting"]
-    simc_normfactor = hist["simc_normfactor"]
-    simc_nevents = hist["simc_nevents"]
     NumEvts_MM_DATA = hist["NumEvts_MM_DATA"]
     NumEvts_MM_DUMMY = hist["NumEvts_MM_DUMMY"]
     NumEvts_MM_SIMC = hist["NumEvts_MM_SIMC"]
