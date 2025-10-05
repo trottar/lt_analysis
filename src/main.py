@@ -380,7 +380,14 @@ for hist in histlist:
 for d in ["Dummy", "Data"]:
     for phiset in phisetlist:
         output_file_lst.append(f"{OUTPATH}/{phiset}_{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e.root")
-    
+
+sys.path.append("normalize")
+from get_eff_charge import find_events
+
+# Upate hist dictionary with effective charge
+for hist in histlist:
+    hist.update(find_events(hist, inpDict))
+        
 # SIMC
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
@@ -485,13 +492,6 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 ** Once unseparated cross sections are achieved with good parameterization, cross section separation can be performed.
 
 '''
-
-sys.path.append("normalize")
-from get_eff_charge import find_events
-
-# Upate hist dictionary with effective charge
-for hist in histlist:
-    hist.update(find_events(hist, inpDict))
     
 sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
