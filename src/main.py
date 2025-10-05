@@ -387,7 +387,7 @@ from get_eff_charge import find_events
 # Upate hist dictionary with effective charge
 for hist in histlist:
     hist.update(find_events(hist, inpDict))
-        
+
 # SIMC
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
@@ -403,6 +403,11 @@ if DEBUG:
 for hist in histlist:
     output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_simc_".format(hist["phi_setting"],ParticleType)))
 
+for hist in histlist:
+    print("\n\n{} data total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DATA"]))
+    print("{} dummy total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DUMMY"]))  
+    print("{} simc weighted total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_SIMC"]))
+    print("{} simc unweighted total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_unweighted_SIMC"]))
     
 ##############################
 # Step 4 of the lt_analysis: # Done
