@@ -49,8 +49,12 @@ CACHEPATH = lt.CACHEPATH
 
 #################################################################################################################################################################
 
-for data_type in ["data", "simc"]:
-#for data_type in ["simc"]:
+if runNum == 0:
+    run_types = ["simc"]
+else:
+    run_types = ["data", "simc"]
+
+for data_type in run_types:
     
     print(f"\n\nFinding MM shift for {data_type}...")
     
