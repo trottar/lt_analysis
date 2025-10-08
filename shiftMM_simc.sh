@@ -65,7 +65,6 @@ if [[ $p_flag = "true" ]]; then
     PHIVAL=$(echo "$3" | tr '[:upper:]' '[:lower:]')
     Q2=$4
     W=$5
-    TargetType=$(echo "$6" | tr '[:upper:]' '[:lower:]')
     RUNNUM=$7
     ParticleType=$8
     echo "Epsilon must be - high - low - Case Sensitive!"
@@ -119,18 +118,6 @@ if [[ $p_flag = "true" ]]; then
 	    esac
 	done
     fi
-    if [[ -z "$6" || ! "$TargetType" =~ lh2|dummy ]]; then # Check the 3rd argument was provided and that it's one of the valid options
-	echo ""
-	echo "I need a valid target type..."
-	while true; do
-	    echo ""
-	    read -p "Target type must be one of - [lh2 - dummy] - or press ctrl-c to exit : " TargetType
-	    case $TargetType in
-		'');; # If blank, prompt again
-		'lh2'|'dummy') break;; # If a valid option, break the loop and continue
-	    esac
-	done
-    fi
     if [[ -z "$8" || ! "$ParticleType" =~ kaon|pion|proton ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	echo ""
 	echo "I need a valid target type..."
@@ -160,7 +147,6 @@ else
     PHIVAL=$(echo "$2" | tr '[:upper:]' '[:lower:]')
     Q2=$3
     W=$4
-    TargetType=$(echo "$5" | tr '[:upper:]' '[:lower:]')
     RUNNUM=$6
     echo "Epsilon must be - high - low - Case Sensitive!"
     echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
@@ -213,18 +199,6 @@ else
 	    esac
 	done
     fi
-    if [[ -z "$5" || ! "$TargetType" =~ lh2|dummy ]]; then # Check the 3rd argument was provided and that it's one of the valid options
-	echo ""
-	echo "I need a valid target type..."
-	while true; do
-	    echo ""
-	    read -p "Target type must be one of - [lh2 - dummy] - or press ctrl-c to exit : " TargetType
-	    case $TargetType in
-		'');; # If blank, prompt again
-		'lh2'|'dummy') break;; # If a valid option, break the loop and continue
-	    esac
-	done
-    fi
 
     echo
     echo "---------------------------------------------------------"
@@ -239,180 +213,87 @@ fi
 
 if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
     if [[ $PHIVAL = "right" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    # Define run list based off kinematics selected
-	    file_right="Q5p5W3p02right_${EPSILON}e_dummy"
-	else
-	    file_right="Q5p5W3p02right_${EPSILON}e"		   
-	fi
+	file_right="Q5p5W3p02right_${EPSILON}e"		   
     elif [[ $PHIVAL = "left" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_left="Q5p5W3p02left_${EPSILON}e_dummy"
-	else
-	    file_left="Q5p5W3p02left_${EPSILON}e"
-	fi
+	file_left="Q5p5W3p02left_${EPSILON}e"
     elif [[ $PHIVAL = "center" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_center="Q5p5W3p02center_${EPSILON}e_dummy"
-	else
-	    file_center="Q5p5W3p02center_${EPSILON}e"
+	file_center="Q5p5W3p02center_${EPSILON}e"
 	fi
-    fi
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.1838
     else
 	EPSVAL=0.5291
     fi
-    if [[ $TargetType = "dummy" ]]; then
-	KIN="Q5p5W3p02_${EPSILON}e_dummy"
-    else
 	KIN="Q5p5W3p02_${EPSILON}e"
-    fi
 fi
 if [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     if [[ $PHIVAL = "right" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_right="Q4p4W2p74right_${EPSILON}e_dummy"
-	else
-	    file_right="Q4p4W2p74right_${EPSILON}e"
-	fi
+	file_right="Q4p4W2p74right_${EPSILON}e"
     elif [[ $PHIVAL = "left" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_left="Q4p4W2p74left_${EPSILON}e_dummy"
-	else
-	    file_left="Q4p4W2p74left_${EPSILON}e"
-	fi
+	file_left="Q4p4W2p74left_${EPSILON}e"
     elif [[ $PHIVAL = "center" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_center="Q4p4W2p74center_${EPSILON}e_dummy"
-	else
-	    file_center="Q4p4W2p74center_${EPSILON}e"
+	file_center="Q4p4W2p74center_${EPSILON}e"
 	fi	
-    fi
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.4805
     else
 	EPSVAL=0.7148
     fi
-    if [[ $TargetType = "dummy" ]]; then
-	KIN="Q4p4W2p74_${EPSILON}e_dummy"
-    else
 	KIN="Q4p4W2p74_${EPSILON}e"
-    fi
 fi
 if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     if [[ $PHIVAL = "right" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_right="Q3p0W3p14right_${EPSILON}e_dummy"
-	else
-	    file_right="Q3p0W3p14right_${EPSILON}e"
-	fi
+	file_right="Q3p0W3p14right_${EPSILON}e"
     elif [[ $PHIVAL = "left" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_left="Q3p0W3p14left_${EPSILON}e_dummy"
-	else
-	    file_left="Q3p0W3p14left_${EPSILON}e"
-	fi	
+	file_left="Q3p0W3p14left_${EPSILON}e"	
     elif [[ $PHIVAL = "center" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_center="Q3p0W3p14center_${EPSILON}e_dummy"
-	else
-	    file_center="Q3p0W3p14center_${EPSILON}e"
+	file_center="Q3p0W3p14center_${EPSILON}e"
 	fi
-    fi
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.3935
     else
 	EPSVAL=0.6668
     fi
-    if [[ $TargetType = "dummy" ]]; then
-	KIN="Q3p0W3p14_${EPSILON}e_dummy"
-    else
 	KIN="Q3p0W3p14_${EPSILON}e"
-    fi
 fi
 if [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     if [[ $PHIVAL = "right" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_right="Q3p0W2p32right_${EPSILON}e_dummy"
-	else
-	    file_right="Q3p0W2p32right_${EPSILON}e"
-	fi
+	file_right="Q3p0W2p32right_${EPSILON}e"
     elif [[ $PHIVAL = "left" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_left="Q3p0W2p32left_${EPSILON}e_dummy"
-	else
-	    file_left="Q3p0W2p32left_${EPSILON}e"
-	fi
+	file_left="Q3p0W2p32left_${EPSILON}e"
     elif [[ $PHIVAL = "center" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_center="Q3p0W2p32center_${EPSILON}e_dummy"
-	else
-	    file_center="Q3p0W2p32center_${EPSILON}e"
+	file_center="Q3p0W2p32center_${EPSILON}e"
 	fi
-    fi
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.5736
     else
 	EPSVAL=0.8791
     fi
-    if [[ $TargetType = "dummy" ]]; then
-	KIN="Q3p0W2p32_${EPSILON}e_dummy"
-    else
 	KIN="Q3p0W2p32_${EPSILON}e"
-    fi
 fi
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     if [[ $PHIVAL = "right" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_right="Q2p1W2p95right_${EPSILON}e_dummy"
-	else
-	    file_right="Q2p1W2p95right_${EPSILON}e"
-	fi
+	file_right="Q2p1W2p95right_${EPSILON}e"
     elif [[ $PHIVAL = "left" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_left="Q2p1W2p95left_${EPSILON}e_dummy"
-	else
-	    file_left="Q2p1W2p95left_${EPSILON}e"
-	fi
+	file_left="Q2p1W2p95left_${EPSILON}e"
     elif [[ $PHIVAL = "center" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_center="Q2p1W2p95center_${EPSILON}e_dummy"
-	else
-	    file_center="Q2p1W2p95center_${EPSILON}e"
+	file_center="Q2p1W2p95center_${EPSILON}e"
 	fi
-    fi
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.2477
     else
 	EPSVAL=0.7864
     fi
-    if [[ $TargetType = "dummy" ]]; then
-	KIN="Q2p1W2p95_${EPSILON}e_dummy"
-    else
 	KIN="Q2p1W2p95_${EPSILON}e"
-    fi
 fi        
 if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     if [[ $PHIVAL = "right" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_right="Q0p5W2p40right_${EPSILON}e_dummy"
-	else
-	    file_right="Q0p5W2p40right_${EPSILON}e"
-	fi
+	file_right="Q0p5W2p40right_${EPSILON}e"
     elif [[ $PHIVAL = "left" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_left="Q0p5W2p40left_${EPSILON}e_dummy"
-	else
-	    file_left="Q0p5W2p40left_${EPSILON}e"
-	fi
+	file_left="Q0p5W2p40left_${EPSILON}e"
     elif [[ $PHIVAL = "center" ]]; then
-	if [[ $TargetType = "dummy" ]]; then
-	    file_center="Q0p5W2p40center_${EPSILON}e_dummy"
-	else
-	    file_center="Q0p5W2p40center_${EPSILON}e"
+	file_center="Q0p5W2p40center_${EPSILON}e"
 	fi
-    fi
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.4515
     else
@@ -422,7 +303,6 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
 	KIN="Q0p5W2p40_${EPSILON}e_dummy"
     else
 	KIN="Q0p5W2p40_${EPSILON}e"
-    fi
 fi    
 
 DataType="simc"
@@ -446,7 +326,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "Shifting MM peak right ${DataType} ${ParticleType}..."
 	echo "------------------------------------------------------"
 	echo
-	python3 shift_MM.py "0" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	python3 shift_MM.py "0" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "None"
 	echo
     fi
 
@@ -460,7 +340,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "Shifting MM peak left ${DataType} ${ParticleType}..."
 	echo "------------------------------------------------------"
 	echo
-	python3 shift_MM.py "0" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	python3 shift_MM.py "0" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "None"
     fi
 
     # Checks that array isn't empty
@@ -473,7 +353,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "Shifting MM peak center ${DataType} ${ParticleType}..."
 	echo "------------------------------------------------------"
 	echo
-	python3 shift_MM.py "0" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	python3 shift_MM.py "0" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "None"
     fi
 
 else
@@ -495,7 +375,7 @@ else
 	    echo "Shifting MM peak right ${DataType} ${i}..."
 	    echo "------------------------------------------------------"
 	    echo
-		python3 shift_MM.py "0" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+		python3 shift_MM.py "0" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "None"
 	    echo
 	fi
 
@@ -509,7 +389,7 @@ else
 	    echo "Shifting MM peak left ${DataType} ${i}..."
 	    echo "------------------------------------------------------"
 	    echo
-		python3 shift_MM.py "0" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+		python3 shift_MM.py "0" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "None"
 	fi
 
 	# Checks that array isn't empty
@@ -522,7 +402,7 @@ else
 	    echo "Shifting MM peak center ${DataType} ${i}..."
 	    echo "------------------------------------------------------"
 	    echo
-		python3 shift_MM.py "0" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+		python3 shift_MM.py "0" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "None"
 	fi
     done
 fi
