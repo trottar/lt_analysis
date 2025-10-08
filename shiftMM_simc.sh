@@ -225,6 +225,7 @@ if [[ $Q2 = "5p5" && $W = "3p02" ]]; then
 	EPSVAL=0.5291
     fi
 	KIN="Q5p5W3p02_${EPSILON}e"
+	fi
 fi
 if [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     if [[ $PHIVAL = "right" ]]; then
@@ -240,6 +241,7 @@ if [[ $Q2 = "4p4" && $W = "2p74" ]]; then
 	EPSVAL=0.7148
     fi
 	KIN="Q4p4W2p74_${EPSILON}e"
+	fi
 fi
 if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     if [[ $PHIVAL = "right" ]]; then
@@ -255,6 +257,7 @@ if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
 	EPSVAL=0.6668
     fi
 	KIN="Q3p0W3p14_${EPSILON}e"
+	fi
 fi
 if [[ $Q2 = "3p0" && $W = "2p32" ]]; then
     if [[ $PHIVAL = "right" ]]; then
@@ -270,6 +273,7 @@ if [[ $Q2 = "3p0" && $W = "2p32" ]]; then
 	EPSVAL=0.8791
     fi
 	KIN="Q3p0W2p32_${EPSILON}e"
+	fi
 fi
 if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     if [[ $PHIVAL = "right" ]]; then
@@ -285,6 +289,7 @@ if [[ $Q2 = "2p1" && $W = "2p95" ]]; then
 	EPSVAL=0.7864
     fi
 	KIN="Q2p1W2p95_${EPSILON}e"
+	fi
 fi        
 if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     if [[ $PHIVAL = "right" ]]; then
@@ -303,6 +308,7 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
 	KIN="Q0p5W2p40_${EPSILON}e_dummy"
     else
 	KIN="Q0p5W2p40_${EPSILON}e"
+	fi
 fi    
 
 DataType="simc"
