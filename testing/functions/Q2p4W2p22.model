@@ -23,7 +23,7 @@ sig_L = (par1 * (qq) / (1 + par2*qq + 0.05*(qq**2))**2) * math.exp((par3 - par4*
 # Transverse cross-section
 # Fpi2
 #sig_T = (4.5 / qq) + (2.0 / (qq**2))
-sig_T = (par5 / qq) + (par6 / (qq**2))
+sig_T = -((par5 / qq) + (par6 / (qq**2)))
 #####
 ##sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt))
 #####
