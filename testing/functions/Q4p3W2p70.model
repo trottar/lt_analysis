@@ -1,0 +1,184 @@
+################################################################################
+# Use this file to define function forms of separated xsect.
+# Used '#' to comment, but using '#' trailing a definition won't work
+# (e.g., wfactor = 1 / ((ww**2) - (mtar**2))**2.0 # This will not work now)
+################################################################################
+
+# Define constants
+pi = math.pi
+mtar = 0.93827231
+mpipl=0.139570
+mkpl=0.493677
+
+# 0th iteration, 
+#tav = (0.1112 + 0.0066 * math.log(q2_set)) * q2_set
+# Determined from (tmin, Q2) = [(0.145, 2.115), (0.17, 3.0), (0.3, 4.4), (0.35, 5.5)]
+# 2nd iteration, 
+tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
+ftav = (math.fabs(tt) - tav) / tav
+ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  
+# pole factor
+Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
+Qdep_T = (math.exp(-qq**2)) / qq
+Qdep_TT = qq * math.exp(-qq)
+
+# Longitudinal cross-section
+# 0th
+#sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
+#####
+#sig_L = (par1 * Qdep_L * ft) * math.exp(-math.fabs(par2 * tt))
+sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
+#sig_L = (par1 * (ft / math.sin(theta_cm))) * math.exp(-math.fabs(par2 * tt))
+#sig_L = (par1 / math.fabs(tt)**par2) * ft
+#sig_L = par1 * math.exp(-math.fabs(par2 * tt))
+#sig_L = (par1 * ft) * (par2 / math.fabs(tt))
+#####
+
+# Transverse cross-section
+# 0th
+#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+#####
+#sig_T = (par5 * math.exp(-math.fabs(par6 * tt))) * Qdep_T
+#sig_T = (par5 + par6 * ft) * math.exp(-math.fabs(par7 * tt)) * Qdep_T
+#sig_T = (par5 + par6 / math.fabs(tt)**par7) * math.exp(-math.fabs(par8 * tt))
+#sig_T = par5 * math.exp(-math.fabs(par6 * tt)) + par7 / math.fabs(tt)**par8
+#sig_T = par5 / math.fabs(tt)**par6
+sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt))
+#sig_T = (par5 / ((math.fabs(tt)**par6) + par7)) * math.exp(-math.fabs(par8 * tt))
+#sig_T = (par5 / math.fabs(tt)) * math.sin(theta_cm)
+#sig_T = par5 + par6 / math.fabs(tt)**par7
+#####
+
+# Longitudinal-Transverse interference term
+# 0th
+#sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+#####
+#sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+#sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
+#sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 / math.fabs(tt))
+#sig_LT = (par9 /((math.fabs(tt)**par10) + par11)) * math.exp(-math.fabs(par12 * tt)) * math.sin(theta_cm)
+#sig_LT = (par9 / math.fabs(tt)**par10) * math.sin(theta_cm)
+###sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
+#sig_LT = par9 * ft * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
+#sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * Qdep_L * math.sin(theta_cm)
+#####
+
+# Transverse-Transverse interference term
+# 0th
+#sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+#####
+#sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+#sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
+sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
+#sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)
+#sig_TT = (par13 / ((math.fabs(tt)**par14) + par15)) * math.exp(-math.fabs(par16 * tt)) * (math.sin(theta_cm)**2)
+#sig_TT = (par13 / math.fabs(tt)) * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm))
+#####
+
+# Weight factor
+# 0th
+#wfactor = 1 / ((ww**2) - (mtar**2))**2.0
+####
+#wfactor = 1 / ((ww**2) - (mtar**2))**(-1.37*ww+6.52)
+###wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(ww**2) - 5.97*ww + 12.68)
+wfactor = 1 / ((ww**2) - (mtar**2))**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+# Fixes W=2.2 to 2.25 and W=3.14 to 2.0
+#wfactor = 1 / ((ww**2) - (mtar**2))**(2.871975-(mpipl/mkpl)*ww)
+####
+
+################################################################################
+# Previous iterations
+
+# Longitudinal cross-section
+# RLT (2/19/2024): Adding a 0.2 term to t dependence to bring down the extreme slope at high t
+# RLT (3/09/2024): Removing +0.2 term for better parameterization of Q2=3.0, W=2.32
+#
+#sig_L = (p1+p1*math.log(qq)) * math.exp((p1+p1*math.log(qq)) * (math.fabs(tt)))
+#sig_L = (p1+p1*math.log(qq)) * math.exp((p1+p1*math.log(qq)) * (math.fabs(tt)+0.2))
+# RLT (4/23/2024): Marco's thesis functional forms
+#sig_L = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + p1*qq))
+# RLT (6/04/2024): Testing simplier exp form for L+T
+##
+##sig_L = (p1+p1*math.log(qq)) * math.exp(p1 * (math.fabs(tt)))
+#sig_L = (p1 * ((math.fabs(tt)/qq)-1)) * math.exp(p1 * (math.fabs(tt)))
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+##sig_L = (p1*Qdep_L*ft)*math.exp(-p1*(math.fabs(tt)))
+#sig_L = (p1 * Qdep_L * ft) * math.exp(-p2 * (math.fabs(tt)))
+
+# Transverse cross-section
+# RLT (2/15/2024): Removing t dependence from sigT because it seems
+#                  to be driving poor sep xsects results
+# RLT (2/20/2024): Added 1/Q^4 term to dampen sigT
+# RLT (2/21/2024): Reintroducing t-dependence
+# RLT (2/21/2024): Using global analysis sig T model and params (https://journals.aps.org/prc/pdf/10.1103/PhysRevC.85.018202)
+#
+#sig_T = p1+p1*math.log(qq)+(p1+p1*math.log(qq)) * ftav
+#sig_T = p1+p1*math.log(qq)
+#sig_T = p1*math.log(qq)+p1/(qq**2)
+#sig_T = p1 / (1 + p1*qq)
+# RLT (4/20/2024): Adding in t-dependence
+#sig_T = (p1 / (1 + p1*qq)) * ftav
+#sig_T = (p1 / (1 + p1*qq)) * math.fabs(tt)
+# RLT (4/23/2024): Exponential t-dependence
+#sig_T = (p1 / (1 + p1*qq)) * math.exp(p1*math.fabs(tt))
+# RLT (4/23/2024): Marco's thesis functional forms
+#sig_T = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + p1*qq))
+# RLT (6/04/2024): Testing simplier exp form for L+T
+##
+##sig_T = (p1 * ((math.fabs(tt)/qq)-1)) * math.exp(p1 * (math.fabs(tt)))
+#sig_T = (p1+p1*math.log(qq)) * math.exp(p1 * (math.fabs(tt)))
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+#sig_T = (p1/qq)*math.exp(-p1*(qq**2))
+##sig_T = p1*(p1+math.exp(-p1*(math.fabs(tt))))*(Qdep_T**p1)
+#sig_T = (p5 * math.exp(-p6 * (math.fabs(tt))) + p7 * (math.fabs(tt))) * (Qdep_T**p8)
+
+# Longitudinal-Transverse interference term
+#print("Calculating function for func_SigLT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+##
+#sig_LT = (p9 * math.exp(p10 * math.fabs(tt)) + p11 / math.fabs(tt)) * math.sin(theta_cm)
+#sig_LT = (p1+p1/math.fabs(tt)) * math.sin(theta_cm)
+# RLT (4/23/2024): Marco's thesis functional forms
+#sig_LT = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + (qq**2)*p1)) * math.sin(theta_cm)
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+###sig_LT = (p1/(1+qq))*math.exp(-p1*(math.fabs(tt))) * math.sin(theta_cm)
+#sig_LT = (p1*math.exp(p1*math.fabs(tt))+p1/math.fabs(tt))
+
+# Transverse-Transverse interference term
+#print("Calculating function for func_SigTT...\nQ2={:.1e}, t={:.3e}\npar=({:.2e}, {:.2e}, {:.2e}, {:.2e})\n\n".format(qq, tt, *par))
+##
+#sig_TT = (p13*qq*math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+# RLT (4/23/2024): Marco's thesis functional forms
+#sig_TT = p1 * math.exp(-p1*math.fabs(tt)) * (1.0 / (1 + (qq**2)*p1)) * (math.sin(theta_cm)**2)
+##
+# RLT (7/11/2024): Redefined functional forms of L, T, LT, TT
+#                  that incorporates Q2-dep based of pi FF
+#sig_TT = (-p1/(1+qq))*math.exp(-p1*(math.fabs(tt))) * (math.sin(theta_cm)**2)
+###sig_TT = (p1/(1+qq))*ft*math.exp(-p1*(qq)) * (math.sin(theta_cm)**2)
+####sig_TT = ((-p13 * math.fabs(tt) + p14) * (math.fabs(tt)**(qq/p15)) - p16 * qq) * (math.sin(theta_cm)**2)
+
+# From 10/17/2024
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+#sig_TT = (par13 * qq * math.exp(-qq)) * ft * (math.sin(theta_cm)**2)
+###sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
+# Trial 31
+#sig_TT = ((par13/math.fabs(tt) + par14) * math.exp(-par15*math.fabs(tt)) * par16 * (qq * math.exp(-qq))) * (math.sin(theta_cm)**2)
+# Trial 32
+# Marco's thesis
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2)
+# Trial 33	
+# Vijay's thesis
+#sig_TT = (par13/math.fabs(tt)**3 * math.exp(par14*math.fabs(tt)) + par15/math.fabs(tt)) * (math.sin(theta_cm)**2)
+# Trial 34
+# Combination with inverse parabola w/ Q2-dep
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**2)
+# Trial 35
+#sig_TT = par13 * math.exp(-par14*math.fabs(tt)) * 1.0/(1.0 + (qq/par15)**2) * (math.sin(theta_cm)**3)
+# Trial 36
+#sig_TT = ((-par13 * math.fabs(tt) + par14) * (math.fabs(tt)**(qq/par15)) - par16 * qq) * (math.sin(theta_cm)**2)
