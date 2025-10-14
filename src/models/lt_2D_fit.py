@@ -732,6 +732,45 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                     red_chi2, t_list[i], w_list[i], q2_list[i], theta_list[i]))
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
+
+        # ---------------- NEW CSV OUTPUT -----------------
+        import pandas as pd
+
+        # Build the output filename dynamically
+        Q2_str = Q2.replace('.', 'p')
+        W_str = W.replace('.', 'p')
+        csv_filename = f"{OUTPATH}/{ANATYPE}LT_Q{Q2_str}W{W_str}.csv"
+
+        # Prepare a single-row dictionary for this t-bin
+        row_data = {
+            "Q2_token":  int(Q2_str.replace('p', '')),
+            "W_token":   int(W_str.replace('p', '')),
+            "Q2":        float(q2_list[i]),
+            "dQ2":       float(q2_list[i]) * 0.001,  # or replace with true uncertainty
+            "W":         float(w_list[i]),
+            "dW":        float(w_list[i]) * 0.001,   # or replace with true uncertainty
+            "t":         float(t_list[i]),
+            "dt":        float(t_list[i]) * 0.001,   # or replace with true uncertainty
+            "sigL":      sig_l,
+            "dsigL":     sig_l_err,
+            "sigT":      sig_t,
+            "dsigT":     sig_t_err,
+            "sigLT":     sig_lt,
+            "dsigLT":    sig_lt_err,
+            "sigTT":     sig_tt,
+            "dsigTT":    sig_tt_err,
+            "chi2":      3.0,
+            "tbin":      i + 1
+        }
+
+        # Append or create CSV
+        if not os.path.exists(csv_filename):
+            pd.DataFrame([row_data]).to_csv(csv_filename, index=False)
+        else:
+            pd.DataFrame([row_data]).to_csv(csv_filename, mode='a', header=False, index=False)
+
+        print(f"→ CSV row written to {csv_filename}")
+        # --------------------------------------------------
             
         del g_plot_err
         
