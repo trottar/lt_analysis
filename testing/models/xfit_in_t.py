@@ -304,7 +304,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         if old != new:
             print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
 
-    para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+    para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p","").zfill(2), w_set.replace("p","").zfill(3))
     print("\nWriting {}...".format(para_file_out))
     with open(para_file_out, 'w') as f:
         for i in range(len(par_vec)):
