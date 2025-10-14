@@ -304,7 +304,17 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         if old != new:
             print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
 
-    para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, q2_set.replace("p","")[:2], w_set.replace("p","")[:3])
+    # Remove 'p' and ensure correct digit count
+    Q2_num = q2_set.replace("p", "")
+    W_num = w_set.replace("p", "")
+    # If Q2 has only one digit (e.g. '1p' -> '1'), pad to 2 digits
+    if len(Q2_num) < 2:
+        Q2_num = Q2_num.ljust(2, "0")
+    # If W has less than 3 digits (e.g. '2p7' -> '27'), pad to 3 digits
+    if len(W_num) < 3:
+        W_num = W_num.ljust(3, "0")
+
+    para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, Q2_num, W_num)
     print("\nWriting {}...".format(para_file_out))
     with open(para_file_out, 'w') as f:
         for i in range(len(par_vec)):

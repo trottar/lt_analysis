@@ -169,8 +169,18 @@ x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict, output_file_lst)
 if DEBUG:
     show_pdf_with_evince(TEMP_CACHEPATH+"/{}_xfit_in_t_Q{}W{}*.pdf".format(ParticleType, Q2, W))
 
+# Remove 'p' and ensure correct digit count
+Q2_num = Q2.replace("p", "")
+W_num = W.replace("p", "")
+# If Q2 has only one digit (e.g. '1p' -> '1'), pad to 2 digits
+if len(Q2_num) < 2:
+    Q2_num = Q2_num.ljust(2, "0")
+# If W has less than 3 digits (e.g. '2p7' -> '27'), pad to 3 digits
+if len(W_num) < 3:
+    W_num = W_num.ljust(3, "0")
+
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
-new_param_file = '{}/testing/parameters/new_par.{}_Q{}W{}.dat'.format(LTANAPATH, pol_str, Q2.replace("p","")[:2], W.replace("p","")[:3])
+new_param_file = '{}/testing/parameters/new_par.{}_Q{}W{}.dat'.format(LTANAPATH, pol_str, Q2_num, W_num)
 print("\nCopying {} to {}".format(new_param_file, new_param_file.replace(LTANAPATH+"/testing/parameters", TEMP_CACHEPATH)))
 shutil.copy(new_param_file, new_param_file.replace(LTANAPATH+"/testing/parameters", TEMP_CACHEPATH))
