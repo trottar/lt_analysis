@@ -46,7 +46,7 @@ TMIN = 0.025
 TMAX = 0.600
 
 # Output filenames
-file_str           = "pl_Q1p6-2p4W2p22_trotta"
+file_str           = "pl_Q1p6-2p4W2p22"
 AVG_OUTFILE        = f"{LTANAPATH}/testing/parameters/new_par.{file_str}.dat"               # original fixed-effects output (preserved)
 BEST_OUTFILE       = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_best.dat"          # per-function FE/RE mix
 DIAG_CSV_OUTFILE   = f"{LTANAPATH}/testing/parameters/new_par.{file_str}_diagnostics.csv"   # diagnostics
