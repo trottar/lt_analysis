@@ -182,7 +182,7 @@ def main():
     ap = argparse.ArgumentParser(description="Fit Q^2 dependence for L,T,LT,TT from two CSVs and plot.")
     ap.add_argument("--file1", type=Path, required=True, help="CSV for dataset 1 (e.g., Q²≈3)")
     ap.add_argument("--file2", type=Path, required=True, help="CSV for dataset 2 (e.g., Q²≈4.4)")
-    ap.add_argument("--outdir", type=Path, required=True, help="Output directory for plots & params.json")
+    ap.add_argument("--outdir", type=Path, default="", help="Output directory for plots & params.json")
     ap.add_argument("--q2_ref", type=float, default=4.3, help="Reference Q² to annotate in plots")
     ap.add_argument("--left_on", type=str, default="", help="Comma-separated bin keys in file1 (optional)")
     ap.add_argument("--right_on", type=str, default="", help="Comma-separated bin keys in file2 (optional)")
