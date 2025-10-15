@@ -71,7 +71,7 @@ def related_error_columns(df: pd.DataFrame, base_col: str) -> List[str]:
 
 def detect_constant_q2(df: pd.DataFrame) -> float | None:
     for c in df.columns:
-        if c.lower() == "q2":
+        if c.strip().lower() == "q2":
             uniq = df[c].dropna().unique()
             if len(uniq) == 1:
                 return float(uniq[0])
