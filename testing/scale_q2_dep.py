@@ -338,7 +338,7 @@ def main():
     ap = argparse.ArgumentParser(description="Q^2 dependence: per-bin and per-setting (single PDF).")
     ap.add_argument("--file1", type=Path, required=True)
     ap.add_argument("--file2", type=Path, required=True)
-    ap.add_argument("--outdir", type=Path, required=True)
+    ap.add_argument("--outdir", type=Path, default="")
     ap.add_argument("--q2_ref", type=float, default=4.3)
     ap.add_argument("--left_on", type=str, default="")
     ap.add_argument("--right_on", type=str, default="")
