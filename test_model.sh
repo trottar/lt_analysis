@@ -36,7 +36,7 @@ TMAX=0.750
 #W="2p70"
 #TMIN=0.400
 #TMAX=0.750
-#ParticleType="kaon"
+ParticleType="kaon"
 #
 #Q2="1p6"
 #W="2p22"
