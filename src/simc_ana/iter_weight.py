@@ -360,7 +360,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
               continue
           
           Weight_array[0] = evt.iter_weight
-          sigcm_array[0] = evt.iter_sig
+          sigcm_array[0] = evt.iter_sig / 1e3
           
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
@@ -395,7 +395,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
               continue
           
           Weight_array[0] = evt.Weight
-          sigcm_array[0] = evt.sigcm
+          sigcm_array[0] = evt.sigcm / 1e3
           
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
