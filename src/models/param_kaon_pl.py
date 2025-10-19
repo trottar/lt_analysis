@@ -80,7 +80,8 @@ def iterWeight(arg_str):
 
     sig = sig * wfactor
 
-    sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+    #sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
+    sig = sig / 2.0 / math.pi / 1e3  # dsig/dtdphicm in microbarns/MeV**2/rad
     
     try:
         wtn = weight_prev_iter * (sig / sig_prev_iter)
