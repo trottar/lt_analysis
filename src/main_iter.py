@@ -675,7 +675,7 @@ if EPSSET == "high":
     # Plot model on this iteration's data
     sys.path.append("models")
     from xfit_in_t import x_fit_in_t
-    x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict, output_file_lst, skip_optimization=True)
+    x_fit_in_t(ParticleType, pol_str, formatted_date, Q2, W, inpDict, output_file_lst, skip_optimization=True)
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_lt_fit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
     
