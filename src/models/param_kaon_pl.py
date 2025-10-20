@@ -78,7 +78,7 @@ def iterWeight(arg_str):
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
 
-    sig = sig * wfactor
+    sig = sig #* wfactor
 
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     
