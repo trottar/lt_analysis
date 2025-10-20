@@ -198,18 +198,18 @@ def get_eff_charge(hist, inpDict, all_data=True):
 
     dummy_target_corr = 4.8579
     if phi_setting == "Right":
-        normfac_dummy = 1e3/(dummy_charge_right*dummy_target_corr)
-        normfac_data = 1e3/(data_charge_right)
+        normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
+        normfac_data = 1/(data_charge_right)
         if all_data:
             normfac_simc = (simc_normfactor)/(simc_nevents)
     if phi_setting == "Left":
-        normfac_dummy = 1e3/(dummy_charge_left*dummy_target_corr)
-        normfac_data = 1e3/(data_charge_left)
+        normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
+        normfac_data = 1/(data_charge_left)
         if all_data:
             normfac_simc = (simc_normfactor)/(simc_nevents)
     if phi_setting == "Center":
-        normfac_dummy = 1e3/(dummy_charge_center*dummy_target_corr)
-        normfac_data = 1e3/(data_charge_center)
+        normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
+        normfac_data = 1/(data_charge_center)
         if all_data:
             normfac_simc = (simc_normfactor)/(simc_nevents)
         
@@ -405,16 +405,16 @@ def find_events(hist, inpDict):
 
     dummy_target_corr = 4.8579
     if phi_setting == "Right":
-        normfac_dummy = 1e3/(dummy_charge_right*dummy_target_corr)
-        normfac_data = 1e3/(data_charge_right)
+        normfac_dummy = 1/(dummy_charge_right*dummy_target_corr)
+        normfac_data = 1/(data_charge_right)
         normfac_simc = (simc_normfactor)/(simc_nevents)
     if phi_setting == "Left":
-        normfac_dummy = 1e3/(dummy_charge_left*dummy_target_corr)
-        normfac_data = 1e3/(data_charge_left)
+        normfac_dummy = 1/(dummy_charge_left*dummy_target_corr)
+        normfac_data = 1/(data_charge_left)
         normfac_simc = (simc_normfactor)/(simc_nevents)
     if phi_setting == "Center":
-        normfac_dummy = 1e3/(dummy_charge_center*dummy_target_corr)
-        normfac_data = 1e3/(data_charge_center)
+        normfac_dummy = 1/(dummy_charge_center*dummy_target_corr)
+        normfac_data = 1/(data_charge_center)
         normfac_simc = (simc_normfactor)/(simc_nevents)
         
 
