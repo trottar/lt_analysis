@@ -327,6 +327,7 @@ print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
+# Temp for simc conversion check
 for hist in histlist:
     hist["normfac_simc"] = hist["normfac_simc"]/1e3
 
