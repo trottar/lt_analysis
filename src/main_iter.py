@@ -216,6 +216,7 @@ inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
 
 # Copy input model to specific particle type directory
+print("\nCopying {} to {}".format('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W)))
 shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
 
 # Save input model
@@ -244,6 +245,15 @@ if EPSSET == "low":
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
 new_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+
+# Create a new directory for each iteration in cache
+# ***Moved up in procedure vs main.py since required for weight iteration***
+new_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
+new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
+create_dir(new_dir)
+
+print("\nCopying {} to {}".format(new_param_file, '{}/parameters/par.{}_Q{}W{}.dat'.format(new_dir, pol_str, Q2.replace("p",""), W.replace("p",""))))
+shutil.copy(new_param_file, '{}/parameters/par.{}_Q{}W{}.dat'.format(new_dir, pol_str, Q2.replace("p",""), W.replace("p","")))\
 
 # Grab combined root files for data and dummy.
 # Then save to dictionary
@@ -370,12 +380,6 @@ iter_weight = get_histogram(prev_root_file, "{}/simc".format(hist["phi_setting"]
 print("\n\n")
 
 # ***Removed effective charge calculation since it is grabbed from prev iter***
-
-# Create a new directory for each iteration in cache
-# ***Moved up in procedure vs main.py since required for weight iteration***
-new_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(), Q2, W, formatted_date)
-new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
-create_dir(new_dir)
 
 # ***Moved from main.py location below because needed for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
