@@ -252,6 +252,7 @@ new_dir_cache = "{}/{}/{}/Q{}W{}/{}".format(CACHEPATH, USER, ParticleType.lower(
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
+create_dir(new_dir+"/parameters")
 print("\nCopying {} to {}".format(new_param_file, '{}/parameters/par.{}_Q{}W{}.dat'.format(new_dir, pol_str, Q2.replace("p",""), W.replace("p",""))))
 shutil.copy(new_param_file, '{}/parameters/par.{}_Q{}W{}.dat'.format(new_dir, pol_str, Q2.replace("p",""), W.replace("p","")))\
 
