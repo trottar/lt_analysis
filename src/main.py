@@ -721,7 +721,7 @@ if EPSSET == "high":
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
-    output_file_lst.append(f"{OUTPATH}/{ANATYPE}LT_Q{Q2.replace(".","p")}W{W.replace(".","p")}.csv")
+    output_file_lst.append(f"{OUTPATH}/{ANATYPE}LT_Q{Q2.replace('.','p')}W{W.replace('.','p')}.csv")
     output_file_lst.append('models/lt_2D_fit.py')
     
     # Save new parameters and unsep values from current iteration
