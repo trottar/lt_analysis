@@ -327,6 +327,9 @@ print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
+for hist in histlist:
+    hist["normfac_simc"] = hist["normfac_simc"]/1e3
+
 phisetlist = []
 for hist in histlist:
     phisetlist.append(hist["phi_setting"])
