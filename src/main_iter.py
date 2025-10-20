@@ -659,8 +659,6 @@ if EPSSET == "high":
     output_file_lst.append('models/lt_2D_fit.py')
     
     # Save sep and unsep values from current iteration
-    new_param_file = '{}/parameters/par.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-    output_file_lst.append(new_param_file) 
     sep_file = '{}/xsects/x_sep.{}_Q{}W{}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
     output_file_lst.append(sep_file)
     unsep_lo_file = '{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100)
