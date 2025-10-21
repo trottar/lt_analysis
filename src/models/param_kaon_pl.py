@@ -51,6 +51,8 @@ def iterWeight(arg_str):
     # Split and convert the input string into a list of floats
     args = list(map(float, arg_str.split()))
 
+    print(f"args: {args}")
+
     # Extract individual values from the list
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
