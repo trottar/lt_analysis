@@ -72,8 +72,8 @@ def iterWeight(arg_str):
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)    
 
     # Convert degrees to radians
-    theta_cm = theta_cm * math.pi/180
-    phi_cm = phi_cm * math.pi/180
+    #theta_cm = theta_cm * math.pi/180
+    #phi_cm = phi_cm * math.pi/180
 
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
