@@ -388,7 +388,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                       #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
           # After 7/31/2025
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
-                      .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)                    
+                    .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetapq, evt.phipqi-math.pi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+                      #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)                    
 
           iter_lst = iterWeight(inp_param)
 
