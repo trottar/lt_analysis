@@ -38,9 +38,9 @@ while getopts 'hp' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-	echo "     EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, RUNNUM=arg5"
+	echo "     EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
-	echo "        EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, RUNNUM=arg5, ParticleType=arg6"
+	echo "        EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, ParticleType=arg5"
 	echo
 	echo " Avaliable Kinematics..."
 	echo "                      EPSILON={high,low}"
@@ -65,8 +65,7 @@ if [[ $p_flag = "true" ]]; then
     PHIVAL=$(echo "$3" | tr '[:upper:]' '[:lower:]')
     Q2=$4
     W=$5
-    RUNNUM=$7
-    ParticleType=$8
+    ParticleType=$6
     echo "Epsilon must be - high - low - Case Sensitive!"
     echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5 - 0p4]"
     echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40 - 2p20]"
@@ -118,7 +117,7 @@ if [[ $p_flag = "true" ]]; then
 	    esac
 	done
     fi
-    if [[ -z "$8" || ! "$ParticleType" =~ kaon|pion|proton ]]; then # Check the 3rd argument was provided and that it's one of the valid options
+    if [[ -z "$6" || ! "$ParticleType" =~ kaon|pion|proton ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	echo ""
 	echo "I need a valid particle type..."
 	while true; do
@@ -147,7 +146,6 @@ else
     PHIVAL=$(echo "$2" | tr '[:upper:]' '[:lower:]')
     Q2=$3
     W=$4
-    RUNNUM=$6
     echo "Epsilon must be - high - low - Case Sensitive!"
     echo "Q2 must be one of - [5p5 - 4p4 - 3p0 - 2p1 - 0p5]"
     echo "W must be one of - [3p02 - 2p74 - 3p14 - 2p32 - 2p95 - 2p40]"
