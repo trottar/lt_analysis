@@ -150,6 +150,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     Wi_array = array( 'f', [0])
     ti_array = array( 'f', [0])
     phipqi_array = array( 'f', [0])
+    thetapqi_array = array( 'f', [0])
     saghai_array = array( 'f', [0])
     factor_array = array( 'f', [0])
     paero_z_det_array = array( 'f', [0])
@@ -216,6 +217,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC.SetBranchAddress("Wi", Wi_array);
     TBRANCH_SIMC.SetBranchAddress("ti", ti_array);
     TBRANCH_SIMC.SetBranchAddress("phipqi", phipqi_array);
+    TBRANCH_SIMC.SetBranchAddress("thetapqi", thetapqi_array);
     TBRANCH_SIMC.SetBranchAddress("saghai", saghai_array);
     TBRANCH_SIMC.SetBranchAddress("factor", factor_array);
     TBRANCH_SIMC.SetBranchAddress("paero_z_det", paero_z_det_array)
@@ -294,6 +296,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Branch("Wi", Wi_array, "Wi/F");
     new_TBRANCH_SIMC.Branch("ti", ti_array, "ti/F");
     new_TBRANCH_SIMC.Branch("phipqi", phipqi_array, "phipqi/F");
+    new_TBRANCH_SIMC.Branch("thetapqi", thetapqi_array, "thetapqi/F");
     new_TBRANCH_SIMC.Branch("saghai", saghai_array, "saghai/F");
     new_TBRANCH_SIMC.Branch("factor", factor_array, "factor/F");        
     new_TBRANCH_SIMC.Branch("Weight", Weight_array, "Weight/F")
