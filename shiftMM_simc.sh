@@ -38,9 +38,9 @@ while getopts 'hp' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-	echo "     EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, target=arg5, RUNNUM=arg6"
+	echo "     EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, RUNNUM=arg5"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for all."
-	echo "        EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, target=arg5, RUNNUM=arg6, ParticleType=arg7"
+	echo "        EPSILON=arg1, PHIVAL=arg2, Q2=arg3, W=arg4, RUNNUM=arg5, ParticleType=arg6"
 	echo
 	echo " Avaliable Kinematics..."
 	echo "                      EPSILON={high,low}"
@@ -120,7 +120,7 @@ if [[ $p_flag = "true" ]]; then
     fi
     if [[ -z "$8" || ! "$ParticleType" =~ kaon|pion|proton ]]; then # Check the 3rd argument was provided and that it's one of the valid options
 	echo ""
-	echo "I need a valid target type..."
+	echo "I need a valid particle type..."
 	while true; do
 	    echo ""
 	    read -p "Particle type must be one of - [kaon - pion - proton] - or press ctrl-c to exit : " ParticleType
