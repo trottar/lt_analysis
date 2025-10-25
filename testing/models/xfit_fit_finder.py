@@ -149,13 +149,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
-                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "T":
-                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "LT":
-                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "TT":
-                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")                
                 funcs_sig.append(fun_Sig)
@@ -504,13 +504,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
-                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "T":
-                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "LT":
-                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "TT":
-                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
+                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")
                 funcs_sig.append(fun_Sig)
@@ -586,13 +586,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
                 if sig_name == "L":
-                    fun_Sig = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                    fun_Sig = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
                 elif sig_name == "T":
-                    fun_Sig = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                    fun_Sig = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
                 elif sig_name == "LT":
-                    fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                    fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
                 elif sig_name == "TT":
-                    fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], th_vec[best_overall_bin])
+                    fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
                 fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     fits_sig[it].FixParameter(i, par_vec[4*it + i])
