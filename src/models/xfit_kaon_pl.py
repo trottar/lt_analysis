@@ -48,9 +48,9 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 
 ################################################################################################################################################
 
-def fun_Sig_L_wrapper(wfactor, q2, w, theta, test=False):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta, test=False):
-        return fun_Sig_L(g, qq, ww, theta_cm, x, par, test=False)
+def fun_Sig_L_wrapper(wfactor, q2, w, theta):
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
 # Theta_cm in radians (-pi, pi)
@@ -58,9 +58,8 @@ def fun_Sig_L(g, qq, ww, theta_cm, x, par, test=False):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
-    par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    if test == True:  
-        print(f"xfit_kaon_pl.py sigL: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
+    par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]  
+    print(f"xfit_kaon_pl.py sigL: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
