@@ -52,9 +52,11 @@ def iterWeight(arg_str):
     args = list(map(float, arg_str.split()))
 
     # Extract individual values from the list
+    # Phi_cm & Theta_cm in radians (-pi, pi)
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
-    
+    print(f"param_kaon_pl.py: theta_cm = {theta_cm}")
+
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
     fun_Sig_T_optimized = prepare_equations(equations, 'sig_T')
@@ -70,13 +72,6 @@ def iterWeight(arg_str):
     
     # Calculate W-factor
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)    
-
-    # Convert degrees to radians
-    #theta_cm = theta_cm * math.pi/180
-    #phi_cm = phi_cm * math.pi/180
-    # Convert radians to degrees (-180, 180)
-    theta_cm = theta_cm * 180/math.pi
-    phi_cm   = phi_cm   * 180/math.pi
 
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)

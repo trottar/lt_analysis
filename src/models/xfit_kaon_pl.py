@@ -53,12 +53,13 @@ def fun_Sig_L_wrapper(wfactor, q2, w, theta):
         return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in degrees (-180, 180)
+# Theta_cm in radians (-pi, pi)
 def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]    
+    print(f"xfit_kaon_pl.py sigL: theta_cm = {theta_cm}")
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
@@ -67,12 +68,13 @@ def fun_Sig_T_wrapper(wfactor, q2, w, theta):
         return fun_Sig_T(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in degrees (-180, 180)
+# Theta_cm in radians (-pi, pi)
 def fun_Sig_T(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    print(f"xfit_kaon_pl.py sigT: theta_cm = {theta_cm}")
     # Calculate SigT
     return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
@@ -81,12 +83,13 @@ def fun_Sig_LT_wrapper(wfactor, q2, w, theta):
         return fun_Sig_LT(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in degrees (-180, 180)
+# Theta_cm in radians (-pi, pi)
 def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
+    print(f"xfit_kaon_pl.py sigLT: theta_cm = {theta_cm}")
     # Calculate SigLT
     return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
@@ -95,11 +98,12 @@ def fun_Sig_TT_wrapper(wfactor, q2, w, theta):
         return fun_Sig_TT(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in degrees (-180, 180)
+# Theta_cm in radians (-pi, pi)
 def fun_Sig_TT(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]  
+    print(f"xfit_kaon_pl.py sigTT: theta_cm = {theta_cm}")
     # Calculate SigTT
     return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)

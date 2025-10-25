@@ -149,13 +149,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
-                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 elif sig_name == "T":
-                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 elif sig_name == "LT":
-                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 elif sig_name == "TT":
-                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")                
                 funcs_sig.append(fun_Sig)
@@ -504,13 +504,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
-                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 elif sig_name == "T":
-                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_T_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 elif sig_name == "LT":
-                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_LT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 elif sig_name == "TT":
-                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], th_vec[b])
+                    fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.Radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")
                 funcs_sig.append(fun_Sig)
