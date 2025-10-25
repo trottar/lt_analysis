@@ -500,8 +500,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 print(f"Initial Parameters: ({param_str})")
                 print(equation_str)
                 print("/*--------------------------------------------------*/")                
-                print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, "
-                      f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
+
                 g_sig_fit = TGraphErrors()
                 graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
