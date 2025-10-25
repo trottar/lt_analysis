@@ -55,7 +55,7 @@ def iterWeight(arg_str):
     # Phi_cm & Theta_cm in radians (-pi, pi)
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
-    print(f"param_kaon_pl.py: theta_cm = {theta_cm}")
+    print(f"param_kaon_pl.py: theta_cm = {theta_cm}, phi_cm = {phi_cm}")
 
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
