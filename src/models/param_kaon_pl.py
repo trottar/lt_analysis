@@ -74,7 +74,7 @@ def iterWeight(arg_str):
     # Convert degrees to radians
     #theta_cm = theta_cm * math.pi/180
     #phi_cm = phi_cm * math.pi/180
-    print(f"param_kaon_pl.py: theta_cm = {theta_cm}, phi_cm = {phi_cm}")
+    # Convert radians to degrees (-180, 180)
     theta_cm = theta_cm * 180/math.pi
     phi_cm   = phi_cm   * 180/math.pi
 
