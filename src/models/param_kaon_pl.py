@@ -74,6 +74,8 @@ def iterWeight(arg_str):
     # Convert degrees to radians
     #theta_cm = theta_cm * math.pi/180
     #phi_cm = phi_cm * math.pi/180
+    theta_cm = (theta_cm * 180/math.pi) % 360
+    phi_cm   = (phi_cm   * 180/math.pi) % 360
 
     sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
              math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
@@ -83,7 +85,7 @@ def iterWeight(arg_str):
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     
     try:
-        wtn = weight_prev_iter * (sig_prev_iter / sig)#* (sig / sig_prev_iter)
+        wtn = weight_prev_iter * (sig / sig_prev_iter)
     except ZeroDivisionError:
         wtn = 0.0
 
