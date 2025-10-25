@@ -221,7 +221,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     inp_dict = {
         "q2_set" : q2_set.replace("p","."),
         "w_set" : w_set.replace("p","."),
-        "objects" : [nsep/1e3, t_vec, g_vec, w_vec, q2_vec, th_vec],
+        "objects" : [nsep, t_vec, g_vec, w_vec, q2_vec, th_vec],
         "max_iterations" : max_iterations,
         "num_optimizations" : num_optimizations,
         "initial_param_bounds" : initial_param_bounds,
