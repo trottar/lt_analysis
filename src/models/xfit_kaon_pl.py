@@ -36,7 +36,6 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     pol_str = inp_pol_str
     Q2 = inp_Q2
     W = inp_W
-    i = 0
 
     # Load equations from model input file of given setting
     equations = load_equations(f"Q{Q2}W{W}.model")
@@ -60,8 +59,7 @@ def fun_Sig_L(g, qq, ww, theta_cm, x, par, test=False):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]  
-    print(f"xfit_kaon_pl.py sigL: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm} | {i}")
-    i += 1
+    print(f"xfit_kaon_pl.py sigL: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
