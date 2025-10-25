@@ -36,6 +36,7 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
     pol_str = inp_pol_str
     Q2 = inp_Q2
     W = inp_W
+    i = 0
 
     # Load equations from model input file of given setting
     equations = load_equations(f"Q{Q2}W{W}.model")
@@ -52,7 +53,7 @@ def fun_Sig_L_wrapper(wfactor, q2, w, theta):
     def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
         return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
-i = 0
+
 # Theta_cm in radians (-pi, pi)
 def fun_Sig_L(g, qq, ww, theta_cm, x, par, test=False):
     tt = abs(x[0])
