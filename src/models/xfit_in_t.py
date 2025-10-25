@@ -82,7 +82,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # False - Set range of parameter search from current_params +/- off*abs(current_params) (off = 0.1, 10% param value)
     full_optimization = True
 
-    #skip_optimization = True # Set to True to skip optimization and use fixed parameters
+    skip_optimization = True # Set to True to skip optimization and use fixed parameters
 
     # Fixed separated xsect parameterization
     if skip_optimization:
@@ -300,25 +300,19 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
         parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
     
-    # Check if parameter values changed and print changes to terminal
-    for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
-        if old != new:
-            print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
+        # Check if parameter values changed and print changes to terminal
+        for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
+            if old != new:
+                print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
 
-    para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-    print("\nWriting {}...".format(para_file_out))
+        para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+        print("\nWriting {}...".format(para_file_out))
+        with open(para_file_out, 'w') as f:
+            for i in range(len(par_vec)):
+                f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+
     with open(para_file_out, 'w') as f:
         for i in range(len(par_vec)):
             f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
             print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-
-    '''
-    print("\n\nWould you like to continue with the analysis?\n")
-    if not request_yn_response():
-        print("-"*25)
-        print("Exiting script...")
-        print("-"*25)
-        sys.exit(2)
-    '''
-    print("\n\n")
-    
