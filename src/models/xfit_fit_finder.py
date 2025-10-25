@@ -66,7 +66,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     graphs_sig_residuals= []
     graphs_sig_ic_aic   = []
     graphs_sig_ic_bic   = []    
-    funcs_sig = []
+    #funcs_sig = []
+    funcs_sig = [None]*4
     fits_sig = []
     
     c2 = TCanvas("c2", "c2", 800, 800)
