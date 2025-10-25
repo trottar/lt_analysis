@@ -83,7 +83,7 @@ def iterWeight(arg_str):
     sig = sig / 2.0 / math.pi / 1e6  # dsig/dtdphicm in microbarns/MeV**2/rad
     
     try:
-        wtn = weight_prev_iter * (sig / sig_prev_iter)
+        wtn = weight_prev_iter * (sig_prev_iter / sig)#* (sig / sig_prev_iter)
     except ZeroDivisionError:
         wtn = 0.0
 
