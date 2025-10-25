@@ -48,9 +48,9 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 
 ################################################################################################################################################
 
-def fun_Sig_L_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
-        return fun_Sig_L(g, qq, ww, theta_cm, x, par)
+def fun_Sig_L_wrapper(wfactor, q2, w, theta, test=False):
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta, test=False):
+        return fun_Sig_L(g, qq, ww, theta_cm, x, par, test=False)
     return tmp_func
 
 # Theta_cm in radians (-pi, pi)
