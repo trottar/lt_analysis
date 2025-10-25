@@ -59,8 +59,8 @@ def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]  
-    if g == 1:
-        print(f"xfit_kaon_pl.py sigL: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
+    if g == 0:
+        print(f"xfit_kaon_pl.py sigL: t = {tt}, Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
