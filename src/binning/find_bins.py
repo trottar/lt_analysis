@@ -62,6 +62,9 @@ def find_bins(histlist, inpDict):
 
     ################################################################################################################################################
     
+    Q2 = inpDict["Q2"]
+    W = inpDict["W"]
+
     ParticleType = inpDict["ParticleType"]
 
     tmin = inpDict["tmin"]
@@ -197,8 +200,14 @@ def find_bins(histlist, inpDict):
         # Aim for >1000 events
         #bad_bins_threshold = 200 # Q2=5.5, W=3.02 
         #bad_bins_threshold = 500
-        bad_bins_threshold = 1000
-        #bad_bins_threshold = 2500 # Q2=4.4, W=2.74
+        #bad_bins_threshold = 1000
+        #bad_bins_threshold = 2500
+        if Q2 == "4p4" and W == "2p74":
+            bad_bins_threshold = 2500 # Q2=4.4, W=2.74
+        elif Q2 == "5p5" and W == "3p02":
+            bad_bins_threshold = 200 # Q2=5.5, W=3.02        
+        else:
+            bad_bins_threshold = 1000
         ##############
         ##############
         ##############
