@@ -82,7 +82,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # False - Set range of parameter search from current_params +/- off*abs(current_params) (off = 0.1, 10% param value)
     full_optimization = True
 
-    skip_optimization = True # Set to True to skip optimization and use fixed parameters
+    #skip_optimization = True # Set to True to skip optimization and use fixed parameters
 
     # Fixed separated xsect parameterization
     if skip_optimization:
@@ -312,7 +312,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
                 f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
                 print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
 
-    with open(para_file_out, 'w') as f:
-        for i in range(len(par_vec)):
-            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-            print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+        '''
+        print("\n\nWould you like to continue with the analysis?\n")
+        if not request_yn_response():
+            print("-"*25)
+            print("Exiting script...")
+            print("-"*25)
+            sys.exit(2)
+        '''
+        print("\n\n")
