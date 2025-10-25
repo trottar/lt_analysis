@@ -66,9 +66,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     graphs_sig_residuals= []
     graphs_sig_ic_aic   = []
     graphs_sig_ic_bic   = []    
-    #funcs_sig = []
-    funcs_sig = [None]*4
-    fits_sig = []
+    funcs_sig = [None]*4 # L, T, LT, TT
+    fits_sig = [None]*4 # L, T, LT, TT
     
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -158,10 +157,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 elif sig_name == "TT":
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
-                    raise ValueError("Unknown signal name")                
-                funcs_sig.append(fun_Sig)
+                    raise ValueError("Unknown signal name") 
+                funcs_sig[it] = fun_Sig                           
                 f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-                fits_sig.append(f_sig)
+                fits_sig[it] = f_sig
 
                 param_offsets = [0.1 for _ in range(num_params)]
                 params_sig_history = [[] for _ in range(num_params)]
@@ -514,10 +513,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")
-                funcs_sig[it] = fun_Sig
-                #funcs_sig.append(fun_Sig)
+                funcs_sig[it] = fun_Sig                
                 f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-                fits_sig.append(f_sig)
+                fits_sig[it] = f_sig
 
                 graph_sig_params = [TGraph() for _ in range(num_params)]
                 graphs_sig_params_all.append(graph_sig_params)
