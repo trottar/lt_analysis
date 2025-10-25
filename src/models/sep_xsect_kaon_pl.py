@@ -33,6 +33,7 @@ def import_model(inp_model, arg_str):
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
 
     # Convert degrees to radians
+    print("sep_xsect_kaon_pl.py: theta_cm = {phi_cm}, theta_cm = {phi_cm}")
     theta_cm = theta_cm * math.pi/180
     
     # Load equations from model input file of given setting
