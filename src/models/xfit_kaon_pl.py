@@ -60,6 +60,7 @@ def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
     # Convert degrees to radians
     print(f"xfit_kaon_pl.py sigL: theta_cm = {theta_cm}")
+    sys.exit(2)
     theta_cm = theta_cm * math.pi/180    
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)

@@ -75,6 +75,7 @@ def iterWeight(arg_str):
     #theta_cm = theta_cm * math.pi/180
     #phi_cm = phi_cm * math.pi/180
     print(f"param_kaon_pl.py: theta_cm = {theta_cm}, phi_cm = {phi_cm}")
+    sys.exit(2)
     theta_cm = (theta_cm * 180/math.pi) % 360
     phi_cm   = (phi_cm   * 180/math.pi) % 360
 
