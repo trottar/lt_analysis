@@ -58,9 +58,8 @@ def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    # Convert degrees to radians
+    # Convert degrees to radians (-180, 180)
     print(f"xfit_kaon_pl.py sigL: theta_cm = {theta_cm}")
-    sys.exit(2)
     theta_cm = theta_cm * math.pi/180    
     # Calculate SigL
     return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
@@ -75,7 +74,7 @@ def fun_Sig_T(g, qq, ww, theta_cm, x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    # Convert degrees to radians
+    # Convert degrees to radians (-180, 180)
     print(f"xfit_kaon_pl.py sigT: theta_cm = {theta_cm}")
     theta_cm = theta_cm * math.pi/180    
     # Calculate SigT
@@ -91,7 +90,7 @@ def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    # Convert degrees to radians
+    # Convert degrees to radians (-180, 180)
     print(f"xfit_kaon_pl.py sigLT: theta_cm = {theta_cm}")
     theta_cm = theta_cm * math.pi/180
     # Calculate SigLT
@@ -107,7 +106,7 @@ def fun_Sig_TT(g, qq, ww, theta_cm, x, par):
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    # Convert degrees to radians
+    # Convert degrees to radians (-180, 180)
     print(f"xfit_kaon_pl.py sigTT: theta_cm = {theta_cm}")
     theta_cm = theta_cm * math.pi/180    
     # Calculate SigTT
