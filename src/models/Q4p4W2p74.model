@@ -43,7 +43,8 @@ sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt)) * (4.3 / 
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #####
 #sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
+#sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
+sig_LT = (par9 / math.fabs(tt)**par10) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
 #####
 
 # Transverse-Transverse interference term
