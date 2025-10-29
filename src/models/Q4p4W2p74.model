@@ -26,24 +26,24 @@ Qdep_TT = qq * math.exp(-qq)
 # 0th
 #sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
 #####
-#sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
-sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt)) * (4.3 / q2_set)**(-2.1795774793857614)
+sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
+#sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt)) * (4.3 / q2_set)**(-2.1795774793857614)
 #####
 
 # Transverse cross-section
 # 0th
 #sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 #####
-#sig_T = (par5 / math.fabs(tt)**par6)
-sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt)) * (4.3 / q2_set)**(-1.8855207068213282)
+sig_T = (par5 / math.fabs(tt)**par6)
+#sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt)) * (4.3 / q2_set)**(-1.8855207068213282)
 #####
 
 # Longitudinal-Transverse interference term
 # 0th
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 #####
-#sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
+sig_LT = (par9 / math.fabs(tt))
+#sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
 #sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
 #####
 
@@ -51,9 +51,9 @@ sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.si
 # 0th
 #sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 #####
-#sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (math.sin(theta_cm)**2)
+sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
-sig_TT = (par13 / math.fabs(tt)**par14) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
+#ig_TT = (par13 / math.fabs(tt)**par14) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
 #sig_TT = (par13 * ft) * (4.3 / q2_set)**(-2.3381694068846635) * ft * (math.sin(theta_cm)**2)
 #####
 
