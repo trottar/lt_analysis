@@ -16,45 +16,44 @@ mkpl=0.493677
 # 2nd iteration, 
 tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
-ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  
 # pole factor
+ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  
+# Q2 dep
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
-Qdep_TT = qq * math.exp(-qq)
+Qdep_LT = 1/(1 + qq)
+Qdep_TT = math.exp(-qq)/(1 + qq)
 
 # Longitudinal cross-section
 # 0th
-#sig_L = (par1 * Qdep_L * ft) * math.exp(-par2 * (math.fabs(tt)))
+sig_L = (par1 * Qdep_L * ft) * math.exp(-math.fabs(par2 * tt))
 #####
 #sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
-sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt)) * (4.3 / q2_set)**(-2.1795774793857614)
+#sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt)) * (4.3 / q2_set)**(-2.1795774793857614)
 #####
 
 # Transverse cross-section
 # 0th
-#sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
+sig_T = (par5 * math.exp(-math.fabs(par6 * tt)) + par7 * (math.fabs(tt))) * (Qdep_T**par8)
 #####
 #sig_T = (par5 / math.fabs(tt)**par6)
-sig_T = (par5 / math.fabs(tt)**par6) * (4.3 / q2_set)**(-1.8855207068213282)
+#sig_T = (par5 / math.fabs(tt)**par6) * (4.3 / q2_set)**(-1.8855207068213282)
 #####
 
 # Longitudinal-Transverse interference term
 # 0th
-#sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 * Qdep_LT * math.exp(-math.fabs(par10 * tt))) * math.sin(theta_cm)
 #####
 #sig_LT = (par9 / math.fabs(tt)) * math.sin(theta_cm)
-sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
-#sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
+#sig_LT = (par9 / math.fabs(tt)) * (4.3 / q2_set)**(-2.009592762873131) * math.sin(theta_cm)
 #####
 
 # Transverse-Transverse interference term
 # 0th
-#sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+sig_TT = (par13 * ft * Qdep_TT**(par14)) * (math.sin(theta_cm)**2)
 #####
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (math.sin(theta_cm)**2)
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
-#sig_TT = (par13 / math.fabs(tt)**par14) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
-sig_TT = (par13 * ft) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
 #####
 
 # Weight factor
