@@ -1386,6 +1386,9 @@ def rand_sub(phi_setting, inpDict):
     H_pmz_DUMMY_RAND.Scale(1/nWindows)
     #H_ct_DUMMY_RAND.Scale(1/nWindows)
 
+    print("\n\n{} data total number of events (no subtraction): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
+    print("{} dummy total number of events (no subtraction): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))     
+
     ###
     # Data Random subtraction
     P_hgcer_xAtCer_vs_yAtCer_DATA.Add(P_hgcer_xAtCer_vs_yAtCer_RAND,-1)
@@ -1503,6 +1506,9 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
+
+    print("\n\n{} data total number of events (random subtraction only!): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
+    print("{} dummy total number of events (random subtraction only!): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))  
 
     ###################################################################################################################################
     # These are applied later, see plotting/data_vs_simc.py
@@ -1684,6 +1690,9 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)      
+
+    print("\n\n{} data total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
+    print("{} dummy total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))      
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
