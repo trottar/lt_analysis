@@ -133,7 +133,7 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     MMCUT =  (mm_min<adj_MM) & (adj_MM<mm_max)
     
-    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and  MMCUT
+    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
 
     return ALLCUTS
 
@@ -196,6 +196,6 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     MMCUT =  (mm_min<adj_missmass) & (adj_missmass<mm_max)
       
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and  MMCUT
+    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
     
     return ALLCUTS
