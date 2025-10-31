@@ -919,7 +919,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         arr_sub = np.array(hist_val_sub)
         try:
             print(f"{i} | DATA Yield: {np.sum(arr_data)/bin_width_data:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
-            yld = np.sum(arr_data)/bin_width_data
+            yld = np.sum(arr_data)#/bin_width_data
             #print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
             # Calculate experimental yield error (relative error)
             # Divide by norm factor to cancel out since we need raw counts            
@@ -1269,7 +1269,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         arr_simc = np.array(hist_val_simc)
         try:
             print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
-            yld = np.sum(arr_simc)/bin_width_simc
+            yld = np.sum(arr_simc)#/bin_width_simc
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
