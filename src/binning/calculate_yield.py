@@ -930,7 +930,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
                 yld_sub_err = 0.0            
             # Convert to absolute error (required for average_ratio.f)
-            yld_err = (yld_data_err**2 + (arr_scale_factor[j][k] * yld_sub_err)**2) * yld
+            yld_err = np.sqrt(yld_data_err**2 + (arr_scale_factor[j][k] * yld_sub_err)**2) * yld
             #print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")
             #print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {arr_scale_factor[j][k]:.3e}")            
         except ZeroDivisionError:
