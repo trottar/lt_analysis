@@ -377,7 +377,7 @@ with PdfPages(outputpdf) as pdf:
         pdf.savefig(fig, bbox_inches='tight')
 
     ##########
-    # Fix ratio data vs Phi
+    # Fit ratio data vs Phi
 
     # functional form in φ [degrees]
     def R_model(phi_deg, A, B, C):
