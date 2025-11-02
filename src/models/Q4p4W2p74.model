@@ -60,7 +60,7 @@ sig_LT = (par9 * math.fabs(tt)**(par10))  * math.exp(-math.fabs(par11 * tt)) * m
 #####
 ##sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (math.sin(theta_cm)**2)
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
-sig_TT = (par13 * math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (math.sin(theta_cm)**2)
+sig_TT = (par13 * math.fabs(tt)**par14) * (1 + par16 * math.fabs(tt)) * math.exp(-math.fabs(par16 * tt)) * (math.sin(theta_cm)**2)
 #####
 
 # Weight factor
