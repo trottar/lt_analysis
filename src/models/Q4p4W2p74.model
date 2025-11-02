@@ -38,7 +38,8 @@ sig_L = (par1 * ft) * math.exp(-math.fabs(par2 * tt))
 #sig_T = (par5 * math.exp(-math.fabs(par6 * tt)) + par7 * (math.fabs(tt))) * (Qdep_T)
 #sig_T = (par5 / math.fabs(tt)**par6) * (Qdep_T)
 #####
-sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt)) * math.sin(theta_cm)
+#sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt)) * math.sin(theta_cm)
+sig_T = par5  * math.exp(-math.fabs(par7 * tt)) * math.sin(theta_cm)
 #sig_T = (par5 / math.fabs(tt)**par6) * (4.3 / q2_set)**(-1.8855207068213282)
 #####
 
@@ -54,7 +55,7 @@ sig_LT = (par9 / math.fabs(tt))  * math.exp(-math.fabs(par10 * tt)) * math.sin(t
 # 0th
 #sig_TT = (par13 * ft * Qdep_TT**(par14)) * (math.sin(theta_cm)**2)
 #####
-sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
+sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (math.sin(theta_cm)**2)
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt)) * (4.3 / q2_set)**(-2.3381694068846635) * (math.sin(theta_cm)**2)
 #####
 
