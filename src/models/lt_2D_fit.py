@@ -99,8 +99,10 @@ w_set = float(W.replace("p",".")) # W value
 PARAM_LIMITS = {
     "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
     "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-    "rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    #"rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    #"rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
+    "rhoLT": [(-0.999, 0.999)]*3,    # ρ_LT : σ_LT / √(σT σL)
+    "rhoTT": [(-0.999, 0.999)]*3     # ρ_TT : σ_TT / σT
 }
 # ------------------------------------------------------------------------------
 
@@ -397,7 +399,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 f")"
             ),
             0, 360,
-            LOEPS-0.1, HIEPS+0.1
+            0.0, 1.0
+            #LOEPS-0.1, HIEPS+0.1
         )         
 
         for k in range(4):
@@ -437,8 +440,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         )
         
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        #fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        #fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(0, max(0.1, 0.1 * SEED_SIGT))     # σ_T step
+        fff2.SetParError(1, max(0.1, 0.1 * SEED_SIGL))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step        
 
@@ -458,8 +463,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=0)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        #fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        #fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(0, max(0.1, 0.1 * SEED_SIGT))     # σ_T step
+        fff2.SetParError(1, max(0.1, 0.1 * SEED_SIGL))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step  
         g_plot_err.Fit(fff2, "SEWQ")       # quiet, no redraw
@@ -488,8 +495,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=1)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        #fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        #fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(0, max(0.1, 0.1 * SEED_SIGT))     # σ_T step
+        fff2.SetParError(1, max(0.1, 0.1 * SEED_SIGL))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step         
         g_plot_err.Fit(fff2, "SEWQ")
@@ -511,8 +520,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        #fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        #fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(0, max(0.1, 0.1 * SEED_SIGT))     # σ_T step
+        fff2.SetParError(1, max(0.1, 0.1 * SEED_SIGL))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step         
         g_plot_err.Fit(fff2, "SEWQ")
@@ -532,8 +543,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        #fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        #fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
+        fff2.SetParError(0, max(0.1, 0.1 * SEED_SIGT))     # σ_T step
+        fff2.SetParError(1, max(0.1, 0.1 * SEED_SIGL))# σ_L step
         fff2.SetParError(2, 0.5)                        # ρ_LT step
         fff2.SetParError(3, 0.5)                        # ρ_TT step         
         g_plot_err.Fit(fff2, "SEWQ")
