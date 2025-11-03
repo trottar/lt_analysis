@@ -440,12 +440,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         )
         
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
-        #fff2.SetParError(2, 0.5)                        # ρ_LT step
-        #fff2.SetParError(3, 0.5)                        # ρ_TT step        
-        fff2.SetParError(2, 0.1)                        # ρ_LT step
-        fff2.SetParError(3, 0.1)                        # ρ_TT step         
+        fff2.SetParError(0, max(1e-3, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
+        fff2.SetParError(2, 1e-3)                        # ρ_LT step
+        fff2.SetParError(3, 1e-3)                        # ρ_TT step         
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -463,12 +461,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=0)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
-        #fff2.SetParError(2, 0.5)                        # ρ_LT step
-        #fff2.SetParError(3, 0.5)                        # ρ_TT step  
-        fff2.SetParError(2, 0.1)                        # ρ_LT step
-        fff2.SetParError(3, 0.1)                        # ρ_TT step         
+        fff2.SetParError(0, max(1e-3, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
+        fff2.SetParError(2, 1e-3)                        # ρ_LT step
+        fff2.SetParError(3, 1e-3)                        # ρ_TT step          
         g_plot_err.Fit(fff2, "SEWQ")       # quiet, no redraw
         check_sigma_positive(fff2, g_plot_err)
 
@@ -495,12 +491,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=1)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
-        #fff2.SetParError(2, 0.5)                        # ρ_LT step
-        #fff2.SetParError(3, 0.5)                        # ρ_TT step
-        fff2.SetParError(2, 0.1)                        # ρ_LT step
-        fff2.SetParError(3, 0.1)                        # ρ_TT step                  
+        fff2.SetParError(0, max(1e-3, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
+        fff2.SetParError(2, 1e-3)                        # ρ_LT step
+        fff2.SetParError(3, 1e-3)                        # ρ_TT step                   
         g_plot_err.Fit(fff2, "SEWQ")
         check_sigma_positive(fff2, g_plot_err)
 
@@ -520,12 +514,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
-        #fff2.SetParError(2, 0.5)                        # ρ_LT step
-        #fff2.SetParError(3, 0.5)                        # ρ_TT step 
-        fff2.SetParError(2, 0.1)                        # ρ_LT step
-        fff2.SetParError(3, 0.1)                        # ρ_TT step                 
+        fff2.SetParError(0, max(1e-3, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
+        fff2.SetParError(2, 1e-3)                        # ρ_LT step
+        fff2.SetParError(3, 1e-3)                        # ρ_TT step                   
         g_plot_err.Fit(fff2, "SEWQ")
         check_sigma_positive(fff2, g_plot_err)
 
@@ -543,12 +535,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
-        fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
-        fff2.SetParError(1, max(0.1, 0.1 * abs(SEED_SIGL)))# σ_L step
-        #fff2.SetParError(2, 0.5)                        # ρ_LT step
-        #fff2.SetParError(3, 0.5)                        # ρ_TT step  
-        fff2.SetParError(2, 0.1)                        # ρ_LT step
-        fff2.SetParError(3, 0.1)                        # ρ_TT step                
+        fff2.SetParError(0, max(1e-3, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
+        fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
+        fff2.SetParError(2, 1e-3)                        # ρ_LT step
+        fff2.SetParError(3, 1e-3)                        # ρ_TT step                 
         g_plot_err.Fit(fff2, "SEWQ")
         check_sigma_positive(fff2, g_plot_err)     
 
