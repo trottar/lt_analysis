@@ -828,6 +828,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
 
     group_dict = {}
+    bad_bins = set()  # <-- collect (tbin_index, phibin_index) that have sem==1000.0 anywhere
     
     for kin_type in kinematic_types:
         binned_t_data = binned_dict[kin_type]["binned_t_data"]
@@ -895,6 +896,10 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 ave_err_val = ave_err_hist[j]
                 print("Data average {} for t-bin {} phi-bin {}: {:.3f} +/- {:.3e}".format(kin_type, j+1, k+1, ave_val, ave_err_val))
                 dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
+
+                # mark bad bins for global override later
+                if ave_err_val == 1000.0:
+                    bad_bins.add((tbin_index, phibin_index))                
                 
         # Group the tuples by the first two elements using defaultdict
         groups = defaultdict(list)
