@@ -659,6 +659,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             event_threshold
         )        
 
+    # Loop through bins in t_data and identify events in specified bins
+    for j in range(len(t_bins)-1):
+
         processed_dict["t_bin{}".format(j+1)] = {
             "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}".format(j)],
             "H_W_DATA" : hist_bin_dict["H_W_DATA_{}".format(j)],
@@ -820,9 +823,6 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
 
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]    
-
-    norm_factor_data = inpDict["normfac_data"]
-    norm_factor_dummy = inpDict["normfac_dummy"]   
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
@@ -845,11 +845,11 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         for data, dummy in zip(binned_hist_data, binned_hist_dummy):
             bin_val_data, hist_val_data = data
             bin_val_dummy, hist_val_dummy = dummy
-            sub_val = np.subtract(hist_val_data, hist_val_dummy)
+            arr_data = np.array(hist_val_data)
             try:
                 # Calculate the weighted sum of frequencies and divide by the total count
-                weighted_sum = np.sum(sub_val * bin_val_data)
-                total_count = np.sum(sub_val)
+                weighted_sum = np.sum(arr_data * bin_val_data)
+                total_count = np.sum(arr_data)
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average):
                     print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
@@ -868,7 +868,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 #print("Total Count:",total_count)
                 #print("Average for t-bin {}:".format(i+1),average)
                 binned_sub_data[0].append(bin_val_data)
-                binned_sub_data[1].append(sub_val)
+                binned_sub_data[1].append(arr_data)
             except ZeroDivisionError:
                 print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
                 sys.exit(2)

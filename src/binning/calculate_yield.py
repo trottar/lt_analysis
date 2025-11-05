@@ -468,14 +468,19 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)            
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)        
 
-            # Normalize for yields
-            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            # Data Normalization
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
-            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
-            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)          
+
+            # Dummy Normalization
+            hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
+            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
+            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
+            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)            
+            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)        
             
             # Dummy subtraction            
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)], -1)
