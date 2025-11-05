@@ -174,15 +174,15 @@ c                 pause
 *                     WRITE(*,*) 'dQ2 = ', dQ2
 *                     WRITE(*,*) 'tt = ', tt
 *                     WRITE(*,*) 'dtt = ', dtt                     
-                     if(dW.gt.0.) then
+                     if(dW.gt.0.and.W.gt.0.) then
                         aW(it,lh,ip)=aW(it,lh,ip)+W/dW**2
                         eW(it,lh,ip)=eW(it,lh,ip)+1./dW**2
                      end if
-                     if(dQ2.gt.0.) then
+                     if(dQ2.gt.0.and.Q2.gt.0.) then
                         aQ2(it,lh,ip)=aQ2(it,lh,ip)+Q2/dQ2**2
                         eQ2(it,lh,ip)=eQ2(it,lh,ip)+1./dQ2**2
                      end if
-                     if(dtt.gt.0.) then
+                     if(dtt.gt.0.and.tt.gt.0.) then
                         att(it,lh,ip)=att(it,lh,ip)+tt/dtt**2
                         ett(it,lh,ip)=ett(it,lh,ip)+1./dtt**2
                      end if                     
