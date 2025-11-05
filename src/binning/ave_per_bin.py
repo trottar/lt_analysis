@@ -851,7 +851,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 weighted_sum = np.sum(arr_data * bin_val_data)
                 total_count = np.sum(arr_data)
                 average = weighted_sum / total_count
-                if math.isnan(average) or math.isinf(average):
+                if math.isnan(average) or math.isinf(average) or average <= 0.0:
                     print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
                     #sys.exit(2)
                     average = 0.0
@@ -862,6 +862,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 n = len(bin_val_data)
                 # Calculate the standard error of the mean (SEM) for the bin
                 sem = std_dev / np.sqrt(n)
+                if average == 0.0:
+                    sem = 1000.0 # Assign a large error if average is zero
                 # Append the uncertainty (SEM) to the list
                 ave_err_hist.append(sem)
                 #print("Weighted Sum:",weighted_sum)
