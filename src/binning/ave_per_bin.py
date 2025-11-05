@@ -906,6 +906,18 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
             }
 
         group_dict[kin_type] = groups
+
+    # ---------- Global override: enforce the rule across all kin_types ----------
+    if bad_bins:
+        for (t_idx, phi_idx) in bad_bins:
+            for kin_type in kinematic_types:
+                key = (t_idx, phi_idx)
+                # Ensure the key exists (it should, but be safe)
+                if key not in group_dict[kin_type]:
+                    group_dict[kin_type][key] = {}
+                group_dict[kin_type][key][f"{kin_type}_ave"] = 0.0
+                group_dict[kin_type][key][f"{kin_type}_ave_err"] = 1000.0
+    # ---------------------------------------------------------------------------        
             
     return group_dict
 
