@@ -115,6 +115,8 @@ InputSIMC_right="Prod_Coin_Q${Q2}W${W}right_${EPSILON}e"
 InputSIMC_left="Prod_Coin_Q${Q2}W${W}left_${EPSILON}e"
 InputSIMC_center="Prod_Coin_Q${Q2}W${W}center_${EPSILON}e"
 
+
+cd ${LTANAPATH}/src/setup
 python3 set_q2_simc.py ${Q2}
 python3 set_w_simc.py ${W}
 python3 set_params_simc.py ${Q2} ${W}
