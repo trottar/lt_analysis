@@ -127,6 +127,8 @@ if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_right}.inp" ]]; then
     echo "Running simc analysis for ${InputSIMC_right}..."
     echo
     ./run_simc_tree "${InputSIMC_right}" "production"
+    cd ${LTANAPATH}
+    ./shiftMM_simc.sh -p ${EPSILON} "right" ${Q2} ${W} ${ParticleType}
 fi
 
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_left}.inp" ]]; then
@@ -135,6 +137,8 @@ if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_left}.inp" ]]; then
     echo "Running simc analysis for ${InputSIMC_left}..."
     echo
     ./run_simc_tree "${InputSIMC_left}" "production"
+    cd ${LTANAPATH}
+    ./shiftMM_simc.sh -p ${EPSILON} "left" ${Q2} ${W} ${ParticleType}    
 fi
 
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_center}.inp" ]]; then
@@ -143,4 +147,6 @@ if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_center}.inp" ]]; then
     echo "Running simc analysis for ${InputSIMC_center}..."
     echo
     ./run_simc_tree "${InputSIMC_center}" "production"
+    cd ${LTANAPATH}
+    ./shiftMM_simc.sh -p ${EPSILON} "center" ${Q2} ${W} ${ParticleType}    
 fi
