@@ -115,13 +115,12 @@ InputSIMC_right="Prod_Coin_Q${Q2}W${W}right_${EPSILON}e"
 InputSIMC_left="Prod_Coin_Q${Q2}W${W}left_${EPSILON}e"
 InputSIMC_center="Prod_Coin_Q${Q2}W${W}center_${EPSILON}e"
 
-cd ${LTANAPATH}/src/setup
-
 python3 set_q2_simc.py ${Q2}
 python3 set_w_simc.py ${W}
 python3 set_params_simc.py ${Q2} ${W}
 
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_right}.inp" ]]; then
+    cd ${LTANAPATH}/src/setup
     echo
     echo 
     echo "Running simc analysis for ${InputSIMC_right}..."
@@ -132,6 +131,7 @@ if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_right}.inp" ]]; then
 fi
 
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_left}.inp" ]]; then
+    cd ${LTANAPATH}/src/setup
     echo
     echo 
     echo "Running simc analysis for ${InputSIMC_left}..."
@@ -142,6 +142,7 @@ if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_left}.inp" ]]; then
 fi
 
 if [[ -f "${LTANAPATH}/input/${ParticleType}/${InputSIMC_center}.inp" ]]; then
+    cd ${LTANAPATH}/src/setup
     echo
     echo 
     echo "Running simc analysis for ${InputSIMC_center}..."
