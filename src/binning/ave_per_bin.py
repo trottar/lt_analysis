@@ -898,7 +898,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 dict_lst.append((tbin_index, phibin_index, ave_val, ave_err_val))
 
                 # mark bad bins for global override later
-                if ave_err_val == 1000.0:
+                if ave_err_val == -1000.0:
                     bad_bins.add((tbin_index, phibin_index))                
                 
         # Group the tuples by the first two elements using defaultdict
