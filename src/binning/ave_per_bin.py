@@ -864,7 +864,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 # Calculate the standard error of the mean (SEM) for the bin
                 sem = std_dev / np.sqrt(n)
                 if average == 0.0:
-                    sem = 1000.0 # Assign a large error if average is zero
+                    sem = -1000.0 # Assign a large error if average is zero
                 # Append the uncertainty (SEM) to the list
                 ave_err_hist.append(sem)
                 #print("Weighted Sum:",weighted_sum)
@@ -921,7 +921,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 if key not in group_dict[kin_type]:
                     group_dict[kin_type][key] = {}
                 group_dict[kin_type][key][f"{kin_type}_ave"] = 0.0
-                group_dict[kin_type][key][f"{kin_type}_ave_err"] = 1000.0
+                group_dict[kin_type][key][f"{kin_type}_ave_err"] = -1000.0
     # ---------------------------------------------------------------------------        
             
     return group_dict
