@@ -299,10 +299,15 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
 
         # Update plots with best chi2
         fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
-        str_param = parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
+        params_used_str = parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
 
-        print(f"1111111111111111111111{str_param}")
-        sys.exit(1)
+        print(f"1111111111111111111111 {params_used_str}")
+
+        max_per = 4
+        params_used = []
+        for s in params_used_str:
+            k = sum(1 for p in s.split(',') if p.strip() != '')
+            params_used.extend([1]*min(k, max_per) + [0]*max(0, max_per - k))
 
         # Check if parameter values changed and print changes to terminal
         for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
@@ -313,8 +318,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         print("\nWriting {}...".format(para_file_out))
         with open(para_file_out, 'w') as f:
             for i in range(len(par_vec)):
-                f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-                print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                if params_used[i] == 1:
+                    f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                    print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                else:
+                    f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(0.0, 0.0, i+1, 0.0))
+                    print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(0.0, 0.0, i+1, 0.0))
 
         '''
         print("\n\nWould you like to continue with the analysis?\n")
@@ -324,4 +333,5 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             print("-"*25)
             sys.exit(2)
         '''
+        sys.exit(1)
         print("\n\n")
