@@ -106,6 +106,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     num_events = nsep.GetEntries()
     colors = [kRed, kBlue, kGreen, kMagenta]
 
+    params_used = []
+
     # -----------------------------------------------------------------------------
     # 3. Main loop over each fit in fit_params
     # -----------------------------------------------------------------------------
@@ -619,6 +621,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
             c6.Update()
             c7.Update()
             c8.Update()
+            params_used.append(param_str)
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
         c3.Print(outputpdf)
@@ -629,4 +632,4 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         c8.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
-    return param_str
+    return params_used
