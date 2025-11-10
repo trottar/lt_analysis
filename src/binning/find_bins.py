@@ -207,7 +207,7 @@ def find_bins(histlist, inpDict):
         elif Q2 == "5p5" and W == "3p02":
             bad_bins_threshold = 200 # Q2=5.5, W=3.02        
         else:
-            bad_bins_threshold = 1000
+            bad_bins_threshold = 1500
         ##############
         ##############
         ##############
