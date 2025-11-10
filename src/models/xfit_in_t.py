@@ -284,6 +284,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
                     best_chi2_vec[j:j+4] = par_chi2_vec[j:j+4].copy()
             i += 1
 
+        # After optimization loop, use the best parameter values found for further analysis and output
         par_vec = best_par_vec
         par_err_vec = best_err_vec
         par_chi2_vec = best_chi2_vec
@@ -291,9 +292,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         # Zero out parameters that did not change from previous iteration
         n = len(par_vec)
         for i in range(n):
-            if (prv_par_vec[i]  == best_par_vec[i] and
-                prv_err_vec[i]  == best_err_vec[i] and
-                prv_chi2_vec[i] == best_chi2_vec[i]):
+            if (np.isclose(prv_par_vec[i], par_vec[i]) and
+                np.isclose(prv_err_vec[i], par_err_vec[i]) and
+                np.isclose(prv_chi2_vec[i], par_chi2_vec[i])):
                 par_vec[i]      = 0.0
                 par_err_vec[i]  = -1000.0
                 par_chi2_vec[i] = 1000.0        
@@ -302,6 +303,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         prv_err_vec = par_err_vec
         prv_chi2_vec = par_chi2_vec
 
+
+        print(prv_par_vec)
+        sys.exit(1)
         # Define output file name
         outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
