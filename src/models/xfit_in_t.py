@@ -90,9 +90,9 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     else:
         #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
         #fixed_params = ["L", "LT"]
-        #fixed_params = ["L", "LT", "TT"]
+        fixed_params = ["L", "T", "TT"]
         #fixed_params = ["TT"]
-        fixed_params = [] # Update all
+        #fixed_params = [] # Update all
     
     # Maximum iterations before ending loop (should always aim for >10000)
     #max_iterations = 1000
@@ -295,6 +295,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             if (np.isclose(prv_par_vec[i], par_vec[i]) and
                 np.isclose(prv_err_vec[i], par_err_vec[i]) and
                 np.isclose(prv_chi2_vec[i], par_chi2_vec[i])):
+                print(f"par{i+1}: {par_vec[i]:.3e} == {prv_par_vec[i]:.3e}, err: {par_err_vec[i]:.3e} == {prv_err_vec[i]:.3e}, chi2: {par_chi2_vec[i]:.3e} == {prv_chi2_vec[i]:.3e} (no change, zeroing out)")
                 par_vec[i]      = 0.0
                 par_err_vec[i]  = 0.0
                 par_chi2_vec[i] = 0.0        
