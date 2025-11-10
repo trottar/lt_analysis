@@ -127,7 +127,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 num_params, init_params, equation_str = inpDict["initial_params"](sig_name, val)
                 # Avoid zero init param
-                init_params = [v if abs(v) > 0.0 else 1.0 for v in init_params]
+                init_params = [v if abs(v) > 0.0 else 1e-15 for v in init_params]
                 param_str = ', '.join(str(p) for p in init_params)
 
                 if num_events <= num_params:
@@ -629,3 +629,4 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         c8.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
+    return param_str

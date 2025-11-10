@@ -99,12 +99,12 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     max_iterations = 10000
     #max_iterations = 15000
     #max_iterations = 25000
-    ##max_iterations = 50000
+    #max_iterations = 50000
     #max_iterations = 100000
 
     # Number of times to run the algorithm
     num_optimizations = 1
-    ##num_optimizations = 3
+    #num_optimizations = 3
     #num_optimizations = 5
     #num_optimizations = 10
 
@@ -287,26 +287,11 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         # After optimization loop, use the best parameter values found for further analysis and output
         par_vec = best_par_vec
         par_err_vec = best_err_vec
-        par_chi2_vec = best_chi2_vec
-
-        # Zero out parameters that did not change from previous iteration
-        n = len(par_vec)
-        for i in range(n):
-            if (np.isclose(prv_par_vec[i], par_vec[i]) and
-                np.isclose(prv_err_vec[i], par_err_vec[i]) and
-                np.isclose(prv_chi2_vec[i], par_chi2_vec[i])):
-                print(f"par{i+1}: {par_vec[i]:.3e} == {prv_par_vec[i]:.3e}, err: {par_err_vec[i]:.3e} == {prv_err_vec[i]:.3e}, chi2: {par_chi2_vec[i]:.3e} == {prv_chi2_vec[i]:.3e} (no change, zeroing out)")
-                par_vec[i]      = 0.0
-                par_err_vec[i]  = 0.0
-                par_chi2_vec[i] = 0.0        
+        par_chi2_vec = best_chi2_vec  
 
         prv_par_vec = par_vec
         prv_err_vec = par_err_vec
         prv_chi2_vec = par_chi2_vec
-
-
-        print(prv_par_vec)
-        sys.exit(1)
 
         # Define output file name
         outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Final.pdf".format(OUTPATH, ParticleType, q2_set, w_set)
@@ -314,8 +299,11 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
 
         # Update plots with best chi2
         fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
-        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
-    
+        str_param = parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
+
+        print(f"1111111111111111111111{str_param}")
+        sys.exit(1)
+
         # Check if parameter values changed and print changes to terminal
         for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
             if old != new:
