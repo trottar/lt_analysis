@@ -493,6 +493,18 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(aveQ2_right_data):
                 if Q2val in processed_Q2vals:
                     continue
+                if any(v <= 0 for v in (
+                    aveQ2_right_data[i], aveQ2_err_right_data[i],
+                    aveW_right_data[i],   aveW_err_right_data[i],
+                    avet_right_data[i],   avet_err_right_data[i]
+                )):
+                        print("Warning: Non-physical kinematic values found for Right setting at Q2={:.4f}, W={:.4f}, t={:.4f}. Setting to 0.0 and error to -1000.0.".format(aveQ2_right_data[i], aveW_right_data[i], avet_right_data[i]))
+                        aveQ2_right_data[i] = 0.0
+                        aveQ2_err_right_data[i] = -1000.0
+                        aveW_right_data[i] = 0.0
+                        aveW_err_right_data[i] = -1000.0
+                        avet_right_data[i] = 0.0
+                        avet_err_right_data[i] = -1000.0
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(aveQ2_right_data[i], aveQ2_err_right_data[i], \
                                                                                   aveW_right_data[i], aveW_err_right_data[i], \
                                                                                   avet_right_data[i], avet_err_right_data[i])
@@ -512,6 +524,18 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(aveQ2_left_data):
                 if Q2val in processed_Q2vals:
                     continue
+                if any(v <= 0 for v in (
+                    aveQ2_left_data[i], aveQ2_err_left_data[i],
+                    aveW_left_data[i],   aveW_err_left_data[i],
+                    avet_left_data[i],   avet_err_left_data[i]
+                )):
+                        print("Warning: Non-physical kinematic values found for Left setting at Q2={:.4f}, W={:.4f}, t={:.4f}. Setting to 0.0 and error to -1000.0.".format(aveQ2_left_data[i], aveW_left_data[i], avet_left_data[i]))
+                        aveQ2_left_data[i] = 0.0
+                        aveQ2_err_left_data[i] = -1000.0
+                        aveW_left_data[i] = 0.0
+                        aveW_err_left_data[i] = -1000.0
+                        avet_left_data[i] = 0.0
+                        avet_err_left_data[i] = -1000.0                
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(aveQ2_left_data[i], aveQ2_err_left_data[i], \
                                                                                   aveW_left_data[i], aveW_err_left_data[i], \
                                                                                   avet_left_data[i], avet_err_left_data[i])
@@ -531,6 +555,18 @@ def create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_
             for i, Q2val in enumerate(aveQ2_center_data):
                 if Q2val in processed_Q2vals:
                     continue
+                if any(v <= 0 for v in (
+                    aveQ2_center_data[i], aveQ2_err_center_data[i],
+                    aveW_center_data[i],   aveW_err_center_data[i],
+                    avet_center_data[i],   avet_err_center_data[i]
+                )):
+                        print("Warning: Non-physical kinematic values found for Center setting at Q2={:.4f}, W={:.4f}, t={:.4f}. Setting to 0.0 and error to -1000.0.".format(aveQ2_center_data[i], aveW_center_data[i], avet_center_data[i]))
+                        aveQ2_center_data[i] = 0.0
+                        aveQ2_err_center_data[i] = -1000.0
+                        aveW_center_data[i] = 0.0
+                        aveW_err_center_data[i] = -1000.0
+                        avet_center_data[i] = 0.0
+                        avet_err_center_data[i] = -1000.0                
                 check_line = "{:.4f} {:.4f} {:.4f} {:.4f} {:.4f} {:.4f}\n".format(aveQ2_center_data[i], aveQ2_err_center_data[i], \
                                                                                   aveW_center_data[i], aveW_err_center_data[i], \
                                                                                   avet_center_data[i], avet_err_center_data[i])
