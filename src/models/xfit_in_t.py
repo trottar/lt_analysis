@@ -288,6 +288,16 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         par_err_vec = best_err_vec
         par_chi2_vec = best_chi2_vec
 
+        # Zero out parameters that did not change from previous iteration
+        n = len(par_vec)
+        for i in range(n):
+            if (prv_par_vec[i]  == par_vec[i] and
+                prv_err_vec[i]  == par_err_vec[i] and
+                prv_chi2_vec[i] == par_chi2_vec[i]):
+                par_vec[i]      = 0.0
+                par_err_vec[i]  = -1000.0
+                par_chi2_vec[i] = 1000.0        
+
         prv_par_vec = par_vec
         prv_err_vec = par_err_vec
         prv_chi2_vec = par_chi2_vec
