@@ -82,7 +82,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     # False - Set range of parameter search from current_params +/- off*abs(current_params) (off = 0.1, 10% param value)
     full_optimization = True
 
-    #skip_optimization = True # Set to True to skip optimization and use fixed parameters
+    skip_optimization = True # Set to True to skip optimization and use fixed parameters
 
     # Fixed separated xsect parameterization
     if skip_optimization:
@@ -90,21 +90,21 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     else:
         #fixed_params = ["L", "T", "LT", "TT"] # Skip optimization
         #fixed_params = ["L", "LT"]
-        fixed_params = ["L", "T", "TT"]
+        #fixed_params = ["L", "T", "TT"]
         #fixed_params = ["TT"]
-        #fixed_params = [] # Update all
+        fixed_params = [] # Update all
     
     # Maximum iterations before ending loop (should always aim for >10000)
     #max_iterations = 1000
-    max_iterations = 10000
+    #max_iterations = 10000
     #max_iterations = 15000
     #max_iterations = 25000
-    #max_iterations = 50000
+    max_iterations = 50000
     #max_iterations = 100000
 
     # Number of times to run the algorithm
-    num_optimizations = 1
-    #num_optimizations = 3
+    #num_optimizations = 1
+    num_optimizations = 3
     #num_optimizations = 5
     #num_optimizations = 10
 
@@ -302,7 +302,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         params_used_str = parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
 
         print(f"1111111111111111111111 {params_used_str}")
-
+        # Determine which parameters were used in the fit
         max_per = 4
         params_used = []
         for s in params_used_str:
@@ -318,6 +318,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         print("\nWriting {}...".format(para_file_out))
         with open(para_file_out, 'w') as f:
             for i in range(len(par_vec)):
+                # Only write parameters that were used in the fit
                 if params_used[i] == 1:
                     f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
                     print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
@@ -333,5 +334,4 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             print("-"*25)
             sys.exit(2)
         '''
-        sys.exit(1)
         print("\n\n")
