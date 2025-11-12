@@ -301,7 +301,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
         params_used_str = parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
 
-        print(f"1111111111111111111111 {params_used_str}")
+        print(f"\n\nFinal Parameters: {params_used_str}")
         # Determine which parameters were used in the fit
         max_per = 4
         params_used = []
