@@ -40,7 +40,7 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
-def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
+def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
     'parameterize' function including:
       - Simple ±initial_param_bounds random init (no expansions).
@@ -66,8 +66,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     graphs_sig_residuals= []
     graphs_sig_ic_aic   = []
     graphs_sig_ic_bic   = []    
-    funcs_sig = []
-    fits_sig = []
+    funcs_sig = [None]*4 # L, T, LT, TT
+    fits_sig = [None]*4 # L, T, LT, TT
     
     c2 = TCanvas("c2", "c2", 800, 800)
     c2.Divide(2, 2)
@@ -106,6 +106,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
     num_events = nsep.GetEntries()
     colors = [kRed, kBlue, kGreen, kMagenta]
 
+    params_used = []
+
     # -----------------------------------------------------------------------------
     # 3. Main loop over each fit in fit_params
     # -----------------------------------------------------------------------------
@@ -127,7 +129,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
 
                 num_params, init_params, equation_str = inpDict["initial_params"](sig_name, val)
                 # Avoid zero init param
-                init_params = [v if abs(v) > 0.0 else 1.0 for v in init_params]
+                init_params = [v if abs(v) > 0.0 else 1e-15 for v in init_params]
                 param_str = ', '.join(str(p) for p in init_params)
 
                 if num_events <= num_params:
@@ -157,10 +159,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                 elif sig_name == "TT":
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
-                    raise ValueError("Unknown signal name")                
-                funcs_sig.append(fun_Sig)
+                    raise ValueError("Unknown signal name") 
+                funcs_sig[it] = fun_Sig                           
                 f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-                fits_sig.append(f_sig)
+                fits_sig[it] = f_sig
 
                 param_offsets = [0.1 for _ in range(num_params)]
                 params_sig_history = [[] for _ in range(num_params)]
@@ -239,8 +241,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                                 g_sig.SetPointError(i_data, 0, y_err)
 
                             for i_pt in range(len(w_vec)):
-                                sig_X_fit = g_sig.GetY()[i_pt] / (g_vec[i_pt])
-                                sig_X_fit_err = g_sig.GetEY()[i_pt] / (g_vec[i_pt])
+                                sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt])# / 1e3
+                                sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt])# / 1e3
                                 graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
                                 graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)
 
@@ -513,9 +515,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")
-                funcs_sig.append(fun_Sig)
+                funcs_sig[it] = fun_Sig                
                 f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
-                fits_sig.append(f_sig)
+                fits_sig[it] = f_sig
 
                 graph_sig_params = [TGraph() for _ in range(num_params)]
                 graphs_sig_params_all.append(graph_sig_params)
@@ -546,8 +548,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
                     g_sig.SetPoint(i_data, x_val, y_val)
                     g_sig.SetPointError(i_data, 0, y_err)
                 for i_pt in range(len(w_vec)):
-                    sig_X_fit = g_sig.GetY()[i_pt] / (g_vec[i_pt])
-                    sig_X_fit_err = g_sig.GetEY()[i_pt] / (g_vec[i_pt])
+                    sig_X_fit = g_sig.GetY()[i_pt]# / (g_vec[i_pt])# / 1e3
+                    sig_X_fit_err = g_sig.GetEY()[i_pt]# / (g_vec[i_pt])# / 1e3
                     graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
                     graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)
                 fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
@@ -619,6 +621,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
             c6.Update()
             c7.Update()
             c8.Update()
+        params_used.append(param_str)
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
         c3.Print(outputpdf)
@@ -629,3 +632,4 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_e
         c8.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
+    return params_used

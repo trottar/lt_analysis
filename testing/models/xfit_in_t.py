@@ -245,7 +245,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         outputpdf  = "{}/{}_lt_fit_in_t_Q{}W{}.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
 
-        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
 
     else:
             
@@ -253,7 +253,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
         outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_Start.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set)
         output_file_lst.append(outputpdf)
 
-        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization) #, True)
         bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
         # Store initial values
@@ -271,7 +271,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             outputpdf  = "{}/{}_xfit_in_t_Q{}W{}_{}.pdf".format(TEMP_CACHEPATH, ParticleType, q2_set, w_set, i)
             output_file_lst.append(outputpdf)
 
-            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
+            parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
             bad_chi2_bool, bad_chi2_indices = check_chi_squared_values(par_chi2_vec, chi2_threshold, fit_params, equations)
 
             # Update best values for each group of 4 elements
@@ -297,29 +297,32 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
 
         # Update plots with best chi2
         fixed_params = ["L", "T", "LT", "TT"] # Using best found chi2 from above for all
-        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, prv_par_vec, prv_err_vec, prv_chi2_vec, fixed_params, outputpdf, full_optimization)
-    
-    # Check if parameter values changed and print changes to terminal
-    for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
-        if old != new:
-            print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
+        parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
+        params_used_str = parameterize(inp_dict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization)
 
-    # Remove 'p' and ensure correct digit count
-    Q2_num = q2_set.replace("p", "")
-    W_num = w_set.replace("p", "")
-    # If Q2 has only one digit (e.g. '1p' -> '1'), pad to 2 digits
-    if len(Q2_num) < 2:
-        Q2_num = Q2_num.ljust(2, "0")
-    # If W has less than 3 digits (e.g. '2p7' -> '27'), pad to 3 digits
-    if len(W_num) < 3:
-        W_num = W_num.ljust(3, "0")
+        # Determine which parameters were used in the fit
+        max_per = 4
+        params_used = []
+        for s in params_used_str:
+            k = sum(1 for p in s.split(',') if p.strip() != '')
+            params_used.extend([1]*min(k, max_per) + [0]*max(0, max_per - k))
 
-    para_file_out = "{}/testing/parameters/new_par.{}_Q{}W{}.dat".format(LTANAPATH, pol_str, Q2_num, W_num)
-    print("\nWriting {}...".format(para_file_out))
-    with open(para_file_out, 'w') as f:
-        for i in range(len(par_vec)):
-            f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
-            print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+        # Check if parameter values changed and print changes to terminal
+        for i, (old, new) in enumerate(zip(prv_par_vec, par_vec)):
+            if old != new:
+                print("par{} changed from {:.3e} to {:.3e}".format(i+1, old, new))
 
-    print("\n\n")
+        para_file_out = "{}/src/{}/parameters/par.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
+        print("\nWriting {}...".format(para_file_out))
+        with open(para_file_out, 'w') as f:
+            for i in range(len(par_vec)):
+                # Only write parameters that were used in the fit
+                if params_used[i] == 1:
+                    f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                    print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(par_vec[i], par_err_vec[i], i+1, par_chi2_vec[i]))
+                else:
+                    f.write("{:13.5e} {:13.5e} {:3d} {:12.1f}\n".format(0.0, 0.0, i+1, 0.0))
+                    print("  {:.3e} {:.3e} {:.1e} {:.1e}".format(0.0, 0.0, i+1, 0.0))
+
+        print("\n\n")
     
