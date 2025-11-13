@@ -1993,9 +1993,9 @@ elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
     # Run for N iterations
     for ((iter=1; iter<=50; iter++)); do
 	echo
-	echo "============================================================"
-	echo "Running automated analysis algorithm [iteration ${iter}/50]"
-	echo "============================================================"
+	echo "============================================================="
+	echo "Running automated iteration algorithm [iteration ${iter}/50]"
+	echo "============================================================="
 	echo
 
 	# Find new date for each iteration
