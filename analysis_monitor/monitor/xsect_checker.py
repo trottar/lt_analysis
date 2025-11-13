@@ -41,6 +41,6 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
-def check_ratio(inpDict, iter_dir):
+def check_xsect(inpDict, iter_dir):
 
     return True
