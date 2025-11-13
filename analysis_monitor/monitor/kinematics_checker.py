@@ -674,10 +674,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
             except Exception:
                 return False, float('nan')
 
-        # chi2/ndf band
-        cndf_pass = 0
-        hell_pass = 0
-        p_pass, p_tot = 0, 0
+        cndf_pass = hell_pass = w1_pass = p95_pass = mean_pass = rms_pass = 0
         fail_summaries = []
 
         for r in ok_rows:
@@ -695,26 +692,44 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
             else:
                 reasons.append("H")
 
-            # inside the for r in ok_rows loop
-            if USE_PVAL:
-                ok_p, pv = _finite_float(r.get("chi2_p"))
-                if ok_p:
-                    p_tot += 1
-                    if pv >= PVAL_MIN:
-                        p_pass += 1
-                    else:
-                        reasons.append("p")
+            ok_w1, w1n = _finite_float(r.get("w1_norm"))
+            if ok_w1 and (w1n <= W1NORM_MAX):
+                w1_pass += 1
+            else:
+                reasons.append("W1")
 
+            ok_p95, p95 = _finite_float(r.get("pull_p95"))
+            if ok_p95 and (p95 <= PULL95_MAX):
+                p95_pass += 1
+            else:
+                reasons.append("pull95")
+
+            ok_m, mrel = _finite_float(r.get("mean_rel"))
+            if ok_m and (mrel <= MEAN_REL_MAX):
+                mean_pass += 1
+            else:
+                reasons.append("dmu")
+
+            ok_r, rrel = _finite_float(r.get("rms_rel"))
+            if ok_r and (rrel <= RMS_REL_MAX):
+                rms_pass += 1
+            else:
+                reasons.append("dRMS")
 
             if reasons:
-                fail_summaries.append(f"{r.get('kin_var','?')}[{r.get('eps','?')}/{r.get('phi','?')}]:" + ",".join(reasons))
+                fail_summaries.append(
+                    f"{r.get('kin_var','?')}[{r.get('eps','?')}/{r.get('phi','?')}]:" + ",".join(reasons)
+                )
 
-        # Prints (compact)
-        print("METRIC BREAKDOWN:")
+        print("=METRIC BREAKDOWN:")
         print(f"  chi2/ndf in [{CHI2_NDF_MIN},{CHI2_NDF_MAX}]: {cndf_pass}/{len(ok_rows)}")
         print(f"  Hellinger ≤ {HELLINGER_MAX}: {hell_pass}/{len(ok_rows)}")
-        if USE_PVAL and p_tot > 0:
-            print(f"  p ≥ {PVAL_MIN}: {p_pass}/{p_tot}")
+        print(f"  W1% ≤ {W1NORM_MAX*100:.2f}: {w1_pass}/{len(ok_rows)}")
+        print(f"  P95|pull| ≤ {PULL95_MAX:.2f}: {p95_pass}/{len(ok_rows)}")
+        print(f"  |Δμ|% ≤ {MEAN_REL_MAX*100:.2f}: {mean_pass}/{len(ok_rows)}")
+        print(f"  |ΔRMS|% ≤ {RMS_REL_MAX*100:.2f}: {rms_pass}/{len(ok_rows)}")
+
+        # chunked fail list, 5 per line
         if fail_summaries:
             n_per_line = 5
             for i in range(0, len(fail_summaries), n_per_line):
