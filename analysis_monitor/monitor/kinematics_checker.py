@@ -372,7 +372,7 @@ def save_overlay_plot(h_data, h_simc, title, outpath, metrics: Dict[str, float],
     leg.AddEntry(hM, "SIMC", "l")
     leg.AddEntry(0, f"KS p={metrics['root_KS_p']:.3g}, Chi2 p={metrics['chi2_p']:.3g}", "")
     leg.AddEntry(0, f"Hellinger={metrics['hellinger']:.3g}, W1={metrics['wasserstein_1']:.3g}", "")
-leg.Draw()
+    leg.Draw()
 
     outpath.parent.mkdir(parents=True, exist_ok=True)
     can.SaveAs(str(outpath))
