@@ -1854,7 +1854,7 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale"] = 0.85
+    inpDict["bg_stat_scale"] = 0.65
 
     background_fit1 = bg_fit(phi_setting,
                             inpDict,
