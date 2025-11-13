@@ -854,22 +854,28 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 average = weighted_sum / total_count
                 if math.isnan(average) or math.isinf(average) or average <= 0.0:
                     print("Empty binning for data {} (t-bin={})... ".format(kin_type, i+1))
-                    #sys.exit(2)
                     average = 0.0
                 ave_hist.append(average)
-                # Calculate the standard deviation of the data points within the bin
-                std_dev = np.std(bin_val_data)
-                # Determine the number of data points within the bin
-                n = len(bin_val_data)
-                # Calculate the standard error of the mean (SEM) for the bin
-                sem = std_dev / np.sqrt(n)
+
+                x = np.array(bin_val_data)
+
+                # Weighted variance using the same weights (arr_data)
+                # var = sum(w * (x - mu)^2) / sum(w)
+                if total_count > 0:
+                    var = np.sum(arr_data * (x - average)**2) / total_count
+                    std_dev = np.sqrt(var)
+
+                    # Use total_count (number of entries) as N, not number of bins
+                    n = total_count
+                    sem = std_dev / np.sqrt(n)
+                else:
+                    std_dev = 0.0
+                    sem = -1000.0
+
                 if average == 0.0:
                     sem = -1000.0 # Assign a large error if average is zero
-                # Append the uncertainty (SEM) to the list
+
                 ave_err_hist.append(sem)
-                #print("Weighted Sum:",weighted_sum)
-                #print("Total Count:",total_count)
-                #print("Average for t-bin {}:".format(i+1),average)
                 binned_sub_data[0].append(bin_val_data)
                 binned_sub_data[1].append(arr_data)
             except ZeroDivisionError:
