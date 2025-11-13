@@ -333,21 +333,26 @@ def compare_th1d(h_data, h_mc,
 
 # -------------------- Plotting (diagnostics) --------------------
 
-def save_overlay_plot(h_data, h_simc, title, outpath, metrics: Dict[str, float], shape_only=True):
+# REPLACE your entire save_overlay_plot() with this version (no KS, no p; shows chi2/ndf + shape metrics)
+
+def save_overlay_plot(h_data, h_simc, title, outpath, metrics, shape_only=True):
     from ROOT import TCanvas, TLegend, kBlue, kRed, gStyle
     gStyle.SetOptStat(0)
+
     can = TCanvas("c", title, 800, 600)
     hD = h_data
     hM = h_simc.Clone()
 
+    # shape-only normalization (match areas)
     if shape_only:
         aD = hD.Integral(0, hD.GetNbinsX()+1)
         aM = hM.Integral(0, hM.GetNbinsX()+1)
         if aD > 0 and aM > 0:
             hM.Scale(aD/aM)
 
-    hD.SetLineColor(kBlue); hD.SetMarkerColor(kBlue); hD.SetMarkerStyle(20)
-    hM.SetLineColor(kRed);  hM.SetMarkerColor(kRed);  hM.SetMarkerStyle(24)
+    # styles (smaller markers/legend)
+    hD.SetLineColor(kBlue); hD.SetMarkerColor(kBlue); hD.SetMarkerStyle(20); hD.SetMarkerSize(0.6); hD.SetLineWidth(1)
+    hM.SetLineColor(kRed);  hM.SetMarkerColor(kRed);  hM.SetMarkerStyle(24); hM.SetMarkerSize(0.6); hM.SetLineWidth(1)
 
     hmax = max(hD.GetMaximum(), hM.GetMaximum())
     hD.SetMaximum(1.2*hmax if hmax > 0 else 1.0)
@@ -355,23 +360,32 @@ def save_overlay_plot(h_data, h_simc, title, outpath, metrics: Dict[str, float],
     hD.Draw("E1")
     hM.Draw("HIST SAME")
 
-    # make markers thinner so legend markers are smaller
-    hD.SetMarkerSize(0.6)
-    hM.SetMarkerSize(0.6)
-    hD.SetLineWidth(1)
-    hM.SetLineWidth(1)
+    # derive W1% on the fly in case w1_norm isn't in metrics
+    try:
+        xr = float(hD.GetXaxis().GetXmax() - hD.GetXaxis().GetXmin())
+        w1 = float(metrics.get("wasserstein_1", float("nan")))
+        w1pct = (w1/xr*100.0) if (xr > 0 and math.isfinite(w1)) else float("nan")
+    except Exception:
+        w1pct = float("nan")
 
-    # smaller, tighter legend
-    leg = TLegend(0.58, 0.76, 0.88, 0.88)  # narrower box
+    # legend (compact, no KS/p-values)
+    leg = TLegend(0.60, 0.75, 0.88, 0.88)
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
-    leg.SetTextSize(0.028)                 # smaller font
-    leg.SetMargin(0.12)                    # tighter gap between symbol and text
+    leg.SetTextSize(0.028)
+    leg.SetMargin(0.12)
 
     leg.AddEntry(hD, "DATA", "lep")
     leg.AddEntry(hM, "SIMC", "l")
-    leg.AddEntry(0, f"KS p={metrics['root_KS_p']:.3g}, Chi2 p={metrics['chi2_p']:.3g}", "")
-    leg.AddEntry(0, f"Hellinger={metrics['hellinger']:.3g}, W1={metrics['wasserstein_1']:.3g}", "")
+    leg.AddEntry(0, f"χ²/ndf={metrics.get('chi2_ndf', float('nan')):.2f}", "")
+    leg.AddEntry(0, f"Hellinger={metrics.get('hellinger', float('nan')):.3f}, W1%={w1pct:.2f}", "")
+
+    # show optional diagnostics if present
+    if 'pull_p95' in metrics:
+        leg.AddEntry(0, f"P95|pull|={metrics['pull_p95']:.2f}", "")
+    if 'mean_rel' in metrics and 'rms_rel' in metrics:
+        leg.AddEntry(0, f"dμ%={metrics['mean_rel']*100:.2f}, dRMS%={metrics['rms_rel']*100:.2f}", "")
+
     leg.Draw()
 
     outpath.parent.mkdir(parents=True, exist_ok=True)
@@ -485,9 +499,8 @@ def process_root_file(rpath: Path,
 
         print(
             f"{var} | Q2={Q2tok} W={Wtok} eps={eps} phi={phi or 'NoPhi'} | "
-            f"chi2/ndf={metrics['chi2_ndf']:.2f}  H={metrics['hellinger']:.3f}  "
-            f"W1%={metrics['w1_norm']*100:.2f}  P95|pull|={metrics['pull_p95']:.2f}  "
-            f"dμ%={metrics['mean_rel']*100:.2f} dRMS%={metrics['rms_rel']*100:.2f}"
+            f"chi2/ndf={metrics['chi2_ndf']:.3g}  H={metrics['hellinger']:.3g}  "
+            f"W1%={(metrics.get('w1_norm', metrics['wasserstein_1']/(hD.GetXaxis().GetXmax()-hD.GetXaxis().GetXmin()))*100):.2f}"
         )
 
         row = {
