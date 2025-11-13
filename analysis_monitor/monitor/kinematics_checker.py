@@ -355,13 +355,24 @@ def save_overlay_plot(h_data, h_simc, title, outpath, metrics: Dict[str, float],
     hD.Draw("E1")
     hM.Draw("HIST SAME")
 
-    leg = TLegend(0.12, 0.72, 0.88, 0.88)
+    # make markers thinner so legend markers are smaller
+    hD.SetMarkerSize(0.6)
+    hM.SetMarkerSize(0.6)
+    hD.SetLineWidth(1)
+    hM.SetLineWidth(1)
+
+    # smaller, tighter legend
+    leg = TLegend(0.58, 0.76, 0.88, 0.88)  # narrower box
     leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+    leg.SetTextSize(0.028)                 # smaller font
+    leg.SetMargin(0.12)                    # tighter gap between symbol and text
+
     leg.AddEntry(hD, "DATA", "lep")
     leg.AddEntry(hM, "SIMC", "l")
     leg.AddEntry(0, f"KS p={metrics['root_KS_p']:.3g}, Chi2 p={metrics['chi2_p']:.3g}", "")
     leg.AddEntry(0, f"Hellinger={metrics['hellinger']:.3g}, W1={metrics['wasserstein_1']:.3g}", "")
-    leg.Draw()
+leg.Draw()
 
     outpath.parent.mkdir(parents=True, exist_ok=True)
     can.SaveAs(str(outpath))
