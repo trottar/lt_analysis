@@ -565,18 +565,29 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
                 all_rows.extend(rows_nophi)
 
     # Write CSV
-    fieldnames = [
+    base = [
         "file","particle","Q2","W","eps","phi","kin_var","status",
-        "shape_only","root_KS_p","root_Chi2_p","chi2_ndf","chi2_p",
-        "alpha_norm_used_chi2","poisson_llr","alpha_norm_used_llr",
-        "hellinger","js_divergence","wasserstein_1"
+        "shape_only","chi2","ndof","chi2_ndf","chi2_p","root_Chi2_p","root_KS_p",
+        "hellinger","js_divergence","wasserstein_1","poisson_llr",
+        "alpha_norm_used_chi2","alpha_norm_used_llr",
     ]
+    # union of keys across rows, preserving order (base first)
+    extra_keys = []
+    seen = set(base)
+    for r in all_rows:
+        for k in r.keys():
+            if k not in seen:
+                seen.add(k)
+                extra_keys.append(k)
+    fieldnames = base + extra_keys
+
     with csv_path.open("w", newline="") as fcsv:
         w = csv.DictWriter(fcsv, fieldnames=fieldnames)
         w.writeheader()
         for r in all_rows:
             for k in fieldnames:
                 r.setdefault(k, "")
+            r = {k: r.get(k, "") for k in fieldnames}
             w.writerow(r)
 
     # Summary counts
