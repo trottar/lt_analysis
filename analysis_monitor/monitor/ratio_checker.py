@@ -63,6 +63,18 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     lo_ratio, lo_dratio = lo[:, 0], lo[:, 1]
     hi_ratio, hi_dratio = hi[:, 0], hi[:, 1]
 
+    # Bad bins: ratio == 0 AND dratio == -1000
+    bad_lo = (lo_ratio == 0) & (lo_dratio == -1000)
+    bad_hi = (hi_ratio == 0) & (hi_dratio == -1000)
+
+    # Indices of bad bins
+    bad_lo_idx = np.where(bad_lo)[0]
+    bad_hi_idx = np.where(bad_hi)[0]
+
+    # Keep only good bins:
+    good_lo = lo[~bad_lo]
+    good_hi = hi[~bad_hi]    
+
     # Optional bin indices (as stored in the file); fall back to simple indices
     if lo.shape[1] >= 4:
         lo_phi_bin = lo[:, 2]
