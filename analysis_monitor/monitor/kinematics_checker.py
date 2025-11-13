@@ -244,11 +244,6 @@ def compare_th1d(h_data, h_mc,
     cD, eD, w = _bin_arrays(h_data, include_overflow=include_overflow)
     cM, eM, _ = _bin_arrays(h_mc,   include_overflow=include_overflow)
 
-    with root_quiet():
-        ks_p = h_data.KolmogorovTest(h_mc, "N")
-    with root_quiet():
-        chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")
-
     # Treat densities as counts if requested
     if use_bin_width:
         cD = [ci*wi for ci, wi in zip(cD, w)]
@@ -263,14 +258,17 @@ def compare_th1d(h_data, h_mc,
     # ROOT built-ins: choose options that silence the "NORM needs UU" warning.
     # Use 'UU NORM P' for shape-only; 'WW P' otherwise. Wrap in try/except.
     try:
-        ks_p = h_data.KolmogorovTest(h_mc, "N")  # normalized KS (shape)
+        with root_quiet():
+            ks_p = h_data.KolmogorovTest(h_mc, "N") # normalized KS (shape)
     except Exception:
         ks_p = float("nan")
     try:
         if shape_only:
-            chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")
+            with root_quiet():
+                chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")            
         else:
-            chi2_p_root = h_data.Chi2Test(h_mc, "WW P")
+            with root_quiet():
+                chi2_p_root = h_data.Chi2Test(h_mc, "WW P")        
     except Exception:
         chi2_p_root = float("nan")
 
