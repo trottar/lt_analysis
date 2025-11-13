@@ -417,9 +417,9 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
     """
     gROOT.SetBatch(True)
 
-    Q2tok: str = inpDict["Q2"]
-    Wtok:  str = inpDict["W"]
-    PT:    str = inpDict["ParticleType"]
+    Q2tok: str = str(inpDict["Q2"])
+    Wtok:  str = str(inpDict["W"])
+    PT:    str = str(inpDict["ParticleType"])
 
     iter_dir_p = Path(iter_dir)
     monitor_dir = iter_dir_p / "monitor" / "kinematics"
