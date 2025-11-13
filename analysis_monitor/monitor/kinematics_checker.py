@@ -65,17 +65,33 @@ INCLUDE_OVERFLOW = False
 USE_BIN_WIDTH = False
 SAVE_PLOTS = True         # diagnostics enabled
 
-# Hard-wired decision thresholds
-F_SYS_YIELD = 0.03  # 3% fractional floor on yields (tune 0.02–0.05)
-PVAL_MIN = 1e-10
-USE_CHI2_NDF_GATE = True
-CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 30.0   # acceptably close to 1
-USE_HELLINGER_GATE = True
-HELLINGER_MAX = 0.15                     # 0 identical → 1 very different
-#REQUIRE_KS = False        # KS not required for CONTINUE
-REQUIRE_KS = True
+# thresholds
+F_SYS_YIELD = 0.03            # 3% floor for yields; try 0.02–0.05
+USE_PVAL = False              # p-value not used for gating
+USE_KS   = False              # KS off (binned + ties -> ~0)
+CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 3.0
+HELLINGER_MAX = 0.15
+W1NORM_MAX = 0.02             # 2% of x-range
+PULL95_MAX = 3.0              # 95th percentile |pull| ≤ 3σ
+MEAN_REL_MAX = 0.05           # |Δmean| ≤ 5% of x-range
+RMS_REL_MAX  = 0.10           # |ΔRMS|  ≤ 10% of x-range
 
 # -------------------- Helpers --------------------
+
+def _x_range(h):
+    ax = h.GetXaxis()
+    return float(ax.GetXmax() - ax.GetXmin())
+
+def _quantiles(vals, ps):
+    if not vals:
+        return [float("nan") for _ in ps]
+    s = sorted(vals)
+    n = len(s)
+    out = []
+    for p in ps:
+        i = min(max(int(round(p*(n-1))), 0), n-1)
+        out.append(float(s[i]))
+    return out
 
 FNAME_RE = re.compile(
     r"^(?P<pt>[^_]+)_FullAnalysis_Q(?P<Q>[0-9p]+)W(?P<W>[0-9p]+)_(?P<eps>[A-Za-z0-9]+)e\.root$"
@@ -266,7 +282,28 @@ def compare_th1d(h_data, h_mc,
 
     # Our chi2 with combined uncertainties
     chi2, ndof, alpha_chi2 = _chi2_with_mc_errors(cD, eD, cM, eM, shape_only=shape_only)
+
+    # Per-bin pulls (using the same variance model)
+    var = [ed*ed + (alpha_chi2*em)**2 for ed, em in zip(eD, eM)]
+    pulls = []
+    for d, m, v in zip(cD, cM, var):
+        if v > 0:
+            pulls.append((d - alpha_chi2*m) / math.sqrt(v))
+    abs_pulls = [abs(x) for x in pulls]
+    pull_p50, pull_p95 = _quantiles(abs_pulls, [0.50, 0.95])
+
+    # Shape metrics (you already compute Hellinger; add W1 normalized)
+    xr = max(_x_range(h_data), 1e-12)
+    w1_norm = w1 / xr if (isinstance(w1, float) and math.isfinite(w1)) else float("nan")
+
+    # Mean / RMS deltas (scale-free, relative to x-range)
+    meanD, meanM = h_data.GetMean(), h_mc.GetMean()
+    rmsD,  rmsM  = h_data.GetRMS(),  h_mc.GetRMS()
+    mean_rel = abs(meanD - meanM) / xr
+    rms_rel  = abs(rmsD  - rmsM ) / xr
+
     chi2_p_ours = TMath.Prob(chi2, int(ndof)) if ndof > 0 else float("nan")
+    
 
     # Poisson LLR (always well-defined with small floor in _poisson_llr)
     llr, alpha_llr = _poisson_llr(cD, cM, shape_only=shape_only)
@@ -287,8 +324,12 @@ def compare_th1d(h_data, h_mc,
         "poisson_llr": llr,
         "alpha_norm_used_llr": alpha_llr,
         "hellinger": hell,
-        "js_divergence": jsd,
         "wasserstein_1": w1,
+        "w1_norm": w1_norm,
+        "pull_p50": pull_p50,
+        "pull_p95": pull_p95,
+        "mean_rel": mean_rel,
+        "rms_rel": rms_rel,
         "shape_only": bool(shape_only),
     }
 
@@ -433,8 +474,12 @@ def process_root_file(rpath: Path,
             shape_only=shape_only
         )
 
-        print(f"{var} | Q2={Q2tok} W={Wtok} eps={eps} phi={phi or 'NoPhi'} | p={metrics['chi2_p']:.3g} chi2/ndf={metrics['chi2_ndf']:.3g} KS={metrics['root_KS_p']:.3g}")
-
+        print(
+            f"{var} | Q2={Q2tok} W={Wtok} eps={eps} phi={phi or 'NoPhi'} | "
+            f"chi2/ndf={metrics['chi2_ndf']:.2f}  H={metrics['hellinger']:.3f}  "
+            f"W1%={metrics['w1_norm']*100:.2f}  P95|pull|={metrics['pull_p95']:.2f}  "
+            f"dμ%={metrics['mean_rel']*100:.2f} dRMS%={metrics['rms_rel']*100:.2f}"
+        )
 
         row = {
             "file": str(rpath), "particle": particle_use, "Q2": Qtok_use, "W": Wtok_use,
@@ -550,29 +595,21 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
             if r.get("status") != "ok":
                 return False
             try:
-                chi2p   = float(r.get("chi2_p"))
+                chi2ndf = float(r["chi2_ndf"])
+                hell    = float(r["hellinger"])
+                w1n     = float(r["w1_norm"])
+                p95     = float(r["pull_p95"])
+                mrel    = float(r["mean_rel"])
+                rrel    = float(r["rms_rel"])
             except Exception:
-                chi2p = float("nan")
-            try:
-                chi2ndf = float(r.get("chi2_ndf"))
-            except Exception:
-                chi2ndf = float("nan")
-            try:
-                hell    = float(r.get("hellinger"))
-            except Exception:
-                hell = float("nan")
+                return False
 
-            # Hard test
-            hard_ok = (chi2p >= PVAL_MIN)
+            band_ok   = CHI2_NDF_MIN <= chi2ndf <= CHI2_NDF_MAX
+            shape_ok  = (hell <= HELLINGER_MAX) and (w1n <= W1NORM_MAX)
+            pulls_ok  = (p95 <= PULL95_MAX)
+            moments_ok= (mrel <= MEAN_REL_MAX) and (rrel <= RMS_REL_MAX)
 
-            # Shape-band test
-            band_ok = (USE_CHI2_NDF_GATE and not math.isnan(chi2ndf)
-                    and CHI2_NDF_MIN <= chi2ndf <= CHI2_NDF_MAX)
-            hell_ok = (USE_HELLINGER_GATE and not math.isnan(hell)
-                    and hell <= HELLINGER_MAX)
-
-            return hard_ok or (band_ok and hell_ok)
-
+            return band_ok and shape_ok and pulls_ok and moments_ok
 
         ok_rows = [r for r in all_rows if r.get("status") == "ok"]
         all_ok_pass = all(pass_row(r) for r in ok_rows) if ok_rows else False
