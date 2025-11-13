@@ -220,7 +220,7 @@ inpDict["iter_num"] = iter_num
 inpDict["LOEPS"] = LOEPS
 inpDict["HIEPS"] = HIEPS
 
-#'''
+'''
 ## DEBUG ##
 if iter_num > 1:        
     # Track continues
@@ -255,7 +255,7 @@ if iter_num > 1:
     print("-"*50)
 sys.exit(2)
 ## DEBUG ##    
-#'''
+'''
 
 # Copy input model to specific particle type directory
 print("\nCopying {} to {}".format('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W)))
@@ -832,6 +832,22 @@ if EPSSET == "high":
 
 if EPSSET == "high":
 
+    # Update iteration file of dates
+    f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_iter):
+        # If it exists, update it with the string
+        with open(f_iter, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_iter, 'x') as file:
+            file.write(formatted_date)
+
+    #sys.path.append("setup")
+    #from compare_iterations import compare_iters
+    #compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)         
+
     if iter_num > 1:        
         # Track continues
         c = 1
@@ -850,7 +866,8 @@ if EPSSET == "high":
             print("\nStep 2: Checking kinematic distributions for consistency between SIMC and data\n")
             CONTINUE = check_kinematics(inpDict, new_dir, iter_num)
         else:
-            print("\nStopping iteration due to failed ratio check...\n")
+            print("\nStopping iteration due to failed ratio check...")
+            print("Ratios did not meet threshold spread of {:.1f}%. The dataset is not ready for this stage of analysis.\n".format(RATIO_THRESHOLD_SPREAD*100))
             print("-"*50)
             print("-"*50)
             sys.exit(2)
@@ -862,20 +879,4 @@ if EPSSET == "high":
             CONTINUE = check_xsect(inpDict, new_dir)
 
         print("-"*50)
-        print("-"*50)
-
-    # Update iteration file of dates
-    f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-    # Check if the file exists
-    if os.path.exists(f_iter):
-        # If it exists, update it with the string
-        with open(f_iter, 'a') as file:
-            file.write('\n'+formatted_date)
-    else:
-        # If not, create it and fill it with the string
-        with open(f_iter, 'x') as file:
-            file.write(formatted_date)
-
-    #sys.path.append("setup")
-    #from compare_iterations import compare_iters
-    #compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)        
+        print("-"*50)   
