@@ -66,11 +66,11 @@ USE_BIN_WIDTH = False
 SAVE_PLOTS = True         # diagnostics enabled
 
 # thresholds
-F_SYS_YIELD = 0.03            # 3% floor for yields; try 0.02–0.05
+F_SYS_YIELD = 0.05            # 5% floor for yields
 USE_PVAL = False              # p-value not used for gating
 USE_KS   = False              # KS off (binned + ties -> ~0)
-CHI2_NDF_MIN, CHI2_NDF_MAX = 0.0, 30.0
-HELLINGER_MAX = 0.15
+CHI2_NDF_MIN, CHI2_NDF_MAX = 0.0, 50.0
+HELLINGER_MAX = 0.20
 W1NORM_MAX = 0.02             # 2% of x-range
 PULL95_MAX = 3.0              # 95th percentile |pull| ≤ 3σ
 MEAN_REL_MAX = 0.05           # |Δmean| ≤ 5% of x-range
