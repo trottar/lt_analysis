@@ -75,6 +75,7 @@ W1NORM_MAX = 0.02             # 2% of x-range
 PULL95_MAX = 3.0              # 95th percentile |pull| ≤ 3σ
 MEAN_REL_MAX = 0.05           # |Δmean| ≤ 5% of x-range
 RMS_REL_MAX  = 0.10           # |ΔRMS|  ≤ 10% of x-range
+PVAL_MIN = 1e-10   # only used if USE_PVAL is True
 
 # -------------------- Helpers --------------------
 
@@ -694,13 +695,16 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
             else:
                 reasons.append("H")
 
-            ok_p, pv = _finite_float(r.get("chi2_p"))
-            if ok_p:
-                p_tot += 1
-                if pv >= PVAL_MIN:
-                    p_pass += 1
-                else:
-                    reasons.append("p")
+            # inside the for r in ok_rows loop
+            if USE_PVAL:
+                ok_p, pv = _finite_float(r.get("chi2_p"))
+                if ok_p:
+                    p_tot += 1
+                    if pv >= PVAL_MIN:
+                        p_pass += 1
+                    else:
+                        reasons.append("p")
+
 
             if reasons:
                 fail_summaries.append(f"{r.get('kin_var','?')}[{r.get('eps','?')}/{r.get('phi','?')}]:" + ",".join(reasons))
@@ -709,7 +713,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         print("=METRIC BREAKDOWN:")
         print(f"  chi2/ndf in [{CHI2_NDF_MIN},{CHI2_NDF_MAX}]: {cndf_pass}/{len(ok_rows)}")
         print(f"  Hellinger ≤ {HELLINGER_MAX}: {hell_pass}/{len(ok_rows)}")
-        if p_tot > 0:
+        if USE_PVAL and p_tot > 0:
             print(f"  p ≥ {PVAL_MIN}: {p_pass}/{p_tot}")
         if fail_summaries:
             preview = "; ".join(fail_summaries[:8])
