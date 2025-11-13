@@ -23,8 +23,25 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from ROOT import TFile, TMath, gROOT
+
 import ROOT
-ROOT.gErrorIgnoreLevel = ROOT.kWarning  # hides all "Info" prints (only shows Warning+)
+from contextlib import contextmanager
+
+@contextmanager
+def root_quiet(level=ROOT.kWarning):
+    prev = int(ROOT.gErrorIgnoreLevel)
+    ROOT.gErrorIgnoreLevel = level
+    try:
+        yield
+    finally:
+        ROOT.gErrorIgnoreLevel = prev
+
+# inside compare_th1d(...)
+with root_quiet():
+    ks_p = h_data.KolmogorovTest(h_mc, "N")
+with root_quiet():
+    chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")
+
 
 ################################################################################################################################################
 '''
