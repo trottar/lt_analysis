@@ -644,11 +644,26 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
 
             return band_ok and shape_ok and pulls_ok and moments_ok
 
-        ok_rows = [r for r in all_rows if r.get("status") == "ok"]
-        all_ok_pass = all(pass_row(r) for r in ok_rows) if ok_rows else False
-        no_structural_fail = (n_bm == 0) and all(r.get("status") != "missing-paths" for r in all_rows)
-        CONTINUE = all_ok_pass and no_structural_fail    
+        # Meaning of checks:
+        #  - EPSILON SETS   : required epsilon settings have files (e.g., 'high', 'low')
+        #  - FILE STRUCTURE : no structural issues (no binning mismatches, no missing histogram paths)
+        #  - METRIC ROWS    : every 'ok' comparison row passes your thresholds
 
-        print(f"\n\nOVERALL: {'PASS' if CONTINUE else 'FAIL'}")   
+        eps_ok = (len(eps_missing_files) == 0)
+
+        missing_paths = sum(1 for r in all_rows if r.get("status") == "missing-paths")
+        bin_mismatch  = n_bm
+        struct_ok = (bin_mismatch == 0) and (missing_paths == 0)
+
+        ok_rows  = [r for r in all_rows if r.get("status") == "ok"]
+        ok_pass  = sum(1 for r in ok_rows if pass_row(r))
+        rows_pass = bool(ok_rows) and (ok_pass == len(ok_rows))
+
+        CONTINUE = eps_ok and struct_ok and rows_pass
+
+        print(f"=EPSILON SETS : {'PASS' if eps_ok else 'FAIL'} | missing={','.join(sorted(eps_missing_files)) if eps_missing_files else 'none'}")
+        print(f"=FILE STRUCTURE: {'PASS' if struct_ok else 'FAIL'} | binMismatch={bin_mismatch} missingPaths={missing_paths}")
+        print(f"=METRIC ROWS  : {'PASS' if rows_pass else 'FAIL'} | okPass={ok_pass}/{len(ok_rows)}")
+        print(f"=OVERALL      : {'PASS' if CONTINUE else 'FAIL'}")        
 
     return CONTINUE
