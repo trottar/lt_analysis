@@ -14,9 +14,10 @@
 ##################################################################################################################################################
 
 # Import relevant packages
-import matplotlib.pyplot as plt
 from pathlib import Path
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import os
 
 ################################################################################################################################################
@@ -45,10 +46,10 @@ OUTPATH=lt.OUTPATH
 def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
 
     # Unpack input dictionary
-    Q2_str = inpDict["Q2"].replace('p','')
-    W_str = inpDict["W"].replace('p','')
-    LOEPS_str = float(inpDict["LOEPS"].replace('p',''))*100
-    HIEPS_str = float(inpDict["HIEPS"].replace('p',''))*100
+    Q2_str   = inpDict["Q2"].replace('p','')
+    W_str    = inpDict["W"].replace('p','')
+    LOEPS_str = float(inpDict["LOEPS"].replace('p','')) * 100
+    HIEPS_str = float(inpDict["HIEPS"].replace('p','')) * 100
 
     iter_dir = Path(iter_dir)
     base = iter_dir / "averages"
@@ -62,7 +63,7 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     lo_ratio, lo_dratio = lo[:, 0], lo[:, 1]
     hi_ratio, hi_dratio = hi[:, 0], hi[:, 1]
 
-    # Optional bin indices (as stored in the file)
+    # Optional bin indices (as stored in the file); fall back to simple indices
     if lo.shape[1] >= 4:
         lo_phi_bin = lo[:, 2]
         lo_t_bin   = lo[:, 3]
@@ -147,59 +148,68 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     print(f"OVERALL: {'PASS' if overall else 'FAIL'} (forced)")
 
     # ---------------------------
-    # Diagnostic plots
+    # Diagnostic plots (PDF only)
     # ---------------------------
     monitor_dir = iter_dir / "monitor" / "ratios"
     monitor_dir.mkdir(parents=True, exist_ok=True)
 
-    # Helper for plotting one setting
     def make_plots(tag, ratio, dratio, phi_bin, t_bin, diff, fail_mask):
-        n = len(ratio)
-        idx = np.arange(n)
+        """
+        Create a multi-page PDF with diagnostics for a given setting (LOEPS/HIEPS).
+        Pages:
+          1) ratio vs index with errors and band
+          2) |ratio-1| vs index
+          3) ratio vs phi_bin (colored by t_bin)
+        """
+        pdf_path = monitor_dir / f"ratios_{tag}.pdf"
+        with PdfPages(pdf_path) as pdf:
 
-        # 1) ratio vs index with error bars and band
-        plt.figure()
-        plt.errorbar(idx, ratio, yerr=dratio, fmt='o', label=f'{tag} ratios')
-        plt.axhline(1.0, linestyle='--')
-        plt.axhspan(1.0 - RATIO_THRESHOLD_SPREAD,
-                    1.0 + RATIO_THRESHOLD_SPREAD,
-                    alpha=0.2, label='band')
-        if fail_mask.any():
-            plt.scatter(idx[fail_mask], ratio[fail_mask], marker='x', label='outside band')
-        plt.xlabel("bin index")
-        plt.ylabel("ratio")
-        plt.title(f"{tag}: ratio vs bin index")
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(monitor_dir / f"ratio_vs_index_{tag}.png")
-        plt.close()
+            n = len(ratio)
+            idx = np.arange(n)
 
-        # 2) |ratio-1| vs index
-        plt.figure()
-        plt.bar(idx, diff)
-        plt.axhline(RATIO_THRESHOLD_SPREAD, linestyle='--')
-        plt.xlabel("bin index")
-        plt.ylabel("|ratio - 1|")
-        plt.title(f"{tag}: deviation from unity")
-        plt.tight_layout()
-        plt.savefig(monitor_dir / f"deviation_vs_index_{tag}.png")
-        plt.close()
+            # 1) ratio vs index with error bars and band
+            fig, ax = plt.subplots()
+            ax.errorbar(idx, ratio, yerr=dratio, fmt='o', label=f'{tag} ratios')
+            ax.axhline(1.0, linestyle='--')
+            ax.axhspan(1.0 - RATIO_THRESHOLD_SPREAD,
+                       1.0 + RATIO_THRESHOLD_SPREAD,
+                       alpha=0.2, label='band')
+            if fail_mask.any():
+                ax.scatter(idx[fail_mask], ratio[fail_mask], marker='x', label='outside band')
+            ax.set_xlabel("bin index")
+            ax.set_ylabel("ratio")
+            ax.set_title(f"{tag}: ratio vs bin index")
+            ax.legend()
+            fig.tight_layout()
+            pdf.savefig(fig)
+            plt.close(fig)
 
-        # 3) ratio vs phi_bin, colored by t_bin
-        plt.figure()
-        sc = plt.scatter(phi_bin, ratio, c=t_bin, cmap='viridis')
-        plt.axhline(1.0, linestyle='--')
-        plt.axhspan(1.0 - RATIO_THRESHOLD_SPREAD,
-                    1.0 + RATIO_THRESHOLD_SPREAD,
-                    alpha=0.2)
-        plt.xlabel("phi_bin")
-        plt.ylabel("ratio")
-        plt.title(f"{tag}: ratio vs phi_bin (color = t_bin)")
-        cbar = plt.colorbar(sc)
-        cbar.set_label("t_bin")
-        plt.tight_layout()
-        plt.savefig(monitor_dir / f"ratio_vs_phi_{tag}.png")
-        plt.close()
+            # 2) |ratio-1| vs index
+            fig, ax = plt.subplots()
+            ax.bar(idx, diff)
+            ax.axhline(RATIO_THRESHOLD_SPREAD, linestyle='--')
+            ax.set_xlabel("bin index")
+            ax.set_ylabel("|ratio - 1|")
+            ax.set_title(f"{tag}: deviation from unity")
+            fig.tight_layout()
+            pdf.savefig(fig)
+            plt.close(fig)
+
+            # 3) ratio vs phi_bin, colored by t_bin
+            fig, ax = plt.subplots()
+            sc = ax.scatter(phi_bin, ratio, c=t_bin, cmap='viridis')
+            ax.axhline(1.0, linestyle='--')
+            ax.axhspan(1.0 - RATIO_THRESHOLD_SPREAD,
+                       1.0 + RATIO_THRESHOLD_SPREAD,
+                       alpha=0.2)
+            ax.set_xlabel("phi_bin")
+            ax.set_ylabel("ratio")
+            ax.set_title(f"{tag}: ratio vs phi_bin (color = t_bin)")
+            cbar = fig.colorbar(sc, ax=ax)
+            cbar.set_label("t_bin")
+            fig.tight_layout()
+            pdf.savefig(fig)
+            plt.close(fig)
 
     make_plots("LOEPS", lo_ratio, lo_dratio, lo_phi_bin, lo_t_bin, lo_diff, lo_fail_mask)
     make_plots("HIEPS", hi_ratio, hi_dratio, hi_phi_bin, hi_t_bin, hi_diff, hi_fail_mask)
