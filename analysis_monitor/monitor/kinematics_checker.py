@@ -72,7 +72,8 @@ USE_CHI2_NDF_GATE = True
 CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 30.0   # acceptably close to 1
 USE_HELLINGER_GATE = True
 HELLINGER_MAX = 0.15                     # 0 identical → 1 very different
-REQUIRE_KS = False        # KS not required for CONTINUE
+#REQUIRE_KS = False        # KS not required for CONTINUE
+REQUIRE_KS = True
 
 # -------------------- Helpers --------------------
 
