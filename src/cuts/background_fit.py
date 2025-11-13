@@ -369,7 +369,7 @@ def bg_fit(
         hist_mm_cut=None,
         *,
         model_key="linear",   # ← just pick a key from BG_MODELS
-        no_bg_subtract=False         # no background subtraction
+        no_bg_subtract=False  # no background subtraction
 ):
     """
     Generic side-band fit and background subtraction.
@@ -380,11 +380,23 @@ def bg_fit(
         Which entry in BG_MODELS to use.
         Every model supplies the TF1 expression and its default side-bands.
     All other parameters are unchanged compared to the legacy version.
+
+    Returns
+    -------
+    fit_hist_inrange : TH1
+        Histogram of the fitted background, binned like `hist_mm_cut`, but
+        only non-zero inside [mm_min, mm_max].
+    fit_vis : TF1
+        The fitted function, useful for plotting.
+    bg_par : float
+        Legacy quantity: background counts per bin in the signal window.
+    f_sig : float
+        NEW: signal fraction = max(0, 1 - N_bg / N_tot) in the MM signal window.
     """
     # ------------------------------- setup --------------------------------
     Q2 = inpDict["Q2"]
-    W = inpDict["W"]
-    model = BG_MODELS[f"Q{Q2}W{W}"][model_key]                 # raises KeyError if wrong
+    W  = inpDict["W"]
+    model  = BG_MODELS[f"Q{Q2}W{W}"][model_key]  # raises KeyError if wrong
     mm_min = inpDict["mm_min"]
     mm_max = inpDict["mm_max"]
 
@@ -401,9 +413,13 @@ def bg_fit(
     if hist_mm_cut is None:
         hist_mm_cut = hist
 
+    # Special case: explicitly no background subtraction
     if no_bg_subtract:
         fit_func = TF1("fit_func_zero", "0", mm_min, mm_max)
-        return fit_func, fit_func.Clone(f"{hist.GetName()}_bg_vis"), 0.0
+        fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
+        bg_par   = 0.0
+        f_sig    = 1.0  # keep everything as "signal"
+        return fit_func, fit_vis, bg_par, f_sig
 
     # -------------------------- mask to side-bands ------------------------
     h_sb = hist.Clone(hist.GetName() + "_sb")
@@ -423,25 +439,47 @@ def bg_fit(
     fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    # integral of background under the signal window, per-bin normalised
-    bg_par = max(0.0, fit_func.Integral(sig_lo, sig_hi) / hist.GetBinWidth(1))
+    # integral of background under the signal window
+    # (N_bg = expected background counts in [sig_lo, sig_hi])
+    N_bg = max(0.0, fit_func.Integral(sig_lo, sig_hi))
+
+    # legacy quantity: per-bin background in the window
+    bw = hist.GetBinWidth(1)
+    bg_par = 0.0
+    if bw > 0.0:
+        bg_par = N_bg / bw
 
     # global scaling of stat errors if user supplied it
     scale = inpDict.get("bg_stat_scale", 1.0)
     if scale != 1.0:
         for ip in range(fit_func.GetNpar()):
             fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
+        N_bg  *= scale
         bg_par *= scale
 
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
 
-    # produce a histogram of the fit on the same binning as (hist_mm_cut)
+    # ---------------------- signal fraction in MM -------------------------
+    ax_mm    = hist_mm_cut.GetXaxis()
+    ib_sig_lo = ax_mm.FindBin(sig_lo)
+    ib_sig_hi = ax_mm.FindBin(sig_hi)
+
+    # total data counts in the MM signal window
+    N_tot = hist_mm_cut.Integral(ib_sig_lo, ib_sig_hi)
+
+    # default: if N_tot <= 0, just keep everything
+    f_sig = 1.0
+    if N_tot > 0.0:
+        f_sig = max(0.0, min(1.0, 1.0 - N_bg / N_tot))
+
+    # ------------------------ build background hist -----------------------
     fit_hist_inrange = get_fit_histogram_padded(
         fit_func,
         hist_mm_cut,
         mm_min, mm_max,
         n_pad=0,
-        ref_binwidth=hist.GetXaxis().GetBinWidth(1)
+        ref_binwidth=bw
     )
 
-    return fit_hist_inrange, fit_vis, bg_par
+    # NOTE: now returning 4 values instead of 3
+    return fit_hist_inrange, fit_vis, bg_par, f_sig
