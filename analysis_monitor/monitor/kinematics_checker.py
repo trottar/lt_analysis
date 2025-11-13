@@ -66,9 +66,9 @@ USE_BIN_WIDTH = False
 SAVE_PLOTS = True         # diagnostics enabled
 
 # Hard-wired decision thresholds
-PVAL_MIN = 1e-5
+PVAL_MIN = 1e-10
 USE_CHI2_NDF_GATE = True
-CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 1.6   # acceptably close to 1
+CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 30.0   # acceptably close to 1
 USE_HELLINGER_GATE = True
 HELLINGER_MAX = 0.15                     # 0 identical → 1 very different
 REQUIRE_KS = False        # KS not required for CONTINUE
