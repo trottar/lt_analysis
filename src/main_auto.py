@@ -61,7 +61,7 @@ formatted_date = sys.argv[10]
 NumtBins = sys.argv[11]
 NumPhiBins = sys.argv[12]
 inp_debug =  sys.argv[13]
-RATIO_THRESHOLD_SPREAD = sys.argv[14]/100 # Convert to decimal
+RATIO_THRESHOLD_SPREAD = float(sys.argv[14])/100 # Convert to decimal
 
 if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
