@@ -676,6 +676,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
 
         cndf_pass = hell_pass = w1_pass = p95_pass = mean_pass = rms_pass = 0
         fail_summaries = []
+        fail_counts = {"chi2/ndf": 0, "H": 0, "W1": 0, "pull95": 0, "dμ": 0, "dRMS": 0}
 
         for r in ok_rows:
             reasons = []
@@ -708,7 +709,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
             if ok_m and (mrel <= MEAN_REL_MAX):
                 mean_pass += 1
             else:
-                reasons.append("dmu")
+                reasons.append("dμ")
 
             ok_r, rrel = _finite_float(r.get("rms_rel"))
             if ok_r and (rrel <= RMS_REL_MAX):
@@ -717,6 +718,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
                 reasons.append("dRMS")
 
             if reasons:
+                for k in reasons:
+                    fail_counts[k] += 1
                 fail_summaries.append(
                     f"{r.get('kin_var','?')}[{r.get('eps','?')}/{r.get('phi','?')}]:" + ",".join(reasons)
                 )
@@ -728,6 +731,13 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         print(f"  P95|pull| ≤ {PULL95_MAX:.2f}: {p95_pass}/{len(ok_rows)}")
         print(f"  |Δμ|% ≤ {MEAN_REL_MAX*100:.2f}: {mean_pass}/{len(ok_rows)}")
         print(f"  |ΔRMS|% ≤ {RMS_REL_MAX*100:.2f}: {rms_pass}/{len(ok_rows)}")
+
+        # show the AND-gate result explicitly (this matches METRIC ROWS Pass=X/Y)
+        print(f"  COMBINED (chi2+H+W1+pull95+dμ+dRMS): {ok_pass}/{len(ok_rows)}")
+
+        # per-reason fail counts (helps see why the AND drops)
+        if any(fail_counts.values()):
+            print("  fail counts:", " ".join(f"{k}={v}" for k, v in fail_counts.items()))
 
         # chunked fail list, 5 per line
         if fail_summaries:
