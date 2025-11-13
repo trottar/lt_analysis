@@ -284,27 +284,43 @@ def save_overlay_plot(h_data, h_simc, title, outpath, metrics: Dict[str, float],
 
 # -------------------- Internal directory logic --------------------
 
-def resolve_hist_paths(file: TFile, eps: str, phi: Optional[str], kin_var: str) -> Tuple[Optional[str], Optional[str]]:
+# --- replace the old resolvers with these ---
+
+def resolve_hist_paths(file: TFile, phi: Optional[str], kin_var: str) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Look for histograms at:
+      {phi}/data/H_{kin_var}_DATA      and {phi}/simc/H_{kin_var}_SIMC
+    and also try a no-phi fallback:
+      data/H_{kin_var}_DATA            and simc/H_{kin_var}_SIMC
+    """
     candidates = []
     if phi:
-        candidates += [
-            (f"{eps}/{phi}/data/H_{kin_var}_DATA", f"{eps}/{phi}/simc/H_{kin_var}_SIMC"),
-            (f"{eps}/data/{phi}/H_{kin_var}_DATA", f"{eps}/simc/{phi}/H_{kin_var}_SIMC"),
-        ]
-    candidates += [
-        (f"{eps}/data/H_{kin_var}_DATA", f"{eps}/simc/H_{kin_var}_SIMC"),
-    ]
+        candidates.append((f"{phi}/data/H_{kin_var}_DATA", f"{phi}/simc/H_{kin_var}_SIMC"))
+    # no-phi fallback
+    candidates.append((f"data/H_{kin_var}_DATA", f"simc/H_{kin_var}_SIMC"))
+
     for dpath, spath in candidates:
-        if get_hist(file, dpath) and get_hist(file, spath):
+        d = file.Get(dpath)
+        s = file.Get(spath)
+        if d and s:
             return dpath, spath
     return None, None
 
-def directory_has_phi(file: TFile, eps: str, phi: str) -> bool:
-    if dir_exists(file, f"{eps}/{phi}"):
+def directory_has_phi(file: TFile, phi: str) -> bool:
+    """
+    Consider a phi 'present' if the directory {phi} exists OR at least one of the
+    expected subdirectories {phi}/data or {phi}/simc exists.
+    """
+    if file.Get(phi):
         return True
-    probeD = get_hist(file, f"{eps}/{phi}/data/H_Q2_DATA")
-    probeS = get_hist(file, f"{eps}/{phi}/simc/H_Q2_SIMC")
-    return bool(probeD and probeS)
+    if file.Get(f"{phi}/data") or file.Get(f"{phi}/simc"):
+        return True
+    # final lightweight probe
+    if file.Get(f"{phi}/data/H_Q2_DATA") or file.Get(f"{phi}/simc/H_Q2_SIMC"):
+        return True
+    return False
+
+# --- replace your existing process_root_file with this version ---
 
 def process_root_file(rpath: Path,
                       eps: str,
@@ -318,6 +334,7 @@ def process_root_file(rpath: Path,
                       use_bin_width: bool,
                       save_plots: bool,
                       plots_dir: Path) -> List[Dict[str, object]]:
+
     rows: List[Dict[str, object]] = []
     f = TFile.Open(str(rpath), "READ")
     if not f or f.IsZombie():
@@ -329,12 +346,17 @@ def process_root_file(rpath: Path,
     Qtok_use = Qtok_file or Q2tok
     Wtok_use = Wtok_file or Wtok
 
-    if phi and not directory_has_phi(f, eps, phi):
+    # If a phi was requested but not present, record one summary row and return
+    if phi and not directory_has_phi(f, phi):
+        rows.append({
+            "file": str(rpath), "particle": particle_use, "Q2": Qtok_use, "W": Wtok_use,
+            "eps": eps, "phi": phi, "kin_var": "", "status": "phi-missing"
+        })
         f.Close()
         return rows
 
     for var in kin_vars:
-        dpath, spath = resolve_hist_paths(f, eps, phi, var)
+        dpath, spath = resolve_hist_paths(f, phi, var)
         if not dpath or not spath:
             rows.append({
                 "file": str(rpath), "particle": particle_use, "Q2": Qtok_use, "W": Wtok_use,
@@ -468,7 +490,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
     # Summary counts
     n_rows = len(all_rows)
     n_ok = sum(1 for r in all_rows if r.get("status") == "ok")
-    n_missing = sum(1 for r in all_rows if r.get("status") in ("missing","missing-paths","no-file-for-eps"))
+    n_missing = sum(1 for r in all_rows if r.get("status") in ("missing","missing-paths","no-file-for-eps","phi-missing"))
     n_bm = sum(1 for r in all_rows if r.get("status") == "binning-mismatch")
 
     # CONTINUE decision logic (hard-wired thresholds)
