@@ -662,9 +662,9 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
 
         CONTINUE = eps_ok and struct_ok and rows_pass
 
-        print(f"=EPSILON SETS : {'PASS' if eps_ok else 'FAIL'} | missing={','.join(sorted(eps_missing_files)) if eps_missing_files else 'none'}")
-        print(f"=FILE STRUCTURE: {'PASS' if struct_ok else 'FAIL'} | binMismatch={bin_mismatch} missingPaths={missing_paths}")
-        print(f"=METRIC ROWS  : {'PASS' if rows_pass else 'FAIL'} | okPass={ok_pass}/{len(ok_rows)}")
+        print(f"\n\nEPSILON SETS : {'PASS' if eps_ok else 'FAIL'} | missing={','.join(sorted(eps_missing_files)) if eps_missing_files else 'none'}")
+        print(f"FILE STRUCTURE: {'PASS' if struct_ok else 'FAIL'} | binMismatch={bin_mismatch} missingPaths={missing_paths}")
+        print(f"METRIC ROWS  : {'PASS' if rows_pass else 'FAIL'} | okPass={ok_pass}/{len(ok_rows)}")
 
         # ---- sub-breakdown of metrics (quick-glance) ----
         def _finite_float(x):
@@ -710,18 +710,22 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
                 fail_summaries.append(f"{r.get('kin_var','?')}[{r.get('eps','?')}/{r.get('phi','?')}]:" + ",".join(reasons))
 
         # Prints (compact)
-        print("=METRIC BREAKDOWN:")
+        print("METRIC BREAKDOWN:")
         print(f"  chi2/ndf in [{CHI2_NDF_MIN},{CHI2_NDF_MAX}]: {cndf_pass}/{len(ok_rows)}")
         print(f"  Hellinger ≤ {HELLINGER_MAX}: {hell_pass}/{len(ok_rows)}")
         if USE_PVAL and p_tot > 0:
             print(f"  p ≥ {PVAL_MIN}: {p_pass}/{p_tot}")
         if fail_summaries:
-            preview = "; ".join(fail_summaries[:8])
-            extra = f" ... (+{len(fail_summaries)-8} more)" if len(fail_summaries) > 8 else ""
-            print(f"  fails: {preview}{extra}")
+            n_per_line = 5
+            for i in range(0, len(fail_summaries), n_per_line):
+                line = "; ".join(fail_summaries[i:i+n_per_line])
+                if i == 0:
+                    print(f"  fails: {line}")
+                else:
+                    print(f"         {line}")
         else:
             print("  fails: none")
 
-        print(f"=OVERALL      : {'PASS' if CONTINUE else 'FAIL'}")
+        print(f"OVERALL      : {'PASS' if CONTINUE else 'FAIL'}")
 
     return CONTINUE
