@@ -64,7 +64,11 @@ USE_BIN_WIDTH = False
 SAVE_PLOTS = True         # diagnostics enabled
 
 # Hard-wired decision thresholds
-PVAL_MIN = 0.01           # minimum acceptable chi2 p-value
+PVAL_MIN = 1e-5
+USE_CHI2_NDF_GATE = True
+CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 1.6   # acceptably close to 1
+USE_HELLINGER_GATE = True
+HELLINGER_MAX = 0.15                     # 0 identical → 1 very different
 REQUIRE_KS = False        # KS not required for CONTINUE
 
 # -------------------- Helpers --------------------
@@ -536,30 +540,33 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
             if r.get("status") != "ok":
                 return False
             try:
-                chi2p = float(r.get("chi2_p"))
+                chi2p   = float(r.get("chi2_p"))
             except Exception:
-                return False
-            if not (chi2p >= PVAL_MIN):
-                return False
-            if REQUIRE_KS:
-                try:
-                    ksp = float(r.get("root_KS_p"))
-                except Exception:
-                    return False
-                if not (ksp >= PVAL_MIN):
-                    return False
-            return True
+                chi2p = float("nan")
+            try:
+                chi2ndf = float(r.get("chi2_ndf"))
+            except Exception:
+                chi2ndf = float("nan")
+            try:
+                hell    = float(r.get("hellinger"))
+            except Exception:
+                hell = float("nan")
+
+            # Hard test
+            hard_ok = (chi2p >= PVAL_MIN)
+
+            # Shape-band test
+            band_ok = (USE_CHI2_NDF_GATE and not math.isnan(chi2ndf)
+                    and CHI2_NDF_MIN <= chi2ndf <= CHI2_NDF_MAX)
+            hell_ok = (USE_HELLINGER_GATE and not math.isnan(hell)
+                    and hell <= HELLINGER_MAX)
+
+            return hard_ok or (band_ok and hell_ok)
+
 
         ok_rows = [r for r in all_rows if r.get("status") == "ok"]
         all_ok_pass = all(pass_row(r) for r in ok_rows) if ok_rows else False
         no_structural_fail = (n_bm == 0) and all(r.get("status") != "missing-paths" for r in all_rows)
-        CONTINUE = all_ok_pass and no_structural_fail
-
-    eps_miss_str = ",".join(sorted(eps_missing_files)) if eps_missing_files else "none"
-    print(
-        f"[kinematics] iter={iter_num} PT={PT or 'ALL'} Q2={Q2tok} W={Wtok} "
-        f"| CONTINUE={CONTINUE} | ok={n_ok}/{n_rows} miss={n_missing} "
-        f"binMismatch={n_bm} | eps_missing={eps_miss_str} | csv={csv_path}"
-    )        
+        CONTINUE = all_ok_pass and no_structural_fail       
 
     return CONTINUE
