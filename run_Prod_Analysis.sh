@@ -2037,7 +2037,7 @@ elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
 	    echo
 	    echo "Running weight iteration analysis for Q2=${Q2}, W=${W}, ${EPSILON} setting..."
 	    echo
-	    echo "                       Iteration: ${iter}/${iterations}"
+	    echo "                       Iteration: ${iter} (maximum 50)"
 	    echo "                       Number of t bins: ${NumtBins}"
 	    echo "                       Range of t: ${TMIN} - ${TMAX}"
 	    echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"	
