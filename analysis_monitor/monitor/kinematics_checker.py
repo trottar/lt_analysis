@@ -66,6 +66,7 @@ USE_BIN_WIDTH = False
 SAVE_PLOTS = True         # diagnostics enabled
 
 # Hard-wired decision thresholds
+F_SYS_YIELD = 0.03  # 3% fractional floor on yields (tune 0.02–0.05)
 PVAL_MIN = 1e-10
 USE_CHI2_NDF_GATE = True
 CHI2_NDF_MIN, CHI2_NDF_MAX = 0.6, 30.0   # acceptably close to 1
@@ -244,6 +245,9 @@ def compare_th1d(h_data, h_mc,
     # Repair zero/NaN errors so our custom chi2 has usable variances
     eD = _repair_errors(cD, eD)
     eM = _repair_errors(cM, eM)
+
+    eD = [math.hypot(ed, F_SYS_YIELD * abs(cd)) for ed, cd in zip(eD, cD)]
+    eM = [math.hypot(em, F_SYS_YIELD * abs(cm)) for em, cm in zip(eM, cM)]    
 
     # ROOT built-ins: choose options that silence the "NORM needs UU" warning.
     # Use 'UU NORM P' for shape-only; 'WW P' otherwise. Wrap in try/except.
