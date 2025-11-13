@@ -498,4 +498,11 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         no_structural_fail = (n_bm == 0) and all(r.get("status") != "missing-paths" for r in all_rows)
         CONTINUE = all_ok_pass and no_structural_fail
 
+    eps_miss_str = ",".join(sorted(eps_missing_files)) if eps_missing_files else "none"
+    print(
+        f"[kinematics] iter={iter_num} PT={PT or 'ALL'} Q2={Q2tok} W={Wtok} "
+        f"| CONTINUE={CONTINUE} | ok={n_ok}/{n_rows} miss={n_missing} "
+        f"binMismatch={n_bm} | eps_missing={eps_miss_str} | csv={csv_path}"
+    )        
+
     return CONTINUE
