@@ -216,6 +216,10 @@ inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
 
+# Save epsilon values
+inpDict["LOEPS"] = LOEPS
+inpDict["HIEPS"] = HIEPS
+
 # Copy input model to specific particle type directory
 print("\nCopying {} to {}".format('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W)))
 shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
