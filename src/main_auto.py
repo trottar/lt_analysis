@@ -794,22 +794,6 @@ if EPSSET == "high":
 '''
 
 if EPSSET == "high":
-    
-    # Update iteration file of dates
-    f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
-    # Check if the file exists
-    if os.path.exists(f_iter):
-        # If it exists, update it with the string
-        with open(f_iter, 'a') as file:
-            file.write('\n'+formatted_date)
-    else:
-        # If not, create it and fill it with the string
-        with open(f_iter, 'x') as file:
-            file.write(formatted_date)
-
-    #sys.path.append("setup")
-    #from compare_iterations import compare_iters
-    #compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
 
     if iter_num > 1:        
         # Track continues
@@ -830,10 +814,31 @@ if EPSSET == "high":
             CONTINUE = check_kinematics(inpDict, new_dir, iter_num)
         else:
             print("\nStopping iteration due to failed ratio check...\n")
-            sys.exit(0)
-        if CONTINUE:
+            print("-"*50)
+            print("-"*50)
+            sys.exit(2)
+        if CONTINUE and c==2:
             c+=1
             sys.path.append("../analysis_monitor/monitor")
             from xsect_checker import check_xsect
             print(f"\nStep 3: Checking cross sections for parameter stability\n")
             CONTINUE = check_xsect(inpDict, new_dir)
+
+        print("-"*50)
+        print("-"*50)
+
+    # Update iteration file of dates
+    f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
+    # Check if the file exists
+    if os.path.exists(f_iter):
+        # If it exists, update it with the string
+        with open(f_iter, 'a') as file:
+            file.write('\n'+formatted_date)
+    else:
+        # If not, create it and fill it with the string
+        with open(f_iter, 'x') as file:
+            file.write(formatted_date)
+
+    #sys.path.append("setup")
+    #from compare_iterations import compare_iters
+    #compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)        
