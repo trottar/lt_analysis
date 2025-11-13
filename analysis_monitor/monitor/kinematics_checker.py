@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from ROOT import TFile, TMath, gROOT
+import ROOT
+ROOT.gErrorIgnoreLevel = ROOT.kWarning  # hides all "Info" prints (only shows Warning+)
 
 ################################################################################################################################################
 '''
