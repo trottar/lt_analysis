@@ -99,7 +99,7 @@ fi
 
 
 # Clean all untracked files and recreate symlinks
-if [[ $i_flag != "true" || $a_flag != "true" ]]; then
+if [[ $i_flag != "true" && $a_flag != "true" ]]; then
     git clean -fdx
     ./set_SymLinks.sh $ParticleType
 fi
