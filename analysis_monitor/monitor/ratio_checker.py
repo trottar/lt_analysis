@@ -88,7 +88,8 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     print(f"HIEPS points: {'PASS' if hi_points_pass else 'FAIL'}")
     print(f"LOEPS ⟨r⟩_w = {lo_mean:.6f} -> {'PASS' if lo_avg_pass else 'FAIL'}")
     print(f"HIEPS ⟨r⟩_w = {hi_mean:.6f} -> {'PASS' if hi_avg_pass else 'FAIL'}")
-    print(f"OVERALL: {'PASS' if overall else 'FAIL'}")
+    #print(f"OVERALL: {'PASS' if overall else 'FAIL'}")
+    print(f"OVERALL: {'PASS' if overall else 'FAIL'} (forced)")
 
     CONTINUE = overall
 
