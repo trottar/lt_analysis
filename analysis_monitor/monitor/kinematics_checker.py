@@ -36,13 +36,6 @@ def root_quiet(level=ROOT.kWarning):
     finally:
         ROOT.gErrorIgnoreLevel = prev
 
-# inside compare_th1d(...)
-with root_quiet():
-    ks_p = h_data.KolmogorovTest(h_mc, "N")
-with root_quiet():
-    chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")
-
-
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
@@ -250,6 +243,11 @@ def compare_th1d(h_data, h_mc,
                  include_overflow=False, use_bin_width=False, shape_only=True) -> Dict[str, float]:
     cD, eD, w = _bin_arrays(h_data, include_overflow=include_overflow)
     cM, eM, _ = _bin_arrays(h_mc,   include_overflow=include_overflow)
+
+    with root_quiet():
+        ks_p = h_data.KolmogorovTest(h_mc, "N")
+    with root_quiet():
+        chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")
 
     # Treat densities as counts if requested
     if use_bin_width:
