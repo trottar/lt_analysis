@@ -125,20 +125,42 @@ def _bin_arrays(h, include_overflow=False):
         widths.append(float(ax.GetBinWidth(i)) if 1 <= i <= nb else 0.0)
     return contents, errors, widths
 
+def _repair_errors(contents, errors):
+    """If bin errors are zero/NaN, fall back to Poisson-like sqrt(|content|)."""
+    import math
+    out = []
+    for c, e in zip(contents, errors):
+        if e is None or not math.isfinite(e) or e <= 0.0:
+            # allow negatives from BG-subtraction
+            out.append(math.sqrt(abs(c)) if abs(c) > 0.0 else 0.0)
+        else:
+            out.append(float(e))
+    return out
+
 def _safe_norm(arr):
-    s = float(sum(arr))
+    import math
+    # Clip negatives/NaNs to 0 and renormalize over positives only
+    cleaned = [(a if (a is not None and math.isfinite(a) and a > 0.0) else 0.0) for a in arr]
+    s = float(sum(cleaned))
     if s <= 0.0:
         return None, 0.0
-    return [a/s for a in arr], s
+    return [a/s for a in cleaned], s
 
 def _hellinger(p, q):
+    import math
     if p is None or q is None:
         return float("nan")
-    s = sum((pi**0.5)*(qi**0.5) for pi, qi in zip(p, q))
+    # p,q are >=0 and sum to 1 (by _safe_norm). Use math.sqrt to avoid complex.
+    s = 0.0
+    for pi, qi in zip(p, q):
+        # both >=0 from _safe_norm
+        s += math.sqrt(pi) * math.sqrt(qi)
+    # numeric guard
     s = max(0.0, min(1.0, s))
     return math.sqrt(1.0 - s)
 
 def _js_divergence(p, q, eps=1e-12):
+    import math
     if p is None or q is None:
         return float("nan")
     m = [(pi+qi)/2.0 for pi, qi in zip(p, q)]
@@ -206,36 +228,49 @@ def compare_th1d(h_data, h_mc,
     cD, eD, w = _bin_arrays(h_data, include_overflow=include_overflow)
     cM, eM, _ = _bin_arrays(h_mc,   include_overflow=include_overflow)
 
+    # Treat densities as counts if requested
     if use_bin_width:
         cD = [ci*wi for ci, wi in zip(cD, w)]
         cM = [ci*wi for ci, wi in zip(cM, w)]
         eD = [ei*wi for ei, wi in zip(eD, w)]
         eM = [ei*wi for ei, wi in zip(eM, w)]
 
+    # Repair zero/NaN errors so our custom chi2 has usable variances
+    eD = _repair_errors(cD, eD)
+    eM = _repair_errors(cM, eM)
+
+    # ROOT built-ins: choose options that silence the "NORM needs UU" warning.
+    # Use 'UU NORM P' for shape-only; 'WW P' otherwise. Wrap in try/except.
     try:
-        ks_p = h_data.KolmogorovTest(h_mc, "N")
+        ks_p = h_data.KolmogorovTest(h_mc, "N")  # normalized KS (shape)
     except Exception:
         ks_p = float("nan")
     try:
-        opt = "P" + (" NORM" if shape_only else "")
-        chi2_p_root = h_data.Chi2Test(h_mc, opt)
+        if shape_only:
+            chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")
+        else:
+            chi2_p_root = h_data.Chi2Test(h_mc, "WW P")
     except Exception:
         chi2_p_root = float("nan")
 
+    # Our chi2 with combined uncertainties
     chi2, ndof, alpha_chi2 = _chi2_with_mc_errors(cD, eD, cM, eM, shape_only=shape_only)
-    chi2_p_ours = TMath.Prob(chi2, int(ndof))
+    chi2_p_ours = TMath.Prob(chi2, int(ndof)) if ndof > 0 else float("nan")
+
+    # Poisson LLR (always well-defined with small floor in _poisson_llr)
     llr, alpha_llr = _poisson_llr(cD, cM, shape_only=shape_only)
 
+    # Shape distances (robust to negatives via _safe_norm clipping)
     pD, _ = _safe_norm(cD)
     pM, _ = _safe_norm(cM)
     hell = _hellinger(pD, pM)
     jsd  = _js_divergence(pD, pM)
-    w1   = _wasserstein1_from_bins(pD, w if not use_bin_width else [1.0]*len(w))(pM)
+    w1   = _wasserstein1_from_bins(pD, w if not use_bin_width else [1.0]*len(w))(pM) if pD is not None else float("nan")
 
     return {
         "root_KS_p": ks_p,
         "root_Chi2_p": chi2_p_root,
-        "chi2_ndf": chi2/max(ndof,1),
+        "chi2_ndf": (chi2/max(ndof,1)) if ndof > 0 else float("nan"),
         "chi2_p": chi2_p_ours,
         "alpha_norm_used_chi2": alpha_chi2,
         "poisson_llr": llr,
