@@ -428,6 +428,9 @@ def process_root_file(rpath: Path,
             shape_only=shape_only
         )
 
+        print(f"[Chi2] var={var} | PT={particle_use} Q2={Q2tok} W={Wtok} eps={eps} phi={phi or 'NoPhi'} | p={metrics['chi2_p']:.3g} chi2/ndf={metrics['chi2_ndf']:.3g} KS={metrics['root_KS_p']:.3g}")
+
+
         row = {
             "file": str(rpath), "particle": particle_use, "Q2": Qtok_use, "W": Wtok_use,
             "eps": eps, "phi": phi or "", "kin_var": var, "status": "ok"
