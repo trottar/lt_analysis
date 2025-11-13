@@ -567,6 +567,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         ok_rows = [r for r in all_rows if r.get("status") == "ok"]
         all_ok_pass = all(pass_row(r) for r in ok_rows) if ok_rows else False
         no_structural_fail = (n_bm == 0) and all(r.get("status") != "missing-paths" for r in all_rows)
-        CONTINUE = all_ok_pass and no_structural_fail       
+        CONTINUE = all_ok_pass and no_structural_fail    
+
+        print(f"\n\nOVERALL: {'PASS' if CONTINUE else 'FAIL'}")   
 
     return CONTINUE
