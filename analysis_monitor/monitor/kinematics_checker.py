@@ -23,18 +23,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from ROOT import TFile, TMath, gROOT
-
 import ROOT
-from contextlib import contextmanager
-
-@contextmanager
-def root_quiet(level=ROOT.kWarning):
-    prev = int(ROOT.gErrorIgnoreLevel)
-    ROOT.gErrorIgnoreLevel = level
-    try:
-        yield
-    finally:
-        ROOT.gErrorIgnoreLevel = prev
+ROOT.gErrorIgnoreLevel = ROOT.kWarning  # hides all "Info" prints (only shows Warning+)
 
 ################################################################################################################################################
 '''
@@ -258,17 +248,14 @@ def compare_th1d(h_data, h_mc,
     # ROOT built-ins: choose options that silence the "NORM needs UU" warning.
     # Use 'UU NORM P' for shape-only; 'WW P' otherwise. Wrap in try/except.
     try:
-        with root_quiet():
-            ks_p = h_data.KolmogorovTest(h_mc, "N") # normalized KS (shape)
+        ks_p = h_data.KolmogorovTest(h_mc, "N")  # normalized KS (shape)
     except Exception:
         ks_p = float("nan")
     try:
         if shape_only:
-            with root_quiet():
-                chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM P")            
+            chi2_p_root = h_data.Chi2Test(h_mc, "UU NORM")
         else:
-            with root_quiet():
-                chi2_p_root = h_data.Chi2Test(h_mc, "WW P")        
+            chi2_p_root = h_data.Chi2Test(h_mc, "WW")
     except Exception:
         chi2_p_root = float("nan")
 
