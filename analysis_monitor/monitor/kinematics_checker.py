@@ -282,6 +282,17 @@ def compare_th1d(h_data, h_mc,
 
     # Our chi2 with combined uncertainties
     chi2, ndof, alpha_chi2 = _chi2_with_mc_errors(cD, eD, cM, eM, shape_only=shape_only)
+    chi2_p_ours = TMath.Prob(chi2, int(ndof)) if ndof > 0 else float("nan")
+
+    # Poisson LLR (always well-defined with small floor in _poisson_llr)
+    llr, alpha_llr = _poisson_llr(cD, cM, shape_only=shape_only)
+
+    # Shape distances (robust to negatives via _safe_norm clipping)
+    pD, _ = _safe_norm(cD)
+    pM, _ = _safe_norm(cM)
+    hell = _hellinger(pD, pM)
+    jsd  = _js_divergence(pD, pM)
+    w1   = _wasserstein1_from_bins(pD, w if not use_bin_width else [1.0]*len(w))(pM) if pD is not None else float("nan")
 
     # Per-bin pulls (using the same variance model)
     var = [ed*ed + (alpha_chi2*em)**2 for ed, em in zip(eD, eM)]
@@ -301,19 +312,6 @@ def compare_th1d(h_data, h_mc,
     rmsD,  rmsM  = h_data.GetRMS(),  h_mc.GetRMS()
     mean_rel = abs(meanD - meanM) / xr
     rms_rel  = abs(rmsD  - rmsM ) / xr
-
-    chi2_p_ours = TMath.Prob(chi2, int(ndof)) if ndof > 0 else float("nan")
-    
-
-    # Poisson LLR (always well-defined with small floor in _poisson_llr)
-    llr, alpha_llr = _poisson_llr(cD, cM, shape_only=shape_only)
-
-    # Shape distances (robust to negatives via _safe_norm clipping)
-    pD, _ = _safe_norm(cD)
-    pM, _ = _safe_norm(cM)
-    hell = _hellinger(pD, pM)
-    jsd  = _js_divergence(pD, pM)
-    w1   = _wasserstein1_from_bins(pD, w if not use_bin_width else [1.0]*len(w))(pM) if pD is not None else float("nan")
 
     return {
         "root_KS_p": ks_p,
