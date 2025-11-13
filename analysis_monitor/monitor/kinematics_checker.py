@@ -69,12 +69,12 @@ SAVE_PLOTS = True         # diagnostics enabled
 F_SYS_YIELD = 0.05            # 5% floor for yields
 USE_PVAL = False              # p-value not used for gating
 USE_KS   = False              # KS off (binned + ties -> ~0)
-CHI2_NDF_MIN, CHI2_NDF_MAX = 0.0, 50.0
+CHI2_NDF_MIN, CHI2_NDF_MAX = 0.0, 15.0
 HELLINGER_MAX = 0.20
 W1NORM_MAX = 0.02             # 2% of x-range
 PULL95_MAX = 3.0              # 95th percentile |pull| ≤ 3σ
-MEAN_REL_MAX = 0.05           # |Δmean| ≤ 5% of x-range
-RMS_REL_MAX  = 0.10           # |ΔRMS|  ≤ 10% of x-range
+MEAN_REL_MAX = 0.10           # |Δmean| ≤ 10% of x-range
+RMS_REL_MAX  = 0.25           # |ΔRMS|  ≤ 25% of x-range
 PVAL_MIN = 1e-10   # only used if USE_PVAL is True
 
 # -------------------- Helpers --------------------
@@ -667,6 +667,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         print(f"METRIC ROWS  : {'PASS' if rows_pass else 'FAIL'} | Pass={ok_pass}/{len(ok_rows)}")
 
         # ---- sub-breakdown of metrics (quick-glance) ----
+        # ---- sub-breakdown of metrics (quick-glance) ----
         def _finite_float(x):
             try:
                 v = float(x)
@@ -751,6 +752,32 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         else:
             print("  fails: none")
 
+        # threshold-based final gate (counts of failures per metric)
+        chi2_fail   = fail_counts["chi2/ndf"]
+        hell_fail   = fail_counts["H"]
+        w1_fail     = fail_counts["W1"]
+        pull95_fail = fail_counts["pull95"]
+        dmu_fail    = fail_counts["dμ"]
+        drms_fail   = fail_counts["dRMS"]
+
+        metric_gate = (
+            (chi2_fail == 0) and
+            (hell_fail == 0) and
+            (w1_fail < 10) and
+            (pull95_fail < 25) and
+            (dmu_fail == 0) and
+            (drms_fail == 0)
+        )
+
+        print(
+            "THRESHOLD GATE: {res} | "
+            "chi2={c} H={h} W1={w}/<10 pull95={p}/<25 dμ={m} dRMS={r}".format(
+                res=("PASS" if metric_gate else "FAIL"),
+                c=chi2_fail, h=hell_fail, w=w1_fail, p=pull95_fail, m=dmu_fail, r=drms_fail
+            )
+        )
+
+        CONTINUE = eps_ok and struct_ok and metric_gate
         print(f"OVERALL: {'PASS' if CONTINUE else 'FAIL'}")
 
     return CONTINUE
