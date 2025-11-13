@@ -220,6 +220,39 @@ inpDict["iter_num"] = iter_num
 inpDict["LOEPS"] = LOEPS
 inpDict["HIEPS"] = HIEPS
 
+
+if iter_num > 1:        
+    # Track continues
+    c = 1
+    sys.path.append("../analysis_monitor/monitor")
+    from ratio_checker import check_ratio
+    print("\n\n")
+    print("-"*50)
+    print("Book keeping for automated iteration algorithm...")
+    print("-"*50)
+    print(f"\nStep 1: Checking ratio for consistency with unity and threshold spread of {RATIO_THRESHOLD_SPREAD*100:.1f}\n")
+    CONTINUE = check_ratio(inpDict, prev_iter_dir, RATIO_THRESHOLD_SPREAD)
+    if CONTINUE:
+        c+=1
+        sys.path.append("../analysis_monitor/monitor")
+        from kinematics_checker import check_kinematics
+        print("\nStep 2: Checking kinematic distributions for consistency between SIMC and data\n")
+        CONTINUE = check_kinematics(inpDict, prev_iter_dir, iter_num)
+    else:
+        print("\nStopping iteration due to failed ratio check...\n")
+        print("-"*50)
+        print("-"*50)
+        sys.exit(2)
+    if CONTINUE and c==2:
+        c+=1
+        sys.path.append("../analysis_monitor/monitor")
+        from xsect_checker import check_xsect
+        print(f"\nStep 3: Checking cross sections for parameter stability\n")
+        CONTINUE = check_xsect(inpDict, new_dir)
+
+    print("-"*50)
+    print("-"*50)
+
 # Copy input model to specific particle type directory
 print("\nCopying {} to {}".format('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W)))
 shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
