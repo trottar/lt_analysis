@@ -220,7 +220,7 @@ inpDict["iter_num"] = iter_num
 inpDict["LOEPS"] = LOEPS
 inpDict["HIEPS"] = HIEPS
 
-#'''
+'''
 ## DEBUG ##
 if iter_num > 1:        
     # Track continues
@@ -249,13 +249,13 @@ if iter_num > 1:
         sys.path.append("../analysis_monitor/monitor")
         from xsect_checker import check_xsect
         print(f"\nStep 3: Checking cross sections for parameter stability\n")
-        CONTINUE = check_xsect(inpDict, new_dir)
+        CONTINUE = check_xsect(inpDict, prev_iter_dir)
 
     print("-"*50)
     print("-"*50)
 sys.exit(2)
 ## DEBUG ##    
-#'''
+'''
 
 # Copy input model to specific particle type directory
 print("\nCopying {} to {}".format('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W)))
