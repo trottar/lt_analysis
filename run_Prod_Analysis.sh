@@ -99,7 +99,7 @@ fi
 
 
 # Clean all untracked files and recreate symlinks
-if [[ $i_flag != "true" ]]; then
+if [[ $i_flag != "true" || $a_flag != "true" ]]; then
     git clean -fdx
     ./set_SymLinks.sh $ParticleType
 fi
@@ -1590,7 +1590,7 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 	fi
     done
 
-elif [[ $i_flag == "true" && $a_flag != "true" ]]; then
+elif [[ $i_flag = "true" && $a_flag != "true" ]]; then
     # Run for N iterations
     for ((iter=1; iter<=iterations; iter++)); do
 	echo
@@ -1989,7 +1989,7 @@ elif [[ $i_flag == "true" && $a_flag != "true" ]]; then
 	    fi	    
 	done
     done
-elif [[ $i_flag != "true" && $a_flag == "true" ]]; then
+elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
     # Run for N iterations
     for ((iter=1; iter<=50; iter++)); do
 	echo
