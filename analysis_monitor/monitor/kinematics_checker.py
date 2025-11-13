@@ -662,9 +662,9 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
 
         CONTINUE = eps_ok and struct_ok and rows_pass
 
-        print(f"\n\nEPSILON SETS : {'PASS' if eps_ok else 'FAIL'} | missing={','.join(sorted(eps_missing_files)) if eps_missing_files else 'none'}")
-        print(f"FILE STRUCTURE: {'PASS' if struct_ok else 'FAIL'} | binMismatch={bin_mismatch} missingPaths={missing_paths}")
-        print(f"METRIC ROWS  : {'PASS' if rows_pass else 'FAIL'} | okPass={ok_pass}/{len(ok_rows)}")
+        print(f"\n\nEPSILON SETS : {'PASS' if eps_ok else 'FAIL'} | Missing={','.join(sorted(eps_missing_files)) if eps_missing_files else 'none'}")
+        print(f"FILE STRUCTURE: {'PASS' if struct_ok else 'FAIL'} | Bin Mismatch={bin_mismatch}, Missing Paths={missing_paths}")
+        print(f"METRIC ROWS  : {'PASS' if rows_pass else 'FAIL'} | Pass={ok_pass}/{len(ok_rows)}")
 
         # ---- sub-breakdown of metrics (quick-glance) ----
         def _finite_float(x):
@@ -726,6 +726,6 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         else:
             print("  fails: none")
 
-        print(f"OVERALL      : {'PASS' if CONTINUE else 'FAIL'}")
+        print(f"OVERALL: {'PASS' if CONTINUE else 'FAIL'}")
 
     return CONTINUE
