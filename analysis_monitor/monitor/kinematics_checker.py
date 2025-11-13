@@ -543,7 +543,7 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
     monitor_dir.mkdir(parents=True, exist_ok=True)
 
     csv_path = monitor_dir / f"metrics_{PT or 'ALL'}_iter{iter_num}_Q{Q2tok}_W{Wtok}.csv"
-    plots_dir = monitor_dir / f"iter{iter_num}" / f"{PT or 'ALL'}_Q{Q2tok}_W{Wtok}"
+    plots_dir = monitor_dir / "plots"
     if SAVE_PLOTS:
         plots_dir.mkdir(parents=True, exist_ok=True)
 
