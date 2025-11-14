@@ -113,8 +113,8 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     lo_sigma  = lo_diff / lo_dratio
     hi_sigma  = hi_diff / hi_dratio
 
-    lo_fail_mask = (lo_diff > RATIO_THRESHOLD_SPREAD) & (lo_sigma > SIGMA_THRESHOLD)
-    hi_fail_mask = (hi_diff > RATIO_THRESHOLD_SPREAD) & (hi_sigma > SIGMA_THRESHOLD)
+    lo_fail_mask = (lo_sigma > SIGMA_THRESHOLD)
+    hi_fail_mask = (hi_sigma > SIGMA_THRESHOLD)
 
     lo_points_pass = not lo_fail_mask.any()
     hi_points_pass = not hi_fail_mask.any()
