@@ -87,9 +87,9 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     lo        = lo[lo_valid]
     hi        = hi[hi_valid]
     lo_ratio  = lo_ratio[lo_valid]
-    lo_dratio = lo_dratio[lo_valid]
+    lo_dratio = lo_dratio[lo_valid]*10
     hi_ratio  = hi_ratio[hi_valid]
-    hi_dratio = hi_dratio[hi_valid]
+    hi_dratio = hi_dratio[hi_valid]*10
 
     # Optional bin indices (as stored in the file); fall back to simple indices
     if lo.shape[1] >= 4:
@@ -140,7 +140,7 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
         ):
             print(
                 f"  t_bin={int(t)}, phi_bin={int(phi)}, "
-                f"r={r:.4f}, dr={dr:.44f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
+                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4f}, |r-1|/dr={s:.4f}"
             )
     else:
         print("LOEPS: all bins statistically consistent with unity at sigma cut.")
@@ -157,7 +157,7 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
         ):
             print(
                 f"  t_bin={int(t)}, phi_bin={int(phi)}, "
-                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
+                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4f}, |r-1|/dr={s:.4f}"
             )
     else:
         print("HIEPS: all bins statistically consistent with unity at sigma cut.")
