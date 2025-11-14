@@ -20,6 +20,13 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import os
 
+import logging
+
+# Turn down matplotlib + PIL debug spam
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("PIL").setLevel(logging.WARNING)
+logging.getLogger("PIL.PngImagePlugin").setLevel(logging.WARNING)
+
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
@@ -64,17 +71,17 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     hi_ratio, hi_dratio = hi[:, 0], hi[:, 1]
 
     # mask out bins where ratio == 0 AND dratio == -1000
-    lo_mask = ~((lo_ratio == 0) & (lo_dratio == -1000))
-    hi_mask = ~((hi_ratio == 0) & (hi_dratio == -1000))
+    lo_valid = ~((lo_ratio == 0) & (lo_dratio == -1000))
+    hi_valid = ~((hi_ratio == 0) & (hi_dratio == -1000))
 
     # keep only good bins, preserving your names
-    lo       = lo[lo_mask]
-    hi       = hi[hi_mask]
-    lo_ratio = lo_ratio[lo_mask]
-    lo_dratio = lo_dratio[lo_mask]
-    hi_ratio = hi_ratio[hi_mask]
-    hi_dratio = hi_dratio[hi_mask]
-    
+    lo        = lo[lo_valid]
+    hi        = hi[hi_valid]
+    lo_ratio  = lo_ratio[lo_valid]
+    lo_dratio = lo_dratio[lo_valid]
+    hi_ratio  = hi_ratio[hi_valid]
+    hi_dratio = hi_dratio[hi_valid]
+
     # Optional bin indices (as stored in the file); fall back to simple indices
     if lo.shape[1] >= 4:
         lo_phi_bin = lo[:, 2]
@@ -91,55 +98,63 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
         hi_t_bin   = np.zeros_like(hi_phi_bin)
 
     # Guard against nonpositive errors
-    lo_mask = lo_dratio > 0
-    hi_mask = hi_dratio > 0
-    if not (lo_mask.all() and hi_mask.all()):
+    lo_poserr = lo_dratio > 0
+    hi_poserr = hi_dratio > 0
+    if not (lo_poserr.all() and hi_poserr.all()):
         raise ValueError("Found nonpositive dratio values.")
 
-    # 1) Point-by-point band check: |r-1| <= threshold
-    lo_diff = np.abs(lo_ratio - 1.0)
-    hi_diff = np.abs(hi_ratio - 1.0)
+    # 1) Point-by-point band check with error weighting
+    #    - absolute band: |r - 1| > RATIO_THRESHOLD_SPREAD
+    #    - AND statistically significant: |r - 1| / dr > SIGMA_THRESHOLD
+    SIGMA_THRESHOLD = 1.0  # change to 2.0, 3.0, etc. if desired
 
-    lo_points_pass = np.all(lo_diff <= RATIO_THRESHOLD_SPREAD)
-    hi_points_pass = np.all(hi_diff <= RATIO_THRESHOLD_SPREAD)
+    lo_diff   = np.abs(lo_ratio - 1.0)
+    hi_diff   = np.abs(hi_ratio - 1.0)
+    lo_sigma  = lo_diff / lo_dratio
+    hi_sigma  = hi_diff / hi_dratio
+
+    lo_fail_mask = (lo_diff > RATIO_THRESHOLD_SPREAD) & (lo_sigma > SIGMA_THRESHOLD)
+    hi_fail_mask = (hi_diff > RATIO_THRESHOLD_SPREAD) & (hi_sigma > SIGMA_THRESHOLD)
+
+    lo_points_pass = not lo_fail_mask.any()
+    hi_points_pass = not hi_fail_mask.any()
 
     # Identify failing bins (t-phi) for diagnostics
-    lo_fail_mask = lo_diff > RATIO_THRESHOLD_SPREAD
-    hi_fail_mask = hi_diff > RATIO_THRESHOLD_SPREAD
-
     if lo_fail_mask.any():
-        print("LOEPS bins outside band (|r-1| > threshold):")
-        for r, dr, phi, t, d in zip(
+        print("LOEPS bins outside band and significant (|r-1| > band AND |r-1|/dr > sigma cut):")
+        for r, dr, phi, t, d, s in zip(
             lo_ratio[lo_fail_mask],
             lo_dratio[lo_fail_mask],
             lo_phi_bin[lo_fail_mask],
             lo_t_bin[lo_fail_mask],
             lo_diff[lo_fail_mask],
+            lo_sigma[lo_fail_mask],
         ):
             print(
                 f"  t_bin={int(t)}, phi_bin={int(phi)}, "
-                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}"
+                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
             )
     else:
-        print("LOEPS: all bins inside band.")
+        print("LOEPS: all bins inside band or statistically consistent with unity.")
 
     if hi_fail_mask.any():
-        print("HIEPS bins outside band (|r-1| > threshold):")
-        for r, dr, phi, t, d in zip(
+        print("HIEPS bins outside band and significant (|r-1| > band AND |r-1|/dr > sigma cut):")
+        for r, dr, phi, t, d, s in zip(
             hi_ratio[hi_fail_mask],
             hi_dratio[hi_fail_mask],
             hi_phi_bin[hi_fail_mask],
             hi_t_bin[hi_fail_mask],
             hi_diff[hi_fail_mask],
+            hi_sigma[hi_fail_mask],
         ):
             print(
                 f"  t_bin={int(t)}, phi_bin={int(phi)}, "
-                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}"
+                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
             )
     else:
-        print("HIEPS: all bins inside band.")
+        print("HIEPS: all bins inside band or statistically consistent with unity.")
 
-    # 2) Error-weighted average checks
+    # 2) Error-weighted average checks (unchanged)
     def wmean(r, dr):
         w = 1.0 / (dr ** 2)
         return np.sum(w * r) / np.sum(w)
@@ -165,13 +180,14 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     monitor_dir = iter_dir / "monitor" / "ratios"
     monitor_dir.mkdir(parents=True, exist_ok=True)
 
-    def make_plots(tag, ratio, dratio, phi_bin, t_bin, diff, fail_mask):
+    def make_plots(tag, ratio, dratio, phi_bin, t_bin, diff, sigma, fail_mask):
         """
         Create a multi-page PDF with diagnostics for a given setting (LOEPS/HIEPS).
         Pages:
-          1) ratio vs index with errors and band
-          2) |ratio-1| vs index
-          3) ratio vs phi_bin (colored by t_bin)
+          1) ratio vs index with errors and band (absolute)
+          2) |ratio-1| vs index + band
+          3) |ratio-1|/dr vs index + sigma cut
+          4) ratio vs phi_bin (colored by t_bin)
         """
         pdf_path = monitor_dir / f"ratios_{tag}.pdf"
         with PdfPages(pdf_path) as pdf:
@@ -179,7 +195,7 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
             n = len(ratio)
             idx = np.arange(n)
 
-            # 1) ratio vs index with error bars and band
+            # 1) ratio vs index with error bars and absolute band
             fig, ax = plt.subplots()
             ax.errorbar(idx, ratio, yerr=dratio, fmt='o', label=f'{tag} ratios')
             ax.axhline(1.0, linestyle='--')
@@ -187,7 +203,7 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
                        1.0 + RATIO_THRESHOLD_SPREAD,
                        alpha=0.2, label='band')
             if fail_mask.any():
-                ax.scatter(idx[fail_mask], ratio[fail_mask], marker='x', label='outside band')
+                ax.scatter(idx[fail_mask], ratio[fail_mask], marker='x', label='outside band + significant')
             ax.set_xlabel("bin index")
             ax.set_ylabel("ratio")
             ax.set_title(f"{tag}: ratio vs bin index")
@@ -202,12 +218,23 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
             ax.axhline(RATIO_THRESHOLD_SPREAD, linestyle='--')
             ax.set_xlabel("bin index")
             ax.set_ylabel("|ratio - 1|")
-            ax.set_title(f"{tag}: deviation from unity")
+            ax.set_title(f"{tag}: deviation from unity (absolute)")
             fig.tight_layout()
             pdf.savefig(fig)
             plt.close(fig)
 
-            # 3) ratio vs phi_bin, colored by t_bin
+            # 3) |ratio-1|/dr vs index (significance)
+            fig, ax = plt.subplots()
+            ax.bar(idx, sigma)
+            ax.axhline(SIGMA_THRESHOLD, linestyle='--')
+            ax.set_xlabel("bin index")
+            ax.set_ylabel("|ratio - 1| / dr")
+            ax.set_title(f"{tag}: deviation significance")
+            fig.tight_layout()
+            pdf.savefig(fig)
+            plt.close(fig)
+
+            # 4) ratio vs phi_bin, colored by t_bin
             fig, ax = plt.subplots()
             sc = ax.scatter(phi_bin, ratio, c=t_bin, cmap='viridis')
             ax.axhline(1.0, linestyle='--')
@@ -223,8 +250,8 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
             pdf.savefig(fig)
             plt.close(fig)
 
-    make_plots("LOEPS", lo_ratio, lo_dratio, lo_phi_bin, lo_t_bin, lo_diff, lo_fail_mask)
-    make_plots("HIEPS", hi_ratio, hi_dratio, hi_phi_bin, hi_t_bin, hi_diff, hi_fail_mask)
+    make_plots("LOEPS", lo_ratio, lo_dratio, lo_phi_bin, lo_t_bin, lo_diff, lo_sigma, lo_fail_mask)
+    make_plots("HIEPS", hi_ratio, hi_dratio, hi_phi_bin, hi_t_bin, hi_diff, hi_sigma, hi_fail_mask)
 
     CONTINUE = overall
     return CONTINUE
