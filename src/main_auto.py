@@ -867,7 +867,6 @@ if EPSSET == "high":
             CONTINUE = check_kinematics(inpDict, new_dir, iter_num)
         else:
             print("\nStopping iteration due to failed ratio check...")
-            print("Ratios did not meet threshold spread of {:.1f}%. The dataset is not ready for this stage of analysis.\n".format(RATIO_THRESHOLD_SPREAD*100))
             print("-"*50)
             print("-"*50)
             sys.exit(2)
@@ -877,6 +876,11 @@ if EPSSET == "high":
             from xsect_checker import check_xsect
             print(f"\nStep 3: Checking cross sections for parameter stability\n")
             CONTINUE = check_xsect(inpDict, new_dir)
+        else:
+            print("\nStopping iteration due to failed kinematics check...")
+            print("-"*50)
+            print("-"*50)
+            sys.exit(2)
 
         print("-"*50)
         print("-"*50)   
