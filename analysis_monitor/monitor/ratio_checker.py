@@ -51,6 +51,15 @@ OUTPATH=lt.OUTPATH
 ################################################################################################################################################
 
 def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
+    """
+    Point-by-point:
+      - purely sigma-based: |r - 1| / dr > SIGMA_THRESHOLD
+    Averages:
+      - threshold-based: |<r>_w - 1| <= RATIO_THRESHOLD_SPREAD
+    """
+
+    # --- knobs ---
+    SIGMA_THRESHOLD = 1.0  # significance cut in sigma; change to 2.0, 3.0, ... if desired
 
     # Unpack input dictionary
     Q2_str   = inpDict["Q2"].replace('p','')
@@ -103,25 +112,24 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     if not (lo_poserr.all() and hi_poserr.all()):
         raise ValueError("Found nonpositive dratio values.")
 
-    # 1) Point-by-point band check with error weighting
-    #    - absolute band: |r - 1| > RATIO_THRESHOLD_SPREAD
-    #    - AND statistically significant: |r - 1| / dr > SIGMA_THRESHOLD
-    SIGMA_THRESHOLD = 1.0  # change to 2.0, 3.0, etc. if desired
+    # ------------------------------------------------------------------
+    # 1) Point-by-point check: purely sigma-based
+    #    sigma = |r - 1| / dr; fail if sigma > SIGMA_THRESHOLD
+    # ------------------------------------------------------------------
+    lo_diff  = np.abs(lo_ratio - 1.0)
+    hi_diff  = np.abs(hi_ratio - 1.0)
+    lo_sigma = lo_diff / lo_dratio
+    hi_sigma = hi_diff / hi_dratio
 
-    lo_diff   = np.abs(lo_ratio - 1.0)
-    hi_diff   = np.abs(hi_ratio - 1.0)
-    lo_sigma  = lo_diff / lo_dratio
-    hi_sigma  = hi_diff / hi_dratio
-
-    lo_fail_mask = (lo_sigma > SIGMA_THRESHOLD)
-    hi_fail_mask = (hi_sigma > SIGMA_THRESHOLD)
+    lo_fail_mask = lo_sigma > SIGMA_THRESHOLD
+    hi_fail_mask = hi_sigma > SIGMA_THRESHOLD
 
     lo_points_pass = not lo_fail_mask.any()
     hi_points_pass = not hi_fail_mask.any()
 
     # Identify failing bins (t-phi) for diagnostics
     if lo_fail_mask.any():
-        print("LOEPS bins outside band and significant (|r-1| > band AND |r-1|/dr > sigma cut):")
+        print(f"LOEPS bins with significant deviation (|r-1|/dr > {SIGMA_THRESHOLD}):")
         for r, dr, phi, t, d, s in zip(
             lo_ratio[lo_fail_mask],
             lo_dratio[lo_fail_mask],
@@ -132,13 +140,13 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
         ):
             print(
                 f"  t_bin={int(t)}, phi_bin={int(phi)}, "
-                f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
+                f"r={r:.4f}, dr={dr:.44f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
             )
     else:
-        print("LOEPS: all bins inside band or statistically consistent with unity.")
+        print("LOEPS: all bins statistically consistent with unity at sigma cut.")
 
     if hi_fail_mask.any():
-        print("HIEPS bins outside band and significant (|r-1| > band AND |r-1|/dr > sigma cut):")
+        print(f"HIEPS bins with significant deviation (|r-1|/dr > {SIGMA_THRESHOLD}):")
         for r, dr, phi, t, d, s in zip(
             hi_ratio[hi_fail_mask],
             hi_dratio[hi_fail_mask],
@@ -152,9 +160,12 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
                 f"r={r:.4f}, dr={dr:.4f}, |r-1|={d:.4g}, |r-1|/dr={s:.3f}"
             )
     else:
-        print("HIEPS: all bins inside band or statistically consistent with unity.")
+        print("HIEPS: all bins statistically consistent with unity at sigma cut.")
 
-    # 2) Error-weighted average checks (unchanged)
+    # ------------------------------------------------------------------
+    # 2) Error-weighted average checks:
+    #    threshold-based: |<r>_w - 1| <= RATIO_THRESHOLD_SPREAD
+    # ------------------------------------------------------------------
     def wmean(r, dr):
         w = 1.0 / (dr ** 2)
         return np.sum(w * r) / np.sum(w)
@@ -165,12 +176,21 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     lo_avg_pass = abs(lo_mean - 1.0) <= RATIO_THRESHOLD_SPREAD
     hi_avg_pass = abs(hi_mean - 1.0) <= RATIO_THRESHOLD_SPREAD
 
-    print(f"LOEPS points: {'PASS' if lo_points_pass else 'FAIL'}")
-    print(f"HIEPS points: {'PASS' if hi_points_pass else 'FAIL'}")
-    print(f"LOEPS ⟨r⟩_w = {lo_mean:.6f} -> {'PASS' if lo_avg_pass else 'FAIL'}")
-    print(f"HIEPS ⟨r⟩_w = {hi_mean:.6f} -> {'PASS' if hi_avg_pass else 'FAIL'}")
+    print(f"LOEPS points: {'PASS' if lo_points_pass else 'FAIL'} (sigma-based)")
+    print(f"HIEPS points: {'PASS' if hi_points_pass else 'FAIL'} (sigma-based)")
+    print(
+        f"LOEPS ⟨r⟩_w = {lo_mean:.6f}, "
+        f"|⟨r⟩_w - 1| = {abs(lo_mean - 1.0):.4g} "
+        f"-> {'PASS' if lo_avg_pass else 'FAIL'} (threshold {RATIO_THRESHOLD_SPREAD})"
+    )
+    print(
+        f"HIEPS ⟨r⟩_w = {hi_mean:.6f}, "
+        f"|⟨r⟩_w - 1| = {abs(hi_mean - 1.0):.4g} "
+        f"-> {'PASS' if hi_avg_pass else 'FAIL'} (threshold {RATIO_THRESHOLD_SPREAD})"
+    )
 
-    #overall = lo_points_pass and hi_points_pass and lo_avg_pass and hi_avg_pass
+    # You can re-enable this if you want an actual gate
+    # overall = lo_points_pass and hi_points_pass and lo_avg_pass and hi_avg_pass
     overall = True
     print(f"OVERALL: {'PASS' if overall else 'FAIL'} (forced)")
 
@@ -180,14 +200,13 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     monitor_dir = iter_dir / "monitor" / "ratios"
     monitor_dir.mkdir(parents=True, exist_ok=True)
 
-    def make_plots(tag, ratio, dratio, phi_bin, t_bin, diff, sigma, fail_mask):
+    def make_plots(tag, ratio, dratio, phi_bin, t_bin, sigma, fail_mask):
         """
         Create a multi-page PDF with diagnostics for a given setting (LOEPS/HIEPS).
         Pages:
-          1) ratio vs index with errors and band (absolute)
-          2) |ratio-1| vs index + band
-          3) |ratio-1|/dr vs index + sigma cut
-          4) ratio vs phi_bin (colored by t_bin)
+          1) ratio vs index with error bars (fail bins marked)
+          2) |ratio-1|/dr vs index + sigma cut
+          3) ratio vs phi_bin (colored by t_bin)
         """
         pdf_path = monitor_dir / f"ratios_{tag}.pdf"
         with PdfPages(pdf_path) as pdf:
@@ -195,52 +214,36 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
             n = len(ratio)
             idx = np.arange(n)
 
-            # 1) ratio vs index with error bars and absolute band
+            # 1) ratio vs index with error bars
             fig, ax = plt.subplots()
             ax.errorbar(idx, ratio, yerr=dratio, fmt='o', label=f'{tag} ratios')
             ax.axhline(1.0, linestyle='--')
-            ax.axhspan(1.0 - RATIO_THRESHOLD_SPREAD,
-                       1.0 + RATIO_THRESHOLD_SPREAD,
-                       alpha=0.2, label='band')
             if fail_mask.any():
-                ax.scatter(idx[fail_mask], ratio[fail_mask], marker='x', label='outside band + significant')
+                ax.scatter(idx[fail_mask], ratio[fail_mask],
+                           marker='x', label='sigma-fail')
             ax.set_xlabel("bin index")
             ax.set_ylabel("ratio")
-            ax.set_title(f"{tag}: ratio vs bin index")
+            ax.set_title(f"{tag}: ratio vs bin index (sigma-based flags)")
             ax.legend()
             fig.tight_layout()
             pdf.savefig(fig)
             plt.close(fig)
 
-            # 2) |ratio-1| vs index
-            fig, ax = plt.subplots()
-            ax.bar(idx, diff)
-            ax.axhline(RATIO_THRESHOLD_SPREAD, linestyle='--')
-            ax.set_xlabel("bin index")
-            ax.set_ylabel("|ratio - 1|")
-            ax.set_title(f"{tag}: deviation from unity (absolute)")
-            fig.tight_layout()
-            pdf.savefig(fig)
-            plt.close(fig)
-
-            # 3) |ratio-1|/dr vs index (significance)
+            # 2) |ratio-1|/dr vs index (significance)
             fig, ax = plt.subplots()
             ax.bar(idx, sigma)
             ax.axhline(SIGMA_THRESHOLD, linestyle='--')
             ax.set_xlabel("bin index")
             ax.set_ylabel("|ratio - 1| / dr")
-            ax.set_title(f"{tag}: deviation significance")
+            ax.set_title(f"{tag}: deviation significance (sigma)")
             fig.tight_layout()
             pdf.savefig(fig)
             plt.close(fig)
 
-            # 4) ratio vs phi_bin, colored by t_bin
+            # 3) ratio vs phi_bin, colored by t_bin
             fig, ax = plt.subplots()
             sc = ax.scatter(phi_bin, ratio, c=t_bin, cmap='viridis')
             ax.axhline(1.0, linestyle='--')
-            ax.axhspan(1.0 - RATIO_THRESHOLD_SPREAD,
-                       1.0 + RATIO_THRESHOLD_SPREAD,
-                       alpha=0.2)
             ax.set_xlabel("phi_bin")
             ax.set_ylabel("ratio")
             ax.set_title(f"{tag}: ratio vs phi_bin (color = t_bin)")
@@ -250,8 +253,8 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
             pdf.savefig(fig)
             plt.close(fig)
 
-    make_plots("LOEPS", lo_ratio, lo_dratio, lo_phi_bin, lo_t_bin, lo_diff, lo_sigma, lo_fail_mask)
-    make_plots("HIEPS", hi_ratio, hi_dratio, hi_phi_bin, hi_t_bin, hi_diff, hi_sigma, hi_fail_mask)
+    make_plots("LOEPS", lo_ratio, lo_dratio, lo_phi_bin, lo_t_bin, lo_sigma, lo_fail_mask)
+    make_plots("HIEPS", hi_ratio, hi_dratio, hi_phi_bin, hi_t_bin, hi_sigma, hi_fail_mask)
 
     CONTINUE = overall
     return CONTINUE
