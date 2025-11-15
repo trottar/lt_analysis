@@ -606,11 +606,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
                 if N_sig_norm < 0.0:
                     N_sig_norm = 0.0
-                N_sig_raw = N_sig_norm * normfac_data
+                N_data_raw = N_sig_norm * normfac_data
 
-                if N_bg_raw > 0.0 and N_sig_raw > 0.0:
+                if N_bg_raw > 0.0 and N_data_raw > 0.0:
                     # fractional error δY/Y from the background term
-                    bg_fit1_frac_err[j][k] = math.sqrt(N_bg_raw) / N_sig_raw
+                    bg_fit1_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
                 else:
                     bg_fit1_frac_err[j][k] = 0.0
             except KeyError:
@@ -671,11 +671,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
                 if N_sig_norm < 0.0:
                     N_sig_norm = 0.0
-                N_sig_raw = N_sig_norm * normfac_data
+                N_data_raw = N_sig_norm * normfac_data
 
-                if N_bg_raw > 0.0 and N_sig_raw > 0.0:
+                if N_bg_raw > 0.0 and N_data_raw > 0.0:
                     # fractional error δY/Y from the background term
-                    bg_fit2_frac_err[j][k] = math.sqrt(N_bg_raw) / N_sig_raw
+                    bg_fit2_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
                 else:
                     bg_fit2_frac_err[j][k] = 0.0
             except KeyError:
@@ -1021,21 +1021,40 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             #print(f"{i} | DATA Yield: {np.sum(arr_data)/bin_width_data:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
             yld = np.sum(arr_data)
             #print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
-            # Calculate experimental yield error (relative error)
+            # "Raw" counts:
+            #   arr_data * normfac_data  -> signal raw counts
+            #   arr_sub  * normfac_data  -> particle subtraction raw counts            
             # Divide by norm factor to cancel out since we need raw counts            
-            yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
+            N_data_raw = np.sum(arr_data / normfac_data)
+            N_sub_raw  = np.sum(arr_sub  / normfac_data) 
+
+            # Calculate experimental yield error (relative error)
+            if N_data_raw > 0.0:
+                yld_data_err = np.sqrt(
+                    data_charge_err**2 +
+                    (1.0 / np.sqrt(N_data_raw))**2
+                )
+            else:
+                yld_data_err = -1000.0
+            if N_data_raw > 0.0 and N_sub_raw > 0.0:
+                yld_sub_err = arr_scale_factor[j][k] * np.sqrt(N_sub_raw) / N_data_raw
+            else:
+                yld_sub_err = 0.0
+
+            # Handle NaN or Inf errors
             if math.isnan(yld_data_err) or math.isinf(yld_data_err):
                 yld_data_err = -1000.0
-            yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
             if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
-                yld_sub_err = -1000.0       
+                yld_sub_err = -1000.0 
+                      
             # Fractional contribution from empirical background fit (background_fit1)
             bg_fit1_err = arr_bg_fit1_frac_err[j][k]        
-            bg_fit2_err = arr_bg_fit2_frac_err[j][k]             
+            bg_fit2_err = arr_bg_fit2_frac_err[j][k]     
+                    
             # Convert to absolute error (required for average_ratio.f)
             yld_err = np.sqrt(
-                yld_data_err**2 + 
-                (arr_scale_factor[j][k] * yld_sub_err)**2 + 
+                yld_data_err**2 +
+                yld_sub_err**2 +
                 bg_fit1_err**2 + 
                 bg_fit2_err**2
                 ) * yld
@@ -1043,7 +1062,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             #print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {arr_scale_factor[j][k]:.3e}")            
         except ZeroDivisionError:
             yld = 0.0
-            yld_err = 0.0
+            yld_err = -1000.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         binned_sub_data[0].append(bin_val_data)
