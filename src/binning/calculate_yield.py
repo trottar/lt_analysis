@@ -1023,10 +1023,10 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             #print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
             # Calculate experimental yield error (relative error)
             # Divide by norm factor to cancel out since we need raw counts            
-            yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data*normfac_data)))**2)
+            yld_data_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_data/normfac_data)))**2)
             if math.isnan(yld_data_err) or math.isinf(yld_data_err):
                 yld_data_err = -1000.0
-            yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub*normfac_data)))**2)
+            yld_sub_err = np.sqrt(data_charge_err**2+(1/np.sqrt(np.sum(arr_sub/normfac_data)))**2)
             if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
                 yld_sub_err = -1000.0       
             # Fractional contribution from empirical background fit (background_fit1)
