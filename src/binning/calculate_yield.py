@@ -599,14 +599,14 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     N_bg_norm = 0.0
 
                 # Convert background yield back to (approximate) raw counts,
-                # same convention as used in yld_data_err (arr_data * normfac_data)
-                N_bg_raw = N_bg_norm * normfac_data
+                # same convention as used in yld_data_err (arr_data / normfac_data)
+                N_bg_raw = N_bg_norm / normfac_data
 
                 # Signal yield (in this t,phi bin) from the t-distribution
                 N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
                 if N_sig_norm < 0.0:
                     N_sig_norm = 0.0
-                N_data_raw = N_sig_norm * normfac_data
+                N_data_raw = N_sig_norm / normfac_data
 
                 if N_bg_raw > 0.0 and N_data_raw > 0.0:
                     # fractional error δY/Y from the background term
@@ -664,14 +664,14 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     N_bg_norm = 0.0
 
                 # Convert background yield back to (approximate) raw counts,
-                # same convention as used in yld_data_err (arr_data * normfac_data)
-                N_bg_raw = N_bg_norm * normfac_data
+                # same convention as used in yld_data_err (arr_data / normfac_data)
+                N_bg_raw = N_bg_norm / normfac_data
 
                 # Signal yield (in this t,phi bin) from the t-distribution
                 N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
                 if N_sig_norm < 0.0:
                     N_sig_norm = 0.0
-                N_data_raw = N_sig_norm * normfac_data
+                N_data_raw = N_sig_norm / normfac_data
 
                 if N_bg_raw > 0.0 and N_data_raw > 0.0:
                     # fractional error δY/Y from the background term
@@ -1022,11 +1022,11 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld = np.sum(arr_data)
             #print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
             # "Raw" counts:
-            #   arr_data * normfac_data  -> signal raw counts
-            #   arr_sub  * normfac_data  -> particle subtraction raw counts            
+            #   arr_data / normfac_data  -> signal raw counts
+            #   arr_sub  / normfac_data  -> particle subtraction raw counts            
             # Divide by norm factor to cancel out since we need raw counts            
-            N_data_raw = np.sum(arr_data * normfac_data)
-            N_sub_raw  = np.sum(arr_sub  * normfac_data) 
+            N_data_raw = np.sum(arr_data / normfac_data)
+            N_sub_raw  = np.sum(arr_sub  / normfac_data) 
 
             # Calculate experimental yield error (relative error)
             if N_data_raw > 0.0:
