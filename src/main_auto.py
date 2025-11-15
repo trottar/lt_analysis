@@ -869,7 +869,7 @@ if EPSSET == "high":
             print("\nStopping iteration due to failed ratio check...")
             print("-"*50)
             print("-"*50)
-            #sys.exit(2)
+            sys.exit(2)
         if CONTINUE and c==2:
             c+=1
             sys.path.append("../analysis_monitor/monitor")
