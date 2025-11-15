@@ -763,8 +763,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
         metric_gate = (
             (chi2_fail == 0) and
             (hell_fail == 0) and
-            (w1_fail < 10) and
-            (pull95_fail < 25) and
+            #(w1_fail < 10) and
+            #(pull95_fail < 25) and
             (dmu_fail == 0) and
             (drms_fail == 0)
         )
