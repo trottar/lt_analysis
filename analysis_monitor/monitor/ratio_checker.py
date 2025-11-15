@@ -87,9 +87,9 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
     lo        = lo[lo_valid]
     hi        = hi[hi_valid]
     lo_ratio  = lo_ratio[lo_valid]
-    lo_dratio = lo_dratio[lo_valid]*10
+    lo_dratio = lo_dratio[lo_valid]
     hi_ratio  = hi_ratio[hi_valid]
-    hi_dratio = hi_dratio[hi_valid]*10
+    hi_dratio = hi_dratio[hi_valid]
 
     # Optional bin indices (as stored in the file); fall back to simple indices
     if lo.shape[1] >= 4:
