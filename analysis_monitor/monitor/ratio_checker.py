@@ -60,7 +60,7 @@ def check_ratio(inpDict, iter_dir, RATIO_THRESHOLD_SPREAD):
 
     # --- knobs ---
     #SIGMA_THRESHOLD = 1.0  # significance cut in sigma; change to 2.0, 3.0, ... if desired
-    SIGMA_THRESHOLD = 10.0 # Very loose cut to catch only egregious outliers
+    SIGMA_THRESHOLD = 5.0 # Very loose cut to catch only egregious outliers
 
 
     # Unpack input dictionary
