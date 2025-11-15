@@ -1025,8 +1025,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             #   arr_data * normfac_data  -> signal raw counts
             #   arr_sub  * normfac_data  -> particle subtraction raw counts            
             # Divide by norm factor to cancel out since we need raw counts            
-            N_data_raw = np.sum(arr_data / normfac_data)
-            N_sub_raw  = np.sum(arr_sub  / normfac_data) 
+            N_data_raw = np.sum(arr_data * normfac_data)
+            N_sub_raw  = np.sum(arr_sub  * normfac_data) 
 
             # Calculate experimental yield error (relative error)
             if N_data_raw > 0.0:
@@ -1050,7 +1050,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             # Fractional contribution from empirical background fit (background_fit1)
             bg_fit1_err = arr_bg_fit1_frac_err[j][k]        
             bg_fit2_err = arr_bg_fit2_frac_err[j][k]     
-                    
+
             # Convert to absolute error (required for average_ratio.f)
             yld_err = np.sqrt(
                 yld_data_err**2 +
