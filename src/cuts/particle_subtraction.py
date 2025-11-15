@@ -355,7 +355,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
     # Note: these momenta are from Dave's slides and may not reflect what is used here
     h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+    c0_list = [-1.0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
 
     c0_dict = {}
 
@@ -1326,7 +1326,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
     # Note: these momenta are from Dave's slides and may not reflect what is used here
     h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+    c0_list = [-1.0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
 
     c0_dict = {}
 
@@ -1688,7 +1688,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
     # Note: these momenta are from Dave's slides and may not reflect what is used here
     h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1,0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+    c0_list = [-1.0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
 
     c0_dict = {}
 
