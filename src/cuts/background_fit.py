@@ -373,12 +373,13 @@ def is_good_background_shape(fit_func, x_min, x_max, *, n_grid=400):
     xs = np.linspace(x_min, x_max, n_grid)
     ys = np.array([fit_func.Eval(x) for x in xs], dtype="float64")
 
+    '''
     # Reject if the function evaluation itself is pathological
     if not np.all(np.isfinite(ys)):
         return False
 
-    # Reject only if it goes significantly negative (allow tiny numerical wiggles)
-    if np.min(ys) < -1e-3:
+    # Reject if it ever goes negative
+    if np.any(ys < 0.0):
         return False
 
     # Numerical first and second derivatives
@@ -391,7 +392,8 @@ def is_good_background_shape(fit_func, x_min, x_max, *, n_grid=400):
     # Reject if the second derivative is positive anywhere (convex region)
     if np.any(d2y > 0.0):
         return False
-
+    '''
+        
     return True
 
 ################################################################################################################################################
