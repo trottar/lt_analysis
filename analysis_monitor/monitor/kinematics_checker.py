@@ -79,6 +79,39 @@ PVAL_MIN = 1e-10   # only used if USE_PVAL is True
 
 # -------------------- Helpers --------------------
 
+# ---- Multi-page PDF manager ----
+class PdfBook:
+    def __init__(self, base_dir: Path, prefix: str):
+        self.base_dir = Path(base_dir)
+        self.prefix = prefix
+        self._files = {}  # key=(eps,phi) -> {"path": Path, "opened": bool}
+
+    def _fname(self, eps: str, phi: str) -> Path:
+        # e.g. Kaon_Q3p0_W2p32_high_Left.pdf
+        return self.base_dir / f"{self.prefix}_{eps}_{phi}.pdf"
+
+    def add_page(self, eps: str, phi: str, canvas):
+        key = (eps, phi)
+        if key not in self._files:
+            path = self._fname(eps, phi)
+            self._files[key] = {"path": path, "opened": False}
+        entry = self._files[key]
+        # open stream on first page
+        if not entry["opened"]:
+            canvas.Print(str(entry["path"]) + "[")
+            entry["opened"] = True
+        # append current page
+        canvas.Print(str(entry["path"]))
+
+    def finalize(self):
+        if not self._files:
+            return
+        tmp = ROOT.TCanvas("c_pdf_close", "", 10, 10)
+        for entry in self._files.values():
+            if entry["opened"]:
+                tmp.Print(str(entry["path"]) + "]")
+        tmp.Close()
+
 def _x_range(h):
     ax = h.GetXaxis()
     return float(ax.GetXmax() - ax.GetXmin())
@@ -334,9 +367,7 @@ def compare_th1d(h_data, h_mc,
 
 # -------------------- Plotting (diagnostics) --------------------
 
-# REPLACE your entire save_overlay_plot() with this version (no KS, no p; shows chi2/ndf + shape metrics)
-
-def save_overlay_plot(h_data, h_simc, title, outpath, metrics, shape_only=True):
+def save_overlay_plot(h_data, h_simc, title, metrics, pdf_book, eps: str, phi: str, shape_only=True):
     from ROOT import TCanvas, TLegend, kBlue, kRed, gStyle
     gStyle.SetOptStat(0)
 
@@ -361,7 +392,7 @@ def save_overlay_plot(h_data, h_simc, title, outpath, metrics, shape_only=True):
     hD.Draw("E1")
     hM.Draw("HIST SAME")
 
-    # derive W1% on the fly in case w1_norm isn't in metrics
+    # W1% (normalized to xrange) for legend
     try:
         xr = float(hD.GetXaxis().GetXmax() - hD.GetXaxis().GetXmin())
         w1 = float(metrics.get("wasserstein_1", float("nan")))
@@ -369,28 +400,22 @@ def save_overlay_plot(h_data, h_simc, title, outpath, metrics, shape_only=True):
     except Exception:
         w1pct = float("nan")
 
-    # legend (compact, no KS/p-values)
+    # compact legend (no KS/p)
     leg = TLegend(0.60, 0.75, 0.88, 0.88)
-    leg.SetBorderSize(0)
-    leg.SetFillStyle(0)
-    leg.SetTextSize(0.028)
-    leg.SetMargin(0.12)
-
+    leg.SetBorderSize(0); leg.SetFillStyle(0); leg.SetTextSize(0.028); leg.SetMargin(0.12)
     leg.AddEntry(hD, "DATA", "lep")
     leg.AddEntry(hM, "SIMC", "l")
     leg.AddEntry(0, f"χ²/ndf={metrics.get('chi2_ndf', float('nan')):.2f}", "")
     leg.AddEntry(0, f"Hellinger={metrics.get('hellinger', float('nan')):.3f}, W1%={w1pct:.2f}", "")
-
-    # show optional diagnostics if present
     if 'pull_p95' in metrics:
         leg.AddEntry(0, f"P95|pull|={metrics['pull_p95']:.2f}", "")
     if 'mean_rel' in metrics and 'rms_rel' in metrics:
         leg.AddEntry(0, f"dμ%={metrics['mean_rel']*100:.2f}, dRMS%={metrics['rms_rel']*100:.2f}", "")
-
     leg.Draw()
 
-    outpath.parent.mkdir(parents=True, exist_ok=True)
-    can.SaveAs(str(outpath))
+    # append this page into the combined (eps,phi) PDF
+    pdf_book.add_page(eps, phi, can)
+
     can.Close()
 
 # -------------------- Internal directory logic --------------------
@@ -511,10 +536,9 @@ def process_root_file(rpath: Path,
         row.update(metrics)
         rows.append(row)
 
-        if save_plots:
-            outname = f"{particle_use or 'PT'}_Q{Q2tok}_W{Wtok}_{eps}_{phi or 'NoPhi'}_{var}.pdf"
-            save_overlay_plot(hD, hS, f"{particle_use} Q{Q2tok} W{Wtok} {eps} {phi or ''} :: {var}",
-                              plots_dir / outname, metrics, shape_only=shape_only)
+        if save_plots and phi:  # only phi-split plots go into combined PDFs
+            title = f"{particle_use} Q{Q2tok} W{Wtok} {eps} {phi} :: {var}"
+            save_overlay_plot(hD, hS, title, metrics, pdf_book, eps, phi, shape_only=shape_only)
 
     f.Close()
     return rows
@@ -547,6 +571,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
     if SAVE_PLOTS:
         plots_dir.mkdir(parents=True, exist_ok=True)
 
+    pdf_book = PdfBook(plots_dir, prefix=f"{PT or 'PT'}_Q{Q2tok}_W{Wtok}")
+
     all_rows: List[Dict[str, object]] = []
     eps_missing_files = set()
 
@@ -571,7 +597,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
                     include_overflow=INCLUDE_OVERFLOW,
                     use_bin_width=USE_BIN_WIDTH,
                     save_plots=SAVE_PLOTS,
-                    plots_dir=plots_dir
+                    plots_dir=plots_dir,
+                    pdf_book=pdf_book,
                 )
                 all_rows.extend(rows)
 
@@ -584,7 +611,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
                 include_overflow=INCLUDE_OVERFLOW,
                 use_bin_width=USE_BIN_WIDTH,
                 save_plots=SAVE_PLOTS,
-                plots_dir=plots_dir
+                plots_dir=plots_dir,
+                pdf_book=pdf_book,
             )
             if any(r.get("status") == "ok" for r in rows_nophi):
                 all_rows.extend(rows_nophi)
@@ -779,5 +807,8 @@ def check_kinematics(inpDict: Dict[str, str], iter_dir: str, iter_num: int) -> D
 
         CONTINUE = eps_ok and struct_ok and metric_gate
         print(f"OVERALL: {'PASS' if CONTINUE else 'FAIL'}")
+
+    # close all open multi-page PDFs (writes the trailing ']' to each)
+    pdf_book.finalize()
 
     return CONTINUE
