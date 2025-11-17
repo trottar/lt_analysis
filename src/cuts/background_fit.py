@@ -359,37 +359,63 @@ def get_fit_histogram_padded(fit_func,
 
 ################################################################################################################################################
 
-def is_good_background_shape(fit_func, x_min, x_max, *, n_grid=400):
+def is_good_background_shape(
+        fit_func,
+        x_min,
+        x_max,
+        *,
+        n_grid=400,
+        neg_tol_frac=0.02,
+        convex_tol_frac=0.5,
+):
     """
-    Return True if the fitted background is acceptable on [x_min, x_max]:
+    Decide whether the fitted background is acceptable on [x_min, x_max].
 
-      - Non-negative:        f(x) >= 0        for all x in [x_min, x_max]
-      - Concave (not convex): d²f/dx² <= 0   for all x in [x_min, x_max]
+    We keep the same intent as before (reject clearly unphysical shapes),
+    but relax things so a visually good empirical background doesn't get
+    thrown away.
 
-    The second derivative is estimated numerically using finite differences
-    on a uniform grid.
+    Conditions:
+      1. Function evaluations are finite.
+      2. The function is mostly non-negative:
+           - we allow small numerical undershoot down to
+             -neg_tol_frac * max(f) (default 2% of the peak).
+      3. The function is not *mostly* convex:
+           - some positive curvature points are allowed, but if more than
+             convex_tol_frac (default 50%) of the grid points have d²f/dx²>0
+             we call it “bad”.
     """
-    # Sample the fit on a dense grid
+    # sample on a dense grid
     xs = np.linspace(x_min, x_max, n_grid)
     ys = np.array([fit_func.Eval(x) for x in xs], dtype="float64")
 
-    # Reject if the function evaluation itself is pathological
+    # 1) finite values
     if not np.all(np.isfinite(ys)):
         return False
 
-    # Reject if it ever goes negative
-    if np.any(ys < 0.0):
+    ymax = float(np.max(ys))
+    ymin = float(np.min(ys))
+
+    # if everything is at or below zero, clearly nonsense
+    if ymax <= 0.0:
         return False
 
-    # Numerical first and second derivatives
+    # 2) allow a small negative undershoot relative to the peak
+    min_allowed = -neg_tol_frac * ymax
+    if ymin < min_allowed:
+        # too much negative excursion
+        return False
+
+    # numerical derivatives
     dy = np.gradient(ys, xs)
     d2y = np.gradient(dy, xs)
 
     if not np.all(np.isfinite(d2y)):
         return False
 
-    # Reject if the second derivative is positive anywhere (convex region)
-    if np.any(d2y > 0.0):
+    # 3) only reject if the curve is *mostly* convex
+    frac_convex = np.count_nonzero(d2y > 0.0) / len(d2y)
+    if frac_convex > convex_tol_frac:
         return False
 
     return True
@@ -406,8 +432,7 @@ def bg_fit(
         hist_mm_cut=None,
         *,
         model_key="linear",   # ← just pick a key from BG_MODELS
-        no_bg_subtract=False,  # no background subtraction
-        remove_bad_bins=True
+        no_bg_subtract=False  # no background subtraction
 ):
     """
     Generic side-band fit and background subtraction.
@@ -477,32 +502,31 @@ def bg_fit(
     fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    if remove_bad_bins:
-        # ------------------- shape sanity check (new) -------------------------
-        # Reject fits that:
-        #   - are convex anywhere (d²f/dx² > 0) on [mm_min, mm_max], or
-        #   - go negative anywhere on [mm_min, mm_max].
-        #
-        # If the fit fails this check, fall back to "no background subtraction"
-        # for this histogram: zero background, f_sig = 1.
-        if not is_good_background_shape(fit_func, mm_min, mm_max):
-            # zero background function on the full MM range
-            fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
-            fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
+    # ------------------- shape sanity check (new) -------------------------
+    # Reject fits that:
+    #   - are convex anywhere (d²f/dx² > 0) on [mm_min, mm_max], or
+    #   - go negative anywhere on [mm_min, mm_max].
+    #
+    # If the fit fails this check, fall back to "no background subtraction"
+    # for this histogram: zero background, f_sig = 1.
+    if not is_good_background_shape(fit_func, mm_min, mm_max):
+        # zero background function on the full MM range
+        fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
+        fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
 
-            # build a zero-valued background histogram on the MM-cut binning
-            fit_hist_inrange = get_fit_histogram_padded(
-                fit_func_zero,
-                hist_mm_cut,
-                mm_min,
-                mm_max,
-                n_pad=0
-            )
+        # build a zero-valued background histogram on the MM-cut binning
+        fit_hist_inrange = get_fit_histogram_padded(
+            fit_func_zero,
+            hist_mm_cut,
+            mm_min,
+            mm_max,
+            n_pad=0
+        )
 
-            bg_par = 0.0
-            f_sig = 0.0  # treat everything as signal if the background is unphysical
+        bg_par = 0.0
+        f_sig = 0.0  # treat everything as signal if the background is unphysical
 
-            return fit_hist_inrange, fit_vis, bg_par, f_sig
+        return fit_hist_inrange, fit_vis, bg_par, f_sig
 
     # ------------------- proceed with accepted fit ------------------------
     # integral of background under the signal window
