@@ -364,41 +364,44 @@ def is_good_background_shape(
         x_min,
         x_max,
         *,
-        n_grid=400,
-        neg_tol_frac=0.10,
+        n_grid=200,
+        neg_tol_frac=0.05,
 ):
     """
-    Very permissive sanity check for the empirical MM background.
+    Very simple sanity check on the empirical MM background fit
+    over [x_min, x_max] (we will call this with x_min = sig_lo,
+    x_max = sig_hi inside bg_fit).
 
-    A fit is rejected only if:
-      - evaluations are non-finite, or
-      - it is mostly non-positive, or
-      - it has a large negative excursion relative to its peak.
+    Accept the fit if:
+      - all evaluations are finite;
+      - the function has some positive support (max > 0);
+      - it does not go more than `neg_tol_frac * max` below zero.
 
-    We *do not* require global concavity, and we only look on [x_min, x_max]
-    (which in bg_fit is chosen as the fit range).
+    This is designed to:
+      - accept 'normal' positive backgrounds under the kaon peak;
+      - reject fits that start clearly negative in the signal region,
+        like the bad example you just showed.
     """
     xs = np.linspace(x_min, x_max, n_grid)
     ys = np.array([fit_func.Eval(x) for x in xs], dtype="float64")
 
-    # 1) finite values
+    # Finite values only
     if not np.all(np.isfinite(ys)):
         return False
 
     ymax = float(np.max(ys))
     ymin = float(np.min(ys))
 
-    # if everything is <= 0, clearly nonsense for a background yield
+    # If everything is <= 0, it's nonsense for a yield-like background
     if ymax <= 0.0:
         return False
 
-    # 2) allow some numerical undershoot:
-    #    reject only if the minimum is more than neg_tol_frac * ymax below 0
+    # Allow a small numerical undershoot; reject if it goes
+    # more than neg_tol_frac * ymax below zero.
     min_allowed = -neg_tol_frac * ymax
     if ymin < min_allowed:
         return False
 
-    # Otherwise accept the fit
     return True
 
 ################################################################################################################################################
@@ -483,15 +486,10 @@ def bg_fit(
     fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    '''
     # ------------------- shape sanity check (new) -------------------------
-    # Reject fits that:
-    #   - are convex anywhere (d²f/dx² > 0) on [mm_min, mm_max], or
-    #   - go negative anywhere on [mm_min, mm_max].
-    #
-    # If the fit fails this check, fall back to "no background subtraction"
-    # for this histogram: zero background, f_sig = 0.
-    if not is_good_background_shape(fit_func, fit_min, fit_max):
+    # Reject fits that go significantly negative inside the MM *signal window*.
+    # sig_lo, sig_hi are already defined above in bg_fit.
+    if not is_good_background_shape(fit_func, sig_lo, sig_hi):
         # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
         fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
@@ -509,8 +507,7 @@ def bg_fit(
         f_sig = 0.0  # treat everything as signal if the background is unphysical
 
         return fit_hist_inrange, fit_vis, bg_par, f_sig
-    '''
-    
+
     # ------------------- proceed with accepted fit ------------------------
     # integral of background under the signal window
     # (N_bg = expected background counts in [sig_lo, sig_hi])
