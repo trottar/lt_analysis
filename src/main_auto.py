@@ -220,7 +220,7 @@ inpDict["iter_num"] = iter_num
 inpDict["LOEPS"] = LOEPS
 inpDict["HIEPS"] = HIEPS
 
-'''
+#'''
 ## DEBUG ##
 if iter_num > 1:        
     # Track continues
@@ -243,7 +243,7 @@ if iter_num > 1:
         print("\nStopping iteration due to failed ratio check...\n")
         print("-"*50)
         print("-"*50)
-        sys.exit(2)
+        #sys.exit(2)
     if CONTINUE and c==2:
         c+=1
         sys.path.append("../analysis_monitor/monitor")
@@ -255,7 +255,7 @@ if iter_num > 1:
     print("-"*50)
 sys.exit(2)
 ## DEBUG ##    
-'''
+#'''
 
 # Copy input model to specific particle type directory
 print("\nCopying {} to {}".format('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W)))
