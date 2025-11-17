@@ -469,7 +469,7 @@ def process_root_file(rpath: Path,
                       include_overflow: bool,
                       use_bin_width: bool,
                       save_plots: bool,
-                      plots_dir: Path) -> List[Dict[str, object]]:
+                      plots_dir: Path, pdf_book: 'PdfBook') -> List[Dict[str, object]]:
 
     rows: List[Dict[str, object]] = []
     f = TFile.Open(str(rpath), "READ")
