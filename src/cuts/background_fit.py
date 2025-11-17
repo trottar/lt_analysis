@@ -365,27 +365,19 @@ def is_good_background_shape(
         x_max,
         *,
         n_grid=400,
-        neg_tol_frac=0.02,
-        convex_tol_frac=0.5,
+        neg_tol_frac=0.10,
 ):
     """
-    Decide whether the fitted background is acceptable on [x_min, x_max].
+    Very permissive sanity check for the empirical MM background.
 
-    We keep the same intent as before (reject clearly unphysical shapes),
-    but relax things so a visually good empirical background doesn't get
-    thrown away.
+    A fit is rejected only if:
+      - evaluations are non-finite, or
+      - it is mostly non-positive, or
+      - it has a large negative excursion relative to its peak.
 
-    Conditions:
-      1. Function evaluations are finite.
-      2. The function is mostly non-negative:
-           - we allow small numerical undershoot down to
-             -neg_tol_frac * max(f) (default 2% of the peak).
-      3. The function is not *mostly* convex:
-           - some positive curvature points are allowed, but if more than
-             convex_tol_frac (default 50%) of the grid points have d²f/dx²>0
-             we call it “bad”.
+    We *do not* require global concavity, and we only look on [x_min, x_max]
+    (which in bg_fit is chosen as the fit range).
     """
-    # sample on a dense grid
     xs = np.linspace(x_min, x_max, n_grid)
     ys = np.array([fit_func.Eval(x) for x in xs], dtype="float64")
 
@@ -396,28 +388,17 @@ def is_good_background_shape(
     ymax = float(np.max(ys))
     ymin = float(np.min(ys))
 
-    # if everything is at or below zero, clearly nonsense
+    # if everything is <= 0, clearly nonsense for a background yield
     if ymax <= 0.0:
         return False
 
-    # 2) allow a small negative undershoot relative to the peak
+    # 2) allow some numerical undershoot:
+    #    reject only if the minimum is more than neg_tol_frac * ymax below 0
     min_allowed = -neg_tol_frac * ymax
     if ymin < min_allowed:
-        # too much negative excursion
         return False
 
-    # numerical derivatives
-    dy = np.gradient(ys, xs)
-    d2y = np.gradient(dy, xs)
-
-    if not np.all(np.isfinite(d2y)):
-        return False
-
-    # 3) only reject if the curve is *mostly* convex
-    frac_convex = np.count_nonzero(d2y > 0.0) / len(d2y)
-    if frac_convex > convex_tol_frac:
-        return False
-
+    # Otherwise accept the fit
     return True
 
 ################################################################################################################################################
@@ -508,8 +489,8 @@ def bg_fit(
     #   - go negative anywhere on [mm_min, mm_max].
     #
     # If the fit fails this check, fall back to "no background subtraction"
-    # for this histogram: zero background, f_sig = 1.
-    if not is_good_background_shape(fit_func, mm_min, mm_max):
+    # for this histogram: zero background, f_sig = 0.
+    if not is_good_background_shape(fit_func, fit_min, fit_max):
         # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
         fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
