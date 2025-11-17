@@ -364,42 +364,31 @@ def is_good_background_shape(
         x_min,
         x_max,
         *,
-        n_grid=200,
-        neg_tol_frac=0.05,
+        neg_tol=0.0,
 ):
     """
-    Very simple sanity check on the empirical MM background fit
-    over [x_min, x_max] (we will call this with x_min = sig_lo,
-    x_max = sig_hi inside bg_fit).
+    Sanity check on the *fit function itself*.
 
-    Accept the fit if:
-      - all evaluations are finite;
-      - the function has some positive support (max > 0);
-      - it does not go more than `neg_tol_frac * max` below zero.
+    The bin is accepted iff:
+      - the function has a finite minimum and maximum on [x_min, x_max];
+      - the maximum is > 0 (non-trivial background);
+      - the minimum is >= -neg_tol.
 
-    This is designed to:
-      - accept 'normal' positive backgrounds under the kaon peak;
-      - reject fits that start clearly negative in the signal region,
-        like the bad example you just showed.
+    With neg_tol = 0.0 this is literally:
+        "if it goes negative anywhere in y, it's a bad bin".
     """
-    xs = np.linspace(x_min, x_max, n_grid)
-    ys = np.array([fit_func.Eval(x) for x in xs], dtype="float64")
+    # ROOT does the extremum search
+    f_min = float(fit_func.GetMinimum(x_min, x_max))
+    f_max = float(fit_func.GetMaximum(x_min, x_max))
 
-    # Finite values only
-    if not np.all(np.isfinite(ys)):
+    # Non-finite or completely non-positive → reject
+    if not (math.isfinite(f_min) and math.isfinite(f_max)):
+        return False
+    if f_max <= 0.0:
         return False
 
-    ymax = float(np.max(ys))
-    ymin = float(np.min(ys))
-
-    # If everything is <= 0, it's nonsense for a yield-like background
-    if ymax <= 0.0:
-        return False
-
-    # Allow a small numerical undershoot; reject if it goes
-    # more than neg_tol_frac * ymax below zero.
-    min_allowed = -neg_tol_frac * ymax
-    if ymin < min_allowed:
+    # Reject if the minimum is below the allowed tolerance
+    if f_min < -neg_tol:
         return False
 
     return True
@@ -490,6 +479,11 @@ def bg_fit(
     # Reject fits that go significantly negative inside the MM *signal window*.
     # sig_lo, sig_hi are already defined above in bg_fit.
     if not is_good_background_shape(fit_func, sig_lo, sig_hi):
+
+        f_min = float(fit_func.GetMinimum(mm_min, mm_max))
+        f_max = float(fit_func.GetMaximum(mm_min, mm_max))
+        print(f"[DBG] {hist.GetName()}  f_min={f_min:.6g}  f_max={f_max:.6g}")
+
         # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
         fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
