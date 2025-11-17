@@ -500,7 +500,7 @@ def bg_fit(
         )
 
         bg_par = 0.0
-        f_sig = 1.0  # treat everything as signal if the background is unphysical
+        f_sig = 0.0  # bad fit → no trusted signal in this bin
 
         return fit_hist_inrange, fit_vis, bg_par, f_sig
 
