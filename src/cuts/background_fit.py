@@ -476,19 +476,10 @@ def bg_fit(
     fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    # ------------------- shape sanity check (new) -------------------------
-    # Reject fits that:
-    #   - are convex anywhere (d²f/dx² > 0) on [mm_min, mm_max], or
-    #   - go negative anywhere on [mm_min, mm_max].
-    #
-    # If the fit fails this check, fall back to "no background subtraction"
-    # for this histogram: zero background, f_sig = 1.
     if not is_good_background_shape(fit_func, mm_min, mm_max):
-        # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
         fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
 
-        # build a zero-valued background histogram on the MM-cut binning
         fit_hist_inrange = get_fit_histogram_padded(
             fit_func_zero,
             hist_mm_cut,
@@ -498,7 +489,7 @@ def bg_fit(
         )
 
         bg_par = 0.0
-        f_sig = 1.0  # treat everything as signal if the background is unphysical
+        f_sig = 0.0  # bad background → no trusted signal in this bin
 
         return fit_hist_inrange, fit_vis, bg_par, f_sig
 
