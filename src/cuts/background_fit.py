@@ -377,18 +377,16 @@ def is_good_background_shape(fit_func, x_min, x_max, *, n_grid=400):
     if not np.all(np.isfinite(ys)):
         return False
 
-    # Reject if it ever goes negative
-    if np.any(ys < 0.0):
+    # Reject only if it goes significantly negative (allow tiny numerical wiggles)
+    if np.min(ys) < -1e-3:
         return False
 
     # Numerical first and second derivatives
     dy = np.gradient(ys, xs)
     d2y = np.gradient(dy, xs)
 
-    '''
     if not np.all(np.isfinite(d2y)):
         return False
-    '''
 
     # Reject if the second derivative is positive anywhere (convex region)
     if np.any(d2y > 0.0):
