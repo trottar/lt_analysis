@@ -557,7 +557,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 
                 scale_factor = scale_factor #* phi_scale
 
-                arr_scale_factor[j][k] = scale_factor * phi_scale
+                arr_scale_factor[j][k] = scale_factor #* phi_scale
 
                 # Scale pion to subtraction proper peak
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -586,8 +586,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 )
 
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit1_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][0], -1)    
-                hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][1], -1)   
+                hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][1], -1)
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][0], -1)                       
 
                 # Estimate fractional yield uncertainty from background_fit1
                 try:
