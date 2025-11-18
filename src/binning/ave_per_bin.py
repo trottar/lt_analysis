@@ -580,16 +580,17 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # ---- Statistic‑scale for this (t,φ) bin ----------------
         inpDict["bg_stat_scale"] = 0.85
         
-        fitDict["background_data_fit1_{}".format(j)] = bg_fit(
-            phi_setting,
-            inpDict,
-            hist_bin_dict[f"H_MM_pisub_DATA_{j}"],   # wide / no–MM-cut
-            hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
-            model_key=f"cheb2_{phi_setting}_{EPSSET}e"
-        )
-        # ----------------------------------------------------------------
-
+        
         if inpDict["bg_stat_scale"] > 0.0:
+            fitDict["background_data_fit1_{}".format(j)] = bg_fit(
+                phi_setting,
+                inpDict,
+                hist_bin_dict[f"H_MM_pisub_DATA_{j}"],   # wide / no–MM-cut
+                hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
+                model_key=f"cheb2_{phi_setting}_{EPSSET}e"
+            )
+            # ----------------------------------------------------------------
+
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
             hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
             hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
@@ -623,16 +624,16 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # ---- Statistic‑scale for this (t,φ) bin ----------------
         inpDict["bg_stat_scale"] = 0.0
         
-        fitDict["background_data_fit2_{}".format(j)] = bg_fit(
-            phi_setting,
-            inpDict,
-            hist_bin_dict[f"H_MM_fit1sub_DATA_{j}"],   # wide / no–MM-cut
-            hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
-            model_key="sigma_peak"
-        )
-        # ----------------------------------------------------------------
-
         if inpDict["bg_stat_scale"] > 0.0:  
+            fitDict["background_data_fit2_{}".format(j)] = bg_fit(
+                phi_setting,
+                inpDict,
+                hist_bin_dict[f"H_MM_fit1sub_DATA_{j}"],   # wide / no–MM-cut
+                hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
+                model_key="sigma_peak"
+            )
+            # ----------------------------------------------------------------
+
             hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
             hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
             hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])

@@ -1856,15 +1856,15 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     inpDict["bg_stat_scale"] = 0.85
 
-    background_fit1 = bg_fit(phi_setting,
-                            inpDict,
-                            H_MM_pisub_DATA,   # wide / no-cut
-                            H_MM_DATA,         # cut-window axis
-                            model_key=f"cheb2_{phi_setting}_{EPSSET}e")
-    # background_fit1[0] : scaled function   (use for subtraction)
-    # background_fit1[1] : original function (use for drawing only)
-
     if  inpDict["bg_stat_scale"] > 0.0:
+        background_fit1 = bg_fit(phi_setting,
+                                inpDict,
+                                H_MM_pisub_DATA,   # wide / no-cut
+                                H_MM_DATA,         # cut-window axis
+                                model_key=f"cheb2_{phi_setting}_{EPSSET}e")
+        # background_fit1[0] : scaled function   (use for subtraction)
+        # background_fit1[1] : original function (use for drawing only)
+
         # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
         #P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(background_fit1[3])
         #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(background_fit1[3])
@@ -1924,15 +1924,15 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     inpDict["bg_stat_scale"] = 0.0
 
-    background_fit2 = bg_fit(phi_setting,
-                            inpDict,
-                            H_MM_fit1sub_DATA,   # wide / no-cut
-                            H_MM_DATA,         # cut-window axis
-                            model_key="sigma_peak")
-    # background_fit2[0] : scaled function   (use for subtraction)
-    # background_fit2[1] : original function (use for drawing only)
-
     if inpDict["bg_stat_scale"] > 0.0:
+        background_fit2 = bg_fit(phi_setting,
+                                inpDict,
+                                H_MM_fit1sub_DATA,   # wide / no-cut
+                                H_MM_DATA,         # cut-window axis
+                                model_key="sigma_peak")
+        # background_fit2[0] : scaled function   (use for subtraction)
+        # background_fit2[1] : original function (use for drawing only)
+
         # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
         #P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(background_fit2[3])
         #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(background_fit2[3])
