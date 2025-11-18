@@ -572,11 +572,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale"] = 0.85
+            inpDict["bg_stat_scale1"] = 0.85
             # ----------------------------------------------------------------
 
-
-            if inpDict["bg_stat_scale"] > 0.0:
+            if inpDict["bg_stat_scale1"] > 0.0:
                 # Fit background and subtract
                 fitDict["background_fit1_{}_{}".format(j, k)] = bg_fit(
                     phi_setting,
@@ -590,53 +589,53 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][0], -1)    
                 hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][1], -1)   
 
-            # Estimate fractional yield uncertainty from background_fit1
-            try:
-                # Background histogram in the MM DATA axis from the first fit
-                bg_hist = fitDict[f"background_fit1_{j}_{k}"][0]
+                # Estimate fractional yield uncertainty from background_fit1
+                try:
+                    # Background histogram in the MM DATA axis from the first fit
+                    bg_hist = fitDict[f"background_fit1_{j}_{k}"][0]
 
-                # Background yield in normalized units (same convention as H_MM_DATA)
-                N_bg_norm = bg_hist.Integral()
-                if N_bg_norm < 0.0:
-                    N_bg_norm = 0.0
+                    # Background yield in normalized units (same convention as H_MM_DATA)
+                    N_bg_norm = bg_hist.Integral()
+                    if N_bg_norm < 0.0:
+                        N_bg_norm = 0.0
 
-                # Convert background yield back to (approximate) raw counts,
-                # same convention as used in yld_data_err (arr_data / normfac_data)
-                N_bg_raw = N_bg_norm / normfac_data
+                    # Convert background yield back to (approximate) raw counts,
+                    # same convention as used in yld_data_err (arr_data / normfac_data)
+                    N_bg_raw = N_bg_norm / normfac_data
 
-                # Signal yield (in this t,phi bin) from the t-distribution
-                N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
-                if N_sig_norm < 0.0:
-                    N_sig_norm = 0.0
-                N_data_raw = N_sig_norm / normfac_data
+                    # Signal yield (in this t,phi bin) from the t-distribution
+                    N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
+                    if N_sig_norm < 0.0:
+                        N_sig_norm = 0.0
+                    N_data_raw = N_sig_norm / normfac_data
 
-                if N_bg_raw > 0.0 and N_data_raw > 0.0:
-                    # fractional error δY/Y from the background term
-                    bg_fit1_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
-                else:
-                    bg_fit1_frac_err[j][k] = 0.0
-            except KeyError:
-                # No fit stored for this bin
-                bg_fit1_frac_err[j][k] = 0.0            
+                    if N_bg_raw > 0.0 and N_data_raw > 0.0:
+                        # fractional error δY/Y from the background term
+                        bg_fit1_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
+                    else:
+                        bg_fit1_frac_err[j][k] = 0.0
+                except KeyError:
+                    # No fit stored for this bin
+                    bg_fit1_frac_err[j][k] = 0.0            
 
-            # Remove histograms with less than event_threshold entries and negative integrals
-            prune_hist(
-                hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
-            )          
-            prune_hist(
-                hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
-            )   
-            prune_hist(
-                hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
-            )                                
-            prune_hist(
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
-                event_threshold
-            )
-            prune_hist(
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
-                event_threshold
-            )
+                # Remove histograms with less than event_threshold entries and negative integrals
+                prune_hist(
+                    hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
+                )          
+                prune_hist(
+                    hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
+                )   
+                prune_hist(
+                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+                )                                
+                prune_hist(
+                    hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
+                    event_threshold
+                )
+                prune_hist(
+                    hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
+                    event_threshold
+                )
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
@@ -656,53 +655,53 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit2_{}_{}".format(j, k)][3])
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit2_{}_{}".format(j, k)][0], -1)            
 
-            # Estimate fractional yield uncertainty from background_fit2
-            try:
-                # Background histogram in the MM DATA axis from the first fit
-                bg_hist = fitDict[f"background_fit2_{j}_{k}"][0]
+                # Estimate fractional yield uncertainty from background_fit2
+                try:
+                    # Background histogram in the MM DATA axis from the first fit
+                    bg_hist = fitDict[f"background_fit2_{j}_{k}"][0]
 
-                # Background yield in normalized units (same convention as H_MM_DATA)
-                N_bg_norm = bg_hist.Integral()
-                if N_bg_norm < 0.0:
-                    N_bg_norm = 0.0
+                    # Background yield in normalized units (same convention as H_MM_DATA)
+                    N_bg_norm = bg_hist.Integral()
+                    if N_bg_norm < 0.0:
+                        N_bg_norm = 0.0
 
-                # Convert background yield back to (approximate) raw counts,
-                # same convention as used in yld_data_err (arr_data / normfac_data)
-                N_bg_raw = N_bg_norm / normfac_data
+                    # Convert background yield back to (approximate) raw counts,
+                    # same convention as used in yld_data_err (arr_data / normfac_data)
+                    N_bg_raw = N_bg_norm / normfac_data
 
-                # Signal yield (in this t,phi bin) from the t-distribution
-                N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
-                if N_sig_norm < 0.0:
-                    N_sig_norm = 0.0
-                N_data_raw = N_sig_norm / normfac_data
+                    # Signal yield (in this t,phi bin) from the t-distribution
+                    N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
+                    if N_sig_norm < 0.0:
+                        N_sig_norm = 0.0
+                    N_data_raw = N_sig_norm / normfac_data
 
-                if N_bg_raw > 0.0 and N_data_raw > 0.0:
-                    # fractional error δY/Y from the background term
-                    bg_fit2_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
-                else:
-                    bg_fit2_frac_err[j][k] = 0.0
-            except KeyError:
-                # No fit stored for this bin
-                bg_fit2_frac_err[j][k] = 0.0   
+                    if N_bg_raw > 0.0 and N_data_raw > 0.0:
+                        # fractional error δY/Y from the background term
+                        bg_fit2_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
+                    else:
+                        bg_fit2_frac_err[j][k] = 0.0
+                except KeyError:
+                    # No fit stored for this bin
+                    bg_fit2_frac_err[j][k] = 0.0   
 
-            # Remove histograms with less than event_threshold entries and negative integrals
-            prune_hist(
-                hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
-            ) 
-            prune_hist(
-                hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
-            ) 
-            prune_hist(
-                hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
-            )                                     
-            prune_hist(
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
-                event_threshold
-            )
-            prune_hist(
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
-                event_threshold
-            )            
+                # Remove histograms with less than event_threshold entries and negative integrals
+                prune_hist(
+                    hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
+                ) 
+                prune_hist(
+                    hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
+                ) 
+                prune_hist(
+                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+                )                                     
+                prune_hist(
+                    hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
+                    event_threshold
+                )
+                prune_hist(
+                    hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
+                    event_threshold
+                )            
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
@@ -789,9 +788,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw("hist same")
-                        fitDict["background_fit1_{}_{}".format(j, k)][1].SetLineColor(3)
-                        fitDict["background_fit1_{}_{}".format(j, k)][1].Draw("same")
+                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw("hist same")                        
+                        if inpDict["bg_stat_scale1"] > 0.0:
+                            fitDict["background_fit1_{}_{}".format(j, k)][1].SetLineColor(3)
+                            fitDict["background_fit1_{}_{}".format(j, k)][1].Draw("same")
                         hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
                         
                         # Ensure correct PDF opening and closing
@@ -815,9 +815,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Draw("hist same")
-                        fitDict["background_fit2_{}_{}".format(j, k)][1].SetLineColor(3)
-                        fitDict["background_fit2_{}_{}".format(j, k)][1].Draw("same")
+                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Draw("hist same")                        
+                        if inpDict["bg_stat_scale2"] > 0.0:
+                            fitDict["background_fit2_{}_{}".format(j, k)][1].SetLineColor(3)
+                            fitDict["background_fit2_{}_{}".format(j, k)][1].Draw("same")
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].GetName())
                         
                         # Ensure correct PDF opening and closing
@@ -953,10 +954,12 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                     "binned_hist_sub" : binned_hist_sub,
                     "mm_hist_data" : mm_hist_data,
                     "mm_hist_sub" : mm_hist_sub,
-                    "scale_factor" : arr_scale_factor,                    
-                    "bg_fit1_frac_err" : arr_bg_fit1_frac_err,        
-                    "bg_fit2_frac_err" : arr_bg_fit2_frac_err,             
+                    "scale_factor" : arr_scale_factor,                                  
                 }
+                if inpDict["bg_stat_scale1"] > 0.0:                 
+                    binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
+                if inpDict["bg_stat_scale2"] > 0.0:        
+                    binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
         
     return binned_dict
 
@@ -1051,6 +1054,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
                 yld_sub_err = -1000.0 
                       
             # Fractional contribution from empirical background fit (background_fit1)
+            
             bg_fit1_err = arr_bg_fit1_frac_err[j][k]        
             bg_fit2_err = arr_bg_fit2_frac_err[j][k]     
 
