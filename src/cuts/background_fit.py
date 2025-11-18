@@ -482,7 +482,19 @@ def bg_fit(
 
         f_min = float(fit_func.GetMinimum(mm_min, mm_max))
         f_max = float(fit_func.GetMaximum(mm_min, mm_max))
-        print(f"[DBG] {hist.GetName()}  f_min={f_min:.6g}  f_max={f_max:.6g}")
+
+        hist_name = hist.GetName()
+        parts = hist_name.split("_")
+        tbin = int(parts[-2])
+        phibin = int(parts[-1])
+
+        print(
+            "-"*25
+            f"Bad fit for: {hist_name}  "
+            f"(tbin={tbin}, phibin={phibin})  "
+            f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+            "-"*25
+        )
 
         # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
