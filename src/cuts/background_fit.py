@@ -384,11 +384,11 @@ def is_good_background_shape(
     # Non-finite or completely non-positive → reject
     if not (math.isfinite(f_min) and math.isfinite(f_max)):
         return False
-    if f_max < -neg_tol:
+    if f_max <= -neg_tol:
         return False
 
     # Reject if the minimum is below the allowed tolerance
-    if f_min < -neg_tol:
+    if f_min <= -neg_tol:
         return False
 
     return True
