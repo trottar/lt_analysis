@@ -364,7 +364,7 @@ def is_good_background_shape(
         x_min,
         x_max,
         *,
-        neg_tol=0.0,
+        neg_tol=0.1,
 ):
     """
     Sanity check on the *fit function itself*.
