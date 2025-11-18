@@ -578,8 +578,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale1"] = 0.85
-        
+        inpDict["bg_stat_scale1"] = 0.85        
         
         if inpDict["bg_stat_scale1"] > 0.0:
             fitDict["background_data_fit1_{}".format(j)] = bg_fit(
@@ -600,16 +599,13 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Remove histograms with less than event_threshold entries and negative integrals  
             prune_hist(
-                hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
-                event_threshold
+                hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)]
             ) 
             prune_hist(
-                hist_bin_dict["H_MM_pisub_DATA_{}".format(j)],
-                event_threshold
+                hist_bin_dict["H_MM_pisub_DATA_{}".format(j)]
             )  
             prune_hist(
-                hist_bin_dict["H_MM_nosub_DATA_{}".format(j)],
-                event_threshold
+                hist_bin_dict["H_MM_nosub_DATA_{}".format(j)]
             )                  
             prune_hist(
                 hist_bin_dict["H_MM_DATA_{}".format(j)],
@@ -642,16 +638,13 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Remove histograms with less than event_threshold entries and negative integrals
             prune_hist(
-                hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
-                event_threshold
+                hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)]
             )          
             prune_hist(
-                hist_bin_dict["H_MM_pisub_DATA_{}".format(j)],
-                event_threshold
+                hist_bin_dict["H_MM_pisub_DATA_{}".format(j)]
             )          
             prune_hist(
-                hist_bin_dict["H_MM_nosub_DATA_{}".format(j)],
-                event_threshold
+                hist_bin_dict["H_MM_nosub_DATA_{}".format(j)]
             )          
             prune_hist(
                 hist_bin_dict["H_MM_DATA_{}".format(j)],
