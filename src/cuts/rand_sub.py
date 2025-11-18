@@ -1854,9 +1854,9 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale"] = 0.85
+    inpDict["bg_stat_scale1"] = 0.85
 
-    if  inpDict["bg_stat_scale"] > 0.0:
+    if  inpDict["bg_stat_scale1"] > 0.0:
         background_fit1 = bg_fit(phi_setting,
                                 inpDict,
                                 H_MM_pisub_DATA,   # wide / no-cut
@@ -1922,9 +1922,9 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale"] = 0.0
+    inpDict["bg_stat_scale2"] = 0.0
 
-    if inpDict["bg_stat_scale"] > 0.0:
+    if inpDict["bg_stat_scale2"] > 0.0:
         background_fit2 = bg_fit(phi_setting,
                                 inpDict,
                                 H_MM_fit1sub_DATA,   # wide / no-cut
@@ -2151,8 +2151,9 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_fit1sub_DATA"].SetFillColor(kBlack)  # Set fill color to black
     #histDict["H_MM_fit1sub_DATA"].Draw("same, E1")
     histDict["H_MM_fit1sub_DATA"].Draw("hist same")
-    background_fit2[1].SetLineColor(3)
-    background_fit2[1].Draw("same")
+    if inpDict["bg_stat_scale2"] > 0.0:
+        background_fit2[1].SetLineColor(3)
+        background_fit2[1].Draw("same")
 
     CMMfit1sub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
@@ -2164,9 +2165,10 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_pisub_DATA"].SetFillStyle(3001)  # Set fill style to dots
     histDict["H_MM_pisub_DATA"].SetFillColor(kBlack)  # Set fill color to black
     #histDict["H_MM_pisub_DATA"].Draw("same, E1")
-    histDict["H_MM_pisub_DATA"].Draw("hist same")
-    background_fit1[1].SetLineColor(3)
-    background_fit1[1].Draw("same")
+    histDict["H_MM_pisub_DATA"].Draw("hist same")    
+    if inpDict["bg_stat_scale1"] > 0.0:
+        background_fit1[1].SetLineColor(3)
+        background_fit1[1].Draw("same")
 
     CMMpisub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
