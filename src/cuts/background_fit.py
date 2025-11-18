@@ -489,11 +489,9 @@ def bg_fit(
         phibin = int(parts[-1])
 
         print(
-            "-"*25
             f"Bad fit for: {hist_name}  "
             f"(tbin={tbin}, phibin={phibin})  "
             f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-            "-"*25
         )
 
         # zero background function on the full MM range
