@@ -511,7 +511,7 @@ def bg_fit(
                 f"(tbin={tbin})  "
                 f"f_min={f_min:.6g}  f_max={f_max:.6g}"
             )
-            sys.exit(2)
+            #sys.exit(2)
 
         # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", sig_lo, sig_hi)
