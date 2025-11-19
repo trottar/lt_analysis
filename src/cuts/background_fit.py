@@ -488,7 +488,7 @@ def shrink_signal_window_to_positive(
         sig_hi,
         *,
         neg_tol=0.25,
-        max_iter=1000,
+        max_iter=50,
 ):
     """
     Iteratively shrink the MM signal window [sig_lo, sig_hi] inward so that
@@ -522,8 +522,7 @@ def shrink_signal_window_to_positive(
     if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
         return sig_lo, sig_hi
 
-    #for _ in range(max_iter):
-    while True:
+    for _ in range(max_iter):
         # Check if shrinking so far has already fixed the shape.
         if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
             return sig_lo, sig_hi
@@ -666,7 +665,7 @@ def bg_fit(
             sig_lo,
             sig_hi,
             neg_tol=neg_tol,
-            max_iter=50,
+            max_iter=1000,
         )
 
         if adjusted is not None:
