@@ -503,7 +503,7 @@ def shrink_signal_window_to_positive(
         f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], neg_tol={neg_tol:g}"
     )
 
-    max_iter   = 1e6          # hard safety cap
+    max_iter   = int(1e6)          # hard safety cap
     min_width  = 1e-10           # minimum useful window width in MM units
     min_delta  = 1e-10          # minimum change in edges to consider progress
 
