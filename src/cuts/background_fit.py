@@ -674,102 +674,140 @@ def bg_fit(
             h_sb.SetBinContent(ib, 0.0)
             h_sb.SetBinError(ib, 0.0)
 
-    # ------------------------------ fit -----------------------------------
-    fit_min, fit_max = sb_left[0], sb_right[1]
-    fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
-    h_sb.Fit(fit_func, "Q0")  # quiet, no UI
-
-    # ------------------- shape sanity check (new) -------------------------
-    # Reject fits that go significantly negative inside the MM *signal window*.
-    # sig_lo, sig_hi are already defined above in bg_fit.
+    # ------------------------------ fit + shape rescue -------------------
+    # We will:
+    #   1) Fit the sidebands.
+    #   2) Check the background shape on [sig_lo, sig_hi].
+    #   3) If bad, pull in the *signal window* edges and refit.
+    #   4) Repeat until the shape is acceptable or the window collapses.
     #
-    #   If the shape is bad, first try to "pull the negative edges inward"
-    #   using shrink_signal_window_to_positive(). Only if that fails do we
-    #   fall back to a zero-background fit.
+    # NOTE: We NEVER change the sideband ranges (sb_left/sb_right). Only the
+    #       MM signal window [sig_lo, sig_hi] is being shrunk.
     #
-    neg_tol = 0.01
+    neg_tol     = inpDict.get("bg_neg_tol", 0.25)    # how negative we tolerate
+    max_refit   = inpDict.get("bg_max_refit", 50)    # max refits per histogram
+    shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
+    min_width   = inpDict.get("bg_min_sig_width", 1e-3)  # minimum MM width
 
-    if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+    orig_sig_lo, orig_sig_hi = sig_lo, sig_hi
+    fit_func = None
 
-        orig_sig_lo = sig_lo
-        orig_sig_hi = sig_hi
+    for irefit in range(max_refit):
+        # (Re)fit on the same sideband histogram each iteration
+        fit_min, fit_max = sb_left[0], sb_right[1]
+        fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
+        h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-        adjusted = shrink_signal_window_to_positive(
-            fit_func,
-            sig_lo,
-            sig_hi,
-            neg_tol=neg_tol,
+        # Check the shape INSIDE THE CURRENT SIGNAL WINDOW
+        if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+            if irefit > 0:
+                print(
+                    f"[bg_fit] rescued background for {hist.GetName()}: "
+                    f"sig window {orig_sig_lo:.3f}-{orig_sig_hi:.3f} "
+                    f"-> {sig_lo:.3f}-{sig_hi:.3f} after {irefit} refits"
+                )
+            break  # good shape, we keep this fit + window
+
+        # Shape still bad ⇒ shrink signal window and try again
+        width = sig_hi - sig_lo
+        if width <= min_width:
+            print(
+                f"[bg_fit] unable to rescue {hist.GetName()}: "
+                f"signal window collapsed (width={width:.4g} <= {min_width:.4g})"
+            )
+            fit_func = None
+            break
+
+        f_lo = float(fit_func.Eval(sig_lo))
+        f_hi = float(fit_func.Eval(sig_hi))
+        step = shrink_frac * width
+
+        print(
+            f"[bg_fit] refit {irefit}: "
+            f"window=[{sig_lo:.5f},{sig_hi:.5f}] width={width:.5g} "
+            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5g}"
         )
 
-        if adjusted is not None:
-
-            # Successfully rescued the signal window by shrinking.
-            sig_lo, sig_hi = adjusted
-
-            f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
-            f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
-
-            print(
-                f"Adjusted MM signal window for {hist.GetName()}: "
-                f"[{orig_sig_lo:.3f}, {orig_sig_hi:.3f}] -> "
-                f"[{sig_lo:.3f}, {sig_hi:.3f}]  "
-                f"(f_min={f_min:.6g}, f_max={f_max:.6g})"
-            )
-
-            # IMPORTANT: we do NOT return here; we proceed with the
-            # background subtraction below, using the new sig_lo/sig_hi.
-
+        # If one edge is clearly more negative, pull that edge in.
+        if (f_lo < -neg_tol) or (f_hi < -neg_tol):
+            if f_lo <= f_hi:
+                print(
+                    f"  -> shrink lower edge: {sig_lo:.5f} -> {sig_lo + step:.5f} "
+                    f"(f_lo={f_lo:.5g})"
+                )
+                sig_lo += step
+            if f_hi < f_lo:
+                print(
+                    f"  -> shrink upper edge: {sig_hi:.5f} -> {sig_hi - step:.5f} "
+                    f"(f_hi={f_hi:.5g})"
+                )
+                sig_hi -= step
         else:
-            # Could not fix the shape by shrinking the window.
-            # Fall back to your original "bad fit → zero background" behavior.
-            f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
-            f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
+            # Edges are not hugely negative, but interior is; shrink symmetrically.
+            new_lo = sig_lo + 0.5 * step
+            new_hi = sig_hi - 0.5 * step
+            print(
+                "  -> symmetric shrink: "
+                f"{sig_lo:.5f}-{sig_hi:.5f} -> {new_lo:.5f}-{new_hi:.5f}"
+            )
+            sig_lo, sig_hi = new_lo, new_hi
 
-            hist_name = hist.GetName()
-            parts = hist_name.split("_")
-            
+    # After the loop, if we still have no acceptable fit, fall back to zero BG
+    if fit_func is None or not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+        # For debug, look at the shape on the ORIGINAL signal window if possible
+        if fit_func is not None:
+            f_min = float(fit_func.GetMinimum(orig_sig_lo, orig_sig_hi))
+            f_max = float(fit_func.GetMaximum(orig_sig_lo, orig_sig_hi))
+        else:
+            f_min = float("nan")
+            f_max = float("nan")
+
+        hist_name = hist.GetName()
+        parts = hist_name.split("_")
+
+        try:
+            tbin = int(parts[-2]) + 1
+            phibin = int(parts[-1]) + 1
+            print(
+                f"Bad fit for: {hist_name}  "
+                f"(tbin={tbin}, phibin={phibin})  "
+                f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+            )
+        except ValueError:
             try:
-                tbin = int(parts[-2]) + 1
-                phibin = int(parts[-1]) + 1
+                tbin = int(parts[-1]) + 1
                 print(
                     f"Bad fit for: {hist_name}  "
-                    f"(tbin={tbin}, phibin={phibin})  "
+                    f"(tbin={tbin})  "
                     f"f_min={f_min:.6g}  f_max={f_max:.6g}"
                 )
             except ValueError:
-                try:
-                    tbin = int(parts[-1]) + 1
-                    print(
-                        f"Bad fit for: {hist_name}  "
-                        f"(tbin={tbin})  "
-                        f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-                    )
-                    #sys.exit(2)
-                except ValueError:
-                    print(
-                        "ERROR!"
-                        f" Bad fit for: {hist_name}  "
-                        "\nClosing script..."
-                    )
-                    sys.exit(2)
+                print(
+                    "ERROR!"
+                    f" Bad fit for: {hist_name}  "
+                    "\nClosing script..."
+                )
+                sys.exit(2)
 
-            # zero background function on the full (shrunk) MM window
-            fit_func_zero = TF1("fit_func_zero_bad", "0", sig_lo, sig_hi)
-            fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
+        # Zero background over the full MM range
+        fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
+        fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
 
-            # build a zero-valued background histogram on the MM-cut binning
-            fit_hist_inrange = get_fit_histogram_padded(
-                fit_func_zero,
-                hist_mm_cut,
-                mm_min,
-                mm_max,
-                n_pad=0
-            )
+        fit_hist_inrange = get_fit_histogram_padded(
+            fit_func_zero,
+            hist_mm_cut,
+            mm_min,
+            mm_max,
+            n_pad=0
+        )
 
-            bg_par = 0.0
-            f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
+        bg_par = 0.0
+        f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
 
-            return fit_hist_inrange, fit_vis, bg_par, f_sig
+        return fit_hist_inrange, fit_vis, bg_par, f_sig
+
+    # If we get here, fit_func is good on the (possibly shrunken) [sig_lo, sig_hi]
+    fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
         
     # ------------------- proceed with accepted fit ------------------------
     # integral of background under the signal window
