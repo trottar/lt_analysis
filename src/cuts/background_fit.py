@@ -374,7 +374,7 @@ def is_good_background_shape(
         x_min,
         x_max,
         *,
-        neg_tol=0.0,
+        neg_tol=0.1,
 ):
     """
     Sanity check on the *fit function itself*.
@@ -394,7 +394,7 @@ def is_good_background_shape(
     # Non-finite or completely non-positive → reject
     if not (math.isfinite(f_min) and math.isfinite(f_max)):
         return False
-    if f_max <= -neg_tol:
+    if f_max < 0.0:
         return False
 
     # Reject if the minimum is below the allowed tolerance
