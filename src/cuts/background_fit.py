@@ -496,8 +496,12 @@ def bg_fit(
         hist_name = hist.GetName()
         parts = hist_name.split("_")
         print("!!!!!!!!!!!!!", parts)
-        tbin = int(parts[-2])
-        phibin = int(parts[-1])
+        try:
+            tbin = int(parts[-2])
+            phibin = int(parts[-1])
+        except ValueError:
+            tbin = int(parts[-1])
+            phibin = "ALL"
 
         print(
             f"Bad fit for: {hist_name}  "
