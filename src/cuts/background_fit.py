@@ -490,8 +490,8 @@ def bg_fit(
     # sig_lo, sig_hi are already defined above in bg_fit.
     if not is_good_background_shape(fit_func, sig_lo, sig_hi):
 
-        f_min = float(fit_func.GetMinimum(mm_min, mm_max))
-        f_max = float(fit_func.GetMaximum(mm_min, mm_max))
+        f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
+        f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
 
         hist_name = hist.GetName()
         parts = hist_name.split("_")
@@ -514,7 +514,7 @@ def bg_fit(
             sys.exit(2)
 
         # zero background function on the full MM range
-        fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
+        fit_func_zero = TF1("fit_func_zero_bad", "0", sig_lo, sig_hi)
         fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
 
         # build a zero-valued background histogram on the MM-cut binning
