@@ -495,19 +495,23 @@ def bg_fit(
 
         hist_name = hist.GetName()
         parts = hist_name.split("_")
-        print("!!!!!!!!!!!!!", parts)
+        
         try:
             tbin = int(parts[-2])
             phibin = int(parts[-1])
+            print(
+                f"Bad fit for: {hist_name}  "
+                f"(tbin={tbin}, phibin={phibin})  "
+                f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+            )            
         except ValueError:
             tbin = int(parts[-1])
-            phibin = "ALL"
-
-        print(
-            f"Bad fit for: {hist_name}  "
-            f"(tbin={tbin}, phibin={phibin})  "
-            f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-        )
+            print(
+                f"Bad fit for: {hist_name}  "
+                f"(tbin={tbin})  "
+                f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+            )
+            sys.exit(2)
 
         # zero background function on the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)

@@ -667,6 +667,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}".format(j)],
             "H_epsilon_DUMMY" : hist_bin_dict["H_epsilon_DUMMY_{}".format(j)],
             "H_MM_DUMMY" : hist_bin_dict["H_MM_DUMMY_{}".format(j)],
+            "H_MM_pisub_DATA" : hist_bin_dict["H_MM_pisub_DATA_{}".format(j)],
+            "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
+            "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
         }
 
         # Sort dictionary keys alphabetically
@@ -910,21 +913,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
                 "{}_ave_err".format(kin_type) : tup[3],
             }
 
-        group_dict[kin_type] = groups
-
-    '''
-    # ---------- Global override: enforce the rule across all kin_types ----------
-    if bad_bins:
-        for (t_idx, phi_idx) in bad_bins:
-            for kin_type in kinematic_types:
-                key = (t_idx, phi_idx)
-                # Ensure the key exists (it should, but be safe)
-                if key not in group_dict[kin_type]:
-                    group_dict[kin_type][key] = {}
-                group_dict[kin_type][key][f"{kin_type}_ave"] = 0.0
-                group_dict[kin_type][key][f"{kin_type}_ave_err"] = -1000.0
-    # ---------------------------------------------------------------------------        
-    '''      
+        group_dict[kin_type] = groups 
     
     return group_dict
 
