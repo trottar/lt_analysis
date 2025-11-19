@@ -535,8 +535,8 @@ def bg_fit(
     sb_right = inpDict.get("sb_right", model["sidebands"]["right"])
 
     # signal window: keep the physics defaults unless over-ridden
-    sig_lo = max(inpDict.get("sig_lo", 1.005), mm_min)
-    sig_hi = min(inpDict.get("sig_hi", 1.130), mm_max)
+    sig_lo = max(inpDict.get("sig_lo", 1.05), mm_min)
+    sig_hi = min(inpDict.get("sig_hi", 1.25), mm_max)
 
     # ---------------------------------------------------------------------
     if hist_mm_cut is None:
