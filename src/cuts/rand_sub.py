@@ -1861,7 +1861,7 @@ def rand_sub(phi_setting, inpDict):
                                 inpDict,
                                 H_MM_pisub_DATA,   # wide / no-cut
                                 H_MM_DATA,         # cut-window axis
-                                model_key=f"cheb2_{phi_setting}_{EPSSET}e")
+                                model_key=f"cheb2_{phi_setting}_{EPSSET}e1")
         # background_fit1[0] : scaled function   (use for subtraction)
         # background_fit1[1] : original function (use for drawing only)
 
@@ -1922,14 +1922,14 @@ def rand_sub(phi_setting, inpDict):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale2"] = 0.0
+    inpDict["bg_stat_scale2"] = 0.85
 
     if inpDict["bg_stat_scale2"] > 0.0:
         background_fit2 = bg_fit(phi_setting,
                                 inpDict,
                                 H_MM_fit1sub_DATA,   # wide / no-cut
                                 H_MM_DATA,         # cut-window axis
-                                model_key="sigma_peak")
+                                model_key="cheb2_{phi_setting}_{EPSSET}e2")
         # background_fit2[0] : scaled function   (use for subtraction)
         # background_fit2[1] : original function (use for drawing only)
 

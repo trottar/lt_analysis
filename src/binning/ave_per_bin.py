@@ -584,7 +584,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 inpDict,
                 hist_bin_dict[f"H_MM_pisub_DATA_{j}"],   # wide / no–MM-cut
                 hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
-                model_key=f"cheb2_{phi_setting}_{EPSSET}e"
+                model_key=f"cheb2_{phi_setting}_{EPSSET}e1"
             )
             # ----------------------------------------------------------------
 
@@ -616,7 +616,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale2"] = 0.0
+        inpDict["bg_stat_scale2"] = 0.85
         
         if inpDict["bg_stat_scale2"] > 0.0:  
             fitDict["background_data_fit2_{}".format(j)] = bg_fit(
@@ -624,7 +624,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 inpDict,
                 hist_bin_dict[f"H_MM_fit1sub_DATA_{j}"],   # wide / no–MM-cut
                 hist_bin_dict[f"H_MM_DATA_{j}"],          # cut-window axis
-                model_key="sigma_peak"
+                model_key="cheb2_{phi_setting}_{EPSSET}e2"
             )
             # ----------------------------------------------------------------
 
