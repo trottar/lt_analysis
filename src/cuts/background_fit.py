@@ -482,6 +482,86 @@ def is_good_background_shape(
 
     return True
 
+def shrink_signal_window_to_positive(
+        fit_func,
+        sig_lo,
+        sig_hi,
+        *,
+        neg_tol=0.25,
+        max_iter=50,
+        max_shrink_frac=0.5,
+):
+    """
+    Iteratively shrink the MM signal window [sig_lo, sig_hi] inward so that
+    the background shape is acceptable (no large negative excursions).
+
+    Strategy:
+      * Start from the current [sig_lo, sig_hi].
+      * If is_good_background_shape(...) is already True, return immediately.
+      * Otherwise, at each iteration:
+          - Evaluate f at both edges.
+          - Prefer shrinking the edge that is more negative.
+          - If both edges are >= -neg_tol but the shape is still bad
+            (the minimum inside is too negative), shrink both edges.
+      * Stop if:
+          - The window has been shrunk by more than `max_shrink_frac`
+            of its original width; or
+          - We run out of iterations.
+
+    Returns
+    -------
+    (new_lo, new_hi) on success, or None if we could not rescue the window.
+    """
+    orig_lo = float(sig_lo)
+    orig_hi = float(sig_hi)
+    orig_width = orig_hi - orig_lo
+
+    if orig_width <= 0.0:
+        return None
+
+    # If we're already good, no need to shrink.
+    if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+        return sig_lo, sig_hi
+
+    for _ in range(max_iter):
+        # Check if shrinking so far has already fixed the shape.
+        if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+            return sig_lo, sig_hi
+
+        width = sig_hi - sig_lo
+        if width <= 0.0:
+            break
+
+        # Stop if we've shrunk too much already
+        if width < orig_width * (1.0 - max_shrink_frac):
+            break
+
+        f_lo = float(fit_func.Eval(sig_lo))
+        f_hi = float(fit_func.Eval(sig_hi))
+
+        # Step size: small fraction of current width
+        step = 0.02 * width  # 2% of the current window per iteration
+
+        # Case 1: one or both edges are actually negative beyond tolerance
+        if (f_lo < -neg_tol) or (f_hi < -neg_tol):
+            # Shrink the "worse" (more negative) edge first
+            if f_lo <= f_hi:
+                sig_lo += step
+            if f_hi < f_lo:
+                sig_hi -= step
+        else:
+            # Case 2: edges are OK but there is a dip in the interior
+            # (is_good_background_shape still failed). Shrink symmetrically.
+            sig_lo += 0.5 * step
+            sig_hi -= 0.5 * step
+
+        # If we collapse the window, give up
+        if sig_hi <= sig_lo:
+            break
+
+    # Could not find a good window within allowed shrink
+    return None
+
 ################################################################################################################################################
 
 #no_bg_subtract=True
@@ -571,56 +651,96 @@ def bg_fit(
     # ------------------- shape sanity check (new) -------------------------
     # Reject fits that go significantly negative inside the MM *signal window*.
     # sig_lo, sig_hi are already defined above in bg_fit.
-    if not is_good_background_shape(fit_func, sig_lo, sig_hi):
+    #
+    # NEW BEHAVIOR:
+    #   If the shape is bad, first try to "pull the negative edges inward"
+    #   using shrink_signal_window_to_positive(). Only if that fails do we
+    #   fall back to a zero-background fit.
+    #
+    neg_tol = 0.1
 
-        f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
-        f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
+    if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
 
-        hist_name = hist.GetName()
-        parts = hist_name.split("_")
-        
-        try:
-            tbin = int(parts[-2])+1
-            phibin = int(parts[-1])+1
-            print(
-                f"Bad fit for: {hist_name}  "
-                f"(tbin={tbin}, phibin={phibin})  "
-                f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-            )            
-        except ValueError:
-            try:
-                tbin = int(parts[-1])+1
-                print(
-                    f"Bad fit for: {hist_name}  "
-                    f"(tbin={tbin})  "
-                    f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-                )
-                #sys.exit(2)
-            except ValueError:
-                print(
-                    "ERROR!"
-                    f"Bad fit for: {hist_name}"
-                    "Closing script..."
-                )
-                sys.exit(2)
+        orig_sig_lo = sig_lo
+        orig_sig_hi = sig_hi
 
-        # zero background function on the full MM range
-        fit_func_zero = TF1("fit_func_zero_bad", "0", sig_lo, sig_hi)
-        fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
-
-        # build a zero-valued background histogram on the MM-cut binning
-        fit_hist_inrange = get_fit_histogram_padded(
-            fit_func_zero,
-            hist_mm_cut,
-            mm_min,
-            mm_max,
-            n_pad=0
+        adjusted = shrink_signal_window_to_positive(
+            fit_func,
+            sig_lo,
+            sig_hi,
+            neg_tol=neg_tol,
+            max_iter=50,
+            max_shrink_frac=0.25,
         )
 
-        bg_par = 0.0
-        f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
+        if adjusted is not None:
+            # Successfully rescued the signal window by shrinking.
+            sig_lo, sig_hi = adjusted
 
-        return fit_hist_inrange, fit_vis, bg_par, f_sig
+            f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
+            f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
+
+            print(
+                f"Adjusted MM signal window for {hist.GetName()}: "
+                f"[{orig_sig_lo:.3f}, {orig_sig_hi:.3f}] -> "
+                f"[{sig_lo:.3f}, {sig_hi:.3f}]  "
+                f"(f_min={f_min:.6g}, f_max={f_max:.6g})"
+            )
+
+            # IMPORTANT: we do NOT return here; we proceed with the
+            # background subtraction below, using the new sig_lo/sig_hi.
+
+        else:
+            # Could not fix the shape by shrinking the window.
+            # Fall back to your original "bad fit → zero background" behavior.
+            f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
+            f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
+
+            hist_name = hist.GetName()
+            parts = hist_name.split("_")
+            
+            try:
+                tbin = int(parts[-2]) + 1
+                phibin = int(parts[-1]) + 1
+                print(
+                    f"Bad fit for: {hist_name}  "
+                    f"(tbin={tbin}, phibin={phibin})  "
+                    f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+                )
+            except ValueError:
+                try:
+                    tbin = int(parts[-1]) + 1
+                    print(
+                        f"Bad fit for: {hist_name}  "
+                        f"(tbin={tbin})  "
+                        f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+                    )
+                    #sys.exit(2)
+                except ValueError:
+                    print(
+                        "ERROR!"
+                        f" Bad fit for: {hist_name}  "
+                        "\nClosing script..."
+                    )
+                    sys.exit(2)
+
+            # zero background function on the full (shrunk) MM window
+            fit_func_zero = TF1("fit_func_zero_bad", "0", sig_lo, sig_hi)
+            fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
+
+            # build a zero-valued background histogram on the MM-cut binning
+            fit_hist_inrange = get_fit_histogram_padded(
+                fit_func_zero,
+                hist_mm_cut,
+                mm_min,
+                mm_max,
+                n_pad=0
+            )
+
+            bg_par = 0.0
+            f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
+
+            return fit_hist_inrange, fit_vis, bg_par, f_sig
         
     # ------------------- proceed with accepted fit ------------------------
     # integral of background under the signal window
