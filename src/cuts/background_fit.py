@@ -516,8 +516,6 @@ def shrink_signal_window_to_positive(
     orig_hi = float(sig_hi)
     orig_width = orig_hi - orig_lo
 
-    print(f"orig_lo:{orig_lo}, orig_hi:{orig_hi}, orig_width:{orig_width}")
-
     if orig_width <= 0.0:
         return None
 
@@ -532,10 +530,12 @@ def shrink_signal_window_to_positive(
 
         width = sig_hi - sig_lo
         if width <= 0.0:
+            print("!!!!!!!!!!!!!!! 1")
             break
 
         # Stop if we've shrunk too much already
         if width < orig_width * (1.0 - max_shrink_frac):
+            print("!!!!!!!!!!!!!!! 2")
             break
 
         f_lo = float(fit_func.Eval(sig_lo))
@@ -559,6 +559,7 @@ def shrink_signal_window_to_positive(
 
         # If we collapse the window, give up
         if sig_hi <= sig_lo:
+            print("!!!!!!!!!!!!!!! 3")
             break
 
     # Could not find a good window within allowed shrink
