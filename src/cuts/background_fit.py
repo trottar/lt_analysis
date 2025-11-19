@@ -52,7 +52,7 @@ BG_MODELS = {
             "Fit 1" : {
                 # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "cheb2_Center_lowe": {
-                    "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
+                    "func_expr": "cheb", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {                
                         #"left":  (1.08, 1.10), #Q4p4W2p74
