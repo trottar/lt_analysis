@@ -516,6 +516,8 @@ def shrink_signal_window_to_positive(
     orig_hi = float(sig_hi)
     orig_width = orig_hi - orig_lo
 
+    print("orig_lo:{orig_lo}, orig_hi:{orig_hi}, orig_width:{orig_width}")
+
     if orig_width <= 0.0:
         return None
 
@@ -652,7 +654,6 @@ def bg_fit(
     # Reject fits that go significantly negative inside the MM *signal window*.
     # sig_lo, sig_hi are already defined above in bg_fit.
     #
-    # NEW BEHAVIOR:
     #   If the shape is bad, first try to "pull the negative edges inward"
     #   using shrink_signal_window_to_positive(). Only if that fails do we
     #   fall back to a zero-background fit.
@@ -674,6 +675,7 @@ def bg_fit(
         )
 
         if adjusted is not None:
+
             # Successfully rescued the signal window by shrinking.
             sig_lo, sig_hi = adjusted
 
