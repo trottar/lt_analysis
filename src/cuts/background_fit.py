@@ -516,6 +516,7 @@ def bg_fit(
     # ------------------------------- setup --------------------------------
     Q2 = inpDict["Q2"]
     W  = inpDict["W"]
+    print(f"{fit_name} -> {model_key}")
     if fit_name:
         model  = BG_MODELS[f"Q{Q2}W{W}"][fit_name][model_key] 
     else:
