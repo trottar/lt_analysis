@@ -488,8 +488,7 @@ def shrink_signal_window_to_positive(
         sig_hi,
         *,
         neg_tol=0.25,
-        max_iter=50,
-        max_shrink_frac=0.5,
+        max_iter=1000,
 ):
     """
     Iteratively shrink the MM signal window [sig_lo, sig_hi] inward so that
@@ -533,13 +532,6 @@ def shrink_signal_window_to_positive(
             print("!!!!!!!!!!!!!!! 1")
             break
 
-        '''
-        # Stop if we've shrunk too much already
-        if width < orig_width * (1.0 - max_shrink_frac):
-            print("!!!!!!!!!!!!!!! 2")
-            break
-        '''
-        
         f_lo = float(fit_func.Eval(sig_lo))
         f_hi = float(fit_func.Eval(sig_hi))
 
@@ -561,7 +553,7 @@ def shrink_signal_window_to_positive(
 
         # If we collapse the window, give up
         if sig_hi <= sig_lo:
-            print("!!!!!!!!!!!!!!! 3")
+            print("!!!!!!!!!!!!!!! 2")
             break
 
     # Could not find a good window within allowed shrink
@@ -661,7 +653,7 @@ def bg_fit(
     #   using shrink_signal_window_to_positive(). Only if that fails do we
     #   fall back to a zero-background fit.
     #
-    neg_tol = 0.1
+    neg_tol = 0.01
 
     if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
 
@@ -674,7 +666,6 @@ def bg_fit(
             sig_hi,
             neg_tol=neg_tol,
             max_iter=50,
-            max_shrink_frac=0.25,
         )
 
         if adjusted is not None:
