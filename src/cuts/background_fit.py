@@ -533,11 +533,13 @@ def shrink_signal_window_to_positive(
             print("!!!!!!!!!!!!!!! 1")
             break
 
+        '''
         # Stop if we've shrunk too much already
         if width < orig_width * (1.0 - max_shrink_frac):
             print("!!!!!!!!!!!!!!! 2")
             break
-
+        '''
+        
         f_lo = float(fit_func.Eval(sig_lo))
         f_hi = float(fit_func.Eval(sig_hi))
 
