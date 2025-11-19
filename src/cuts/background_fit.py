@@ -503,8 +503,8 @@ def shrink_signal_window_to_positive(
         f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], neg_tol={neg_tol:g}"
     )
 
-    max_iter   = 20000          # hard safety cap
-    min_width  = 1e-6           # minimum useful window width in MM units
+    max_iter   = 1e6          # hard safety cap
+    min_width  = 1e-10           # minimum useful window width in MM units
     min_delta  = 1e-10          # minimum change in edges to consider progress
 
     for it in range(1, max_iter + 1):
@@ -546,19 +546,16 @@ def shrink_signal_window_to_positive(
 
         # Case 1: one or both edges are actually negative beyond tolerance
         if (f_lo < -neg_tol) or (f_hi < -neg_tol):
-            # Shrink the "worse" (more negative) edge first
-            if f_lo <= f_hi:
-                new_sig_lo = sig_lo + step
-                print(
-                    f"  -> move lower edge: "
-                    f"sig_lo {sig_lo:.12g} -> {new_sig_lo:.12g} (f_lo={f_lo:.5g})"
-                )
-            if f_hi < f_lo:
-                new_sig_hi = sig_hi - step
-                print(
-                    f"  -> move upper edge: "
-                    f"sig_hi {sig_hi:.12g} -> {new_sig_hi:.12g} (f_hi={f_hi:.5g})"
-                )
+            new_sig_lo = sig_lo + step
+            print(
+                f"  -> move lower edge: "
+                f"sig_lo {sig_lo:.12g} -> {new_sig_lo:.12g} (f_lo={f_lo:.5g})"
+            )
+            new_sig_hi = sig_hi - step
+            print(
+                f"  -> move upper edge: "
+                f"sig_hi {sig_hi:.12g} -> {new_sig_hi:.12g} (f_hi={f_hi:.5g})"
+            )
         else:
             # Case 2: edges are OK but there is a dip in the interior
             # (is_good_background_shape still failed). Shrink symmetrically.
