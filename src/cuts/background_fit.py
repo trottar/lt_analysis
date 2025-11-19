@@ -516,7 +516,7 @@ def shrink_signal_window_to_positive(
     orig_hi = float(sig_hi)
     orig_width = orig_hi - orig_lo
 
-    print("orig_lo:{orig_lo}, orig_hi:{orig_hi}, orig_width:{orig_width}")
+    print(f"orig_lo:{orig_lo}, orig_hi:{orig_hi}, orig_width:{orig_width}")
 
     if orig_width <= 0.0:
         return None
