@@ -503,15 +503,21 @@ def shrink_signal_window_to_positive(
         f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], neg_tol={neg_tol:g}"
     )
 
-    max_iter = 1e6
-    it = 0
+    max_iter   = 20000          # hard safety cap
+    min_width  = 1e-6           # minimum useful window width in MM units
+    min_delta  = 1e-10          # minimum change in edges to consider progress
 
-    while True:
-        it += 1
-        if it > max_iter:
+    for it in range(1, max_iter + 1):
+
+        width = sig_hi - sig_lo
+
+        # If window is already too small, give up
+        if width <= min_width:
             print(
-                f"[shrink_signal_window] reached max_iter={max_iter} "
-                f"without good shape; final=[{sig_lo:.5f}, {sig_hi:.5f}]"
+                f"[shrink_signal_window] width<=min_width at iter={it}: "
+                f"width={width:.12g}, min_width={min_width:.12g} "
+                f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
+                f"current=[{sig_lo:.5f}, {sig_hi:.5f}]"
             )
             break
 
@@ -523,15 +529,6 @@ def shrink_signal_window_to_positive(
             )
             return sig_lo, sig_hi
 
-        width = sig_hi - sig_lo
-        if width <= 0.0:
-            print(
-                f"[shrink_signal_window] width<=0 at iter={it}: "
-                f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
-                f"current=[{sig_lo:.5f}, {sig_hi:.5f}]"
-            )
-            break
-
         f_lo = float(fit_func.Eval(sig_lo))
         f_hi = float(fit_func.Eval(sig_hi))
 
@@ -540,39 +537,52 @@ def shrink_signal_window_to_positive(
 
         print(
             f"[shrink_signal_window] iter={it} "
-            f"window=[{sig_lo:.5f}, {sig_hi:.5f}] width={width:.5f} "
-            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5f}"
+            f"window=[{sig_lo:.5f}, {sig_hi:.5f}] width={width:.12g} "
+            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.12g}"
         )
+
+        new_sig_lo = sig_lo
+        new_sig_hi = sig_hi
 
         # Case 1: one or both edges are actually negative beyond tolerance
         if (f_lo < -neg_tol) or (f_hi < -neg_tol):
             # Shrink the "worse" (more negative) edge first
             if f_lo <= f_hi:
-                old = sig_lo
-                sig_lo += step
+                new_sig_lo = sig_lo + step
                 print(
                     f"  -> move lower edge: "
-                    f"sig_lo {old:.5f} -> {sig_lo:.5f} (f_lo={f_lo:.5g})"
+                    f"sig_lo {sig_lo:.12g} -> {new_sig_lo:.12g} (f_lo={f_lo:.5g})"
                 )
             if f_hi < f_lo:
-                old = sig_hi
-                sig_hi -= step
+                new_sig_hi = sig_hi - step
                 print(
                     f"  -> move upper edge: "
-                    f"sig_hi {old:.5f} -> {sig_hi:.5f} (f_hi={f_hi:.5g})"
+                    f"sig_hi {sig_hi:.12g} -> {new_sig_hi:.12g} (f_hi={f_hi:.5g})"
                 )
         else:
             # Case 2: edges are OK but there is a dip in the interior
             # (is_good_background_shape still failed). Shrink symmetrically.
-            old_lo = sig_lo
-            old_hi = sig_hi
-            sig_lo += 0.5 * step
-            sig_hi -= 0.5 * step
+            new_sig_lo = sig_lo + 0.5 * step
+            new_sig_hi = sig_hi - 0.5 * step
             print(
                 "  -> symmetric shrink: "
-                f"sig_lo {old_lo:.5f} -> {sig_lo:.5f}, "
-                f"sig_hi {old_hi:.5f} -> {sig_hi:.5f}"
+                f"sig_lo {sig_lo:.12g} -> {new_sig_lo:.12g}, "
+                f"sig_hi {sig_hi:.12g} -> {new_sig_hi:.12g}"
             )
+
+        # Check if edges actually moved (floating-point stall protection)
+        moved_lo = abs(new_sig_lo - sig_lo)
+        moved_hi = abs(new_sig_hi - sig_hi)
+
+        if moved_lo < min_delta and moved_hi < min_delta:
+            print(
+                f"[shrink_signal_window] edges stopped moving at iter={it}: "
+                f"Δlo={moved_lo:.12g}, Δhi={moved_hi:.12g}, "
+                f"current=[{sig_lo:.12g}, {sig_hi:.12g}]"
+            )
+            break
+
+        sig_lo, sig_hi = new_sig_lo, new_sig_hi
 
         # If we collapse the window, give up
         if sig_hi <= sig_lo:
