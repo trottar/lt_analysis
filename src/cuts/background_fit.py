@@ -489,18 +489,47 @@ def shrink_signal_window_to_positive(
         *,
         neg_tol=0.25,
 ):
+    """
+    Iteratively shrink the MM signal window [sig_lo, sig_hi] inward so that
+    the background shape is acceptable (no large negative excursions).
+
+    Returns (new_lo, new_hi) on success, or None on failure.
+    """
     orig_lo = float(sig_lo)
     orig_hi = float(sig_hi)
 
+    print(
+        f"[shrink_signal_window] start: "
+        f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], neg_tol={neg_tol:g}"
+    )
+
+    max_iter = 1e6
+    it = 0
+
     while True:
+        it += 1
+        if it > max_iter:
+            print(
+                f"[shrink_signal_window] reached max_iter={max_iter} "
+                f"without good shape; final=[{sig_lo:.5f}, {sig_hi:.5f}]"
+            )
+            break
+
         # Check if shrinking so far has already fixed the shape.
         if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+            print(
+                f"[shrink_signal_window] SUCCESS at iter={it}: "
+                f"window=[{sig_lo:.5f}, {sig_hi:.5f}]"
+            )
             return sig_lo, sig_hi
 
         width = sig_hi - sig_lo
         if width <= 0.0:
-            print("!!!!!!!!!!!!!!! 1  (window collapsed: "
-                  f"{orig_lo:.3f}-{orig_hi:.3f} -> {sig_lo:.3f}-{sig_hi:.3f})")
+            print(
+                f"[shrink_signal_window] width<=0 at iter={it}: "
+                f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
+                f"current=[{sig_lo:.5f}, {sig_hi:.5f}]"
+            )
             break
 
         f_lo = float(fit_func.Eval(sig_lo))
@@ -509,26 +538,56 @@ def shrink_signal_window_to_positive(
         # Step size: small fraction of current width
         step = 0.02 * width  # 2% of the current window per iteration
 
+        print(
+            f"[shrink_signal_window] iter={it} "
+            f"window=[{sig_lo:.5f}, {sig_hi:.5f}] width={width:.5f} "
+            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5f}"
+        )
+
         # Case 1: one or both edges are actually negative beyond tolerance
         if (f_lo < -neg_tol) or (f_hi < -neg_tol):
             # Shrink the "worse" (more negative) edge first
             if f_lo <= f_hi:
+                old = sig_lo
                 sig_lo += step
+                print(
+                    f"  -> move lower edge: "
+                    f"sig_lo {old:.5f} -> {sig_lo:.5f} (f_lo={f_lo:.5g})"
+                )
             if f_hi < f_lo:
+                old = sig_hi
                 sig_hi -= step
+                print(
+                    f"  -> move upper edge: "
+                    f"sig_hi {old:.5f} -> {sig_hi:.5f} (f_hi={f_hi:.5g})"
+                )
         else:
             # Case 2: edges are OK but there is a dip in the interior
             # (is_good_background_shape still failed). Shrink symmetrically.
+            old_lo = sig_lo
+            old_hi = sig_hi
             sig_lo += 0.5 * step
             sig_hi -= 0.5 * step
+            print(
+                "  -> symmetric shrink: "
+                f"sig_lo {old_lo:.5f} -> {sig_lo:.5f}, "
+                f"sig_hi {old_hi:.5f} -> {sig_hi:.5f}"
+            )
 
         # If we collapse the window, give up
         if sig_hi <= sig_lo:
-            print("!!!!!!!!!!!!!!! 2  (window collapsed: "
-                  f"{orig_lo:.3f}-{orig_hi:.3f} -> {sig_lo:.3f}-{sig_hi:.3f})")
+            print(
+                f"[shrink_signal_window] collapsed (sig_hi<=sig_lo) at iter={it}: "
+                f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
+                f"current=[{sig_lo:.5f}, {sig_hi:.5f}]"
+            )
             break
 
-    # If we get here, we never found a "good" window
+    print(
+        f"[shrink_signal_window] FAILED to find good window: "
+        f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
+        f"final=[{sig_lo:.5f}, {sig_hi:.5f}]"
+    )
     return None
 
 ################################################################################################################################################
