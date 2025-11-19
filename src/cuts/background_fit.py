@@ -489,8 +489,7 @@ def bg_fit(
         hist_mm_cut=None,
         *,
         model_key="linear",   # ← just pick a key from BG_MODELS
-        fit_name=None,
-        no_bg_subtract=False  # no background subtraction
+        fit_name=None
 ):
     """
     Generic side-band fit and background subtraction.
@@ -518,10 +517,11 @@ def bg_fit(
     Q2 = inpDict["Q2"]
     W  = inpDict["W"]
     if fit_name:
-        model  = BG_MODELS[f"Q{Q2}W{W}"][fit_name][model_key]  # raises KeyError if wrong
+        model  = BG_MODELS[f"Q{Q2}W{W}"][fit_name][model_key] 
     else:
-        model  = BG_MODELS[f"Q{Q2}W{W}"][model_key]  # raises KeyError if wrong
-    mm_min = inpDict["mm_min"]
+        model  = BG_MODELS[f"Q{Q2}W{W}"][model_key]
+
+    mm_min = inpDict["mm_min"]  
     mm_max = inpDict["mm_max"]
 
     # allow user to override SBs ad-hoc via inpDict; otherwise fall back to
