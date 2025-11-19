@@ -488,48 +488,19 @@ def shrink_signal_window_to_positive(
         sig_hi,
         *,
         neg_tol=0.25,
-        max_iter=50,
 ):
-    """
-    Iteratively shrink the MM signal window [sig_lo, sig_hi] inward so that
-    the background shape is acceptable (no large negative excursions).
-
-    Strategy:
-      * Start from the current [sig_lo, sig_hi].
-      * If is_good_background_shape(...) is already True, return immediately.
-      * Otherwise, at each iteration:
-          - Evaluate f at both edges.
-          - Prefer shrinking the edge that is more negative.
-          - If both edges are >= -neg_tol but the shape is still bad
-            (the minimum inside is too negative), shrink both edges.
-      * Stop if:
-          - The window has been shrunk by more than `max_shrink_frac`
-            of its original width; or
-          - We run out of iterations.
-
-    Returns
-    -------
-    (new_lo, new_hi) on success, or None if we could not rescue the window.
-    """
     orig_lo = float(sig_lo)
     orig_hi = float(sig_hi)
-    orig_width = orig_hi - orig_lo
 
-    if orig_width <= 0.0:
-        return None
-
-    # If we're already good, no need to shrink.
-    if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
-        return sig_lo, sig_hi
-
-    for _ in range(max_iter):
+    while True:
         # Check if shrinking so far has already fixed the shape.
         if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
             return sig_lo, sig_hi
 
         width = sig_hi - sig_lo
         if width <= 0.0:
-            print("!!!!!!!!!!!!!!! 1")
+            print("!!!!!!!!!!!!!!! 1  (window collapsed: "
+                  f"{orig_lo:.3f}-{orig_hi:.3f} -> {sig_lo:.3f}-{sig_hi:.3f})")
             break
 
         f_lo = float(fit_func.Eval(sig_lo))
@@ -553,10 +524,11 @@ def shrink_signal_window_to_positive(
 
         # If we collapse the window, give up
         if sig_hi <= sig_lo:
-            print("!!!!!!!!!!!!!!! 2")
+            print("!!!!!!!!!!!!!!! 2  (window collapsed: "
+                  f"{orig_lo:.3f}-{orig_hi:.3f} -> {sig_lo:.3f}-{sig_hi:.3f})")
             break
 
-    # Could not find a good window within allowed shrink
+    # If we get here, we never found a "good" window
     return None
 
 ################################################################################################################################################
@@ -665,7 +637,6 @@ def bg_fit(
             sig_lo,
             sig_hi,
             neg_tol=neg_tol,
-            max_iter=1000,
         )
 
         if adjusted is not None:
