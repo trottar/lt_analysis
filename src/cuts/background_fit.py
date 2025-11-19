@@ -522,7 +522,8 @@ def shrink_signal_window_to_positive(
     if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
         return sig_lo, sig_hi
 
-    for _ in range(max_iter):
+    #for _ in range(max_iter):
+    while True:
         # Check if shrinking so far has already fixed the shape.
         if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
             return sig_lo, sig_hi
