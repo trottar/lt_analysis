@@ -476,10 +476,12 @@ def is_good_background_shape(
     if f_max < 0.0:
         return False
 
+    '''
     # Reject if the minimum is below the allowed tolerance
     if f_min <= -neg_tol:
         return False
-
+    '''
+    
     return True
 
 ################################################################################################################################################
