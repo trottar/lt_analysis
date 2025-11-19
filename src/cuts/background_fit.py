@@ -482,117 +482,6 @@ def is_good_background_shape(
 
     return True
 
-def shrink_signal_window_to_positive(
-        fit_func,
-        sig_lo,
-        sig_hi,
-        *,
-        neg_tol=0.25,
-):
-    """
-    Iteratively shrink the MM signal window [sig_lo, sig_hi] inward so that
-    the background shape is acceptable (no large negative excursions).
-
-    Returns (new_lo, new_hi) on success, or None on failure.
-    """
-    orig_lo = float(sig_lo)
-    orig_hi = float(sig_hi)
-
-    print(
-        f"[shrink_signal_window] start: "
-        f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], neg_tol={neg_tol:g}"
-    )
-
-    max_iter   = 20000          # hard safety cap
-    min_width  = 1e-10          # minimum useful window width in MM units
-    min_delta  = 1e-10          # minimum change in edges to consider progress
-
-    for it in range(1, max_iter + 1):
-
-        width = sig_hi - sig_lo
-
-        # If window is already too small, give up
-        if width <= min_width:
-            print(
-                f"[shrink_signal_window] width<=min_width at iter={it}: "
-                f"width={width:.12g}, min_width={min_width:.12g} "
-                f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
-                f"current=[{sig_lo:.5f}, {sig_hi:.5f}]"
-            )
-            break
-
-        # Check if shrinking so far has already fixed the shape.
-        if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
-            print(
-                f"[shrink_signal_window] SUCCESS at iter={it}: "
-                f"window=[{sig_lo:.5f}, {sig_hi:.5f}]"
-            )
-            return sig_lo, sig_hi
-
-        f_lo = float(fit_func.Eval(sig_lo))
-        f_hi = float(fit_func.Eval(sig_hi))
-
-        # Step size: small fraction of current width
-        step = 0.02 * width  # 2% of the current window per iteration
-
-        print(
-            f"[shrink_signal_window] iter={it} "
-            f"window=[{sig_lo:.5f}, {sig_hi:.5f}] width={width:.12g} "
-            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.12g}"
-        )
-
-        new_sig_lo = sig_lo
-        new_sig_hi = sig_hi
-
-        # Case 1: one or both edges are actually negative beyond tolerance
-        if (f_lo < -neg_tol) or (f_hi < -neg_tol):
-            if f_hi < f_lo:
-                new_sig_hi = sig_hi - step
-                print(
-                    f"  -> move upper edge: "
-                    f"sig_hi {sig_hi:.12g} -> {new_sig_hi:.12g} (f_hi={f_hi:.5g})"
-                )
-        else:
-            # Case 2: edges are OK but there is a dip in the interior
-            # (is_good_background_shape still failed). Shrink symmetrically.
-            new_sig_lo = sig_lo + 0.5 * step
-            new_sig_hi = sig_hi - 0.5 * step
-            print(
-                "  -> symmetric shrink: "
-                f"sig_lo {sig_lo:.12g} -> {new_sig_lo:.12g}, "
-                f"sig_hi {sig_hi:.12g} -> {new_sig_hi:.12g}"
-            )
-
-        # Check if edges actually moved (floating-point stall protection)
-        moved_lo = abs(new_sig_lo - sig_lo)
-        moved_hi = abs(new_sig_hi - sig_hi)
-
-        if moved_lo < min_delta and moved_hi < min_delta:
-            print(
-                f"[shrink_signal_window] edges stopped moving at iter={it}: "
-                f"Δlo={moved_lo:.12g}, Δhi={moved_hi:.12g}, "
-                f"current=[{sig_lo:.12g}, {sig_hi:.12g}]"
-            )
-            break
-
-        sig_lo, sig_hi = new_sig_lo, new_sig_hi
-
-        # If we collapse the window, give up
-        if sig_hi <= sig_lo:
-            print(
-                f"[shrink_signal_window] collapsed (sig_hi<=sig_lo) at iter={it}: "
-                f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
-                f"current=[{sig_lo:.5f}, {sig_hi:.5f}]"
-            )
-            break
-
-    print(
-        f"[shrink_signal_window] FAILED to find good window: "
-        f"orig=[{orig_lo:.5f}, {orig_hi:.5f}], "
-        f"final=[{sig_lo:.5f}, {sig_hi:.5f}]"
-    )
-    return None
-
 ################################################################################################################################################
 
 #no_bg_subtract=True
@@ -684,10 +573,10 @@ def bg_fit(
     # NOTE: We NEVER change the sideband ranges (sb_left/sb_right). Only the
     #       MM signal window [sig_lo, sig_hi] is being shrunk.
     #
-    neg_tol     = inpDict.get("bg_neg_tol", 0.25)    # how negative we tolerate
-    max_refit   = inpDict.get("bg_max_refit", 50)    # max refits per histogram
+    neg_tol     = inpDict.get("bg_neg_tol", 0.1)    # how negative we tolerate
+    max_refit   = inpDict.get("bg_max_refit", 20000)    # max refits per histogram
     shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
-    min_width   = inpDict.get("bg_min_sig_width", 1e-3)  # minimum MM width
+    min_width   = inpDict.get("bg_min_sig_width", 1e-10)  # minimum MM width
 
     orig_sig_lo, orig_sig_hi = sig_lo, sig_hi
     fit_func = None
