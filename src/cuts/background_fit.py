@@ -597,7 +597,7 @@ def bg_fit(
                 )
                 #sys.exit(2)
             except ValueError:
-                    print(
+                print(
                     "ERROR!"
                     f"Bad fit for: {hist_name}"
                     "Closing script..."
