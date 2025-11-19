@@ -568,7 +568,6 @@ def bg_fit(
     fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
     h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    '''
     # ------------------- shape sanity check (new) -------------------------
     # Reject fits that go significantly negative inside the MM *signal window*.
     # sig_lo, sig_hi are already defined above in bg_fit.
@@ -614,7 +613,6 @@ def bg_fit(
         f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
 
         return fit_hist_inrange, fit_vis, bg_par, f_sig
-    '''
         
     # ------------------- proceed with accepted fit ------------------------
     # integral of background under the signal window
