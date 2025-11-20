@@ -482,39 +482,34 @@ def is_good_background_shape(
 
     return True
 
-def adjust_signal_edges_to_positive(
+def move_edges_to_nonnegative(
         fit_func,
         sig_lo,
         sig_hi,
         *,
-        neg_tol=0.25,
-        max_iter=100,
-        step_frac=0.02,
-        min_width=1e-3,
+        neg_tol=0.01,
+        max_iter=1000,
+        step_frac=0.05,
+        min_width=1e-4,
 ):
     """
-    Starting from [sig_lo, sig_hi], iteratively move the edges inward
-    whenever the function is below -neg_tol at that edge.
+    Adjust [sig_lo, sig_hi] so that f(sig_lo) and f(sig_hi) are >= -neg_tol.
 
-    Only the edges are considered:
-      - if f(sig_lo) < -neg_tol, move sig_lo inward;
-      - if f(sig_hi) < -neg_tol, move sig_hi inward;
-      - if both edges are negative, move both.
+    • Uses ONLY the current fit_func (no refitting).
+    • On each iteration, any edge with f(edge) < -neg_tol is moved inward
+      by step_frac * current_width.
+    • Stops when both edges are >= -neg_tol, the window collapses, or
+      max_iter is reached.
 
-    The fit function itself is NOT changed.
-
-    Returns
-    -------
-    (new_lo, new_hi) on success (both edges >= -neg_tol),
-    or (None, None) if the window collapses or max_iter is reached.
+    Returns (new_lo, new_hi) on success, or (None, None) on failure.
     """
     orig_lo, orig_hi = float(sig_lo), float(sig_hi)
 
-    for i in range(max_iter):
+    for it in range(max_iter):
         width = sig_hi - sig_lo
         if width <= min_width:
             print(
-                "[adjust_signal_edges] window collapsed: "
+                f"[move_edges] window collapsed at iter={it}: "
                 f"orig=[{orig_lo:.5f},{orig_hi:.5f}], "
                 f"final=[{sig_lo:.5f},{sig_hi:.5f}], width={width:.5g}"
             )
@@ -524,7 +519,7 @@ def adjust_signal_edges_to_positive(
         f_hi = float(fit_func.Eval(sig_hi))
 
         print(
-            f"[adjust_signal_edges] iter={i} "
+            f"[move_edges] iter={it} "
             f"window=[{sig_lo:.5f},{sig_hi:.5f}] width={width:.5g} "
             f"f_lo={f_lo:.5g} f_hi={f_hi:.5g}"
         )
@@ -532,35 +527,33 @@ def adjust_signal_edges_to_positive(
         # If both edges are above threshold, we are done.
         if (f_lo >= -neg_tol) and (f_hi >= -neg_tol):
             print(
-                "[adjust_signal_edges] success: "
+                f"[move_edges] success after {it} iters: "
                 f"orig=[{orig_lo:.5f},{orig_hi:.5f}] -> "
-                f"new=[{sig_lo:.5f},{sig_hi:.5f}] after {i} iterations"
+                f"new=[{sig_lo:.5f},{sig_hi:.5f}]"
             )
             return sig_lo, sig_hi
 
         step = step_frac * width
 
-        # Move whichever edges are too negative
         if f_lo < -neg_tol:
-            old = sig_lo
-            sig_lo += step
+            new_lo = sig_lo + step
             print(
-                f"  -> move lower edge: {old:.5f} -> {sig_lo:.5f} "
+                f"  -> move lower edge: {sig_lo:.5f} -> {new_lo:.5f} "
                 f"(f_lo={f_lo:.5g})"
             )
+            sig_lo = new_lo
+
         if f_hi < -neg_tol:
-            old = sig_hi
-            sig_hi -= step
+            new_hi = sig_hi - step
             print(
-                f"  -> move upper edge: {old:.5f} -> {sig_hi:.5f} "
+                f"  -> move upper edge: {sig_hi:.5f} -> {new_hi:.5f} "
                 f"(f_hi={f_hi:.5g})"
             )
+            sig_hi = new_hi
 
     print(
-        "[adjust_signal_edges] reached max_iter without both edges "
-        "above threshold: "
-        f"orig=[{orig_lo:.5f},{orig_hi:.5f}], "
-        f"final=[{sig_lo:.5f},{sig_hi:.5f}]"
+        f"[move_edges] max_iter={max_iter} reached without both edges "
+        f"above -neg_tol; final=[{sig_lo:.5f},{sig_hi:.5f}]"
     )
     return None, None
 
@@ -645,91 +638,112 @@ def bg_fit(
             h_sb.SetBinContent(ib, 0.0)
             h_sb.SetBinError(ib, 0.0)
 
-    # ------------------- shape sanity check (new) -------------------------
-    # We want the background to be non-negative (within neg_tol) in the
-    # MM *signal window*. If the global shape test fails, first try to
-    # pull any negative edges inward; only if that fails do we zero out
-    # the background.
-    neg_tol = inpDict.get("bg_neg_tol", 0.25)
+    # ------------------------------ fit once ------------------------------
+    # Define the function over the FULL MM range, but only fit in sidebands.
+    func_min, func_max = mm_min, mm_max
+    fit_min,  fit_max  = sb_left[0], sb_right[1]
 
+    fit_func = TF1("fit_func", model["func_expr"], func_min, func_max)
+    h_sb.Fit(fit_func, "Q0", "", fit_min, fit_max)
+
+    # ----------------------------------------------------------------------
+    # Now enforce: the green background must not go negative in the
+    # signal window. If it does, move negative edges inward until they
+    # are above -neg_tol, then re-check the global shape once.
+    # ----------------------------------------------------------------------
+    neg_tol     = inpDict.get("bg_neg_tol", 0.01)
+    max_refit   = inpDict.get("bg_max_refit", 1000)       # now = max edge moves
+    shrink_frac = inpDict.get("bg_shrink_frac", 0.05)
+    min_width   = inpDict.get("bg_min_sig_width", 1e-4)
+
+    orig_sig_lo, orig_sig_hi = sig_lo, sig_hi
+    shape_ok = True
+
+    # 1) Check original window
     if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+        print(
+            f"[bg_fit] initial shape bad for {hist.GetName()}: "
+            f"window=[{sig_lo:.5f},{sig_hi:.5f}]"
+        )
 
-        # 1) Try to rescue the window by moving negative edges inward.
-        new_sig_lo, new_sig_hi = adjust_signal_edges_to_positive(
+        # 2) Move any negative edges inward (no refit)
+        new_lo, new_hi = move_edges_to_nonnegative(
             fit_func,
             sig_lo,
             sig_hi,
             neg_tol=neg_tol,
+            max_iter=max_refit,
+            step_frac=shrink_frac,
+            min_width=min_width,
         )
 
-        # 2) If we successfully adjusted the edges and the shape is now OK,
-        #    keep the fit and continue with the new window.
-        if (new_sig_lo is not None and
-                is_good_background_shape(fit_func, new_sig_lo, new_sig_hi, neg_tol=neg_tol)):
-
-            if (new_sig_lo != sig_lo) or (new_sig_hi != sig_hi):
+        if new_lo is None:
+            shape_ok = False
+        else:
+            sig_lo, sig_hi = new_lo, new_hi
+            # 3) After edge adjustment, check shape once more
+            if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
+                print(
+                    f"[bg_fit] shape still bad after edge adjustment for "
+                    f"{hist.GetName()}: window=[{sig_lo:.5f},{sig_hi:.5f}]"
+                )
+                shape_ok = False
+            elif (sig_lo != orig_sig_lo) or (sig_hi != orig_sig_hi):
                 print(
                     f"[bg_fit] adjusted signal window for {hist.GetName()}: "
-                    f"[{sig_lo:.5f},{sig_hi:.5f}] -> "
-                    f"[{new_sig_lo:.5f},{new_sig_hi:.5f}]"
+                    f"[{orig_sig_lo:.5f},{orig_sig_hi:.5f}] -> "
+                    f"[{sig_lo:.5f},{sig_hi:.5f}]"
                 )
 
-            sig_lo, sig_hi = new_sig_lo, new_sig_hi
+    # 4) If shape is still bad, fall back to zero background and return
+    if not shape_ok:
+        f_min = float(fit_func.GetMinimum(orig_sig_lo, orig_sig_hi))
+        f_max = float(fit_func.GetMaximum(orig_sig_lo, orig_sig_hi))
 
-        else:
-            # 3) Could not rescue (edges never got acceptable, or interior
-            #    still goes too negative). Fall back to your original
-            #    "zero background" behavior.
-            f_min = float(fit_func.GetMinimum(sig_lo, sig_hi))
-            f_max = float(fit_func.GetMaximum(sig_lo, sig_hi))
+        hist_name = hist.GetName()
+        parts = hist_name.split("_")
 
-            hist_name = hist.GetName()
-            parts = hist_name.split("_")
-            
+        try:
+            tbin = int(parts[-2]) + 1
+            phibin = int(parts[-1]) + 1
+            print(
+                f"Bad fit for: {hist_name}  "
+                f"(tbin={tbin}, phibin={phibin})  "
+                f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+            )
+        except ValueError:
             try:
-                tbin = int(parts[-2]) + 1
-                phibin = int(parts[-1]) + 1
+                tbin = int(parts[-1]) + 1
                 print(
                     f"Bad fit for: {hist_name}  "
-                    f"(tbin={tbin}, phibin={phibin})  "
+                    f"(tbin={tbin})  "
                     f"f_min={f_min:.6g}  f_max={f_max:.6g}"
                 )
             except ValueError:
-                try:
-                    tbin = int(parts[-1]) + 1
-                    print(
-                        f"Bad fit for: {hist_name}  "
-                        f"(tbin={tbin})  "
-                        f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-                    )
-                    #sys.exit(2)
-                except ValueError:
-                    print(
-                        "ERROR!"
-                        f" Bad fit for: {hist_name}  "
-                        "\nClosing script..."
-                    )
-                    sys.exit(2)
+                print(
+                    "ERROR!"
+                    f" Bad fit for: {hist_name}  "
+                    "\nClosing script..."
+                )
+                sys.exit(2)
 
-            # zero background function on the full MM range
-            fit_func_zero = TF1("fit_func_zero_bad", "0", sig_lo, sig_hi)
-            fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
+        fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
+        fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
 
-            # build a zero-valued background histogram on the MM-cut binning
-            fit_hist_inrange = get_fit_histogram_padded(
-                fit_func_zero,
-                hist_mm_cut,
-                mm_min,
-                mm_max,
-                n_pad=0
-            )
+        fit_hist_inrange = get_fit_histogram_padded(
+            fit_func_zero,
+            hist_mm_cut,
+            mm_min,
+            mm_max,
+            n_pad=0
+        )
 
-            bg_par = 0.0
-            f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
+        bg_par = 0.0
+        f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
 
-            return fit_hist_inrange, fit_vis, bg_par, f_sig
+        return fit_hist_inrange, fit_vis, bg_par, f_sig
 
-    # If we get here, fit_func is good on the (possibly shrunken) [sig_lo, sig_hi]
+    # If we get here, fit_func is good on the (possibly adjusted) [sig_lo, sig_hi]
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
         
     # ------------------- proceed with accepted fit ------------------------
