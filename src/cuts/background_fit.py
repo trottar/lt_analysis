@@ -583,9 +583,13 @@ def bg_fit(
 
     for irefit in range(max_refit):
         # (Re)fit on the same sideband histogram each iteration
-        fit_min, fit_max = sb_left[0], sb_right[1]
-        fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
-        h_sb.Fit(fit_func, "Q0")  # quiet, no UI
+        # Define the function over the FULL MM range, but only fit in sidebands.
+        func_min, func_max = mm_min, mm_max          # where TF1 is defined/drawn
+        fit_min,  fit_max  = sb_left[0], sb_right[1] # where we actually fit
+
+        fit_func = TF1("fit_func", model["func_expr"], func_min, func_max)
+        # Fit only in the sidebands [fit_min, fit_max]
+        h_sb.Fit(fit_func, "Q0", "", fit_min, fit_max)
 
         # Check the shape INSIDE THE CURRENT SIGNAL WINDOW
         if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
