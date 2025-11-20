@@ -487,7 +487,7 @@ def shrink_signal_window_to_positive(
         sig_lo,
         sig_hi,
         *,
-        neg_tol=0.005,
+        neg_tol=0.0,
         max_iter=2000,
         step_frac=0.05,
         min_width=1e-4,
