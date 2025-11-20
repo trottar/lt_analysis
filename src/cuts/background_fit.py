@@ -493,6 +493,7 @@ def bg_fit(
         hist,
         hist_mm_cut=None,
         *,
+        scaling=1.0,
         model_key="linear",   # ← just pick a key from BG_MODELS
         fit_name=None
 ):
@@ -715,12 +716,11 @@ def bg_fit(
         bg_par = N_bg / bw
 
     # global scaling of stat errors if user supplied it
-    scale = inpDict.get("bg_stat_scale", 1.0)
-    if scale != 1.0:
+    if scaling != 1.0:
         for ip in range(fit_func.GetNpar()):
-            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scale)
-        N_bg  *= scale
-        bg_par *= scale
+            fit_func.SetParameter(ip, fit_func.GetParameter(ip) * scaling)
+        N_bg  *= scaling
+        bg_par *= scaling
 
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
 
