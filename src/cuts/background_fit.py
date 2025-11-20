@@ -573,7 +573,7 @@ def bg_fit(
     # NOTE: We NEVER change the sideband ranges (sb_left/sb_right). Only the
     #       MM signal window [sig_lo, sig_hi] is being shrunk.
     #
-    neg_tol     = inpDict.get("bg_neg_tol", 0.1)    # how negative we tolerate
+    neg_tol     = inpDict.get("bg_neg_tol", 0.01)    # how negative we tolerate
     max_refit   = inpDict.get("bg_max_refit", 20000)    # max refits per histogram
     shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
     min_width   = inpDict.get("bg_min_sig_width", 1e-10)  # minimum MM width
