@@ -573,7 +573,7 @@ def bg_fit(
     #      and refit, until the function is above -neg_tol or the window
     #      collapses.
     #
-    neg_tol     = inpDict.get("bg_neg_tol", 0.001)      # how negative we tolerate
+    neg_tol     = inpDict.get("bg_neg_tol", 0.0)      # how negative we tolerate
     max_refit   = inpDict.get("bg_max_refit", 2000)   # max refits per histogram
     shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
     min_width   = inpDict.get("bg_min_sig_width", 1e-10)  # minimum BG window width
