@@ -482,78 +482,111 @@ def is_good_background_shape(
 
     return True
 
-def move_edges_to_nonnegative(
+def shrink_signal_window_to_positive(
         fit_func,
         sig_lo,
         sig_hi,
         *,
         neg_tol=0.01,
-        max_iter=1000,
+        max_iter=2000,
         step_frac=0.05,
         min_width=1e-4,
+        min_delta=1e-10,
 ):
     """
-    Adjust [sig_lo, sig_hi] so that f(sig_lo) and f(sig_hi) are >= -neg_tol.
+    Starting from [sig_lo, sig_hi], iteratively shrink the *window* so that
+    the fitted background is never < -neg_tol anywhere in that window.
 
-    • Uses ONLY the current fit_func (no refitting).
-    • On each iteration, any edge with f(edge) < -neg_tol is moved inward
-      by step_frac * current_width.
-    • Stops when both edges are >= -neg_tol, the window collapses, or
-      max_iter is reached.
+    We do NOT refit. We only move the edges inward and keep the same TF1.
+
+    Algorithm:
+      - On each iteration:
+          * If is_good_background_shape(...) is already True, stop.
+          * Otherwise evaluate f at both edges:
+              - If either edge is < -neg_tol, move the more negative edge
+                inward by step_frac * width.
+              - If both edges are >= -neg_tol but the interior is still bad
+                (minimum < -neg_tol), shrink symmetrically.
+      - Stop if:
+          * width < min_width, or
+          * edges stop changing by more than min_delta, or
+          * max_iter reached.
 
     Returns (new_lo, new_hi) on success, or (None, None) on failure.
     """
-    orig_lo, orig_hi = float(sig_lo), float(sig_hi)
+    orig_lo = float(sig_lo)
+    orig_hi = float(sig_hi)
 
-    for it in range(max_iter):
+    for it in range(1, max_iter + 1):
         width = sig_hi - sig_lo
         if width <= min_width:
             print(
-                f"[move_edges] window collapsed at iter={it}: "
+                f"[shrink_window] width <= min_width at iter={it}: "
                 f"orig=[{orig_lo:.5f},{orig_hi:.5f}], "
-                f"final=[{sig_lo:.5f},{sig_hi:.5f}], width={width:.5g}"
+                f"current=[{sig_lo:.5f},{sig_hi:.5f}], width={width:.5g}"
             )
             return None, None
 
-        f_lo = float(fit_func.Eval(sig_lo))
-        f_hi = float(fit_func.Eval(sig_hi))
-
-        print(
-            f"[move_edges] iter={it} "
-            f"window=[{sig_lo:.5f},{sig_hi:.5f}] width={width:.5g} "
-            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g}"
-        )
-
-        # If both edges are above threshold, we are done.
-        if (f_lo >= -neg_tol) and (f_hi >= -neg_tol):
+        # If the shape is already acceptable, we’re done.
+        if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
             print(
-                f"[move_edges] success after {it} iters: "
+                f"[shrink_window] SUCCESS at iter={it}: "
                 f"orig=[{orig_lo:.5f},{orig_hi:.5f}] -> "
                 f"new=[{sig_lo:.5f},{sig_hi:.5f}]"
             )
             return sig_lo, sig_hi
 
+        f_lo = float(fit_func.Eval(sig_lo))
+        f_hi = float(fit_func.Eval(sig_hi))
         step = step_frac * width
 
-        if f_lo < -neg_tol:
-            new_lo = sig_lo + step
-            print(
-                f"  -> move lower edge: {sig_lo:.5f} -> {new_lo:.5f} "
-                f"(f_lo={f_lo:.5g})"
-            )
-            sig_lo = new_lo
+        print(
+            f"[shrink_window] iter={it} "
+            f"window=[{sig_lo:.5f},{sig_hi:.5f}] width={width:.5g} "
+            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5g}"
+        )
 
-        if f_hi < -neg_tol:
-            new_hi = sig_hi - step
+        new_lo = sig_lo
+        new_hi = sig_hi
+
+        # Case 1: an edge is clearly too negative → pull that edge in.
+        if (f_lo < -neg_tol) or (f_hi < -neg_tol):
+            if f_lo <= f_hi:
+                new_lo = sig_lo + step
+                print(
+                    f"  -> move lower edge: {sig_lo:.5f} -> {new_lo:.5f} "
+                    f"(f_lo={f_lo:.5g})"
+                )
+            if f_hi < f_lo:
+                new_hi = sig_hi - step
+                print(
+                    f"  -> move upper edge: {sig_hi:.5f} -> {new_hi:.5f} "
+                    f"(f_hi={f_hi:.5g})"
+                )
+        else:
+            # Case 2: edges are OK but interior is negative → shrink symmetrically.
+            new_lo = sig_lo + 0.5 * step
+            new_hi = sig_hi - 0.5 * step
             print(
-                f"  -> move upper edge: {sig_hi:.5f} -> {new_hi:.5f} "
-                f"(f_hi={f_hi:.5g})"
+                "  -> symmetric shrink: "
+                f"{sig_lo:.5f}-{sig_hi:.5f} -> {new_lo:.5f}-{new_hi:.5f}"
             )
-            sig_hi = new_hi
+
+        moved_lo = abs(new_lo - sig_lo)
+        moved_hi = abs(new_hi - sig_hi)
+        if moved_lo < min_delta and moved_hi < min_delta:
+            print(
+                f"[shrink_window] edges stopped moving at iter={it}: "
+                f"Δlo={moved_lo:.3g}, Δhi={moved_hi:.3g}, "
+                f"current=[{sig_lo:.12g},{sig_hi:.12g}]"
+            )
+            return None, None
+
+        sig_lo, sig_hi = new_lo, new_hi
 
     print(
-        f"[move_edges] max_iter={max_iter} reached without both edges "
-        f"above -neg_tol; final=[{sig_lo:.5f},{sig_hi:.5f}]"
+        f"[shrink_window] reached max_iter={max_iter} without acceptable "
+        f"window; final=[{sig_lo:.5f},{sig_hi:.5f}]"
     )
     return None, None
 
@@ -646,57 +679,29 @@ def bg_fit(
     fit_func = TF1("fit_func", model["func_expr"], func_min, func_max)
     h_sb.Fit(fit_func, "Q0", "", fit_min, fit_max)
 
-    # ----------------------------------------------------------------------
-    # Now enforce: the green background must not go negative in the
-    # signal window. If it does, move negative edges inward until they
-    # are above -neg_tol, then re-check the global shape once.
-    # ----------------------------------------------------------------------
+    # -------------------------- shrink signal window ----------------------
     neg_tol     = inpDict.get("bg_neg_tol", 0.01)
-    max_refit   = inpDict.get("bg_max_refit", 1000)       # now = max edge moves
+    max_refit   = inpDict.get("bg_max_refit", 2000)       # reuse as max shrink iters
     shrink_frac = inpDict.get("bg_shrink_frac", 0.05)
     min_width   = inpDict.get("bg_min_sig_width", 1e-4)
 
     orig_sig_lo, orig_sig_hi = sig_lo, sig_hi
-    shape_ok = True
 
-    # 1) Check original window
-    if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
-        print(
-            f"[bg_fit] initial shape bad for {hist.GetName()}: "
-            f"window=[{sig_lo:.5f},{sig_hi:.5f}]"
-        )
+    new_sig_lo, new_sig_hi = shrink_signal_window_to_positive(
+        fit_func,
+        sig_lo,
+        sig_hi,
+        neg_tol=neg_tol,
+        max_iter=max_refit,
+        step_frac=shrink_frac,
+        min_width=min_width,
+        min_delta=1e-10,
+    )
 
-        # 2) Move any negative edges inward (no refit)
-        new_lo, new_hi = move_edges_to_nonnegative(
-            fit_func,
-            sig_lo,
-            sig_hi,
-            neg_tol=neg_tol,
-            max_iter=max_refit,
-            step_frac=shrink_frac,
-            min_width=min_width,
-        )
+    if (new_sig_lo is None or new_sig_hi is None):
+        # Could not find a non-negative window; fall back to zero background,
+        # exactly like your previous "bad fit" path.
 
-        if new_lo is None:
-            shape_ok = False
-        else:
-            sig_lo, sig_hi = new_lo, new_hi
-            # 3) After edge adjustment, check shape once more
-            if not is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
-                print(
-                    f"[bg_fit] shape still bad after edge adjustment for "
-                    f"{hist.GetName()}: window=[{sig_lo:.5f},{sig_hi:.5f}]"
-                )
-                shape_ok = False
-            elif (sig_lo != orig_sig_lo) or (sig_hi != orig_sig_hi):
-                print(
-                    f"[bg_fit] adjusted signal window for {hist.GetName()}: "
-                    f"[{orig_sig_lo:.5f},{orig_sig_hi:.5f}] -> "
-                    f"[{sig_lo:.5f},{sig_hi:.5f}]"
-                )
-
-    # 4) If shape is still bad, fall back to zero background and return
-    if not shape_ok:
         f_min = float(fit_func.GetMinimum(orig_sig_lo, orig_sig_hi))
         f_max = float(fit_func.GetMaximum(orig_sig_lo, orig_sig_hi))
 
@@ -739,11 +744,21 @@ def bg_fit(
         )
 
         bg_par = 0.0
-        f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
+        f_sig = 1.0
 
         return fit_hist_inrange, fit_vis, bg_par, f_sig
 
-    # If we get here, fit_func is good on the (possibly adjusted) [sig_lo, sig_hi]
+    # Use the adjusted, non-negative signal window
+    if (new_sig_lo != orig_sig_lo) or (new_sig_hi != orig_sig_hi):
+        print(
+            f"[bg_fit] adjusted signal window for {hist.GetName()}: "
+            f"[{orig_sig_lo:.5f},{orig_sig_hi:.5f}] -> "
+            f"[{new_sig_lo:.5f},{new_sig_hi:.5f}]"
+        )
+
+    sig_lo, sig_hi = new_sig_lo, new_sig_hi
+
+    # At this point, is_good_background_shape is guaranteed inside the window.
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
         
     # ------------------- proceed with accepted fit ------------------------
