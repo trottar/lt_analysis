@@ -579,7 +579,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale1"] = 0.25        
+        inpDict["bg_stat_scale1"] = 0.85        
         
         if inpDict["bg_stat_scale1"] > 0.0:
             fitDict["background_data_fit1_{}".format(j)] = bg_fit(
@@ -592,12 +592,12 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             )
             # ----------------------------------------------------------------
 
-            hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][1], -1)
-            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)  
+            hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3]*inpDict["bg_stat_scale1"])
+            hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3]*inpDict["bg_stat_scale1"])
+            hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3]*inpDict["bg_stat_scale1"])
+            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3]*inpDict["bg_stat_scale1"])
+            hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][1]*inpDict["bg_stat_scale1"], -1)
+            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0]*inpDict["bg_stat_scale1"], -1)  
 
             # Remove histograms with less than event_threshold entries and negative integrals  
             prune_hist(
@@ -636,11 +636,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             )
             # ----------------------------------------------------------------
 
-            hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)  
+            hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3]*inpDict["bg_stat_scale2"])
+            hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3]*inpDict["bg_stat_scale2"])
+            hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3]*inpDict["bg_stat_scale2"])
+            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3]*inpDict["bg_stat_scale2"])
+            hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0]*inpDict["bg_stat_scale2"], -1)  
 
             # Remove histograms with less than event_threshold entries and negative integrals
             prune_hist(
