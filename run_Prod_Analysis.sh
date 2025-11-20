@@ -80,7 +80,7 @@ formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 DEBUG="False" # Flag for no plot splash
 #DEBUG="True" # Flag for plot splash
 
-RATIO_THRESHOLD_SPREAD=25 # Threshold spread of ratio in percent for automated iteration algorithm
+RATIO_THRESHOLD_SPREAD=15 # Threshold spread of ratio in percent for automated iteration algorithm
 
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
