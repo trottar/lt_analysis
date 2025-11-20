@@ -52,7 +52,7 @@ BG_MODELS = {
             "Fit 1" : {
                 # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "fixquad_Center_lowe": {
-                    # quadratic, forced to be 0 at x = 1.15
+                    # quadratic, forced to be 0 at x = 1.12
                     "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
                     "n_par":      2,                    
                     "sidebands": {                
