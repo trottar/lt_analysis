@@ -575,7 +575,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale1"] = 0.85
+            inpDict["bg_stat_scale1"] = 0.25
             # ----------------------------------------------------------------
 
             if inpDict["bg_stat_scale1"] > 0.0:
@@ -647,7 +647,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale"] = 0.85
+            inpDict["bg_stat_scale"] = 0.25
             # ----------------------------------------------------------------
 
             if inpDict["bg_stat_scale"] > 0.0:
