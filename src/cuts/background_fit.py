@@ -671,39 +671,98 @@ def bg_fit(
             h_sb.SetBinContent(ib, 0.0)
             h_sb.SetBinError(ib, 0.0)
 
-    # ------------------------------ fit once ------------------------------
-    # Define the function over the FULL MM range, but only fit in sidebands.
-    func_min, func_max = mm_min, mm_max
-    fit_min,  fit_max  = sb_left[0], sb_right[1]
+    # ------------------------------ fit + shape rescue -------------------
+    # We will:
+    #   1) Fit the sidebands defined in BG_MODELS.
+    #   2) Check the background shape ONLY between the BG_MODELS bounds:
+    #          [sb_left[0], sb_right[1]]
+    #      i.e. exactly the x–range where the green fit is drawn.
+    #   3) If the fit goes negative at those bounds, pull those bounds inward
+    #      and refit, until the function is above -neg_tol or the window
+    #      collapses.
+    #
+    neg_tol     = inpDict.get("bg_neg_tol", 0.01)      # how negative we tolerate
+    max_refit   = inpDict.get("bg_max_refit", 20000)   # max refits per histogram
+    shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
+    min_width   = inpDict.get("bg_min_sig_width", 1e-10)  # minimum BG window width
 
-    fit_func = TF1("fit_func", model["func_expr"], func_min, func_max)
-    h_sb.Fit(fit_func, "Q0", "", fit_min, fit_max)
+    # Background SHAPE window = BG_MODELS bounds (this is what you care about)
+    bg_lo = sb_left[0]
+    bg_hi = sb_right[1]
+    orig_bg_lo, orig_bg_hi = bg_lo, bg_hi
 
-    # -------------------------- shrink signal window ----------------------
-    neg_tol     = inpDict.get("bg_neg_tol", 0.01)
-    max_refit   = inpDict.get("bg_max_refit", 2000)       # reuse as max shrink iters
-    shrink_frac = inpDict.get("bg_shrink_frac", 0.05)
-    min_width   = inpDict.get("bg_min_sig_width", 1e-4)
+    fit_func = None
 
-    orig_sig_lo, orig_sig_hi = sig_lo, sig_hi
+    for irefit in range(max_refit):
+        # (Re)fit on the same sideband histogram each iteration
+        fit_min, fit_max = sb_left[0], sb_right[1]
+        fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
+        h_sb.Fit(fit_func, "Q0")  # quiet, no UI
 
-    new_sig_lo, new_sig_hi = shrink_signal_window_to_positive(
-        fit_func,
-        sig_lo,
-        sig_hi,
-        neg_tol=neg_tol,
-        max_iter=max_refit,
-        step_frac=shrink_frac,
-        min_width=min_width,
-        min_delta=1e-10,
-    )
+        # Check the shape INSIDE THE BG_MODELS BOUNDS [bg_lo, bg_hi]
+        if is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
+            if irefit > 0:
+                print(
+                    f"[bg_fit] rescued background for {hist.GetName()}: "
+                    f"BG window {orig_bg_lo:.3f}-{orig_bg_hi:.3f} "
+                    f"-> {bg_lo:.3f}-{bg_hi:.3f} after {irefit} refits"
+                )
+            break  # good shape, keep this fit + BG window
 
-    if (new_sig_lo is None or new_sig_hi is None):
-        # Could not find a non-negative window; fall back to zero background,
-        # exactly like your previous "bad fit" path.
+        # Shape still bad ⇒ shrink the BG window and try again
+        width = bg_hi - bg_lo
+        if width <= min_width:
+            print(
+                f"[bg_fit] unable to rescue {hist.GetName()}: "
+                f"BG window collapsed (width={width:.4g} <= {min_width:.4g})"
+            )
+            fit_func = None
+            break
 
-        f_min = float(fit_func.GetMinimum(orig_sig_lo, orig_sig_hi))
-        f_max = float(fit_func.GetMaximum(orig_sig_lo, orig_sig_hi))
+        f_lo = float(fit_func.Eval(bg_lo))
+        f_hi = float(fit_func.Eval(bg_hi))
+        step = shrink_frac * width
+
+        print(
+            f"[bg_fit] refit {irefit}: "
+            f"BG window=[{bg_lo:.5f},{bg_hi:.5f}] width={width:.5g} "
+            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5g}"
+        )
+
+        # If one edge is clearly more negative, pull that edge in.
+        if (f_lo < -neg_tol) or (f_hi < -neg_tol):
+            if f_lo <= f_hi:
+                print(
+                    f"  -> shrink lower BG edge: {bg_lo:.5f} -> {bg_lo + step:.5f} "
+                    f"(f_lo={f_lo:.5g})"
+                )
+                bg_lo += step
+            if f_hi < f_lo:
+                print(
+                    f"  -> shrink upper BG edge: {bg_hi:.5f} -> {bg_hi - step:.5f} "
+                    f"(f_hi={f_hi:.5g})"
+                )
+                bg_hi -= step
+        else:
+            # Edges are OK but the interior in [bg_lo, bg_hi] is still bad:
+            # shrink symmetrically.
+            new_lo = bg_lo + 0.5 * step
+            new_hi = bg_hi - 0.5 * step
+            print(
+                "  -> symmetric BG shrink: "
+                f"{bg_lo:.5f}-{bg_hi:.5f} -> {new_lo:.5f}-{new_hi:.5f}"
+            )
+            bg_lo, bg_hi = new_lo, new_hi
+
+    # After the loop, if we still have no acceptable fit, fall back to zero BG
+    if fit_func is None or not is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
+        # For debug, look at the shape on the ORIGINAL BG window if possible
+        if fit_func is not None:
+            f_min = float(fit_func.GetMinimum(orig_bg_lo, orig_bg_hi))
+            f_max = float(fit_func.GetMaximum(orig_bg_lo, orig_bg_hi))
+        else:
+            f_min = float("nan")
+            f_max = float("nan")
 
         hist_name = hist.GetName()
         parts = hist_name.split("_")
@@ -732,6 +791,7 @@ def bg_fit(
                 )
                 sys.exit(2)
 
+        # Zero background over the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
         fit_vis = fit_func_zero.Clone(f"{hist.GetName()}_bg_vis")
 
@@ -744,21 +804,11 @@ def bg_fit(
         )
 
         bg_par = 0.0
-        f_sig = 1.0
+        f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
 
         return fit_hist_inrange, fit_vis, bg_par, f_sig
 
-    # Use the adjusted, non-negative signal window
-    if (new_sig_lo != orig_sig_lo) or (new_sig_hi != orig_sig_hi):
-        print(
-            f"[bg_fit] adjusted signal window for {hist.GetName()}: "
-            f"[{orig_sig_lo:.5f},{orig_sig_hi:.5f}] -> "
-            f"[{new_sig_lo:.5f},{new_sig_hi:.5f}]"
-        )
-
-    sig_lo, sig_hi = new_sig_lo, new_sig_hi
-
-    # At this point, is_good_background_shape is guaranteed inside the window.
+    # If we get here, fit_func is good on the (possibly shrunken) BG window.
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
         
     # ------------------- proceed with accepted fit ------------------------
