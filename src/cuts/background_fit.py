@@ -482,114 +482,6 @@ def is_good_background_shape(
 
     return True
 
-def shrink_signal_window_to_positive(
-        fit_func,
-        sig_lo,
-        sig_hi,
-        *,
-        neg_tol=0.0,
-        max_iter=2000,
-        step_frac=0.05,
-        min_width=1e-4,
-        min_delta=1e-10,
-):
-    """
-    Starting from [sig_lo, sig_hi], iteratively shrink the *window* so that
-    the fitted background is never < -neg_tol anywhere in that window.
-
-    We do NOT refit. We only move the edges inward and keep the same TF1.
-
-    Algorithm:
-      - On each iteration:
-          * If is_good_background_shape(...) is already True, stop.
-          * Otherwise evaluate f at both edges:
-              - If either edge is < -neg_tol, move the more negative edge
-                inward by step_frac * width.
-              - If both edges are >= -neg_tol but the interior is still bad
-                (minimum < -neg_tol), shrink symmetrically.
-      - Stop if:
-          * width < min_width, or
-          * edges stop changing by more than min_delta, or
-          * max_iter reached.
-
-    Returns (new_lo, new_hi) on success, or (None, None) on failure.
-    """
-    orig_lo = float(sig_lo)
-    orig_hi = float(sig_hi)
-
-    for it in range(1, max_iter + 1):
-        width = sig_hi - sig_lo
-        if width <= min_width:
-            print(
-                f"[shrink_window] width <= min_width at iter={it}: "
-                f"orig=[{orig_lo:.5f},{orig_hi:.5f}], "
-                f"current=[{sig_lo:.5f},{sig_hi:.5f}], width={width:.5g}"
-            )
-            return None, None
-
-        # If the shape is already acceptable, we’re done.
-        if is_good_background_shape(fit_func, sig_lo, sig_hi, neg_tol=neg_tol):
-            print(
-                f"[shrink_window] SUCCESS at iter={it}: "
-                f"orig=[{orig_lo:.5f},{orig_hi:.5f}] -> "
-                f"new=[{sig_lo:.5f},{sig_hi:.5f}]"
-            )
-            return sig_lo, sig_hi
-
-        f_lo = float(fit_func.Eval(sig_lo))
-        f_hi = float(fit_func.Eval(sig_hi))
-        step = step_frac * width
-
-        print(
-            f"[shrink_window] iter={it} "
-            f"window=[{sig_lo:.5f},{sig_hi:.5f}] width={width:.5g} "
-            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5g}"
-        )
-
-        new_lo = sig_lo
-        new_hi = sig_hi
-
-        # Case 1: an edge is clearly too negative → pull that edge in.
-        if (f_lo < -neg_tol) or (f_hi < -neg_tol):
-            if f_lo <= f_hi:
-                new_lo = sig_lo + step
-                print(
-                    f"  -> move lower edge: {sig_lo:.5f} -> {new_lo:.5f} "
-                    f"(f_lo={f_lo:.5g})"
-                )
-            if f_hi < f_lo:
-                new_hi = sig_hi - step
-                print(
-                    f"  -> move upper edge: {sig_hi:.5f} -> {new_hi:.5f} "
-                    f"(f_hi={f_hi:.5g})"
-                )
-        else:
-            # Case 2: edges are OK but interior is negative → shrink symmetrically.
-            new_lo = sig_lo + 0.5 * step
-            new_hi = sig_hi - 0.5 * step
-            print(
-                "  -> symmetric shrink: "
-                f"{sig_lo:.5f}-{sig_hi:.5f} -> {new_lo:.5f}-{new_hi:.5f}"
-            )
-
-        moved_lo = abs(new_lo - sig_lo)
-        moved_hi = abs(new_hi - sig_hi)
-        if moved_lo < min_delta and moved_hi < min_delta:
-            print(
-                f"[shrink_window] edges stopped moving at iter={it}: "
-                f"Δlo={moved_lo:.3g}, Δhi={moved_hi:.3g}, "
-                f"current=[{sig_lo:.12g},{sig_hi:.12g}]"
-            )
-            return None, None
-
-        sig_lo, sig_hi = new_lo, new_hi
-
-    print(
-        f"[shrink_window] reached max_iter={max_iter} without acceptable "
-        f"window; final=[{sig_lo:.5f},{sig_hi:.5f}]"
-    )
-    return None, None
-
 ################################################################################################################################################
 
 #no_bg_subtract=True
@@ -681,8 +573,8 @@ def bg_fit(
     #      and refit, until the function is above -neg_tol or the window
     #      collapses.
     #
-    neg_tol     = inpDict.get("bg_neg_tol", 0.01)      # how negative we tolerate
-    max_refit   = inpDict.get("bg_max_refit", 20000)   # max refits per histogram
+    neg_tol     = inpDict.get("bg_neg_tol", 0.001)      # how negative we tolerate
+    max_refit   = inpDict.get("bg_max_refit", 2000)   # max refits per histogram
     shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
     min_width   = inpDict.get("bg_min_sig_width", 1e-10)  # minimum BG window width
 
