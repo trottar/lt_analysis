@@ -126,9 +126,9 @@ for t in "${TARGET[@]}"; do
 			    echo "Running ${number}"
 			    cd "${LTANAPATH}"
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
-				jcache get ${rootfile}
-			    #./applyCuts_Prod.sh -pm ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
-				#./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
+				#jcache get ${rootfile}
+			    ./applyCuts_Prod.sh -pm ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
+				./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
 			done
 			break ;;
 		    [Nn]* ) 
