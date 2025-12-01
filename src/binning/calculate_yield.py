@@ -615,8 +615,12 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     N_data_raw = N_sig_norm / normfac_data
 
                     if N_bg_raw > 0.0 and N_data_raw > 0.0:
-                        # fractional error δY/Y from the background term
-                        bg_fit1_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
+                        # covariance-propagated background integral uncertainty from bg_fit(...)
+                        N_bg_norm_err = 0.0
+                        if len(fitDict[f"background_fit1_{j}_{k}"]) > 4:
+                            N_bg_norm_err = fitDict[f"background_fit1_{j}_{k}"][4]
+                        N_bg_raw_err = N_bg_norm_err / normfac_data  # same raw-count convention
+                        bg_fit1_frac_err[j][k] = (N_bg_raw_err / N_data_raw) if (N_data_raw > 0.0) else 0.0
                     else:
                         bg_fit1_frac_err[j][k] = 0.0
                 except KeyError:
@@ -686,8 +690,12 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     N_data_raw = N_sig_norm / normfac_data
 
                     if N_bg_raw > 0.0 and N_data_raw > 0.0:
-                        # fractional error δY/Y from the background term
-                        bg_fit2_frac_err[j][k] = math.sqrt(N_bg_raw) / N_data_raw
+                        # covariance-propagated background integral uncertainty from bg_fit(...)
+                        N_bg_norm_err = 0.0
+                        if len(fitDict[f"background_fit2_{j}_{k}"]) > 4:
+                            N_bg_norm_err = fitDict[f"background_fit2_{j}_{k}"][4]
+                        N_bg_raw_err = N_bg_norm_err / normfac_data  # same raw-count convention
+                        bg_fit2_frac_err[j][k] = (N_bg_raw_err / N_data_raw) if (N_data_raw > 0.0) else 0.0
                     else:
                         bg_fit2_frac_err[j][k] = 0.0
                 except KeyError:

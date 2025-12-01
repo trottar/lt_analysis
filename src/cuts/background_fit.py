@@ -482,6 +482,82 @@ def is_good_background_shape(
 
     return True
 
+def bg_integral_norm_and_err_from_cov(
+        fit_func,
+        fit_res,
+        hist_ref,
+        x_min,
+        x_max,
+        *,
+        ref_binwidth,
+        allow_negative=False
+):
+    """
+    Returns (N_bg_norm, dN_bg_norm) where N_bg_norm matches the sum of bin-contents
+    produced by get_fit_histogram_padded(..., n_pad=0) over [x_min, x_max].
+
+    Error is propagated from the fit covariance:
+        Var(N) = grad^T * Cov * grad
+    where grad_i = dN/dp_i computed by finite differences.
+    """
+    if fit_res is None:
+        return 0.0, 0.0
+
+    ax = hist_ref.GetXaxis()
+    nb = ax.GetNbins()
+    bw = float(ref_binwidth) if (ref_binwidth is not None and ref_binwidth > 0.0) else float(ax.GetBinWidth(1))
+
+    i_lo = max(1,  ax.FindBin(x_min))
+    i_hi = min(nb, ax.FindBin(x_max))
+
+    def eval_N():
+        tot = 0.0
+        for ib in range(i_lo, i_hi + 1):
+            x_lo = ax.GetBinLowEdge(ib)
+            x_hi = x_lo + ax.GetBinWidth(ib)
+            y_pred = fit_func.Integral(x_lo, x_hi) / bw
+            if (not allow_negative) and (y_pred < 0.0):
+                y_pred = 0.0
+            tot += y_pred
+        return tot
+
+    N0 = eval_N()
+
+    npar = fit_func.GetNpar()
+    cov = fit_res.GetCovarianceMatrix()
+
+    grads = np.zeros(npar, dtype=float)
+
+    # finite-difference derivatives dN/dp_i
+    for ip in range(npar):
+        p0 = float(fit_func.GetParameter(ip))
+        pe = float(fit_func.GetParError(ip))
+
+        # step size: tied to fit uncertainty if available, else scale with parameter magnitude
+        dp = 0.1 * pe if pe > 0.0 else 1e-4 * (abs(p0) + 1.0)
+        dp = max(dp, 1e-8)
+
+        fit_func.SetParameter(ip, p0 + dp)
+        Np = eval_N()
+
+        fit_func.SetParameter(ip, p0 - dp)
+        Nm = eval_N()
+
+        fit_func.SetParameter(ip, p0)  # restore
+        grads[ip] = (Np - Nm) / (2.0 * dp)
+
+    # Var(N) = g^T C g
+    var = 0.0
+    for i in range(npar):
+        for j in range(npar):
+            try:
+                cij = float(cov[i][j])
+            except Exception:
+                cij = float(cov(i, j))
+            var += grads[i] * cij * grads[j]
+
+    return N0, math.sqrt(max(0.0, var))
+
 ################################################################################################################################################
 
 #no_bg_subtract=True
@@ -549,7 +625,7 @@ def bg_fit(
         fit_vis  = fit_func.Clone(f"{hist.GetName()}_bg_vis")
         bg_par   = 0.0
         f_sig    = 1.0  # keep everything as "signal"
-        return fit_func, fit_vis, bg_par, f_sig
+        return fit_func, fit_vis, bg_par, f_sig, 0.0
 
     # -------------------------- mask to side-bands ------------------------
     h_sb = hist.Clone(hist.GetName() + "_sb")
@@ -585,12 +661,13 @@ def bg_fit(
     orig_bg_lo, orig_bg_hi = bg_lo, bg_hi
 
     fit_func = None
+    fit_res = None  # keep TFitResultPtr for covariance
 
     for irefit in range(max_refit):
         # (Re)fit on the same sideband histogram each iteration
         fit_min, fit_max = sb_left[0], sb_right[1]
         fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
-        h_sb.Fit(fit_func, "Q0")  # quiet, no UI
+        fit_res = h_sb.Fit(fit_func, "SQ0")  # S: keep fit result (covariance) + quiet
 
         # Check the shape INSIDE THE BG_MODELS BOUNDS [bg_lo, bg_hi]
         if is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
@@ -699,7 +776,7 @@ def bg_fit(
         bg_par = 0.0
         f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
 
-        return fit_hist_inrange, fit_vis, bg_par, f_sig
+        return fit_hist_inrange, fit_vis, bg_par, f_sig, 0.0
 
     # If we get here, fit_func is good on the (possibly shrunken) BG window.
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")
@@ -746,5 +823,25 @@ def bg_fit(
         ref_binwidth=bw
     )
 
-    # NOTE: now returning 4 values instead of 3
-    return fit_hist_inrange, fit_vis, bg_par, f_sig
+    # --- background integral uncertainty (covariance-propagated) ---
+    # matches how calculate_yield currently uses bg_hist.Integral()
+    bw_for_norm = hist.GetBinWidth(1)
+    if bw_for_norm <= 0.0:
+        bw_for_norm = hist_mm_cut.GetXaxis().GetBinWidth(1)
+
+    _, N_bg_norm_err = bg_integral_norm_and_err_from_cov(
+        fit_func,
+        fit_res,
+        hist_mm_cut,
+        mm_min,
+        mm_max,
+        ref_binwidth=bw_for_norm,
+        allow_negative=False
+    )
+
+    # if you apply a global scaling to the fit, scale the uncertainty the same way
+    if scaling != 1.0:
+        N_bg_norm_err *= abs(scaling)
+
+    return fit_hist_inrange, fit_vis, bg_par, f_sig, N_bg_norm_err
+
