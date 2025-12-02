@@ -77,13 +77,13 @@ W="2p32"
 
 KIN="Q${Q2}W${W}"
 
-TARGET=("LH2" "dummy")
-EPS=("high" "low")
-PHISET=("center" "left" "right")
-
-#TARGET=("LH2")
+#TARGET=("LH2" "dummy")
 #EPS=("high" "low")
 #PHISET=("center" "left" "right")
+
+TARGET=("LH2")
+EPS=("high")
+PHISET=("center" "right")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
