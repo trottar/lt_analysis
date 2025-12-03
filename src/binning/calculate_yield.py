@@ -596,17 +596,13 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 # Estimate fractional yield uncertainty from background_fit1
                 try:
-                    # Background histogram in the MM DATA axis from the first fit
-                    bg_hist = fitDict[f"background_fit1_{j}_{k}"][0]
+                    # fit output tuple: (bg_hist, fit_vis, bg_par, f_sig, N_bg_norm_err)
+                    fit_out = fitDict[f"background_fit1_{j}_{k}"]
 
-                    # Background yield in normalized units (same convention as H_MM_DATA)
-                    N_bg_norm = bg_hist.Integral()
-                    if N_bg_norm < 0.0:
-                        N_bg_norm = 0.0
-
-                    # Convert background yield back to (approximate) raw counts,
-                    # same convention as used in yld_data_err (arr_data / normfac_data)
-                    N_bg_raw = N_bg_norm / normfac_data
+                    # normalized background integral uncertainty from covariance propagation
+                    N_bg_norm_err = fit_out[4] if (len(fit_out) > 4) else 0.0
+                    if N_bg_norm_err is None or N_bg_norm_err < 0.0:
+                        N_bg_norm_err = 0.0
 
                     # Signal yield (in this t,phi bin) from the t-distribution
                     N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
@@ -614,18 +610,16 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         N_sig_norm = 0.0
                     N_data_raw = N_sig_norm / normfac_data
 
-                    if N_bg_raw > 0.0 and N_data_raw > 0.0:
-                        # covariance-propagated background integral uncertainty from bg_fit(...)
-                        N_bg_norm_err = 0.0
-                        if len(fitDict[f"background_fit1_{j}_{k}"]) > 4:
-                            N_bg_norm_err = fitDict[f"background_fit1_{j}_{k}"][4]
-                        N_bg_raw_err = N_bg_norm_err / normfac_data  # same raw-count convention
-                        bg_fit1_frac_err[j][k] = (N_bg_raw_err / N_data_raw) if (N_data_raw > 0.0) else 0.0
+                    # Convert bg uncertainty to the same "raw count" convention used elsewhere
+                    N_bg_raw_err = N_bg_norm_err / normfac_data
+
+                    if N_data_raw > 0.0:
+                        bg_fit1_frac_err[j][k] = N_bg_raw_err / N_data_raw
                     else:
                         bg_fit1_frac_err[j][k] = 0.0
+
                 except KeyError:
-                    # No fit stored for this bin
-                    bg_fit1_frac_err[j][k] = 0.0            
+                    bg_fit1_frac_err[j][k] = 0.0         
 
                 # Remove histograms with less than event_threshold entries and negative integrals
                 prune_hist(
@@ -671,36 +665,26 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 # Estimate fractional yield uncertainty from background_fit2
                 try:
-                    # Background histogram in the MM DATA axis from the first fit
-                    bg_hist = fitDict[f"background_fit2_{j}_{k}"][0]
+                    fit_out = fitDict[f"background_fit2_{j}_{k}"]
 
-                    # Background yield in normalized units (same convention as H_MM_DATA)
-                    N_bg_norm = bg_hist.Integral()
-                    if N_bg_norm < 0.0:
-                        N_bg_norm = 0.0
+                    N_bg_norm_err = fit_out[4] if (len(fit_out) > 4) else 0.0
+                    if N_bg_norm_err is None or N_bg_norm_err < 0.0:
+                        N_bg_norm_err = 0.0
 
-                    # Convert background yield back to (approximate) raw counts,
-                    # same convention as used in yld_data_err (arr_data / normfac_data)
-                    N_bg_raw = N_bg_norm / normfac_data
-
-                    # Signal yield (in this t,phi bin) from the t-distribution
                     N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
                     if N_sig_norm < 0.0:
                         N_sig_norm = 0.0
                     N_data_raw = N_sig_norm / normfac_data
 
-                    if N_bg_raw > 0.0 and N_data_raw > 0.0:
-                        # covariance-propagated background integral uncertainty from bg_fit(...)
-                        N_bg_norm_err = 0.0
-                        if len(fitDict[f"background_fit2_{j}_{k}"]) > 4:
-                            N_bg_norm_err = fitDict[f"background_fit2_{j}_{k}"][4]
-                        N_bg_raw_err = N_bg_norm_err / normfac_data  # same raw-count convention
-                        bg_fit2_frac_err[j][k] = (N_bg_raw_err / N_data_raw) if (N_data_raw > 0.0) else 0.0
+                    N_bg_raw_err = N_bg_norm_err / normfac_data
+
+                    if N_data_raw > 0.0:
+                        bg_fit2_frac_err[j][k] = N_bg_raw_err / N_data_raw
                     else:
                         bg_fit2_frac_err[j][k] = 0.0
+
                 except KeyError:
-                    # No fit stored for this bin
-                    bg_fit2_frac_err[j][k] = 0.0   
+                    bg_fit2_frac_err[j][k] = 0.0
 
                 # Remove histograms with less than event_threshold entries and negative integrals
                 prune_hist(

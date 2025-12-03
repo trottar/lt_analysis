@@ -496,13 +496,14 @@ def bg_integral_norm_and_err_from_cov(
     Returns (N_bg_norm, dN_bg_norm) where N_bg_norm matches the sum of bin-contents
     produced by get_fit_histogram_padded(..., n_pad=0) over [x_min, x_max].
 
-    Error is propagated from the fit covariance:
+    Error is propagated from the fit covariance when available:
         Var(N) = grad^T * Cov * grad
-    where grad_i = dN/dp_i computed by finite differences.
-    """
-    if fit_res is None:
-        return 0.0, 0.0
+    with grad_i = dN/dp_i from finite differences.
 
+    If covariance is unavailable (failed fit / nullptr / PyROOT issues), falls back to
+    diagonal-only propagation using TF1 parameter errors:
+        Var(N) ≈ Σ_i (dN/dp_i)^2 * σ_i^2
+    """
     ax = hist_ref.GetXaxis()
     nb = ax.GetNbins()
     bw = float(ref_binwidth) if (ref_binwidth is not None and ref_binwidth > 0.0) else float(ax.GetBinWidth(1))
@@ -524,7 +525,14 @@ def bg_integral_norm_and_err_from_cov(
     N0 = eval_N()
 
     npar = fit_func.GetNpar()
-    cov = fit_res.GetCovarianceMatrix()
+
+    # Try to obtain covariance; if not available, we will do diagonal-only propagation
+    cov = None
+    if fit_res is not None:
+        try:
+            cov = fit_res.GetCovarianceMatrix()
+        except Exception:
+            cov = None
 
     grads = np.zeros(npar, dtype=float)
 
@@ -546,15 +554,20 @@ def bg_integral_norm_and_err_from_cov(
         fit_func.SetParameter(ip, p0)  # restore
         grads[ip] = (Np - Nm) / (2.0 * dp)
 
-    # Var(N) = g^T C g
+    # Full covariance propagation when available; otherwise diagonal-only fallback
     var = 0.0
-    for i in range(npar):
-        for j in range(npar):
-            try:
-                cij = float(cov[i][j])
-            except Exception:
-                cij = float(cov(i, j))
-            var += grads[i] * cij * grads[j]
+    if cov is not None:
+        for i in range(npar):
+            for j in range(npar):
+                try:
+                    cij = float(cov[i][j])
+                except Exception:
+                    cij = float(cov(i, j))
+                var += grads[i] * cij * grads[j]
+    else:
+        for i in range(npar):
+            pe = float(fit_func.GetParError(i))
+            var += (grads[i] * pe) ** 2
 
     return N0, math.sqrt(max(0.0, var))
 
@@ -667,7 +680,14 @@ def bg_fit(
         # (Re)fit on the same sideband histogram each iteration
         fit_min, fit_max = sb_left[0], sb_right[1]
         fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
-        fit_res = h_sb.Fit(fit_func, "SQ0")  # S: keep fit result (covariance) + quiet
+        fit_res_ptr = h_sb.Fit(fit_func, "SQ0")  # S: keep fit result (covariance) + quiet
+        fit_res = None
+        try:
+            fit_res = fit_res_ptr.Get()  # nullptr if fit failed
+            if not fit_res:
+                fit_res = None
+        except Exception:
+            fit_res = None
 
         # Check the shape INSIDE THE BG_MODELS BOUNDS [bg_lo, bg_hi]
         if is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
