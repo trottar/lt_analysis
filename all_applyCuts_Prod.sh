@@ -81,9 +81,9 @@ KIN="Q${Q2}W${W}"
 #EPS=("high" "low")
 #PHISET=("center" "left" "right")
 
-TARGET=("LH2")
-EPS=("high")
-PHISET=("center" "right")
+TARGET=("dummy")
+EPS=("high" "low")
+PHISET=("center" "left" "right")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
