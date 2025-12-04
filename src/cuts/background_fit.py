@@ -822,7 +822,9 @@ def bg_fit(
         bg_par = 0.0
         f_sig = 1.0  # 0.0 remove bin, 1.0 dont apply subtraction
 
-        return fit_hist_inrange, fit_vis, bg_par, f_sig, 0.0
+        # Return NaN so calculate_yield flags this bin with large (100%) BG fractional uncertainty
+        return fit_hist_inrange, fit_vis, bg_par, f_sig, float("nan")
+
 
     # If we get here, fit_func is good on the (possibly shrunken) BG window.
     fit_vis = fit_func.Clone(f"{hist.GetName()}_bg_vis")

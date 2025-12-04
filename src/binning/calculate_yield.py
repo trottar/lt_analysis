@@ -599,7 +599,16 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     # This is dN_bg_norm returned by bg_fit(): (fit_hist_inrange, fit_vis, bg_par, f_sig, N_bg_norm_err)
                     dN_bg_norm = float(fitDict[f"background_fit1_{j}_{k}"][4])
 
-                    N_sig_norm = float(hist_bin_dict[f"H_MM_DATA_{j}_{k}"].Integral())
+                    mm_min = float(inpDict["mm_min"])
+                    mm_max = float(inpDict["mm_max"])
+
+                    hmm = hist_bin_dict[f"H_MM_DATA_{j}_{k}"]
+                    ax  = hmm.GetXaxis()
+                    ib_lo = max(1, ax.FindBin(mm_min))
+                    ib_hi = min(ax.GetNbins(), ax.FindBin(mm_max))
+
+                    # normalize BG uncertainty to signal-region counts only (same window as bg_fit() uses for N_bg_norm_err)
+                    N_sig_norm = float(hmm.Integral(ib_lo, ib_hi))
                     if N_sig_norm < 0.0:
                         N_sig_norm = 0.0
 
@@ -664,7 +673,15 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 try:
                     dN_bg_norm = float(fitDict[f"background_fit2_{j}_{k}"][4])
 
-                    N_sig_norm = float(hist_bin_dict[f"H_MM_DATA_{j}_{k}"].Integral())
+                    mm_min = float(inpDict["mm_min"])
+                    mm_max = float(inpDict["mm_max"])
+
+                    hmm = hist_bin_dict[f"H_MM_DATA_{j}_{k}"]
+                    ax  = hmm.GetXaxis()
+                    ib_lo = max(1, ax.FindBin(mm_min))
+                    ib_hi = min(ax.GetNbins(), ax.FindBin(mm_max))
+
+                    N_sig_norm = float(hmm.Integral(ib_lo, ib_hi))
                     if N_sig_norm < 0.0:
                         N_sig_norm = 0.0
 
