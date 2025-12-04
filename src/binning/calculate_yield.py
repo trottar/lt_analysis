@@ -594,32 +594,29 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][1], -1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][0], -1)                       
 
-                # Estimate fractional yield uncertainty from background_fit1
+                # Estimate fractional yield uncertainty from background_fit1 (covariance-propagated)
                 try:
-                    # fit output tuple: (bg_hist, fit_vis, bg_par, f_sig, N_bg_norm_err)
-                    fit_out = fitDict[f"background_fit1_{j}_{k}"]
+                    # This is dN_bg_norm returned by bg_fit(): (fit_hist_inrange, fit_vis, bg_par, f_sig, N_bg_norm_err)
+                    dN_bg_norm = float(fitDict[f"background_fit1_{j}_{k}"][4])
 
-                    # normalized background integral uncertainty from covariance propagation
-                    N_bg_norm_err = fit_out[4] if (len(fit_out) > 4) else 0.0
-                    if N_bg_norm_err is None or N_bg_norm_err < 0.0:
-                        N_bg_norm_err = 0.0
-
-                    # Signal yield (in this t,phi bin) from the t-distribution
-                    N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
+                    N_sig_norm = float(hist_bin_dict[f"H_MM_DATA_{j}_{k}"].Integral())
                     if N_sig_norm < 0.0:
                         N_sig_norm = 0.0
-                    N_data_raw = N_sig_norm / normfac_data
 
-                    # Convert bg uncertainty to the same "raw count" convention used elsewhere
-                    N_bg_raw_err = N_bg_norm_err / normfac_data
-
-                    if N_data_raw > 0.0:
-                        bg_fit1_frac_err[j][k] = N_bg_raw_err / N_data_raw
+                    if N_sig_norm > 0.0:
+                        if (not math.isfinite(dN_bg_norm)) or (dN_bg_norm < 0.0):
+                            # missing/invalid covariance => flag bin with large (100%) fractional BG uncertainty
+                            bg_fit1_frac_err[j][k] = 1.0
+                        else:
+                            bg_fit1_frac_err[j][k] = abs(dN_bg_norm) / N_sig_norm
                     else:
                         bg_fit1_frac_err[j][k] = 0.0
 
                 except KeyError:
-                    bg_fit1_frac_err[j][k] = 0.0         
+                    bg_fit1_frac_err[j][k] = 0.0
+                except Exception:
+                    # Any unexpected failure: make it obvious in the error budget (but don’t change yields here)
+                    bg_fit1_frac_err[j][k] = 1.0        
 
                 # Remove histograms with less than event_threshold entries and negative integrals
                 prune_hist(
@@ -663,28 +660,26 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit2_{}_{}".format(j, k)][3])
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit2_{}_{}".format(j, k)][0], -1)            
 
-                # Estimate fractional yield uncertainty from background_fit2
+                # Estimate fractional yield uncertainty from background_fit2 (covariance-propagated)
                 try:
-                    fit_out = fitDict[f"background_fit2_{j}_{k}"]
+                    dN_bg_norm = float(fitDict[f"background_fit2_{j}_{k}"][4])
 
-                    N_bg_norm_err = fit_out[4] if (len(fit_out) > 4) else 0.0
-                    if N_bg_norm_err is None or N_bg_norm_err < 0.0:
-                        N_bg_norm_err = 0.0
-
-                    N_sig_norm = hist_bin_dict[f"H_t_DATA_{j}_{k}"].Integral()
+                    N_sig_norm = float(hist_bin_dict[f"H_MM_DATA_{j}_{k}"].Integral())
                     if N_sig_norm < 0.0:
                         N_sig_norm = 0.0
-                    N_data_raw = N_sig_norm / normfac_data
 
-                    N_bg_raw_err = N_bg_norm_err / normfac_data
-
-                    if N_data_raw > 0.0:
-                        bg_fit2_frac_err[j][k] = N_bg_raw_err / N_data_raw
+                    if N_sig_norm > 0.0:
+                        if (not math.isfinite(dN_bg_norm)) or (dN_bg_norm < 0.0):
+                            bg_fit2_frac_err[j][k] = 1.0
+                        else:
+                            bg_fit2_frac_err[j][k] = abs(dN_bg_norm) / N_sig_norm
                     else:
                         bg_fit2_frac_err[j][k] = 0.0
 
                 except KeyError:
                     bg_fit2_frac_err[j][k] = 0.0
+                except Exception:
+                    bg_fit2_frac_err[j][k] = 1.0
 
                 # Remove histograms with less than event_threshold entries and negative integrals
                 prune_hist(

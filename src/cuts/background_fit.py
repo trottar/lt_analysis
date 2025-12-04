@@ -496,13 +496,11 @@ def bg_integral_norm_and_err_from_cov(
     Returns (N_bg_norm, dN_bg_norm) where N_bg_norm matches the sum of bin-contents
     produced by get_fit_histogram_padded(..., n_pad=0) over [x_min, x_max].
 
-    Error is propagated from the fit covariance when available:
+    Error is propagated from the fit covariance:
         Var(N) = grad^T * Cov * grad
-    with grad_i = dN/dp_i from finite differences.
+    where grad_i = dN/dp_i computed by finite differences.
 
-    If covariance is unavailable (failed fit / nullptr / PyROOT issues), falls back to
-    diagonal-only propagation using TF1 parameter errors:
-        Var(N) ≈ Σ_i (dN/dp_i)^2 * σ_i^2
+    Robust to: null TFitResultPtr / missing covariance matrix.
     """
     ax = hist_ref.GetXaxis()
     nb = ax.GetNbins()
@@ -524,15 +522,46 @@ def bg_integral_norm_and_err_from_cov(
 
     N0 = eval_N()
 
-    npar = fit_func.GetNpar()
+    npar = int(fit_func.GetNpar())
 
-    # Try to obtain covariance; if not available, we will do diagonal-only propagation
+    # --- get covariance safely ---
     cov = None
-    if fit_res is not None:
+    cov_ok = False
+
+    # NOTE: in PyROOT, a null TFitResultPtr is *not* None but evaluates False
+    if (fit_res is not None) and bool(fit_res):
         try:
             cov = fit_res.GetCovarianceMatrix()
-        except Exception:
-            cov = None
+            cov_ok = True
+        except ReferenceError:
+            cov_ok = False
+
+        # If available, reject bad/empty covariance status
+        if cov_ok and hasattr(fit_res, "CovMatrixStatus"):
+            try:
+                if int(fit_res.CovMatrixStatus()) <= 0:
+                    cov_ok = False
+            except Exception:
+                pass
+
+    # Fallback: diagonal covariance from TF1 parameter errors
+    if not cov_ok:
+        cov = ROOT.TMatrixDSym(npar)
+        any_nonzero = False
+        for i in range(npar):
+            ei = float(fit_func.GetParError(i))
+            if ei > 0.0:
+                any_nonzero = True
+            # set diagonal
+            try:
+                cov[i][i] = ei * ei
+            except Exception:
+                cov(i, i)  # touch to ensure exists
+                cov[i][i] = ei * ei
+
+        # If even par-errors are zero (no info), be conservative: 100% of N0
+        if not any_nonzero:
+            return N0, abs(N0)
 
     grads = np.zeros(npar, dtype=float)
 
@@ -541,7 +570,6 @@ def bg_integral_norm_and_err_from_cov(
         p0 = float(fit_func.GetParameter(ip))
         pe = float(fit_func.GetParError(ip))
 
-        # step size: tied to fit uncertainty if available, else scale with parameter magnitude
         dp = 0.1 * pe if pe > 0.0 else 1e-4 * (abs(p0) + 1.0)
         dp = max(dp, 1e-8)
 
@@ -554,22 +582,20 @@ def bg_integral_norm_and_err_from_cov(
         fit_func.SetParameter(ip, p0)  # restore
         grads[ip] = (Np - Nm) / (2.0 * dp)
 
-    # Full covariance propagation when available; otherwise diagonal-only fallback
+    # Var(N) = g^T C g
     var = 0.0
-    if cov is not None:
-        for i in range(npar):
-            for j in range(npar):
-                try:
-                    cij = float(cov[i][j])
-                except Exception:
-                    cij = float(cov(i, j))
-                var += grads[i] * cij * grads[j]
-    else:
-        for i in range(npar):
-            pe = float(fit_func.GetParError(i))
-            var += (grads[i] * pe) ** 2
+    for i in range(npar):
+        for j in range(npar):
+            try:
+                cij = float(cov[i][j])
+            except Exception:
+                cij = float(cov(i, j))
+            var += grads[i] * cij * grads[j]
 
-    return N0, math.sqrt(max(0.0, var))
+    if (not math.isfinite(var)) or (var < 0.0):
+        var = 0.0
+
+    return N0, math.sqrt(var)
 
 ################################################################################################################################################
 
