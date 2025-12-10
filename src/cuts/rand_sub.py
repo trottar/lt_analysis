@@ -2175,7 +2175,7 @@ def rand_sub(phi_setting, inpDict):
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     ###
-    # MM sub plots    
+    # MM full plots    
     CMMfull = TCanvas()
 
     histDict["H_MM_full_DATA"].SetLineColor(1)
@@ -2183,6 +2183,33 @@ def rand_sub(phi_setting, inpDict):
     histDict["H_MM_full_DATA"].SetFillColor(kBlack)  # Set fill color to black
     #histDict["H_MM_full_DATA"].Draw("same, E1")
     histDict["H_MM_full_DATA"].Draw("hist same")
+
+    # Ensure pad exists and ranges are set after drawing
+    gPad.Update()
+
+    ymin = gPad.GetUymin()
+    ymax = gPad.GetUymax()
+
+    x1 = float(inpDict["mm_min"])
+    x2 = float(inpDict["mm_max"])
+
+    line_min = TLine(x1, ymin, x1, ymax)
+    line_min.SetLineColor(kBlue)
+    line_min.SetLineStyle(3)   # dotted
+    line_min.SetLineWidth(2)
+    line_min.Draw("same")
+
+    line_max = TLine(x2, ymin, x2, ymax)
+    line_max.SetLineColor(kBlue)
+    line_max.SetLineStyle(3)   # dotted
+    line_max.SetLineWidth(2)
+    line_max.Draw("same")
+
+    gPad.Modified()
+    gPad.Update()
+
+    # keep references alive if this is in a function/script that might garbage-collect
+    histDict["_mm_cut_lines"] = (line_min, line_max)    
 
     CMMfull.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
     
