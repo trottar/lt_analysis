@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
-from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
+from ROOT import kBlue, kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
 ################################################################################################################################################
