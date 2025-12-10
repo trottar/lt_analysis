@@ -2205,7 +2205,7 @@ def rand_sub(phi_setting, inpDict):
     CMM = TCanvas()
 
     histDict["H_MM_dummy_DATA"].SetLineColor(1)
-    histDict["H_MM_dummy_DATA"].Draw("same, E1")
+    histDict["H_MM_dummy_DATA"].Draw("hist same")
 
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
@@ -2214,7 +2214,7 @@ def rand_sub(phi_setting, inpDict):
     CMM = TCanvas()
 
     histDict["H_MM_rand_dummy_DATA"].SetLineColor(1)
-    histDict["H_MM_rand_dummy_DATA"].Draw("same, E1")
+    histDict["H_MM_rand_dummy_DATA"].Draw("hist same")
 
     CMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
     
