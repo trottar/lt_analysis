@@ -2179,7 +2179,7 @@ def rand_sub(phi_setting, inpDict):
 
     from ROOT import (
         TCanvas, TLegend, TLine, gPad, gStyle,
-        kBlack, kGray+2, kOrange+7, kGreen+2, kAzure+2, kViolet+1, kBlue
+        kBlack, kGray, kOrange, kGreen, kAzure, kViolet, kBlue
     )
 
     gStyle.SetOptStat(0)
