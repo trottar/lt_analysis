@@ -2328,7 +2328,7 @@ def rand_sub(phi_setting, inpDict):
     
     ###
     # t-Phi plots        
-    Cpht_data = ROOT.TCanvas()
+    Cpht_data = TCanvas()
 
     # Create the polar plot using the function
     polar_plot = create_polar_plot(histDict["polar_phiq_vs_t_DATA"])
