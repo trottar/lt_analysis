@@ -2176,40 +2176,72 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # MM full plots    
-    CMMfull = TCanvas()
 
-    histDict["H_MM_full_DATA"].SetLineColor(1)
-    histDict["H_MM_full_DATA"].SetFillStyle(3001)  # Set fill style to dots
-    histDict["H_MM_full_DATA"].SetFillColor(kBlack)  # Set fill color to black
-    #histDict["H_MM_full_DATA"].Draw("same, E1")
-    histDict["H_MM_full_DATA"].Draw("hist same")
+    from ROOT import (
+        TCanvas, TLegend, TLine, gPad, gStyle,
+        kBlack, kGray+2, kOrange+7, kGreen+2, kAzure+2, kViolet+1, kBlue
+    )
 
-    # Ensure pad exists and ranges are set after drawing
+    gStyle.SetOptStat(0)
+
+    def style_hist(h, line_col, fill_col=None, alpha=0.25, lstyle=1, lwidth=2, fstyle=1001):
+        h.SetLineColor(line_col)
+        h.SetLineStyle(lstyle)
+        h.SetLineWidth(lwidth)
+
+        if fill_col is None:
+            h.SetFillStyle(0)  # no fill
+        else:
+            if hasattr(h, "SetFillColorAlpha"):
+                h.SetFillColorAlpha(fill_col, alpha)
+            else:
+                h.SetFillColor(fill_col)  # fallback (no true alpha)
+            h.SetFillStyle(fstyle)
+
+    # --- Canvas
+    CMMfull = TCanvas("CMMfull", "MM full (subtraction steps)", 1000, 700)
+    CMMfull.SetGrid()
+
+    # --- Ordered steps (earliest -> latest), increasing visual priority
+    steps = [
+        ("H_MM_rand_dummy_DATA", "rand_dummy", kGray+2,   kGray+2,   0.12, 1, 2),
+        ("H_MM_dummy_DATA",      "dummy",      kOrange+7, kOrange+7, 0.14, 1, 2),
+        ("H_MM_pisub_DATA",      "pi-sub",     kGreen+2,  kGreen+2,  0.16, 1, 2),
+        ("H_MM_fit1sub_DATA",    "fit1-sub",   kAzure+2,  kAzure+2,  0.18, 2, 2),
+        ("H_MM_fit2sub_DATA",    "fit2-sub",   kViolet+1, kViolet+1, 0.20, 3, 2),
+        ("H_MM_full_DATA",       "full",       kBlack,    None,      0.00, 1, 3),  # final: bold line, no fill
+    ]
+
+    hlist = [histDict[k] for k, *_ in steps]
+    ymax = max(h.GetMaximum() for h in hlist)
+    hlist[0].SetMaximum(1.15 * ymax)
+    hlist[0].SetMinimum(0)
+
+    # --- Draw + legend
+    leg = TLegend(0.62, 0.62, 0.88, 0.88)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+
+    for i, (key, label, lcol, fcol, a, ls, lw) in enumerate(steps):
+        h = histDict[key]
+        style_hist(h, lcol, fcol, alpha=a, lstyle=ls, lwidth=lw, fstyle=1001)
+
+        opt = "hist" if i == 0 else "hist same"
+        h.Draw(opt)
+        leg.AddEntry(h, label, "lf" if fcol is not None else "l")
+
+    leg.Draw()
+
+    # --- Cut lines (blue, dotted)
     gPad.Update()
+    ymin, ymax = gPad.GetUymin(), gPad.GetUymax()
+    x1, x2 = float(inpDict["mm_min"]), float(inpDict["mm_max"])
 
-    ymin = gPad.GetUymin()
-    ymax = gPad.GetUymax()
+    line_min = TLine(x1, ymin, x1, ymax); line_min.SetLineColor(kBlue); line_min.SetLineStyle(3); line_min.SetLineWidth(2); line_min.Draw("same")
+    line_max = TLine(x2, ymin, x2, ymax); line_max.SetLineColor(kBlue); line_max.SetLineStyle(3); line_max.SetLineWidth(2); line_max.Draw("same")
 
-    x1 = float(inpDict["mm_min"])
-    x2 = float(inpDict["mm_max"])
-
-    line_min = TLine(x1, ymin, x1, ymax)
-    line_min.SetLineColor(kBlue)
-    line_min.SetLineStyle(3)   # dotted
-    line_min.SetLineWidth(2)
-    line_min.Draw("same")
-
-    line_max = TLine(x2, ymin, x2, ymax)
-    line_max.SetLineColor(kBlue)
-    line_max.SetLineStyle(3)   # dotted
-    line_max.SetLineWidth(2)
-    line_max.Draw("same")
-
-    gPad.Modified()
-    gPad.Update()
-
-    # keep references alive if this is in a function/script that might garbage-collect
-    histDict["_mm_cut_lines"] = (line_min, line_max)    
+    gPad.Modified(); gPad.Update()
+    histDict["_mm_cut_lines_full"] = (line_min, line_max)  # keep alive
 
     CMMfull.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
     
