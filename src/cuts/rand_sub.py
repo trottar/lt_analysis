@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
-from ROOT import kBlue, kBlack, kCyan, kRed, kGreen, kMagenta
+from ROOT import kBlue, kBlack, kCyan, kRed, kGreen, kMagenta, kGray, kOrange, kAzure, kViolet
 from functools import reduce
 
 ################################################################################################################################################
@@ -2176,11 +2176,6 @@ def rand_sub(phi_setting, inpDict):
 
     ###
     # MM full plots    
-
-    from ROOT import (
-        TCanvas, TLegend, TLine, gPad, gStyle,
-        kBlack, kGray, kOrange, kGreen, kAzure, kViolet, kBlue
-    )
 
     gStyle.SetOptStat(0)
 
