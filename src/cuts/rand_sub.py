@@ -2235,7 +2235,6 @@ def rand_sub(phi_setting, inpDict):
     line_max = TLine(x2, ymin, x2, ymax); line_max.SetLineColor(kBlue); line_max.SetLineStyle(3); line_max.SetLineWidth(2); line_max.Draw("same")
 
     gPad.Modified(); gPad.Update()
-    histDict["_mm_cut_lines_full"] = (line_min, line_max)  # keep alive
 
     CMMfull.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
     
