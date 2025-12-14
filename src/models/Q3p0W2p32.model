@@ -40,14 +40,14 @@ sig_T = par5 * math.exp(-math.fabs(par6 * tt))
 # 0th
 #sig_LT = (par9 / math.fabs(tt))
 #####
-sig_LT = par9 * math.exp(-math.fabs(par10 * tt))
+sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * (math.sin(theta_cm)**2)
 #####
 
 # Transverse-Transverse interference term
 # 0th
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
 #####
-sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm))
+sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm)**2)
 #####
 
 # Weight factor
