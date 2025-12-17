@@ -448,37 +448,69 @@ def get_fit_histogram_padded(fit_func,
 
 ################################################################################################################################################
 
+import math
+
 def is_good_background_shape(
-        fit_func,
-        x_min,
-        x_max,
-        *,
-        neg_tol=0.25,
+    fit_func,
+    x_min,
+    x_max,
+    *,
+    neg_tol=0.25,
+    pos_tol=0.0,                 # require f_max > pos_tol
+    concavity_rel_tol=0.02,       # max deviation from a straight line, as a fraction of scale
+    concavity_abs_tol=None,       # if set, overrides rel tol (same units as y)
+    n_samples=64,
 ):
     """
     Sanity check on the *fit function itself*.
 
-    The bin is accepted iff:
-      - the function has a finite minimum and maximum on [x_min, x_max];
-      - the maximum is > 0 (non-trivial background);
-      - the minimum is >= -neg_tol.
-
-    With neg_tol = 0.0 this is literally:
-        "if it goes negative anywhere in y, it's a bad bin".
+    Accept iff:
+      - finite min/max on [x_min, x_max]
+      - f_max > pos_tol
+      - f_min >= -neg_tol
+      - not "too concave": close to the secant (endpoint-to-endpoint line)
     """
-    # ROOT does the extremum search
+    if not (x_max > x_min):
+        return False
+
+    # ROOT extremum search
     f_min = float(fit_func.GetMinimum(x_min, x_max))
     f_max = float(fit_func.GetMaximum(x_min, x_max))
 
-    # Non-finite or completely non-positive → reject
     if not (math.isfinite(f_min) and math.isfinite(f_max)):
         return False
-    if f_max <= -neg_tol:
+    if f_max <= pos_tol:
         return False
-
-    # Reject if the minimum is below the allowed tolerance
     if f_min <= -neg_tol:
         return False
+
+    # Concavity / curvature check: max deviation from the secant line
+    if n_samples >= 3 and (concavity_rel_tol is not None or concavity_abs_tol is not None):
+        xs = [x_min + i * (x_max - x_min) / (n_samples - 1) for i in range(n_samples)]
+        ys = []
+        for x in xs:
+            y = float(fit_func.Eval(x))
+            if not math.isfinite(y):
+                return False
+            ys.append(y)
+
+        y0, y1 = ys[0], ys[-1]
+        span = x_max - x_min
+        max_dev = 0.0
+        for x, y in zip(xs, ys):
+            t = (x - x_min) / span
+            y_lin = y0 + t * (y1 - y0)
+            dev = abs(y - y_lin)
+            if dev > max_dev:
+                max_dev = dev
+
+        if concavity_abs_tol is not None:
+            if max_dev > concavity_abs_tol:
+                return False
+        else:
+            scale = max(abs(f_max), abs(f_min), 1.0)
+            if max_dev / scale > concavity_rel_tol:
+                return False
 
     return True
 
