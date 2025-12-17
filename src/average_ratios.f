@@ -189,9 +189,7 @@ c      pause
          do ip=1,nphi
             r=0.
             e=0.
-*     RLT: Calculate ratio only if both yields are non-zero            
-            if (ymc(ip,it) /= 0.0 .and. .not. isnan(ymc(ip,it))
-     *        yrd(ip,it) /= 0.0 .and. .not. isnan(yrd(ip,it))) then
+            if (ymc(ip,it) /= 0.0 .and. .not. isnan(ymc(ip,it))) then
                r=(yrd(ip,it))/ymc(ip,it)
 *               r=1.0
 *     Calculate ratio error in quadrature (absolute error)
