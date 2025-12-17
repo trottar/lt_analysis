@@ -477,36 +477,6 @@ def is_good_background_shape(
     f_min = float(fit_func.GetMinimum(x_min, x_max))
     f_max = float(fit_func.GetMaximum(x_min, x_max))
 
-    # Sample the function explicitly (including near the edges) to catch dips
-    # that ROOT's extremum search can miss, especially right at the boundaries.
-    span = x_max - x_min
-
-    # Use a dense grid to catch narrow dips; bump n_samples if too small.
-    n_uniform = max(n_samples, 512, 3)
-
-    xs_uniform = [x_min + i * span / (n_uniform - 1) for i in range(n_uniform)]
-
-    # Add extra edge-biased probes to enforce the negative tolerance near the ends
-    edge_fracs = (0.001, 0.01)
-    xs_minmax = xs_uniform + [
-        x_min + frac * span for frac in edge_fracs
-    ] + [
-        x_max - frac * span for frac in edge_fracs
-    ]
-    xs_minmax = sorted(set(x for x in xs_minmax if x_min <= x <= x_max))
-
-    y_at = {}
-    for x in xs_minmax:
-        y = float(fit_func.Eval(x))
-        if not math.isfinite(y):
-            return False
-        y_at[x] = y
-
-    sample_min = min(y_at.values())
-    sample_max = max(y_at.values())
-    f_min = min(f_min, sample_min)
-    f_max = max(f_max, sample_max)
-
     if not (math.isfinite(f_min) and math.isfinite(f_max)):
         return False
     if f_max <= pos_tol:
@@ -516,8 +486,13 @@ def is_good_background_shape(
 
     # Concavity / curvature check: max deviation from the secant line
     if n_samples >= 3 and (concavity_rel_tol is not None or concavity_abs_tol is not None):
-        xs = xs_uniform
-        ys = [y_at[x] for x in xs]
+        xs = [x_min + i * (x_max - x_min) / (n_samples - 1) for i in range(n_samples)]
+        ys = []
+        for x in xs:
+            y = float(fit_func.Eval(x))
+            if not math.isfinite(y):
+                return False
+            ys.append(y)
 
         y0, y1 = ys[0], ys[-1]
         span = x_max - x_min
@@ -949,3 +924,4 @@ def bg_fit(
         N_bg_norm_err *= abs(scaling)
 
     return fit_hist_inrange, fit_vis, bg_par, f_sig, N_bg_norm_err
+
