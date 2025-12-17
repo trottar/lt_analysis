@@ -480,8 +480,10 @@ def is_good_background_shape(
     # Sample the function explicitly (including near the edges) to catch dips
     # that ROOT's extremum search can miss, especially right at the boundaries.
     span = x_max - x_min
+
     # Use a dense grid to catch narrow dips; bump n_samples if too small.
     n_uniform = max(n_samples, 512, 3)
+
     xs_uniform = [x_min + i * span / (n_uniform - 1) for i in range(n_uniform)]
 
     # Add extra edge-biased probes to enforce the negative tolerance near the ends
