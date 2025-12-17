@@ -542,12 +542,12 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     # Check that pion background is not over subtracting within kaon MM range
                     kaon_range_check = integrate_hist_range(
                         hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                        pi_mm_min, pi_mm_max             
+                        mm_min, mm_max             
                     )
 
                     pion_range_check = integrate_hist_range(
                         subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                        pi_mm_min, pi_mm_max                    
+                        mm_min, mm_max                    
                     )
 
                     if pion_range_check > kaon_range_check:
