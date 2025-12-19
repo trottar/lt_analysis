@@ -432,7 +432,7 @@ def is_good_background_shape(
     x_min,
     x_max,
     *,
-    neg_tol=0.25,
+    neg_tol=1e-4,
     pos_tol=0.0,                 # require f_max > pos_tol
     concavity_rel_tol=0.02,       # max deviation from a straight line, as a fraction of scale
     concavity_abs_tol=None,       # if set, overrides rel tol (same units as y)
@@ -548,10 +548,17 @@ def bg_integral_norm_and_err_from_cov(
         # If available, reject bad/empty covariance status
         if cov_ok and hasattr(fit_res, "CovMatrixStatus"):
             try:
-                if int(fit_res.CovMatrixStatus()) <= 0:
+                if int(fit_res.CovMatrixStatus()) < 3:  # require "accurate"
                     cov_ok = False
             except Exception:
                 pass
+
+        if cov_ok and hasattr(fit_res, "Status"):
+            try:
+                if int(fit_res.Status()) != 0:
+                    cov_ok = False
+            except Exception:
+                pass            
 
     # Fallback: diagonal covariance from TF1 parameter errors
     if not cov_ok:
@@ -686,7 +693,7 @@ def bg_fit(
     for ib in range(1, h_sb.GetNbinsX() + 1):
         if not in_any_sb(h_sb.GetBinCenter(ib)):
             h_sb.SetBinContent(ib, 0.0)
-            h_sb.SetBinError(ib, 0.0)
+            h_sb.SetBinError(ib, 1e9) # Set to a huge value so they contribute ~zero weight
 
     # ------------------------------ fit + shape rescue -------------------
     # We will:
@@ -715,7 +722,7 @@ def bg_fit(
         # (Re)fit on the same sideband histogram each iteration
         fit_min, fit_max = sb_left[0], sb_right[1]
         fit_func = TF1("fit_func", model["func_expr"], fit_min, fit_max)
-        fit_res_ptr = h_sb.Fit(fit_func, "SQ0")  # S: keep fit result (covariance) + quiet
+        fit_res_ptr = h_sb.Fit(fit_func, "SRQ0")  # S: keep fit result (covariance) + quiet
         fit_res = None
         try:
             fit_res = fit_res_ptr.Get()  # nullptr if fit failed
