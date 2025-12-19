@@ -77,13 +77,13 @@ W="2p74"
 
 KIN="Q${Q2}W${W}"
 
-#TARGET=("LH2" "dummy")
-#EPS=("high" "low")
-#PHISET=("center" "left" "right")
-
-TARGET=("dummy")
+TARGET=("LH2" "dummy")
 EPS=("high" "low")
 PHISET=("center" "left" "right")
+
+#TARGET=("dummy")
+#EPS=("high" "low")
+#PHISET=("center" "left" "right")
 
 for t in "${TARGET[@]}"; do
     for e in "${EPS[@]}"; do
@@ -126,7 +126,7 @@ for t in "${TARGET[@]}"; do
 			    echo "Running ${number}"
 			    cd "${LTANAPATH}"
 			    rootfile=/cache/hallc/kaonlt/Pass3_Dec_2023/ROOTfiles/Analysis/KaonLT/Kaon_coin_replay_production_${number}_-1.root
-				#jcache get ${rootfile}
+				jcache get ${rootfile}
 			    ./applyCuts_Prod.sh -pm ${e} ${p} ${Q2} ${W} ${t} ${number} kaon
 				./applyCuts_Prod.sh -p ${e} ${p} ${Q2} ${W} ${t} ${number} pion
 			done
