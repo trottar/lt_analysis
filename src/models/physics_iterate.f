@@ -416,9 +416,9 @@ c 	Best for Q2=4.4, W=2.74 (No Q2 dependence), after CS xsect fit
 
        sigT=(fitpar(5))*exp(-abs(fitpar(6)*t_gev))
 
-       siglt=(fitpar(9))*exp(-abs(fitpar(10)*t_gev))*(sin(theta_cm)**2)
+       siglt=(fitpar(9))*exp(-abs(fitpar(10)*t_gev))*(sin(thetacm)**2)
 
-       sigtt=(fitpar(13))*exp(-abs(fitpar(14)*t_gev))*(sin(theta_cm)**2)
+       sigtt=(fitpar(13))*exp(-abs(fitpar(14)*t_gev))*(sin(thetacm)**2)
 
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
