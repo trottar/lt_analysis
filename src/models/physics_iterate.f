@@ -412,13 +412,14 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 	   Qdep_TT=Q2_g*(exp(-Q2_g))
 
 c 	Best for Q2=4.4, W=2.74 (No Q2 dependence), after CS xsect fit
-	   sigL=(fitpar(1)*ft)*exp(-fitpar(2)*(abs(t_gev)))
+       sigL=(fitpar(1)*ft)*exp(-abs(fitpar(2)*t_gev))
 
-	   sigT=(fitpar(5) / abs(t_gev)**fitpar(6)) * exp(-abs(fitpar(7) * t_gev))
-	   
-	   siglt=(fitpar(9) / abs(t_gev))	   
+       sigT=(fitpar(5))*exp(-abs(fitpar(6)*t_gev))
 
-	   sigtt=(fitpar(13) / abs(t_gev)**fitpar(14)) * exp(-abs(fitpar(15) * t_gev))
+       siglt=(fitpar(9))*exp(-abs(fitpar(10)*t_gev))*(sin(theta_cm)**2)
+
+       sigtt=(fitpar(13))*exp(-abs(fitpar(14)*t_gev))*(sin(theta_cm)**2)
+
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
      >		+sqrt(2.0*main%epsilon*(1.+main%epsilon))*cos(phicm)*siglt)/1.d0
