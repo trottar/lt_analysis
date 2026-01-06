@@ -559,7 +559,7 @@ def bg_integral_norm_and_err_from_cov(
                     cov_ok = False
             except Exception:
                 pass            
-
+    '''
     # Fallback: diagonal covariance from TF1 parameter errors
     if not cov_ok:
         cov = ROOT.TMatrixDSym(npar)
@@ -578,7 +578,8 @@ def bg_integral_norm_and_err_from_cov(
         # If even par-errors are zero (no info), be conservative: 100% of N0
         if not any_nonzero:
             return N0, abs(N0)
-
+    '''
+    
     grads = np.zeros(npar, dtype=float)
 
     # finite-difference derivatives dN/dp_i
