@@ -76,6 +76,7 @@ for sig_val in sig_var:
                     sigl_str = sigl_str.replace(f"math.log",f"log")
                     sigl_str = sigl_str.replace(f"math.fabs",f"abs")
                     sigl_str = sigl_str.replace(f"math.sin",f"sin")
+                    sigl_str = sigl_str.replace(f"math.cos",f"cos")
                     # Update parameter names to match fortran vectors
                     if "sig_L" == sig_val:
                         for par in range(1,5):
