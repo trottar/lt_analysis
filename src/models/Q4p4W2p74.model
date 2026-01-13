@@ -16,13 +16,14 @@ mkpl=0.493677
 # 2nd iteration, 
 tav = (0.05032 + 0.01345 * math.log(q2_set)) * q2_set
 ftav = (math.fabs(tt) - tav) / tav
-# pole factor
 ft = math.fabs(tt) / (math.fabs(tt) + mkpl**2)**2  
-# Q2 dep
+# pole factor
 Qdep_L = qq / (1.0 + (1.77 * qq) + 0.12 * (qq**2))
 Qdep_T = (math.exp(-qq**2)) / qq
-Qdep_LT = 1/(1 + qq)
-Qdep_TT = math.exp(-qq)/(1 + qq)
+Qdep_TT = qq * math.exp(-qq)
+# Controls the phase shift in the interference terms
+# Adjust the integer to match data.
+beta = ((3) * pi)/10 
 
 # Longitudinal cross-section
 # 0th
@@ -43,7 +44,7 @@ sig_T = par5 * math.exp(-math.fabs(par6 * tt))
 #sig_LT = (par9 / math.fabs(tt))
 #####
 #sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * (math.sin(theta_cm)**2)
-sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * (math.sin(theta_cm) + 0.1*math.cos(theta_cm))
+sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * (math.sin(theta_cm) + beta*math.cos(theta_cm))
 #####
 
 # Transverse-Transverse interference term
@@ -51,7 +52,7 @@ sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * (math.sin(theta_cm) + 0.1*mat
 #sig_TT = (par13 / math.fabs(tt)**par14) * math.exp(-math.fabs(par15 * tt))
 #####
 #sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm)**2)
-sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm) + 2*0.1*math.cos(theta_cm)) * math.sin(theta_cm)
+sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm) + 2*beta*math.cos(theta_cm)) * math.sin(theta_cm)
 #####
 
 # Weight factor
