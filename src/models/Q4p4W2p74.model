@@ -2,6 +2,8 @@
 # Use this file to define function forms of separated xsect.
 # Used '#' to comment, but using '#' trailing a definition won't work
 # (e.g., wfactor = 1 / ((ww**2) - (mtar**2))**2.0 # This will not work now)
+# Note: Make sure any new variables are explicitly called in the 
+#       xmodel_{ParticleType}.f script!
 ################################################################################
 
 # Define constants

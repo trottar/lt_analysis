@@ -72,6 +72,9 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 *     Model sig_L, sig_T, sig_TT, sig_LT.
 
 *** Make sure there is a space after every equation ***
+
+*** Beta; Controls the phase shift in the interference terms
+      beta=((1) * pi/2)/100 
       
       tav=(0.1112 + 0.0066*log(q2_set))*q2_set
       
