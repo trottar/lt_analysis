@@ -277,7 +277,8 @@ print("-"*25)
 inpDict["Epsmin"] = 0.0
 inpDict["Epsmax"] = 1.0
 
-phisetlist = ["Center","Left","Right"]
+#phisetlist = ["Center","Left","Right"]
+phisetlist = ["Center","Left"]
 #phisetlist = ["Center"]
 
 for phiset in phisetlist:
