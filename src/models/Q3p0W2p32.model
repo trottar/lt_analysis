@@ -38,8 +38,7 @@ sig_L = par1  * ft * math.exp(-math.fabs(par2 * tt))
 # 0th
 #sig_T = (par5 / math.fabs(tt)**par6) * math.exp(-math.fabs(par7 * tt))
 #####
-#sig_T = par5 * math.exp(-math.fabs(par6 * tt))
-sig_T = par5 * math.fabs(tt) * math.exp(-math.fabs(par6 * tt))
+sig_T = par5 * math.exp(-math.fabs(par6 * tt))
 #####
 
 # Longitudinal-Transverse interference term
@@ -48,7 +47,7 @@ sig_T = par5 * math.fabs(tt) * math.exp(-math.fabs(par6 * tt))
 #####
 #sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * (math.sin(theta_cm)**2)
 #sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.fabs(math.sin(theta_cm) + beta*math.cos(theta_cm))
-sig_LT = par9 * math.fabs(tt) * math.fabs(math.sin(theta_cm) + beta*math.cos(theta_cm))
+sig_LT = par9 * math.fabs(tt) * math.exp(-math.fabs(par10 * tt)) * math.fabs(math.sin(theta_cm) + beta*math.cos(theta_cm)) * math.sin(theta_cm)
 #####
 
 # Transverse-Transverse interference term
@@ -57,7 +56,7 @@ sig_LT = par9 * math.fabs(tt) * math.fabs(math.sin(theta_cm) + beta*math.cos(the
 #####
 #sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * (math.sin(theta_cm)**2)
 #sig_TT = par13 * math.exp(-math.fabs(par14 * tt)) * math.fabs(math.sin(theta_cm) + 2*beta*math.cos(theta_cm)) * math.sin(theta_cm)
-sig_TT = par13 * math.fabs(tt) * math.fabs(math.sin(theta_cm) + 2*beta*math.cos(theta_cm)) * math.sin(theta_cm)
+sig_TT = par13 * math.fabs(tt) * math.exp(-math.fabs(par10 * tt)) * math.fabs(math.sin(theta_cm) + 2*beta*math.cos(theta_cm)) * math.sin(theta_cm)
 #####
 
 # Weight factor
