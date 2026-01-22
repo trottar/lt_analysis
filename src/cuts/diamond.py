@@ -789,16 +789,33 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         return best
 
     def _build_q2w_hist_for_file(root_path, hname):
+        # NOTE: In ROOT, histograms created while a TFile is the current directory can be owned
+        # by that file and deleted when the file is closed. We detach (SetDirectory(0)) so the
+        # returned TH2D remains valid after infile.Close().
         if root_path is None:
             return None
+
         infile = open_root_file(root_path, "READ")
+        if (not infile) or infile.IsZombie():
+            print("WARNING: Could not open ROOT file: {}".format(root_path))
+            try:
+                if infile:
+                    infile.Close()
+            except Exception:
+                pass
+            return None
+
         tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
         if not tree:
-            print("!!!!! ERROR !!!!!\n Missing tree in file: {}\n!!!!! ERROR !!!!!".format(root_path))
+            print("!!!!! ERROR !!!!!\\n Missing tree in file: {}\\n!!!!! ERROR !!!!!".format(root_path))
             infile.Close()
             return None
 
+        # Make sure the histogram is NOT owned by the file directory
+        ROOT.gROOT.cd()
         h = TH2D(hname, "", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+        h.SetDirectory(0)
+
         for ev in tree:
             h.Fill(ev.Q2, ev.W)
 
@@ -807,10 +824,16 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         return h
 
     def _draw_contour(h, color, label, style=1):
-        if h is None:
+        # PyROOT may represent a null pointer as CPyCppyy_NoneType (not identical to Python None).
+        # Use truthiness to catch both None and null-pointer ROOT objects.
+        if not h:
             return
-        if h.GetMaximum() <= 0:
+        try:
+            if h.GetMaximum() <= 0:
+                return
+        except Exception:
             return
+
         h.SetContour(1)
         h.SetContourLevel(0, 0.5)
         h.SetLineColor(color)
