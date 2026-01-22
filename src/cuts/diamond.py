@@ -746,24 +746,67 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     #
     gStyle.SetOptStat(0)
 
-    c1_overlay = TCanvas("c1_overlay", "%s Diamond Overlay" % ParticleType, 100, 0, 1000, 900)
+    
+    # Overlay plot: all three phi settings (Center/Left/Right) for High and Low epsilon on one plot
+    #
+    # Color encodes epsilon (High=blue, Low=red). Line style encodes phi setting.
+    #
+    gStyle.SetOptStat(0)
 
-    frame_overlay = TH2D(
-        "frame_overlay",
-        "All Diamonds Overlay (contours); Q2; W",
+    c1_overlay_allphi = TCanvas("c1_overlay_allphi", "%s All-Phi Diamond Overlay" % ParticleType, 100, 0, 1100, 950)
+
+    frame_overlay_allphi = TH2D(
+        "frame_overlay_allphi",
+        "All Diamonds Overlay (High/Low #epsilon; Center/Left/Right #phi); Q2; W",
         nbins, Q2min, Q2max,
         nbins, Wmin, Wmax
     )
-    frame_overlay.GetXaxis().SetRangeUser(Q2min - Q2min * 0.1, Q2max + Q2max * 0.1)
-    frame_overlay.GetYaxis().SetRangeUser(Wmin - Wmin * 0.1, Wmax + Wmax * 0.1)
-    frame_overlay.Draw()
+    frame_overlay_allphi.GetXaxis().SetRangeUser(Q2min - Q2min * 0.1, Q2max + Q2max * 0.1)
+    frame_overlay_allphi.GetYaxis().SetRangeUser(Wmin - Wmin * 0.1, Wmax + Wmax * 0.1)
+    frame_overlay_allphi.Draw()
 
-    leg = TLegend(0.15, 0.78, 0.45, 0.90)
+    leg = TLegend(0.15, 0.74, 0.55, 0.90)
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
 
+    # Same threshold rule as the main plot block
+    if Q2Val == 3.0 and WVal == 3.14:
+        event_threshold_overlay = 15
+    else:
+        event_threshold_overlay = 5
+
+    def _find_shortest_root(phi_tokens, eps_tag):
+        # Choose the shortest matching file path (same heuristic as main selection)
+        best = None
+        best_len = 10**9
+        for tok in phi_tokens:
+            for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                fl = f.lower()
+                if eps_tag in fl:
+                    if len(f) < best_len:
+                        best = f
+                        best_len = len(f)
+        return best
+
+    def _build_q2w_hist_for_file(root_path, hname):
+        if root_path is None:
+            return None
+        infile = open_root_file(root_path, "READ")
+        tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
+        if not tree:
+            print("!!!!! ERROR !!!!!\n Missing tree in file: {}\n!!!!! ERROR !!!!!".format(root_path))
+            infile.Close()
+            return None
+
+        h = TH2D(hname, "", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+        for ev in tree:
+            h.Fill(ev.Q2, ev.W)
+
+        apply_bin_threshold(h, event_threshold_overlay)
+        infile.Close()
+        return h
+
     def _draw_contour(h, color, label, style=1):
-        # Skip empty histograms
         if h is None:
             return
         if h.GetMaximum() <= 0:
@@ -776,19 +819,54 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         h.Draw("cont3 same")
         leg.AddEntry(h, label, "l")
 
-    # High / Mid / Low epsilon contour overlays
-    if (highe_input != False):
-        _draw_contour(Q2vsW_hi_cut, kBlue, "High #epsilon", 1)
-    if (mide_input != False):
-        # dashed to distinguish from high/low if present
-        _draw_contour(Q2vsW_mi_cut, kBlack, "Mid #epsilon", 2)
-    if (lowe_input != False):
-        _draw_contour(Q2vsW_lo_cut, kRed, "Low #epsilon", 1)
+    # Define the three phi settings and their line styles
+    phi_defs = [
+        ("Center", ["Center", "center"]),
+        ("Left",   ["Left", "left"]),
+        ("Right",  ["Right", "right"]),
+    ]
+    phi_style = {"Center": 1, "Left": 2, "Right": 3}
+
+    # Build and draw 6 contours: (High/Low) x (Center/Left/Right)
+    for phi_label, phi_tokens in phi_defs:
+        # High epsilon
+        high_file = _find_shortest_root(phi_tokens, "high")
+        if high_file is None and phi_label == "Center":
+            # Fallback: try files without explicit Left/Right/Mid tags
+            cand = None
+            cand_len = 10**9
+            for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                fl = f.lower()
+                if ("high" in fl) and ("left" not in fl) and ("right" not in fl) and ("mid" not in fl):
+                    if len(f) < cand_len:
+                        cand = f
+                        cand_len = len(f)
+            high_file = cand
+        if high_file is None:
+            print("WARNING: No High epsilon file found for phi = {}".format(phi_label))
+        h_high = _build_q2w_hist_for_file(high_file, "Q2vsW_high_{}_overlay".format(phi_label))
+        _draw_contour(h_high, kBlue, "High #epsilon, {}".format(phi_label), phi_style[phi_label])
+
+        # Low epsilon
+        low_file = _find_shortest_root(phi_tokens, "low")
+        if low_file is None and phi_label == "Center":
+            # Fallback: try files without explicit Left/Right/Mid tags
+            cand = None
+            cand_len = 10**9
+            for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                fl = f.lower()
+                if ("low" in fl) and ("left" not in fl) and ("right" not in fl) and ("mid" not in fl):
+                    if len(f) < cand_len:
+                        cand = f
+                        cand_len = len(f)
+            low_file = cand
+        if low_file is None:
+            print("WARNING: No Low epsilon file found for phi = {}".format(phi_label))
+        h_low = _build_q2w_hist_for_file(low_file, "Q2vsW_low_{}_overlay".format(phi_label))
+        _draw_contour(h_low, kRed, "Low #epsilon, {}".format(phi_label), phi_style[phi_label])
 
     leg.Draw()
 
     # Close the multipage PDF here
-    c1_overlay.Print(Analysis_Distributions + close_pdf)
-
-
+    c1_overlay_allphi.Print(Analysis_Distributions + close_pdf)
     return paramDict
