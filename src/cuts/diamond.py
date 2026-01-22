@@ -58,41 +58,40 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
 
-def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10):
+def diamond_fit_legacy(Q2vsW_hist, Q2Val, fitrange=10):
+    """Legacy (curve_fit/projection) implementation kept for reference."""
+
     def line(x, a, b):
         return a * x + b
 
     if fitrange <= 1:
         print("Fit range too small, setting to default of 10.")
         fitrange = 10
-    
+
     lol, hil, lor, hir = [], [], [], []
     xvl, xvr = [], []
-    
-    fitl = Q2vsW_hist.GetXaxis().FindBin(Q2Val) - int(fitrange*5)
+
+    fitl = Q2vsW_hist.GetXaxis().FindBin(Q2Val) - int(fitrange * 5)
     fitr = Q2vsW_hist.GetXaxis().FindBin(Q2Val) + int(fitrange)
 
-    print("\nFinding diamond fits...")
-    for b in range(fitrange*2):
-        # Progress bar
-        Misc.progressBar(b, fitrange*2-1, bar_length=25)
-        
+    print("\nFinding diamond fits (legacy)...")
+    for b in range(fitrange * 2):
         # Left side
-        proj_l = Q2vsW_hist.ProjectionY("y", b+fitl, b+fitl)
+        proj_l = Q2vsW_hist.ProjectionY("y", b + fitl, b + fitl)
         minYl = proj_l.GetBinCenter(proj_l.FindFirstBinAbove(0))
         maxYl = proj_l.GetBinCenter(proj_l.FindLastBinAbove(0))
         lol.append(minYl)
         hil.append(maxYl)
-        
+
         # Right side
-        proj_r = Q2vsW_hist.ProjectionY("y", b+fitr, b+fitr+1)
+        proj_r = Q2vsW_hist.ProjectionY("y", b + fitr, b + fitr + 1)
         minYr = proj_r.GetBinCenter(proj_r.FindFirstBinAbove(0))
         maxYr = proj_r.GetBinCenter(proj_r.FindLastBinAbove(0))
         lor.append(minYr)
         hir.append(maxYr)
-        
-        xl = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitl)
-        xr = Q2vsW_hist.GetXaxis().GetBinCenter(b+fitr)
+
+        xl = Q2vsW_hist.GetXaxis().GetBinCenter(b + fitl)
+        xr = Q2vsW_hist.GetXaxis().GetBinCenter(b + fitr)
         xvl.append(xl)
         xvr.append(xr)
 
@@ -103,6 +102,206 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10):
     popt_r_high, _ = curve_fit(line, xvr, hir)
 
     return popt_l_low, popt_l_high, popt_r_low, popt_r_high
+
+
+def _th2_to_numpy(th2):
+    """Convert ROOT.TH2* into (histo[xbin,ybin], x_centers, y_centers)."""
+    nbx = th2.GetNbinsX()
+    nby = th2.GetNbinsY()
+
+    x = np.array([th2.GetXaxis().GetBinCenter(i) for i in range(1, nbx + 1)], dtype=float)
+    y = np.array([th2.GetYaxis().GetBinCenter(j) for j in range(1, nby + 1)], dtype=float)
+
+    histo = np.empty((nbx, nby), dtype=float)
+    for ix in range(1, nbx + 1):
+        for iy in range(1, nby + 1):
+            histo[ix - 1, iy - 1] = th2.GetBinContent(ix, iy)
+
+    return histo, x, y
+
+
+def _diamond_fit_numpy(
+    histo,
+    x,
+    y,
+    control_left=None,
+    control_right=None,
+    threshold=0.0,
+):
+    """
+    Ported from diamond_new.py:
+      - Threshold bins
+      - Extract upper/lower W edges vs Q2 and left/right edges vs Q2
+      - Fit each edge with a straight line: W = a*Q2 + b
+    Returns: (down, up, left, right) where each is (a, b).
+    """
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    histo = np.asarray(histo, dtype=float)
+
+    if histo.ndim != 2:
+        raise ValueError("_diamond_fit_numpy: histo must be 2D")
+    if len(x) != histo.shape[0] or len(y) != histo.shape[1]:
+        raise ValueError("_diamond_fit_numpy: x/y sizes do not match histo shape")
+
+    if control_left is None or control_right is None:
+        # Use occupancy-weighted center and a small control window.
+        mask = np.where(histo > threshold, 1.0, 0.0)
+        if mask.sum() == 0:
+            raise ValueError("_diamond_fit_numpy: histogram has no bins above threshold.")
+        dx = x[1] - x[0] if len(x) > 1 else 1.0
+        dy = y[1] - y[0] if len(y) > 1 else 1.0
+        xc = np.average(x, weights=np.sum(mask, axis=1))
+        yc = np.average(y, weights=np.sum(mask, axis=0))
+        control_left = (xc - dx * 10.0, yc - dy * 10.0)
+        control_right = (xc + dx * 10.0, yc + dy * 10.0)
+
+    histo = np.where(histo > threshold, histo, 0.0)
+
+    # Upper/Lower edges as W(Q2)
+    start_ud = int(np.digitize(control_left[0], x, right=True))
+    end_ud = int(np.digitize(control_right[0], x, right=True)) + 1
+    start_ud = max(0, min(start_ud, len(x)))
+    end_ud = max(0, min(end_ud, len(x)))
+
+    x_u, up = [], []
+    x_d, down = [], []
+
+    for b in range(start_ud, end_ud):
+        proj_ud = histo[b, :]
+        nz = proj_ud > 0
+        if not np.any(nz):
+            continue
+        x_u.append(x[b])
+        up.append(y[nz][-1])
+        x_d.append(x[b])
+        down.append(y[nz][0])
+
+    for b in range(end_ud, len(x)):
+        proj_ud = histo[b, :]
+        nz = proj_ud > 0
+        if not np.any(nz):
+            continue
+        x_d.append(x[b])
+        down.append(y[nz][0])
+
+    for b in range(0, start_ud):
+        proj_ud = histo[b, :]
+        nz = proj_ud > 0
+        if not np.any(nz):
+            continue
+        x_u.append(x[b])
+        up.append(y[nz][-1])
+
+    # Left/Right edges as W(Q2) by first finding Q2(W), then fitting W(Q2)
+    start_lr = int(np.digitize(control_left[1], y, right=True))
+    end_lr = int(np.digitize(control_right[1], y, right=True)) + 1
+    start_lr = max(0, min(start_lr, len(y)))
+    end_lr = max(0, min(end_lr, len(y)))
+
+    y_l, left = [], []
+    y_r, right = [], []
+
+    for b in range(start_lr, end_lr):
+        proj_lr = histo[:, b]
+        nz = proj_lr > 0
+        if not np.any(nz):
+            continue
+        y_l.append(y[b])
+        left.append(x[nz][0])
+        y_r.append(y[b])
+        right.append(x[nz][-1])
+
+    for b in range(end_lr, len(y)):
+        proj_lr = histo[:, b]
+        nz = proj_lr > 0
+        if not np.any(nz):
+            continue
+        y_l.append(y[b])
+        left.append(x[nz][0])
+
+    for b in range(0, start_lr):
+        proj_lr = histo[:, b]
+        nz = proj_lr > 0
+        if not np.any(nz):
+            continue
+        y_r.append(y[b])
+        right.append(x[nz][-1])
+
+    if len(down) < 2 or len(up) < 2 or len(left) < 2 or len(right) < 2:
+        raise ValueError("Not enough edge points to perform the fit (increase stats or lower threshold).")
+
+    popt_down = np.polyfit(x_d, down, 1)
+    popt_up = np.polyfit(x_u, up, 1)
+    popt_left = np.polyfit(left, y_l, 1)
+    popt_right = np.polyfit(right, y_r, 1)
+
+    return popt_down, popt_up, popt_left, popt_right
+
+
+def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10, threshold=0.0, use_legacy=False):
+    """
+    Updated diamond-fit procedure (ported from diamond_new.py):
+      - Fits *four* lines in (Q2, W): down/up/left/right in the form W = a*Q2 + b.
+
+    Parameters
+    ----------
+    Q2vsW_hist : ROOT.TH2*
+        Histogram with x=Q2, y=W.
+    Q2Val : float
+        Central Q2 value (used to define an x-control window matching the legacy behavior).
+    fitrange : int
+        Defines the x-control window. Legacy used: [Q2bin - 5*fitrange, Q2bin + fitrange].
+    threshold : float
+        Bin-content threshold used to define occupied bins.
+        Use threshold=0.0 if you already applied apply_bin_threshold().
+    use_legacy : bool
+        If True, uses the original projection+curve_fit implementation.
+
+    Returns
+    -------
+    (down, up, left, right) : tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+        Each is (a, b) for W = a*Q2 + b.
+    """
+
+    if use_legacy:
+        return diamond_fit_legacy(Q2vsW_hist, Q2Val, fitrange)
+
+    if fitrange <= 1:
+        print("Fit range too small, setting to default of 10.")
+        fitrange = 10
+
+    histo, x, y = _th2_to_numpy(Q2vsW_hist)
+
+    mask = np.where(histo > threshold, 1.0, 0.0)
+    if mask.sum() == 0:
+        raise ValueError("diamond_fit: histogram has no bins above threshold.")
+
+    # Keep Q2Val as the x-center, but compute a y-center from occupancy.
+    dy = y[1] - y[0] if len(y) > 1 else 1.0
+    yc = np.average(y, weights=np.sum(mask, axis=0))
+
+    nbx = len(x)
+    q2bin = Q2vsW_hist.GetXaxis().FindBin(Q2Val)
+    fitl_bin = max(1, q2bin - int(fitrange * 5))
+    fitr_bin = min(nbx, q2bin + int(fitrange))
+
+    control_left = (x[fitl_bin - 1], yc - dy * 10.0)
+    control_right = (x[fitr_bin - 1], yc + dy * 10.0)
+
+    try:
+        return _diamond_fit_numpy(
+            histo,
+            x,
+            y,
+            control_left=control_left,
+            control_right=control_right,
+            threshold=threshold,
+        )
+    except Exception as e:
+        print(f"diamond_fit: new procedure failed ({e}); falling back to legacy.")
+        return diamond_fit_legacy(Q2vsW_hist, Q2Val, fitrange)
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
