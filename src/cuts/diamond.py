@@ -747,17 +747,22 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     gStyle.SetOptStat(0)
 
     
+
     # Overlay plot: all three phi settings (Center/Left/Right) for High and Low epsilon on one plot
     #
-    # Color encodes epsilon (High=blue, Low=red). Line style encodes phi setting.
+    # Draw ONLY the fitted diamond outlines (no distributions). Each (epsilon, phi) combination gets a unique color.
     #
     gStyle.SetOptStat(0)
 
-    c1_overlay_allphi = TCanvas("c1_overlay_allphi_{}".format(FilenameOverride), "%s All-Phi Diamond Overlay" % ParticleType, 100, 0, 1100, 950)
+    c1_overlay_allphi = TCanvas(
+        "c1_overlay_allphi_{}".format(FilenameOverride),
+        "%s All-Phi Diamond Outline Overlay" % ParticleType,
+        100, 0, 1100, 950
+    )
 
     frame_overlay_allphi = TH2D(
         "frame_overlay_allphi_{}".format(FilenameOverride),
-        "All Diamonds Overlay (High/Low #epsilon; Center/Left/Right #phi); Q2; W",
+        "All Diamond Outlines Overlay; Q2; W",
         nbins, Q2min, Q2max,
         nbins, Wmin, Wmax
     )
@@ -765,14 +770,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     frame_overlay_allphi.GetYaxis().SetRangeUser(Wmin - Wmin * 0.1, Wmax + Wmax * 0.1)
     frame_overlay_allphi.Draw()
 
-    leg = TLegend(0.15, 0.74, 0.55, 0.90)
+    leg = TLegend(0.12, 0.70, 0.58, 0.90)
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
 
-    # Keep Python references to drawn histograms so ROOT legend pointers stay valid
+    # Keep Python references to TGraph objects so ROOT legend pointers remain valid through Print()
     overlay_keepalive = []
 
-    # Same threshold rule as the main plot block
+    # Same threshold rule as the main plot block (used ONLY to build the hist for edge finding)
     if Q2Val == 3.0 and WVal == 3.14:
         event_threshold_overlay = 15
     else:
@@ -792,9 +797,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         return best
 
     def _build_q2w_hist_for_file(root_path, hname):
-        # NOTE: In ROOT, histograms created while a TFile is the current directory can be owned
-        # by that file and deleted when the file is closed. We detach (SetDirectory(0)) so the
-        # returned TH2D remains valid after infile.Close().
+        # Build a Q2vsW TH2D in memory (SetDirectory(0)) so it survives infile.Close().
         if root_path is None:
             return None
 
@@ -810,11 +813,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
         if not tree:
-            print("!!!!! ERROR !!!!!\\n Missing tree in file: {}\\n!!!!! ERROR !!!!!".format(root_path))
+            print("!!!!! ERROR !!!!!\n Missing tree in file: {}\n!!!!! ERROR !!!!!".format(root_path))
             infile.Close()
             return None
 
-        # Make sure the histogram is NOT owned by the file directory
         ROOT.gROOT.cd()
         h = TH2D(hname, "", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
         h.SetDirectory(0)
@@ -826,38 +828,99 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         infile.Close()
         return h
 
-    def _draw_contour(h, color, label, style=1):
-        # PyROOT may represent a null pointer as CPyCppyy_NoneType (not identical to Python None).
-        # Use truthiness to catch both None and null-pointer ROOT objects.
+    def _line_intersection(p1, p2):
+        # Each p is [a, b] for W = a*Q2 + b
+        a1, b1 = float(p1[0]), float(p1[1])
+        a2, b2 = float(p2[0]), float(p2[1])
+        den = (a1 - a2)
+        if abs(den) < 1.0e-12:
+            return None
+        q2 = (b2 - b1) / den
+        w = a1 * q2 + b1
+        if (not np.isfinite(q2)) or (not np.isfinite(w)):
+            return None
+        return (q2, w)
+
+    def _diamond_graph_from_fits(fits, gname):
+        # fits = (down, up, left, right), each [a, b] for W = a*Q2 + b
+        down, up, left, right = fits
+
+        corners = [
+            _line_intersection(down, left),
+            _line_intersection(down, right),
+            _line_intersection(up, right),
+            _line_intersection(up, left),
+        ]
+        pts = [p for p in corners if p is not None]
+        if len(pts) < 3:
+            return None
+
+        # Order points around centroid
+        cx = sum(p[0] for p in pts) / float(len(pts))
+        cy = sum(p[1] for p in pts) / float(len(pts))
+        pts = sorted(pts, key=lambda p: math.atan2(p[1] - cy, p[0] - cx))
+
+        g = ROOT.TGraph(len(pts) + 1)
+        g.SetName(gname)
+        for i, (qx, wy) in enumerate(pts):
+            g.SetPoint(i, qx, wy)
+        g.SetPoint(len(pts), pts[0][0], pts[0][1])  # close
+        g.SetFillStyle(0)
+        g.SetLineStyle(1)
+        g.SetLineWidth(3)
+        return g
+
+    def _draw_diamond_outline(root_path, eps_label, phi_label, color):
+        if root_path is None:
+            print("WARNING: No {} epsilon file found for phi = {}".format(eps_label, phi_label))
+            return
+
+        h = _build_q2w_hist_for_file(
+            root_path,
+            "Q2vsW_{}_{}_{}_overlay_fit".format(eps_label.lower(), phi_label, FilenameOverride)
+        )
         if not h:
+            print("WARNING: Could not build hist for {} epsilon, phi = {}".format(eps_label, phi_label))
             return
+
         try:
-            if h.GetMaximum() <= 0:
-                return
-        except Exception:
+            fits = diamond_fit(h, Q2Val, fitrange=10, threshold=0.0)
+        except Exception as e:
+            print("WARNING: diamond_fit failed for {} epsilon, phi = {} ({})".format(eps_label, phi_label, e))
             return
 
-        h.SetContour(1)
-        h.SetContourLevel(0, 0.5)
-        h.SetLineColor(color)
-        h.SetLineWidth(3)
-        h.SetLineStyle(style)
+        g = _diamond_graph_from_fits(
+            fits,
+            "gDiamond_{}_{}_{}".format(eps_label.lower(), phi_label, FilenameOverride)
+        )
+        if not g:
+            print("WARNING: Could not form diamond corners for {} epsilon, phi = {}".format(eps_label, phi_label))
+            return
 
-        # prevent premature deletion of the underlying C++ object (PyROOT ownership)
-        overlay_keepalive.append(h)
+        g.SetLineColor(color)
+        g.Draw("L SAME")
+        leg.AddEntry(g, "{} #epsilon, {}".format(eps_label, phi_label), "l")
 
-        h.Draw("cont3 same")
-        leg.AddEntry(h, label, "l")
+        # keep alive through canvas Print()
+        overlay_keepalive.append(g)
 
-    # Define the three phi settings and their line styles
+    # Define the three phi settings
     phi_defs = [
         ("Center", ["Center", "center"]),
         ("Left",   ["Left", "left"]),
         ("Right",  ["Right", "right"]),
     ]
-    phi_style = {"Center": 1, "Left": 2, "Right": 3}
 
-    # Build and draw 6 contours: (High/Low) x (Center/Left/Right)
+    # Unique color per (epsilon, phi)
+    color_map = {
+        ("High", "Center"): ROOT.kBlue,
+        ("High", "Left"):   ROOT.kCyan + 1,
+        ("High", "Right"):  ROOT.kGreen + 2,
+        ("Low",  "Center"): ROOT.kRed,
+        ("Low",  "Left"):   ROOT.kMagenta + 1,
+        ("Low",  "Right"):  ROOT.kOrange + 7,
+    }
+
     for phi_label, phi_tokens in phi_defs:
         # High epsilon
         high_file = _find_shortest_root(phi_tokens, "high")
@@ -872,10 +935,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         cand = f
                         cand_len = len(f)
             high_file = cand
-        if high_file is None:
-            print("WARNING: No High epsilon file found for phi = {}".format(phi_label))
-        h_high = _build_q2w_hist_for_file(high_file, "Q2vsW_high_{}_{}_overlay".format(phi_label, FilenameOverride))
-        _draw_contour(h_high, kBlue, "High #epsilon, {}".format(phi_label), phi_style[phi_label])
+        _draw_diamond_outline(high_file, "High", phi_label, color_map[("High", phi_label)])
 
         # Low epsilon
         low_file = _find_shortest_root(phi_tokens, "low")
@@ -890,10 +950,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         cand = f
                         cand_len = len(f)
             low_file = cand
-        if low_file is None:
-            print("WARNING: No Low epsilon file found for phi = {}".format(phi_label))
-        h_low = _build_q2w_hist_for_file(low_file, "Q2vsW_low_{}_{}_overlay".format(phi_label, FilenameOverride))
-        _draw_contour(h_low, kRed, "Low #epsilon, {}".format(phi_label), phi_style[phi_label])
+        _draw_diamond_outline(low_file, "Low", phi_label, color_map[("Low", phi_label)])
 
     leg.Draw()
 
