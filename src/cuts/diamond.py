@@ -753,10 +753,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     #
     gStyle.SetOptStat(0)
 
-    c1_overlay_allphi = TCanvas("c1_overlay_allphi", "%s All-Phi Diamond Overlay" % ParticleType, 100, 0, 1100, 950)
+    c1_overlay_allphi = TCanvas("c1_overlay_allphi_{}".format(FilenameOverride), "%s All-Phi Diamond Overlay" % ParticleType, 100, 0, 1100, 950)
 
     frame_overlay_allphi = TH2D(
-        "frame_overlay_allphi",
+        "frame_overlay_allphi_{}".format(FilenameOverride),
         "All Diamonds Overlay (High/Low #epsilon; Center/Left/Right #phi); Q2; W",
         nbins, Q2min, Q2max,
         nbins, Wmin, Wmax
@@ -768,6 +768,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     leg = TLegend(0.15, 0.74, 0.55, 0.90)
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
+
+    # Keep Python references to drawn histograms so ROOT legend pointers stay valid
+    overlay_keepalive = []
 
     # Same threshold rule as the main plot block
     if Q2Val == 3.0 and WVal == 3.14:
@@ -839,6 +842,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         h.SetLineColor(color)
         h.SetLineWidth(3)
         h.SetLineStyle(style)
+
+        # prevent premature deletion of the underlying C++ object (PyROOT ownership)
+        overlay_keepalive.append(h)
+
         h.Draw("cont3 same")
         leg.AddEntry(h, label, "l")
 
@@ -867,7 +874,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             high_file = cand
         if high_file is None:
             print("WARNING: No High epsilon file found for phi = {}".format(phi_label))
-        h_high = _build_q2w_hist_for_file(high_file, "Q2vsW_high_{}_overlay".format(phi_label))
+        h_high = _build_q2w_hist_for_file(high_file, "Q2vsW_high_{}_{}_overlay".format(phi_label, FilenameOverride))
         _draw_contour(h_high, kBlue, "High #epsilon, {}".format(phi_label), phi_style[phi_label])
 
         # Low epsilon
@@ -885,7 +892,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             low_file = cand
         if low_file is None:
             print("WARNING: No Low epsilon file found for phi = {}".format(phi_label))
-        h_low = _build_q2w_hist_for_file(low_file, "Q2vsW_low_{}_overlay".format(phi_label))
+        h_low = _build_q2w_hist_for_file(low_file, "Q2vsW_low_{}_{}_overlay".format(phi_label, FilenameOverride))
         _draw_contour(h_low, kRed, "Low #epsilon, {}".format(phi_label), phi_style[phi_label])
 
     leg.Draw()
