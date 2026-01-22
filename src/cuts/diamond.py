@@ -240,7 +240,7 @@ def _diamond_fit_numpy(
     return popt_down, popt_up, popt_left, popt_right
 
 
-def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10, threshold=0.0, use_legacy=False):
+def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10, threshold=0.0, use_legacy=False, auto_control=False):
     """
     Updated diamond-fit procedure (ported from diamond_new.py):
       - Fits *four* lines in (Q2, W): down/up/left/right in the form W = a*Q2 + b.
@@ -278,17 +278,22 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10, threshold=0.0, use_legacy=False)
     if mask.sum() == 0:
         raise ValueError("diamond_fit: histogram has no bins above threshold.")
 
-    # Keep Q2Val as the x-center, but compute a y-center from occupancy.
+    # Compute a y-center from occupancy.
     dy = y[1] - y[0] if len(y) > 1 else 1.0
     yc = np.average(y, weights=np.sum(mask, axis=0))
 
-    nbx = len(x)
-    q2bin = Q2vsW_hist.GetXaxis().FindBin(Q2Val)
-    fitl_bin = max(1, q2bin - int(fitrange * 5))
-    fitr_bin = min(nbx, q2bin + int(fitrange))
+    control_left = None
+    control_right = None
 
-    control_left = (x[fitl_bin - 1], yc - dy * 10.0)
-    control_right = (x[fitr_bin - 1], yc + dy * 10.0)
+    # Legacy-style control window (centered on Q2Val) if requested.
+    if not auto_control:
+        nbx = len(x)
+        q2bin = Q2vsW_hist.GetXaxis().FindBin(Q2Val)
+        fitl_bin = max(1, q2bin - int(fitrange * 5))
+        fitr_bin = min(nbx, q2bin + int(fitrange))
+
+        control_left = (x[fitl_bin - 1], yc - dy * 10.0)
+        control_right = (x[fitr_bin - 1], yc + dy * 10.0)
 
     try:
         return _diamond_fit_numpy(
@@ -302,6 +307,136 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10, threshold=0.0, use_legacy=False)
     except Exception as e:
         print(f"diamond_fit: new procedure failed ({e}); falling back to legacy.")
         return diamond_fit_legacy(Q2vsW_hist, Q2Val, fitrange)
+
+###################################################################################################
+# Convex polygon helpers (used for "common overlap" cuts)
+
+def _sort_ccw_points(points):
+    pts = [(float(p[0]), float(p[1])) for p in points]
+    if len(pts) < 3:
+        return pts
+    cx = sum(p[0] for p in pts) / float(len(pts))
+    cy = sum(p[1] for p in pts) / float(len(pts))
+    pts = sorted(pts, key=lambda p: math.atan2(p[1] - cy, p[0] - cx))
+    return pts
+
+def _dedup_points(points, tol=1e-6):
+    out = []
+    for p in points:
+        if not out:
+            out.append(p)
+            continue
+        if abs(p[0] - out[-1][0]) > tol or abs(p[1] - out[-1][1]) > tol:
+            out.append(p)
+    if len(out) >= 2 and abs(out[0][0] - out[-1][0]) <= tol and abs(out[0][1] - out[-1][1]) <= tol:
+        out.pop()
+    return out
+
+def _segment_line_intersection(p1, p2, q1, q2):
+    x1, y1 = float(p1[0]), float(p1[1])
+    x2, y2 = float(p2[0]), float(p2[1])
+    x3, y3 = float(q1[0]), float(q1[1])
+    x4, y4 = float(q2[0]), float(q2[1])
+
+    den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    if abs(den) < 1.0e-12:
+        return None
+
+    px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / den
+    py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / den
+    if (not np.isfinite(px)) or (not np.isfinite(py)):
+        return None
+    return (px, py)
+
+def _inside_halfplane(p, a, b, eps=1e-12):
+    return ((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) >= -eps
+
+def _convex_polygon_intersection(subject, clip):
+    if subject is None or clip is None:
+        return None
+    subj = _sort_ccw_points(subject)
+    clip = _sort_ccw_points(clip)
+    output = subj
+
+    for i in range(len(clip)):
+        if not output:
+            return None
+        cp1 = clip[i]
+        cp2 = clip[(i + 1) % len(clip)]
+
+        input_list = output
+        output = []
+        S = input_list[-1]
+
+        for E in input_list:
+            if _inside_halfplane(E, cp1, cp2):
+                if not _inside_halfplane(S, cp1, cp2):
+                    inter = _segment_line_intersection(S, E, cp1, cp2)
+                    if inter is not None:
+                        output.append(inter)
+                output.append(E)
+            elif _inside_halfplane(S, cp1, cp2):
+                inter = _segment_line_intersection(S, E, cp1, cp2)
+                if inter is not None:
+                    output.append(inter)
+            S = E
+
+        output = _dedup_points(output)
+
+    if len(output) < 3:
+        return None
+    return _sort_ccw_points(output)
+
+def _point_in_convex_poly(x, y, poly, eps=1e-12):
+    if poly is None or len(poly) < 3:
+        return False
+    px, py = float(x), float(y)
+    pts = _sort_ccw_points(poly)
+    for i in range(len(pts)):
+        a = pts[i]
+        b = pts[(i + 1) % len(pts)]
+        if ((b[0] - a[0]) * (py - a[1]) - (b[1] - a[1]) * (px - a[0])) < -eps:
+            return False
+    return True
+
+def _line_intersection_ab(p1, p2):
+    a1, b1 = float(p1[0]), float(p1[1])
+    a2, b2 = float(p2[0]), float(p2[1])
+    den = (a1 - a2)
+    if abs(den) < 1.0e-12:
+        return None
+    q2 = (b2 - b1) / den
+    w = a1 * q2 + b1
+    if (not np.isfinite(q2)) or (not np.isfinite(w)):
+        return None
+    return (q2, w)
+
+def _poly_from_diamond_fits(fits):
+    down, up, left, right = fits
+    corners = [
+        _line_intersection_ab(down, left),
+        _line_intersection_ab(down, right),
+        _line_intersection_ab(up, right),
+        _line_intersection_ab(up, left),
+    ]
+    pts = [p for p in corners if p is not None]
+    if len(pts) < 3:
+        return None
+    return _sort_ccw_points(pts)
+
+def _tgraph_from_poly(poly, name):
+    if poly is None or len(poly) < 3:
+        return None
+    pts = _sort_ccw_points(poly)
+    g = ROOT.TGraph(len(pts) + 1)
+    g.SetName(name)
+    for i, (qx, wy) in enumerate(pts):
+        g.SetPoint(i, qx, wy)
+    g.SetPoint(len(pts), pts[0][0], pts[0][1])
+    g.SetFillStyle(0)
+    return g
+
+###################################################################################################
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
@@ -365,6 +500,119 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         sys.exit(1)
 
     ##############################################################################################################################################
+    # Common-cut polygon: (Low Center) ∩ (High Center/Left/Right that exist)
+    # This prevents using the Low-Center diamond as a cut if it extends beyond more restrictive diamonds
+    # (e.g. High-Right).
+    common_poly = None
+    common_poly_sources = []
+
+    # Use the same hard-coded threshold rule as the main hist thresholding.
+    if Q2Val == 3.0 and WVal == 3.14:
+        event_threshold_common = 15
+    else:
+        event_threshold_common = 5
+
+    def _passes_common_cut(q2, w):
+        if common_poly is None:
+            return False
+        return _point_in_convex_poly(q2, w, common_poly)
+
+    if phi_setting == "Center":
+        def _find_shortest_root_any(phi_tokens, eps_tag):
+            best = None
+            best_len = 10**9
+            for tok in phi_tokens:
+                for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                    fl = f.lower()
+                    if eps_tag in fl:
+                        if len(f) < best_len:
+                            best = f
+                            best_len = len(f)
+            return best
+
+        def _find_center_fallback(eps_tag):
+            cand = None
+            cand_len = 10**9
+            for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                fl = f.lower()
+                if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl) and ("mid" not in fl):
+                    if len(f) < cand_len:
+                        cand = f
+                        cand_len = len(f)
+            return cand
+
+        def _build_q2w_hist_inmem(root_path, hname):
+            if root_path is None:
+                return None
+            infile = open_root_file(root_path, "READ")
+            if (not infile) or infile.IsZombie():
+                try:
+                    if infile:
+                        infile.Close()
+                except Exception:
+                    pass
+                return None
+            tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
+            if not tree:
+                infile.Close()
+                return None
+            ROOT.gROOT.cd()
+            h = TH2D(hname, "", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
+            h.SetDirectory(0)
+            for ev in tree:
+                h.Fill(ev.Q2, ev.W)
+            apply_bin_threshold(h, event_threshold_common)
+            infile.Close()
+            return h
+
+        polys = []
+
+        low_center_file = lowe_input if lowe_input else _find_center_fallback("low")
+        if low_center_file:
+            htmp = _build_q2w_hist_inmem(low_center_file, "Q2vsW_low_center_common_{}".format(FilenameOverride))
+            if htmp:
+                try:
+                    fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
+                    poly_tmp = _poly_from_diamond_fits(fits_tmp)
+                    if poly_tmp:
+                        polys.append(poly_tmp)
+                        common_poly_sources.append(("Low", "Center", low_center_file))
+                except Exception as e:
+                    print("WARNING: common-cut: failed low-center fit ({})".format(e))
+
+        phi_defs_common = [
+            ("Center", ["Center", "center"]),
+            ("Left",   ["Left", "left"]),
+            ("Right",  ["Right", "right"]),
+        ]
+
+        for phi_lbl, toks in phi_defs_common:
+            high_file = _find_shortest_root_any(toks, "high")
+            if high_file is None and phi_lbl == "Center":
+                high_file = _find_center_fallback("high")
+            if not high_file:
+                continue
+            htmp = _build_q2w_hist_inmem(high_file, "Q2vsW_high_{}_common_{}".format(phi_lbl, FilenameOverride))
+            if not htmp:
+                continue
+            try:
+                fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
+                poly_tmp = _poly_from_diamond_fits(fits_tmp)
+                if poly_tmp:
+                    polys.append(poly_tmp)
+                    common_poly_sources.append(("High", phi_lbl, high_file))
+            except Exception as e:
+                print("WARNING: common-cut: failed high-{} fit ({})".format(phi_lbl, e))
+
+        if len(polys) >= 2:
+            common_poly = polys[0]
+            for p in polys[1:]:
+                common_poly = _convex_polygon_intersection(common_poly, p)
+                if common_poly is None:
+                    break
+            if common_poly is not None:
+                print("Common-cut polygon built with {} vertices from {} sources".format(len(common_poly), len(common_poly_sources)))
+
     labelh = ""
     labelm = ""
     labell = ""
@@ -521,10 +769,13 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             a4, b4 = fit_results[3]
 
             for event in Cut_Events_all_noRF_tree:
-                if (event.W > a1*event.Q2 + b1 and
-                    event.W < a2*event.Q2 + b2 and
-                    event.W > a3*event.Q2 + b3 and
-                    event.W < a4*event.Q2 + b4):
+                if (common_poly is not None and _passes_common_cut(event.Q2, event.W)) or (
+                    common_poly is None and
+                    (event.W > a1*event.Q2 + b1 and
+                     event.W < a2*event.Q2 + b2 and
+                     event.W > a3*event.Q2 + b3 and
+                     event.W < a4*event.Q2 + b4)
+                ):
                     Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                     countA += 1
                     
@@ -532,7 +783,13 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             print("\n\n")
             if (k==2):
                 for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
+                    if (common_poly is not None and _passes_common_cut(event.Q2, event.W)) or (
+
+                        common_poly is None and
+
+                        (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2)
+
+                    ):
                         if (tmax != False):
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
                             t_cut.Fill(-event.MandelT)
@@ -541,7 +798,13 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
             elif (k==1):
                 for event in Cut_Events_all_noRF_tree:
-                    if (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2):
+                    if (common_poly is not None and _passes_common_cut(event.Q2, event.W)) or (
+
+                        common_poly is None and
+
+                        (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2)
+
+                    ):
                         if (tmax != False):
                             Q2vsW_milo_cut.Fill(event.Q2, event.W)
                             t_mi_cut.Fill(-event.MandelT)
@@ -565,6 +828,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             "a4" : a4,
             "b4" : b4
         }
+        # If available, include the "common overlap" polygon cut (CCW list of (Q2, W) vertices).
+        if common_poly is not None:
+            paramDict["cut_mode"] = "poly"
+            paramDict["poly_points"] = [[float(p[0]), float(p[1])] for p in _sort_ccw_points(common_poly)]
+            paramDict["poly_sources"] = [
+                {"epsilon": eps, "phi": phi, "file": fpath} for (eps, phi, fpath) in common_poly_sources
+            ]
+        else:
+            paramDict["cut_mode"] = "quad"
 
     else:
 
@@ -884,7 +1156,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             return
 
         try:
-            fits = diamond_fit(h, Q2Val, fitrange=10, threshold=0.0)
+            fits = diamond_fit(h, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
         except Exception as e:
             print("WARNING: diamond_fit failed for {} epsilon, phi = {} ({})".format(eps_label, phi_label, e))
             return
@@ -951,6 +1223,17 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         cand_len = len(f)
             low_file = cand
         _draw_diamond_outline(low_file, "Low", phi_label, color_map[("Low", phi_label)])
+
+    # Draw the common-cut polygon (if built) as a thick black outline
+    if common_poly is not None:
+        gcut = _tgraph_from_poly(common_poly, "gCommonCut_{}".format(FilenameOverride))
+        if gcut:
+            gcut.SetLineColor(ROOT.kBlack)
+            gcut.SetLineWidth(5)
+            gcut.SetLineStyle(1)
+            gcut.Draw("L SAME")
+            leg.AddEntry(gcut, "Common Cut (overlap)", "l")
+            overlay_keepalive.append(gcut)
 
     leg.Draw()
 
