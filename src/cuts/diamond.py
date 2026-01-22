@@ -643,6 +643,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     if (pages==6): endf = ")"
 
     gStyle.SetOptStat(1)
+
+    # Defer PDF closing to the final overlay plot
+    end = ""
+    endm = ""
+    endc = ""
+    endf = ""
+    close_pdf = ")"
+
+    gStyle.SetOptStat(1)
     gStyle.SetPalette(55)
 
     if (tmax != False):
@@ -729,4 +738,57 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             c1_kinhl.Print(Analysis_Distributions+endc+endf)
 	
             
+
+    #############################################################################################################################
+    # Overlay plot: all diamonds (Q2 vs W acceptance) superimposed, color-coded by epsilon
+    #
+    # Use contours at ~0.5 counts after thresholding so that bins with content > 0 define the diamond boundary.
+    #
+    gStyle.SetOptStat(0)
+
+    c1_overlay = TCanvas("c1_overlay", "%s Diamond Overlay" % ParticleType, 100, 0, 1000, 900)
+
+    frame_overlay = TH2D(
+        "frame_overlay",
+        "All Diamonds Overlay (contours); Q2; W",
+        nbins, Q2min, Q2max,
+        nbins, Wmin, Wmax
+    )
+    frame_overlay.GetXaxis().SetRangeUser(Q2min - Q2min * 0.1, Q2max + Q2max * 0.1)
+    frame_overlay.GetYaxis().SetRangeUser(Wmin - Wmin * 0.1, Wmax + Wmax * 0.1)
+    frame_overlay.Draw()
+
+    leg = TLegend(0.15, 0.78, 0.45, 0.90)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+
+    def _draw_contour(h, color, label, style=1):
+        # Skip empty histograms
+        if h is None:
+            return
+        if h.GetMaximum() <= 0:
+            return
+        h.SetContour(1)
+        h.SetContourLevel(0, 0.5)
+        h.SetLineColor(color)
+        h.SetLineWidth(3)
+        h.SetLineStyle(style)
+        h.Draw("cont3 same")
+        leg.AddEntry(h, label, "l")
+
+    # High / Mid / Low epsilon contour overlays
+    if (highe_input != False):
+        _draw_contour(Q2vsW_hi_cut, kBlue, "High #epsilon", 1)
+    if (mide_input != False):
+        # dashed to distinguish from high/low if present
+        _draw_contour(Q2vsW_mi_cut, kBlack, "Mid #epsilon", 2)
+    if (lowe_input != False):
+        _draw_contour(Q2vsW_lo_cut, kRed, "Low #epsilon", 1)
+
+    leg.Draw()
+
+    # Close the multipage PDF here
+    c1_overlay.Print(Analysis_Distributions + close_pdf)
+
+
     return paramDict
