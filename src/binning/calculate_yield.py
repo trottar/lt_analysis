@@ -1242,7 +1242,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         phi_shift = (evt.phipq)       
         
         if ParticleType == "kaon":          
-            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) #and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
+            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_y_det, evt.phgcer_x_det)          
         else:
             ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
