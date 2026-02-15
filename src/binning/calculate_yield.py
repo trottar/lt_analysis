@@ -1235,7 +1235,11 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
         ##############
         ##############        
-        ##############        
+        ##############   
+
+        # Phase shift to right setting
+        #phi_shift = (evt.phipq+math.pi)
+        phi_shift = (evt.phipq)       
         
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
@@ -1243,11 +1247,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
         #Fill SIMC events
-        if(ALLCUTS):
-            
-            # Phase shift to right setting
-            #phi_shift = (evt.phipq+math.pi)
-            phi_shift = (evt.phipq)            
+        if(ALLCUTS):                      
             
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):
@@ -1271,8 +1271,8 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         for k in range(len(phi_bins)-1):
 
             # Normalize for yields
-            #hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
-            #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
