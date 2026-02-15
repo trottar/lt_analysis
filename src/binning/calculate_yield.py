@@ -1242,7 +1242,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         phi_shift = (evt.phipq)       
         
         if ParticleType == "kaon":          
-            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
+            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) #and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
         else:
             ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
@@ -1253,14 +1253,14 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                        if phi_bins[k] <= (evt.phipq)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
                             if iteration:                                
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
-                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass_shift, evt.iter_weight)
+                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
                             else:
                                 hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.Weight)
-                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(evt.missmass_shift, evt.Weight)
-                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(evt.missmass_shift)
+                                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.Weight)
+                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
