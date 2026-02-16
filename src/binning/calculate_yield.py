@@ -1213,9 +1213,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
-            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
-            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
-            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 1000, inpDict["mm_min"], inpDict["mm_max"])
+            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 1000, inpDict["tmin"], inpDict["tmax"])
+            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 1000, inpDict["mm_min"], inpDict["mm_max"])
 
     print("\nBinning simc...")
     for i,evt in enumerate(TBRANCH_SIMC):
@@ -1404,7 +1404,6 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
                     "binned_t_simc" : binned_t_simc,
                     "binned_hist_simc" : binned_hist_simc,
                     "mm_hist_simc" : mm_hist_simc,
-                    "test" : H_MM_SIMC,
                     "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
                 }
         
@@ -1432,11 +1431,13 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     binned_sub_simc = [[],[]]
     i=0 # iter
     print("-"*25)
-    for simc in binned_dict[kin_type]["test"]:
+    for simc in binned_hist_simc:
+        bin_val_simc, hist_val_simc = simc
+        bin_width_simc = np.mean(np.diff(bin_val_simc))
+        arr_simc = np.array(hist_val_simc)
         try:
             #print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
-            #yld = np.sum(arr_simc)
-            yld = simc.Integral()
+            yld = np.sum(arr_simc)
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
