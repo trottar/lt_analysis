@@ -178,7 +178,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     # Check if variable shift branch exists
     try:
-        adj_missmass = evt.missmass_shift
+        adj_missmass = evt.missmass #evt.missmass_shift
     except AttributeError:
         adj_missmass = evt.missmass
 
@@ -196,7 +196,6 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     MMCUT =  (mm_min<adj_missmass) & (adj_missmass<mm_max)
       
-    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and MMCUT
+    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
     
     return ALLCUTS
