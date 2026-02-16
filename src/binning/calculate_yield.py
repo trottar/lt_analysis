@@ -1434,7 +1434,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
         bin_width_simc = np.mean(np.diff(bin_val_simc))
-        arr_simc = np.array(hist_val_simc)
+        arr_simc = np.array(hist_val_simc)/bin_width_simc
         try:
             #print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
             yld = np.sum(arr_simc)
