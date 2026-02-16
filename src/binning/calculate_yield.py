@@ -1432,14 +1432,11 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     binned_sub_simc = [[],[]]
     i=0 # iter
     print("-"*25)
-    for simc in binned_hist_simc:
-        bin_val_simc, hist_val_simc = simc
-        bin_width_simc = np.mean(np.diff(bin_val_simc))
-        arr_simc = np.array(hist_val_simc)
+    for simc in binned_dict[kin_type]["test"]:
         try:
             #print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
             #yld = np.sum(arr_simc)
-            yld = binned_dict[kin_type]["test"].Integral()
+            yld = simc.Integral()
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
             yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
