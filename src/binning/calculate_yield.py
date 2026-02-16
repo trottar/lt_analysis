@@ -245,7 +245,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
@@ -257,7 +257,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
@@ -301,7 +301,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM) 
                             hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)             
@@ -313,7 +313,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
@@ -356,7 +356,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])   
                             hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)].Fill(adj_MM)             
@@ -368,7 +368,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
@@ -411,7 +411,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1]) 
                             hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)               
                             hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
@@ -423,7 +423,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.MandelT <= t_bins[j+1]:
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) <= phi_bins[k+1]:
+                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
