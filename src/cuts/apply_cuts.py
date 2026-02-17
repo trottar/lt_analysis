@@ -189,8 +189,8 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     # Define the acceptance cuts  
     #SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
     #HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-    HMS_Acceptance = (evt.hsdelta>=-10.0) & (evt.hsdelta<=20.0) & (evt.hsxptar>=-0.06) & (evt.hsxptar<=0.06) & (evt.hsyptar>=-0.04) & (evt.hsyptar<=0.04)
-    SHMS_Acceptance = (evt.ssdelta>=-8.0) & (evt.ssdelta<=8.0) & (evt.ssxptar>=-0.08) & (evt.ssxptar<=0.08) & (evt.ssyptar>=-0.045) & (evt.ssyptar<=0.045)
+    SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssyptar>=-0.06) & (evt.ssyptar<=0.06) & (evt.ssxptar>=-0.04) & (evt.ssxptar<=0.04)
+    HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsyptar>=-0.08) & (evt.hsyptar<=0.08) & (evt.hsxptar>=-0.045) & (evt.hsxptar<=0.045)
 
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
@@ -198,8 +198,8 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     MMCUT =  (mm_min<=adj_missmass) & (adj_missmass<mm_max)
       
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
+    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
     #ALLCUTS = SHMS_Acceptance and t_RANGE and MMCUT
-    #ALLCUTS = t_RANGE and MMCUT
+    ALLCUTS = t_RANGE and MMCUT
 
     return ALLCUTS
