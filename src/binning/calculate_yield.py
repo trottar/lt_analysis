@@ -1236,6 +1236,10 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         except AttributeError:
             adj_missmass = evt.missmass
 
+        del adj_missmass
+
+        adj_missmass = evt.missmass
+        
         ##############
         ##############        
         ##############   
