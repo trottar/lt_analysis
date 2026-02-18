@@ -61,7 +61,7 @@ def iterWeight(arg_str):
     theta_cm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
     phi_cm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
 
-    print(f"theta_cm (radians): {theta_cm}, phi_cm (radians): {phi_cm}")
+    print(f"theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
 
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
