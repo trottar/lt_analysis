@@ -59,9 +59,12 @@ def iterWeight(arg_str):
 
     print(f"1 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
 
+    # Wrap 0 to 2pi
+    theta_cm = theta_cm % (2 * math.pi)
+    phi_cm = phi_cm % (2 * math.pi)
     # Wrap -pi to pi
-    theta_cm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
-    phi_cm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
+    #theta_cm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
+    #phi_cm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
 
     print(f"2 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
 
