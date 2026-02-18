@@ -1224,32 +1224,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     for i,evt in enumerate(TBRANCH_SIMC):
 
         # Progress bar
-        Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        # Check if variable shift branch exists
-        try:
-            adj_missmass = evt.missmass_shift
-        except AttributeError:
-            adj_missmass = evt.missmass
-
-        del adj_missmass
-
-        adj_missmass = evt.missmass
-
-        ##############
-        ##############        
-        ##############   
-
-        # Phase shift to right setting
-        # Wrap 0 to 2pi
-        #phi_shift = (evt.phipq + math.pi) % (2 * math.pi)
-        # Wrap -pi to pi
-        #phi_shift = ((evt.phipq + math.pi) % (2 * math.pi)) - math.pi
-        phi_shift = (evt.phipq)       
+        Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)       
         
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
@@ -1257,7 +1232,32 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
         #Fill SIMC events
-        if(ALLCUTS):                      
+        if(ALLCUTS):        
+
+            ##############
+            # HARD CODED #
+            ##############
+
+            # Check if variable shift branch exists
+            try:
+                adj_missmass = evt.missmass_shift
+            except AttributeError:
+                adj_missmass = evt.missmass
+
+            del adj_missmass
+
+            adj_missmass = evt.missmass
+
+            ##############
+            ##############        
+            ##############   
+
+            # Phase shift to right setting
+            # Wrap 0 to 2pi
+            #phi_shift = (evt.phipq + math.pi) % (2 * math.pi)
+            # Wrap -pi to pi
+            #phi_shift = ((evt.phipq + math.pi) % (2 * math.pi)) - math.pi
+            phi_shift = (evt.phipq)                          
             
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):
@@ -1282,8 +1282,8 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         for k in range(len(phi_bins)-1):
 
             # Normalize for yields
-            #hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
-            #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
@@ -1447,7 +1447,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
         arr_simc = np.array(hist_val_simc)
         try:
             #print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
-            yld = np.sum(arr_simc) * normfac_simc
+            yld = np.sum(arr_simc)
             #yld = mm_hist_simc[i].Integral()
             # Calculate simc yield error (relative error)
             # No norm_fac, shouldn't normalize non-weighted distribution
