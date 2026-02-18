@@ -1239,7 +1239,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         del adj_missmass
 
         adj_missmass = evt.missmass
-        
+
         ##############
         ##############        
         ##############   
@@ -1272,7 +1272,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                                 hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.Weight)
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
 
-
+    del adj_missmass
+    del phi_shift
+    
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
     total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove t-phi bin edges and NumEvts_bin_MM_SIMC_unweighted
