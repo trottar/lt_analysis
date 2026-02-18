@@ -403,9 +403,6 @@ shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
-old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-print("\nCopying {} to {}".format(initial_param_file, old_param_file))    
-shutil.copy(initial_param_file, old_param_file)
 
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
@@ -422,7 +419,7 @@ for hist in histlist:
     # Make sure old simc root file exists
     if os.path.exists(rootFileSimc):
         # Function to calculation new weight and apply it to simc root file 
-        iter_weight(old_param_file, rootFileSimc, inpDict, hist["phi_setting"])
+        iter_weight(initial_param_file, rootFileSimc, inpDict, hist["phi_setting"])
     else:
         print("ERROR: Issue with simc root file {}".format(rootFileSimc))
         sys.exit(2)
@@ -697,6 +694,7 @@ output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
+old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_date)
 with open(old_param_file, 'r') as file:
     for line in file:
