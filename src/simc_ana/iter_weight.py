@@ -242,9 +242,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     iter_sig_array = array( 'f', [0])
     TBRANCH_SIMC.SetBranchAddress("Weight", Weight_array)
     TBRANCH_SIMC.SetBranchAddress("sigcm", sigcm_array)
-    if iter_num > 1:
-        TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
-        TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
+    TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
+    TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
 
     # Create branches for current iteration
     new_TBRANCH_SIMC.Branch("hsdelta", hsdelta_array, "hsdelta/F");
