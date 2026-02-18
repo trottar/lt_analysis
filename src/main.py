@@ -390,7 +390,6 @@ for hist in histlist:
 
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
-from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
@@ -404,6 +403,7 @@ for hist in histlist:
     # ***Moved from main.py location below because needed for weight iteration***
     # Save fortran scripts that contain iteration functional form of parameterization
     py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
+    output_file_lst.append(py_param)
 
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
