@@ -362,8 +362,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
               bad_events.append(i)
               continue
           
-          Weight_array[0] = iter_lst[0]
-          sigcm_array[0] = iter_lst[1]
+          Weight_array[0] = evt.Weight
+          sigcm_array[0] = evt.sigcm 
+          
+          iter_weight_array[0] = iter_lst[0]
+          iter_sig_array[0] = iter_lst[1]
 
           new_TBRANCH_SIMC.Fill()
 
