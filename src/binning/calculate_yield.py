@@ -1433,7 +1433,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     tree_simc  = InFile_SIMC.Get("h10")   
 
-    tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
+    tmp, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
     phi_setting = hist["phi_setting"]
 
     mm_min = inpDict["mm_min"] 
