@@ -57,8 +57,6 @@ def iterWeight(arg_str):
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
     #print(f"param_kaon_pl.py: theta_cm = {theta_cm}, phi_cm = {phi_cm}")
 
-    print(f"1 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
-
     # Wrap 0 to 2pi
     #theta_cm = theta_cm % (2 * math.pi)
     #phi_cm = phi_cm % (2 * math.pi)
@@ -66,7 +64,9 @@ def iterWeight(arg_str):
     thetacm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
     phicm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
 
-    print(f"2 | thetacm (deg): {thetacm * 180.0 / math.pi}, phicm (deg): {phicm * 180.0 / math.pi}")
+    if theta_cm != thetacm:
+        print(f"1 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
+        print(f"2 | thetacm (deg): {thetacm * 180.0 / math.pi}, phicm (deg): {phicm * 180.0 / math.pi}")
 
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
