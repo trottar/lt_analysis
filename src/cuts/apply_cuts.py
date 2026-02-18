@@ -206,4 +206,6 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     ALLCUTS = MMCUT
     #ALLCUTS = (-100000<=-evt.t)
 
+    del adj_missmass
+
     return ALLCUTS
