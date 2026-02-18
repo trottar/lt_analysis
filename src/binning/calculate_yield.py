@@ -1238,7 +1238,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         ##############   
 
         # Phase shift to right setting
-        phi_shift = (evt.phipq+math.pi)
+        phi_shift = (evt.phipq-math.pi)
         #phi_shift = (evt.phipq)       
         
         if ParticleType == "kaon":          
