@@ -388,6 +388,31 @@ from get_eff_charge import find_events
 for hist in histlist:
     hist.update(find_events(hist, inpDict))
 
+sys.path.append("simc_ana")
+from iter_weight import iter_weight
+from compare_simc_iter import compare_simc
+
+# Upate hist dictionary with effective charge and simc histograms
+for hist in histlist:
+    # ***Create root directory here since it is used for weight iteration***
+    create_dir(new_dir+"/root")
+
+    # Names don't match so need to do some string rearrangement
+    InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting']}_{EPSSET}e.root"
+    rootFileSimc = OUTPATH+"/"+InSIMCFilename
+        
+    # ***Parameter file from last iteration!***
+    # ***These old parameters are needed for this iteration. See README for more info on procedure!***
+    old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+
+    # Make sure old simc root file exists
+    if os.path.exists(rootFileSimc):
+        # Function to calculation new weight and apply it to simc root file 
+        iter_weight(old_param_file, rootFileSimc, inpDict, hist["phi_setting"])
+    else:
+        print("ERROR: Issue with simc root file {}".format(rootFileSimc))
+        sys.exit(2)
+
 # SIMC
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
@@ -658,7 +683,6 @@ output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
-old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_date)
 with open(old_param_file, 'r') as file:
     for line in file:
