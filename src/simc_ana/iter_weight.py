@@ -58,7 +58,10 @@ OUTPATH=lt.OUTPATH
 def iter_weight(param_file, simc_root, inpDict, phi_setting):
     
     formatted_date  = inpDict["formatted_date"]
-    iter_num = inpDict["iter_num"]
+    try:
+        iter_num = inpDict["iter_num"]
+    except KeyError:
+        iter_num = 0
     ParticleType  = inpDict["ParticleType"]
     q2_set = inpDict["Q2"]
     Q2 = q2_set.replace("p",".")
@@ -86,10 +89,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     InFile_SIMC = open_root_file(simc_root, "READ")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
-    if iter_num > 1:
+    if iter_num == 0:
+        # Create a new ROOT file for writing
+        new_InFile_SIMC = open_root_file(simc_root, "UPDATE")
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+    elif iter_num > 1:
         # Create a new ROOT file for writing
         new_InFile_SIMC = open_root_file(simc_root.replace("iter_{}.root".format(iter_num-1),"iter_{}.root".format(iter_num)), "UPDATE")
-        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))
+        new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
     else:
         # Create a new ROOT file for writing
         new_InFile_SIMC = open_root_file(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "UPDATE")
