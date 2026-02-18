@@ -790,7 +790,8 @@ def bg_fit(
         *,
         scaling=1.0,
         model_key="linear",   # ← just pick a key from BG_MODELS
-        fit_name=None
+        fit_name=None,
+        DEBUG=False
 ):
     """
     Generic side-band fit and background subtraction.
@@ -898,20 +899,22 @@ def bg_fit(
         # Check the shape INSIDE THE BG_MODELS BOUNDS [bg_lo, bg_hi]
         if is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
             if irefit > 0:
-                print(
-                    f"[bg_fit] rescued background for {hist.GetName()}: "
-                    f"BG window {orig_bg_lo:.3f}-{orig_bg_hi:.3f} "
-                    f"-> {bg_lo:.3f}-{bg_hi:.3f} after {irefit} refits"
-                )
+                if DEBUG:
+                    print(
+                        f"[bg_fit] rescued background for {hist.GetName()}: "
+                        f"BG window {orig_bg_lo:.3f}-{orig_bg_hi:.3f} "
+                        f"-> {bg_lo:.3f}-{bg_hi:.3f} after {irefit} refits"
+                    )
             break  # good shape, keep this fit + BG window
 
         # Shape still bad ⇒ shrink the BG window and try again
         width = bg_hi - bg_lo
         if width <= min_width:
-            print(
-                f"[bg_fit] unable to rescue {hist.GetName()}: "
-                f"BG window collapsed (width={width:.4g} <= {min_width:.4g})"
-            )
+            if DEBUG:
+                print(
+                    f"[bg_fit] unable to rescue {hist.GetName()}: "
+                    f"BG window collapsed (width={width:.4g} <= {min_width:.4g})"
+                )
             fit_func = None
             break
 
@@ -919,35 +922,39 @@ def bg_fit(
         f_hi = float(fit_func.Eval(bg_hi))
         step = shrink_frac * width
 
-        print(
-            f"[bg_fit] refit {irefit}: "
-            f"BG window=[{bg_lo:.5f},{bg_hi:.5f}] width={width:.5g} "
-            f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5g}"
-        )
+        if DEBUG:
+            print(
+                f"[bg_fit] refit {irefit}: "
+                f"BG window=[{bg_lo:.5f},{bg_hi:.5f}] width={width:.5g} "
+                f"f_lo={f_lo:.5g} f_hi={f_hi:.5g} step={step:.5g}"
+            )
 
         # If one edge is clearly more negative, pull that edge in.
         if (f_lo < -neg_tol) or (f_hi < -neg_tol):
             if f_lo <= f_hi:
-                print(
-                    f"  -> shrink lower BG edge: {bg_lo:.5f} -> {bg_lo + step:.5f} "
-                    f"(f_lo={f_lo:.5g})"
-                )
+                if DEBUG:
+                    print(
+                        f"  -> shrink lower BG edge: {bg_lo:.5f} -> {bg_lo + step:.5f} "
+                        f"(f_lo={f_lo:.5g})"
+                    )
                 bg_lo += step
             if f_hi < f_lo:
-                print(
-                    f"  -> shrink upper BG edge: {bg_hi:.5f} -> {bg_hi - step:.5f} "
-                    f"(f_hi={f_hi:.5g})"
-                )
+                if DEBUG:
+                    print(
+                        f"  -> shrink upper BG edge: {bg_hi:.5f} -> {bg_hi - step:.5f} "
+                        f"(f_hi={f_hi:.5g})"
+                    )
                 bg_hi -= step
         else:
             # Edges are OK but the interior in [bg_lo, bg_hi] is still bad:
             # shrink symmetrically.
             new_lo = bg_lo + 0.5 * step
             new_hi = bg_hi - 0.5 * step
-            print(
-                "  -> symmetric BG shrink: "
-                f"{bg_lo:.5f}-{bg_hi:.5f} -> {new_lo:.5f}-{new_hi:.5f}"
-            )
+            if DEBUG:
+                print(
+                    "  -> symmetric BG shrink: "
+                    f"{bg_lo:.5f}-{bg_hi:.5f} -> {new_lo:.5f}-{new_hi:.5f}"
+                )
             bg_lo, bg_hi = new_lo, new_hi
 
     # After the loop, if we still have no acceptable fit, fall back to zero BG
@@ -966,25 +973,28 @@ def bg_fit(
         try:
             tbin = int(parts[-2]) + 1
             phibin = int(parts[-1]) + 1
-            print(
-                f"Bad fit for: {hist_name}  "
-                f"(tbin={tbin}, phibin={phibin})  "
-                f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-            )
+            if DEBUG:
+                print(
+                    f"Bad fit for: {hist_name}  "
+                    f"(tbin={tbin}, phibin={phibin})  "
+                    f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+                )
         except ValueError:
             try:
                 tbin = int(parts[-1]) + 1
-                print(
-                    f"Bad fit for: {hist_name}  "
-                    f"(tbin={tbin})  "
-                    f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-                )
+                if DEBUG:
+                    print(
+                        f"Bad fit for: {hist_name}  "
+                        f"(tbin={tbin})  "
+                        f"f_min={f_min:.6g}  f_max={f_max:.6g}"
+                    )
             except ValueError:
-                print(
-                    "ERROR!"
-                    f" Bad fit for: {hist_name}  "
-                    "\nClosing script..."
-                )
+                if DEBUG:
+                    print(
+                        "ERROR!"
+                        f" Bad fit for: {hist_name}  "
+                        "\nClosing script..."
+                    )
                 sys.exit(2)
 
         # Zero background over the full MM range
