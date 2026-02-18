@@ -401,6 +401,10 @@ for hist in histlist:
     InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting']}_{EPSSET}e.root"
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
         
+    # ***Moved from main.py location below because needed for weight iteration***
+    # Save fortran scripts that contain iteration functional form of parameterization
+    py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
+
     # Active scripts to make file selection dynamic
     # Needs to be done this way because of fortran compiler limitations
     py_param_active = 'models/param_active.py'
