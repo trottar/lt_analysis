@@ -202,6 +202,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
       
     #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
     #ALLCUTS = SHMS_Acceptance and t_RANGE and MMCUT
-    ALLCUTS = t_RANGE and MMCUT
+    #ALLCUTS = t_RANGE and MMCUT
+    ALLCUTS = ""
 
     return ALLCUTS
