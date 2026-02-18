@@ -401,6 +401,13 @@ for hist in histlist:
     InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting']}_{EPSSET}e.root"
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
         
+    # Active scripts to make file selection dynamic
+    # Needs to be done this way because of fortran compiler limitations
+    py_param_active = 'models/param_active.py'
+    # \nCopying content of used models to actively used files
+    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
+    shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
+
     # ***Parameter file from last iteration!***
     # ***These old parameters are needed for this iteration. See README for more info on procedure!***
     old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
