@@ -1238,8 +1238,8 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         ##############   
 
         # Phase shift to right setting
-        #phi_shift = (evt.phipq+math.pi)
-        phi_shift = (evt.phipq)       
+        phi_shift = (evt.phipq+math.pi)
+        #phi_shift = (evt.phipq)       
         
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
