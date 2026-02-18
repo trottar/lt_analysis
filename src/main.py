@@ -391,6 +391,22 @@ for hist in histlist:
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
 
+# ***Moved from main.py location below because needed for weight iteration***
+# Save fortran scripts that contain iteration functional form of parameterization
+py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
+output_file_lst.append(py_param)
+
+# Active scripts to make file selection dynamic
+# Needs to be done this way because of fortran compiler limitations
+py_param_active = 'models/param_active.py'
+# \nCopying content of used models to actively used files
+print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
+shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
+
+# ***Parameter file from last iteration!***
+# ***These old parameters are needed for this iteration. See README for more info on procedure!***
+old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     # ***Create root directory here since it is used for weight iteration***
@@ -400,22 +416,6 @@ for hist in histlist:
     InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting']}_{EPSSET}e.root"
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
         
-    # ***Moved from main.py location below because needed for weight iteration***
-    # Save fortran scripts that contain iteration functional form of parameterization
-    py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
-    output_file_lst.append(py_param)
-
-    # Active scripts to make file selection dynamic
-    # Needs to be done this way because of fortran compiler limitations
-    py_param_active = 'models/param_active.py'
-    # \nCopying content of used models to actively used files
-    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
-    shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
-
-    # ***Parameter file from last iteration!***
-    # ***These old parameters are needed for this iteration. See README for more info on procedure!***
-    old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
-
     # Make sure old simc root file exists
     if os.path.exists(rootFileSimc):
         # Function to calculation new weight and apply it to simc root file 
