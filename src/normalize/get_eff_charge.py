@@ -301,8 +301,7 @@ def find_events(hist, inpDict):
         if "Ncontribute" in line:
             val = line.split("=")
             simc_nevents = int(val[1])
-        #if "normfac" in line:
-        if "wtcontr" in line:
+        if "normfac" in line:
             val = line.split("=")
             simc_normfactor = float(val[1])
     if 'simc_nevents' and 'simc_normfactor' not in locals():
