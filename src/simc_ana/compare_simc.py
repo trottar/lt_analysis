@@ -128,7 +128,6 @@ def compare_simc(hist, inpDict):
     # Names don't match so need to do some string rearrangement
     InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
-    print("\nLooking for simc file called: {}\n".format(rootFileSimc))
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
         return histDict
@@ -302,6 +301,7 @@ def compare_simc(hist, inpDict):
     ################################################################################################################################################    
 
     histDict["InFile_SIMC"] = InFile_SIMC
+    histDict["rootFileSimc"] = rootFileSimc
     histDict["H_Weight_SIMC"] =     H_Weight_SIMC
     histDict["H_hsdelta_SIMC"] =     H_hsdelta_SIMC
     histDict["H_hsxptar_SIMC"] =     H_hsxptar_SIMC

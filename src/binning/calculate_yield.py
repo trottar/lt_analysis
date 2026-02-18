@@ -1421,6 +1421,18 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
 
 def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
+    sys.path.append("utility")
+    from utility import open_root_file
+
+    rootFileSimc = inpDict["rootFileSimc"]
+    if not os.path.isfile(rootFileSimc):
+        print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))
+        return sys.exit(2)
+
+    InFile_SIMC = open_root_file(rootFileSimc)
+
+    tree_simc  = InFile_SIMC.Get("h10")   
+
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
     phi_setting = hist["phi_setting"]
 
