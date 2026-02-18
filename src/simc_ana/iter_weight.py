@@ -335,7 +335,39 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
       TBRANCH_SIMC.GetEntry(i)
 
-      if iter_num > 1:
+      if iter_num == 0:
+
+          # Note: ti is used instead of t, ti = main%t which matches its calculation in simc
+          #       while t is calculated in recon_hcana (but should be invariant?? Not sure the issue)
+          #       This goes for Q2i, Wi, and phiqpi as well
+          #inp_param = '{} {} {} {} {} {} {} {} {} '.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          #print("-"*25,"\n",i,"\n",inp_param)
+          #inp_param = '{} {} {} {} {} {} {} {} {} '\
+              #.format(Q2, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phipqi, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          ###################
+          # Before 8/28/2024
+          #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
+                      #.format(Q2, W, evt.Q2, evt.W, evt.t, evt.epsilon, evt.thetapq, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          # After 8/28/2024
+          #inp_param = '{} {} {} {} {} {} {} {} {} {} '\
+                      #.format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epsilon, evt.thetacm, evt.phipq, evt.sigcm, evt.Weight)+' '.join(param_arr)
+          # After 10/24/2025
+          inp_param = '{} {} {} {} {} {} {} {} {} {} '\
+                    .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
+
+          iter_lst = iterWeight(inp_param)
+
+          # Check for bad events
+          if iter_lst[0] == 0.0:
+              bad_events.append(i)
+              continue
+          
+          Weight_array[0] = iter_lst[0]
+          sigcm_array[0] = iter_lst[1]
+
+          new_TBRANCH_SIMC.Fill()
+
+      elif iter_num > 1:
 
           #evt.Weight = evt.iter_weight
           #evt.sigcm = evt.iter_sig
