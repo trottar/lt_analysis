@@ -407,7 +407,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
 
-          if evt.Weight == iter_weight_array[0]:
+          if evt.Weight != iter_weight_array[0]:
                 print("\n\nERROR: No change in weight for event {}...check param model and input parameters\n\n".format(i))
 
           new_TBRANCH_SIMC.Fill()
