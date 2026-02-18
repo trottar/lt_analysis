@@ -60,13 +60,13 @@ def iterWeight(arg_str):
     print(f"1 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
 
     # Wrap 0 to 2pi
-    theta_cm = theta_cm % (2 * math.pi)
-    phi_cm = phi_cm % (2 * math.pi)
+    #theta_cm = theta_cm % (2 * math.pi)
+    #phi_cm = phi_cm % (2 * math.pi)
     # Wrap -pi to pi
-    #theta_cm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
-    #phi_cm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
+    thetacm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
+    phicm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
 
-    print(f"2 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
+    print(f"2 | thetacm (deg): {thetacm * 180.0 / math.pi}, phicm (deg): {phicm * 180.0 / math.pi}")
 
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
@@ -76,16 +76,16 @@ def iterWeight(arg_str):
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
     # Calculate SigL, SigT, SigLT, SigTT
-    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
-    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
-    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
+    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, thetacm, par1, par2, par3, par4)
+    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, thetacm, par5, par6, par7, par8)
+    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, thetacm, par9, par10, par11, par12)
+    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, thetacm, par13, par14, par15, par16)
 
     # Calculate W-factor
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)    
 
-    sig = (sig_T + eps * sig_L + eps * math.cos(2. * phi_cm) * sig_TT +
-             math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phi_cm) * sig_LT)
+    sig = (sig_T + eps * sig_L + eps * math.cos(2. * phicm) * sig_TT +
+             math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phicm) * sig_LT)
 
     sig = sig * wfactor
 
