@@ -407,6 +407,7 @@ initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
 
+'''
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
     # ***Create root directory here since it is used for weight iteration***
@@ -423,6 +424,7 @@ for hist in histlist:
     else:
         print("ERROR: Issue with simc root file {}".format(rootFileSimc))
         sys.exit(2)
+'''
 
 # SIMC
 sys.path.append("simc_ana")    
