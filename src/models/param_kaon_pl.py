@@ -57,6 +57,10 @@ def iterWeight(arg_str):
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
     #print(f"param_kaon_pl.py: theta_cm = {theta_cm}, phi_cm = {phi_cm}")
 
+    # Wrap -pi to pi
+    theta_cm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
+    phi_cm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
+
     # Grab functional forms from model input file
     fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
     fun_Sig_T_optimized = prepare_equations(equations, 'sig_T')
@@ -69,7 +73,7 @@ def iterWeight(arg_str):
     sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
     sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
     sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
-    
+
     # Calculate W-factor
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)    
 
