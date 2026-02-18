@@ -388,9 +388,6 @@ from get_eff_charge import find_events
 for hist in histlist:
     hist.update(find_events(hist, inpDict))
 
-sys.path.append("simc_ana")
-from iter_weight import iter_weight
-
 # ***Moved from main.py location below because needed for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
 py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
@@ -406,6 +403,9 @@ shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
+
+sys.path.append("simc_ana")
+from iter_weight import iter_weight
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
