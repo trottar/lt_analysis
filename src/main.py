@@ -413,7 +413,7 @@ for hist in histlist:
     create_dir(new_dir+"/root")
 
     # Names don't match so need to do some string rearrangement
-    InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting']}_{EPSSET}e.root"
+    InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
         
     # Make sure old simc root file exists
