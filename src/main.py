@@ -402,7 +402,7 @@ shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
-initial_param_file = '{}/src/models/par.{}_Q{}W{}.dat'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
+initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
 old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 print("\nCopying {} to {}".format(initial_param_file, old_param_file))    
 shutil.copy(initial_param_file, old_param_file)
