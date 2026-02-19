@@ -90,6 +90,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     InFile_SIMC = open_root_file(simc_root, "READ")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
+    print("1.1 | HERE!!!!")
+
     if iter_num == 0:
         # Create a new ROOT file for writing
         new_InFile_SIMC = open_root_file(simc_root, "UPDATE")
@@ -102,6 +104,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Create a new ROOT file for writing
         new_InFile_SIMC = open_root_file(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "UPDATE")
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
+
+    print("1.2 | HERE!!!!")
 
     # Grab branches from previous iteration
     hsdelta_array = array( 'f', [0])
@@ -247,6 +251,8 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
         TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
 
+    print("1.3 | HERE!!!!")
+
     # Create branches for current iteration
     new_TBRANCH_SIMC.Branch("hsdelta", hsdelta_array, "hsdelta/F");
     new_TBRANCH_SIMC.Branch("hsyptar", hsyptar_array, "hsyptar/F");
@@ -318,9 +324,13 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Branch("pend_x_det", pend_x_det_array, "pend_x_det/F")
     new_TBRANCH_SIMC.Branch("pend_y_det", pend_y_det_array, "pend_y_det/F")
 
+    print("1.4 | HERE!!!!")
+
     # Set pol_str, q2_set, w_set for param model script
     set_val(pol_str, q2_set, w_set)
     
+    print("1.5 | HERE!!!!")
+
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
 
