@@ -413,7 +413,7 @@ for hist in histlist:
     # Names don't match so need to do some string rearrangement
     InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"    
     original_rootFileSimc = OUTPATH+"/"+InSIMCFilename
-    rootFileSimc = rootFileSimc.replace(InSIMCFilename, f"{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root")
+    rootFileSimc = original_rootFileSimc.replace(InSIMCFilename, f"{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root")
     hist["InSIMCFilename"] = rootFileSimc
 
     # Copy to new iteration so and then edit the weight
