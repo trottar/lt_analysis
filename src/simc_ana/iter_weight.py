@@ -11,6 +11,7 @@
 # Copyright (c) trottar
 #
 import numpy as np
+from HeeP.SING.HeepSing import TBRANCH_SIMC
 import root_numpy as rnp
 import ROOT
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
@@ -242,8 +243,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     iter_sig_array = array( 'f', [0])
     TBRANCH_SIMC.SetBranchAddress("Weight", Weight_array)
     TBRANCH_SIMC.SetBranchAddress("sigcm", sigcm_array)
-    TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
-    TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
+    if iter_num != 0:
+        TBRANCH_SIMC.SetBranchAddress("iter_weight", iter_weight_array)
+        TBRANCH_SIMC.SetBranchAddress("iter_sig", iter_sig_array)
 
     # Create branches for current iteration
     new_TBRANCH_SIMC.Branch("hsdelta", hsdelta_array, "hsdelta/F");
