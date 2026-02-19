@@ -409,8 +409,6 @@ from iter_weight import iter_weight
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
-    # ***Create root directory here since it is used for weight iteration***
-    create_dir(new_dir+"/root")
 
     # Names don't match so need to do some string rearrangement
     InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"
