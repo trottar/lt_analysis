@@ -405,9 +405,7 @@ shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
 
 sys.path.append("simc_ana")
-print("1 | HERE!!!!")
 from iter_weight import iter_weight
-print("2 | HERE!!!!")
 
 # Upate hist dictionary with effective charge and simc histograms
 for hist in histlist:
@@ -418,7 +416,6 @@ for hist in histlist:
         
     # Make sure old simc root file exists
     if os.path.exists(rootFileSimc):
-        print("3 | HERE!!!!")
         # Function to calculation new weight and apply it to simc root file 
         iter_weight(initial_param_file, rootFileSimc, inpDict, hist["phi_setting"])
     else:

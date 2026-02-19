@@ -1,5 +1,5 @@
 #! /usr/bin/python
-print("1.0 | HERE!!!!")
+
 #
 # Description: Adapted from fortran code wt28_3.f
 # ================================================================
@@ -11,7 +11,6 @@ print("1.0 | HERE!!!!")
 # Copyright (c) trottar
 #
 import numpy as np
-from HeeP.SING.HeepSing import TBRANCH_SIMC
 import root_numpy as rnp
 import ROOT
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
@@ -26,14 +25,12 @@ import importlib.util
 
 sys.path.append("utility")
 from utility import open_root_file, run_fortran
-print("1.1 | HERE!!!!")
 
 ##################################################################################################################################################
 # Importing param model for weight iteration
 
 sys.path.append("models")
 from param_active import set_val, iterWeight
-print("1.2 | HERE!!!!")
 
 ################################################################################################################################################
 '''
