@@ -1168,6 +1168,27 @@ def find_yield_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
+
+def make_binbybin_weighted_hist(h_unw, h_wsum, h_w2sum, out_name):
+    """
+    Construct a bin-by-bin weighted histogram from:
+      - h_unw  : unweighted counts vs x (only used for binning/template)
+      - h_wsum : sum of weights per x-bin  (filled with Fill(x, w))
+      - h_w2sum: sum of w^2 per x-bin      (filled with Fill(x, w*w))
+    Output:
+      - TH1 with content = sumw per bin, error = sqrt(sumw2) per bin
+    """
+    h_out = h_unw.Clone(out_name)
+    h_out.Reset("ICES")  # reset Integral/Contents/Errors/Stats
+
+    for ib in range(1, h_unw.GetNbinsX() + 1):
+        sumw  = h_wsum.GetBinContent(ib)
+        sumw2 = h_w2sum.GetBinContent(ib)
+        h_out.SetBinContent(ib, sumw)
+        h_out.SetBinError(ib, math.sqrt(sumw2) if sumw2 > 0.0 else 0.0)
+
+    return h_out
+
 def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
     processed_dict = {}
@@ -1206,21 +1227,43 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     ################################################################################################################################################
         
     TBRANCH_SIMC  = tree_simc.Get("h10")
-    
+
     hist_bin_dict = {}
-    
+
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
-            #hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
-            #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
-            #hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])            
-            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
-            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, 0.0, 1.0)
-            hist_bin_dict["H_MM_Weighted_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_Weighted_SIMC_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
-            hist_bin_dict["H_t_Weighted_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_Weighted_SIMC_{}_{}".format(j, k),"-t", 100, 0.0, 1.0)            
-            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
+            # Unweighted (counts) templates
+            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D(
+                "H_MM_SIMC_unweighted_{}_{}".format(j, k), "MM", 100, 0.0, 2.0
+            )
+            hist_bin_dict["H_t_SIMC_unweighted_{}_{}".format(j, k)] = TH1D(
+                "H_t_SIMC_unweighted_{}_{}".format(j, k), "-t", 100, 0.0, 1.0
+            )
+
+            # Bin-by-bin accumulators (same binning as the target variable!)
+            hist_bin_dict["H_WSUM_MM_SIMC_{}_{}".format(j, k)] = TH1D(
+                "H_WSUM_MM_SIMC_{}_{}".format(j, k), "WSUM vs MM", 100, 0.0, 2.0
+            )
+            hist_bin_dict["H_W2SUM_MM_SIMC_{}_{}".format(j, k)] = TH1D(
+                "H_W2SUM_MM_SIMC_{}_{}".format(j, k), "W2SUM vs MM", 100, 0.0, 2.0
+            )
+
+            hist_bin_dict["H_WSUM_t_SIMC_{}_{}".format(j, k)] = TH1D(
+                "H_WSUM_t_SIMC_{}_{}".format(j, k), "WSUM vs t", 100, 0.0, 1.0
+            )
+            hist_bin_dict["H_W2SUM_t_SIMC_{}_{}".format(j, k)] = TH1D(
+                "H_W2SUM_t_SIMC_{}_{}".format(j, k), "W2SUM vs t", 100, 0.0, 1.0
+            )
+
+            # Final weighted outputs (constructed after loop) - create placeholders now if you want
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)] = TH1D(
+                "H_MM_SIMC_{}_{}".format(j, k), "MM", 100, 0.0, 2.0
+            )
+            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)] = TH1D(
+                "H_t_SIMC_{}_{}".format(j, k), "-t", 100, 0.0, 1.0
+            )
 
     print("\nBinning simc...")
     for i,evt in enumerate(TBRANCH_SIMC):
@@ -1266,42 +1309,50 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                 for k in range(len(phi_bins)-1):            
                     if t_bins[j] <= -evt.t < t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, (phi_shift)*(180 / math.pi)))
-                            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t)
-                            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass)
-                            hist_bin_dict["H_t_Weighted_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
-                            hist_bin_dict["H_MM_Weighted_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
-                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
+                            w  = evt.iter_weight
+                            tt = -evt.t
+                            mm = adj_missmass
+
+                            # Unweighted counts (for N per bin)
+                            hist_bin_dict["H_t_SIMC_unweighted_{}_{}".format(j, k)].Fill(tt)
+                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(mm)
+
+                            # Bin-by-bin accumulators (sum w and sum w^2 per x-bin)
+                            hist_bin_dict["H_WSUM_t_SIMC_{}_{}".format(j, k)].Fill(tt, w)
+                            hist_bin_dict["H_W2SUM_t_SIMC_{}_{}".format(j, k)].Fill(tt, w*w)
+
+                            hist_bin_dict["H_WSUM_MM_SIMC_{}_{}".format(j, k)].Fill(mm, w)
+                            hist_bin_dict["H_W2SUM_MM_SIMC_{}_{}".format(j, k)].Fill(mm, w*w)
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
-    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC", "H_Weight_SIMC"]))-1 # '-1' to remove t-phi bin edges and NumEvts_bin_MM_SIMC_unweighted
-
-    def replace_with_wsum(h_counts, h_wsum):
-        # assumes identical binning; also copies errors correctly if Sumw2 was enabled on h_wsum
-        if h_counts.GetNbinsX() != h_wsum.GetNbinsX():
-            raise RuntimeError("Bin count mismatch")
-        for i in range(1, h_counts.GetNbinsX()+1):
-            h_counts.SetBinContent(i, h_wsum.GetBinContent(i))
-            h_counts.SetBinError(i,   h_wsum.GetBinError(i))
+    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove t-phi bin edges and NumEvts_bin_MM_SIMC_unweighted
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
+            # Construct the final weighted histograms bin-by-bin
+            hMM_unw   = hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)]
+            ht_unw    = hist_bin_dict["H_t_SIMC_unweighted_{}_{}".format(j, k)]
+
+            hMM_wsum  = hist_bin_dict["H_WSUM_MM_SIMC_{}_{}".format(j, k)]
+            hMM_w2sum = hist_bin_dict["H_W2SUM_MM_SIMC_{}_{}".format(j, k)]
+
+            ht_wsum   = hist_bin_dict["H_WSUM_t_SIMC_{}_{}".format(j, k)]
+            ht_w2sum  = hist_bin_dict["H_W2SUM_t_SIMC_{}_{}".format(j, k)]
+
+            # Overwrite your output hists with bin-by-bin weighted versions
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)] = make_binbybin_weighted_hist(
+                hMM_unw, hMM_wsum, hMM_w2sum, "H_MM_SIMC_{}_{}".format(j, k)
+            )
+            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)] = make_binbybin_weighted_hist(
+                ht_unw, ht_wsum, ht_w2sum, "H_t_SIMC_{}_{}".format(j, k)
+            )
+
             # Normalize for yields
             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
-            hist_bin_dict["H_MM_Weighted_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
-            hist_bin_dict["H_t_Weighted_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
-
-            hMM = hist_bin_dict[f"H_MM_SIMC_{j}_{k}"]
-            ht  = hist_bin_dict[f"H_t_SIMC_{j}_{k}"]
-            hWSUM_MM = hist_bin_dict[f"H_MM_Weighted_SIMC_{j}_{k}"]
-            hWSUM_t  = hist_bin_dict[f"H_t_Weighted_SIMC_{j}_{k}"]
-
-            replace_with_wsum(hMM, hWSUM_MM)
-            replace_with_wsum(ht,  hWSUM_t)
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
