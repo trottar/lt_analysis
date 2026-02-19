@@ -399,13 +399,13 @@ py_param_active = 'models/param_active.py'
 # \nCopying content of used models to actively used files
 print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
 shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
-print("1 | HERE!!!!")
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p",""))
 
 sys.path.append("simc_ana")
+print("1 | HERE!!!!")
 from iter_weight import iter_weight
 print("2 | HERE!!!!")
 
