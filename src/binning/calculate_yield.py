@@ -14,6 +14,7 @@
 ##################################################################################################################################################
 
 # Import relevant packages
+from bisect import bisect
 import uproot as up
 import numpy as np
 import root_numpy as rnp
@@ -1220,6 +1221,8 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, 0.0, 1.0)
             #hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
 
+    import bisect
+
     print("\nBinning simc...")
     for i,evt in enumerate(TBRANCH_SIMC):
 
@@ -1245,7 +1248,12 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         #phi_shift = ((evt.phipq + math.pi) % (2 * math.pi))*(180 / math.pi)
         # Wrap -pi to pi
         #phi_shift = (((evt.phipq + math.pi) % (2 * math.pi)) - math.pi)*(180 / math.pi)
-        phi_shift = (evt.phipq)*(180 / math.pi)
+        #phi_shift = (evt.phipq)*(180 / math.pi)
+        tval = -evt.t
+        phi_deg = (evt.phipq * 180.0 / math.pi + 180.0) % 360.0 - 180.0
+
+        j = bisect.bisect_right(t_bins, tval) - 1
+        k = bisect.bisect_right(phi_bins, phi_deg) - 1
         
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) #and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
@@ -1255,20 +1263,12 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         #Fill SIMC events
         if(ALLCUTS):      
 
-            filled = False
-
             # Loop through bins in t_simc and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                for k in range(len(phi_bins)-1):            
-                    if t_bins[j] <= -evt.t < t_bins[j+1]:
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, (phi_shift)*(180 / math.pi)))
-                            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
-                            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
-                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
-                            filled = True
-                            break                            
-                        break
+            if 0 <= j < len(t_bins)-1 and 0 <= k < len(phi_bins)-1:
+                #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, (phi_shift)*(180 / math.pi)))
+                hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
+                hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
+                hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
