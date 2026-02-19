@@ -402,10 +402,10 @@ from compare_simc_iter import compare_simc
 for hist in histlist:
     if iter_num > 1:
         # SIMC file with weight from last iteration
-        old_simc_root = f"{prev_iter_dir}/root/{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e_iter_{iter_num-1}.root"
+        old_simc_root = f"{prev_iter_dir}/root/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e_iter_{iter_num-1}.root"
     else:
         # SIMC file with weight from last iteration
-        old_simc_root = f"{prev_iter_dir}/root/{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
+        old_simc_root = f"{prev_iter_dir}/root/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
     # Copying previous iteration root file to new iteration's directory (variable redefined and naming fixed after weight applied)
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
     old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])

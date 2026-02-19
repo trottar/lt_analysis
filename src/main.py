@@ -413,7 +413,7 @@ for hist in histlist:
     # Names don't match so need to do some string rearrangement
     InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"    
     original_rootFileSimc = OUTPATH+"/"+InSIMCFilename
-    rootFileSimc = original_rootFileSimc.replace(InSIMCFilename, f"{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root")
+    rootFileSimc = original_rootFileSimc.replace(InSIMCFilename, f"{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root")
     hist["InSIMCFilename"] = rootFileSimc
 
     # Copy to new iteration so and then edit the weight
@@ -805,7 +805,7 @@ if EPSSET == "high":
         for eps in ["highe","lowe"]:
             f_simc_original_root = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
             f_simc_hist = OUTPATH+"/Prod_Coin_{}.hist".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
-            f_simc_root = f"{OUTPATH}/{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{eps}.root"
+            f_simc_root = f"{OUTPATH}/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{eps}.root"
             if os.path.exists(f_simc_original_root):
                 output_file_lst.append(f_simc_original_root)
             if os.path.exists(f_simc_hist):
