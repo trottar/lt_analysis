@@ -411,9 +411,10 @@ from iter_weight import iter_weight
 for hist in histlist:
 
     # Names don't match so need to do some string rearrangement
-    InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"    
-    original_rootFileSimc = OUTPATH+"/"+InSIMCFilename
-    rootFileSimc = original_rootFileSimc.replace(InSIMCFilename, f"{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root")
+    InSIMCFilename_original = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"  
+    InSIMCFilename = f"{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
+    original_rootFileSimc = OUTPATH+"/"+InSIMCFilename_original
+    rootFileSimc = OUTPATH+"/"+InSIMCFilename
     hist["InSIMCFilename"] = InSIMCFilename
 
     # Copy to new iteration so and then edit the weight
