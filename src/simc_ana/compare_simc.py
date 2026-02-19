@@ -98,6 +98,8 @@ def compare_simc(hist, inpDict):
     efficiency_table = inpDict["efficiency_table"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+
+    InSIMCFilename = hist["InSIMCFilename"]
     
     ################################################################################################################################################
 
@@ -126,7 +128,6 @@ def compare_simc(hist, inpDict):
     # Define simc root file trees of interest
 
     # Names don't match so need to do some string rearrangement
-    InSIMCFilename = "Prod_Coin_{}.root".format(kinematics[0]+phi_setting.lower()+"_"+kinematics[1])
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     if not os.path.isfile(rootFileSimc):
         print("\n\nERROR: No simc file found called {}\n\n".format(rootFileSimc))

@@ -411,9 +411,15 @@ from iter_weight import iter_weight
 for hist in histlist:
 
     # Names don't match so need to do some string rearrangement
-    InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"
-    rootFileSimc = OUTPATH+"/"+InSIMCFilename
-        
+    InSIMCFilename = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"    
+    original_rootFileSimc = OUTPATH+"/"+InSIMCFilename
+    rootFileSimc = rootFileSimc.replace(InSIMCFilename, f"{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root")
+    hist["InSIMCFilename"] = rootFileSimc
+
+    # Copy to new iteration so and then edit the weight
+    print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
+    shutil.copy(original_rootFileSimc, rootFileSimc)
+    
     # Make sure old simc root file exists
     if os.path.exists(rootFileSimc):
         # Function to calculation new weight and apply it to simc root file 
@@ -797,12 +803,15 @@ if EPSSET == "high":
     # Grab simc root file
     for hist in histlist:
         for eps in ["highe","lowe"]:
-            f_simc_root = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
+            f_simc_original_root = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
             f_simc_hist = OUTPATH+"/Prod_Coin_{}.hist".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
-            if os.path.exists(f_simc_root):
-                output_file_lst.append(f_simc_root)
+            f_simc_root = f"{OUTPATH}/{hist['phi_setting'].lower()}_{ParticleType}_Simc_Q{Q2}W{W}_{eps}.root"
+            if os.path.exists(f_simc_original_root):
+                output_file_lst.append(f_simc_original_root)
             if os.path.exists(f_simc_hist):
-                output_file_lst.append(f_simc_hist)                
+                output_file_lst.append(f_simc_hist) 
+            if os.path.exists(f_simc_root):
+                output_file_lst.append(f_simc_root)                               
 
     # Update iteration file of dates
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
