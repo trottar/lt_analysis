@@ -1521,8 +1521,10 @@ def find_yield_simc(histlist, inpDict, iteration=False):
         phi_bins = hist["phi_bins"]
 
     yieldDict = {
-        "t_bins" : t_bins,
-        "phi_bins" : phi_bins
+        #"t_bins" : t_bins,
+        #"phi_bins" : phi_bins
+        "t_bins" : 2,
+        "phi_bins" : 2        
     }
         
     # Loop through histlist and update yieldDict
