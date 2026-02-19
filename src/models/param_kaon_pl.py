@@ -87,7 +87,7 @@ def iterWeight(arg_str):
     #sig = (sig_T + eps * sig_L + eps * math.cos(2. * phicm) * sig_TT +
     #         math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phicm) * sig_LT)
 
-    sig = (sig_T + eps * sig_L)
+    sig = (eps * math.cos(2. * phicm) * sig_TT + math.sqrt(2.0 * eps * (1. + eps)) * math.cos(phicm) * sig_LT)
 
     sig = sig * wfactor
 
