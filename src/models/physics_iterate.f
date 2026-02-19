@@ -412,13 +412,13 @@ c	write(6,*)' phicm ',phicm*180./3.14159,phicm_fer*180./3.14159,phipq*180./3.141
 	   Qdep_TT=Q2_g*(exp(-Q2_g))
 
 c 	Best for Q2=4.4, W=2.74 (No Q2 dependence), after CS xsect fit
-       sigL=(fitpar(1)*ft)*exp(-abs(fitpar(2)*t_gev))
+       sigl=(fitpar(1)*ft)*exp(-fitpar(2)*abs(t_gev))
 
-       sigT=(fitpar(5))*exp(-abs(fitpar(6)*t_gev))
+       sigt=(fitpar(5))*exp(-fitpar(6)*abs(t_gev))
 
-       siglt=(fitpar(9))*exp(-abs(fitpar(10)*t_gev))*(sin(thetacm)**2)
+       siglt=(fitpar(9))*exp(-fitpar(10)*abs(t_gev))*(sin(thetacm)**2)
 
-       sigtt=(fitpar(13))*exp(-abs(fitpar(14)*t_gev))*(sin(thetacm)**2)
+       sigtt=(fitpar(13))*exp(-fitpar(14)*abs(t_gev))*(sin(thetacm)**2)
 
 
 	   sig219=(sigt+main%epsilon*sigl+main%epsilon*cos(2.*phicm)*sigtt
@@ -428,9 +428,9 @@ c       now convert to different W
 c       W dependence given by 1/(W^2-M^2)^2
 c       factor 15.333 is value of (w**2-ami**2)**2 at W=2.19
 	   
-c	  wfactor=1.D0/(s_gev-mtar_gev**2)**2
-	  wfactor=1.D0/(s_gev-mtar_gev**2)
-     >		**(0.85*(w_set**2) - 5.97*w_set + 12.68)
+	  wfactor=1.D0/(s_gev-mtar_gev**2)**2
+c	  wfactor=1.D0/(s_gev-mtar_gev**2)
+c     >		**(0.85*(w_set**2) - 5.97*w_set + 12.68)
 	  sig=sig219*wfactor
 	  sigl=sigl*wfactor
 	  sigt=sigt*wfactor
