@@ -1403,15 +1403,12 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
             
             binned_unweighted_NumEvts_simc.append(NumEvts_bin_MM_SIMC_unweighted)
 
-            print("1 | t-bin {} phi-bin {} | Yield: {}".format(j+1, k+1, mm_hist_simc[-1].Integral()))
-            if j+1 == len(t_bins)-1:
-                print("2 | t-bin {} phi-bin {} | Yield: {}".format(j+1, k+1, mm_hist_simc[-1].Integral()))
-                binned_dict[kin_type] = {
-                    "binned_t_simc" : binned_t_simc,
-                    "binned_hist_simc" : binned_hist_simc,
-                    "mm_hist_simc" : mm_hist_simc,
-                    "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
-                }
+            binned_dict[kin_type] = {
+                "binned_t_simc" : binned_t_simc,
+                "binned_hist_simc" : binned_hist_simc,
+                "mm_hist_simc" : mm_hist_simc,
+                "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
+            }
         
     return binned_dict
 
