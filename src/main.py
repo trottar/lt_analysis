@@ -277,8 +277,8 @@ print("-"*25)
 inpDict["Epsmin"] = 0.0
 inpDict["Epsmax"] = 1.0
 
-phisetlist = ["Center","Left","Right"]
-#phisetlist = ["Center"]
+#phisetlist = ["Center","Left","Right"]
+phisetlist = ["Center"]
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
