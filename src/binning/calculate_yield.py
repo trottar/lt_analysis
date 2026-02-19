@@ -1292,7 +1292,8 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             # Normalize for yields
             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
-            hist_bin_dict["H_Weight_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_MM_Weighted_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_t_Weighted_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
 
             hMM = hist_bin_dict[f"H_MM_SIMC_{j}_{k}"]
             ht  = hist_bin_dict[f"H_t_SIMC_{j}_{k}"]
