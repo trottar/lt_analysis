@@ -1212,9 +1212,11 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
 
-            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
+            # Fill MM without an explicit MM cut window; apply MM cuts later during yield extraction
+            # using the same bin-center masking procedure as Method B.
+            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
-            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])            
+            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
             #hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 1000, 0.0, 2.0)
             #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, 0.0, 1.0)
             #hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
@@ -1281,6 +1283,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
                 "H_t_SIMC" : hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)],
+                "H_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)],
                 "NumEvts_bin_MM_SIMC_unweighted" : hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Integral(),
             }
 
@@ -1368,6 +1371,7 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
     binned_t_simc = []
     binned_hist_simc = []
     mm_hist_simc = []
+    mm_hist_simc_unweighted = []
     
     binned_unweighted_NumEvts_simc = []
 
@@ -1378,8 +1382,10 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
             H_MM_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SIMC"]
             H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
             NumEvts_bin_MM_SIMC_unweighted = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["NumEvts_bin_MM_SIMC_unweighted"]
+            H_MM_SIMC_unweighted = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SIMC_unweighted"]
 
             mm_hist_simc.append(H_MM_SIMC.Clone())            
+            mm_hist_simc_unweighted.append(H_MM_SIMC_unweighted.Clone())
             
             # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
             tmp_binned_t_simc = []
@@ -1406,6 +1412,7 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
         "binned_t_simc" : binned_t_simc,
         "binned_hist_simc" : binned_hist_simc,
         "mm_hist_simc" : mm_hist_simc,
+        "mm_hist_simc_unweighted" : mm_hist_simc_unweighted,
         "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
     }
         
@@ -1425,6 +1432,7 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
     mm_hist_simc = binned_dict[kin_type]["mm_hist_simc"]
+    mm_hist_simc_unweighted = binned_dict[kin_type]["mm_hist_simc_unweighted"]
     
     binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
 
@@ -1435,16 +1443,19 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     print("-"*25)
     for simc in binned_hist_simc:
         bin_val_simc, hist_val_simc = simc
-        bin_width_simc = np.mean(np.diff(bin_val_simc))
         arr_simc = np.array(hist_val_simc)
+        arr_simc_unweighted = np.array([
+            mm_hist_simc_unweighted[i].GetBinContent(ib)
+            for ib in range(1, mm_hist_simc_unweighted[i].GetNbinsX() + 1)
+        ])
+
+        # Match Method B MM-cut behavior: apply MM window by bin center mask (inclusive bounds).
+        mm_mask = (np.array(bin_val_simc) >= mm_min) & (np.array(bin_val_simc) <= mm_max)
+
         try:
-            #print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
-            yld = np.sum(arr_simc)
-            #yld = mm_hist_simc[i].Integral()
-            # Calculate simc yield error (relative error)
-            # No norm_fac, shouldn't normalize non-weighted distribution
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
-            # Convert to absolute error (required for average_ratio.f)
+            yld = np.sum(arr_simc[mm_mask])
+            n_unweighted_in_mm = np.sum(arr_simc_unweighted[mm_mask])
+            yld_err = (1/np.sqrt(n_unweighted_in_mm))
             yld_err = yld_err*yld
         except ZeroDivisionError:
             yld = 0.0
