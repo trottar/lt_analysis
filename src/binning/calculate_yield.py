@@ -980,20 +980,19 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             binned_hist_data.append(tmp_binned_hist_data[0])
             binned_hist_sub.append(tmp_binned_hist_sub[0])
 
-            if j+1 == len(t_bins)-1:
-                binned_dict[kin_type] = {
-                    "binned_t_data" : binned_t_data,
-                    "binned_hist_data" : binned_hist_data,
-                    "binned_hist_sub" : binned_hist_sub,
-                    "mm_hist_data" : mm_hist_data,
-                    "mm_hist_sub" : mm_hist_sub,
-                    "scale_factor" : arr_scale_factor,                                  
-                }
-                if inpDict["bg_stat_scale1"] > 0.0:                 
-                    binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
-                if inpDict["bg_stat_scale2"] > 0.0:        
-                    binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
-        
+    binned_dict[kin_type] = {
+        "binned_t_data" : binned_t_data,
+        "binned_hist_data" : binned_hist_data,
+        "binned_hist_sub" : binned_hist_sub,
+        "mm_hist_data" : mm_hist_data,
+        "mm_hist_sub" : mm_hist_sub,
+        "scale_factor" : arr_scale_factor,                                  
+    }
+    if inpDict["bg_stat_scale1"] > 0.0:                 
+        binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
+    if inpDict["bg_stat_scale2"] > 0.0:        
+        binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
+
     return binned_dict
 
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
@@ -1403,12 +1402,12 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
             
             binned_unweighted_NumEvts_simc.append(NumEvts_bin_MM_SIMC_unweighted)
 
-            binned_dict[kin_type] = {
-                "binned_t_simc" : binned_t_simc,
-                "binned_hist_simc" : binned_hist_simc,
-                "mm_hist_simc" : mm_hist_simc,
-                "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
-            }
+    binned_dict[kin_type] = {
+        "binned_t_simc" : binned_t_simc,
+        "binned_hist_simc" : binned_hist_simc,
+        "mm_hist_simc" : mm_hist_simc,
+        "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
+    }
         
     return binned_dict
 
