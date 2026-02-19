@@ -1257,10 +1257,10 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
         # Phase shift to right setting
         # Wrap 0 to 2pi
-        phi_shift = ((evt.phipq + math.pi) % (2 * math.pi))*(180 / math.pi)
+        #phi_shift = ((evt.phipq + math.pi) % (2 * math.pi))*(180 / math.pi)
         # Wrap -pi to pi
         #phi_shift = (((evt.phipq + math.pi) % (2 * math.pi)) - math.pi)*(180 / math.pi)
-        #phi_shift = (evt.phipq)*(180 / math.pi)
+        phi_shift = (evt.phipq)*(180 / math.pi)
         
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) #and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
@@ -1522,7 +1522,7 @@ def find_yield_simc(histlist, inpDict, iteration=False):
 
     yieldDict = {
         "t_bins" : t_bins,
-        "phi_bins" : np.mod(phi_bins + 360, 360)
+        "phi_bins" : phi_bins
     }
         
     # Loop through histlist and update yieldDict
