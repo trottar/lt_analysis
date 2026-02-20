@@ -205,7 +205,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC.SetBranchAddress("phipq", phipq_array);
     TBRANCH_SIMC.SetBranchAddress("phicm", phicm_array);
     TBRANCH_SIMC.SetBranchAddress("missmass", missmass_array);
-    TBRANCH_SIMC.SetBranchAddress("missmass_shift", missmass_shift_array);    
+    try:
+        TBRANCH_SIMC.SetBranchAddress("missmass_shift", missmass_shift_array);    
+    except TypeError:
+        print("No missmass_shift branch found...skipping...")
     TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);
     TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);    
     TBRANCH_SIMC.SetBranchAddress("phad", phad_array);

@@ -59,10 +59,8 @@ for data_type in run_types:
     print(f"\n\nFinding MM shift for {data_type}...")
     
     if data_type == "simc":
-        #simc_str = kinematics.replace('_',f'{phiset}_')
-        simc_str = kinematics+'_{phiset}_' # Kin
-        #filename = f"{OUTPATH}/Prod_Coin_{simc_str}.root"
-        filename = f"{OUTPATH}/{simc_str}/Prod_Coin_{simc_str}.root" # Kin
+        simc_str = kinematics.replace('_',f'{phiset}_')
+        filename = f"{OUTPATH}/Prod_Coin_{simc_str}.root"
         trees = [f"h10"]
         reference_tree_name = f"h10"
         mass_var_name = "missmass"

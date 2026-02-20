@@ -237,7 +237,7 @@ if [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     else
 	EPSVAL=0.7148
     fi
-	KIN="Q4p4_W2p74_${EPSILON}e"
+	KIN="Q4p4W2p74_${EPSILON}e"
 fi
 if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     if [[ $PHIVAL = "right" ]]; then
