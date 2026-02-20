@@ -60,7 +60,7 @@ for data_type in run_types:
     
     if data_type == "simc":
         simc_str = kinematics.replace('_',f'_{phiset}_')
-        filename = f"{OUTPATH}/Prod_Coin_{simc_str}.root"
+        filename = f"{OUTPATH}/{simc_str}/Prod_Coin_{simc_str}.root"
         trees = [f"h10"]
         reference_tree_name = f"h10"
         mass_var_name = "missmass"
