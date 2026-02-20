@@ -230,14 +230,14 @@ if [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     elif [[ $PHIVAL = "left" ]]; then
 	file_left="Q4p4W2p74left_${EPSILON}e"
     elif [[ $PHIVAL = "center" ]]; then
-	file_center="Q4p4_W2p74_center_${EPSILON}e"
+	file_center="Q4p4W2p74center_${EPSILON}e"
 	fi	
     if [[ ${EPSILON} == "low" ]]; then
 	EPSVAL=0.4805
     else
 	EPSVAL=0.7148
     fi
-	KIN="Q4p4W2p74_${EPSILON}e"
+	KIN="Q4p4_W2p74_${EPSILON}e"
 fi
 if [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     if [[ $PHIVAL = "right" ]]; then
