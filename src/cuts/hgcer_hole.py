@@ -17,8 +17,8 @@ def apply_HGCer_hole_cut(Q2, W, EPSSET):
 
     # Defined HGCer Geometric cuts
     cutg = TCutG("cutg",21)
-    cutg.SetVarX("P_hgcer_yAtCer")
-    cutg.SetVarY("P_hgcer_xAtCer")
+    #cutg.SetVarX("P_hgcer_yAtCer")
+    #cutg.SetVarY("P_hgcer_xAtCer")
     cutg.SetPoint(0, -25, 2)
     cutg.SetPoint(1, -2, 2)
     cutg.SetPoint(2, -1, 2.5)
