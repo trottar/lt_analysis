@@ -1272,9 +1272,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.t < t_bins[j+1]:
+                if t_bins[j] <= -evt.t <= t_bins[j+1]:
                     for k in range(len(phi_bins)-1):                                
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                        if phi_bins[k] <= phi_shift <= phi_bins[k+1]:
                             #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, (phi_shift)*(180 / math.pi)))
                             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
                             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
