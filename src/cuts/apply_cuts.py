@@ -129,11 +129,14 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-    t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
+    # RLT: These are done via histogram cuts
+    #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
+    #MMCUT =  (mm_min<=adj_MM) & (adj_MM<mm_max)
+    #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
 
-    MMCUT =  (mm_min<=adj_MM) & (adj_MM<mm_max)
-    
-    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
+    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+    #ALLCUTS = (-100000<=-evt.MandelT) # No cuts
+
 
     return ALLCUTS
 
@@ -159,12 +162,16 @@ def apply_data_sub_cuts(evt):
     HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
     HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
+    # RLT: These are done via histogram cuts
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-    t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
+    # RLT: These are done via histogram cuts
+    #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
+    #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE
 
     # No MM cut    
-    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE
+    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+    #ALLCUTS = (-100000<=-evt.MandelT) # No cuts
 
     return ALLCUTS
 
@@ -196,15 +203,12 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
 
-    t_RANGE =  (tmin<=-evt.t) & (-evt.t<tmax)
+    # RLT: These are done via histogram cuts
+    #t_RANGE =  (tmin<=-evt.t) & (-evt.t<tmax)
+    #MMCUT =  (mm_min<=adj_missmass) & (adj_missmass<mm_max)      
+    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT    
 
-    MMCUT =  (mm_min<=adj_missmass) & (adj_missmass<mm_max)
-      
-    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
-    #ALLCUTS = SHMS_Acceptance and t_RANGE and MMCUT
-    #ALLCUTS = t_RANGE and MMCUT
-    #ALLCUTS = MMCUT
     ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond
-    #ALLCUTS = (-100000<=-evt.t)
+    #ALLCUTS = (-100000<=-evt.t) # No cuts
 
     return ALLCUTS

@@ -1026,16 +1026,10 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
             # Loop through bins in t_simc and identify events in specified bins
             for j in range(len(t_bins)-1):            
                 if t_bins[j] <= -evt.t <= t_bins[j+1]:
-                    if iteration:
-                        hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.iter_weight)
-                        hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.iter_weight)
-                        hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.iter_weight)
-                        hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.iter_weight)
-                    else:
-                        hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.Weight)
-                        hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.Weight)
-                        hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.Weight)
-                        hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.Weight)                    
+                    hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.iter_weight)
+                    hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.iter_weight)
+                    hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.iter_weight)
+                    hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.iter_weight)                  
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
