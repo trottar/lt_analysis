@@ -996,18 +996,18 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             binned_hist_data.append(tmp_binned_hist_data[0])
             binned_hist_sub.append(tmp_binned_hist_sub[0])
 
-        binned_dict[kin_type] = {
-            "binned_t_data" : binned_t_data,
-            "binned_hist_data" : binned_hist_data,
-            "binned_hist_sub" : binned_hist_sub,
-            "mm_hist_data" : mm_hist_data,
-            "mm_hist_sub" : mm_hist_sub,
-            "scale_factor" : arr_scale_factor,                                  
-        }
-        if inpDict["bg_stat_scale1"] > 0.0:                 
-            binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
-        if inpDict["bg_stat_scale2"] > 0.0:        
-            binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
+    binned_dict[kin_type] = {
+        "binned_t_data" : binned_t_data,
+        "binned_hist_data" : binned_hist_data,
+        "binned_hist_sub" : binned_hist_sub,
+        "mm_hist_data" : mm_hist_data,
+        "mm_hist_sub" : mm_hist_sub,
+        "scale_factor" : arr_scale_factor,                                  
+    }
+    if inpDict["bg_stat_scale1"] > 0.0:                 
+        binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
+    if inpDict["bg_stat_scale2"] > 0.0:        
+        binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
 
     return binned_dict
 
@@ -1294,7 +1294,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
 
-            print("SIMC yield for t-bin {} phi-bin {}: {:.3e}".format(j+1, k+1, hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Integral()))
+            #print("SIMC yield for t-bin {} phi-bin {}: {:.3e}".format(j+1, k+1, hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Integral()))
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_SIMC" : hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)],
