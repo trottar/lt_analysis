@@ -374,6 +374,11 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
 
+          '''
+          if evt.Weight != iter_lst[0]:
+                print("\n\nWARNING: Weight mismatch for event {}...simc weight = {}, iter weight = {}".format(i, evt.Weight, iter_lst[0]))              
+          '''
+          
           new_TBRANCH_SIMC.Fill()
 
       else:

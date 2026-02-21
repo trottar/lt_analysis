@@ -574,7 +574,7 @@ from calculate_yield import find_yield_data, find_yield_simc
 yieldDict = {}
 yieldDict.update(find_yield_data(histlist, inpDict))
 yieldDict.update(find_yield_simc(histlist, inpDict))
-sys.exit(2)
+#sys.exit(2)
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio
