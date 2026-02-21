@@ -83,9 +83,6 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     full_optimization = True
     #full_optimization = False
 
-    if iter_num == 1:
-        skip_optimization = True # Set to True to skip optimization and use fixed parameters    
-
     #skip_optimization = True # Set to True to skip optimization and use fixed parameters           
 
     # Fixed separated xsect parameterization
