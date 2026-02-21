@@ -408,7 +408,7 @@ for hist in histlist:
         old_simc_root = f"{prev_iter_dir}/root/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
     # Copying previous iteration root file to new iteration's directory (variable redefined and naming fixed after weight applied)
     new_simc_root = old_simc_root.replace(closest_date, formatted_date)
-    old_simc_hist = '{}/root/Prod_Coin_{}.hist'.format(prev_iter_dir, kinematics[0]+hist["phi_setting"].lower()+"_"+kinematics[1])
+    old_simc_hist = f"{prev_iter_dir}/root/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.hist"
     new_simc_hist = old_simc_hist.replace(closest_date, formatted_date)
     # ***Create root directory here since it is used for weight iteration***
     create_dir(new_dir+"/root")
