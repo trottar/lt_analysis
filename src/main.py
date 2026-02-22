@@ -284,13 +284,19 @@ for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
  
-print("\n\nDiamond cut parameters: ")
-for p in [1,2,3,4]:
-    if inpDict["a%i" % p] == 0.0 or inpDict["b%i" % p] == 0.0:
-        print("ERROR: Invalid diamond cut paramters")
-        sys.exit(2)
-    else:
-        print("a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))    
+print("\n\nDiamond cut polygon:")
+if inpDict.get("cut_mode") != "poly":
+    print("ERROR: Invalid cut mode. Expected polygon cut.")
+    sys.exit(2)
+
+poly_points = inpDict.get("poly_points", [])
+if len(poly_points) < 3:
+    print("ERROR: Invalid polygon cut parameters")
+    sys.exit(2)
+
+print("vertices = {}".format(len(poly_points)))
+for i, p in enumerate(poly_points, start=1):
+    print("v{} = ({:.6f}, {:.6f})".format(i, float(p[0]), float(p[1])))
 
 print("\n\n")
         

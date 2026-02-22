@@ -514,11 +514,6 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     else:
         event_threshold_common = 5
 
-    def _passes_common_cut(q2, w):
-        if common_poly is None:
-            return False
-        return _point_in_convex_poly(q2, w, common_poly)
-
     if phi_setting == "Center":
         def _find_shortest_root_any(phi_tokens, eps_tag):
             best = None
@@ -660,25 +655,13 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
     Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
 
-    a1 = 0
-    b1 = 0
-    a2 = 0
-    b2 = 0
-    a3 = 0
-    b3 = 0
-    a4 = 0
-    b4 = 0
-    minQ = 0
-    maxQ = 0
-    fitl = 0
-    fitr = 0
-    fitrange = 0
-    lol = []
-    lor = []
-    hil = []
-    hir = []
-    xvl = []
-    xvr = []
+    cut_poly = _sort_ccw_points(common_poly) if common_poly is not None else None
+
+    def _passes_active_cut(q2, w):
+        if cut_poly is None:
+            return False
+        return _point_in_convex_poly(q2, w, cut_poly)
+
     for k in range(0, 3):
 
 	# Construct the name of the rootfile based upon the info we provided
@@ -757,27 +740,20 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             apply_bin_threshold(Q2vsW_lowe_cut, event_threshold)
             apply_bin_threshold(Q2vsW_lo_cut, event_threshold)
                 
-        #Does assume nbins bins for Q2 and W, centered at kinematic values
+        # Does assume nbins bins for Q2 and W, centered at kinematic values
         minQ = Q2_cut.FindFirstBinAbove(0)
         maxQ = Q2_cut.FindLastBinAbove(0)
         fitrange = int((maxQ-minQ)/100)
-        print("fitrange: ",fitrange)                
+        print("fitrange: ",fitrange)
         if (k == 0):  # Low epsilon
-            # Replace the existing diamond fitting code with:
+            # Build low-epsilon polygon fallback if common overlap polygon is unavailable.
             fit_results = diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange)
-            a1, b1 = fit_results[0]
-            a2, b2 = fit_results[1]
-            a3, b3 = fit_results[2]
-            a4, b4 = fit_results[3]
+            low_fit_poly = _poly_from_diamond_fits(fit_results)
+            if (cut_poly is None) and (low_fit_poly is not None):
+                cut_poly = _sort_ccw_points(low_fit_poly)
 
             for event in Cut_Events_all_noRF_tree:
-                if (common_poly is not None and _passes_common_cut(event.Q2, event.W)) or (
-                    common_poly is None and
-                    (event.W > a1*event.Q2 + b1 and
-                     event.W < a2*event.Q2 + b2 and
-                     event.W > a3*event.Q2 + b3 and
-                     event.W < a4*event.Q2 + b4)
-                ):
+                if _passes_active_cut(event.Q2, event.W):
                     Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                     countA += 1
                     
@@ -785,13 +761,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             print("\n\n")
             if (k==2):
                 for event in Cut_Events_all_noRF_tree:
-                    if (common_poly is not None and _passes_common_cut(event.Q2, event.W)) or (
-
-                        common_poly is None and
-
-                        (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2)
-
-                    ):
+                    if _passes_active_cut(event.Q2, event.W):
                         if (tmax != False):
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
                             t_cut.Fill(-event.MandelT)
@@ -800,13 +770,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
             elif (k==1):
                 for event in Cut_Events_all_noRF_tree:
-                    if (common_poly is not None and _passes_common_cut(event.Q2, event.W)) or (
-
-                        common_poly is None and
-
-                        (event.W/event.Q2>a1+b1/event.Q2 and event.W/event.Q2<a2+b2/event.Q2 and event.W/event.Q2>a3+b3/event.Q2 and event.W/event.Q2<a4+b4/event.Q2)
-
-                    ):
+                    if _passes_active_cut(event.Q2, event.W):
                         if (tmax != False):
                             Q2vsW_milo_cut.Fill(event.Q2, event.W)
                             t_mi_cut.Fill(-event.MandelT)
@@ -818,27 +782,19 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         infile.Close()
 
-    if phi_setting == "Center":        
-        paramDict = {
+    if phi_setting == "Center":
+        if cut_poly is None:
+            print("!!!!! ERROR !!!!!\n No valid cut polygon available.\n!!!!! ERROR !!!!!")
+            sys.exit(2)
 
-            "a1" : a1,
-            "b1" : b1,
-            "a2" : a2,
-            "b2" : b2,
-            "a3" : a3,
-            "b3" : b3,
-            "a4" : a4,
-            "b4" : b4
+        paramDict = {
+            "cut_mode": "poly",
+            "poly_points": [[float(p[0]), float(p[1])] for p in _sort_ccw_points(cut_poly)],
         }
-        # If available, include the "common overlap" polygon cut (CCW list of (Q2, W) vertices).
         if common_poly is not None:
-            paramDict["cut_mode"] = "poly"
-            paramDict["poly_points"] = [[float(p[0]), float(p[1])] for p in _sort_ccw_points(common_poly)]
             paramDict["poly_sources"] = [
                 {"epsilon": eps, "phi": phi, "file": fpath} for (eps, phi, fpath) in common_poly_sources
             ]
-        else:
-            paramDict["cut_mode"] = "quad"
 
     else:
 
@@ -960,41 +916,12 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         # hir.clear()
         # xvl.clear()
         # xvr.clear()
-        #print (xvl[0], xvl[-1])
-        line1 = TLine(Q2min, a1*Q2min+b1, Q2max, a1*Q2max+b1)   
-        line2 = TLine(Q2min, a2*Q2min+b2, Q2max, a2*Q2max+b2) 
-        line3 = TLine(Q2min, a3*Q2min+b3, Q2max, a3*Q2max+b3) 
-        line4 = TLine(Q2min, a4*Q2min+b4, Q2max, a4*Q2max+b4)  
-        line1.SetLineColor(1)
-        line2.SetLineColor(2)
-        line3.SetLineColor(3)
-        line4.SetLineColor(4)  
-        line1.SetLineWidth(5)
-        line2.SetLineWidth(5)
-        line3.SetLineWidth(5)
-        line4.SetLineWidth(5)
-        line1.Draw()
-        line2.Draw()
-        line3.Draw()
-        line4.Draw()
-        x1 = (nbins*0.25)*(Q2max-Q2min)+Q2min
-        x2 = (nbins*0.75)*(Q2max-Q2min)+Q2min
-        line1f = TLine(x1,a1*x1+b1,x2,a1*x2+b1)   
-        line2f = TLine(x1,a2*x1+b2,x2,a2*x2+b2) 
-        line3f = TLine(x1,a3*x1+b3,x2,a3*x2+b3) 
-        line4f = TLine(x1,a4*x1+b4,x2,a4*x2+b4)  
-        line1f.SetLineColor(1)
-        line2f.SetLineColor(2)
-        line3f.SetLineColor(3)
-        line4f.SetLineColor(4)  
-        line1f.SetLineWidth(2)
-        line2f.SetLineWidth(2)
-        line3f.SetLineWidth(2)
-        line4f.SetLineWidth(2)
-        line1f.Draw()
-        line2f.Draw()
-        line3f.Draw()
-        line4f.Draw()
+        gcut_lolo = _tgraph_from_poly(cut_poly, "gCutLolo_{}".format(FilenameOverride))
+        if gcut_lolo:
+            gcut_lolo.SetLineColor(ROOT.kBlack)
+            gcut_lolo.SetLineWidth(5)
+            gcut_lolo.SetLineStyle(1)
+            gcut_lolo.Draw("L SAME")
         c1_kinll.Print(Analysis_Distributions+end)
 
         if (mide_input != False):
@@ -1226,15 +1153,18 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             low_file = cand
         _draw_diamond_outline(low_file, "Low", phi_label, color_map[("Low", phi_label)])
 
-    # Draw the common-cut polygon (if built) as a thick black outline
-    if common_poly is not None:
-        gcut = _tgraph_from_poly(common_poly, "gCommonCut_{}".format(FilenameOverride))
+    # Draw the applied cut polygon as a thick black outline.
+    if cut_poly is not None:
+        gcut = _tgraph_from_poly(cut_poly, "gCommonCut_{}".format(FilenameOverride))
         if gcut:
             gcut.SetLineColor(ROOT.kBlack)
             gcut.SetLineWidth(5)
             gcut.SetLineStyle(1)
             gcut.Draw("L SAME")
-            leg.AddEntry(gcut, "Common Cut (overlap)", "l")
+            if common_poly is not None:
+                leg.AddEntry(gcut, "Common Cut (overlap)", "l")
+            else:
+                leg.AddEntry(gcut, "Applied Cut Polygon", "l")
             overlay_keepalive.append(gcut)
 
     leg.Draw()

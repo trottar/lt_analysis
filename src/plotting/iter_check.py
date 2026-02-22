@@ -69,16 +69,6 @@ def plot_iteration(histlist, phisetlist, inpDict):
     closest_date = inpDict["closest_date"]
     formatted_date = inpDict["formatted_date"]
 
-    # Define diamond cut parameters
-    a1 = inpDict["a1"]
-    b1 = inpDict["b1"]
-    a2 = inpDict["a2"]
-    b2 = inpDict["b2"]
-    a3 = inpDict["a3"]
-    b3 = inpDict["b3"]
-    a4 = inpDict["a4"]
-    b4 = inpDict["b4"]
-
     ################################################################################################################################################
 
     foutname = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"

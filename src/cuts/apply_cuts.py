@@ -22,22 +22,37 @@ Q2 = ""
 EPSSET = ""
 tmin = ""
 tmax = ""
-a1 = ""
-b1 = ""
-a2 = ""
-b2 = ""
-a3 = ""
-b3 = ""
-a4 = ""
-b4 = ""
+cut_poly = []
 c0_dict = {}
+
+
+def _sort_ccw_points(points):
+    pts = [(float(p[0]), float(p[1])) for p in points]
+    if len(pts) < 3:
+        return pts
+    cx = sum(p[0] for p in pts) / float(len(pts))
+    cy = sum(p[1] for p in pts) / float(len(pts))
+    pts = sorted(pts, key=lambda p: math.atan2(p[1] - cy, p[0] - cx))
+    return pts
+
+
+def _point_in_convex_poly(x, y, poly, eps=1e-12):
+    if poly is None or len(poly) < 3:
+        return False
+    px, py = float(x), float(y)
+    for i in range(len(poly)):
+        a = poly[i]
+        b = poly[(i + 1) % len(poly)]
+        if ((b[0] - a[0]) * (py - a[1]) - (b[1] - a[1]) * (px - a[0])) < -eps:
+            return False
+    return True
 
 # Then, set global variables which is called with arguments
 def set_val(inpDict):
     
     global W, Q2, EPSSET, ParticleType
     global tmin, tmax
-    global a1, b1, a2, b2, a3, b3, a4, b4
+    global cut_poly
     
     W = inpDict["W"] 
     Q2 = inpDict["Q2"] 
@@ -46,16 +61,16 @@ def set_val(inpDict):
 
     tmin = float(inpDict["tmin"] )
     tmax = float(inpDict["tmax"] )
-    
-    # Define diamond cut parameters
-    a1 = float(inpDict["a1"])
-    b1 = float(inpDict["b1"])
-    a2 = float(inpDict["a2"])
-    b2 = float(inpDict["b2"])
-    a3 = float(inpDict["a3"])
-    b3 = float(inpDict["b3"])
-    a4 = float(inpDict["a4"])
-    b4 = float(inpDict["b4"])
+
+    if inpDict.get("cut_mode") != "poly":
+        print("ERROR: Invalid cut_mode. Expected 'poly'.")
+        sys.exit(2)
+
+    points = inpDict.get("poly_points", [])
+    if len(points) < 3:
+        print("ERROR: Invalid polygon cut. Expected at least 3 vertices.")
+        sys.exit(2)
+    cut_poly = _sort_ccw_points(points)
     
     ##############
     # HARD CODED #
@@ -127,7 +142,7 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
     HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
     HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-    Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+    Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
 
     # RLT: These are done via histogram cuts
     #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
@@ -163,7 +178,7 @@ def apply_data_sub_cuts(evt):
     HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
     # RLT: These are done via histogram cuts
-    Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+    Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
 
     # RLT: These are done via histogram cuts
     #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
@@ -201,7 +216,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     #SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssyptar>=-0.06) & (evt.ssyptar<=0.06) & (evt.ssxptar>=-0.04) & (evt.ssxptar<=0.04)
     #HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsyptar>=-0.08) & (evt.hsyptar<=0.08) & (evt.hsxptar>=-0.045) & (evt.hsxptar<=0.045)
 
-    Diamond = (evt.W/evt.Q2>a1+b1/evt.Q2) & (evt.W/evt.Q2<a2+b2/evt.Q2) & (evt.W/evt.Q2>a3+b3/evt.Q2) & (evt.W/evt.Q2<a4+b4/evt.Q2)
+    Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
 
     # RLT: These are done via histogram cuts
     #t_RANGE =  (tmin<=-evt.t) & (-evt.t<tmax)

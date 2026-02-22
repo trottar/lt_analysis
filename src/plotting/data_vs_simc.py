@@ -1222,13 +1222,31 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         tex.SetTextColor(i+1)
         texlist.append(tex)
         cut_summary_lst += "\n"+"phi_bins-> {}".format(phi_bins)
-        cut_summary_lst += "\n\n"+"Diamond Cut Paramters"
-        for p in [1,2,3,4]:
-            tex = TLatex(0.,0.+(0.95-(0.3+(0.05*(j+3+p)/2))),"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p]))
+        cut_summary_lst += "\n\nCut Polygon Parameters"
+        cut_mode = inpDict.get("cut_mode", "unknown")
+        tex = TLatex(0., 0.+(0.95-(0.3+(0.05*(j+4)/2))), "cut_mode = {}".format(cut_mode))
+        tex.SetTextSize(0.03)
+        tex.SetTextColor(i+1)
+        texlist.append(tex)
+        cut_summary_lst += "\ncut_mode = {}".format(cut_mode)
+
+        poly_points = inpDict.get("poly_points", [])
+        tex = TLatex(0., 0.+(0.95-(0.3+(0.05*(j+5)/2))), "vertices = {}".format(len(poly_points)))
+        tex.SetTextSize(0.03)
+        tex.SetTextColor(i+1)
+        texlist.append(tex)
+        cut_summary_lst += "\nvertices = {}".format(len(poly_points))
+
+        for p_idx, pval in enumerate(poly_points, start=1):
+            tex = TLatex(
+                0.,
+                0.+(0.95-(0.3+(0.05*(j+5+p_idx)/2))),
+                "v{} = ({:.6f}, {:.6f})".format(p_idx, float(pval[0]), float(pval[1])),
+            )
             tex.SetTextSize(0.03)
             tex.SetTextColor(i+1)
             texlist.append(tex)
-            cut_summary_lst += "\n"+"a{} = {}, b{} = {}".format(p,inpDict["a%i" % p],p,inpDict["b%i" % p])
+            cut_summary_lst += "\nv{} = ({:.6f}, {:.6f})".format(p_idx, float(pval[0]), float(pval[1]))
 
         for j, tex in enumerate(texlist):
             tex.Draw()
