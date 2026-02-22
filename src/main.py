@@ -812,14 +812,17 @@ if EPSSET == "high":
     for hist in histlist:
         for eps in ["highe","lowe"]:
             f_simc_original_root = OUTPATH+"/Prod_Coin_{}.root".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
-            f_simc_hist = OUTPATH+"/Prod_Coin_{}.hist".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
             f_simc_root = f"{OUTPATH}/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{eps}.root"
+            f_simc_original_hist = OUTPATH+"/Prod_Coin_{}.hist".format(kinematics[0]+hist["phi_setting"].lower()+"_"+eps)
+            f_simc_hist = f"{OUTPATH}/{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{eps}.hist"            
             if os.path.exists(f_simc_original_root):
-                output_file_lst.append(f_simc_original_root)
-            if os.path.exists(f_simc_hist):
-                output_file_lst.append(f_simc_hist) 
+                output_file_lst.append(f_simc_original_root) 
             if os.path.exists(f_simc_root):
                 output_file_lst.append(f_simc_root)                               
+            if os.path.exists(f_simc_original_hist):
+                output_file_lst.append(f_simc_original_hist) 
+            if os.path.exists(f_simc_hist):
+                output_file_lst.append(f_simc_hist)    
 
     # Update iteration file of dates
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
