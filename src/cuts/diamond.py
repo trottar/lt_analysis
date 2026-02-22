@@ -502,9 +502,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         sys.exit(1)
 
     ##############################################################################################################################################
-    # Common-cut polygon: (Low Center) ∩ (High Center/Left/Right that exist)
-    # This prevents using the Low-Center diamond as a cut if it extends beyond more restrictive diamonds
-    # (e.g. High-Right).
+    # Common-cut polygon:
+    # Intersect all available epsilon/phi diamond polygons so the chosen cut is
+    # guaranteed to lie inside the full set of setting diamonds.
     common_poly = None
     common_poly_sources = []
 
@@ -532,7 +532,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             cand_len = 10**9
             for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
                 fl = f.lower()
-                if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl) and ("mid" not in fl):
+                if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
                     if len(f) < cand_len:
                         cand = f
                         cand_len = len(f)
@@ -562,46 +562,60 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             infile.Close()
             return h
 
-        polys = []
-
-        low_center_file = lowe_input if lowe_input else _find_center_fallback("low")
-        if low_center_file:
-            htmp = _build_q2w_hist_inmem(low_center_file, "Q2vsW_low_center_common_{}".format(FilenameOverride))
-            if htmp:
-                try:
-                    fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
-                    poly_tmp = _poly_from_diamond_fits(fits_tmp)
-                    if poly_tmp:
-                        polys.append(poly_tmp)
-                        common_poly_sources.append(("Low", "Center", low_center_file))
-                except Exception as e:
-                    print("WARNING: common-cut: failed low-center fit ({})".format(e))
-
         phi_defs_common = [
             ("Center", ["Center", "center"]),
             ("Left",   ["Left", "left"]),
             ("Right",  ["Right", "right"]),
         ]
 
-        for phi_lbl, toks in phi_defs_common:
-            high_file = _find_shortest_root_any(toks, "high")
-            if high_file is None and phi_lbl == "Center":
-                high_file = _find_center_fallback("high")
-            if not high_file:
-                continue
-            htmp = _build_q2w_hist_inmem(high_file, "Q2vsW_high_{}_common_{}".format(phi_lbl, FilenameOverride))
-            if not htmp:
-                continue
-            try:
-                fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
-                poly_tmp = _poly_from_diamond_fits(fits_tmp)
-                if poly_tmp:
-                    polys.append(poly_tmp)
-                    common_poly_sources.append(("High", phi_lbl, high_file))
-            except Exception as e:
-                print("WARNING: common-cut: failed high-{} fit ({})".format(phi_lbl, e))
+        eps_defs_common = [
+            ("Low", "low"),
+            ("Mid", "mid"),
+            ("High", "high"),
+        ]
 
-        if len(polys) >= 2:
+        def _find_source_file(eps_tag, phi_lbl, toks):
+            # For center, prefer the file already selected earlier in this call.
+            if phi_lbl == "Center":
+                if eps_tag == "low" and lowe_input:
+                    return lowe_input
+                if eps_tag == "mid" and mide_input:
+                    return mide_input
+                if eps_tag == "high" and highe_input:
+                    return highe_input
+            fpath = _find_shortest_root_any(toks, eps_tag)
+            if fpath is None and phi_lbl == "Center":
+                fpath = _find_center_fallback(eps_tag)
+            return fpath
+
+        polys = []
+        seen_sources = set()
+        for eps_lbl, eps_tag in eps_defs_common:
+            for phi_lbl, toks in phi_defs_common:
+                src_file = _find_source_file(eps_tag, phi_lbl, toks)
+                if not src_file:
+                    continue
+                src_key = (eps_lbl, phi_lbl, os.path.normpath(src_file))
+                if src_key in seen_sources:
+                    continue
+                seen_sources.add(src_key)
+
+                htmp = _build_q2w_hist_inmem(
+                    src_file,
+                    "Q2vsW_{}_{}_common_{}".format(eps_tag, phi_lbl.lower(), FilenameOverride),
+                )
+                if not htmp:
+                    continue
+                try:
+                    fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
+                    poly_tmp = _poly_from_diamond_fits(fits_tmp)
+                    if poly_tmp:
+                        polys.append(poly_tmp)
+                        common_poly_sources.append((eps_lbl, phi_lbl, src_file))
+                except Exception as e:
+                    print("WARNING: common-cut: failed {}-{} fit ({})".format(eps_lbl, phi_lbl, e))
+
+        if len(polys) >= 1:
             common_poly = polys[0]
             for p in polys[1:]:
                 common_poly = _convex_polygon_intersection(common_poly, p)
@@ -609,6 +623,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     break
             if common_poly is not None:
                 print("Common-cut polygon built with {} vertices from {} sources".format(len(common_poly), len(common_poly_sources)))
+            else:
+                print("WARNING: common-cut: no overlap polygon found across {} sources".format(len(common_poly_sources)))
 
     labelh = ""
     labelm = ""
@@ -749,7 +765,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             # Build low-epsilon polygon fallback if common overlap polygon is unavailable.
             fit_results = diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange)
             low_fit_poly = _poly_from_diamond_fits(fit_results)
-            if (cut_poly is None) and (low_fit_poly is not None):
+            if (cut_poly is None) and (low_fit_poly is not None) and (phi_setting != "Center"):
                 cut_poly = _sort_ccw_points(low_fit_poly)
 
             for event in Cut_Events_all_noRF_tree:
@@ -1117,41 +1133,31 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         ("High", "Center"): ROOT.kBlue,
         ("High", "Left"):   ROOT.kCyan + 1,
         ("High", "Right"):  ROOT.kGreen + 2,
+        ("Mid",  "Center"): ROOT.kViolet + 1,
+        ("Mid",  "Left"):   ROOT.kAzure + 7,
+        ("Mid",  "Right"):  ROOT.kTeal + 3,
         ("Low",  "Center"): ROOT.kRed,
         ("Low",  "Left"):   ROOT.kMagenta + 1,
         ("Low",  "Right"):  ROOT.kOrange + 7,
     }
 
-    for phi_label, phi_tokens in phi_defs:
-        # High epsilon
-        high_file = _find_shortest_root(phi_tokens, "high")
-        if high_file is None and phi_label == "Center":
-            # Fallback: try files without explicit Left/Right/Mid tags
-            cand = None
-            cand_len = 10**9
-            for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
-                fl = f.lower()
-                if ("high" in fl) and ("left" not in fl) and ("right" not in fl) and ("mid" not in fl):
-                    if len(f) < cand_len:
-                        cand = f
-                        cand_len = len(f)
-            high_file = cand
-        _draw_diamond_outline(high_file, "High", phi_label, color_map[("High", phi_label)])
+    def _find_center_fallback_overlay(eps_tag):
+        cand = None
+        cand_len = 10**9
+        for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
+            fl = f.lower()
+            if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
+                if len(f) < cand_len:
+                    cand = f
+                    cand_len = len(f)
+        return cand
 
-        # Low epsilon
-        low_file = _find_shortest_root(phi_tokens, "low")
-        if low_file is None and phi_label == "Center":
-            # Fallback: try files without explicit Left/Right/Mid tags
-            cand = None
-            cand_len = 10**9
-            for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
-                fl = f.lower()
-                if ("low" in fl) and ("left" not in fl) and ("right" not in fl) and ("mid" not in fl):
-                    if len(f) < cand_len:
-                        cand = f
-                        cand_len = len(f)
-            low_file = cand
-        _draw_diamond_outline(low_file, "Low", phi_label, color_map[("Low", phi_label)])
+    for phi_label, phi_tokens in phi_defs:
+        for eps_label, eps_tag in [("High", "high"), ("Mid", "mid"), ("Low", "low")]:
+            eps_file = _find_shortest_root(phi_tokens, eps_tag)
+            if eps_file is None and phi_label == "Center":
+                eps_file = _find_center_fallback_overlay(eps_tag)
+            _draw_diamond_outline(eps_file, eps_label, phi_label, color_map[(eps_label, phi_label)])
 
     # Draw the applied cut polygon as a thick black outline.
     if cut_poly is not None:
