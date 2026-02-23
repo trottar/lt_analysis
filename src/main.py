@@ -427,7 +427,14 @@ for hist in histlist:
     # Copy to new iteration so and then edit the weight
     print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
     shutil.copy(original_rootFileSimc, rootFileSimc)
+
+    print("\nCopying {} to {}".format(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist")))
+    shutil.copy(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist"))
     
+    # Back up to new iteration file list for output
+    for f in [original_rootFileSimc, original_rootFileSimc.replace(".root", ".hist"), rootFileSimc, rootFileSimc.replace(".root", ".hist")]:
+        output_file_lst.append(f)
+
     # Make sure old simc root file exists
     if os.path.exists(rootFileSimc):
         # Function to calculation new weight and apply it to simc root file 
