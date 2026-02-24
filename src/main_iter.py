@@ -657,6 +657,7 @@ if EPSSET == "high":
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))        
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    output_file_lst.append(f"{OUTPATH}/{ANATYPE}LT_Q{Q2.replace('.','p')}W{W.replace('.','p')}.csv")
     output_file_lst.append('models/lt_2D_fit.py')
     
     # Save sep and unsep values from current iteration
@@ -693,7 +694,6 @@ if EPSSET == "high":
 # ***Likewise for SIMC root/hist files***
 
 if EPSSET == "high":
-
     f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(iter_num))
     shutil.copy(f_iter,f_iter_new)
 
