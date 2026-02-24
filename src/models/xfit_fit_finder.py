@@ -58,7 +58,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     # -----------------------------------------------------------------------------
     # 1. Create lists to store global graphs (unchanged structure)
     # -----------------------------------------------------------------------------
-    graphs_sig_fit      = []
+    graphs_sig_fit      = [None] * 4  # one graph per signal index (L/T/LT/TT)
     graphs_sig_params_all = []
     graphs_sig_converge = []
     graphs_sig_temp     = []
@@ -124,6 +124,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         best_overall_ic_aic  = float('inf')
         best_overall_ic_bic  = float('inf')
 
+        # Keep graph indexing aligned with signal indexing.
+        graphs_sig_fit[it] = TGraphErrors()
+
         for b in range(len(t_vec)):
             if sig_name not in fixed_params:
 
@@ -148,8 +151,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 print(equation_str)
                 print("/*--------------------------------------------------*/")
 
-                g_sig_fit = TGraphErrors()
-                graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
                     fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "T":
@@ -503,8 +504,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 print(equation_str)
                 print("/*--------------------------------------------------*/")                
 
-                g_sig_fit = TGraphErrors()
-                graphs_sig_fit.append(g_sig_fit)
                 if sig_name == "L":
                     fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 elif sig_name == "T":
