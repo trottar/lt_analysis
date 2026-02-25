@@ -424,6 +424,43 @@ def _poly_from_diamond_fits(fits):
         return None
     return _sort_ccw_points(pts)
 
+
+def _parse_bool(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    v = str(value).strip().lower()
+    if v in ("1", "true", "t", "yes", "y", "on"):
+        return True
+    if v in ("0", "false", "f", "no", "n", "off", ""):
+        return False
+    return default
+
+
+HARDCODED_DIAMOND_AB_PARAMS = {
+    "a1": -0.22478443202783813,
+    "b1": 3.6863942419482063,
+    "a2": -0.1780992912706183,
+    "b2": 3.586856595515984,
+    "a3": -0.3516380890076293,
+    "b3": 4.210272623820992,
+    "a4": -0.3664439092360068,
+    "b4": 4.427889346144653,
+}
+
+
+def _hardcoded_diamond_fit_tuple():
+    # Order must match: (down, up, left, right)
+    return (
+        np.array([HARDCODED_DIAMOND_AB_PARAMS["a1"], HARDCODED_DIAMOND_AB_PARAMS["b1"]], dtype=float),
+        np.array([HARDCODED_DIAMOND_AB_PARAMS["a2"], HARDCODED_DIAMOND_AB_PARAMS["b2"]], dtype=float),
+        np.array([HARDCODED_DIAMOND_AB_PARAMS["a3"], HARDCODED_DIAMOND_AB_PARAMS["b3"]], dtype=float),
+        np.array([HARDCODED_DIAMOND_AB_PARAMS["a4"], HARDCODED_DIAMOND_AB_PARAMS["b4"]], dtype=float),
+    )
+
 def _tgraph_from_poly(poly, name):
     if poly is None or len(poly) < 3:
         return None
