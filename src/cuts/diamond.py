@@ -496,6 +496,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     ##############
     ##############
     ##############
+
+    use_hardcoded_diamond_fits = _parse_bool(inpDict.get("use_hardcoded_diamond_fits", False), default=False)
+    hardcoded_fit_results = _hardcoded_diamond_fit_tuple() if use_hardcoded_diamond_fits else None
+    hardcoded_cut_poly = _poly_from_diamond_fits(hardcoded_fit_results) if hardcoded_fit_results is not None else None
+    if use_hardcoded_diamond_fits:
+        print("INFO: Using hardcoded diamond fit coefficients (a1..b4).")
+        if hardcoded_cut_poly is None:
+            print("!!!!! ERROR !!!!!\n Hardcoded diamond coefficients do not form a valid polygon.\n!!!!! ERROR !!!!!")
+            sys.exit(2)
     
     FilenameOverride = 'Q'+Qs+'W'+Ws
     
@@ -551,7 +560,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     else:
         event_threshold_common = 5
 
-    if phi_setting == "Center":
+    if (phi_setting == "Center") and (not use_hardcoded_diamond_fits):
         def _find_shortest_root_any(phi_tokens, eps_tag):
             best = None
             best_len = 10**9
@@ -708,7 +717,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
     Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
 
-    cut_poly = _sort_ccw_points(common_poly) if common_poly is not None else None
+    if hardcoded_cut_poly is not None:
+        cut_poly = _sort_ccw_points(hardcoded_cut_poly)
+    else:
+        cut_poly = _sort_ccw_points(common_poly) if common_poly is not None else None
 
     def _passes_active_cut(q2, w):
         if cut_poly is None:
@@ -800,7 +812,10 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         print("fitrange: ",fitrange)
         if (k == 0):  # Low epsilon
             # Build low-epsilon polygon fallback if common overlap polygon is unavailable.
-            fit_results = diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange)
+            if hardcoded_fit_results is not None:
+                fit_results = hardcoded_fit_results
+            else:
+                fit_results = diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange)
             low_fit_poly = _poly_from_diamond_fits(fit_results)
             if (cut_poly is None) and (low_fit_poly is not None) and (phi_setting != "Center"):
                 cut_poly = _sort_ccw_points(low_fit_poly)
@@ -844,6 +859,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             "cut_mode": "poly",
             "poly_points": [[float(p[0]), float(p[1])] for p in _sort_ccw_points(cut_poly)],
         }
+        if use_hardcoded_diamond_fits:
+            paramDict["diamond_fit_source"] = "hardcoded"
+            paramDict["diamond_fit_params"] = dict(HARDCODED_DIAMOND_AB_PARAMS)
+            paramDict["diamond_fit_lines"] = {
+                "down": [float(hardcoded_fit_results[0][0]), float(hardcoded_fit_results[0][1])],
+                "up": [float(hardcoded_fit_results[1][0]), float(hardcoded_fit_results[1][1])],
+                "left": [float(hardcoded_fit_results[2][0]), float(hardcoded_fit_results[2][1])],
+                "right": [float(hardcoded_fit_results[3][0]), float(hardcoded_fit_results[3][1])],
+            }
         if common_poly is not None:
             paramDict["poly_sources"] = [
                 {"epsilon": eps, "phi": phi, "file": fpath} for (eps, phi, fpath) in common_poly_sources
