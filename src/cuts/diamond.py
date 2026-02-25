@@ -477,6 +477,8 @@ def _tgraph_from_poly(poly, name):
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
+    inpDict["use_hardcoded_diamond_fits"] = True
+
     ##############
     # HARD CODED #
     ##############
