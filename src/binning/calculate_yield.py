@@ -231,7 +231,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         
         # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)        
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -245,8 +245,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):                                
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
                             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
@@ -259,8 +259,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
                             MM_offset_DATA = evt.MM_shift-evt.MM
@@ -291,7 +291,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         
         # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)        
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -305,8 +305,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
                             hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM) 
                             hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)             
                             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
@@ -319,8 +319,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):             
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
                             break
@@ -350,7 +350,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 
         # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)        
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -364,8 +364,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])   
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])   
                             hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)].Fill(adj_MM)             
                             hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
@@ -378,8 +378,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             break
@@ -409,7 +409,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         
        # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)        
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -423,8 +423,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1]) 
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1]) 
                             hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)               
                             hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
@@ -437,8 +437,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             for j in range(len(t_bins)-1):
                 if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",(phi_shift)*(180 / math.pi)," <= ",phi_bins[k+1])
+                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
+                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
                             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             break
@@ -1275,7 +1275,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                 if t_bins[j] <= -evt.t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):                                
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, (phi_shift)*(180 / math.pi)))
+                            #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, phi_shift))
                             hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
                             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
                             hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
