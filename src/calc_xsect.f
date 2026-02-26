@@ -71,6 +71,8 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
 
       integer ipol
       real th_pq
+      integer ios
+      real tol
 
       real phi
 
@@ -102,19 +104,23 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       close(22)
       
       ipol=0
+      w=0.
       q2=0.
       eps=0.
       tmn=0.
       tmx=0.
+      tol=1.e-4
       open(55,file=trim(pid) // '/list.settings')
-      do while(ipol.ne.npol_set.or.q2.ne.q2_set.or.
-     *     w.ne.w_set.or.eps.ne.eps_set)
-         read(55,*) ipol,q2,w,eps,th_pq,tmn,tmx
+      do while(.true.)
+         read(55,*,iostat=ios) ipol,q2,w,eps,th_pq,tmn,tmx
+         if(ios.ne.0) exit
+         if(ipol.eq.npol_set.and.abs(q2-q2_set).lt.tol.and.
+     *     abs(w-w_set).lt.tol.and.abs(eps-eps_set).lt.tol) exit
       end do
       close(55)
       write(6,3)tmn,tmx
  3    format(' tmn, tmx: ',2f10.5)
-      if(tmn.eq.0..or.tmx.eq.0.) 
+      if(ios.ne.0.or.tmn.eq.0..or.tmx.eq.0.) 
      *     stop '*** setting is not found in list.settings'
                   
       if(npol_set.lt.0) then
@@ -127,10 +133,13 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       Eb=0.
       open(56, file=trim(pid) // '/beam/Eb_KLT.dat')
       do while(.true.)
-         read(56,*) Eb,q2,w,eps
-         if(q2.eq.q2_set.and.w.eq.w_set.and.
-     *     eps.eq.eps_set) go to 5         
+         read(56,*,iostat=ios) Eb,q2,w,eps
+         if(ios.ne.0) exit
+         if(abs(q2-q2_set).lt.tol.and.abs(w-w_set).lt.tol.and.
+     *     abs(eps-eps_set).lt.tol) go to 5         
       end do
+      close(56)
+      stop '*** setting is not found in beam/Eb_KLT.dat'
  5    close(56)
       
       write(6,4)Eb,q2,w,eps,pol
@@ -285,7 +294,6 @@ c        Write out kinematics for Henk.
       close(51)
       close(52)
       close(61)
-      close(71)
       print*,' '
 
       end
