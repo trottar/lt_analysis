@@ -37,7 +37,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
          m32=mpi2
       else
         print *, "*** Invalid particle type: ",pid
-        exit
+        return
       endif
 
       if(npol.gt.0) then
@@ -63,14 +63,14 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       p1lab=q
       p1cm=p1lab*m2/ww
       p3cm=sqrt(e3cm*e3cm-m32)
-      tmin=-((e1cm-e3cm)**2-(p1cm-p3cm)**2)
+      tmin=-((e1cm-e3cm)**2-(p1cm-p3cm)**2) !-t_min calculation (tt=-t)
 
       if (tt.ge.tmin) then
          theta_cm=2*asin(sqrt((tt-tmin)/(4*p1cm*p3cm)))
       else
          theta_cm=-1.
          print*, 'eps_n_theta: tt=',tt,' <  tmin=',tmin
-         exit
+         return
       endif
       
       eps=1.+2.*(qq+omega**2)/(4.*Eb*(Eb-omega)-qq)
