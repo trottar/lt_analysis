@@ -37,6 +37,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
          m32=mpi2
       else
         print *, "*** Invalid particle type: ",pid
+        exit
       endif
 
       if(npol.gt.0) then
