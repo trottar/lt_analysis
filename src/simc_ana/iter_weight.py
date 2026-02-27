@@ -331,6 +331,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Keep track of bad events
     bad_events = []
+    bad_weights = 0
     total_events = TBRANCH_SIMC.GetEntries()
     
     print("\nRecalculating weight for %s simc..." % phi_setting)
@@ -374,7 +375,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
 
-          bad_weights = 0
           if evt.Weight != iter_lst[0]:
                 print("\n\nWARNING: Weight mismatch for event {}...simc weight = {}, iter weight = {}".format(i, evt.Weight, iter_lst[0]))
                 bad_weights += 1
