@@ -70,7 +70,7 @@ def fit_gaussian(hist, peak_center, fit_min, fit_max):
         raise RuntimeError("Gaussian fit failed.")
 
     fit_func.SetLineColor(kRed)
-    return fit_func.GetParameter(1), fit_func.GetParError(1)
+    return fit_func.GetParameter(1), fit_func.GetParError(1), fit_name
 
 
 def build_histogram(
@@ -132,11 +132,17 @@ def fit_tree_peak(
         hist_xmin=hist_xmin,
         hist_xmax=hist_xmax,
     )
-    mean, mean_err = fit_gaussian(hist, peak_center, fit_min, fit_max)
+    mean, mean_err, fit_name = fit_gaussian(hist, peak_center, fit_min, fit_max)
+    fit_func = hist.GetFunction(fit_name)
+    if not fit_func:
+        raise RuntimeError("Gaussian fit object was not attached to the histogram.")
+    fit_func = fit_func.Clone(f"{fit_name}_plot")
+    fit_func.SetLineColor(kRed)
     return {
         "hist": hist,
         "mean": mean,
         "mean_err": mean_err,
+        "fit_func": fit_func,
     }
 
 
@@ -243,7 +249,7 @@ def write_shift_plots(
     simc_hist.SetLineWidth(2)
     simc_hist.GetXaxis().SetRangeUser(plot_xmin, plot_xmax)
     simc_hist.Draw("hist")
-    simc_fit_line = simc_hist.GetFunction("gaus")
+    simc_fit_line = simc_fit["fit_func"].Clone(f"{simc_fit['fit_func'].GetName()}_draw")
     if simc_fit_line:
         simc_fit_line.Draw("same")
     simc_peak_line = make_peak_line(simc_fit["mean"], simc_hist.GetMaximum(), kRed)
@@ -263,7 +269,7 @@ def write_shift_plots(
     data_hist.SetLineWidth(2)
     data_hist.GetXaxis().SetRangeUser(plot_xmin, plot_xmax)
     data_hist.Draw("hist")
-    data_fit_line = data_hist.GetFunction("gaus")
+    data_fit_line = data_fit["fit_func"].Clone(f"{data_fit['fit_func'].GetName()}_draw")
     if data_fit_line:
         data_fit_line.Draw("same")
     data_peak_line = make_peak_line(data_fit["mean"], data_hist.GetMaximum(), kBlue)
