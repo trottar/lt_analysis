@@ -118,7 +118,7 @@ def fit_tree_peak(
     hist_xmin=DEFAULT_HIST_XMIN,
     hist_xmax=DEFAULT_HIST_XMAX,
 ):
-    _, mm_min, mm_max = get_peak_window(particle_type)
+    mm_min, mm_max = hist_xmin, hist_xmax
     hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
     hist = build_histogram(
         filename,
