@@ -217,7 +217,16 @@ def make_plot_filename(data_filename):
     return os.path.join(os.path.dirname(data_filename), f"{base_name}_MM_Shift.pdf")
 
 
-def write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, output_pdf):
+def write_shift_plots(
+    particle_type,
+    simc_fit,
+    data_fit,
+    shifted_hist,
+    shift,
+    output_pdf,
+    plot_xmin=DEFAULT_HIST_XMIN,
+    plot_xmax=DEFAULT_HIST_XMAX,
+):
     old_opt_stat = gStyle.GetOptStat()
     gStyle.SetOptStat(0)
 
@@ -225,10 +234,11 @@ def write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, ou
     canvas = TCanvas(canvas_name, "MM Shift", 900, 700)
     canvas.Print(f"{output_pdf}[")
 
-    simc_hist = simc_fit["hist"]
+    simc_hist = simc_fit["hist"].Clone(f"{simc_fit['hist'].GetName()}_plot")
     simc_hist.SetTitle(f"SIMC M_{particle_type[0].upper()} Fit")
     simc_hist.SetLineColor(kRed)
     simc_hist.SetLineWidth(2)
+    simc_hist.GetXaxis().SetRangeUser(plot_xmin, plot_xmax)
     simc_hist.Draw("hist")
     simc_fit_line = simc_hist.GetFunction("gaus")
     if simc_fit_line:
@@ -244,10 +254,11 @@ def write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, ou
     simc_text.Draw("same")
     canvas.Print(output_pdf)
 
-    data_hist = data_fit["hist"]
+    data_hist = data_fit["hist"].Clone(f"{data_fit['hist'].GetName()}_plot")
     data_hist.SetTitle(f"Data M_{particle_type[0].upper()} Fit")
     data_hist.SetLineColor(kBlack)
     data_hist.SetLineWidth(2)
+    data_hist.GetXaxis().SetRangeUser(plot_xmin, plot_xmax)
     data_hist.Draw("hist")
     data_fit_line = data_hist.GetFunction("gaus")
     if data_fit_line:
@@ -337,16 +348,12 @@ def shift_experimental_files_to_simc_peak(
         "h10",
         "missmass",
         particle_type,
-        hist_xmin=hist_xmin,
-        hist_xmax=hist_xmax,
     )
     data_fit = fit_tree_peak(
         data_filename,
         reference_tree,
         "MM",
         particle_type,
-        hist_xmin=hist_xmin,
-        hist_xmax=hist_xmax,
     )
     shift = simc_fit["mean"] - data_fit["mean"]
 
@@ -374,7 +381,16 @@ def shift_experimental_files_to_simc_peak(
         hist_xmax=hist_xmax,
     )
     plot_filename = make_plot_filename(data_filename)
-    write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, plot_filename)
+    write_shift_plots(
+        particle_type,
+        simc_fit,
+        data_fit,
+        shifted_hist,
+        shift,
+        plot_filename,
+        plot_xmin=hist_xmin,
+        plot_xmax=hist_xmax,
+    )
 
     return {
         "simc_peak": simc_fit["mean"],
