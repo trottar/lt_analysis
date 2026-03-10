@@ -204,6 +204,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 sys.path.append("setup")
 from shift_MM import shift_experimental_files_to_simc_peak
 
+mm_shift_summary = {}
 for phiset in phisetlist:
     rootFileData = f"{OUTPATH}/{phiset}_{ParticleType}_{InDATAFilename}.root"
     if not os.path.exists(rootFileData):
@@ -216,12 +217,13 @@ for phiset in phisetlist:
         sys.exit(2)
 
     rootFileDummy = f"{OUTPATH}/{phiset}_{ParticleType}_{InDUMMYFilename}.root"
-    shift_experimental_files_to_simc_peak(
+    mm_shift_summary[phiset] = shift_experimental_files_to_simc_peak(
         ParticleType,
         rootFileSimc,
         rootFileData,
         rootFileDummy if os.path.exists(rootFileDummy) else None,
     )
+inpDict["mm_shift_summary"] = mm_shift_summary
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)

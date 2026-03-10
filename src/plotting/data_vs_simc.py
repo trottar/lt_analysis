@@ -1255,5 +1255,17 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             Ctext.Print(outputpdf+')')
         else:
             Ctext.Print(outputpdf)
+
+    mm_shift_summary = inpDict.get("mm_shift_summary", {})
+    if mm_shift_summary:
+        cut_summary_lst += "\n\nMissing Mass Shifts"
+        for phiset in phisetlist:
+            shift_info = mm_shift_summary.get(phiset)
+            if not shift_info:
+                continue
+            cut_summary_lst += "\n{} MM_shift = {:+.6f}".format(
+                phiset,
+                float(shift_info["shift"]),
+            )
             
     return cut_summary_lst
