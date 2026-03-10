@@ -37,6 +37,63 @@ def get_peak_center(particle_type):
     return 0.9380
 
 
+def find_peak_bin(hist, x_min, x_max, expected_center):
+    bin_min = max(1, hist.GetXaxis().FindBin(x_min))
+    bin_max = min(hist.GetNbinsX(), hist.GetXaxis().FindBin(x_max))
+    if bin_max < bin_min:
+        raise RuntimeError("Invalid peak search window.")
+
+    peak_bin = bin_min
+    peak_height = hist.GetBinContent(bin_min)
+    peak_distance = abs(hist.GetBinCenter(bin_min) - expected_center)
+
+    for bin_idx in range(bin_min, bin_max + 1):
+        bin_height = hist.GetBinContent(bin_idx)
+        bin_distance = abs(hist.GetBinCenter(bin_idx) - expected_center)
+        if (bin_height > peak_height) or (bin_height == peak_height and bin_distance < peak_distance):
+            peak_bin = bin_idx
+            peak_height = bin_height
+            peak_distance = bin_distance
+
+    if peak_height <= 0.0:
+        raise RuntimeError("No populated bins found near the expected peak.")
+
+    return peak_bin, peak_height
+
+
+def determine_fit_window(hist, peak_bin, search_min, search_max):
+    peak_height = hist.GetBinContent(peak_bin)
+    threshold = peak_height * 0.5
+
+    left_bin = peak_bin
+    right_bin = peak_bin
+
+    while left_bin > 1:
+        next_center = hist.GetBinCenter(left_bin - 1)
+        if next_center < search_min or hist.GetBinContent(left_bin - 1) < threshold:
+            break
+        left_bin -= 1
+
+    while right_bin < hist.GetNbinsX():
+        next_center = hist.GetBinCenter(right_bin + 1)
+        if next_center > search_max or hist.GetBinContent(right_bin + 1) < threshold:
+            break
+        right_bin += 1
+
+    bin_width = hist.GetBinWidth(peak_bin)
+    fit_min = max(search_min, hist.GetBinLowEdge(left_bin) - bin_width)
+    fit_max = min(search_max, hist.GetBinLowEdge(right_bin + 1) + bin_width)
+
+    min_width = max(6.0 * bin_width, 0.02)
+    fit_center = hist.GetBinCenter(peak_bin)
+    if (fit_max - fit_min) < min_width:
+        half_width = 0.5 * min_width
+        fit_min = max(search_min, fit_center - half_width)
+        fit_max = min(search_max, fit_center + half_width)
+
+    return fit_min, fit_max
+
+
 def get_data_tree_names(particle_type):
     particle_name = particle_type.capitalize()
     return [
@@ -50,19 +107,19 @@ def get_data_tree_names(particle_type):
     ]
 
 
-def fit_gaussian(hist, peak_center, fit_min, fit_max):
+def fit_gaussian(hist, fit_center, fit_min, fit_max):
     fit_name = f"gaus_{hist.GetName()}"
     fit_func = TF1(fit_name, "gaus", fit_min, fit_max)
-    peak_bin = hist.GetXaxis().FindBin(peak_center)
+    peak_bin = hist.GetXaxis().FindBin(fit_center)
     peak_height = hist.GetBinContent(peak_bin)
     if peak_height <= 0.0:
         peak_height = hist.GetMaximum()
     if peak_height <= 0.0:
         raise RuntimeError("Histogram is empty in the requested fit window.")
 
-    fit_func.SetParameters(peak_height, peak_center, max((fit_max - fit_min) / 6.0, 0.002))
+    fit_func.SetParameters(peak_height, fit_center, max((fit_max - fit_min) / 6.0, 0.002))
     fit_func.SetParLimits(0, 0.0, peak_height * 10.0)
-    fit_func.SetParLimits(1, fit_min, fit_max)
+    fit_func.SetParLimits(1, max(fit_min, fit_center - 0.02), min(fit_max, fit_center + 0.02))
     fit_func.SetParLimits(2, 0.001, max(fit_max - fit_min, 0.01))
 
     hist.Fit(fit_func, "QR")
@@ -115,11 +172,11 @@ def fit_tree_peak(
     hist_xmax=FIT_HIST_XMAX,
 ):
     peak_center = get_peak_center(particle_type)
-    fit_min = hist_xmin
-    fit_max = hist_xmax
-    if not (fit_min <= peak_center <= fit_max):
+    search_min = max(hist_xmin, get_peak_window(particle_type)[1])
+    search_max = min(hist_xmax, get_peak_window(particle_type)[2])
+    if not (search_min <= peak_center <= search_max):
         raise RuntimeError(
-            f"Expected peak {peak_center:.4f} is outside histogram range [{fit_min:.4f}, {fit_max:.4f}]."
+            f"Expected peak {peak_center:.4f} is outside peak search range [{search_min:.4f}, {search_max:.4f}]."
         )
 
     hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
@@ -132,7 +189,10 @@ def fit_tree_peak(
         hist_xmin=hist_xmin,
         hist_xmax=hist_xmax,
     )
-    mean, mean_err, fit_name = fit_gaussian(hist, peak_center, fit_min, fit_max)
+    peak_bin, _ = find_peak_bin(hist, search_min, search_max, peak_center)
+    fit_center = hist.GetBinCenter(peak_bin)
+    fit_min, fit_max = determine_fit_window(hist, peak_bin, search_min, search_max)
+    mean, mean_err, fit_name = fit_gaussian(hist, fit_center, fit_min, fit_max)
     fit_func = hist.GetFunction(fit_name)
     if not fit_func:
         raise RuntimeError("Gaussian fit object was not attached to the histogram.")
@@ -143,6 +203,9 @@ def fit_tree_peak(
         "mean": mean,
         "mean_err": mean_err,
         "fit_func": fit_func,
+        "fit_min": fit_min,
+        "fit_max": fit_max,
+        "fit_center": fit_center,
     }
 
 
@@ -258,6 +321,7 @@ def write_shift_plots(
         [
             f"SIMC peak = {simc_fit['mean']:.6f}",
             f"Fit err = {simc_fit['mean_err']:.6f}",
+            f"Fit range = [{simc_fit['fit_min']:.4f}, {simc_fit['fit_max']:.4f}]",
         ]
     )
     simc_text.Draw("same")
@@ -281,6 +345,7 @@ def write_shift_plots(
             f"Data peak = {data_fit['mean']:.6f}",
             f"SIMC peak = {simc_fit['mean']:.6f}",
             f"MM shift = {shift:+.6f}",
+            f"Fit range = [{data_fit['fit_min']:.4f}, {data_fit['fit_max']:.4f}]",
         ]
     )
     data_text.Draw("same")
