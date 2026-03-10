@@ -98,7 +98,18 @@ def fit_tree_peak(filename, tree_name, branch_name, particle_type):
 
 def build_shifted_tree(tree, source_branch_name, shift_branch_name, shift):
     shifted_value = array("f", [0.0])
+
+    # Clone the tree without the old shift branch so the replacement branch
+    # is freshly written with the current alignment.
+    has_existing_shift_branch = bool(tree.GetBranch(shift_branch_name))
+    if has_existing_shift_branch:
+        tree.SetBranchStatus(shift_branch_name, 0)
+
     new_tree = tree.CloneTree(0)
+
+    if has_existing_shift_branch:
+        tree.SetBranchStatus(shift_branch_name, 1)
+
     new_tree.Branch(shift_branch_name, shifted_value, f"{shift_branch_name}/F")
 
     for evt in tree:
@@ -121,11 +132,8 @@ def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
             print(f"Tree '{tree_name}' not found in {filename}. Skipping.")
             continue
 
-        if tree.GetBranch(shift_branch_name):
-            print(f"{filename}:{tree_name} already has '{shift_branch_name}'. Leaving it unchanged.")
-            continue
-
-        print(f"Applying shift {shift:+.6f} to {filename}:{tree_name}")
+        action = "Replacing" if tree.GetBranch(shift_branch_name) else "Applying"
+        print(f"{action} shift {shift:+.6f} in {filename}:{tree_name}")
         updated_trees.append(
             (tree_name, build_shifted_tree(tree, source_branch_name, shift_branch_name, shift))
         )
