@@ -12,7 +12,7 @@ import sys
 from array import array
 
 import ROOT
-from ROOT import TCanvas, TFile, TH1F, TLegend, TLine, TTree, gStyle, kBlack, kBlue, kGreen, kRed
+from ROOT import TCanvas, TFile, TF1, TH1F, TLegend, TLine, TTree, gStyle, kBlack, kBlue, kGreen, kRed
 
 
 HIST_NBINS = 200
@@ -31,6 +31,12 @@ def get_peak_window(particle_type):
     return peak_name, peak_center - 0.05, peak_center + 0.05
 
 
+def get_peak_center(particle_type):
+    if particle_type == "kaon":
+        return 1.1156
+    return 0.9380
+
+
 def get_data_tree_names(particle_type):
     particle_name = particle_type.capitalize()
     return [
@@ -44,32 +50,22 @@ def get_data_tree_names(particle_type):
     ]
 
 
-def fit_gaussian(hist, x_min, x_max):
-    bin_min = hist.GetXaxis().FindBin(x_min)
-    bin_max = hist.GetXaxis().FindBin(x_max)
+def fit_gaussian(hist, peak_center, fit_min, fit_max):
+    fit_name = f"gaus_{hist.GetName()}"
+    fit_func = TF1(fit_name, "gaus", fit_min, fit_max)
+    peak_bin = hist.GetXaxis().FindBin(peak_center)
+    peak_height = hist.GetBinContent(peak_bin)
+    if peak_height <= 0.0:
+        peak_height = hist.GetMaximum()
+    if peak_height <= 0.0:
+        raise RuntimeError("Histogram is empty in the requested fit window.")
 
-    max_bin = bin_min
-    max_value = hist.GetBinContent(max_bin)
-    for bin_idx in range(bin_min, bin_max + 1):
-        bin_value = hist.GetBinContent(bin_idx)
-        if bin_value > max_value:
-            max_bin = bin_idx
-            max_value = bin_value
+    fit_func.SetParameters(peak_height, peak_center, max((fit_max - fit_min) / 6.0, 0.002))
+    fit_func.SetParLimits(0, 0.0, peak_height * 10.0)
+    fit_func.SetParLimits(1, fit_min, fit_max)
+    fit_func.SetParLimits(2, 0.001, max(fit_max - fit_min, 0.01))
 
-    half_max = max_value * 0.75
-
-    left_bin = max_bin
-    right_bin = max_bin
-    while left_bin > 1 and hist.GetBinContent(left_bin) > half_max:
-        left_bin -= 1
-    while right_bin < hist.GetNbinsX() and hist.GetBinContent(right_bin) > half_max:
-        right_bin += 1
-
-    fit_min = hist.GetBinCenter(left_bin)
-    fit_max = hist.GetBinCenter(right_bin)
-
-    hist.Fit("gaus", "Q", "", fit_min, fit_max)
-    fit_func = hist.GetFunction("gaus")
+    hist.Fit(fit_func, "QR")
     if not fit_func:
         raise RuntimeError("Gaussian fit failed.")
 
@@ -118,7 +114,14 @@ def fit_tree_peak(
     hist_xmin=FIT_HIST_XMIN,
     hist_xmax=FIT_HIST_XMAX,
 ):
-    mm_min, mm_max = get_peak_window(particle_type)[1:]
+    peak_center = get_peak_center(particle_type)
+    fit_min = hist_xmin
+    fit_max = hist_xmax
+    if not (fit_min <= peak_center <= fit_max):
+        raise RuntimeError(
+            f"Expected peak {peak_center:.4f} is outside histogram range [{fit_min:.4f}, {fit_max:.4f}]."
+        )
+
     hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
     hist = build_histogram(
         filename,
@@ -129,7 +132,7 @@ def fit_tree_peak(
         hist_xmin=hist_xmin,
         hist_xmax=hist_xmax,
     )
-    mean, mean_err = fit_gaussian(hist, mm_min, mm_max)
+    mean, mean_err = fit_gaussian(hist, peak_center, fit_min, fit_max)
     return {
         "hist": hist,
         "mean": mean,
