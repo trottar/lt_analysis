@@ -115,6 +115,8 @@ def fit_tree_peak(
     tree_name,
     branch_name,
     particle_type,
+    hist_xmin=FIT_HIST_XMIN,
+    hist_xmax=FIT_HIST_XMAX,
 ):
     mm_min, mm_max = get_peak_window(particle_type)[1:]
     hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
@@ -124,6 +126,8 @@ def fit_tree_peak(
         branch_name,
         hist_name,
         branch_name,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
     )
     mean, mean_err = fit_gaussian(hist, mm_min, mm_max)
     return {
@@ -349,12 +353,16 @@ def shift_experimental_files_to_simc_peak(
         "h10",
         "missmass",
         particle_type,
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
     )
     data_fit = fit_tree_peak(
         data_filename,
         reference_tree,
         "MM",
         particle_type,
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
     )
     shift = simc_fit["mean"] - data_fit["mean"]
 
@@ -378,8 +386,8 @@ def shift_experimental_files_to_simc_peak(
         "MM_shift",
         f"hist_shifted_{abs(hash((data_filename, reference_tree))) & 0xFFFFFFFF}",
         "MM_shift",
-        hist_xmin=FIT_HIST_XMIN,
-        hist_xmax=FIT_HIST_XMAX,
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
     )
     plot_filename = make_plot_filename(data_filename)
     write_shift_plots(
