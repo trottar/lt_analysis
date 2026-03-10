@@ -568,6 +568,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             best_len = 10**9
             for tok in phi_tokens:
                 for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                    if "Simc" in file:
+                        continue
                     fl = f.lower()
                     if eps_tag in fl:
                         if len(f) < best_len:
@@ -579,6 +581,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             cand = None
             cand_len = 10**9
             for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                if "Simc" in file:
+                    continue                
                 fl = f.lower()
                 if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
                     if len(f) < cand_len:
@@ -1069,6 +1073,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         best_len = 10**9
         for tok in phi_tokens:
             for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
+                if "Simc" in file:
+                    continue                
                 fl = f.lower()
                 if eps_tag in fl:
                     if len(f) < best_len:
@@ -1208,6 +1214,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         cand = None
         cand_len = 10**9
         for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
+            if "Simc" in file:
+                continue            
             fl = f.lower()
             if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
                 if len(f) < cand_len:
