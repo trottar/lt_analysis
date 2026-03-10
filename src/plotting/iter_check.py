@@ -181,11 +181,7 @@ def plot_iteration(histlist, phisetlist, inpDict):
             # HARD CODED #
             ##############
 
-            # Check if variable shift branch exists
-            try:
-                adj_missmass = evt.missmass_shift
-            except AttributeError:
-                adj_missmass = evt.missmass
+            adj_missmass = evt.missmass
 
             ##############
             ##############        

@@ -140,7 +140,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     phipq_array = array( 'f', [0])
     phicm_array = array( 'f', [0])
     missmass_array = array( 'f', [0])
-    missmass_shift_array = array( 'f', [0])    
     mmnuc_array = array( 'f', [0])
     phad_array = array( 'f', [0])
     t_array = array( 'f', [0])
@@ -205,12 +204,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     TBRANCH_SIMC.SetBranchAddress("phipq", phipq_array);
     TBRANCH_SIMC.SetBranchAddress("phicm", phicm_array);
     TBRANCH_SIMC.SetBranchAddress("missmass", missmass_array);
-    shift_exists = False
-    try:
-        TBRANCH_SIMC.SetBranchAddress("missmass_shift", missmass_shift_array);    
-        shift_exists = True
-    except TypeError:
-        print("No missmass_shift branch found...skipping...")
     TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);
     TBRANCH_SIMC.SetBranchAddress("mmnuc", mmnuc_array);    
     TBRANCH_SIMC.SetBranchAddress("phad", phad_array);
@@ -289,8 +282,6 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     new_TBRANCH_SIMC.Branch("phipq", phipq_array, "phipq/F");
     new_TBRANCH_SIMC.Branch("phicm", phicm_array, "phicm/F");
     new_TBRANCH_SIMC.Branch("missmass", missmass_array, "missmass/F");
-    if shift_exists:
-        new_TBRANCH_SIMC.Branch("missmass_shift", missmass_shift_array, "missmass_shift/F");    
     new_TBRANCH_SIMC.Branch("mmnuc", mmnuc_array, "mmnuc/F");
     new_TBRANCH_SIMC.Branch("phad", phad_array, "phad/F");
     new_TBRANCH_SIMC.Branch("t", t_array, "t/F");

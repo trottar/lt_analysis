@@ -1245,11 +1245,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         # HARD CODED #
         ##############
 
-        # Check if variable shift branch exists
-        try:
-            adj_missmass = evt.missmass_shift
-        except AttributeError:
-            adj_missmass = evt.missmass
+        adj_missmass = evt.missmass
 
         ##############
         ##############        

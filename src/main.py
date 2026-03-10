@@ -194,9 +194,34 @@ output_file_lst = []
 # Append csv of efficiencies
 output_file_lst.append(OUTPATH + "/" + f"table_{ParticleType}_{kinematics}" + ".csv")
 
+phisetlist = ["Center", "Left", "Right"]
+#phisetlist = ["Center"]
+
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
+
+sys.path.append("setup")
+from shift_MM import shift_experimental_files_to_simc_peak
+
+for phiset in phisetlist:
+    rootFileData = f"{OUTPATH}/{phiset}_{ParticleType}_{InDATAFilename}.root"
+    if not os.path.exists(rootFileData):
+        print(f"Skipping MM shift for {phiset}: data file {rootFileData} not found.")
+        continue
+
+    rootFileSimc = f"{OUTPATH}/Prod_Coin_Q{Q2}W{W}{phiset.lower()}_{EPSSET}e.root"
+    if not os.path.exists(rootFileSimc):
+        print(f"ERROR: No SIMC file found for MM shift: {rootFileSimc}")
+        sys.exit(2)
+
+    rootFileDummy = f"{OUTPATH}/{phiset}_{ParticleType}_{InDUMMYFilename}.root"
+    shift_experimental_files_to_simc_peak(
+        ParticleType,
+        rootFileSimc,
+        rootFileData,
+        rootFileDummy if os.path.exists(rootFileDummy) else None,
+    )
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
@@ -276,9 +301,6 @@ print("-"*25)
 # Default starting values no need to change
 inpDict["Epsmin"] = 0.0
 inpDict["Epsmax"] = 1.0
-
-phisetlist = ["Center","Left","Right"]
-#phisetlist = ["Center"]
 
 for phiset in phisetlist:
     # Call diamond cut script and append paramters to dictionary

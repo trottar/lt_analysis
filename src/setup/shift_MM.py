@@ -3,275 +3,193 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-06-21 15:29:33 trottar"
+# Shift experimental missing-mass branches to the fitted SIMC peak.
 # ================================================================
 #
-# Author:  Richard L. Trotta III <trottar.iii@gmail.com>
-#
-# Copyright (c) trottar
-#
-import ROOT
-from ROOT import TFile, TTree, TH1F, TCanvas, TLine, kRed, kGreen
-from ROOT import gStyle
+
+import os
+import sys
 from array import array
-import os, sys
 
-##################################################################################################################################################
+import ROOT
+from ROOT import TFile, TH1F, TTree, kRed
 
-# Input params - run number, particle type, and max number of events
-runNum = sys.argv[1]
-ParticleType = sys.argv[2]
-ROOTPrefix = sys.argv[3]
-MaxEvent = "-1"
-kinematics = sys.argv[4]
-phiset = sys.argv[5]
-target =  sys.argv[6]
 
-###############################################################################################################################################
-# ltsep package import and pathing definitions
-
-# Import package for cuts
-from ltsep import Root
-# Import package for progress bar
-from ltsep import Misc
-
-lt = Root(os.path.realpath(__file__), "Plot_LTSep")
-
-# Add this to all files for more dynamic pathing
-USER = lt.USER  # Grab user info for file finding
-HOST = lt.HOST
-REPLAYPATH = lt.REPLAYPATH
-UTILPATH = lt.UTILPATH
-LTANAPATH = lt.LTANAPATH
-ANATYPE = lt.ANATYPE
-OUTPATH = lt.OUTPATH
-CACHEPATH = lt.CACHEPATH
-
-#################################################################################################################################################################
-
-if runNum == '0':
-    run_types = ["simc"]
-else:
-    run_types = ["data", "simc"]
-
-for data_type in run_types:
-    
-    print(f"\n\nFinding MM shift for {data_type}...")
-    
-    if data_type == "simc":
-        simc_str = kinematics.replace('_',f'{phiset}_')
-        filename = f"{OUTPATH}/Prod_Coin_{simc_str}.root"
-        trees = [f"h10"]
-        reference_tree_name = f"h10"
-        mass_var_name = "missmass"
-        pdf_filename = f"{OUTPATH}/{phiset.capitalize()}_{ParticleType}_{data_type}_MM_Shift_{kinematics}.pdf"
+def get_peak_window(particle_type):
+    if particle_type == "kaon":
+        peak_name = "lambda"
+        peak_center = 1.1156
     else:
-        data_type = "data" if target == "lh2" else "dummy"
-        filename = f"{OUTPATH}/{ParticleType}_{runNum}_{MaxEvent}_Raw_Data.root"
-        trees = [f"Uncut_{ParticleType.capitalize()}_Events",
-                 f"Cut_{ParticleType.capitalize()}_Events_all_noRF", f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF", f"Cut_{ParticleType.capitalize()}_Events_rand_noRF",
-                 f"Cut_{ParticleType.capitalize()}_Events_all_RF", f"Cut_{ParticleType.capitalize()}_Events_prompt_RF", f"Cut_{ParticleType.capitalize()}_Events_rand_RF"]
-        reference_tree_name = f"Cut_{ParticleType.capitalize()}_Events_prompt_noRF"
-        mass_var_name = "MM"
-        pdf_filename = f"{OUTPATH}/{phiset.capitalize()}_{ParticleType}_{runNum}_{data_type}_MM_Shift_{kinematics}.pdf"
+        peak_name = "proton"
+        peak_center = 0.9380
 
-    # Check if the file exists
+    return peak_name, peak_center - 0.05, peak_center + 0.05
+
+
+def get_data_tree_names(particle_type):
+    particle_name = particle_type.capitalize()
+    return [
+        f"Uncut_{particle_name}_Events",
+        f"Cut_{particle_name}_Events_all_noRF",
+        f"Cut_{particle_name}_Events_prompt_noRF",
+        f"Cut_{particle_name}_Events_rand_noRF",
+        f"Cut_{particle_name}_Events_all_RF",
+        f"Cut_{particle_name}_Events_prompt_RF",
+        f"Cut_{particle_name}_Events_rand_RF",
+    ]
+
+
+def fit_gaussian(hist, x_min, x_max):
+    bin_min = hist.GetXaxis().FindBin(x_min)
+    bin_max = hist.GetXaxis().FindBin(x_max)
+
+    max_bin = bin_min
+    max_value = hist.GetBinContent(max_bin)
+    for bin_idx in range(bin_min, bin_max + 1):
+        bin_value = hist.GetBinContent(bin_idx)
+        if bin_value > max_value:
+            max_bin = bin_idx
+            max_value = bin_value
+
+    half_max = max_value * 0.75
+
+    left_bin = max_bin
+    right_bin = max_bin
+    while left_bin > 1 and hist.GetBinContent(left_bin) > half_max:
+        left_bin -= 1
+    while right_bin < hist.GetNbinsX() and hist.GetBinContent(right_bin) > half_max:
+        right_bin += 1
+
+    fit_min = hist.GetBinCenter(left_bin)
+    fit_max = hist.GetBinCenter(right_bin)
+
+    hist.Fit("gaus", "Q", "", fit_min, fit_max)
+    fit_func = hist.GetFunction("gaus")
+    if not fit_func:
+        raise RuntimeError("Gaussian fit failed.")
+
+    fit_func.SetLineColor(kRed)
+    return fit_func.GetParameter(1), fit_func.GetParError(1)
+
+
+def fit_tree_peak(filename, tree_name, branch_name, particle_type):
     if not os.path.exists(filename):
-        print(f"Error: File '{filename}' does not exist.")
-        sys.exit(1)  # Exit the script with an error code
+        raise FileNotFoundError(filename)
 
-    if ParticleType == "kaon":
-        MM_str = "lambda"
-        MM_true = 1.1156  # Lambda peak
-    else:
-        MM_str = "proton"
-        MM_true = 0.938  # Proton peak
+    root_file = TFile.Open(filename, "READ")
+    if not root_file or root_file.IsZombie():
+        raise RuntimeError(f"Unable to open ROOT file: {filename}")
 
-    MM_min = MM_true - 0.05
-    MM_max = MM_true + 0.05
+    tree = root_file.Get(tree_name)
+    if not tree:
+        root_file.Close()
+        raise RuntimeError(f"Tree '{tree_name}' not found in {filename}")
 
-    print(f"\n\nShifting missing mass to {MM_str} peak of {MM_true} for file {filename}...")
+    _, mm_min, mm_max = get_peak_window(particle_type)
+    hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
+    hist = TH1F(hist_name, branch_name, 200, 0.7, 1.5)
+    tree.Draw(f"{branch_name}>>{hist_name}", "", "goff")
+    hist.SetDirectory(0)
 
-    # Suppress canvas splash
+    mean, mean_err = fit_gaussian(hist, mm_min, mm_max)
+    root_file.Close()
+    return mean, mean_err
+
+
+def build_shifted_tree(tree, source_branch_name, shift_branch_name, shift):
+    shifted_value = array("f", [0.0])
+    new_tree = tree.CloneTree(0)
+    new_tree.Branch(shift_branch_name, shifted_value, f"{shift_branch_name}/F")
+
+    for evt in tree:
+        shifted_value[0] = getattr(evt, source_branch_name) + shift
+        new_tree.Fill()
+
+    return new_tree
+
+
+def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
+    shift_branch_name = f"{source_branch_name}_shift"
+    root_file = TFile.Open(filename, "UPDATE")
+    if not root_file or root_file.IsZombie():
+        raise RuntimeError(f"Unable to open ROOT file for update: {filename}")
+
+    updated_trees = []
+    for tree_name in tree_names:
+        tree = root_file.Get(tree_name)
+        if not tree:
+            print(f"Tree '{tree_name}' not found in {filename}. Skipping.")
+            continue
+
+        if tree.GetBranch(shift_branch_name):
+            print(f"{filename}:{tree_name} already has '{shift_branch_name}'. Leaving it unchanged.")
+            continue
+
+        print(f"Applying shift {shift:+.6f} to {filename}:{tree_name}")
+        updated_trees.append(
+            (tree_name, build_shifted_tree(tree, source_branch_name, shift_branch_name, shift))
+        )
+
+    root_file.cd()
+    for tree_name, new_tree in updated_trees:
+        new_tree.Write(tree_name, TTree.kOverwrite)
+
+    root_file.Close()
+    return len(updated_trees)
+
+
+def shift_experimental_files_to_simc_peak(particle_type, simc_filename, data_filename, dummy_filename=None):
     ROOT.gROOT.SetBatch(True)
 
-    # Open ROOT file
-    file = TFile.Open(filename)
+    reference_tree = f"Cut_{particle_type.capitalize()}_Events_prompt_noRF"
+    peak_name, _, _ = get_peak_window(particle_type)
 
-    # Fit the peak for the reference tree
-    print(f"\nFitting M_{ParticleType[0].upper()} of tree {reference_tree_name}...")
-    reference_tree = file.Get(reference_tree_name)
+    simc_peak, simc_peak_err = fit_tree_peak(simc_filename, "h10", "missmass", particle_type)
+    data_peak, data_peak_err = fit_tree_peak(data_filename, reference_tree, "MM", particle_type)
+    shift = simc_peak - data_peak
 
-    branches = reference_tree.GetListOfBranches()
-    branch_names = [branch.GetName() for branch in branches]
+    print(f"\nAligning experimental {peak_name} peak to SIMC...")
+    print(f"SIMC peak ({simc_filename}) = {simc_peak:.6f} +/- {simc_peak_err:.6f}")
+    print(f"Data peak ({data_filename}) = {data_peak:.6f} +/- {data_peak_err:.6f}")
+    print(f"Applying MM shift = {shift:+.6f}")
 
-    branch_to_check = f"{mass_var_name}_shift"  # Check if shift already exists for file
-    
-    if branch_to_check in branch_names:
-        print(f"\n\nBranch '{branch_to_check}' is in the file already.")
-        continue
+    tree_names = get_data_tree_names(particle_type)
+    add_shift_branch_to_file(data_filename, tree_names, "MM", shift)
 
-    # Define a function for fitting a Gaussian with dynamically determined FWHM range
-    def fit_gaussian(hist, x_min, x_max):
+    if dummy_filename:
+        if os.path.exists(dummy_filename):
+            add_shift_branch_to_file(dummy_filename, tree_names, "MM", shift)
+        else:
+            print(f"Dummy file '{dummy_filename}' not found. Skipping dummy MM shift.")
 
-        print("-" * 25)
+    return {
+        "simc_peak": simc_peak,
+        "simc_peak_err": simc_peak_err,
+        "data_peak": data_peak,
+        "data_peak_err": data_peak_err,
+        "shift": shift,
+    }
 
-        # Find the corresponding bin numbers
-        bin_min = hist.GetXaxis().FindBin(x_min)
-        bin_max = hist.GetXaxis().FindBin(x_max)
 
-        # Find the maximum value within the specified range
-        max_bin = bin_min
-        max_value = hist.GetBinContent(max_bin)
-        for i in range(bin_min, bin_max):
-            if hist.GetBinContent(i) > max_value:
-                max_bin = i
-                max_value = hist.GetBinContent(i)
+def main():
+    if len(sys.argv) not in (4, 5):
+        print(
+            "Usage: shift_MM.py <particle_type> <simc_root> <data_root> [dummy_root]"
+        )
+        sys.exit(1)
 
-        half_max = max_value * 0.75
+    particle_type = sys.argv[1]
+    simc_filename = sys.argv[2]
+    data_filename = sys.argv[3]
+    dummy_filename = sys.argv[4] if len(sys.argv) == 5 else None
 
-        # Find left and right bins closest to half-max value
-        left_bin = max_bin
-        right_bin = max_bin
-        while hist.GetBinContent(left_bin) > half_max and left_bin > 1:
-            left_bin -= 1
-        while hist.GetBinContent(right_bin) > half_max and right_bin < hist.GetNbinsX():
-            right_bin += 1
+    shift_experimental_files_to_simc_peak(
+        particle_type,
+        simc_filename,
+        data_filename,
+        dummy_filename,
+    )
 
-        min_range = hist.GetBinCenter(left_bin)
-        max_range = hist.GetBinCenter(right_bin)
 
-        print(f"min_range: {min_range:.4f}")
-        print(f"max_range: {max_range:.4f}")
-        print("-" * 25)
-
-        hist.Fit("gaus", "Q", "", min_range, max_range)
-        fit_func = hist.GetFunction('gaus')
-
-        fit_func.SetLineColor(kRed)
-
-        mean = fit_func.GetParameter(1)
-        mean_err = fit_func.GetParError(1)
-
-        return [mean, mean_err]
-
-    # Function to apply mass shift
-    def shift_mass(tree, branch_name, shift):
-        new_values = []
-        for evt in tree:
-            original_mass = getattr(evt, branch_name)
-            shifted_mass = original_mass + shift
-            new_values.append(shifted_mass)
-        return new_values
-    
-    # Define histogram for fitting
-    hist = TH1F("hist", f"M_{ParticleType[0].upper()}", 200, 0.7, 1.5)  # Adjust binning/range as needed
-    reference_tree.Draw(f"{mass_var_name}>>hist")
-
-    # Fit the histogram to find the peak
-    peak_position = fit_gaussian(hist, MM_min, MM_max)[0]  # Grab Mean for shift
-
-    # Calculate the shift
-    shift = MM_true - peak_position
-    print(f"Calculated shift: {shift:.4f}\n\n")
-
-    # Create a canvas for plotting
-    canvas = TCanvas("canvas", "Fit and Shift", 800, 600)
-
-    # Save plots to PDF    
-    canvas.Print(f"{pdf_filename}[")
-
-    # Disable the stats box globally
-    gStyle.SetOptStat(0)
-
-    # Draw the histogram and fit
-    hist.Draw("E1")  # Draw the histogram
-
-    # Draw the vertical line at MM_true
-    line = TLine(MM_true, 0, MM_true, hist.GetMaximum())
-    line.SetLineColor(kGreen)
-    line.SetLineStyle(2)
-    line.SetLineWidth(3)
-    line.Draw("same")
-
-    # Add a breakdown of MM_true, fit mean, and shift value
-    text = ROOT.TPaveText(0.6, 0.7, 0.9, 0.9, "NDC")  # Define the text box in normalized device coordinates
-    text.SetFillColor(0)  # Transparent background
-    text.SetBorderSize(1)  # Thin border
-    text.AddText(f"MM_true: {MM_true:.4f}")
-    text.AddText(f"Fit Mean: {peak_position:.4f}")
-    text.AddText(f"Shift: {shift:.4f}")
-    text.SetTextSize(0.03)
-    text.SetTextAlign(13)  # Align text to the top-left within the box
-    text.Draw("same")
-
-    # Save the plot to the PDF
-    canvas.Print(pdf_filename)
-
-    # Enable the stats box globally
-    gStyle.SetOptStat(1)
-
-    # Apply the shift to all trees
-    for tree_name in trees:
-        tree = file.Get(tree_name)
-        if not tree:
-            print(f"Tree {tree_name} not found!")
-            continue
-
-        shifted_masses = shift_mass(tree, f"{mass_var_name}", shift)
-
-        # Plot shifted histogram
-        hist_shifted = TH1F(f"hist_shifted_{tree_name}", f"M_{ParticleType[0].upper()} Shifted", 200, 0.7, 1.5)
-        for mass in shifted_masses:
-            hist_shifted.Fill(mass)
-
-        hist_shifted.Draw()
-        line.Draw("same")
-        canvas.Print(pdf_filename)
-
-    canvas.Print(f"{pdf_filename}]")
-
-    # Clean up
-    file.Close()
-
-    print("\n\n")
-
-    # Function to apply mass shift and create a new branch for the shifted values
-    def apply_shift_to_tree(tree, shift):
-        # Create a new branch to hold the shifted values
-        MM_shift = array('f', [0.0])  # Temporary array for the shifted MM
-        new_tree = tree.CloneTree(0)  # Clone the structure of the tree without entries
-        new_tree.Branch(f"{mass_var_name}_shift", MM_shift, f"{mass_var_name}_shift/F")  # Add the new branch
-
-        # Loop over the tree and apply the shift
-        for i, evt in enumerate(tree):
-            # Progress bar
-            Misc.progressBar(i, tree.GetEntries(), bar_length=25)
-            # Retrieve the original MM value
-            if data_type == "simc":
-                original_mass = evt.missmass  # Assuming the branch "missmass" exists
-            else:
-                original_mass = evt.MM  # Assuming the branch "MM" exists
-            shifted_mass = original_mass + shift  # Apply the shift
-            MM_shift[0] = shifted_mass  # Assign the shifted value
-
-            new_tree.Fill()  # Add this event to the new tree
-
-        return new_tree  # Return the updated tree
-
-    # Open the ROOT file in UPDATE mode
-    file = TFile.Open(filename, "UPDATE")
-
-    # Apply the shift to all trees
-    for tree_name in trees:
-        tree = file.Get(tree_name)
-        if not tree:
-            print(f"Tree {tree_name} not found!")
-            continue
-
-        print(f"Applying shift to {tree_name} as {mass_var_name}_shift branch")
-        new_tree = apply_shift_to_tree(tree, shift)  # Create the new tree
-        new_tree.Write(tree_name, TTree.kOverwrite)  # Overwrite the old tree with the new one
-
-    # Write the changes to the file and close it
-    file.Close()
+if __name__ == "__main__":
+    main()
