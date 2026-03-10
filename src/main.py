@@ -223,6 +223,7 @@ for phiset in phisetlist:
         rootFileData,
         rootFileDummy if os.path.exists(rootFileDummy) else None,
     )
+    output_file_lst.append(mm_shift_summary[phiset]["plot_filename"])
 inpDict["mm_shift_summary"] = mm_shift_summary
 
 # Removes this file to reset iteration count (see below for more details)

@@ -12,7 +12,12 @@ import sys
 from array import array
 
 import ROOT
-from ROOT import TFile, TH1F, TTree, kRed
+from ROOT import TCanvas, TFile, TH1F, TLegend, TLine, TTree, gStyle, kBlack, kBlue, kGreen, kRed
+
+
+HIST_NBINS = 200
+HIST_XMIN = 0.7
+HIST_XMAX = 1.5
 
 
 def get_peak_window(particle_type):
@@ -72,7 +77,7 @@ def fit_gaussian(hist, x_min, x_max):
     return fit_func.GetParameter(1), fit_func.GetParError(1)
 
 
-def fit_tree_peak(filename, tree_name, branch_name, particle_type):
+def build_histogram(filename, tree_name, branch_name, hist_name, hist_title, shift=0.0):
     if not os.path.exists(filename):
         raise FileNotFoundError(filename)
 
@@ -85,15 +90,27 @@ def fit_tree_peak(filename, tree_name, branch_name, particle_type):
         root_file.Close()
         raise RuntimeError(f"Tree '{tree_name}' not found in {filename}")
 
+    expression = branch_name
+    if abs(shift) > 0.0:
+        expression = f"({branch_name}+({shift:.12g}))"
+
+    hist = TH1F(hist_name, hist_title, HIST_NBINS, HIST_XMIN, HIST_XMAX)
+    tree.Draw(f"{expression}>>{hist_name}", "", "goff")
+    hist.SetDirectory(0)
+    root_file.Close()
+    return hist
+
+
+def fit_tree_peak(filename, tree_name, branch_name, particle_type):
     _, mm_min, mm_max = get_peak_window(particle_type)
     hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
-    hist = TH1F(hist_name, branch_name, 200, 0.7, 1.5)
-    tree.Draw(f"{branch_name}>>{hist_name}", "", "goff")
-    hist.SetDirectory(0)
-
+    hist = build_histogram(filename, tree_name, branch_name, hist_name, branch_name)
     mean, mean_err = fit_gaussian(hist, mm_min, mm_max)
-    root_file.Close()
-    return mean, mean_err
+    return {
+        "hist": hist,
+        "mean": mean,
+        "mean_err": mean_err,
+    }
 
 
 def build_shifted_tree(tree, source_branch_name, shift_branch_name, shift):
@@ -146,19 +163,151 @@ def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
     return len(updated_trees)
 
 
+def make_text_box(lines):
+    text_box = ROOT.TPaveText(0.58, 0.70, 0.89, 0.89, "NDC")
+    text_box.SetFillColor(0)
+    text_box.SetBorderSize(1)
+    text_box.SetTextSize(0.03)
+    text_box.SetTextAlign(12)
+    for line in lines:
+        text_box.AddText(line)
+    return text_box
+
+
+def make_peak_line(peak_value, ymax, color):
+    line = TLine(peak_value, 0.0, peak_value, ymax)
+    line.SetLineColor(color)
+    line.SetLineStyle(2)
+    line.SetLineWidth(3)
+    return line
+
+
+def normalize_hist(hist):
+    integral = hist.Integral()
+    if integral > 0.0:
+        hist.Scale(1.0 / integral)
+
+
+def make_plot_filename(data_filename):
+    base_name = os.path.splitext(os.path.basename(data_filename))[0]
+    return os.path.join(os.path.dirname(data_filename), f"{base_name}_MM_Shift.pdf")
+
+
+def write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, output_pdf):
+    old_opt_stat = gStyle.GetOptStat()
+    gStyle.SetOptStat(0)
+
+    canvas_name = f"canvas_mm_shift_{abs(hash(output_pdf)) & 0xFFFFFFFF}"
+    canvas = TCanvas(canvas_name, "MM Shift", 900, 700)
+    canvas.Print(f"{output_pdf}[")
+
+    simc_hist = simc_fit["hist"]
+    simc_hist.SetTitle(f"SIMC M_{particle_type[0].upper()} Fit")
+    simc_hist.SetLineColor(kRed)
+    simc_hist.SetLineWidth(2)
+    simc_hist.Draw("hist")
+    simc_fit_line = simc_hist.GetFunction("gaus")
+    if simc_fit_line:
+        simc_fit_line.Draw("same")
+    simc_peak_line = make_peak_line(simc_fit["mean"], simc_hist.GetMaximum(), kRed)
+    simc_peak_line.Draw("same")
+    simc_text = make_text_box(
+        [
+            f"SIMC peak = {simc_fit['mean']:.6f}",
+            f"Fit err = {simc_fit['mean_err']:.6f}",
+        ]
+    )
+    simc_text.Draw("same")
+    canvas.Print(output_pdf)
+
+    data_hist = data_fit["hist"]
+    data_hist.SetTitle(f"Data M_{particle_type[0].upper()} Fit")
+    data_hist.SetLineColor(kBlack)
+    data_hist.SetLineWidth(2)
+    data_hist.Draw("hist")
+    data_fit_line = data_hist.GetFunction("gaus")
+    if data_fit_line:
+        data_fit_line.Draw("same")
+    data_peak_line = make_peak_line(data_fit["mean"], data_hist.GetMaximum(), kBlue)
+    data_peak_line.Draw("same")
+    simc_reference_line = make_peak_line(simc_fit["mean"], data_hist.GetMaximum(), kGreen + 2)
+    simc_reference_line.Draw("same")
+    data_text = make_text_box(
+        [
+            f"Data peak = {data_fit['mean']:.6f}",
+            f"SIMC peak = {simc_fit['mean']:.6f}",
+            f"MM shift = {shift:+.6f}",
+        ]
+    )
+    data_text.Draw("same")
+    canvas.Print(output_pdf)
+
+    data_overlay = data_hist.Clone(f"{data_hist.GetName()}_overlay")
+    shifted_overlay = shifted_hist.Clone(f"{shifted_hist.GetName()}_overlay")
+    simc_overlay = simc_hist.Clone(f"{simc_hist.GetName()}_overlay")
+
+    normalize_hist(data_overlay)
+    normalize_hist(shifted_overlay)
+    normalize_hist(simc_overlay)
+
+    data_overlay.SetTitle(f"M_{particle_type[0].upper()} Raw / Shifted / SIMC")
+    data_overlay.SetLineColor(kBlack)
+    shifted_overlay.SetLineColor(kBlue)
+    simc_overlay.SetLineColor(kRed)
+    data_overlay.SetLineWidth(2)
+    shifted_overlay.SetLineWidth(2)
+    simc_overlay.SetLineWidth(2)
+
+    ymax = max(
+        data_overlay.GetMaximum(),
+        shifted_overlay.GetMaximum(),
+        simc_overlay.GetMaximum(),
+    ) * 1.15
+    data_overlay.SetMaximum(ymax)
+    data_overlay.GetYaxis().SetTitle("Normalized counts")
+    data_overlay.Draw("hist")
+    shifted_overlay.Draw("hist same")
+    simc_overlay.Draw("hist same")
+
+    overlay_peak_line = make_peak_line(simc_fit["mean"], ymax, kGreen + 2)
+    overlay_peak_line.Draw("same")
+
+    legend = TLegend(0.58, 0.55, 0.89, 0.68)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(data_overlay, "Data MM", "l")
+    legend.AddEntry(shifted_overlay, "Data MM_shift", "l")
+    legend.AddEntry(simc_overlay, "SIMC", "l")
+    legend.Draw("same")
+
+    overlay_text = make_text_box(
+        [
+            f"Data peak = {data_fit['mean']:.6f}",
+            f"SIMC peak = {simc_fit['mean']:.6f}",
+            f"Applied shift = {shift:+.6f}",
+        ]
+    )
+    overlay_text.Draw("same")
+    canvas.Print(output_pdf)
+
+    canvas.Print(f"{output_pdf}]")
+    canvas.Close()
+    gStyle.SetOptStat(old_opt_stat)
+
+
 def shift_experimental_files_to_simc_peak(particle_type, simc_filename, data_filename, dummy_filename=None):
     ROOT.gROOT.SetBatch(True)
 
     reference_tree = f"Cut_{particle_type.capitalize()}_Events_prompt_noRF"
     peak_name, _, _ = get_peak_window(particle_type)
 
-    simc_peak, simc_peak_err = fit_tree_peak(simc_filename, "h10", "missmass", particle_type)
-    data_peak, data_peak_err = fit_tree_peak(data_filename, reference_tree, "MM", particle_type)
-    shift = simc_peak - data_peak
+    simc_fit = fit_tree_peak(simc_filename, "h10", "missmass", particle_type)
+    data_fit = fit_tree_peak(data_filename, reference_tree, "MM", particle_type)
+    shift = simc_fit["mean"] - data_fit["mean"]
 
     print(f"\nAligning experimental {peak_name} peak to SIMC...")
-    print(f"SIMC peak ({simc_filename}) = {simc_peak:.6f} +/- {simc_peak_err:.6f}")
-    print(f"Data peak ({data_filename}) = {data_peak:.6f} +/- {data_peak_err:.6f}")
+    print(f"SIMC peak ({simc_filename}) = {simc_fit['mean']:.6f} +/- {simc_fit['mean_err']:.6f}")
+    print(f"Data peak ({data_filename}) = {data_fit['mean']:.6f} +/- {data_fit['mean_err']:.6f}")
     print(f"Applying MM shift = {shift:+.6f}")
 
     tree_names = get_data_tree_names(particle_type)
@@ -170,12 +319,23 @@ def shift_experimental_files_to_simc_peak(particle_type, simc_filename, data_fil
         else:
             print(f"Dummy file '{dummy_filename}' not found. Skipping dummy MM shift.")
 
+    shifted_hist = build_histogram(
+        data_filename,
+        reference_tree,
+        "MM_shift",
+        f"hist_shifted_{abs(hash((data_filename, reference_tree))) & 0xFFFFFFFF}",
+        "MM_shift",
+    )
+    plot_filename = make_plot_filename(data_filename)
+    write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, plot_filename)
+
     return {
-        "simc_peak": simc_peak,
-        "simc_peak_err": simc_peak_err,
-        "data_peak": data_peak,
-        "data_peak_err": data_peak_err,
+        "simc_peak": simc_fit["mean"],
+        "simc_peak_err": simc_fit["mean_err"],
+        "data_peak": data_fit["mean"],
+        "data_peak_err": data_fit["mean_err"],
         "shift": shift,
+        "plot_filename": plot_filename,
     }
 
 
