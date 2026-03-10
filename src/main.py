@@ -222,6 +222,8 @@ for phiset in phisetlist:
         rootFileSimc,
         rootFileData,
         rootFileDummy if os.path.exists(rootFileDummy) else None,
+        hist_xmin=mm_min,
+        hist_xmax=mm_max,
     )
     output_file_lst.append(mm_shift_summary[phiset]["plot_filename"])
 inpDict["mm_shift_summary"] = mm_shift_summary

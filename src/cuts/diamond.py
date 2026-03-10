@@ -528,7 +528,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
         #print(file)
-        if "Simc" in file:
+        if "simc" in file.lower():
             continue
         if "high" in file:
             if (len(file) < lenh):
@@ -555,6 +555,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     # guaranteed to lie inside the full set of setting diamonds.
     common_poly = None
     common_poly_sources = []
+    overlay_diamond_entries = []
 
     # Use the same hard-coded threshold rule as the main hist thresholding.
     if Q2Val == 3.0 and WVal == 3.14:
@@ -568,7 +569,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             best_len = 10**9
             for tok in phi_tokens:
                 for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
-                    if "Simc" in file:
+                    if "simc" in f.lower():
                         continue
                     fl = f.lower()
                     if eps_tag in fl:
@@ -581,7 +582,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             cand = None
             cand_len = 10**9
             for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
-                if "Simc" in file:
+                if "simc" in f.lower():
                     continue                
                 fl = f.lower()
                 if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
@@ -662,8 +663,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
                     poly_tmp = _poly_from_diamond_fits(fits_tmp)
                     if poly_tmp:
+                        poly_tmp = _sort_ccw_points(poly_tmp)
                         polys.append(poly_tmp)
                         common_poly_sources.append((eps_lbl, phi_lbl, src_file))
+                        overlay_diamond_entries.append({
+                            "epsilon": eps_lbl,
+                            "phi": phi_lbl,
+                            "file": src_file,
+                            "poly": poly_tmp,
+                        })
                 except Exception as e:
                     print("WARNING: common-cut: failed {}-{} fit ({})".format(eps_lbl, phi_lbl, e))
 
@@ -1073,7 +1081,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         best_len = 10**9
         for tok in phi_tokens:
             for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
-                if "Simc" in file:
+                if "simc" in f.lower():
                     continue                
                 fl = f.lower()
                 if eps_tag in fl:
@@ -1156,6 +1164,19 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         g.SetLineWidth(3)
         return g
 
+    def _draw_poly_outline(poly, eps_label, phi_label, color, gname):
+        g = _tgraph_from_poly(poly, gname)
+        if not g:
+            print("WARNING: Could not build polygon graph for {} epsilon, phi = {}".format(eps_label, phi_label))
+            return
+
+        g.SetLineColor(color)
+        g.SetLineStyle(1)
+        g.SetLineWidth(3)
+        g.Draw("L SAME")
+        leg.AddEntry(g, "{} #epsilon, {}".format(eps_label, phi_label), "l")
+        overlay_keepalive.append(g)
+
     def _draw_diamond_outline(root_path, eps_label, phi_label, color):
         if root_path is None:
             print("WARNING: No {} epsilon file found for phi = {}".format(eps_label, phi_label))
@@ -1214,7 +1235,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         cand = None
         cand_len = 10**9
         for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
-            if "Simc" in file:
+            if "simc" in f.lower():
                 continue            
             fl = f.lower()
             if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
@@ -1223,12 +1244,22 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     cand_len = len(f)
         return cand
 
-    for phi_label, phi_tokens in phi_defs:
-        for eps_label, eps_tag in [("High", "high"), ("Mid", "mid"), ("Low", "low")]:
-            eps_file = _find_shortest_root(phi_tokens, eps_tag)
-            if eps_file is None and phi_label == "Center":
-                eps_file = _find_center_fallback_overlay(eps_tag)
-            _draw_diamond_outline(eps_file, eps_label, phi_label, color_map[(eps_label, phi_label)])
+    if overlay_diamond_entries:
+        for entry in overlay_diamond_entries:
+            _draw_poly_outline(
+                entry["poly"],
+                entry["epsilon"],
+                entry["phi"],
+                color_map[(entry["epsilon"], entry["phi"])],
+                "gDiamond_{}_{}_{}".format(entry["epsilon"].lower(), entry["phi"], FilenameOverride),
+            )
+    else:
+        for phi_label, phi_tokens in phi_defs:
+            for eps_label, eps_tag in [("High", "high"), ("Mid", "mid"), ("Low", "low")]:
+                eps_file = _find_shortest_root(phi_tokens, eps_tag)
+                if eps_file is None and phi_label == "Center":
+                    eps_file = _find_center_fallback_overlay(eps_tag)
+                _draw_diamond_outline(eps_file, eps_label, phi_label, color_map[(eps_label, phi_label)])
 
     # Draw the applied cut polygon as a thick black outline.
     if cut_poly is not None:

@@ -16,8 +16,8 @@ from ROOT import TCanvas, TFile, TH1F, TLegend, TLine, TTree, gStyle, kBlack, kB
 
 
 HIST_NBINS = 200
-HIST_XMIN = 0.7
-HIST_XMAX = 1.5
+DEFAULT_HIST_XMIN = 0.7
+DEFAULT_HIST_XMAX = 1.5
 
 
 def get_peak_window(particle_type):
@@ -77,7 +77,16 @@ def fit_gaussian(hist, x_min, x_max):
     return fit_func.GetParameter(1), fit_func.GetParError(1)
 
 
-def build_histogram(filename, tree_name, branch_name, hist_name, hist_title, shift=0.0):
+def build_histogram(
+    filename,
+    tree_name,
+    branch_name,
+    hist_name,
+    hist_title,
+    shift=0.0,
+    hist_xmin=DEFAULT_HIST_XMIN,
+    hist_xmax=DEFAULT_HIST_XMAX,
+):
     if not os.path.exists(filename):
         raise FileNotFoundError(filename)
 
@@ -94,17 +103,32 @@ def build_histogram(filename, tree_name, branch_name, hist_name, hist_title, shi
     if abs(shift) > 0.0:
         expression = f"({branch_name}+({shift:.12g}))"
 
-    hist = TH1F(hist_name, hist_title, HIST_NBINS, HIST_XMIN, HIST_XMAX)
+    hist = TH1F(hist_name, hist_title, HIST_NBINS, hist_xmin, hist_xmax)
     tree.Draw(f"{expression}>>{hist_name}", "", "goff")
     hist.SetDirectory(0)
     root_file.Close()
     return hist
 
 
-def fit_tree_peak(filename, tree_name, branch_name, particle_type):
+def fit_tree_peak(
+    filename,
+    tree_name,
+    branch_name,
+    particle_type,
+    hist_xmin=DEFAULT_HIST_XMIN,
+    hist_xmax=DEFAULT_HIST_XMAX,
+):
     _, mm_min, mm_max = get_peak_window(particle_type)
     hist_name = f"hist_{abs(hash((filename, tree_name, branch_name))) & 0xFFFFFFFF}"
-    hist = build_histogram(filename, tree_name, branch_name, hist_name, branch_name)
+    hist = build_histogram(
+        filename,
+        tree_name,
+        branch_name,
+        hist_name,
+        branch_name,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
+    )
     mean, mean_err = fit_gaussian(hist, mm_min, mm_max)
     return {
         "hist": hist,
@@ -295,14 +319,35 @@ def write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, ou
     gStyle.SetOptStat(old_opt_stat)
 
 
-def shift_experimental_files_to_simc_peak(particle_type, simc_filename, data_filename, dummy_filename=None):
+def shift_experimental_files_to_simc_peak(
+    particle_type,
+    simc_filename,
+    data_filename,
+    dummy_filename=None,
+    hist_xmin=DEFAULT_HIST_XMIN,
+    hist_xmax=DEFAULT_HIST_XMAX,
+):
     ROOT.gROOT.SetBatch(True)
 
     reference_tree = f"Cut_{particle_type.capitalize()}_Events_prompt_noRF"
     peak_name, _, _ = get_peak_window(particle_type)
 
-    simc_fit = fit_tree_peak(simc_filename, "h10", "missmass", particle_type)
-    data_fit = fit_tree_peak(data_filename, reference_tree, "MM", particle_type)
+    simc_fit = fit_tree_peak(
+        simc_filename,
+        "h10",
+        "missmass",
+        particle_type,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
+    )
+    data_fit = fit_tree_peak(
+        data_filename,
+        reference_tree,
+        "MM",
+        particle_type,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
+    )
     shift = simc_fit["mean"] - data_fit["mean"]
 
     print(f"\nAligning experimental {peak_name} peak to SIMC...")
@@ -325,6 +370,8 @@ def shift_experimental_files_to_simc_peak(particle_type, simc_filename, data_fil
         "MM_shift",
         f"hist_shifted_{abs(hash((data_filename, reference_tree))) & 0xFFFFFFFF}",
         "MM_shift",
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
     )
     plot_filename = make_plot_filename(data_filename)
     write_shift_plots(particle_type, simc_fit, data_fit, shifted_hist, shift, plot_filename)
@@ -340,22 +387,35 @@ def shift_experimental_files_to_simc_peak(particle_type, simc_filename, data_fil
 
 
 def main():
-    if len(sys.argv) not in (4, 5):
+    if len(sys.argv) not in (4, 5, 6, 7):
         print(
-            "Usage: shift_MM.py <particle_type> <simc_root> <data_root> [dummy_root]"
+            "Usage: shift_MM.py <particle_type> <simc_root> <data_root> [dummy_root] [mm_min mm_max]"
         )
         sys.exit(1)
 
     particle_type = sys.argv[1]
     simc_filename = sys.argv[2]
     data_filename = sys.argv[3]
-    dummy_filename = sys.argv[4] if len(sys.argv) == 5 else None
+    dummy_filename = None
+    hist_xmin = DEFAULT_HIST_XMIN
+    hist_xmax = DEFAULT_HIST_XMAX
+
+    range_arg_start = 4
+    if len(sys.argv) in (5, 7):
+        dummy_filename = sys.argv[4]
+        range_arg_start = 5
+
+    if len(sys.argv) in (6, 7):
+        hist_xmin = float(sys.argv[range_arg_start])
+        hist_xmax = float(sys.argv[range_arg_start + 1])
 
     shift_experimental_files_to_simc_peak(
         particle_type,
         simc_filename,
         data_filename,
         dummy_filename,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
     )
 
 
