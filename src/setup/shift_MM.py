@@ -20,6 +20,16 @@ FIT_HIST_XMIN = 0.7
 FIT_HIST_XMAX = 1.5
 
 
+def get_hist_nbins(hist_xmin, hist_xmax):
+    reference_width = (FIT_HIST_XMAX - FIT_HIST_XMIN) / float(HIST_NBINS)
+    hist_width = hist_xmax - hist_xmin
+    if hist_width <= 0.0:
+        raise RuntimeError("Histogram range must have positive width.")
+
+    nbins = int(round(hist_width / reference_width))
+    return max(nbins, 10)
+
+
 def get_peak_name(particle_type):
     if particle_type == "kaon":
         return "lambda"
@@ -120,7 +130,8 @@ def build_histogram(
     if abs(shift) > 0.0:
         expression = f"({branch_name}+({shift:.12g}))"
 
-    hist = TH1F(hist_name, hist_title, HIST_NBINS, hist_xmin, hist_xmax)
+    hist_nbins = get_hist_nbins(hist_xmin, hist_xmax)
+    hist = TH1F(hist_name, hist_title, hist_nbins, hist_xmin, hist_xmax)
     tree.Draw(f"{expression}>>{hist_name}", "", "goff")
     hist.SetDirectory(0)
     root_file.Close()
