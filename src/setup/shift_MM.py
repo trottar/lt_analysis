@@ -348,12 +348,16 @@ def shift_experimental_files_to_simc_peak(
         "h10",
         "missmass",
         particle_type,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
     )
     data_fit = fit_tree_peak(
         data_filename,
         reference_tree,
         "MM",
         particle_type,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
     )
     shift = simc_fit["mean"] - data_fit["mean"]
 
