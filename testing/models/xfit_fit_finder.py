@@ -119,6 +119,11 @@ def set_graph_vertical_range(graph, pad_fraction=0.1, min_pad=1.0e-6):
     graph.SetMinimum(y_min - pad)
     graph.SetMaximum(y_max + pad)
 
+def has_acceptable_run(best_cost, best_chi2, fit_num_events, num_params, chi2_threshold):
+    if fit_num_events > num_params:
+        return math.isfinite(best_chi2) and best_chi2 <= chi2_threshold
+    return math.isfinite(best_cost) and best_cost <= chi2_threshold
+
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
     'parameterize' function including:
@@ -286,6 +291,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 total_iteration = 0
                 restart_patience = max(250, 100 * num_params)
                 local_search_interval = max(100, 40 * num_params)
+                early_stop_patience = max(1500, 300 * num_params)
+                min_iterations_before_stop = max(250, 50 * num_params)
                 start_time = time.time()
 
                 for i_pt in range(fit_num_events):
@@ -342,6 +349,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_lambda = float('inf')
                     accept_prob = 0.0
                     restart_count = 0
+                    best_update_iteration = 0
 
                     def evaluate_candidate(seed_params, lambda_value):
                         trial_params = list(seed_params)
@@ -466,6 +474,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                     best_residual = current_residual
                                     best_rms_pull = current_rms_pull
                                     best_lambda = current_lambda
+                                    best_update_iteration = iteration
                                     stagnation_count = 0
                                 else:
                                     stagnation_count += 1
@@ -587,6 +596,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         graph_sig_restarts.SetPoint(total_iteration, total_iteration, restart_count)
 
                         total_iteration += 1
+
+                        no_best_update_iterations = iteration - best_update_iteration
+                        if (
+                            iteration >= min_iterations_before_stop
+                            and has_acceptable_run(best_cost, best_chi2, fit_num_events, num_params, chi2_threshold)
+                            and no_best_update_iterations >= early_stop_patience
+                        ):
+                            print(
+                                f"\nEarly stop: acceptable fit and no run-best improvement for "
+                                f"{no_best_update_iterations} iterations."
+                            )
+                            break
 
                     # end while iteration <= max_iterations
                     print(f"\nRun Best Objective Cost: {format_metric(best_cost, precision=3)}")
