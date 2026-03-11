@@ -11,7 +11,7 @@
 # Copyright (c) trottar
 #
 import numpy as np
-from ROOT import TGraph, TGraphErrors, TF1, TCanvas, TText, TLatex, TLegend, kRed, kBlue, kGreen, kMagenta, kBlack
+from ROOT import TGraph, TGraphErrors, TF1, TCanvas, TText, TLatex, TLegend, TH2D, kRed, kBlue, kGreen, kMagenta, kBlack
 import sys, math, time, random, re
 
 ##################################################################################################################################################
@@ -119,6 +119,113 @@ def set_graph_vertical_range(graph, pad_fraction=0.1, min_pad=1.0e-6):
     graph.SetMinimum(y_min - pad)
     graph.SetMaximum(y_max + pad)
 
+def set_combined_graph_vertical_range(reference_graph, graphs, pad_fraction=0.1, min_pad=1.0e-6):
+    y_values = []
+    for graph in graphs:
+        if graph is None:
+            continue
+        n_points = graph.GetN()
+        for i_point in range(n_points):
+            y_value = graph.GetY()[i_point]
+            if math.isfinite(y_value):
+                y_values.append(y_value)
+    if not y_values:
+        return
+    y_min = min(y_values)
+    y_max = max(y_values)
+    span = y_max - y_min
+    if span <= 0.0:
+        pad = max(abs(y_min) * pad_fraction, min_pad)
+    else:
+        pad = max(span * pad_fraction, min_pad)
+    reference_graph.SetMinimum(y_min - pad)
+    reference_graph.SetMaximum(y_max + pad)
+
+def evaluate_cost_at_params(fit_func, g_sig, params, num_events, num_params, lambda_reg):
+    clipped_params = sanitize_params(list(params), clip_min=-1e4, clip_max=1e4)
+    for i_par, value in enumerate(clipped_params):
+        fit_func.SetParameter(i_par, value)
+
+    residuals = []
+    for i_point in range(num_events):
+        y_fit = fit_func.Eval(g_sig.GetX()[i_point])
+        if not math.isfinite(y_fit):
+            return float('inf'), float('inf')
+        y_err = g_sig.GetEY()[i_point]
+        denom = y_err if y_err != 0 else 1.0
+        residuals.append((g_sig.GetY()[i_point] - y_fit) / denom)
+
+    residuals = np.asarray(residuals, dtype=float)
+    if residuals.size == 0 or not np.all(np.isfinite(residuals)):
+        return float('inf'), float('inf')
+
+    l2_reg = float(np.sum(np.square(clipped_params)))
+    lambda_term = lambda_reg if math.isfinite(lambda_reg) else 0.0
+
+    if num_events <= num_params:
+        mse = float(np.mean(np.square(residuals)))
+        complexity_penalty = 0.1 * num_params / max(num_events, 1)
+        cost = (mse + lambda_term * l2_reg) / (num_events + complexity_penalty)
+        return cost, cost
+
+    nu = num_events - num_params
+    if nu < 1:
+        return float('inf'), float('inf')
+    chi_square = float(np.sum(np.square(residuals)))
+    red_chi2 = chi_square / nu
+    if lambda_term == 0.0:
+        cost = red_chi2
+    else:
+        cost = red_chi2 + (lambda_term * l2_reg) / nu
+    return cost, red_chi2
+
+def build_objective_landscape_hist(hist_name, fit_func, g_sig, best_params, num_events, num_params, lambda_reg, lower_bounds, upper_bounds, n_bins=60):
+    if num_params != 2 or best_params is None:
+        return None
+
+    original_params = [fit_func.GetParameter(i_par) for i_par in range(num_params)]
+    hist = TH2D(
+        hist_name,
+        "",
+        n_bins,
+        lower_bounds[0],
+        upper_bounds[0],
+        n_bins,
+        lower_bounds[1],
+        upper_bounds[1]
+    )
+
+    finite_values = []
+    invalid_bins = []
+    for i_x in range(1, n_bins + 1):
+        p0 = hist.GetXaxis().GetBinCenter(i_x)
+        for i_y in range(1, n_bins + 1):
+            p1 = hist.GetYaxis().GetBinCenter(i_y)
+            scan_params = list(best_params)
+            scan_params[0] = p0
+            scan_params[1] = p1
+            cost_value, _ = evaluate_cost_at_params(
+                fit_func, g_sig, scan_params, num_events, num_params, lambda_reg
+            )
+            if math.isfinite(cost_value) and cost_value > 0.0:
+                z_value = math.log10(cost_value)
+                hist.SetBinContent(i_x, i_y, z_value)
+                finite_values.append(z_value)
+            else:
+                invalid_bins.append((i_x, i_y))
+
+    if finite_values:
+        invalid_fill = max(finite_values) + 1.0
+        for i_x, i_y in invalid_bins:
+            hist.SetBinContent(i_x, i_y, invalid_fill)
+        hist.SetMinimum(min(finite_values))
+        hist.SetMaximum(max(finite_values))
+
+    for i_par, value in enumerate(original_params):
+        fit_func.SetParameter(i_par, value)
+
+    return hist
+
 def has_acceptable_run(best_cost, best_chi2, fit_num_events, num_params, chi2_threshold):
     if fit_num_events > num_params:
         return math.isfinite(best_chi2) and best_chi2 <= chi2_threshold
@@ -171,6 +278,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     c9.Divide(2, 2)
     c10 = TCanvas("c10", "Search Control", 900, 900)
     c10.Divide(2, 2)
+    c11 = TCanvas("c11", "Objective Landscape", 900, 900)
+    c11.Divide(2, 2)
 
     # -----------------------------------------------------------------------------
     # 2. Unpack input objects/settings
@@ -260,6 +369,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 graph_sig_chi2   = TGraph()
                 graph_sig_temp   = TGraph()
                 graph_sig_accept = TGraph()
+                graph_sig_accept_rate = TGraph()
                 graph_sig_residuals = TGraph()
                 graph_sig_aic    = TGraph()
                 graph_sig_bic    = TGraph()
@@ -270,6 +380,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 graph_sig_lambda = TGraph()
                 graph_sig_stagnation = TGraph()
                 graph_sig_restarts = TGraph()
+                graph_sig_param_space_path = TGraph()
+                graph_sig_run_best_points = TGraph()
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
@@ -293,6 +405,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 local_search_interval = max(100, 40 * num_params)
                 early_stop_patience = max(1500, 300 * num_params)
                 min_iterations_before_stop = max(250, 50 * num_params)
+                trajectory_stride = max(1, max_iterations // 500)
                 start_time = time.time()
 
                 for i_pt in range(fit_num_events):
@@ -350,6 +463,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     accept_prob = 0.0
                     restart_count = 0
                     best_update_iteration = 0
+                    accepted_moves = 0
+                    evaluated_moves = 0
 
                     def evaluate_candidate(seed_params, lambda_value):
                         trial_params = list(seed_params)
@@ -452,8 +567,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 lambda_reg = adaptive_regularization(cost_history, lambda_reg)
 
                             accept_prob = acceptance_probability(current_cost, candidate_cost, temperature)
+                            evaluated_moves += 1
+                            accepted_move = accept_prob > random.random()
 
-                            if accept_prob > random.random():
+                            if accepted_move:
+                                accepted_moves += 1
                                 current_params = list(candidate_params)
                                 current_errors = list(candidate_errors)
                                 current_cost = candidate_cost
@@ -519,6 +637,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                         best_residual = current_residual
                                         best_rms_pull = current_rms_pull
                                         best_lambda = current_lambda
+                                        best_update_iteration = iteration
                                     stagnation_count = 0
 
                             if stagnation_count >= restart_patience:
@@ -584,6 +703,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         graph_sig_chi2.SetPoint(total_iteration, total_iteration, plotted_best_chi2)
                         graph_sig_temp.SetPoint(total_iteration, total_iteration, temperature)
                         graph_sig_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                        accept_rate = accepted_moves / evaluated_moves if evaluated_moves > 0 else 0.0
+                        graph_sig_accept_rate.SetPoint(total_iteration, total_iteration, accept_rate)
                         graph_sig_residuals.SetPoint(total_iteration, total_iteration, current_residual)
                         graph_sig_aic.SetPoint(total_iteration, total_iteration, best_aic)
                         graph_sig_bic.SetPoint(total_iteration, total_iteration, best_bic)
@@ -594,6 +715,17 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         graph_sig_lambda.SetPoint(total_iteration, total_iteration, lambda_reg)
                         graph_sig_stagnation.SetPoint(total_iteration, total_iteration, stagnation_count)
                         graph_sig_restarts.SetPoint(total_iteration, total_iteration, restart_count)
+                        if (
+                            num_params == 2
+                            and total_iteration % trajectory_stride == 0
+                            and len(current_params) >= 2
+                            and all(math.isfinite(value) for value in current_params[:2])
+                        ):
+                            graph_sig_param_space_path.SetPoint(
+                                graph_sig_param_space_path.GetN(),
+                                current_params[0],
+                                current_params[1]
+                            )
 
                         total_iteration += 1
 
@@ -618,6 +750,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         f"lambda={best_lambda:.6e}, restarts={restart_count}, "
                         f"npts={fit_num_events}, npar={num_params}"
                     )
+                    if num_params == 2 and best_params is not None and all(math.isfinite(value) for value in best_params[:2]):
+                        graph_sig_run_best_points.SetPoint(
+                            graph_sig_run_best_points.GetN(),
+                            best_params[0],
+                            best_params[1]
+                        )
 
                 # end for run_idx
                 try:
@@ -654,6 +792,26 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     par_vec[4*it + j]     = best_overall_params[j]
                     par_err_vec[4*it + j] = best_overall_errors[j]
                     par_chi2_vec[4*it + j]  = best_overall_chi2
+
+                objective_landscape_hist = None
+                best_overall_point = None
+                if num_params == 2 and best_overall_params is not None:
+                    objective_landscape_hist = build_objective_landscape_hist(
+                        f"landscape_{sig_name}_{it}_{b}",
+                        fits_sig[it],
+                        g_sig,
+                        best_overall_params,
+                        fit_num_events,
+                        num_params,
+                        best_overall_lambda,
+                        param_lower_bounds,
+                        param_upper_bounds
+                    )
+                    best_overall_point = TGraph()
+                    best_overall_point.SetPoint(0, best_overall_params[0], best_overall_params[1])
+                    best_overall_point.SetMarkerStyle(29)
+                    best_overall_point.SetMarkerSize(2.0)
+                    best_overall_point.SetMarkerColor(kBlue)
 
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -696,6 +854,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 # Plot the parameter convergence on canvas c3 (each parameter drawn with its own color)
                 c3.cd(it+1).SetLeftMargin(0.12)
+                if num_params > 0:
+                    set_combined_graph_vertical_range(graph_sig_params[0], graph_sig_params[:num_params])
                 for i in range(num_params):
                     if i == 0:
                         graph = graph_sig_params[i]
@@ -710,8 +870,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 # Plot chi2 convergence
                 c4.cd(it+1).SetLeftMargin(0.12)
-                set_graph_vertical_range(graph_sig_chi2)
-                set_graph_vertical_range(graph_sig_chi2_current)
+                set_combined_graph_vertical_range(graph_sig_chi2, [graph_sig_chi2, graph_sig_chi2_current])
                 graph_sig_chi2.SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
                 graph_sig_chi2.SetLineColor(kBlue)
                 graph_sig_chi2.Draw("ALP")
@@ -736,10 +895,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 c5.Update()
 
                 c6.cd(it+1).SetLeftMargin(0.12)
-                set_graph_vertical_range(graph_sig_accept)
+                set_combined_graph_vertical_range(graph_sig_accept, [graph_sig_accept, graph_sig_accept_rate])
                 graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
                 graph_sig_accept.SetLineColor(1)
                 graph_sig_accept.Draw("ALP")
+                graph_sig_accept_rate.SetLineColor(kBlue)
+                graph_sig_accept_rate.Draw("LP SAME")
+                leg_accept = TLegend(0.55, 0.7, 0.9, 0.9)
+                leg_accept.AddEntry(graph_sig_accept, "Metropolis Probability", "lp")
+                leg_accept.AddEntry(graph_sig_accept_rate, "Accepted Fraction", "lp")
+                leg_accept.Draw()
                 c6.Update()
 
                 c7.cd(it+1).SetLeftMargin(0.12)
@@ -750,8 +915,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 c7.Update()
 
                 c8.cd(it+1).SetLeftMargin(0.12)
-                set_graph_vertical_range(graph_sig_aic)
-                set_graph_vertical_range(graph_sig_bic)
+                set_combined_graph_vertical_range(graph_sig_aic, [graph_sig_aic, graph_sig_bic])
                 graph_sig_aic.SetTitle(f"Sig {sig_name} Information Criteria Evolution")
                 graph_sig_aic.SetLineColor(kRed)
                 graph_sig_aic.Draw("ALP")
@@ -764,8 +928,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 c8.Update()
 
                 c9.cd(it+1).SetLeftMargin(0.12)
-                set_graph_vertical_range(graph_sig_cost_current)
-                set_graph_vertical_range(graph_sig_cost_best)
+                set_combined_graph_vertical_range(graph_sig_cost_current, [graph_sig_cost_current, graph_sig_cost_best])
                 graph_sig_cost_current.SetTitle(f"Sig {sig_name} Objective Cost;Optimization Run;Objective Cost")
                 graph_sig_cost_current.SetLineColor(kBlack)
                 graph_sig_cost_current.Draw("ALP")
@@ -778,10 +941,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 c9.Update()
 
                 c10.cd(it+1).SetLeftMargin(0.12)
-                set_graph_vertical_range(graph_sig_stagnation)
-                set_graph_vertical_range(graph_sig_restarts)
-                set_graph_vertical_range(graph_sig_lambda)
-                graph_sig_stagnation.SetTitle(f"Sig {sig_name} Search Control;Optimization Run;Control Value")
+                set_combined_graph_vertical_range(graph_sig_stagnation, [graph_sig_stagnation, graph_sig_restarts, graph_sig_lambda])
+                graph_sig_stagnation.SetTitle(f"Sig {sig_name} Search Control Summary;Optimization Run;Shared Value Scale")
                 graph_sig_stagnation.SetLineColor(kBlack)
                 graph_sig_stagnation.Draw("ALP")
                 graph_sig_restarts.SetLineColor(kRed)
@@ -794,6 +955,37 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 leg_control.AddEntry(graph_sig_lambda, "Lambda", "lp")
                 leg_control.Draw()
                 c10.Update()
+
+                c11.cd(it+1).SetLeftMargin(0.14)
+                if objective_landscape_hist is not None:
+                    objective_landscape_hist.SetTitle(
+                        f"Sig {sig_name} Full Parameter-Space Landscape;"
+                        f"Parameter 1;Parameter 2;log_{{10}}(Objective Cost)"
+                    )
+                    objective_landscape_hist.Draw("COLZ")
+                    graph_sig_param_space_path.SetMarkerStyle(20)
+                    graph_sig_param_space_path.SetMarkerSize(0.4)
+                    graph_sig_param_space_path.SetMarkerColor(kBlack)
+                    graph_sig_param_space_path.Draw("P SAME")
+                    graph_sig_run_best_points.SetMarkerStyle(24)
+                    graph_sig_run_best_points.SetMarkerSize(1.1)
+                    graph_sig_run_best_points.SetMarkerColor(kRed)
+                    graph_sig_run_best_points.Draw("P SAME")
+                    best_overall_point.Draw("P SAME")
+                    leg_landscape = TLegend(0.48, 0.72, 0.9, 0.9)
+                    leg_landscape.AddEntry(graph_sig_param_space_path, "Sampled Search Path", "p")
+                    leg_landscape.AddEntry(graph_sig_run_best_points, "Run Best Points", "p")
+                    leg_landscape.AddEntry(best_overall_point, "Best Overall", "p")
+                    leg_landscape.Draw()
+                    latex_landscape = TLatex()
+                    latex_landscape.SetTextSize(0.03)
+                    latex_landscape.SetNDC(True)
+                    latex_landscape.DrawLatex(0.16, 0.93, "Coarse grid over full search bounds")
+                else:
+                    placeholder = TText()
+                    placeholder.SetTextSize(0.035)
+                    placeholder.DrawTextNDC(0.12, 0.5, "Full phase-space COLZ available for 2-parameter fits only.")
+                c11.Update()
                 print("\n")
             else:
 
@@ -924,6 +1116,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
             c8.Update()
             c9.Update()
             c10.Update()
+            c11.Update()
         params_used.append(param_str)
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
@@ -934,7 +1127,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         c7.Print(outputpdf)
         c8.Print(outputpdf)
         c9.Print(outputpdf)
-        c10.Print(outputpdf+')')
+        c10.Print(outputpdf)
+        c11.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
     return params_used
