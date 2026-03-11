@@ -229,7 +229,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         current_params = [simulated_annealing(p, temperature)
                                           for p in current_params]
 
-                        sys.stdout.write(f"\rSearching for best parameters...({iteration}/{max_iterations})")
+                        sys.stdout.write(
+                            f"\rSearching for best parameters...({iteration}/{max_iterations}) "
+                            f"T={temperature:.4f}"
+                        )
                         sys.stdout.flush()
 
                         try:
