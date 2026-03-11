@@ -12,7 +12,7 @@
 #
 import numpy as np
 from ROOT import TGraph, TGraphErrors, TF1, TCanvas, TText, TLatex, TLegend, kRed, kBlue, kGreen, kMagenta, kBlack
-import sys, math, time, random
+import sys, math, time, random, re
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -21,7 +21,7 @@ sys.path.append("utility")
 from utility import (
     adaptive_regularization, calculate_cost, adaptive_cooling,
     simulated_annealing, acceptance_probability, adjust_params, 
-    local_search, select_valid_parameter, get_central_value,
+    local_search, get_central_value,
     calculate_information_criteria, sanitize_params
 )
 
@@ -45,6 +45,27 @@ def compute_iteration_ic(red_chi2, num_events, num_params):
     if ndf <= 0 or not math.isfinite(red_chi2):
         return 0.0, 0.0
     return calculate_information_criteria(num_events, num_params, red_chi2 * ndf)
+
+def infer_positive_parameter_indices(equation_str):
+    param_tokens = []
+    for token in re.findall(r"par\d+", equation_str):
+        if token not in param_tokens:
+            param_tokens.append(token)
+
+    param_index_map = {token: idx for idx, token in enumerate(param_tokens)}
+    positive_indices = set()
+    for token in re.findall(r"math\.exp\(\s*-\s*(par\d+)\s*\*", equation_str):
+        if token in param_index_map:
+            positive_indices.add(param_index_map[token])
+    return sorted(positive_indices)
+
+def constrain_params(params, lower_bounds, upper_bounds):
+    constrained = []
+    for value, lower, upper in zip(params, lower_bounds, upper_bounds):
+        if not math.isfinite(value):
+            value = 0.0 if lower <= 0.0 <= upper else lower
+        constrained.append(max(lower, min(value, upper)))
+    return constrained
 
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
@@ -152,20 +173,32 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 init_params = [v if abs(v) > 0.0 else 1e-15 for v in init_params]
                 param_str = ', '.join(str(p) for p in init_params)
 
-                if num_events <= num_params:
+                use_regularization = num_events <= num_params
+                positive_param_indices = infer_positive_parameter_indices(equation_str)
+                param_labels = [f"par{4*it + i + 1}" for i in range(num_params)]
+                param_lower_bounds = [-initial_param_bounds] * num_params
+                param_upper_bounds = [initial_param_bounds] * num_params
+                for idx in positive_param_indices:
+                    param_lower_bounds[idx] = 0.0
+
+                if use_regularization:
                     print(f"\nWARNING: For Sig {sig_name}, #params={num_params} >= #data={num_events}. Using adapt. reg.")
                     fit_convergence_type = "Adapt. Reg."
                 else:
                     fit_convergence_type = "Red. Chi-Square"
 
+                restart_patience = max(100, max_iterations // 100)
                 total_iteration = 0
-                lambda_reg = 0.01
-                cost_history = []
 
                 print("\n/*--------------------------------------------------*/")
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Parameters: ({param_str})")
                 print(equation_str)
+                print(f"Objective Ranking: {'adaptive regularized cost' if use_regularization else 'pure chi2/ndf'}")
+                if positive_param_indices:
+                    constrained_labels = ', '.join(param_labels[idx] for idx in positive_param_indices)
+                    print(f"Positive-only parameters: {constrained_labels}")
+                print(f"Restart patience: {restart_patience} iterations without run-best improvement")
                 print("/*--------------------------------------------------*/")
 
                 if sig_name == "L":
@@ -230,6 +263,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 for run_idx in range(num_optimizations):
                     print(f"\nStarting optimization run {run_idx+1}/{num_optimizations}")
                     set_optimization   = full_optimization
+                    lambda_reg = 0.01 if use_regularization else 0.0
+                    cost_history = []
 
                     print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, "
                           f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
@@ -242,8 +277,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                     # Random initialization in ± max_param_bounds
                     current_params = [
-                        random.uniform(-max_param_bounds, max_param_bounds)
-                        for _ in range(num_params)
+                        random.uniform(param_lower_bounds[i], param_upper_bounds[i])
+                        for i in range(num_params)
                     ]
                     current_errors = [0.0]*num_params
                     current_cost   = float('inf')
@@ -252,7 +287,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     current_ndf    = 0
                     current_residual = float('inf')
                     current_rms_pull = float('inf')
-                    current_lambda = float('inf')
+                    current_lambda = lambda_reg
                     best_params = list(current_params)
                     best_errors = list(current_errors)
                     best_cost   = float('inf')
@@ -261,26 +296,29 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_ndf    = 0
                     best_residual = float('inf')
                     best_rms_pull = float('inf')
-                    best_lambda = float('inf')
+                    best_lambda = lambda_reg
                     accept_prob = 0.0
                     restart_count = 0
 
                     def evaluate_candidate(seed_params, lambda_value, param_bound_value):
-                        trial_params = list(seed_params)
+                        trial_params = constrain_params(seed_params, param_lower_bounds, param_upper_bounds)
                         for i_par in range(num_params):
-                            if abs(trial_params[i_par]) > abs(param_bound_value):
-                                trial_params[i_par] = 0.0
                             if abs(trial_params[i_par]) < 1e-15:
                                 trial_params[i_par] = 0.0
                             fits_sig[it].SetParameter(i_par, trial_params[i_par])
                             if set_optimization:
-                                fits_sig[it].SetParLimits(i_par, -param_bound_value, param_bound_value)
+                                fits_sig[it].SetParLimits(i_par, param_lower_bounds[i_par], param_upper_bounds[i_par])
                             else:
                                 off = param_offsets[i_par]
+                                width = max(off*abs(trial_params[i_par]), 1e-6*max(abs(param_upper_bounds[i_par]), 1.0))
+                                lower_limit = max(param_lower_bounds[i_par], trial_params[i_par] - width)
+                                upper_limit = min(param_upper_bounds[i_par], trial_params[i_par] + width)
+                                if lower_limit >= upper_limit:
+                                    upper_limit = min(param_upper_bounds[i_par], lower_limit + 1e-6)
                                 fits_sig[it].SetParLimits(
                                     i_par,
-                                    trial_params[i_par] - off*abs(trial_params[i_par]),
-                                    trial_params[i_par] + off*abs(trial_params[i_par])
+                                    lower_limit,
+                                    upper_limit
                                 )
 
                         graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
@@ -323,10 +361,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         # Simulated annealing step => perturb each param by some fraction
                         # using the current 'temperature'
                         # -----------------------------------------------------------------
-                        proposal_params = [
+                        proposal_params = constrain_params([
                             simulated_annealing(p, temperature)
                             for p in current_params
-                        ]
+                        ], param_lower_bounds, param_upper_bounds)
 
                         sys.stdout.write(
                             f"\rSearching for best parameters...({iteration}/{max_iterations}) "
@@ -340,8 +378,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 proposal_params, lambda_reg, max_param_bounds
                             )
 
-                            cost_history.append(candidate_cost)
-                            if len(cost_history) >= 2:
+                            if use_regularization:
+                                cost_history.append(candidate_cost)
+                            if use_regularization and len(cost_history) >= 2:
                                 lambda_reg = adaptive_regularization(cost_history, lambda_reg)
 
                             accept_prob = acceptance_probability(current_cost, candidate_cost, temperature)
@@ -380,7 +419,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 local_params, local_cost, local_chi2 = local_search(
                                     current_params, fits_sig[it], g_sig,
                                     num_events, num_params, lambda_reg,
-                                    max_param_bounds=max_param_bounds
+                                    max_param_bounds=max_param_bounds,
+                                    lower_bounds=param_lower_bounds,
+                                    upper_bounds=param_upper_bounds
                                 )
                                 if local_cost < current_cost:
                                     local_params, local_errors, local_cost, local_lambda, local_chi2, local_chi_square, local_ndf, local_residual, local_rms_pull = evaluate_candidate(
@@ -407,10 +448,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                         best_lambda = current_lambda
                                     stagnation_count = 0
 
-                            if stagnation_count > 5:
+                            if stagnation_count >= restart_patience:
                                 current_params = [
-                                    random.uniform(-max_param_bounds, max_param_bounds)
-                                    for _ in range(num_params)
+                                    random.uniform(param_lower_bounds[i], param_upper_bounds[i])
+                                    for i in range(num_params)
                                 ]
                                 current_errors = [0.0] * num_params
                                 current_cost = float('inf')
@@ -419,7 +460,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 current_ndf = 0
                                 current_residual = float('inf')
                                 current_rms_pull = float('inf')
-                                current_lambda = float('inf')
+                                current_lambda = lambda_reg
                                 restart_count += 1
                                 stagnation_count = 0
                                 if debug:
@@ -427,17 +468,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                             # Adjust temperature with your adaptive_cooling
                             temperature = adaptive_cooling(initial_temperature, iteration, max_iterations)
-                            max_param_bounds = random.uniform(100.0, initial_param_bounds)
                             iteration += 1
 
                         except (TypeError, ZeroDivisionError, OverflowError) as e:
                             # On error => re-random
                             if debug:
                                 print(f"[DEBUG] Exception => {str(e)}, re-randomizing.")
-                            max_param_bounds = random.uniform(100.0, initial_param_bounds)
                             current_params = [
-                                random.uniform(-max_param_bounds, max_param_bounds)
-                                for _ in range(num_params)
+                                random.uniform(param_lower_bounds[i], param_upper_bounds[i])
+                                for i in range(num_params)
                             ]
                             current_errors = [0.0] * num_params
                             current_cost = float('inf')
@@ -446,7 +485,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             current_ndf = 0
                             current_residual = float('inf')
                             current_rms_pull = float('inf')
-                            current_lambda = float('inf')
+                            current_lambda = lambda_reg
                             restart_count += 1
                             stagnation_count = 0
                             iteration += 1
