@@ -94,6 +94,31 @@ def build_parameter_bounds(init_params, equation_str, initial_param_bounds):
 
     return lower_bounds, upper_bounds
 
+def format_metric(value, precision=3, sci_threshold=1.0e-3, large_threshold=1.0e4):
+    if not math.isfinite(value):
+        return str(value)
+    abs_value = abs(value)
+    if abs_value != 0.0 and (abs_value < sci_threshold or abs_value >= large_threshold):
+        return f"{value:.6e}"
+    return f"{value:.{precision}f}"
+
+def set_graph_vertical_range(graph, pad_fraction=0.1, min_pad=1.0e-6):
+    n_points = graph.GetN()
+    if n_points <= 0:
+        return
+    y_values = [graph.GetY()[i] for i in range(n_points) if math.isfinite(graph.GetY()[i])]
+    if not y_values:
+        return
+    y_min = min(y_values)
+    y_max = max(y_values)
+    span = y_max - y_min
+    if span <= 0.0:
+        pad = max(abs(y_min) * pad_fraction, min_pad)
+    else:
+        pad = max(span * pad_fraction, min_pad)
+    graph.SetMinimum(y_min - pad)
+    graph.SetMaximum(y_max + pad)
+
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
     'parameterize' function including:
@@ -550,25 +575,25 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         # TGraph updates
                         for i_par in range(num_params):
                             graph_sig_params[i_par].SetPoint(total_iteration, total_iteration, plotted_params[i_par])
-                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(plotted_best_chi2, 4))
-                        graph_sig_temp.SetPoint(total_iteration, total_iteration, round(temperature, 4))
-                        graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
-                        graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(current_residual, 4))
-                        graph_sig_aic.SetPoint(total_iteration, total_iteration, round(best_aic, 4))
-                        graph_sig_bic.SetPoint(total_iteration, total_iteration, round(best_bic, 4))
-                        graph_sig_cost_current.SetPoint(total_iteration, total_iteration, round(current_cost, 4))
-                        graph_sig_cost_best.SetPoint(total_iteration, total_iteration, round(plotted_best_cost, 4))
-                        graph_sig_chi2_current.SetPoint(total_iteration, total_iteration, round(current_chi2, 4))
-                        graph_sig_chi2_best.SetPoint(total_iteration, total_iteration, round(plotted_best_chi2, 4))
-                        graph_sig_lambda.SetPoint(total_iteration, total_iteration, round(lambda_reg, 6))
+                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, plotted_best_chi2)
+                        graph_sig_temp.SetPoint(total_iteration, total_iteration, temperature)
+                        graph_sig_accept.SetPoint(total_iteration, total_iteration, accept_prob)
+                        graph_sig_residuals.SetPoint(total_iteration, total_iteration, current_residual)
+                        graph_sig_aic.SetPoint(total_iteration, total_iteration, best_aic)
+                        graph_sig_bic.SetPoint(total_iteration, total_iteration, best_bic)
+                        graph_sig_cost_current.SetPoint(total_iteration, total_iteration, current_cost)
+                        graph_sig_cost_best.SetPoint(total_iteration, total_iteration, plotted_best_cost)
+                        graph_sig_chi2_current.SetPoint(total_iteration, total_iteration, current_chi2)
+                        graph_sig_chi2_best.SetPoint(total_iteration, total_iteration, plotted_best_chi2)
+                        graph_sig_lambda.SetPoint(total_iteration, total_iteration, lambda_reg)
                         graph_sig_stagnation.SetPoint(total_iteration, total_iteration, stagnation_count)
                         graph_sig_restarts.SetPoint(total_iteration, total_iteration, restart_count)
 
                         total_iteration += 1
 
                     # end while iteration <= max_iterations
-                    print(f"\nRun Best Objective Cost: {best_cost:.3f}")
-                    print(f"Run Best chi2/ndf: {best_chi2:.3f}")
+                    print(f"\nRun Best Objective Cost: {format_metric(best_cost, precision=3)}")
+                    print(f"Run Best chi2/ndf: {format_metric(best_chi2, precision=3)}")
                     print(
                         f"Run Diagnostics: chi2={best_chi_square:.6e}, ndf={best_ndf}, "
                         f"max|pull|={best_residual:.6e}, rms_pull={best_rms_pull:.6e}, "
@@ -580,8 +605,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 try:
                     if best_overall_params is not None:
                         print(f"\nBest overall solution: {best_overall_params}")
-                        print(f"Best overall objective cost: {best_overall_cost:.5f}")
-                        print(f"Best overall chi2/ndf: {best_overall_chi2:.5f}")
+                        print(f"Best overall objective cost: {format_metric(best_overall_cost, precision=5)}")
+                        print(f"Best overall chi2/ndf: {format_metric(best_overall_chi2, precision=5)}")
                         print(
                             f"Best overall diagnostics: chi2={best_overall_chi_square:.6e}, "
                             f"ndf={best_overall_ndf}, max|pull|={best_overall_residual:.6e}, "
@@ -667,6 +692,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 # Plot chi2 convergence
                 c4.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_chi2)
+                set_graph_vertical_range(graph_sig_chi2_current)
                 graph_sig_chi2.SetTitle(f"Sig {sig_name} {fit_convergence_type} Convergence;Optimization Run;{fit_convergence_type}")
                 graph_sig_chi2.SetLineColor(kBlue)
                 graph_sig_chi2.Draw("ALP")
@@ -684,24 +711,29 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 # Plot temperature, acceptance probability, residuals, and information criteria on their canvases
                 c5.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_temp)
                 graph_sig_temp.SetTitle(f"Sig {sig_name} Temperature Convergence;Optimization Run;Temperature")
                 graph_sig_temp.SetLineColor(1)
                 graph_sig_temp.Draw("ALP")
                 c5.Update()
 
                 c6.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_accept)
                 graph_sig_accept.SetTitle(f"Sig {sig_name} Acceptance Probability Convergence;Optimization Run;Acceptance Probability")
                 graph_sig_accept.SetLineColor(1)
                 graph_sig_accept.Draw("ALP")
                 c6.Update()
 
                 c7.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_residuals)
                 graph_sig_residuals.SetTitle(f"Sig {sig_name} Residuals Evolution")
                 graph_sig_residuals.SetLineColor(1)
                 graph_sig_residuals.Draw("ALP")
                 c7.Update()
 
                 c8.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_aic)
+                set_graph_vertical_range(graph_sig_bic)
                 graph_sig_aic.SetTitle(f"Sig {sig_name} Information Criteria Evolution")
                 graph_sig_aic.SetLineColor(kRed)
                 graph_sig_aic.Draw("ALP")
@@ -714,6 +746,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 c8.Update()
 
                 c9.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_cost_current)
+                set_graph_vertical_range(graph_sig_cost_best)
                 graph_sig_cost_current.SetTitle(f"Sig {sig_name} Objective Cost;Optimization Run;Objective Cost")
                 graph_sig_cost_current.SetLineColor(kBlack)
                 graph_sig_cost_current.Draw("ALP")
@@ -726,6 +760,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 c9.Update()
 
                 c10.cd(it+1).SetLeftMargin(0.12)
+                set_graph_vertical_range(graph_sig_stagnation)
+                set_graph_vertical_range(graph_sig_restarts)
+                set_graph_vertical_range(graph_sig_lambda)
                 graph_sig_stagnation.SetTitle(f"Sig {sig_name} Search Control;Optimization Run;Control Value")
                 graph_sig_stagnation.SetLineColor(kBlack)
                 graph_sig_stagnation.Draw("ALP")
