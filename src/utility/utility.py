@@ -863,6 +863,13 @@ def simulated_annealing(param, temperature, perturbation_factor=0.1, min_scale=1
     # Clip new_param to keep it in a reasonable range:
     return max(min(new_param, clip_max), clip_min)
 
+def get_reduced_chi_square(f_sig):
+    chi_square = f_sig.GetChisquare()
+    nu = f_sig.GetNDF()
+    if nu < 1e-6:
+        return float('inf')
+    return chi_square / nu
+
 def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_reg=0.01):
     """
     Calculate cost (modified reduced chi-square) with adaptive regularization.
@@ -892,35 +899,36 @@ def calculate_cost(f_sig, g_sig, current_params, num_events, num_params, lambda_
     # If any residual is non-finite, return a very large cost.
     if not np.all(np.isfinite(residuals)):
         print("Non-finite residual detected. Parameters:", current_params)
-        return 1e12, lambda_reg
+        return 1e12, lambda_reg, float('inf')
 
     def compute_cost(lambda_val, residuals):
         mse = np.mean(np.square(residuals))
         complexity_penalty = 0.1 * num_params / num_events
         if num_events <= num_params:
             cost = (mse + lambda_val * l2_reg) / (num_events + complexity_penalty)
+            red_chi2 = cost
         else:
-            chi_square = f_sig.GetChisquare()
             nu = f_sig.GetNDF()
-            # Safeguard against division by very small nu:
             if nu < 1e-6:
-                nu = 1e-6
-            if lambda_reg == 0:
-                cost = (chi_square) / nu
+                return float('inf'), float('inf')
+            chi_square = f_sig.GetChisquare()
+            red_chi2 = chi_square / nu
+            if lambda_val == 0:
+                cost = red_chi2
             else:
-                cost = (chi_square + lambda_val * l2_reg) / nu
-        return cost
+                cost = red_chi2 + (lambda_val * l2_reg) / nu
+        return cost, red_chi2
 
     if num_events <= num_params:
         lambda_values = np.logspace(np.log10(lambda_min), np.log10(lambda_max), 20)
-        costs = [compute_cost(lam, residuals) for lam in lambda_values]
+        costs = [compute_cost(lam, residuals)[0] for lam in lambda_values]
         best_index = np.argmin(costs)
         best_lambda = lambda_values[best_index]
-        best_cost = costs[best_index]
+        best_cost, best_red_chi2 = compute_cost(best_lambda, residuals)
     else:
         best_lambda = lambda_reg
-        best_cost = compute_cost(best_lambda, residuals)
-    return best_cost, best_lambda
+        best_cost, best_red_chi2 = compute_cost(best_lambda, residuals)
+    return best_cost, best_lambda, best_red_chi2
 
 def acceptance_probability(old_cost, new_cost, temperature):
     """

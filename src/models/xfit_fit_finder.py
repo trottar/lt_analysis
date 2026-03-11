@@ -21,7 +21,7 @@ sys.path.append("utility")
 from utility import (
     adaptive_regularization, calculate_cost, adaptive_cooling,
     simulated_annealing, acceptance_probability, adjust_params, 
-    local_search, select_valid_parameter, get_central_value, 
+    local_search, select_valid_parameter, get_central_value,
     calculate_information_criteria, sanitize_params
 )
 
@@ -39,24 +39,6 @@ mkpl = 0.493677
 from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper, fun_Sig_TT_wrapper
 
 ##################################################################################################################################################
-
-def get_fit_metric(f_sig, cost_value, num_events, num_params):
-    if num_events <= num_params:
-        return cost_value
-
-    ndf = f_sig.GetNDF()
-    if ndf < 1e-6:
-        return float('inf')
-    return f_sig.GetChisquare() / ndf
-
-def get_fit_score(metric_value, num_events, num_params):
-    if not math.isfinite(metric_value):
-        return float('inf')
-    if num_events <= num_params:
-        return metric_value
-
-    # Compare reduced chi2 to 1 symmetrically so values far below 1 do not win by default.
-    return abs(math.log(max(metric_value, 1e-12)))
 
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
@@ -135,7 +117,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         best_overall_params   = None
         best_overall_errors   = None
         best_overall_cost     = float('inf')
-        best_overall_score    = float('inf')
+        best_overall_chi2     = float('inf')
         best_overall_bin      = None
         best_overall_temp     = float('inf')
         best_overall_prob     = 1.0
@@ -230,7 +212,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_params = list(current_params)
                     best_errors = list(current_errors)
                     best_cost   = float('inf')
-                    best_score  = float('inf')
+                    best_chi2   = float('inf')
                     accept_prob = 0.0
                     residual    = float('inf')
 
@@ -288,15 +270,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
 
                             # Evaluate cost
-                            current_cost, lambda_reg = calculate_cost(
+                            current_cost, lambda_reg, current_chi2 = calculate_cost(
                                 fits_sig[it], g_sig, current_params,
                                 num_events, num_params, lambda_reg
-                            )
-                            current_metric = get_fit_metric(
-                                fits_sig[it], current_cost, num_events, num_params
-                            )
-                            current_score = get_fit_score(
-                                current_metric, num_events, num_params
                             )
 
                             # Simple residual from last data point
@@ -315,7 +291,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             if len(cost_history) >= 2:
                                 lambda_reg = adaptive_regularization(cost_history, lambda_reg)
 
-                            accept_prob = acceptance_probability(best_score, current_score, temperature)
+                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
 
                             # Update current params from the fit
                             current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
@@ -324,12 +300,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             # Accept or not
                             if accept_prob > random.random():
                                 best_params = list(current_params)
-                                best_cost   = current_metric
-                                best_score  = current_score
+                                best_cost   = current_cost
+                                best_chi2   = current_chi2
                                 best_errors = list(current_errors)
                                 if debug and iteration % 50 == 0:
-                                    print(f"[DEBUG] ACCEPT => metric={best_cost:.3f}, score={best_score:.3f}, iteration={iteration}")
-                                if current_score > best_overall_score:
+                                    print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, chi2/ndf={best_chi2:.3f}, iteration={iteration}")
+                                if current_cost > best_overall_cost:
                                     stagnation_count += 1
                             else:
                                 stagnation_count += 1
@@ -369,9 +345,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             continue
 
                         # Unconditionally update best_overall_cost
-                        if best_score < best_overall_score:
+                        if best_cost < best_overall_cost:
                             best_overall_cost    = best_cost
-                            best_overall_score   = best_score
+                            best_overall_chi2    = best_chi2
                             best_overall_bin     = b
                             best_overall_params  = best_params[:]
                             best_overall_errors  = best_errors[:]
@@ -382,7 +358,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         # TGraph updates
                         for i_par in range(num_params):
                             graph_sig_params[i_par].SetPoint(total_iteration, total_iteration, best_params[i_par])
-                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(best_cost, 4))
+                        graph_sig_chi2.SetPoint(total_iteration, total_iteration, round(best_chi2, 4))
                         graph_sig_temp.SetPoint(total_iteration, total_iteration, round(temperature, 4))
                         graph_sig_accept.SetPoint(total_iteration, total_iteration, round(accept_prob, 4))
                         graph_sig_residuals.SetPoint(total_iteration, total_iteration, round(residual, 4))
@@ -392,13 +368,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         total_iteration += 1
 
                     # end while iteration <= max_iterations
-                    print(f"\nBest Cost: {best_overall_cost:.3f}")
+                    print(f"\nBest Objective Cost: {best_overall_cost:.3f}")
 
                 # end for run_idx
                 try:
                     if best_overall_params is not None:
                         print(f"\nBest overall solution: {best_overall_params}")
-                        print(f"Best overall cost: {best_overall_cost:.5f}")
+                        print(f"Best overall objective cost: {best_overall_cost:.5f}")
+                        print(f"Best overall chi2/ndf: {best_overall_chi2:.5f}")
                         print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, "
                               f"Q2={q2_vec[best_overall_bin]:.3f}, "
                               f"W={w_vec[best_overall_bin]:.3f}, "
@@ -420,7 +397,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 for j in range(num_params):
                     par_vec[4*it + j]     = best_overall_params[j]
                     par_err_vec[4*it + j] = best_overall_errors[j]
-                    par_chi2_vec[4*it + j]  = best_overall_cost
+                    par_chi2_vec[4*it + j]  = best_overall_chi2
 
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -483,7 +460,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 latex = TLatex()
                 latex.SetTextSize(0.04)
                 latex.SetNDC(True)
-                latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_overall_cost:.3f}")
+                latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}/ndf: {best_overall_chi2:.3f}")
                 c4.Update()
 
                 # Plot temperature, acceptance probability, residuals, and information criteria on their canvases
@@ -583,26 +560,21 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 for i in range(num_params):
                     fits_sig[it].FixParameter(i, par_vec[4*it + i])
                 r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
-                current_cost, lambda_reg = calculate_cost(
+                current_cost, lambda_reg, current_chi2 = calculate_cost(
                     fits_sig[it], g_sig, par_vec[4*it:4*(it+1)],
                     num_events, num_params, lambda_reg
                 )
-                current_metric = get_fit_metric(
-                    fits_sig[it], current_cost, num_events, num_params
-                )
-                current_score = get_fit_score(
-                    current_metric, num_events, num_params
-                )
-                if current_score < best_overall_score:
-                    best_overall_cost = current_metric
-                    best_overall_score = current_score
+                if current_cost < best_overall_cost:
+                    best_overall_cost = current_cost
+                    best_overall_chi2 = current_chi2
                     best_overall_bin = b
                     best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
                 print(f"\nBest overall solution: {best_overall_params}")
-                print(f"Best overall cost: {best_overall_cost:.5f}")
+                print(f"Best overall objective cost: {best_overall_cost:.5f}")
+                print(f"Best overall chi2/ndf: {best_overall_chi2:.5f}")
 
                 for j in range(num_params):
-                    par_chi2_vec[4*it + j] = best_overall_cost
+                    par_chi2_vec[4*it + j] = best_overall_chi2
 
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -645,7 +617,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 latex = TLatex()
                 latex.SetTextSize(0.04)
                 latex.SetNDC(True)
-                latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}: {best_overall_cost:.3f}")
+                latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}/ndf: {best_overall_chi2:.3f}")
                 c2.Update()
                 print("\n")
             c2.Update()
