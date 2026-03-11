@@ -67,6 +67,13 @@ def constrain_params(params, lower_bounds, upper_bounds):
         constrained.append(max(lower, min(value, upper)))
     return constrained
 
+def format_metric(value):
+    if not math.isfinite(value):
+        return "inf"
+    if value != 0.0 and abs(value) < 1e-3:
+        return f"{value:.6e}"
+    return f"{value:.3f}"
+
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
     'parameterize' function including:
@@ -188,6 +195,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     fit_convergence_type = "Red. Chi-Square"
 
                 restart_patience = max(100, max_iterations // 100)
+                local_search_patience = max(25, restart_patience // 4)
+                convergence_patience = max(50, restart_patience // 2)
+                converged_chi2_target = min(1.0, chi2_threshold)
                 total_iteration = 0
 
                 print("\n/*--------------------------------------------------*/")
@@ -198,6 +208,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 if positive_param_indices:
                     constrained_labels = ', '.join(param_labels[idx] for idx in positive_param_indices)
                     print(f"Positive-only parameters: {constrained_labels}")
+                print(f"Local-search patience: {local_search_patience} stagnant iterations")
                 print(f"Restart patience: {restart_patience} iterations without run-best improvement")
                 print("/*--------------------------------------------------*/")
 
@@ -299,6 +310,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_lambda = lambda_reg
                     accept_prob = 0.0
                     restart_count = 0
+                    local_search_count = 0
 
                     def evaluate_candidate(seed_params, lambda_value, param_bound_value):
                         trial_params = constrain_params(seed_params, param_lower_bounds, param_upper_bounds)
@@ -415,7 +427,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             else:
                                 stagnation_count += 1
 
-                            if iteration > 0 and iteration % 15 == 0 and math.isfinite(current_cost):
+                            if (
+                                stagnation_count > 0
+                                and stagnation_count % local_search_patience == 0
+                                and math.isfinite(current_cost)
+                            ):
                                 local_params, local_cost, local_chi2 = local_search(
                                     current_params, fits_sig[it], g_sig,
                                     num_events, num_params, lambda_reg,
@@ -423,6 +439,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                     lower_bounds=param_lower_bounds,
                                     upper_bounds=param_upper_bounds
                                 )
+                                local_search_count += 1
                                 if local_cost < current_cost:
                                     local_params, local_errors, local_cost, local_lambda, local_chi2, local_chi_square, local_ndf, local_residual, local_rms_pull = evaluate_candidate(
                                         local_params, lambda_reg, max_param_bounds
@@ -447,6 +464,19 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                         best_rms_pull = current_rms_pull
                                         best_lambda = current_lambda
                                     stagnation_count = 0
+
+                            if (
+                                not use_regularization
+                                and math.isfinite(best_chi2)
+                                and best_chi2 <= converged_chi2_target
+                                and stagnation_count >= convergence_patience
+                            ):
+                                if debug:
+                                    print(
+                                        f"[DEBUG] Early stop => chi2/ndf={best_chi2:.6e}, "
+                                        f"stagnation={stagnation_count}"
+                                    )
+                                break
 
                             if stagnation_count >= restart_patience:
                                 current_params = [
@@ -531,12 +561,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         total_iteration += 1
 
                     # end while iteration <= max_iterations
-                    print(f"\nRun Best Objective Cost: {best_cost:.3f}")
-                    print(f"Run Best chi2/ndf: {best_chi2:.3f}")
+                    print(f"\nRun Best Objective Cost: {format_metric(best_cost)}")
+                    print(f"Run Best chi2/ndf: {format_metric(best_chi2)}")
                     print(
                         f"Run Diagnostics: chi2={best_chi_square:.6e}, ndf={best_ndf}, "
                         f"max|pull|={best_residual:.6e}, rms_pull={best_rms_pull:.6e}, "
                         f"lambda={best_lambda:.6e}, restarts={restart_count}, "
+                        f"local_searches={local_search_count}, "
                         f"npts={num_events}, npar={num_params}"
                     )
 
@@ -544,8 +575,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 try:
                     if best_overall_params is not None:
                         print(f"\nBest overall solution: {best_overall_params}")
-                        print(f"Best overall objective cost: {best_overall_cost:.5f}")
-                        print(f"Best overall chi2/ndf: {best_overall_chi2:.5f}")
+                        print(f"Best overall objective cost: {format_metric(best_overall_cost)}")
+                        print(f"Best overall chi2/ndf: {format_metric(best_overall_chi2)}")
                         print(
                             f"Best overall diagnostics: chi2={best_overall_chi_square:.6e}, "
                             f"ndf={best_overall_ndf}, max|pull|={best_overall_residual:.6e}, "
