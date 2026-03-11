@@ -40,6 +40,24 @@ from xfit_active import fun_Sig_L_wrapper, fun_Sig_T_wrapper, fun_Sig_LT_wrapper
 
 ##################################################################################################################################################
 
+def get_fit_metric(f_sig, cost_value, num_events, num_params):
+    if num_events <= num_params:
+        return cost_value
+
+    ndf = f_sig.GetNDF()
+    if ndf < 1e-6:
+        return float('inf')
+    return f_sig.GetChisquare() / ndf
+
+def get_fit_score(metric_value, num_events, num_params):
+    if not math.isfinite(metric_value):
+        return float('inf')
+    if num_events <= num_params:
+        return metric_value
+
+    # Compare reduced chi2 to 1 symmetrically so values far below 1 do not win by default.
+    return abs(math.log(max(metric_value, 1e-12)))
+
 def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outputpdf, full_optimization=True, debug=False):
     """
     'parameterize' function including:
@@ -117,6 +135,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         best_overall_params   = None
         best_overall_errors   = None
         best_overall_cost     = float('inf')
+        best_overall_score    = float('inf')
         best_overall_bin      = None
         best_overall_temp     = float('inf')
         best_overall_prob     = 1.0
@@ -210,6 +229,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_params = list(current_params)
                     best_errors = list(current_errors)
                     best_cost   = float('inf')
+                    best_score  = float('inf')
                     accept_prob = 0.0
                     residual    = float('inf')
 
@@ -271,6 +291,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 fits_sig[it], g_sig, current_params,
                                 num_events, num_params, lambda_reg
                             )
+                            current_metric = get_fit_metric(
+                                fits_sig[it], current_cost, num_events, num_params
+                            )
+                            current_score = get_fit_score(
+                                current_metric, num_events, num_params
+                            )
 
                             # Simple residual from last data point
                             residual = 0.0
@@ -288,7 +314,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             if len(cost_history) >= 2:
                                 lambda_reg = adaptive_regularization(cost_history, lambda_reg)
 
-                            accept_prob = acceptance_probability(best_cost, current_cost, temperature)
+                            accept_prob = acceptance_probability(best_score, current_score, temperature)
 
                             # Update current params from the fit
                             current_params = [fits_sig[it].GetParameter(i_par) for i_par in range(num_params)]
@@ -297,11 +323,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             # Accept or not
                             if accept_prob > random.random():
                                 best_params = list(current_params)
-                                best_cost   = current_cost
+                                best_cost   = current_metric
+                                best_score  = current_score
                                 best_errors = list(current_errors)
                                 if debug and iteration % 50 == 0:
-                                    print(f"[DEBUG] ACCEPT => cost={best_cost:.3f}, iteration={iteration}")
-                                if current_cost > best_overall_cost:
+                                    print(f"[DEBUG] ACCEPT => metric={best_cost:.3f}, score={best_score:.3f}, iteration={iteration}")
+                                if current_score > best_overall_score:
                                     stagnation_count += 1
                             else:
                                 stagnation_count += 1
@@ -341,8 +368,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             continue
 
                         # Unconditionally update best_overall_cost
-                        if best_cost < best_overall_cost:
+                        if best_score < best_overall_score:
                             best_overall_cost    = best_cost
+                            best_overall_score   = best_score
                             best_overall_bin     = b
                             best_overall_params  = best_params[:]
                             best_overall_errors  = best_errors[:]
@@ -560,8 +588,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     fits_sig[it], g_sig, par_vec[4*it:4*(it+1)],
                     num_events, num_params, lambda_reg
                 )
-                if current_cost < best_overall_cost:
-                    best_overall_cost = current_cost
+                current_metric = get_fit_metric(
+                    fits_sig[it], current_cost, num_events, num_params
+                )
+                current_score = get_fit_score(
+                    current_metric, num_events, num_params
+                )
+                if current_score < best_overall_score:
+                    best_overall_cost = current_metric
+                    best_overall_score = current_score
                     best_overall_bin = b
                     best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
                 print(f"\nBest overall solution: {best_overall_params}")
