@@ -128,10 +128,16 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         best_overall_errors   = None
         best_overall_cost     = float('inf')
         best_overall_chi2     = float('inf')
+        best_overall_chi_square = float('inf')
+        best_overall_ndf      = 0
+        best_overall_lambda   = float('inf')
         best_overall_bin      = None
+        best_overall_run_idx  = None
         best_overall_temp     = float('inf')
         best_overall_prob     = 1.0
         best_overall_residual= float('inf')
+        best_overall_rms_pull = float('inf')
+        best_overall_restarts = 0
         best_overall_ic_aic  = float('inf')
         best_overall_ic_bic  = float('inf')
 
@@ -242,12 +248,20 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     current_errors = [0.0]*num_params
                     current_cost   = float('inf')
                     current_chi2   = float('inf')
+                    current_chi_square = float('inf')
+                    current_ndf    = 0
                     current_residual = float('inf')
+                    current_rms_pull = float('inf')
+                    current_lambda = float('inf')
                     best_params = list(current_params)
                     best_errors = list(current_errors)
                     best_cost   = float('inf')
                     best_chi2   = float('inf')
+                    best_chi_square = float('inf')
+                    best_ndf    = 0
                     best_residual = float('inf')
+                    best_rms_pull = float('inf')
+                    best_lambda = float('inf')
                     accept_prob = 0.0
                     restart_count = 0
 
@@ -275,8 +289,10 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         fitted_cost, next_lambda, fitted_chi2 = calculate_cost(
                             fits_sig[it], g_sig, fitted_params, num_events, num_params, lambda_value
                         )
+                        fitted_chi_square = fits_sig[it].GetChisquare()
+                        fitted_ndf = fits_sig[it].GetNDF()
 
-                        residual_value = 0.0
+                        residuals = []
                         for i_pt2 in range(num_events):
                             x_pt = g_sig.GetX()[i_pt2]
                             y_data = g_sig.GetY()[i_pt2]
@@ -286,8 +302,15 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 residual_value = (y_data - y_fit)/y_err
                             else:
                                 residual_value = (y_data - y_fit)
+                            residuals.append(residual_value)
 
-                        return fitted_params, fitted_errors, fitted_cost, next_lambda, fitted_chi2, residual_value
+                        max_abs_pull = max(abs(res) for res in residuals) if residuals else float('inf')
+                        rms_pull = math.sqrt(sum(res*res for res in residuals) / len(residuals)) if residuals else float('inf')
+
+                        return (
+                            fitted_params, fitted_errors, fitted_cost, next_lambda, fitted_chi2,
+                            fitted_chi_square, fitted_ndf, max_abs_pull, rms_pull
+                        )
 
                     while iteration <= max_iterations:
                         # Debug prints every 100 iterations
@@ -313,7 +336,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                         try:
                             fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
-                            candidate_params, candidate_errors, candidate_cost, lambda_reg, candidate_chi2, candidate_residual = evaluate_candidate(
+                            candidate_params, candidate_errors, candidate_cost, candidate_lambda, candidate_chi2, candidate_chi_square, candidate_ndf, candidate_residual, candidate_rms_pull = evaluate_candidate(
                                 proposal_params, lambda_reg, max_param_bounds
                             )
 
@@ -328,14 +351,22 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 current_errors = list(candidate_errors)
                                 current_cost = candidate_cost
                                 current_chi2 = candidate_chi2
+                                current_chi_square = candidate_chi_square
+                                current_ndf = candidate_ndf
                                 current_residual = candidate_residual
+                                current_rms_pull = candidate_rms_pull
+                                current_lambda = candidate_lambda
 
                                 if current_cost < best_cost:
                                     best_params = list(current_params)
                                     best_errors = list(current_errors)
                                     best_cost = current_cost
                                     best_chi2 = current_chi2
+                                    best_chi_square = current_chi_square
+                                    best_ndf = current_ndf
                                     best_residual = current_residual
+                                    best_rms_pull = current_rms_pull
+                                    best_lambda = current_lambda
                                     stagnation_count = 0
                                 else:
                                     stagnation_count += 1
@@ -352,20 +383,28 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                     max_param_bounds=max_param_bounds
                                 )
                                 if local_cost < current_cost:
-                                    local_params, local_errors, local_cost, lambda_reg, local_chi2, local_residual = evaluate_candidate(
+                                    local_params, local_errors, local_cost, local_lambda, local_chi2, local_chi_square, local_ndf, local_residual, local_rms_pull = evaluate_candidate(
                                         local_params, lambda_reg, max_param_bounds
                                     )
                                     current_params = list(local_params)
                                     current_errors = list(local_errors)
                                     current_cost = local_cost
                                     current_chi2 = local_chi2
+                                    current_chi_square = local_chi_square
+                                    current_ndf = local_ndf
                                     current_residual = local_residual
+                                    current_rms_pull = local_rms_pull
+                                    current_lambda = local_lambda
                                     if current_cost < best_cost:
                                         best_params = list(current_params)
                                         best_errors = list(current_errors)
                                         best_cost = current_cost
                                         best_chi2 = current_chi2
+                                        best_chi_square = current_chi_square
+                                        best_ndf = current_ndf
                                         best_residual = current_residual
+                                        best_rms_pull = current_rms_pull
+                                        best_lambda = current_lambda
                                     stagnation_count = 0
 
                             if stagnation_count > 5:
@@ -376,7 +415,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                                 current_errors = [0.0] * num_params
                                 current_cost = float('inf')
                                 current_chi2 = float('inf')
+                                current_chi_square = float('inf')
+                                current_ndf = 0
                                 current_residual = float('inf')
+                                current_rms_pull = float('inf')
+                                current_lambda = float('inf')
                                 restart_count += 1
                                 stagnation_count = 0
                                 if debug:
@@ -399,7 +442,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             current_errors = [0.0] * num_params
                             current_cost = float('inf')
                             current_chi2 = float('inf')
+                            current_chi_square = float('inf')
+                            current_ndf = 0
                             current_residual = float('inf')
+                            current_rms_pull = float('inf')
+                            current_lambda = float('inf')
                             restart_count += 1
                             stagnation_count = 0
                             iteration += 1
@@ -408,12 +455,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         if best_cost < best_overall_cost:
                             best_overall_cost    = best_cost
                             best_overall_chi2    = best_chi2
+                            best_overall_chi_square = best_chi_square
+                            best_overall_ndf     = best_ndf
+                            best_overall_lambda  = best_lambda
                             best_overall_bin     = b
+                            best_overall_run_idx = run_idx + 1
                             best_overall_params  = best_params[:]
                             best_overall_errors  = best_errors[:]
                             best_overall_temp    = temperature
                             best_overall_prob    = accept_prob
                             best_overall_residual= best_residual
+                            best_overall_rms_pull = best_rms_pull
+                            best_overall_restarts = restart_count
 
                         current_aic, current_bic = compute_iteration_ic(current_chi2, num_events, num_params)
                         best_aic, best_bic = compute_iteration_ic(best_chi2, num_events, num_params)
@@ -444,6 +497,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     # end while iteration <= max_iterations
                     print(f"\nRun Best Objective Cost: {best_cost:.3f}")
                     print(f"Run Best chi2/ndf: {best_chi2:.3f}")
+                    print(
+                        f"Run Diagnostics: chi2={best_chi_square:.6e}, ndf={best_ndf}, "
+                        f"max|pull|={best_residual:.6e}, rms_pull={best_rms_pull:.6e}, "
+                        f"lambda={best_lambda:.6e}, restarts={restart_count}, "
+                        f"npts={num_events}, npar={num_params}"
+                    )
 
                 # end for run_idx
                 try:
@@ -451,6 +510,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         print(f"\nBest overall solution: {best_overall_params}")
                         print(f"Best overall objective cost: {best_overall_cost:.5f}")
                         print(f"Best overall chi2/ndf: {best_overall_chi2:.5f}")
+                        print(
+                            f"Best overall diagnostics: chi2={best_overall_chi_square:.6e}, "
+                            f"ndf={best_overall_ndf}, max|pull|={best_overall_residual:.6e}, "
+                            f"rms_pull={best_overall_rms_pull:.6e}, lambda={best_overall_lambda:.6e}, "
+                            f"restarts={best_overall_restarts}, run={best_overall_run_idx}, "
+                            f"npts={num_events}, npar={num_params}"
+                        )
                         print(f"Best overall bin: t={t_vec[best_overall_bin]:.3f}, "
                               f"Q2={q2_vec[best_overall_bin]:.3f}, "
                               f"W={w_vec[best_overall_bin]:.3f}, "
