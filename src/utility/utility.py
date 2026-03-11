@@ -947,37 +947,15 @@ def adjust_params(params, adjustment_factor=0.1):
     """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-def local_search(
-    params,
-    inp_func,
-    g_sig,
-    num_events,
-    num_params,
-    lambda_reg=0.0,
-    max_param_bounds=None,
-    lower_bounds=None,
-    upper_bounds=None,
-    step_scale=0.05,
-    num_passes=2
-):
+def local_search(params, inp_func, g_sig, num_events, num_params, lambda_reg=0.0, max_param_bounds=None, step_scale=0.05, num_passes=2):
     """
     Perform a small coordinate search around the current point using the same
     objective as the annealing loop.
     """
     best_params = sanitize_params(list(params), clip_min=-1e4, clip_max=1e4)
-    if lower_bounds is None or upper_bounds is None:
-        if max_param_bounds is not None:
-            bound = abs(max_param_bounds)
-            lower_bounds = [-bound] * num_params
-            upper_bounds = [bound] * num_params
-        else:
-            lower_bounds = [-1e4] * num_params
-            upper_bounds = [1e4] * num_params
-
-    best_params = [
-        clip_to_bounds(value, low, high)
-        for value, low, high in zip(best_params, lower_bounds, upper_bounds)
-    ]
+    if max_param_bounds is not None:
+        bound = abs(max_param_bounds)
+        best_params = [select_valid_parameter(p, -bound, bound) for p in best_params]
 
     def evaluate(candidate_params):
         for i, value in enumerate(candidate_params):
@@ -997,9 +975,10 @@ def local_search(
             for direction in (-1.0, 1.0):
                 candidate_params = best_params[:]
                 candidate_params[i] = center_value + direction * step
-                candidate_params[i] = clip_to_bounds(
-                    candidate_params[i], lower_bounds[i], upper_bounds[i]
-                )
+                if max_param_bounds is not None:
+                    candidate_params[i] = select_valid_parameter(
+                        candidate_params[i], -bound, bound
+                    )
                 candidate_params = sanitize_params(candidate_params, clip_min=-1e4, clip_max=1e4)
                 candidate_cost, candidate_red_chi2 = evaluate(candidate_params)
                 if candidate_cost < best_cost:
@@ -1046,7 +1025,7 @@ def calculate_information_criteria(n_samples, n_parameters, chi2):
     bic = n_parameters * np.log(n_samples) - 2 * log_likelihood
     return aic, bic
 
-def clip_to_bounds(param, lower_bound, upper_bound):
+def select_valid_parameter(param, lower_bound, upper_bound):
     """Ensure the parameter stays within the given bounds."""
     return max(lower_bound, min(param, upper_bound))
 
@@ -1265,7 +1244,7 @@ def find_params(equations, sig_type, param_vals):
         
 ##################################################################################################################################################
 
-def select_valid_parameter(sig_name, elements):
+def prompt_valid_parameter_choice(sig_name, elements):
     
     sig_dict = {
         "L" : [ f"p{v}" for v in range(1,5)],
