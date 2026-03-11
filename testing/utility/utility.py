@@ -947,15 +947,37 @@ def adjust_params(params, adjustment_factor=0.1):
     """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-def local_search(params, inp_func, g_sig, num_events, num_params, lambda_reg=0.0, max_param_bounds=None, step_scale=0.05, num_passes=2):
+def local_search(
+    params,
+    inp_func,
+    g_sig,
+    num_events,
+    num_params,
+    lambda_reg=0.0,
+    max_param_bounds=None,
+    lower_bounds=None,
+    upper_bounds=None,
+    step_scale=0.05,
+    num_passes=2
+):
     """
     Perform a small coordinate search around the current point using the same
     objective as the annealing loop.
     """
     best_params = sanitize_params(list(params), clip_min=-1e4, clip_max=1e4)
-    if max_param_bounds is not None:
-        bound = abs(max_param_bounds)
-        best_params = [select_valid_parameter(p, -bound, bound) for p in best_params]
+    if lower_bounds is None or upper_bounds is None:
+        if max_param_bounds is not None:
+            bound = abs(max_param_bounds)
+            lower_bounds = [-bound] * num_params
+            upper_bounds = [bound] * num_params
+        else:
+            lower_bounds = [-1e4] * num_params
+            upper_bounds = [1e4] * num_params
+
+    best_params = [
+        select_valid_parameter(value, low, high)
+        for value, low, high in zip(best_params, lower_bounds, upper_bounds)
+    ]
 
     def evaluate(candidate_params):
         for i, value in enumerate(candidate_params):
@@ -975,10 +997,9 @@ def local_search(params, inp_func, g_sig, num_events, num_params, lambda_reg=0.0
             for direction in (-1.0, 1.0):
                 candidate_params = best_params[:]
                 candidate_params[i] = center_value + direction * step
-                if max_param_bounds is not None:
-                    candidate_params[i] = select_valid_parameter(
-                        candidate_params[i], -bound, bound
-                    )
+                candidate_params[i] = select_valid_parameter(
+                    candidate_params[i], lower_bounds[i], upper_bounds[i]
+                )
                 candidate_params = sanitize_params(candidate_params, clip_min=-1e4, clip_max=1e4)
                 candidate_cost, candidate_red_chi2 = evaluate(candidate_params)
                 if candidate_cost < best_cost:
