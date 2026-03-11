@@ -13,7 +13,6 @@ import ROOT
 from ROOT import TFile, TNtuple, TText
 from ROOT import TGraph, TGraphErrors, TCanvas
 from ROOT import TF1, TFitResultPtr
-from ROOT import Math
 import scipy.stats as stats
 import csv
 from array import array
@@ -948,76 +947,51 @@ def adjust_params(params, adjustment_factor=0.1):
     """Adjust parameters randomly by a percentage of their value."""
     return params + np.random.uniform(-adjustment_factor, adjustment_factor, size=len(params)) * params
 
-# Create a PyROOT callable object
-class PyFunc:
-    def __call__(self, par):
-        return chi2_func(par)
+def local_search(params, inp_func, g_sig, num_events, num_params, lambda_reg=0.0, max_param_bounds=None, step_scale=0.05, num_passes=2):
+    """
+    Perform a small coordinate search around the current point using the same
+    objective as the annealing loop.
+    """
+    best_params = sanitize_params(list(params), clip_min=-1e4, clip_max=1e4)
+    if max_param_bounds is not None:
+        bound = abs(max_param_bounds)
+        best_params = [select_valid_parameter(p, -bound, bound) for p in best_params]
 
-# RedHat7    
-#minimizer = Math.Factory.CreateMinimizer("Minuit2", "Migrad")
-# Alma9
-minimizer = Math.Factory.CreateMinimizer("Minuit", "Migrad")
-minimizer.SetMaxFunctionCalls(1000000)
-minimizer.SetMaxIterations(100000)
-minimizer.SetTolerance(0.001)
-minimizer.SetPrintLevel(0)
+    def evaluate(candidate_params):
+        for i, value in enumerate(candidate_params):
+            inp_func.SetParameter(i, value)
+        cost, _, red_chi2 = calculate_cost(
+            inp_func, g_sig, candidate_params, num_events, num_params, lambda_reg
+        )
+        return cost, red_chi2
 
-def local_search(params, inp_func, num_params):
+    best_cost, best_red_chi2 = evaluate(best_params)
 
-    if num_params+1 > 2:
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            for i in range(num_params+1):
-                inp_func.SetParameter(i, par[i])
-            return inp_func.GetChisquare()
+    for _ in range(num_passes):
+        improved = False
+        for i in range(num_params):
+            center_value = best_params[i]
+            step = max(abs(center_value) * step_scale, 1e-3)
+            for direction in (-1.0, 1.0):
+                candidate_params = best_params[:]
+                candidate_params[i] = center_value + direction * step
+                if max_param_bounds is not None:
+                    candidate_params[i] = select_valid_parameter(
+                        candidate_params[i], -bound, bound
+                    )
+                candidate_params = sanitize_params(candidate_params, clip_min=-1e4, clip_max=1e4)
+                candidate_cost, candidate_red_chi2 = evaluate(candidate_params)
+                if candidate_cost < best_cost:
+                    best_params = candidate_params
+                    best_cost = candidate_cost
+                    best_red_chi2 = candidate_red_chi2
+                    improved = True
+        if not improved:
+            break
 
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, num_params+1)  # num_params+1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        for i, param in enumerate(params):
-            minimizer.SetVariable(i, "p{}".format(i), param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = [minimizer.X()[i] for i in range(num_params+1)]
-
-        minimizer.Delete()
-        func.Delete()
-
-        return improved_params
-
-    else:
-
-        # Create a wrapper function that can be called by the minimizer
-        def chi2_func(par):
-            inp_func.SetParameter(1, par)
-            return inp_func.GetChisquare()
-
-        py_func = PyFunc()
-
-        # Create the functor
-        func = Math.Functor(py_func, 1)  # 1 is the number of parameters
-        minimizer.SetFunction(func)
-
-        # Set initial values and step sizes
-        minimizer.SetVariable(1, "p1", param, 0.01 * abs(param))
-
-        # Perform the minimization
-        minimizer.Minimize()
-
-        # Get the improved parameters
-        improved_params = minimizer.X()
-
-        minimizer.Delete()
-        func.Delete()
-        
-        return improved_params            
+    for i, value in enumerate(best_params):
+        inp_func.SetParameter(i, value)
+    return best_params, best_cost, best_red_chi2
 
 def adaptive_regularization(cost_history, lambda_reg, min_improvement=1e-4, max_lambda=1.0, min_lambda=1e-6):
     """
