@@ -218,13 +218,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]  \
                     = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
                 
-    for hist in hist_bin_dict.values():
-        hist.Sumw2()
-    if ParticleType == "kaon":
-        for hist in subDict.values():
-            if is_hist(hist):
-                hist.Sumw2()
-
     print("\nBinning data...")
     for i,evt in enumerate(TBRANCH_DATA):
 
@@ -714,7 +707,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     phi_setting,
                     inpDict,
                     hist_bin_dict[f"H_MM_fit1sub_DATA_{j}_{k}"],   # wide / no-MM-cut
-                    hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis
+                    hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis 
                     scaling=inpDict.get("bg_stat_scale2", 0.0),
                     model_key=f"cheb2_{phi_setting}_{EPSSET}e",
                     fit_name="Fit 2"
@@ -1119,7 +1112,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         except ZeroDivisionError:
             yld = 0.0
             yld_err = -1000.0
-        if yld <= 0.0 or not math.isfinite(yld):
+        if not math.isfinite(yld):
             yld = 0.0
             yld_err = -1000.0
         if not math.isfinite(yld_err):
