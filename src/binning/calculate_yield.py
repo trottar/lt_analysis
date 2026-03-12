@@ -705,17 +705,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale2"] = 0.50
+            inpDict["bg_stat_scale"] = 0.50
             # ----------------------------------------------------------------
 
-            if inpDict["bg_stat_scale2"] > 0.0:
+            if inpDict.get("bg_stat_scale2", 0.0) > 0.0:
                 # Fit background and subtract
                 fitDict["background_fit2_{}_{}".format(j, k)] = bg_fit(
                     phi_setting,
                     inpDict,
                     hist_bin_dict[f"H_MM_fit1sub_DATA_{j}_{k}"],   # wide / no-MM-cut
-                    hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis 
-                    scaling=inpDict["bg_stat_scale2"],
+                    hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis
+                    scaling=inpDict.get("bg_stat_scale2", 0.0),
                     model_key=f"cheb2_{phi_setting}_{EPSSET}e",
                     fit_name="Fit 2"
                 )
@@ -888,7 +888,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Draw("hist same")                        
-                        if inpDict["bg_stat_scale2"] > 0.0:
+                        if inpDict.get("bg_stat_scale2", 0.0) > 0.0:
                             fitDict["background_fit2_{}_{}".format(j, k)][1].SetLineColor(3)
                             fitDict["background_fit2_{}_{}".format(j, k)][1].Draw("same")
                         hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].GetName())
@@ -1033,7 +1033,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
     }
     if inpDict["bg_stat_scale1"] > 0.0:                 
         binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
-    if inpDict["bg_stat_scale2"] > 0.0:        
+    if inpDict.get("bg_stat_scale2", 0.0) > 0.0:
         binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
 
     return binned_dict
