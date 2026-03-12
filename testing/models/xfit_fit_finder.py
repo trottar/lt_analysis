@@ -226,6 +226,43 @@ def build_objective_landscape_hist(hist_name, fit_func, g_sig, best_params, num_
 
     return hist
 
+def build_zoomed_bounds(lower_bounds, upper_bounds, best_params, *graphs):
+    if best_params is None or len(best_params) < 2:
+        return list(lower_bounds), list(upper_bounds)
+
+    x_values = [best_params[0]]
+    y_values = [best_params[1]]
+    for graph in graphs:
+        if graph is None:
+            continue
+        for i_point in range(graph.GetN()):
+            x_value = graph.GetX()[i_point]
+            y_value = graph.GetY()[i_point]
+            if math.isfinite(x_value) and math.isfinite(y_value):
+                x_values.append(x_value)
+                y_values.append(y_value)
+
+    def compute_axis_bounds(values, axis_low, axis_high):
+        full_span = axis_high - axis_low
+        if full_span <= 0.0:
+            return axis_low, axis_high
+        data_min = min(values)
+        data_max = max(values)
+        core_span = max(data_max - data_min, full_span * 0.05, 1e-3)
+        center = 0.5 * (data_min + data_max)
+        half_width = 0.75 * core_span
+        low = max(axis_low, center - half_width)
+        high = min(axis_high, center + half_width)
+        if high - low < full_span * 0.02:
+            min_half_width = 0.01 * full_span
+            low = max(axis_low, center - min_half_width)
+            high = min(axis_high, center + min_half_width)
+        return low, high
+
+    zoom_low_x, zoom_high_x = compute_axis_bounds(x_values, lower_bounds[0], upper_bounds[0])
+    zoom_low_y, zoom_high_y = compute_axis_bounds(y_values, lower_bounds[1], upper_bounds[1])
+    return [zoom_low_x, zoom_low_y], [zoom_high_x, zoom_high_y]
+
 def hold_root_objects(store, *objects):
     for obj in objects:
         if obj is not None:
@@ -286,6 +323,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     c10.Divide(2, 2)
     c11 = TCanvas("c11", "Objective Landscape", 900, 900)
     c11.Divide(2, 2)
+    c12 = TCanvas("c12", "Zoomed Objective Landscape", 900, 900)
+    c12.Divide(2, 2)
 
     # -----------------------------------------------------------------------------
     # 2. Unpack input objects/settings
@@ -821,6 +860,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     par_chi2_vec[4*it + j]  = best_overall_chi2
 
                 objective_landscape_hist = None
+                objective_landscape_zoom_hist = None
                 best_overall_point = None
                 if num_params == 2 and best_overall_params is not None:
                     objective_landscape_hist = build_objective_landscape_hist(
@@ -834,12 +874,35 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         param_lower_bounds,
                         param_upper_bounds
                     )
+                    zoom_lower_bounds, zoom_upper_bounds = build_zoomed_bounds(
+                        param_lower_bounds,
+                        param_upper_bounds,
+                        best_overall_params,
+                        graph_sig_param_space_path,
+                        graph_sig_run_best_points
+                    )
+                    objective_landscape_zoom_hist = build_objective_landscape_hist(
+                        f"landscape_zoom_{sig_name}_{it}_{b}",
+                        fits_sig[it],
+                        g_sig,
+                        best_overall_params,
+                        fit_num_events,
+                        num_params,
+                        best_overall_lambda,
+                        zoom_lower_bounds,
+                        zoom_upper_bounds
+                    )
                     best_overall_point = TGraph()
                     best_overall_point.SetPoint(0, best_overall_params[0], best_overall_params[1])
                     best_overall_point.SetMarkerStyle(29)
                     best_overall_point.SetMarkerSize(2.0)
                     best_overall_point.SetMarkerColor(kBlue)
-                    hold_root_objects(plot_object_refs, objective_landscape_hist, best_overall_point)
+                    hold_root_objects(
+                        plot_object_refs,
+                        objective_landscape_hist,
+                        objective_landscape_zoom_hist,
+                        best_overall_point
+                    )
 
                 if best_overall_bin != b:
                     continue
@@ -1002,9 +1065,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     objective_landscape_hist.Draw("COLZ")
                     graph_sig_param_space_path.SetMarkerStyle(20)
                     graph_sig_param_space_path.SetMarkerSize(0.7)
-                    graph_sig_param_space_path.SetMarkerColor(kBlack)
-                    graph_sig_param_space_path.SetLineColor(kBlack)
-                    graph_sig_param_space_path.SetLineWidth(1)
+                    graph_sig_param_space_path.SetMarkerColor(kMagenta)
+                    graph_sig_param_space_path.SetLineColor(kMagenta)
+                    graph_sig_param_space_path.SetLineWidth(2)
                     graph_sig_param_space_path.Draw("LP SAME")
                     graph_sig_run_best_points.SetMarkerStyle(24)
                     graph_sig_run_best_points.SetMarkerSize(1.4)
@@ -1027,6 +1090,33 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     placeholder.DrawTextNDC(0.12, 0.5, "Full phase-space COLZ available for 2-parameter fits only.")
                     hold_root_objects(plot_object_refs, placeholder)
                 c11.Update()
+
+                c12.cd(it+1).SetLeftMargin(0.14)
+                if objective_landscape_zoom_hist is not None:
+                    objective_landscape_zoom_hist.SetTitle(
+                        f"Sig {sig_name} Zoomed Parameter-Space Landscape;"
+                        f"Parameter 1;Parameter 2;log_{{10}}(Objective Cost)"
+                    )
+                    objective_landscape_zoom_hist.Draw("COLZ")
+                    graph_sig_param_space_path.Draw("LP SAME")
+                    graph_sig_run_best_points.Draw("P SAME")
+                    best_overall_point.Draw("P SAME")
+                    leg_landscape_zoom = TLegend(0.48, 0.72, 0.9, 0.9)
+                    leg_landscape_zoom.AddEntry(graph_sig_param_space_path, "Sampled Search Path", "lp")
+                    leg_landscape_zoom.AddEntry(graph_sig_run_best_points, "Run Best Points", "p")
+                    leg_landscape_zoom.AddEntry(best_overall_point, "Best Overall", "p")
+                    leg_landscape_zoom.Draw()
+                    latex_landscape_zoom = TLatex()
+                    latex_landscape_zoom.SetTextSize(0.03)
+                    latex_landscape_zoom.SetNDC(True)
+                    latex_landscape_zoom.DrawLatex(0.16, 0.93, "Zoomed to explored basin")
+                    hold_root_objects(plot_object_refs, leg_landscape_zoom, latex_landscape_zoom)
+                else:
+                    placeholder_zoom = TText()
+                    placeholder_zoom.SetTextSize(0.035)
+                    placeholder_zoom.DrawTextNDC(0.12, 0.5, "Zoomed COLZ available for 2-parameter fits only.")
+                    hold_root_objects(plot_object_refs, placeholder_zoom)
+                c12.Update()
                 print("\n")
             else:
 
@@ -1158,6 +1248,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
             c9.Update()
             c10.Update()
             c11.Update()
+            c12.Update()
         params_used.append(param_str)
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
@@ -1169,7 +1260,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         c8.Print(outputpdf)
         c9.Print(outputpdf)
         c10.Print(outputpdf)
-        c11.Print(outputpdf+')')
+        c11.Print(outputpdf)
+        c12.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
     return params_used
