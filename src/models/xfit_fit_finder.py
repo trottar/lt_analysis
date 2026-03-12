@@ -226,6 +226,11 @@ def build_objective_landscape_hist(hist_name, fit_func, g_sig, best_params, num_
 
     return hist
 
+def hold_root_objects(store, *objects):
+    for obj in objects:
+        if obj is not None:
+            store.append(obj)
+
 def has_acceptable_run(best_cost, best_chi2, fit_num_events, num_params, chi2_threshold):
     if fit_num_events > num_params:
         return math.isfinite(best_chi2) and best_chi2 <= chi2_threshold
@@ -257,6 +262,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     graphs_sig_residuals= []
     graphs_sig_ic_aic   = []
     graphs_sig_ic_bic   = []    
+    plot_object_refs = []
     funcs_sig = [None]*4 # L, T, LT, TT
     fits_sig = [None]*4 # L, T, LT, TT
     
@@ -382,6 +388,26 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 graph_sig_restarts = TGraph()
                 graph_sig_param_space_path = TGraph()
                 graph_sig_run_best_points = TGraph()
+                hold_root_objects(
+                    plot_object_refs,
+                    *graph_sig_params,
+                    graph_sig_chi2,
+                    graph_sig_temp,
+                    graph_sig_accept,
+                    graph_sig_accept_rate,
+                    graph_sig_residuals,
+                    graph_sig_aic,
+                    graph_sig_bic,
+                    graph_sig_cost_current,
+                    graph_sig_cost_best,
+                    graph_sig_chi2_current,
+                    graph_sig_chi2_best,
+                    graph_sig_lambda,
+                    graph_sig_stagnation,
+                    graph_sig_restarts,
+                    graph_sig_param_space_path,
+                    graph_sig_run_best_points
+                )
                 graphs_sig_converge.append(graph_sig_chi2)
                 graphs_sig_temp.append(graph_sig_temp)
                 graphs_sig_accept.append(graph_sig_accept)
@@ -815,6 +841,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_overall_point.SetMarkerStyle(29)
                     best_overall_point.SetMarkerSize(2.0)
                     best_overall_point.SetMarkerColor(kBlue)
+                    hold_root_objects(plot_object_refs, objective_landscape_hist, best_overall_point)
 
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
@@ -854,6 +881,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 fit_status = TText()
                 fit_status.SetTextSize(0.04)
                 fit_status.DrawTextNDC(0.35, 0.85, " Fit Status: " + f_sig_status)
+                hold_root_objects(plot_object_refs, fit_status)
 
                 # Plot the parameter convergence on canvas c3 (each parameter drawn with its own color)
                 c3.cd(it+1).SetLeftMargin(0.12)
@@ -887,6 +915,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 leg_chi2.AddEntry(graph_sig_chi2, "Run Best", "lp")
                 leg_chi2.AddEntry(graph_sig_chi2_current, "Current", "lp")
                 leg_chi2.Draw()
+                hold_root_objects(plot_object_refs, latex, leg_chi2)
                 c4.Update()
 
                 # Plot temperature, acceptance probability, residuals, and information criteria on their canvases
@@ -908,6 +937,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 leg_accept.AddEntry(graph_sig_accept, "Metropolis Probability", "lp")
                 leg_accept.AddEntry(graph_sig_accept_rate, "Accepted Fraction", "lp")
                 leg_accept.Draw()
+                hold_root_objects(plot_object_refs, leg_accept)
                 c6.Update()
 
                 c7.cd(it+1).SetLeftMargin(0.12)
@@ -928,6 +958,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 leg.AddEntry(graph_sig_aic, "AIC", "lp")
                 leg.AddEntry(graph_sig_bic, "BIC", "lp")
                 leg.Draw()
+                hold_root_objects(plot_object_refs, leg)
                 c8.Update()
 
                 c9.cd(it+1).SetLeftMargin(0.12)
@@ -941,6 +972,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 leg_cost.AddEntry(graph_sig_cost_current, "Current", "lp")
                 leg_cost.AddEntry(graph_sig_cost_best, "Run Best", "lp")
                 leg_cost.Draw()
+                hold_root_objects(plot_object_refs, leg_cost)
                 c9.Update()
 
                 c10.cd(it+1).SetLeftMargin(0.12)
@@ -957,6 +989,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 leg_control.AddEntry(graph_sig_restarts, "Restarts", "lp")
                 leg_control.AddEntry(graph_sig_lambda, "Lambda", "lp")
                 leg_control.Draw()
+                hold_root_objects(plot_object_refs, leg_control)
                 c10.Update()
 
                 c11.cd(it+1).SetLeftMargin(0.14)
@@ -984,10 +1017,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     latex_landscape.SetTextSize(0.03)
                     latex_landscape.SetNDC(True)
                     latex_landscape.DrawLatex(0.16, 0.93, "Coarse grid over full search bounds")
+                    hold_root_objects(plot_object_refs, leg_landscape, latex_landscape)
                 else:
                     placeholder = TText()
                     placeholder.SetTextSize(0.035)
                     placeholder.DrawTextNDC(0.12, 0.5, "Full phase-space COLZ available for 2-parameter fits only.")
+                    hold_root_objects(plot_object_refs, placeholder)
                 c11.Update()
                 print("\n")
             else:
