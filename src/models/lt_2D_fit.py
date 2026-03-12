@@ -18,6 +18,7 @@ from array import array
 import math
 import ctypes
 import os, sys
+import pandas as pd
 
 ParticleType = sys.argv[1]
 POL = float(sys.argv[2])
@@ -68,6 +69,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 #pt_to_pt_systematic_error = 2.9 # Percent, just matching Bill's for now
 pt_to_pt_systematic_error = 3.6 # In percent, matches PAC propsal projections (https://redmine.jlab.org/attachments/download/635/k12_proposal.pdf)
 PI = math.pi
+FIT_OPTIONS = "SERQ0"
+POSITIVE_REFIT_OPTIONS = "MRQ0"
 if polID == "pl":
     mtar = 0.938272046 # GeV/c^2, mass of the target (proton)  
 else:
@@ -137,10 +140,99 @@ def get_limits(fcn, idx):
 # ---------------------------------------------------------------
 # Positivity guard + auto-refit (robust version)
 # ---------------------------------------------------------------
+def unwrap_fit_result(fit_res_ptr):
+    if fit_res_ptr is None:
+        return None
+    try:
+        fit_res = fit_res_ptr.Get()
+        if fit_res:
+            return fit_res
+    except Exception:
+        pass
+    try:
+        if bool(fit_res_ptr):
+            return fit_res_ptr
+    except Exception:
+        pass
+    return None
+
+# ---------------------------------------------------------------
+def matrix_element(matrix, i, j):
+    try:
+        return float(matrix[i][j])
+    except Exception:
+        return float(matrix(i, j))
+
+# ---------------------------------------------------------------
+def get_fit_covariance(fit_func, fit_res):
+    npar = int(fit_func.GetNpar())
+    cov = np.zeros((npar, npar), dtype=float)
+    cov_ok = False
+
+    if fit_res is not None:
+        try:
+            status_ok = True
+            if hasattr(fit_res, "Status") and int(fit_res.Status()) != 0:
+                status_ok = False
+            if hasattr(fit_res, "CovMatrixStatus") and int(fit_res.CovMatrixStatus()) < 3:
+                status_ok = False
+            root_cov = fit_res.GetCovarianceMatrix()
+            if status_ok:
+                for row in range(npar):
+                    for col in range(npar):
+                        cov[row, col] = matrix_element(root_cov, row, col)
+                cov_ok = True
+        except Exception:
+            cov_ok = False
+
+    if not cov_ok:
+        for idx in range(npar):
+            par_err = float(fit_func.GetParError(idx))
+            cov[idx, idx] = par_err * par_err
+
+    return cov, cov_ok
+
+# ---------------------------------------------------------------
+def propagated_variance(covariance, gradient):
+    grad = np.asarray(gradient, dtype=float)
+    variance = float(grad @ covariance @ grad)
+    if not np.isfinite(variance):
+        return 0.0
+    return max(variance, 0.0)
+
+# ---------------------------------------------------------------
+def load_average_kinematics(q2_set, w_set):
+    avek_path = "{}/src/{}/averages/avek.Q{}W{}.dat".format(
+        LTANAPATH, ParticleType, q2_set.replace("p",""), w_set.replace("p",""))
+    avek_by_tbin = {}
+
+    try:
+        with open(avek_path, "r") as ave_file:
+            for line in ave_file:
+                fields = line.strip().split()
+                if len(fields) != 8:
+                    continue
+                ww, dww, qq, dqq, tt, dtt, theta_cm, tbin = map(float, fields)
+                avek_by_tbin[int(round(tbin))] = {
+                    "W": ww,
+                    "dW": dww,
+                    "Q2": qq,
+                    "dQ2": dqq,
+                    "t": tt,
+                    "dt": dtt,
+                    "theta_cm": theta_cm,
+                }
+    except IOError:
+        print("Error reading average kinematics file {}.".format(avek_path))
+
+    return avek_by_tbin
+
+# ---------------------------------------------------------------
 def check_sigma_positive(fcn, graph,
                          phi_set=(0, 90, 180, 270),
                          eps_set=(LOEPS, HIEPS),
-                         shrink_factor=0.90):
+                         shrink_factor=0.90,
+                         fit_options=POSITIVE_REFIT_OPTIONS):
     """
     Ensure σ(φ,ε) ≥ 0 for φ-sample × ε-set.
     If violated, shrink ρTT limits by `shrink_factor` and refit once.
@@ -168,7 +260,7 @@ def check_sigma_positive(fcn, graph,
             fcn.GetParLimits(idx, lo_ref, hi_ref)
             lo_i, hi_i = lo_ref.value, hi_ref.value
         fcn.SetParLimits(idx, lo_i * shrink_factor, hi_i * shrink_factor)
-    graph.Fit(fcn, "MRQ")                    # quiet, no redraw
+    graph.Fit(fcn, fit_options)
 
     # final check
     if not _is_positive():
@@ -212,6 +304,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     t_list = []
     lo_eps_list = []
     hi_eps_list = []
+    avek_by_tbin = load_average_kinematics(q2_set, w_set)
 
     for evt in nlo:
         if evt.t not in t_list:
@@ -336,9 +429,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             syst_err   = syst_frac * sigma_val
             total_err  = math.sqrt(stat_err**2 + syst_err**2)
 
-            # Accumulate inverse-variance weight
-            lo_cross_sec_err[i] += 1.0 / (total_err**2)
-
             # Insert into TGraph2DErrors: x=φ, y=ε_lo, z=σ
             g_plot_err.SetPoint(g_plot_err.GetN(),
                                 phi_val,
@@ -359,8 +449,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             syst_err  = syst_frac * sigma_val
             total_err = math.sqrt(stat_err**2 + syst_err**2)
 
-            hi_cross_sec_err[i] += 1.0 / (total_err**2)
-
             g_plot_err.SetPoint(g_plot_err.GetN(),
                                 phi_val,
                                 hi_eps,
@@ -370,13 +458,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                                      0.0,
                                      total_err)
 
-        try:
-            lo_cross_sec_err[i] = 1/math.sqrt(lo_cross_sec_err[i])            
-            hi_cross_sec_err[i] = 1/math.sqrt(hi_cross_sec_err[i])
-        except ZeroDivisionError:
-            lo_cross_sec_err[i] = -1000
-            hi_cross_sec_err[i] = -1000
-            
         g_plot_err.SetFillColor(29)
         g_plot_err.SetMarkerSize(0.8)
         g_plot_err.SetMarkerStyle(20)
@@ -465,7 +546,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
         fff2.SetParError(2, 1e-3)                        # ρ_LT step
         fff2.SetParError(3, 1e-3)                        # ρ_TT step          
-        g_plot_err.Fit(fff2, "SEWQ")       # quiet, no redraw
+        g_plot_err.Fit(fff2, FIT_OPTIONS)
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
@@ -495,7 +576,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
         fff2.SetParError(2, 1e-3)                        # ρ_LT step
         fff2.SetParError(3, 1e-3)                        # ρ_TT step                   
-        g_plot_err.Fit(fff2, "SEWQ")
+        g_plot_err.Fit(fff2, FIT_OPTIONS)
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -518,7 +599,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
         fff2.SetParError(2, 1e-3)                        # ρ_LT step
         fff2.SetParError(3, 1e-3)                        # ρ_TT step                   
-        g_plot_err.Fit(fff2, "SEWQ")
+        g_plot_err.Fit(fff2, FIT_OPTIONS)
         check_sigma_positive(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -539,8 +620,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
         fff2.SetParError(2, 1e-3)                        # ρ_LT step
         fff2.SetParError(3, 1e-3)                        # ρ_TT step                 
-        g_plot_err.Fit(fff2, "SEWQ")
-        check_sigma_positive(fff2, g_plot_err)     
+        g_plot_err.Fit(fff2, FIT_OPTIONS)
+        check_sigma_positive(fff2, g_plot_err)
+        fit_res = unwrap_fit_result(g_plot_err.Fit(fff2, FIT_OPTIONS))
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -685,33 +767,40 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_l   = fff2.GetParameter(1)
         rho_lt  = fff2.GetParameter(2)
         rho_tt  = fff2.GetParameter(3)
+        covariance, covariance_ok = get_fit_covariance(fff2, fit_res)
+
+        if not covariance_ok:
+            print("WARNING: accurate fit covariance unavailable; falling back to diagonal parameter errors.")
 
         sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)
         sig_tt  = rho_tt * sig_t
 
         # One-sigma errors ----------------------------------------------
-        sig_t_err   = fff2.GetParError(0)
-        sig_l_err   = fff2.GetParError(1)
-        rho_lt_err  = fff2.GetParError(2)
-        rho_tt_err  = fff2.GetParError(3)
+        sig_t_err   = math.sqrt(max(covariance[0, 0], 0.0))
+        sig_l_err   = math.sqrt(max(covariance[1, 1], 0.0))
+        rho_lt_err  = math.sqrt(max(covariance[2, 2], 0.0))
+        rho_tt_err  = math.sqrt(max(covariance[3, 3], 0.0))
 
-        # ---------------------------------------------------------------
-        # Error propagation (fully guarded) -----------------------------
-        _eps = 1e-6                           # numerical floor
+        sqrt_sig_t_sig_l = math.sqrt(max(sig_t * sig_l, 0.0))
+        if sqrt_sig_t_sig_l > 0.0:
+            sig_lt_gradient = np.array([
+                0.5 * rho_lt * sig_l / sqrt_sig_t_sig_l,
+                0.5 * rho_lt * sig_t / sqrt_sig_t_sig_l,
+                sqrt_sig_t_sig_l,
+                0.0,
+            ], dtype=float)
+        else:
+            sig_lt_gradient = np.zeros(4, dtype=float)
 
-        safe_sig_t  = max(abs(sig_t),  _eps)
-        safe_sig_l  = max(abs(sig_l),  _eps)
-        safe_rho_lt = max(abs(rho_lt), _eps)
+        sig_tt_gradient = np.array([rho_tt, 0.0, 0.0, sig_t], dtype=float)
 
-        sig_lt_err = abs(sig_lt) * math.sqrt(
-            (rho_lt_err / safe_rho_lt)**2
-            + (sig_t_err / (2.0 * safe_sig_t))**2
-            + (sig_l_err / (2.0 * safe_sig_l))**2
-        )
+        sig_lt_err = math.sqrt(propagated_variance(covariance, sig_lt_gradient))
+        sig_tt_err = math.sqrt(propagated_variance(covariance, sig_tt_gradient))
 
-        sig_tt_err = math.hypot( safe_sig_t * rho_tt_err,
-                                rho_tt      * sig_t_err )
-        # ---------------------------------------------------------------
+        lo_cross_sec[i] = sig_t + (lo_eps * sig_l)
+        hi_cross_sec[i] = sig_t + (hi_eps * sig_l)
+        lo_cross_sec_err[i] = math.sqrt(propagated_variance(covariance, [1.0, lo_eps, 0.0, 0.0]))
+        hi_cross_sec_err[i] = math.sqrt(propagated_variance(covariance, [1.0, hi_eps, 0.0, 0.0]))
 
         print(f"\n=== Bin {i+1} Summary ===")
         print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
@@ -737,23 +826,21 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             print("Error writing to file {}.".format(fn_sep))
 
         # ---------------- NEW CSV OUTPUT -----------------
-        import pandas as pd
-
-        # Build the output filename dynamically
         Q2_str = Q2.replace('.', 'p')
         W_str = W.replace('.', 'p')
         csv_filename = f"{OUTPATH}/{ANATYPE}LT_Q{Q2_str}W{W_str}.csv"
+        avek_entry = avek_by_tbin.get(i + 1, {})
 
         # Prepare a single-row dictionary for this t-bin
         row_data = {
             "Q2_token":  int(Q2_str.replace('p', '')),
             "W_token":   int(W_str.replace('p', '')),
-            "Q2":        float(q2_list[i]),
-            "dQ2":       float(q2_list[i]) * 0.001,  # or replace with true uncertainty
-            "W":         float(w_list[i]),
-            "dW":        float(w_list[i]) * 0.001,   # or replace with true uncertainty
-            "t":         float(t_list[i]),
-            "dt":        float(t_list[i]) * 0.001,   # or replace with true uncertainty
+            "Q2":        float(avek_entry.get("Q2", q2_list[i])),
+            "dQ2":       float(avek_entry.get("dQ2", 0.0)),
+            "W":         float(avek_entry.get("W", w_list[i])),
+            "dW":        float(avek_entry.get("dW", 0.0)),
+            "t":         float(avek_entry.get("t", t_list[i])),
+            "dt":        float(avek_entry.get("dt", 0.0)),
             "sigL":      sig_l,
             "dsigL":     sig_l_err,
             "sigT":      sig_t,
@@ -762,7 +849,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             "dsigLT":    sig_lt_err,
             "sigTT":     sig_tt,
             "dsigTT":    sig_tt_err,
-            "chi2":      3.0,
+            "chi2":      red_chi2,
             "tbin":      i + 1
         }
 
@@ -867,9 +954,6 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         sig_diff_g.Draw("a*")
         c5.Print(outputpdf)
         c5.Clear()
-        
-        lo_cross_sec[i] = flo_unsep.Integral(0, 2*PI) / (2*PI)
-        hi_cross_sec[i] = fhi_unsep.Integral(0, 2*PI) / (2*PI)
         
         g_unsep_lo.SetPoint(g_unsep_lo.GetN(), LOEPS, lo_cross_sec[i])
         g_unsep_lo.SetPointError(g_unsep_lo.GetN()-1, 0, lo_cross_sec_err[i])        

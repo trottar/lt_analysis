@@ -58,6 +58,16 @@ from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist
 
 ##################################################################################################################################################
 
+def integral_with_stat_error(hist):
+    total = 0.0
+    variance = 0.0
+    for bin_index in range(1, hist.GetNbinsX() + 1):
+        total += hist.GetBinContent(bin_index)
+        bin_error = hist.GetBinError(bin_index)
+        variance += bin_error * bin_error
+    return total, math.sqrt(max(variance, 0.0))
+
+
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
@@ -145,6 +155,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     ##############
 
     hist_bin_dict = {}
+    dummy_norm_hist_dict = {}
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
@@ -207,6 +218,13 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]  \
                     = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
                 
+    for hist in hist_bin_dict.values():
+        hist.Sumw2()
+    if ParticleType == "kaon":
+        for hist in subDict.values():
+            if is_hist(hist):
+                hist.Sumw2()
+
     print("\nBinning data...")
     for i,evt in enumerate(TBRANCH_DATA):
 
@@ -501,6 +519,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)            
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)        
+
+            dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)] = hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Clone(
+                "H_MM_DUMMY_NORM_{}_{}".format(j, k)
+            )
             
             # Dummy subtraction            
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)], -1)
@@ -683,10 +705,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale"] = 0.50
+            inpDict["bg_stat_scale2"] = 0.50
             # ----------------------------------------------------------------
 
-            if inpDict["bg_stat_scale"] > 0.0:
+            if inpDict["bg_stat_scale2"] > 0.0:
                 # Fit background and subtract
                 fitDict["background_fit2_{}_{}".format(j, k)] = bg_fit(
                     phi_setting,
@@ -762,6 +784,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
+                "H_MM_DUMMY_NORM" : dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
@@ -934,6 +957,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
     binned_hist_sub = []
     mm_hist_data = []
     mm_hist_sub = []
+    mm_hist_dummy_norm = []
 
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
@@ -949,6 +973,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
         for k in range(len(phi_bins)-1):
 
             H_MM_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DATA"]
+            H_MM_DUMMY_NORM = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_DUMMY_NORM"]
             H_t_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_DATA"]
 
             H_MM_SUB_DATA = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_MM_SUB_DATA"]
@@ -967,6 +992,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
                 arr_bg_fit2_frac_err[j][k] = 0.0
 
             mm_hist_data.append(H_MM_DATA.Clone())
+            mm_hist_dummy_norm.append(H_MM_DUMMY_NORM.Clone())
             mm_hist_sub.append(H_MM_SUB_DATA.Clone())
 
             # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_sub
@@ -1001,6 +1027,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
         "binned_hist_data" : binned_hist_data,
         "binned_hist_sub" : binned_hist_sub,
         "mm_hist_data" : mm_hist_data,
+        "mm_hist_dummy_norm" : mm_hist_dummy_norm,
         "mm_hist_sub" : mm_hist_sub,
         "scale_factor" : arr_scale_factor,                                  
     }
@@ -1019,6 +1046,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     # Grab the setting by setting normalized error
     data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())]
+    dummy_charge_err = inpDict["dummy_charge_err_{}".format(hist["phi_setting"].lower())]
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
     
@@ -1029,6 +1057,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
     binned_hist_sub = binned_dict[kin_type]["binned_hist_sub"]
     mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
+    mm_hist_dummy_norm = binned_dict[kin_type]["mm_hist_dummy_norm"]
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
 
     # Initialize list saving scaled pion values    
@@ -1060,63 +1089,40 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
-    for data, sub in zip(binned_hist_data, binned_hist_sub):
+    for data, final_hist, dummy_hist in zip(binned_hist_data, mm_hist_data, mm_hist_dummy_norm):
         j = i // nphi
         k = i %  nphi
         # Data is dummy, background (if used) subtracted and normalized
         bin_val_data, hist_val_data = data
-        # Optional subtracted histograms (background, particle, etc.)
-        bin_val_sub, hist_val_sub = sub
-        bin_width_data = np.mean(np.diff(bin_val_data))
         arr_data = np.array(hist_val_data)
-        bin_width_sub = np.mean(np.diff(bin_val_sub))
-        arr_sub = np.array(hist_val_sub)
         try:
-            #print(f"{i} | DATA Yield: {np.sum(arr_data)/bin_width_data:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
-            yld = np.sum(arr_data)
-            #print(f"{i} | DATA Yield: {yld:.3e} =  NumEvts: {np.sum(arr_data):.3e} / BinWidth: {bin_width_data:.3e}")
-            # "Raw" counts:
-            #   arr_data / normfac_data  -> signal raw counts
-            #   arr_sub  / normfac_data  -> particle subtraction raw counts            
-            # Divide by norm factor to cancel out since we need raw counts            
-            N_data_raw = np.sum(arr_data / normfac_data)
-            N_sub_raw  = np.sum(arr_sub  / normfac_data) 
+            yld, yld_stat_err = integral_with_stat_error(final_hist)
+            dummy_yld, _ = integral_with_stat_error(dummy_hist)
 
-            # Calculate experimental yield error (relative error)
-            if N_data_raw > 0.0:
-                yld_data_err = np.sqrt(
-                    data_charge_err**2 +
-                    (1.0 / np.sqrt(N_data_raw))**2
-                )
-            else:
-                yld_data_err = -1000.0
-            if N_data_raw > 0.0 and N_sub_raw > 0.0:
-                yld_sub_err = arr_scale_factor[j][k] * np.sqrt(N_sub_raw) / N_data_raw
-            else:
-                yld_sub_err = 0.0
-
-            # Handle NaN or Inf errors
-            if math.isnan(yld_data_err) or math.isinf(yld_data_err):
-                yld_data_err = -1000.0
-            if math.isnan(yld_sub_err) or math.isinf(yld_sub_err):
-                yld_sub_err = -1000.0 
-                      
-            # Fractional contribution from empirical background fit (background_fit1)
-            
             bg_fit1_err = arr_bg_fit1_frac_err[j][k]        
             bg_fit2_err = arr_bg_fit2_frac_err[j][k]     
 
-            # Convert to absolute error (required for average_ratio.f)
+            # Normalization uncertainty from the data effective charge applies to the
+            # final extracted yield, while the dummy normalization uncertainty applies
+            # to the normalized dummy component that was subtracted.
+            yld_data_norm_err = abs(yld) * data_charge_err
+            yld_dummy_norm_err = abs(dummy_yld) * dummy_charge_err
+
+            # Convert background-fit fractional terms to absolute uncertainties.
             yld_err = np.sqrt(
-                yld_data_err**2 +
-                yld_sub_err**2 +
-                bg_fit1_err**2 + 
-                bg_fit2_err**2
-                ) * yld
-            #print(f"    | DATA Yield Error: {yld_data_err:.3e} = {np.sum(arr_data/normfac_data):.3e}")
-            #print(f"    | SUB Yield Error: {yld_sub_err:.3e} = {np.sum(arr_sub/normfac_data):.3e}, SCALE: {arr_scale_factor[j][k]:.3e}")            
+                yld_stat_err**2 +
+                yld_data_norm_err**2 +
+                yld_dummy_norm_err**2 +
+                (abs(yld) * bg_fit1_err)**2 + 
+                (abs(yld) * bg_fit2_err)**2
+            )
         except ZeroDivisionError:
             yld = 0.0
+            yld_err = -1000.0
+        if yld <= 0.0 or not math.isfinite(yld):
+            yld = 0.0
+            yld_err = -1000.0
+        if not math.isfinite(yld_err):
             yld_err = -1000.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
@@ -1234,6 +1240,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             #hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 1000, 0.0, 2.0)
             #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, 0.0, 2.0)
             #hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
+
+    for hist in hist_bin_dict.values():
+        hist.Sumw2()
 
     print("\nBinning simc...")
     for i,evt in enumerate(TBRANCH_SIMC):
@@ -1440,26 +1449,16 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
     mm_hist_simc = binned_dict[kin_type]["mm_hist_simc"]
     
-    binned_unweighted_NumEvts_simc = binned_dict[kin_type]["binned_unweighted_NumEvts_simc"]
-
     yield_hist = []
     yield_err_hist = []
     binned_sub_simc = [[],[]]
     i=0 # iter
     print("-"*25)
-    for simc in binned_hist_simc:
+    for simc, simc_hist in zip(binned_hist_simc, mm_hist_simc):
         bin_val_simc, hist_val_simc = simc
-        bin_width_simc = np.mean(np.diff(bin_val_simc))
         arr_simc = np.array(hist_val_simc)
         try:
-            #print(f"{i} | SIMC Yield: {np.sum(arr_simc)/bin_width_simc:.3e} =  NumEvts: {np.sum(arr_simc):.3e} / BinWidth: {bin_width_simc:.3e}")
-            yld = np.sum(arr_simc)
-            #yld = mm_hist_simc[i].Integral()
-            # Calculate simc yield error (relative error)
-            # No norm_fac, shouldn't normalize non-weighted distribution
-            yld_err = (1/np.sqrt(binned_unweighted_NumEvts_simc[i]))
-            # Convert to absolute error (required for average_ratio.f)
-            yld_err = yld_err*yld
+            yld, yld_err = integral_with_stat_error(simc_hist)
         except ZeroDivisionError:
             yld = 0.0
             yld_err = 0.0
