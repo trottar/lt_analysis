@@ -433,6 +433,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 min_iterations_before_stop = max(250, 50 * num_params)
                 trajectory_stride = max(1, max_iterations // 500)
                 start_time = time.time()
+                graphs_sig_fit[it] = TGraphErrors()
 
                 for i_pt in range(fit_num_events):
                     sig_X_fit = g_sig.GetY()[i_pt]
@@ -840,6 +841,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_overall_point.SetMarkerColor(kBlue)
                     hold_root_objects(plot_object_refs, objective_landscape_hist, best_overall_point)
 
+                if best_overall_bin != b:
+                    continue
+
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
@@ -997,11 +1001,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     )
                     objective_landscape_hist.Draw("COLZ")
                     graph_sig_param_space_path.SetMarkerStyle(20)
-                    graph_sig_param_space_path.SetMarkerSize(0.4)
+                    graph_sig_param_space_path.SetMarkerSize(0.7)
                     graph_sig_param_space_path.SetMarkerColor(kBlack)
-                    graph_sig_param_space_path.Draw("P SAME")
+                    graph_sig_param_space_path.SetLineColor(kBlack)
+                    graph_sig_param_space_path.SetLineWidth(1)
+                    graph_sig_param_space_path.Draw("LP SAME")
                     graph_sig_run_best_points.SetMarkerStyle(24)
-                    graph_sig_run_best_points.SetMarkerSize(1.1)
+                    graph_sig_run_best_points.SetMarkerSize(1.4)
                     graph_sig_run_best_points.SetMarkerColor(kRed)
                     graph_sig_run_best_points.Draw("P SAME")
                     best_overall_point.Draw("P SAME")
