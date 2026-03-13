@@ -299,6 +299,23 @@ def hold_root_objects(store, *objects):
         if obj is not None:
             store.append(obj)
 
+def extract_graph_points(graph):
+    if graph is None:
+        return []
+    points = []
+    for i_point in range(graph.GetN()):
+        x_value = graph.GetX()[i_point]
+        y_value = graph.GetY()[i_point]
+        if math.isfinite(x_value) and math.isfinite(y_value):
+            points.append((float(x_value), float(y_value)))
+    return points
+
+def build_graph_from_points(points):
+    graph = TGraph()
+    for i_point, (x_value, y_value) in enumerate(points):
+        graph.SetPoint(i_point, x_value, y_value)
+    return graph
+
 def has_acceptable_run(best_cost, best_chi2, fit_num_events, num_params, chi2_threshold):
     if fit_num_events > num_params:
         return math.isfinite(best_chi2) and best_chi2 <= chi2_threshold
@@ -372,6 +389,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     iter_num    = inpDict["iter_num"]
     fit_params  = inpDict["fit_params"]
     chi2_threshold = inpDict["chi2_threshold"]
+    search_history_cache = inpDict.setdefault("search_history_cache", {})
 
     q2_center_val = get_central_value(q2_vec)
     w_center_val  = get_central_value(w_vec)
@@ -962,6 +980,13 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     best_overall_point.SetMarkerStyle(29)
                     best_overall_point.SetMarkerSize(2.0)
                     best_overall_point.SetMarkerColor(kBlue)
+                    search_history_cache[sig_name] = {
+                        "best_bin": best_overall_bin,
+                        "proposal_points": extract_graph_points(graph_sig_param_space_samples),
+                        "accepted_points": extract_graph_points(graph_sig_param_space_path),
+                        "run_best_points": extract_graph_points(graph_sig_run_best_points),
+                        "best_params": list(best_overall_params),
+                    }
                     hold_root_objects(
                         plot_object_refs,
                         objective_landscape_hist,
@@ -1226,6 +1251,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 num_params, init_params, equation_str = inpDict["initial_params"](sig_name, val)
                 param_str = ', '.join(str(p) for p in init_params)
+                param_lower_bounds, param_upper_bounds = build_parameter_bounds(
+                    init_params, equation_str, initial_param_bounds
+                )
 
                 total_iteration = 0
                 lambda_reg = 0.0
@@ -1234,7 +1262,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 print(f"Fit for Sig {sig_name} ({num_params} parameters)")
                 print(f"Initial Parameters: ({param_str})")
                 print(equation_str)
-                print("/*--------------------------------------------------*/")                
+                print("/*--------------------------------------------------*/")
 
                 if sig_name == "L":
                     fun_Sig = fun_Sig_L_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
@@ -1246,7 +1274,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     fun_Sig = fun_Sig_TT_wrapper(g_vec[b], q2_vec[b], w_vec[b], math.radians(th_vec[b]))
                 else:
                     raise ValueError("Unknown signal name")
-                funcs_sig[it] = fun_Sig                
+                funcs_sig[it] = fun_Sig
                 f_sig = TF1(f"sig_{sig_name}", funcs_sig[it], tmin_range, tmax_range, num_params)
                 fits_sig[it] = f_sig
 
@@ -1273,24 +1301,27 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     print(f"WARNING: No data points selected for Sig {sig_name}. Skipping.")
                     continue
 
+                graphs_sig_fit[it] = TGraphErrors()
                 for i_pt in range(fit_num_events):
-                    sig_X_fit = g_sig.GetY()[i_pt]#/ (g_vec[i_pt])# / 1e3
-                    sig_X_fit_err = g_sig.GetEY()[i_pt]#/ (g_vec[i_pt])# / 1e3
+                    sig_X_fit = g_sig.GetY()[i_pt]
+                    sig_X_fit_err = g_sig.GetEY()[i_pt]
                     graphs_sig_fit[it].SetPoint(i_pt, g_sig.GetX()[i_pt], sig_X_fit)
                     graphs_sig_fit[it].SetPointError(i_pt, 0, sig_X_fit_err)
                 fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
                 for i in range(num_params):
                     fits_sig[it].FixParameter(i, par_vec[4*it + i])
-                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
+                graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
                 current_cost, lambda_reg, current_chi2 = calculate_cost(
                     fits_sig[it], g_sig, par_vec[4*it:4*(it+1)],
                     fit_num_events, num_params, lambda_reg
                 )
-                if current_cost < best_overall_cost:
-                    best_overall_cost = current_cost
-                    best_overall_chi2 = current_chi2
-                    best_overall_bin = b
-                    best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
+                if current_cost >= best_overall_cost:
+                    continue
+
+                best_overall_cost = current_cost
+                best_overall_chi2 = current_chi2
+                best_overall_bin = b
+                best_overall_params = [par_vec[4*it + j] for j in range(num_params)]
                 print(f"\nBest overall solution: {best_overall_params}")
                 print(f"Best overall objective cost: {best_overall_cost:.5f}")
                 print(f"Best overall chi2/ndf: {best_overall_chi2:.5f}")
@@ -1298,7 +1329,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 for j in range(num_params):
                     par_chi2_vec[4*it + j] = best_overall_chi2
 
-                # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
                 graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
                 graphs_sig_fit[it].Draw("A*")
@@ -1315,17 +1345,6 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 margin = 0.1
                 graphs_sig_fit[it].GetXaxis().SetRangeUser(x_min - margin, x_max + margin)
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-                if sig_name == "L":
-                    fun_Sig = fun_Sig_L_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
-                elif sig_name == "T":
-                    fun_Sig = fun_Sig_T_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
-                elif sig_name == "LT":
-                    fun_Sig = fun_Sig_LT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
-                elif sig_name == "TT":
-                    fun_Sig = fun_Sig_TT_wrapper(g_vec[best_overall_bin], q2_vec[best_overall_bin], w_vec[best_overall_bin], math.radians(th_vec[best_overall_bin]))
-                fits_sig[it].SetParNames(*[f"p{4*it + i}" for i in range(num_params)])
-                for i in range(num_params):
-                    fits_sig[it].FixParameter(i, par_vec[4*it + i])
                 n_points = 100
                 fit_y_values = [fits_sig[it].Eval(x) for x in np.linspace(tmin_range, tmax_range, n_points)]
                 fit_y_min = min(fit_y_values)
@@ -1334,12 +1353,211 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 y_max = max(y_max, fit_y_max)
                 margin = 0.1 * (y_max - y_min)
                 graphs_sig_fit[it].GetYaxis().SetRangeUser(y_min - margin, y_max + margin)
-                r_sig_fit = graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
+                graphs_sig_fit[it].Fit(fits_sig[it], "SQ")
                 fits_sig[it].Draw("same")
                 latex = TLatex()
                 latex.SetTextSize(0.04)
                 latex.SetNDC(True)
                 latex.DrawLatex(0.35, 0.85, f"Best #chi^{{2}}/ndf: {best_overall_chi2:.3f}")
+                hold_root_objects(plot_object_refs, latex)
+
+                cached_history = search_history_cache.get(sig_name, {})
+                history_matches_best_bin = cached_history.get("best_bin") == best_overall_bin
+                history_proposals = build_graph_from_points(
+                    cached_history.get("proposal_points", []) if history_matches_best_bin else []
+                )
+                history_accepted = build_graph_from_points(
+                    cached_history.get("accepted_points", []) if history_matches_best_bin else []
+                )
+                history_run_best = build_graph_from_points(
+                    cached_history.get("run_best_points", []) if history_matches_best_bin else []
+                )
+                history_accepted.SetMarkerStyle(20)
+                history_accepted.SetMarkerSize(0.8)
+                history_accepted.SetMarkerColor(kBlack)
+                history_accepted.SetLineColor(kBlack)
+                history_accepted.SetLineWidth(2)
+                history_proposals.SetMarkerStyle(25)
+                history_proposals.SetMarkerSize(0.9)
+                history_proposals.SetMarkerColor(kMagenta)
+                history_proposals.SetLineColor(kMagenta)
+                history_run_best.SetMarkerStyle(24)
+                history_run_best.SetMarkerSize(1.4)
+                history_run_best.SetMarkerColor(kRed)
+
+                objective_landscape_hist = None
+                objective_landscape_zoom_hist = None
+                search_density_hist = None
+                best_overall_point = None
+                if num_params == 2 and best_overall_params is not None:
+                    objective_landscape_hist = build_objective_landscape_hist(
+                        f"landscape_fixed_{sig_name}_{it}_{b}",
+                        fits_sig[it],
+                        g_sig,
+                        best_overall_params,
+                        fit_num_events,
+                        num_params,
+                        lambda_reg,
+                        param_lower_bounds,
+                        param_upper_bounds
+                    )
+                    zoom_lower_bounds, zoom_upper_bounds = build_zoomed_bounds(
+                        param_lower_bounds,
+                        param_upper_bounds,
+                        best_overall_params,
+                        history_accepted,
+                        history_proposals,
+                        history_run_best
+                    )
+                    objective_landscape_zoom_hist = build_objective_landscape_hist(
+                        f"landscape_fixed_zoom_{sig_name}_{it}_{b}",
+                        fits_sig[it],
+                        g_sig,
+                        best_overall_params,
+                        fit_num_events,
+                        num_params,
+                        lambda_reg,
+                        zoom_lower_bounds,
+                        zoom_upper_bounds
+                    )
+                    search_density_hist = build_search_density_hist(
+                        f"search_density_fixed_{sig_name}_{it}_{b}",
+                        history_proposals,
+                        zoom_lower_bounds,
+                        zoom_upper_bounds
+                    )
+                    best_overall_point = TGraph()
+                    best_overall_point.SetPoint(0, best_overall_params[0], best_overall_params[1])
+                    best_overall_point.SetMarkerStyle(29)
+                    best_overall_point.SetMarkerSize(2.0)
+                    best_overall_point.SetMarkerColor(kBlue)
+                hold_root_objects(
+                    plot_object_refs,
+                    history_proposals,
+                    history_accepted,
+                    history_run_best,
+                    objective_landscape_hist,
+                    objective_landscape_zoom_hist,
+                    search_density_hist,
+                    best_overall_point
+                )
+
+                c11.cd(it+1).SetLeftMargin(0.14)
+                if objective_landscape_hist is not None:
+                    objective_landscape_hist.SetTitle(
+                        f"Sig {sig_name} Full Parameter-Space Landscape;"
+                        f"Parameter 1;Parameter 2;log_{{10}}(Objective Cost)"
+                    )
+                    objective_landscape_hist.Draw("COLZ")
+                    if history_accepted.GetN() > 0:
+                        history_accepted.Draw("LP SAME")
+                    if history_run_best.GetN() > 0:
+                        history_run_best.Draw("P SAME")
+                    if best_overall_point is not None:
+                        best_overall_point.Draw("P SAME")
+                    if history_proposals.GetN() > 0:
+                        history_proposals.Draw("P SAME")
+                    leg_landscape = TLegend(0.48, 0.66, 0.9, 0.9)
+                    if history_proposals.GetN() > 0:
+                        leg_landscape.AddEntry(history_proposals, "Annealing Proposals", "p")
+                    if history_accepted.GetN() > 0:
+                        leg_landscape.AddEntry(history_accepted, "Accepted Path", "lp")
+                    if history_run_best.GetN() > 0:
+                        leg_landscape.AddEntry(history_run_best, "Run Best Points", "p")
+                    if best_overall_point is not None:
+                        leg_landscape.AddEntry(best_overall_point, "Best Overall", "p")
+                    leg_landscape.Draw()
+                    latex_landscape = TLatex()
+                    latex_landscape.SetTextSize(0.03)
+                    latex_landscape.SetNDC(True)
+                    if history_matches_best_bin and history_proposals.GetN() > 0:
+                        latex_landscape.DrawLatex(0.16, 0.93, "Stored annealing history for final best bin")
+                    else:
+                        latex_landscape.DrawLatex(0.16, 0.93, "Fixed-parameter redraw: objective landscape only")
+                    hold_root_objects(plot_object_refs, leg_landscape, latex_landscape)
+                else:
+                    placeholder = TText()
+                    placeholder.SetTextSize(0.035)
+                    placeholder.DrawTextNDC(0.12, 0.5, "Full phase-space COLZ available for 2-parameter fits only.")
+                    hold_root_objects(plot_object_refs, placeholder)
+                c11.Update()
+
+                c12.cd(it+1).SetLeftMargin(0.14)
+                if objective_landscape_zoom_hist is not None:
+                    objective_landscape_zoom_hist.SetTitle(
+                        f"Sig {sig_name} Zoomed Parameter-Space Landscape;"
+                        f"Parameter 1;Parameter 2;log_{{10}}(Objective Cost)"
+                    )
+                    objective_landscape_zoom_hist.Draw("COLZ")
+                    if history_accepted.GetN() > 0:
+                        history_accepted.Draw("LP SAME")
+                    if history_run_best.GetN() > 0:
+                        history_run_best.Draw("P SAME")
+                    if best_overall_point is not None:
+                        best_overall_point.Draw("P SAME")
+                    if history_proposals.GetN() > 0:
+                        history_proposals.Draw("P SAME")
+                    leg_landscape_zoom = TLegend(0.48, 0.66, 0.9, 0.9)
+                    if history_proposals.GetN() > 0:
+                        leg_landscape_zoom.AddEntry(history_proposals, "Annealing Proposals", "p")
+                    if history_accepted.GetN() > 0:
+                        leg_landscape_zoom.AddEntry(history_accepted, "Accepted Path", "lp")
+                    if history_run_best.GetN() > 0:
+                        leg_landscape_zoom.AddEntry(history_run_best, "Run Best Points", "p")
+                    if best_overall_point is not None:
+                        leg_landscape_zoom.AddEntry(best_overall_point, "Best Overall", "p")
+                    leg_landscape_zoom.Draw()
+                    latex_landscape_zoom = TLatex()
+                    latex_landscape_zoom.SetTextSize(0.03)
+                    latex_landscape_zoom.SetNDC(True)
+                    if history_matches_best_bin and history_proposals.GetN() > 0:
+                        latex_landscape_zoom.DrawLatex(0.16, 0.93, "Zoomed to stored explored basin")
+                    else:
+                        latex_landscape_zoom.DrawLatex(0.16, 0.93, "Zoomed around final fixed-parameter minimum")
+                    hold_root_objects(plot_object_refs, leg_landscape_zoom, latex_landscape_zoom)
+                else:
+                    placeholder_zoom = TText()
+                    placeholder_zoom.SetTextSize(0.035)
+                    placeholder_zoom.DrawTextNDC(0.12, 0.5, "Zoomed COLZ available for 2-parameter fits only.")
+                    hold_root_objects(plot_object_refs, placeholder_zoom)
+                c12.Update()
+
+                c13.cd(it+1).SetLeftMargin(0.14)
+                if search_density_hist is not None:
+                    search_density_hist.SetTitle(
+                        f"Sig {sig_name} Proposal Search Density;"
+                        f"Parameter 1;Parameter 2;Visits"
+                    )
+                    search_density_hist.Draw("COLZ")
+                    if history_accepted.GetN() > 0:
+                        history_accepted.Draw("LP SAME")
+                    if history_run_best.GetN() > 0:
+                        history_run_best.Draw("P SAME")
+                    if best_overall_point is not None:
+                        best_overall_point.Draw("P SAME")
+                    leg_density = TLegend(0.48, 0.66, 0.9, 0.9)
+                    leg_density.AddEntry(search_density_hist, "Proposal Density", "f")
+                    if history_accepted.GetN() > 0:
+                        leg_density.AddEntry(history_accepted, "Accepted Path", "lp")
+                    if history_run_best.GetN() > 0:
+                        leg_density.AddEntry(history_run_best, "Run Best Points", "p")
+                    if best_overall_point is not None:
+                        leg_density.AddEntry(best_overall_point, "Best Overall", "p")
+                    leg_density.Draw()
+                    latex_density = TLatex()
+                    latex_density.SetTextSize(0.03)
+                    latex_density.SetNDC(True)
+                    latex_density.DrawLatex(0.16, 0.93, "Stored search density for the final best bin")
+                    hold_root_objects(plot_object_refs, leg_density, latex_density)
+                else:
+                    placeholder_density = TText()
+                    placeholder_density.SetTextSize(0.035)
+                    if history_matches_best_bin:
+                        placeholder_density.DrawTextNDC(0.12, 0.5, "No proposal-density samples were stored for this signal.")
+                    else:
+                        placeholder_density.DrawTextNDC(0.12, 0.5, "No annealing history available in fixed-parameter redraw.")
+                    hold_root_objects(plot_object_refs, placeholder_density)
+                c13.Update()
                 c2.Update()
                 print("\n")
             c2.Update()
