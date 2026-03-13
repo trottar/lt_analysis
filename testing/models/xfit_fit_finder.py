@@ -226,6 +226,37 @@ def build_objective_landscape_hist(hist_name, fit_func, g_sig, best_params, num_
 
     return hist
 
+def build_search_density_hist(hist_name, graph, lower_bounds, upper_bounds, n_bins=60):
+    if graph is None or graph.GetN() <= 0:
+        return None
+
+    hist = TH2D(
+        hist_name,
+        "",
+        n_bins,
+        lower_bounds[0],
+        upper_bounds[0],
+        n_bins,
+        lower_bounds[1],
+        upper_bounds[1]
+    )
+
+    filled_points = 0
+    for i_point in range(graph.GetN()):
+        x_value = graph.GetX()[i_point]
+        y_value = graph.GetY()[i_point]
+        if math.isfinite(x_value) and math.isfinite(y_value):
+            hist.Fill(x_value, y_value)
+            filled_points += 1
+
+    if filled_points == 0:
+        return None
+
+    hist.SetMinimum(0.0)
+    if hist.GetMaximum() <= 0.0:
+        hist.SetMaximum(1.0)
+    return hist
+
 def build_zoomed_bounds(lower_bounds, upper_bounds, best_params, *graphs):
     if best_params is None or len(best_params) < 2:
         return list(lower_bounds), list(upper_bounds)
@@ -325,6 +356,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
     c11.Divide(2, 2)
     c12 = TCanvas("c12", "Zoomed Objective Landscape", 900, 900)
     c12.Divide(2, 2)
+    c13 = TCanvas("c13", "Search Density", 900, 900)
+    c13.Divide(2, 2)
 
     # -----------------------------------------------------------------------------
     # 2. Unpack input objects/settings
@@ -426,6 +459,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 graph_sig_stagnation = TGraph()
                 graph_sig_restarts = TGraph()
                 graph_sig_param_space_path = TGraph()
+                graph_sig_param_space_samples = TGraph()
                 graph_sig_run_best_points = TGraph()
                 hold_root_objects(
                     plot_object_refs,
@@ -445,6 +479,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     graph_sig_stagnation,
                     graph_sig_restarts,
                     graph_sig_param_space_path,
+                    graph_sig_param_space_samples,
                     graph_sig_run_best_points
                 )
                 graphs_sig_converge.append(graph_sig_chi2)
@@ -500,6 +535,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         return [
                             random.uniform(low, high)
                             for low, high in zip(param_lower_bounds, param_upper_bounds)
+                        ]
+
+                    def clip_to_bounds(params):
+                        return [
+                            select_valid_parameter(value, low, high)
+                            for value, low, high in zip(params, param_lower_bounds, param_upper_bounds)
                         ]
 
                     if run_idx == 0:
@@ -615,6 +656,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                             simulated_annealing(p, temperature)
                             for p in current_params
                         ]
+                        proposal_plot_params = clip_to_bounds(proposal_params)
 
                         sys.stdout.write(
                             f"\rSearching for best parameters...({iteration}/{max_iterations}) "
@@ -784,6 +826,18 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         if (
                             num_params == 2
                             and total_iteration % trajectory_stride == 0
+                            and len(proposal_plot_params) >= 2
+                            and all(math.isfinite(value) for value in proposal_plot_params[:2])
+                        ):
+                            graph_sig_param_space_samples.SetPoint(
+                                graph_sig_param_space_samples.GetN(),
+                                proposal_plot_params[0],
+                                proposal_plot_params[1]
+                            )
+                        if (
+                            num_params == 2
+                            and accepted_move
+                            and total_iteration % trajectory_stride == 0
                             and len(current_params) >= 2
                             and all(math.isfinite(value) for value in current_params[:2])
                         ):
@@ -861,6 +915,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 objective_landscape_hist = None
                 objective_landscape_zoom_hist = None
+                search_density_hist = None
                 best_overall_point = None
                 if num_params == 2 and best_overall_params is not None:
                     objective_landscape_hist = build_objective_landscape_hist(
@@ -879,6 +934,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         param_upper_bounds,
                         best_overall_params,
                         graph_sig_param_space_path,
+                        graph_sig_param_space_samples,
                         graph_sig_run_best_points
                     )
                     objective_landscape_zoom_hist = build_objective_landscape_hist(
@@ -892,6 +948,12 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         zoom_lower_bounds,
                         zoom_upper_bounds
                     )
+                    search_density_hist = build_search_density_hist(
+                        f"search_density_{sig_name}_{it}_{b}",
+                        graph_sig_param_space_samples,
+                        zoom_lower_bounds,
+                        zoom_upper_bounds
+                    )
                     best_overall_point = TGraph()
                     best_overall_point.SetPoint(0, best_overall_params[0], best_overall_params[1])
                     best_overall_point.SetMarkerStyle(29)
@@ -901,6 +963,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         plot_object_refs,
                         objective_landscape_hist,
                         objective_landscape_zoom_hist,
+                        search_density_hist,
                         best_overall_point
                     )
 
@@ -1064,18 +1127,25 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     )
                     objective_landscape_hist.Draw("COLZ")
                     graph_sig_param_space_path.SetMarkerStyle(20)
-                    graph_sig_param_space_path.SetMarkerSize(0.7)
-                    graph_sig_param_space_path.SetMarkerColor(kMagenta)
-                    graph_sig_param_space_path.SetLineColor(kMagenta)
+                    graph_sig_param_space_path.SetMarkerSize(0.8)
+                    graph_sig_param_space_path.SetMarkerColor(kBlack)
+                    graph_sig_param_space_path.SetLineColor(kBlack)
                     graph_sig_param_space_path.SetLineWidth(2)
                     graph_sig_param_space_path.Draw("LP SAME")
+                    graph_sig_param_space_samples.SetMarkerStyle(25)
+                    graph_sig_param_space_samples.SetMarkerSize(0.9)
+                    graph_sig_param_space_samples.SetMarkerColor(kMagenta)
+                    graph_sig_param_space_samples.SetLineColor(kMagenta)
+                    graph_sig_param_space_samples.SetLineWidth(1)
                     graph_sig_run_best_points.SetMarkerStyle(24)
                     graph_sig_run_best_points.SetMarkerSize(1.4)
                     graph_sig_run_best_points.SetMarkerColor(kRed)
                     graph_sig_run_best_points.Draw("P SAME")
                     best_overall_point.Draw("P SAME")
-                    leg_landscape = TLegend(0.48, 0.72, 0.9, 0.9)
-                    leg_landscape.AddEntry(graph_sig_param_space_path, "Sampled Search Path", "p")
+                    graph_sig_param_space_samples.Draw("P SAME")
+                    leg_landscape = TLegend(0.48, 0.66, 0.9, 0.9)
+                    leg_landscape.AddEntry(graph_sig_param_space_samples, "Annealing Proposals", "p")
+                    leg_landscape.AddEntry(graph_sig_param_space_path, "Accepted Path", "lp")
                     leg_landscape.AddEntry(graph_sig_run_best_points, "Run Best Points", "p")
                     leg_landscape.AddEntry(best_overall_point, "Best Overall", "p")
                     leg_landscape.Draw()
@@ -1098,11 +1168,14 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                         f"Parameter 1;Parameter 2;log_{{10}}(Objective Cost)"
                     )
                     objective_landscape_zoom_hist.Draw("COLZ")
+                    graph_sig_param_space_samples.SetMarkerSize(1.0)
                     graph_sig_param_space_path.Draw("LP SAME")
+                    graph_sig_param_space_samples.Draw("P SAME")
                     graph_sig_run_best_points.Draw("P SAME")
                     best_overall_point.Draw("P SAME")
-                    leg_landscape_zoom = TLegend(0.48, 0.72, 0.9, 0.9)
-                    leg_landscape_zoom.AddEntry(graph_sig_param_space_path, "Sampled Search Path", "lp")
+                    leg_landscape_zoom = TLegend(0.48, 0.66, 0.9, 0.9)
+                    leg_landscape_zoom.AddEntry(graph_sig_param_space_samples, "Annealing Proposals", "p")
+                    leg_landscape_zoom.AddEntry(graph_sig_param_space_path, "Accepted Path", "lp")
                     leg_landscape_zoom.AddEntry(graph_sig_run_best_points, "Run Best Points", "p")
                     leg_landscape_zoom.AddEntry(best_overall_point, "Best Overall", "p")
                     leg_landscape_zoom.Draw()
@@ -1117,6 +1190,34 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     placeholder_zoom.DrawTextNDC(0.12, 0.5, "Zoomed COLZ available for 2-parameter fits only.")
                     hold_root_objects(plot_object_refs, placeholder_zoom)
                 c12.Update()
+
+                c13.cd(it+1).SetLeftMargin(0.14)
+                if search_density_hist is not None:
+                    search_density_hist.SetTitle(
+                        f"Sig {sig_name} Proposal Search Density;"
+                        f"Parameter 1;Parameter 2;Visits"
+                    )
+                    search_density_hist.Draw("COLZ")
+                    graph_sig_param_space_path.Draw("LP SAME")
+                    graph_sig_run_best_points.Draw("P SAME")
+                    best_overall_point.Draw("P SAME")
+                    leg_density = TLegend(0.48, 0.66, 0.9, 0.9)
+                    leg_density.AddEntry(search_density_hist, "Proposal Density", "f")
+                    leg_density.AddEntry(graph_sig_param_space_path, "Accepted Path", "lp")
+                    leg_density.AddEntry(graph_sig_run_best_points, "Run Best Points", "p")
+                    leg_density.AddEntry(best_overall_point, "Best Overall", "p")
+                    leg_density.Draw()
+                    latex_density = TLatex()
+                    latex_density.SetTextSize(0.03)
+                    latex_density.SetNDC(True)
+                    latex_density.DrawLatex(0.16, 0.93, "Where the annealer actually visited")
+                    hold_root_objects(plot_object_refs, leg_density, latex_density)
+                else:
+                    placeholder_density = TText()
+                    placeholder_density.SetTextSize(0.035)
+                    placeholder_density.DrawTextNDC(0.12, 0.5, "Search-density view available for 2-parameter fits with samples.")
+                    hold_root_objects(plot_object_refs, placeholder_density)
+                c13.Update()
                 print("\n")
             else:
 
@@ -1249,6 +1350,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
             c10.Update()
             c11.Update()
             c12.Update()
+            c13.Update()
         params_used.append(param_str)
         # Print all canvases to the output PDF
         c2.Print(outputpdf+'(')
@@ -1261,7 +1363,8 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
         c9.Print(outputpdf)
         c10.Print(outputpdf)
         c11.Print(outputpdf)
-        c12.Print(outputpdf+')')
+        c12.Print(outputpdf)
+        c13.Print(outputpdf+')')
     print(f"\nFits saved to {outputpdf}...")
 
     return params_used
