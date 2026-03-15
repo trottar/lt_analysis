@@ -1381,6 +1381,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM + MM_offset_DATA
+        adj_t = get_shifted_t(evt)
         
         ##############
         ##############        
