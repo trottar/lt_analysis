@@ -202,9 +202,102 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 ###############################################################################################################################################
 
 sys.path.append("setup")
-from shift_MM import shift_experimental_files_to_simc_peak
+from shift_MM import (
+    add_derived_branch_to_file,
+    add_shift_branch_to_file,
+    compute_mm_shift_details,
+    get_data_tree_names,
+    make_t_plot_filename,
+    plot_mm_shift_from_details,
+    write_t_shift_plots,
+)
+
+
+def get_shift_theta_and_beam(phiset):
+    config = {
+        "Right": {
+            "run_nums": [run for run in runNumRight.split(" ") if run],
+            "ptheta_vals": pThetaValRight,
+            "beam_vals": EbeamValRight,
+            "sign": 1.0,
+        },
+        "Left": {
+            "run_nums": [run for run in runNumLeft.split(" ") if run],
+            "ptheta_vals": pThetaValLeft,
+            "beam_vals": EbeamValLeft,
+            "sign": -1.0,
+        },
+        "Center": {
+            "run_nums": [run for run in runNumCenter.split(" ") if run],
+            "ptheta_vals": pThetaValCenter,
+            "beam_vals": EbeamValCenter,
+            "sign": 0.0,
+        },
+    }
+
+    setting = config[phiset]
+    run_nums = setting["run_nums"]
+    ptheta_vals = setting["ptheta_vals"]
+    beam_vals = setting["beam_vals"]
+    max_len = min(len(run_nums), len(ptheta_vals), len(pThetaValCenter), len(beam_vals))
+    if max_len == 0:
+        raise RuntimeError(f"No valid theta/beam entries found for {phiset} shift calculation.")
+
+    chosen_index = 0
+    log_suffix = OutFilename.replace("FullAnalysis_", "")
+    for idx, run in enumerate(run_nums[:max_len]):
+        pid_log = f"{LTANAPATH}/log/{phiset}_{ParticleType}_{run}_{log_suffix}.log"
+        if os.path.exists(pid_log):
+            chosen_index = idx
+            break
+
+    beam_energy_gev = float(beam_vals[chosen_index])
+    if phiset == "Center":
+        theta_cm_deg = 0.0
+    else:
+        theta_delta = abs(float(pThetaValCenter[chosen_index]) - float(ptheta_vals[chosen_index]))
+        theta_cm_deg = setting["sign"] * theta_delta
+
+    return theta_cm_deg, beam_energy_gev
+
+
+def run_shift_script(simc_root, data_root, theta_cm_deg, beam_energy_gev):
+    command = [
+        "bash",
+        f"{LTANAPATH}/run_shift.sh",
+        LTANAPATH,
+        ParticleType,
+        simc_root,
+        data_root,
+        Q2,
+        W,
+        f"{theta_cm_deg:.6f}",
+        f"{beam_energy_gev:.6f}",
+        f"{mm_min:.6f}",
+        f"{mm_max:.6f}",
+    ]
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.stderr:
+        print(result.stderr.rstrip())
+    if result.returncode != 0:
+        raise RuntimeError(
+            "run_shift.sh failed with exit code {}.\nstdout:\n{}\nstderr:\n{}".format(
+                result.returncode,
+                result.stdout,
+                result.stderr,
+            )
+        )
+
+    stdout_lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if not stdout_lines:
+        raise RuntimeError("run_shift.sh returned no output.")
+
+    return json.loads(stdout_lines[-1])
+
 
 mm_shift_summary = {}
+t_shift_summary = {}
+tree_names = get_data_tree_names(ParticleType)
 for phiset in phisetlist:
     rootFileData = f"{OUTPATH}/{phiset}_{ParticleType}_{InDATAFilename}.root"
     if not os.path.exists(rootFileData):
@@ -217,16 +310,84 @@ for phiset in phisetlist:
         sys.exit(2)
 
     rootFileDummy = f"{OUTPATH}/{phiset}_{ParticleType}_{InDUMMYFilename}.root"
-    mm_shift_summary[phiset] = shift_experimental_files_to_simc_peak(
+    theta_cm_deg, beam_energy_gev = get_shift_theta_and_beam(phiset)
+    shift_values = run_shift_script(
+        rootFileSimc,
+        rootFileData,
+        theta_cm_deg,
+        beam_energy_gev,
+    )
+    mm_shift = float(shift_values["shift"])
+
+    mm_details = compute_mm_shift_details(
         ParticleType,
         rootFileSimc,
         rootFileData,
-        rootFileDummy if os.path.exists(rootFileDummy) else None,
         plot_xmin=mm_min,
         plot_xmax=mm_max,
     )
-    output_file_lst.append(mm_shift_summary[phiset]["plot_filename"])
+    mm_plot_filename = plot_mm_shift_from_details(
+        ParticleType,
+        rootFileData,
+        mm_details,
+        plot_xmin=mm_min,
+        plot_xmax=mm_max,
+    )
+
+    add_shift_branch_to_file(rootFileData, tree_names, "MM", mm_shift)
+    if os.path.exists(rootFileDummy):
+        add_shift_branch_to_file(rootFileDummy, tree_names, "MM", mm_shift)
+
+    mm_shift_summary[phiset] = {
+        "simc_peak": float(shift_values["simc_peak"]),
+        "simc_peak_err": float(shift_values["simc_peak_err"]),
+        "data_peak": float(shift_values["data_peak"]),
+        "data_peak_err": float(shift_values["data_peak_err"]),
+        "shift": mm_shift,
+        "theta_cm_deg": theta_cm_deg,
+        "beam_energy_gev": beam_energy_gev,
+        "plot_filename": mm_plot_filename,
+    }
+    output_file_lst.append(mm_plot_filename)
+
+    if shift_values.get("t_shift") is not None:
+        t_shift = float(shift_values["t_shift"])
+        print(f"Applying t shift = {t_shift:+.6f} in -t convention")
+        add_derived_branch_to_file(
+            rootFileData,
+            tree_names,
+            "t_shift",
+            lambda evt, shift=t_shift: -getattr(evt, "MandelT") + shift,
+        )
+        if os.path.exists(rootFileDummy):
+            add_derived_branch_to_file(
+                rootFileDummy,
+                tree_names,
+                "t_shift",
+                lambda evt, shift=t_shift: -getattr(evt, "MandelT") + shift,
+            )
+
+        t_plot_filename = make_t_plot_filename(rootFileData)
+        write_t_shift_plots(
+            ParticleType,
+            rootFileSimc,
+            rootFileData,
+            t_shift,
+            t_plot_filename,
+            plot_xmin=tmin,
+            plot_xmax=tmax,
+        )
+        t_shift_summary[phiset] = {
+            "shift": t_shift,
+            "theta_cm_deg": theta_cm_deg,
+            "beam_energy_gev": beam_energy_gev,
+            "phi_deg": float(shift_values.get("phi_deg", 0.0)),
+            "plot_filename": t_plot_filename,
+        }
+        output_file_lst.append(t_plot_filename)
+
 inpDict["mm_shift_summary"] = mm_shift_summary
+inpDict["t_shift_summary"] = t_shift_summary
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)

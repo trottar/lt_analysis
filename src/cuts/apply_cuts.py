@@ -157,6 +157,14 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
 ###############################################################################################################################################
 
+# Prefer the stored shifted branch when available; otherwise fall back to the
+# legacy convention of deriving -t from MandelT on the fly.
+def get_shifted_t(evt):
+    try:
+        return evt.t_shift
+    except AttributeError:
+        return -evt.MandelT
+
 # Subtraction cuts
 def apply_data_sub_cuts(evt):
 

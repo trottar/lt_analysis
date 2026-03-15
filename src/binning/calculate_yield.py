@@ -93,7 +93,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -235,6 +235,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -254,7 +255,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         if(NOMMCUTS):
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):                                
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
@@ -268,11 +269,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(adj_t)
                             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
                             MM_offset_DATA = evt.MM_shift-evt.MM
                             break
@@ -295,6 +296,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -314,7 +316,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         if(NOMMCUTS):
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
@@ -328,11 +330,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Loop through bins in t_dummy and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):             
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(adj_t)
                             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
                             break
                     break   
@@ -354,6 +356,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -373,7 +376,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         if(NOMMCUTS):
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])   
@@ -387,11 +390,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Loop through bins in t_rand and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(adj_t)
                             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             break
                     break      
@@ -413,6 +416,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -432,7 +436,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         if(NOMMCUTS):
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1]) 
@@ -446,11 +450,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Loop through bins in t_dummy_rand and identify events in specified bins
             for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     for k in range(len(phi_bins)-1):            
                         if phi_bins[k] <= phi_shift < phi_bins[k+1]:
                             #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(-evt.MandelT)
+                            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_t)
                             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
                             break
                     break

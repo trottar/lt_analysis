@@ -86,7 +86,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
     set_val(inpDict) # Set global variables for optimization
 
     ################################################################################################################################################
@@ -246,6 +246,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -260,7 +261,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
+                if t_bins[j] <= adj_t < t_bins[j+1]:
                     hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Fill(adj_MM)
                     hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Fill(adj_MM) 
                     hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(adj_MM)          
@@ -269,8 +270,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_data and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
-                    hist_bin_dict["H_t_DATA_{}".format(j)].Fill(-evt.MandelT)
+                if t_bins[j] <= adj_t < t_bins[j+1]:
+                    hist_bin_dict["H_t_DATA_{}".format(j)].Fill(adj_t)
                     hist_bin_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DATA_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
@@ -294,6 +295,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -308,7 +310,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:   
+                if t_bins[j] <= adj_t < t_bins[j+1]:   
                     hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)].Fill(adj_MM)             
                     hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)].Fill(adj_MM)
                     hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(adj_MM)            
@@ -317,8 +319,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_dummy and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
-                    hist_bin_dict["H_t_DUMMY_{}".format(j)].Fill(-evt.MandelT)
+                if t_bins[j] <= adj_t < t_bins[j+1]:
+                    hist_bin_dict["H_t_DUMMY_{}".format(j)].Fill(adj_t)
                     hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
@@ -341,6 +343,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -355,7 +358,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:       
+                if t_bins[j] <= adj_t < t_bins[j+1]:       
                     hist_bin_dict["H_MM_fit1sub_RAND_{}".format(j)].Fill(adj_MM)         
                     hist_bin_dict["H_MM_pisub_RAND_{}".format(j)].Fill(adj_MM) 
                     hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(adj_MM)           
@@ -364,8 +367,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_rand and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
-                    hist_bin_dict["H_t_RAND_{}".format(j)].Fill(-evt.MandelT)
+                if t_bins[j] <= adj_t < t_bins[j+1]:
+                    hist_bin_dict["H_t_RAND_{}".format(j)].Fill(adj_t)
                     hist_bin_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
@@ -388,6 +391,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
 
         ##############
         ##############        
@@ -402,7 +406,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:         
+                if t_bins[j] <= adj_t < t_bins[j+1]:         
                     hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)       
                     hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
                     hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)            
@@ -411,8 +415,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
             # Loop through bins in t_dummy_rand and identify events in specified bins
             for j in range(len(t_bins)-1):                
-                if t_bins[j] <= -evt.MandelT < t_bins[j+1]:
-                    hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(-evt.MandelT)
+                if t_bins[j] <= adj_t < t_bins[j+1]:
+                    hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(adj_t)
                     hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
                     hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)                        
                     hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)

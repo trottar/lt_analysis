@@ -1267,5 +1267,17 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
                 phiset,
                 float(shift_info["shift"]),
             )
+
+    t_shift_summary = inpDict.get("t_shift_summary", {})
+    if t_shift_summary:
+        cut_summary_lst += "\n\n-t Shifts"
+        for phiset in phisetlist:
+            shift_info = t_shift_summary.get(phiset)
+            if not shift_info:
+                continue
+            cut_summary_lst += "\n{} t_shift = {:+.6f}".format(
+                phiset,
+                float(shift_info["shift"]),
+            )
             
     return cut_summary_lst

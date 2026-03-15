@@ -115,7 +115,7 @@ def rand_sub(phi_setting, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -851,6 +851,7 @@ def rand_sub(phi_setting, inpDict):
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
         
         ##############
         ##############        
@@ -898,13 +899,13 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_DATA.Fill(adj_MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DATA.Fill(adj_MM,evt.P_aero_npeSum)
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DATA.Fill(phi_shift, -evt.MandelT)
+          phiq_vs_t_DATA.Fill(phi_shift, adj_t)
           Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
-          Q2_vs_t_DATA.Fill(evt.Q2, -evt.MandelT)
-          W_vs_t_DATA.Fill(evt.W, -evt.MandelT)
-          EPS_vs_t_DATA.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DATA.Fill(adj_MM, -evt.MandelT)
-          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (phi_shift)*(180/math.pi), -evt.MandelT)
+          Q2_vs_t_DATA.Fill(evt.Q2, adj_t)
+          W_vs_t_DATA.Fill(evt.W, adj_t)
+          EPS_vs_t_DATA.Fill(evt.epsilon, adj_t)
+          MM_vs_t_DATA.Fill(adj_MM, adj_t)
+          polar_phiq_vs_t_DATA.SetPoint(polar_phiq_vs_t_DATA.GetN(), (phi_shift)*(180/math.pi), adj_t)
           
           H_ct_DATA.Fill(evt.CTime_ROC1)
 
@@ -937,7 +938,7 @@ def rand_sub(phi_setting, inpDict):
           H_pmy_DATA.Fill(evt.pmy)
           H_pmz_DATA.Fill(evt.pmz)
           H_Q2_DATA.Fill(evt.Q2)
-          H_t_DATA.Fill(-evt.MandelT)
+          H_t_DATA.Fill(adj_t)
           H_W_DATA.Fill(evt.W)
           H_epsilon_DATA.Fill(evt.epsilon)
           H_MM_DATA.Fill(adj_MM)
@@ -973,6 +974,7 @@ def rand_sub(phi_setting, inpDict):
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
         
         ##############
         ##############        
@@ -1020,13 +1022,13 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_DUMMY.Fill(adj_MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DUMMY.Fill(adj_MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DUMMY.Fill(phi_shift, -evt.MandelT)
+          phiq_vs_t_DUMMY.Fill(phi_shift, adj_t)
           Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
-          Q2_vs_t_DUMMY.Fill(evt.Q2, -evt.MandelT)
-          W_vs_t_DUMMY.Fill(evt.W, -evt.MandelT)
-          EPS_vs_t_DUMMY.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DUMMY.Fill(adj_MM, -evt.MandelT)
-          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (phi_shift)*(180/math.pi), -evt.MandelT)
+          Q2_vs_t_DUMMY.Fill(evt.Q2, adj_t)
+          W_vs_t_DUMMY.Fill(evt.W, adj_t)
+          EPS_vs_t_DUMMY.Fill(evt.epsilon, adj_t)
+          MM_vs_t_DUMMY.Fill(adj_MM, adj_t)
+          polar_phiq_vs_t_DUMMY.SetPoint(polar_phiq_vs_t_DUMMY.GetN(), (phi_shift)*(180/math.pi), adj_t)
 
           H_ct_DUMMY.Fill(evt.CTime_ROC1)
 
@@ -1059,7 +1061,7 @@ def rand_sub(phi_setting, inpDict):
           H_pmy_DUMMY.Fill(evt.pmy)
           H_pmz_DUMMY.Fill(evt.pmz)
           H_Q2_DUMMY.Fill(evt.Q2)
-          H_t_DUMMY.Fill(-evt.MandelT)
+          H_t_DUMMY.Fill(adj_t)
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
           H_MM_DUMMY.Fill(adj_MM)
@@ -1086,6 +1088,7 @@ def rand_sub(phi_setting, inpDict):
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
         
         ##############
         ##############        
@@ -1134,12 +1137,12 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_RAND.Fill(adj_MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_RAND.Fill(adj_MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_RAND.Fill(phi_shift, -evt.MandelT)
+          phiq_vs_t_RAND.Fill(phi_shift, adj_t)
           Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
-          Q2_vs_t_RAND.Fill(evt.Q2, -evt.MandelT)
-          W_vs_t_RAND.Fill(evt.W, -evt.MandelT)
-          EPS_vs_t_RAND.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_RAND.Fill(adj_MM, -evt.MandelT)
+          Q2_vs_t_RAND.Fill(evt.Q2, adj_t)
+          W_vs_t_RAND.Fill(evt.W, adj_t)
+          EPS_vs_t_RAND.Fill(evt.epsilon, adj_t)
+          MM_vs_t_RAND.Fill(adj_MM, adj_t)
 
           H_ct_RAND.Fill(evt.CTime_ROC1)          
           
@@ -1172,7 +1175,7 @@ def rand_sub(phi_setting, inpDict):
           H_pmy_RAND.Fill(evt.pmy)
           H_pmz_RAND.Fill(evt.pmz)
           H_Q2_RAND.Fill(evt.Q2)
-          H_t_RAND.Fill(-evt.MandelT)
+          H_t_RAND.Fill(adj_t)
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(adj_MM)
@@ -1197,6 +1200,7 @@ def rand_sub(phi_setting, inpDict):
             adj_MM = evt.MM_shift
         except AttributeError:
             adj_MM = evt.MM
+        adj_t = get_shifted_t(evt)
         
         ##############
         ##############        
@@ -1243,12 +1247,12 @@ def rand_sub(phi_setting, inpDict):
           MM_vs_P_hgcer_DUMMY_RAND.Fill(adj_MM,evt.P_hgcer_npeSum)
           MM_vs_P_aero_DUMMY_RAND.Fill(adj_MM,evt.P_aero_npeSum)          
           # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DUMMY_RAND.Fill(phi_shift, -evt.MandelT)
+          phiq_vs_t_DUMMY_RAND.Fill(phi_shift, adj_t)
           Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
-          Q2_vs_t_DUMMY_RAND.Fill(evt.Q2, -evt.MandelT)
-          W_vs_t_DUMMY_RAND.Fill(evt.W, -evt.MandelT)
-          EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, -evt.MandelT)
-          MM_vs_t_DUMMY_RAND.Fill(adj_MM, -evt.MandelT)
+          Q2_vs_t_DUMMY_RAND.Fill(evt.Q2, adj_t)
+          W_vs_t_DUMMY_RAND.Fill(evt.W, adj_t)
+          EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, adj_t)
+          MM_vs_t_DUMMY_RAND.Fill(adj_MM, adj_t)
           
           H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)
 
@@ -1281,7 +1285,7 @@ def rand_sub(phi_setting, inpDict):
           H_pmy_DUMMY_RAND.Fill(evt.pmy)
           H_pmz_DUMMY_RAND.Fill(evt.pmz)
           H_Q2_DUMMY_RAND.Fill(evt.Q2)
-          H_t_DUMMY_RAND.Fill(-evt.MandelT)
+          H_t_DUMMY_RAND.Fill(adj_t)
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(adj_MM)

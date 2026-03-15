@@ -104,13 +104,12 @@ def fit_gaussian(hist, fit_min, fit_max):
     return fit_func.GetParameter(1), fit_func.GetParError(1), fit_func.Clone(f"gaus_{hist.GetName()}_plot")
 
 
-def build_histogram(
+def build_histogram_from_expression(
     filename,
     tree_name,
-    branch_name,
+    expression,
     hist_name,
     hist_title,
-    shift=0.0,
     hist_xmin=FIT_HIST_XMIN,
     hist_xmax=FIT_HIST_XMAX,
 ):
@@ -126,16 +125,37 @@ def build_histogram(
         root_file.Close()
         raise RuntimeError(f"Tree '{tree_name}' not found in {filename}")
 
-    expression = branch_name
-    if abs(shift) > 0.0:
-        expression = f"({branch_name}+({shift:.12g}))"
-
     hist_nbins = get_hist_nbins(hist_xmin, hist_xmax)
     hist = TH1F(hist_name, hist_title, hist_nbins, hist_xmin, hist_xmax)
     tree.Draw(f"{expression}>>{hist_name}", "", "goff")
     hist.SetDirectory(0)
     root_file.Close()
     return hist
+
+
+def build_histogram(
+    filename,
+    tree_name,
+    branch_name,
+    hist_name,
+    hist_title,
+    shift=0.0,
+    hist_xmin=FIT_HIST_XMIN,
+    hist_xmax=FIT_HIST_XMAX,
+):
+    expression = branch_name
+    if abs(shift) > 0.0:
+        expression = f"({branch_name}+({shift:.12g}))"
+
+    return build_histogram_from_expression(
+        filename,
+        tree_name,
+        expression,
+        hist_name,
+        hist_title,
+        hist_xmin=hist_xmin,
+        hist_xmax=hist_xmax,
+    )
 
 
 def fit_tree_peak(
@@ -165,8 +185,10 @@ def fit_tree_peak(
     fit_func.SetLineColor(kRed)
     return {
         "hist": hist,
+        "amplitude": fit_func.GetParameter(0),
         "mean": mean,
         "mean_err": mean_err,
+        "sigma": fit_func.GetParameter(2),
         "fit_func": fit_func,
         "fit_min": fit_min,
         "fit_max": fit_max,
@@ -174,31 +196,38 @@ def fit_tree_peak(
     }
 
 
-def build_shifted_tree(tree, source_branch_name, shift_branch_name, shift):
-    shifted_value = array("f", [0.0])
+def build_derived_tree(tree, branch_name, value_getter):
+    derived_value = array("f", [0.0])
 
-    # Clone the tree without the old shift branch so the replacement branch
+    # Clone the tree without the old derived branch so the replacement branch
     # is freshly written with the current alignment.
-    has_existing_shift_branch = bool(tree.GetBranch(shift_branch_name))
+    has_existing_shift_branch = bool(tree.GetBranch(branch_name))
     if has_existing_shift_branch:
-        tree.SetBranchStatus(shift_branch_name, 0)
+        tree.SetBranchStatus(branch_name, 0)
 
     new_tree = tree.CloneTree(0)
 
     if has_existing_shift_branch:
-        tree.SetBranchStatus(shift_branch_name, 1)
+        tree.SetBranchStatus(branch_name, 1)
 
-    new_tree.Branch(shift_branch_name, shifted_value, f"{shift_branch_name}/F")
+    new_tree.Branch(branch_name, derived_value, f"{branch_name}/F")
 
     for evt in tree:
-        shifted_value[0] = getattr(evt, source_branch_name) + shift
+        derived_value[0] = float(value_getter(evt))
         new_tree.Fill()
 
     return new_tree
 
 
-def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
-    shift_branch_name = f"{source_branch_name}_shift"
+def build_shifted_tree(tree, source_branch_name, shift_branch_name, shift):
+    return build_derived_tree(
+        tree,
+        shift_branch_name,
+        lambda evt: getattr(evt, source_branch_name) + shift,
+    )
+
+
+def add_derived_branch_to_file(filename, tree_names, branch_name, value_getter, action_label="Applying"):
     root_file = TFile.Open(filename, "UPDATE")
     if not root_file or root_file.IsZombie():
         raise RuntimeError(f"Unable to open ROOT file for update: {filename}")
@@ -210,10 +239,10 @@ def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
             print(f"Tree '{tree_name}' not found in {filename}. Skipping.")
             continue
 
-        action = "Replacing" if tree.GetBranch(shift_branch_name) else "Applying"
-        print(f"{action} shift {shift:+.6f} in {filename}:{tree_name}")
+        action = "Replacing" if tree.GetBranch(branch_name) else action_label
+        print(f"{action} branch {branch_name} in {filename}:{tree_name}")
         updated_trees.append(
-            (tree_name, build_shifted_tree(tree, source_branch_name, shift_branch_name, shift))
+            (tree_name, build_derived_tree(tree, branch_name, value_getter))
         )
 
     root_file.cd()
@@ -222,6 +251,17 @@ def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
 
     root_file.Close()
     return len(updated_trees)
+
+
+def add_shift_branch_to_file(filename, tree_names, source_branch_name, shift):
+    shift_branch_name = f"{source_branch_name}_shift"
+    print(f"Applying shift {shift:+.6f} to {source_branch_name} in {filename}")
+    return add_derived_branch_to_file(
+        filename,
+        tree_names,
+        shift_branch_name,
+        lambda evt: getattr(evt, source_branch_name) + shift,
+    )
 
 
 def make_text_box(lines):
@@ -252,6 +292,11 @@ def normalize_hist(hist):
 def make_plot_filename(data_filename):
     base_name = os.path.splitext(os.path.basename(data_filename))[0]
     return os.path.join(os.path.dirname(data_filename), f"{base_name}_MM_Shift.pdf")
+
+
+def make_t_plot_filename(data_filename):
+    base_name = os.path.splitext(os.path.basename(data_filename))[0]
+    return os.path.join(os.path.dirname(data_filename), f"{base_name}_T_Shift.pdf")
 
 
 def write_shift_plots(
@@ -369,11 +414,130 @@ def write_shift_plots(
     gStyle.SetOptStat(old_opt_stat)
 
 
-def shift_experimental_files_to_simc_peak(
+def write_t_shift_plots(
     particle_type,
     simc_filename,
     data_filename,
-    dummy_filename=None,
+    t_shift,
+    output_pdf,
+    plot_xmin,
+    plot_xmax,
+):
+    old_opt_stat = gStyle.GetOptStat()
+    gStyle.SetOptStat(0)
+
+    reference_tree = f"Cut_{particle_type.capitalize()}_Events_prompt_noRF"
+    canvas_name = f"canvas_t_shift_{abs(hash(output_pdf)) & 0xFFFFFFFF}"
+    canvas = TCanvas(canvas_name, "t Shift", 900, 700)
+    canvas.Print(f"{output_pdf}[")
+
+    simc_hist = build_histogram_from_expression(
+        simc_filename,
+        "h10",
+        "(-t)",
+        f"hist_t_simc_{abs(hash((simc_filename, output_pdf))) & 0xFFFFFFFF}",
+        "-t",
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
+    )
+    simc_hist.SetTitle(f"SIMC -t ({particle_type})")
+    simc_hist.SetLineColor(kRed)
+    simc_hist.SetLineWidth(2)
+    simc_hist.Draw("hist")
+    simc_text = make_text_box(
+        [
+            "Convention: -t",
+            f"Range = [{plot_xmin:.4f}, {plot_xmax:.4f}]",
+        ]
+    )
+    simc_text.Draw("same")
+    canvas.Print(output_pdf)
+
+    data_hist = build_histogram_from_expression(
+        data_filename,
+        reference_tree,
+        "(-MandelT)",
+        f"hist_t_data_{abs(hash((data_filename, output_pdf))) & 0xFFFFFFFF}",
+        "-t",
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
+    )
+    data_hist.SetTitle(f"Data -t ({particle_type})")
+    data_hist.SetLineColor(kBlack)
+    data_hist.SetLineWidth(2)
+    data_hist.Draw("hist")
+    data_text = make_text_box(
+        [
+            "Convention: -t",
+            f"Applied t_shift = {t_shift:+.6f}",
+        ]
+    )
+    data_text.Draw("same")
+    canvas.Print(output_pdf)
+
+    shifted_hist = build_histogram_from_expression(
+        data_filename,
+        reference_tree,
+        f"((-MandelT)+({t_shift:.12g}))",
+        f"hist_t_shifted_{abs(hash((data_filename, output_pdf, t_shift))) & 0xFFFFFFFF}",
+        "t_shift",
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
+    )
+
+    data_overlay = data_hist.Clone(f"{data_hist.GetName()}_overlay")
+    shifted_overlay = shifted_hist.Clone(f"{shifted_hist.GetName()}_overlay")
+    simc_overlay = simc_hist.Clone(f"{simc_hist.GetName()}_overlay")
+
+    normalize_hist(data_overlay)
+    normalize_hist(shifted_overlay)
+    normalize_hist(simc_overlay)
+
+    data_overlay.SetTitle(f"-t Raw / Shifted / SIMC ({particle_type})")
+    data_overlay.SetLineColor(kBlack)
+    shifted_overlay.SetLineColor(kBlue)
+    simc_overlay.SetLineColor(kRed)
+    data_overlay.SetLineWidth(2)
+    shifted_overlay.SetLineWidth(2)
+    simc_overlay.SetLineWidth(2)
+
+    ymax = max(
+        data_overlay.GetMaximum(),
+        shifted_overlay.GetMaximum(),
+        simc_overlay.GetMaximum(),
+    ) * 1.15
+    data_overlay.SetMaximum(ymax)
+    data_overlay.GetYaxis().SetTitle("Normalized counts")
+    data_overlay.Draw("hist")
+    shifted_overlay.Draw("hist same")
+    simc_overlay.Draw("hist same")
+
+    legend = TLegend(0.58, 0.55, 0.89, 0.68)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(data_overlay, "Data -t", "l")
+    legend.AddEntry(shifted_overlay, "Data t_shift", "l")
+    legend.AddEntry(simc_overlay, "SIMC -t", "l")
+    legend.Draw("same")
+
+    overlay_text = make_text_box(
+        [
+            "Convention: -t",
+            f"Applied t_shift = {t_shift:+.6f}",
+        ]
+    )
+    overlay_text.Draw("same")
+    canvas.Print(output_pdf)
+
+    canvas.Print(f"{output_pdf}]")
+    canvas.Close()
+    gStyle.SetOptStat(old_opt_stat)
+
+
+def compute_mm_shift_details(
+    particle_type,
+    simc_filename,
+    data_filename,
     plot_xmin=None,
     plot_xmax=None,
 ):
@@ -405,6 +569,98 @@ def shift_experimental_files_to_simc_peak(
     )
     shift = simc_fit["mean"] - data_fit["mean"]
 
+    return {
+        "peak_name": peak_name,
+        "simc_fit": simc_fit,
+        "data_fit": data_fit,
+        "shift": shift,
+    }
+
+
+def compute_mm_shift_summary(
+    particle_type,
+    simc_filename,
+    data_filename,
+    plot_xmin=None,
+    plot_xmax=None,
+):
+    details = compute_mm_shift_details(
+        particle_type,
+        simc_filename,
+        data_filename,
+        plot_xmin=plot_xmin,
+        plot_xmax=plot_xmax,
+    )
+    simc_fit = details["simc_fit"]
+    data_fit = details["data_fit"]
+
+    return {
+        "simc_peak": simc_fit["mean"],
+        "simc_peak_err": simc_fit["mean_err"],
+        "data_peak": data_fit["mean"],
+        "data_peak_err": data_fit["mean_err"],
+        "simc_sigma": simc_fit["sigma"],
+        "data_sigma": data_fit["sigma"],
+        "simc_fit_min": simc_fit["fit_min"],
+        "simc_fit_max": simc_fit["fit_max"],
+        "data_fit_min": data_fit["fit_min"],
+        "data_fit_max": data_fit["fit_max"],
+        "shift": details["shift"],
+    }
+
+
+def plot_mm_shift_from_details(
+    particle_type,
+    data_filename,
+    details,
+    output_pdf=None,
+    plot_xmin=FIT_HIST_XMIN,
+    plot_xmax=FIT_HIST_XMAX,
+):
+    shifted_hist = build_histogram(
+        data_filename,
+        f"Cut_{particle_type.capitalize()}_Events_prompt_noRF",
+        "MM",
+        f"hist_shifted_{abs(hash((data_filename, plot_xmin, plot_xmax))) & 0xFFFFFFFF}",
+        "MM_shift",
+        shift=details["shift"],
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
+    )
+    plot_filename = output_pdf or make_plot_filename(data_filename)
+    write_shift_plots(
+        particle_type,
+        details["simc_fit"],
+        details["data_fit"],
+        shifted_hist,
+        details["shift"],
+        plot_filename,
+        plot_xmin=plot_xmin,
+        plot_xmax=plot_xmax,
+    )
+    return plot_filename
+
+
+def shift_experimental_files_to_simc_peak(
+    particle_type,
+    simc_filename,
+    data_filename,
+    dummy_filename=None,
+    plot_xmin=None,
+    plot_xmax=None,
+):
+    details = compute_mm_shift_details(
+        particle_type,
+        simc_filename,
+        data_filename,
+        plot_xmin=plot_xmin,
+        plot_xmax=plot_xmax,
+    )
+    simc_fit = details["simc_fit"]
+    data_fit = details["data_fit"]
+    shift = details["shift"]
+    peak_name = details["peak_name"]
+
     print(f"\nAligning experimental {peak_name} peak to SIMC...")
     print(f"SIMC peak ({simc_filename}) = {simc_fit['mean']:.6f} +/- {simc_fit['mean_err']:.6f}")
     print(f"Data peak ({data_filename}) = {data_fit['mean']:.6f} +/- {data_fit['mean_err']:.6f}")
@@ -419,23 +675,11 @@ def shift_experimental_files_to_simc_peak(
         else:
             print(f"Dummy file '{dummy_filename}' not found. Skipping dummy MM shift.")
 
-    shifted_hist = build_histogram(
-        data_filename,
-        reference_tree,
-        "MM_shift",
-        f"hist_shifted_{abs(hash((data_filename, reference_tree))) & 0xFFFFFFFF}",
-        "MM_shift",
-        hist_xmin=plot_xmin,
-        hist_xmax=plot_xmax,
-    )
-    plot_filename = make_plot_filename(data_filename)
-    write_shift_plots(
+    plot_filename = plot_mm_shift_from_details(
         particle_type,
-        simc_fit,
-        data_fit,
-        shifted_hist,
-        shift,
-        plot_filename,
+        data_filename,
+        details,
+        output_pdf=make_plot_filename(data_filename),
         plot_xmin=plot_xmin,
         plot_xmax=plot_xmax,
     )
