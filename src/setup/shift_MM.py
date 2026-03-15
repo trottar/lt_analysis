@@ -95,7 +95,7 @@ def get_data_tree_names(particle_type):
 
 
 def fit_gaussian(hist, fit_min, fit_max):
-    hist.Fit("gaus", "QR", "", fit_min, fit_max)
+    hist.Fit("gaus", "Q0R", "", fit_min, fit_max)
     fit_func = hist.GetFunction("gaus")
     if not fit_func:
         raise RuntimeError("Gaussian fit failed.")

@@ -27,20 +27,8 @@ def run_t_shift_program(executable, q2, w, theta_cm_deg, mm_shift_apply, beam_en
     beam_energy_mev = 1000.0 * beam_energy_gev
 
     input_lines = [
-        f"{q2:.6f} {w:.6f}",
-        f"{theta_cm_deg:.6f}",
+        f"{q2:.6f} {w:.6f} {theta_cm_deg:.6f} {mm_shift_fortran_mev:.6f} {beam_energy_mev:.6f}",
     ]
-
-    # The t-channel is always forward in this workflow, so the azimuth is fixed.
-    if not math.isclose(theta_cm_deg, 0.0, abs_tol=1e-12):
-        input_lines.append("0.0")
-
-    input_lines.extend(
-        [
-            f"{mm_shift_fortran_mev:.6f}",
-            f"{beam_energy_mev:.6f}",
-        ]
-    )
 
     process = subprocess.run(
         [executable],
@@ -61,16 +49,16 @@ def run_t_shift_program(executable, q2, w, theta_cm_deg, mm_shift_apply, beam_en
 
     output = process.stdout
     match = re.search(
-        r"MM shift of\s+([+-]?\d+(?:\.\d*)?)\s+MeV gives\s+([+-]?\d+(?:\.\d*)?)\s+GeV\^2 shift",
+        r"TSHIFT_GEV2\s*=\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?)",
         output,
     )
     if not match:
         raise RuntimeError(f"Unable to parse t-shift output:\n{output}")
 
     return {
-        "fortran_mm_shift_mev": float(match.group(1)),
+        "fortran_mm_shift_mev": mm_shift_fortran_mev,
         # This is already the shift in the code's -t convention.
-        "t_shift": float(match.group(2)),
+        "t_shift": float(match.group(1)),
         "phi_deg": 0.0,
         "raw_output": output,
     }
