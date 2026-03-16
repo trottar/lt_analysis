@@ -135,7 +135,7 @@ def rand_sub(phi_setting, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, get_shifted_t, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, evaluate_data_event, get_shifted_t, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -855,6 +855,17 @@ def rand_sub(phi_setting, inpDict):
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
+    c0_factor = c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]
+    hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
+    has_mm_shift_data = bool(TBRANCH_DATA.GetBranch("MM_shift"))
+    has_mm_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("MM_shift"))
+    has_mm_shift_rand = bool(TBRANCH_RAND.GetBranch("MM_shift"))
+    has_mm_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("MM_shift"))
+    has_t_shift_data = bool(TBRANCH_DATA.GetBranch("t_shift"))
+    has_t_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("t_shift"))
+    has_t_shift_rand = bool(TBRANCH_RAND.GetBranch("t_shift"))
+    has_t_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("t_shift"))
+
     print("\nGrabbing {} {} data...".format(phi_setting,ParticleType))
     data_entries = TBRANCH_DATA.GetEntries()
     data_progress_time = 0.0
@@ -870,22 +881,16 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+        adj_MM = evt.MM_shift if has_mm_shift_data else evt.MM
+        adj_t = evt.t_shift if has_t_shift_data else -evt.MandelT
         
         ##############
         ##############        
         ##############
         
         if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
-            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = base_all_cuts
             NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
@@ -895,7 +900,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
-            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_rand_dummy_DATA.Fill(adj_MM)
@@ -1003,22 +1008,16 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+        adj_MM = evt.MM_shift if has_mm_shift_dummy else evt.MM
+        adj_t = evt.t_shift if has_t_shift_dummy else -evt.MandelT
         
         ##############
         ##############        
         ##############
         
         if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
-            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = base_all_cuts
             NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
@@ -1029,7 +1028,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
         else:
-            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_full_DUMMY.Fill(adj_MM)                        
@@ -1127,22 +1126,16 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+        adj_MM = evt.MM_shift if has_mm_shift_rand else evt.MM
+        adj_t = evt.t_shift if has_t_shift_rand else -evt.MandelT
         
         ##############
         ##############        
         ##############
 
         if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
-            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = base_all_cuts
             NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
@@ -1153,7 +1146,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
         else:
-            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_rand_dummy_RAND.Fill(adj_MM)
@@ -1249,22 +1242,16 @@ def rand_sub(phi_setting, inpDict):
         # HARD CODED #
         ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+        adj_MM = evt.MM_shift if has_mm_shift_dummy_rand else evt.MM
+        adj_t = evt.t_shift if has_t_shift_dummy_rand else -evt.MandelT
         
         ##############
         ##############        
         ##############
 
         if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
-            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             NOHOLECUTS = base_all_cuts
             NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
@@ -1275,7 +1262,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
         else:
-            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_full_DUMMY_RAND.Fill(adj_MM)

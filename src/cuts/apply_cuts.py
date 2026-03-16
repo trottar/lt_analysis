@@ -138,7 +138,7 @@ def set_val(inpDict):
     
 ###############################################################################################################################################
 
-def _compute_base_data_cuts(evt):
+def _compute_base_data_cut_state(evt):
 
     ##############
     # HARD CODED #
@@ -152,32 +152,39 @@ def _compute_base_data_cuts(evt):
 
     #CUTs Definations 
     if evt.P_hod_goodstarttime != 1 or evt.P_dc_InsideDipoleExit != 1:
-        return False
+        return False, adj_hsdelta
     if evt.ssdelta < -10.0 or evt.ssdelta > 20.0 or evt.ssxptar < -0.06 or evt.ssxptar > 0.06 or evt.ssyptar < -0.04 or evt.ssyptar > 0.04:
-        return False
+        return False, adj_hsdelta
 
     if evt.H_hod_goodstarttime != 1 or evt.H_dc_InsideDipoleExit != 1:
-        return False
+        return False, adj_hsdelta
     if adj_hsdelta < -8.0 or adj_hsdelta > 8.0 or evt.hsxptar < -0.08 or evt.hsxptar > 0.08 or evt.hsyptar < -0.045 or evt.hsyptar > 0.045:
-        return False
+        return False, adj_hsdelta
 
     # RLT: These are done via histogram cuts
     #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
     #MMCUT =  (mm_min<=adj_MM) & (adj_MM<mm_max)
     #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
 
-    return _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
+    return _point_in_convex_poly(evt.Q2, evt.W, cut_poly), adj_hsdelta
+
+
+def evaluate_data_event(evt, mm_min=0.7, mm_max=1.5):
+    # MM/t windows are intentionally excluded here to preserve the existing
+    # histogram-cut behavior used throughout the analysis.
+    base_cuts, adj_hsdelta = _compute_base_data_cut_state(evt)
+    return base_cuts, base_cuts, adj_hsdelta
 
 
 def evaluate_data_cut_bools(evt, mm_min=0.7, mm_max=1.5):
     # MM/t windows are intentionally excluded here to preserve the existing
     # histogram-cut behavior used throughout the analysis.
-    base_cuts = _compute_base_data_cuts(evt)
+    base_cuts, _ = _compute_base_data_cut_state(evt)
     return base_cuts, base_cuts
 
 
 def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
-    return _compute_base_data_cuts(evt)
+    return _compute_base_data_cut_state(evt)[0]
 
 ###############################################################################################################################################
 
@@ -191,7 +198,7 @@ def get_shifted_t(evt):
 
 # Subtraction cuts
 def apply_data_sub_cuts(evt):
-    return _compute_base_data_cuts(evt)
+    return _compute_base_data_cut_state(evt)[0]
 
 ################################################################################################################################################
 
