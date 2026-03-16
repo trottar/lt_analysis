@@ -576,6 +576,8 @@ if DEBUG:
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
 # Save histograms to root file
+root_file = open_root_file(foutroot, "UPDATE")
+root_dir_cache = {}
 for hist in histlist:
     print("\nUpdating simc {} histograms in {}...".format(hist["phi_setting"],foutroot))
     # Loop through all keys,values of dictionary
@@ -593,10 +595,7 @@ for hist in histlist:
                 elif "totevts" in key:
                     continue
                 else:
-                    hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))
-
-# Open the ROOT file
-root_file = open_root_file(foutroot, "UPDATE")
+                    hist_to_root(val, root_file, "{}/simc".format(hist["phi_setting"]), root_dir_cache)
 
 # Check if the file was opened successfully
 if root_file.IsOpen():

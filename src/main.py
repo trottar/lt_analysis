@@ -819,6 +819,8 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 # Check that root file doesnt already exist    
 #if not os.path.exists(foutroot):
 #if os.path.exists(foutroot):
+root_file = open_root_file(foutroot, "UPDATE")
+root_dir_cache = {}
 for hist in histlist:
     print("\nSaving {} histograms to {}".format(hist["phi_setting"],foutroot))
     # Loop through all keggys,values of dictionary
@@ -826,7 +828,7 @@ for hist in histlist:
         # Progress bar
         Misc.progressBar(i, len(hist.items())-1,bar_length=25)
         if "G_data_eff" in key:
-            hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+            hist_to_root(val, root_file, "{}/data".format(hist["phi_setting"]), root_dir_cache)
         if is_hist(val):
             if "SIMC" in key:
                 if "yield" in key:
@@ -836,7 +838,7 @@ for hist in histlist:
                 elif "totevts" in key:
                     continue
                 else:
-                    hist_to_root(val, foutroot, "{}/simc".format(hist["phi_setting"]))                
+                    hist_to_root(val, root_file, "{}/simc".format(hist["phi_setting"]), root_dir_cache)
             if "DATA" in key:
                 if "yield" in key:
                     continue
@@ -845,12 +847,9 @@ for hist in histlist:
                 elif "totevts" in key:
                     continue
                 else:
-                    hist_to_root(val, foutroot, "{}/data".format(hist["phi_setting"]))
+                    hist_to_root(val, root_file, "{}/data".format(hist["phi_setting"]), root_dir_cache)
             if "DUMMY" in key:
-                hist_to_root(val, foutroot, "{}/dummy".format(hist["phi_setting"]))
-
-# Open the ROOT file
-root_file = open_root_file(foutroot, "UPDATE")
+                hist_to_root(val, root_file, "{}/dummy".format(hist["phi_setting"]), root_dir_cache)
 
 # Check if the file was opened successfully
 if root_file.IsOpen():

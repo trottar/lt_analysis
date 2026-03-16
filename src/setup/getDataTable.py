@@ -12,7 +12,7 @@
 #
 import pandas as pd
 import numpy as np
-from functools import reduce
+from functools import reduce, lru_cache
 import sys,os
 
 ###############################################################################################################################################
@@ -36,23 +36,38 @@ sys.path.append("utility")
 from utility import data_to_csv
 
 ################################################################################################################################################
-# Grab bcm value
+# Reuse the efficiency table within a process instead of re-reading it for every
+# per-run quantity request.
+def _get_efficiency_table_path(efficiency_table):
+    return UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
 
-def get_bcm(runNum,efficiency_table,foutcsv):
-    
-    inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
+################################################################################################################################################
 
-    # Converts csv data to dataframe
+@lru_cache(maxsize=None)
+def _load_efficiency_table(efficiency_table):
+
+    inp_f = _get_efficiency_table_path(efficiency_table)
+
     try:
-        eff_data = pd.read_csv(inp_f)
+        return pd.read_csv(inp_f)
     except IOError:
         print("Error: %s does not appear to exist." % inp_f)
         sys.exit(0)
-    #print(eff_data.keys())
 
-    # Redefine table to be only the run number of interest
-    eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
-    #print(eff_data)
+################################################################################################################################################
+
+@lru_cache(maxsize=None)
+def _get_run_efficiency_data(runNum, efficiency_table):
+
+    eff_data = _load_efficiency_table(efficiency_table)
+    return eff_data[eff_data['Run_Number'] == int(runNum)]
+
+################################################################################################################################################
+
+# Grab bcm value
+
+def get_bcm(runNum,efficiency_table,foutcsv):
+    eff_data = _get_run_efficiency_data(runNum, efficiency_table)
     
     return eff_data["BCM1_Beam_Cut_Charge"].iloc[0]
 
@@ -60,20 +75,7 @@ def get_bcm(runNum,efficiency_table,foutcsv):
 # Grab ebeam value
 
 def get_ebeam(runNum,efficiency_table,foutcsv):
-    
-    inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
-
-    # Converts csv data to dataframe
-    try:
-        eff_data = pd.read_csv(inp_f)
-    except IOError:
-        print("Error: %s does not appear to exist." % inp_f)
-        sys.exit(0)
-    #print(eff_data.keys())
-
-    # Redefine table to be only the run number of interest
-    eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
-    #print(eff_data)
+    eff_data = _get_run_efficiency_data(runNum, efficiency_table)
 
     return eff_data["Beam_Energy"].iloc[0]
 
@@ -81,20 +83,7 @@ def get_ebeam(runNum,efficiency_table,foutcsv):
 # Grab pTheta value
 
 def get_pTheta(runNum,efficiency_table,foutcsv):
-    
-    inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
-
-    # Converts csv data to dataframe
-    try:
-        eff_data = pd.read_csv(inp_f)
-    except IOError:
-        print("Error: %s does not appear to exist." % inp_f)
-        sys.exit(0)
-    #print(eff_data.keys())
-
-    # Redefine table to be only the run number of interest
-    eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
-    #print(eff_data)
+    eff_data = _get_run_efficiency_data(runNum, efficiency_table)
 
     return eff_data["SHMS_Angle"].iloc[0]
 
@@ -103,20 +92,10 @@ def get_pTheta(runNum,efficiency_table,foutcsv):
 
 def get_efficiencies(runNum,efficiency_table,foutcsv):
 
-    inp_f = UTILPATH+"/scripts/efficiency/OUTPUTS/%s" % efficiency_table
-
     if "heep" in efficiency_table:
         runType = "heep"
     else:
         runType = "production"
-
-    # Converts csv data to dataframe
-    try:
-        eff_data = pd.read_csv(inp_f)
-    except IOError:
-        print("Error: %s does not appear to exist." % inp_f)
-        sys.exit(0)
-    #print(eff_data.keys())
 
     ##############
     # HARD CODED #
@@ -137,7 +116,7 @@ def get_efficiencies(runNum,efficiency_table,foutcsv):
     ##############
     
     # Redefine table to be only the run number of interest
-    eff_data = eff_data[eff_data['Run_Number'] == int(runNum)]
+    eff_data = _get_run_efficiency_data(runNum, efficiency_table)
     #print(eff_data)
     
     if len(eff_data) > 0:  # Check if eff_data is not empty

@@ -513,65 +513,48 @@ def is_root_obj(obj):
 
 ################################################################################################################################################
 
-# Save histograms to root file
-def hist_to_root(hist, file_name, directory_name):
-    # Check if the ROOT file already exists
-    root_file = open_root_file(file_name, "UPDATE")
+# Resolve or create a nested directory path within an open ROOT file.
+def get_root_directory(root_file, directory_name, directory_cache=None):
+    if directory_cache is not None and directory_name in directory_cache:
+        return directory_cache[directory_name]
 
-    # Split the directory names
-    directories = directory_name.split('/')
-
-    # Create or navigate through the nested directories
-    current_dir = root_file    
-    for directory in directories:
-        # Check if the directory exists
-        dir_exists = bool(current_dir.GetDirectory(directory))
-        if not dir_exists:
+    current_dir = root_file
+    for directory in directory_name.split('/'):
+        next_dir = current_dir.GetDirectory(directory)
+        if not next_dir:
             current_dir.mkdir(directory)
-        current_dir.cd(directory)
-        current_dir = ROOT.gDirectory  # Update the current directory
+            next_dir = current_dir.GetDirectory(directory)
+        current_dir = next_dir
 
-    # Check if the histogram already exists in the file
-    existing_hist = current_dir.Get(hist.GetName())
-    if existing_hist:
-        current_dir.Delete(hist.GetName() + ";*")  # Delete existing histogram
-        
-    #print("Saving {} to {}".format(hist.GetName(), file_name))
-        
-    # Clone the histogram since we're storing it in a directory
-    cloned_hist = hist.Clone()
-    cloned_hist.Write()
+    if directory_cache is not None:
+        directory_cache[directory_name] = current_dir
+
+    return current_dir
 
 ################################################################################################################################################
 
 # Save histograms to root file
-def hist_to_root(hist, file_name, directory_name):
-    # Check if the ROOT file already exists
-    root_file = open_root_file(file_name, "UPDATE")
+def hist_to_root(hist, file_name_or_root, directory_name, directory_cache=None):
+    owns_root_file = isinstance(file_name_or_root, str)
+    root_file = open_root_file(file_name_or_root, "UPDATE") if owns_root_file else file_name_or_root
 
-    # Split the directory names
-    directories = directory_name.split('/')
+    if not root_file or not root_file.IsOpen():
+        print("Error: Unable to open ROOT file {}.".format(file_name_or_root))
+        sys.exit(2)
 
-    # Create or navigate through the nested directories
-    current_dir = root_file    
-    for directory in directories:
-        # Check if the directory exists
-        dir_exists = bool(current_dir.GetDirectory(directory))
-        if not dir_exists:
-            current_dir.mkdir(directory)
-        current_dir.cd(directory)
-        current_dir = ROOT.gDirectory  # Update the current directory
+    current_dir = get_root_directory(root_file, directory_name, directory_cache)
 
     # Check if the histogram already exists in the file
     existing_hist = current_dir.Get(hist.GetName())
     if existing_hist:
         current_dir.Delete(hist.GetName() + ";*")  # Delete existing histogram
-        
-    #print("Saving {} to {}".format(hist.GetName(), file_name))
-        
-    # Clone the histogram since we're storing it in a directory
+
+    current_dir.cd()
     cloned_hist = hist.Clone()
     cloned_hist.Write()
+
+    if owns_root_file:
+        root_file.Close()
 
 ################################################################################################################################################    
 

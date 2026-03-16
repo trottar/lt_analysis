@@ -29,6 +29,8 @@ from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
+from binning_helpers import find_bin_index
+
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
@@ -58,7 +60,48 @@ from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_h
 
 ##################################################################################################################################################
 
-def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict):
+
+def _fill_cached_ave_section(cache_section, hist_bin_dict, section_label, t_bins):
+    mm_offset_data = None
+
+    for idx, adj_t in enumerate(cache_section["adj_t"]):
+        t_index = find_bin_index(adj_t, t_bins)
+        if t_index is None:
+            continue
+
+        adj_mm = cache_section["adj_MM"][idx]
+
+        if cache_section["nommcuts"][idx]:
+            hist_bin_dict["H_MM_fit1sub_{}_{}".format(section_label, t_index)].Fill(adj_mm)
+            hist_bin_dict["H_MM_pisub_{}_{}".format(section_label, t_index)].Fill(adj_mm)
+            hist_bin_dict["H_MM_nosub_{}_{}".format(section_label, t_index)].Fill(adj_mm)
+
+        if cache_section["allcuts"][idx]:
+            hist_bin_dict["H_t_{}_{}".format(section_label, t_index)].Fill(adj_t)
+            hist_bin_dict["H_Q2_{}_{}".format(section_label, t_index)].Fill(cache_section["Q2"][idx])
+            hist_bin_dict["H_W_{}_{}".format(section_label, t_index)].Fill(cache_section["W"][idx])
+            hist_bin_dict["H_epsilon_{}_{}".format(section_label, t_index)].Fill(cache_section["epsilon"][idx])
+            hist_bin_dict["H_MM_{}_{}".format(section_label, t_index)].Fill(adj_mm)
+            if section_label == "DATA":
+                mm_offset_data = cache_section["mm_offset"][idx]
+
+    return mm_offset_data
+
+
+def _fill_cached_ave_simc(cache_section, hist_bin_dict, t_bins):
+    for idx, minus_t in enumerate(cache_section["minus_t"]):
+        t_index = find_bin_index(minus_t, t_bins)
+        if t_index is None:
+            continue
+
+        iter_weight = cache_section["iter_weight"][idx]
+        hist_bin_dict["H_t_SIMC_{}".format(t_index)].Fill(minus_t, iter_weight)
+        hist_bin_dict["H_Q2_SIMC_{}".format(t_index)].Fill(cache_section["Q2"][idx], iter_weight)
+        hist_bin_dict["H_W_SIMC_{}".format(t_index)].Fill(cache_section["W"][idx], iter_weight)
+        hist_bin_dict["H_epsilon_SIMC_{}".format(t_index)].Fill(cache_section["epsilon"][idx], iter_weight)
+
+
+def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None):
 
     processed_dict = {}
 
@@ -230,197 +273,203 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             subDict["H_MM_nosub_SUB_DUMMY_RAND_{}".format(j)]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}".format(j),"MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)
             
     print("\nBinning data...")
-    for i,evt in enumerate(TBRANCH_DATA):
+    if event_cache is not None:
+        mm_offset_from_cache = _fill_cached_ave_section(event_cache["prompt"], hist_bin_dict, "DATA", t_bins)
+        if mm_offset_from_cache is not None:
+            MM_offset_DATA = mm_offset_from_cache
+    else:
+        for i,evt in enumerate(TBRANCH_DATA):
 
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
+            ##############
+            # HARD CODED #
+            ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+            # Check if variable shift branch exists
+            try:
+                adj_MM = evt.MM_shift
+            except AttributeError:
+                adj_MM = evt.MM
+            adj_t = get_shifted_t(evt)
 
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ##############
+            ##############        
+            ##############
+            
+            if ParticleType == "kaon":
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+                NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            else:
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+                NOMMCUTS = apply_data_sub_cuts(evt)
 
-        if(NOMMCUTS):
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Fill(adj_MM)
-                    hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Fill(adj_MM) 
-                    hist_bin_dict["H_MM_nosub_DATA_{}".format(j)].Fill(adj_MM)          
+            t_index = find_bin_index(adj_t, t_bins)
+            if t_index is None:
+                continue
 
-        if(ALLCUTS):            
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_fit1sub_DATA_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_pisub_DATA_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_nosub_DATA_{}".format(t_index)].Fill(adj_MM)
 
-            # Loop through bins in t_data and identify events in specified bins
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    hist_bin_dict["H_t_DATA_{}".format(j)].Fill(adj_t)
-                    hist_bin_dict["H_Q2_DATA_{}".format(j)].Fill(evt.Q2)
-                    hist_bin_dict["H_W_DATA_{}".format(j)].Fill(evt.W)                        
-                    hist_bin_dict["H_epsilon_DATA_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_DATA_{}".format(j)].Fill(adj_MM)
-                    MM_offset_DATA = evt.MM_shift-evt.MM
+            if(ALLCUTS):
+                hist_bin_dict["H_t_DATA_{}".format(t_index)].Fill(adj_t)
+                hist_bin_dict["H_Q2_DATA_{}".format(t_index)].Fill(evt.Q2)
+                hist_bin_dict["H_W_DATA_{}".format(t_index)].Fill(evt.W)
+                hist_bin_dict["H_epsilon_DATA_{}".format(t_index)].Fill(evt.epsilon)
+                hist_bin_dict["H_MM_DATA_{}".format(t_index)].Fill(adj_MM)
+                MM_offset_DATA = evt.MM_shift-evt.MM
                     
     print("\nBinning dummy...")
-    for i,evt in enumerate(TBRANCH_DUMMY):
+    if event_cache is not None:
+        _fill_cached_ave_section(event_cache["dummy"], hist_bin_dict, "DUMMY", t_bins)
+    else:
+        for i,evt in enumerate(TBRANCH_DUMMY):
 
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
+            ##############
+            # HARD CODED #
+            ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+            # Check if variable shift branch exists
+            try:
+                adj_MM = evt.MM_shift
+            except AttributeError:
+                adj_MM = evt.MM
+            adj_t = get_shifted_t(evt)
 
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ##############
+            ##############        
+            ##############
+            
+            if ParticleType == "kaon":
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+                NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            else:
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+                NOMMCUTS = apply_data_sub_cuts(evt)
 
-        if(NOMMCUTS):
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:   
-                    hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(j)].Fill(adj_MM)             
-                    hist_bin_dict["H_MM_pisub_DUMMY_{}".format(j)].Fill(adj_MM)
-                    hist_bin_dict["H_MM_nosub_DUMMY_{}".format(j)].Fill(adj_MM)            
+            t_index = find_bin_index(adj_t, t_bins)
+            if t_index is None:
+                continue
 
-        if(ALLCUTS):
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_fit1sub_DUMMY_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_pisub_DUMMY_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_nosub_DUMMY_{}".format(t_index)].Fill(adj_MM)
 
-            # Loop through bins in t_dummy and identify events in specified bins
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    hist_bin_dict["H_t_DUMMY_{}".format(j)].Fill(adj_t)
-                    hist_bin_dict["H_Q2_DUMMY_{}".format(j)].Fill(evt.Q2)
-                    hist_bin_dict["H_W_DUMMY_{}".format(j)].Fill(evt.W)                        
-                    hist_bin_dict["H_epsilon_DUMMY_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_DUMMY_{}".format(j)].Fill(adj_MM)                    
+            if(ALLCUTS):
+                hist_bin_dict["H_t_DUMMY_{}".format(t_index)].Fill(adj_t)
+                hist_bin_dict["H_Q2_DUMMY_{}".format(t_index)].Fill(evt.Q2)
+                hist_bin_dict["H_W_DUMMY_{}".format(t_index)].Fill(evt.W)
+                hist_bin_dict["H_epsilon_DUMMY_{}".format(t_index)].Fill(evt.epsilon)
+                hist_bin_dict["H_MM_DUMMY_{}".format(t_index)].Fill(adj_MM)
                     
     print("\nBinning rand...")
-    for i,evt in enumerate(TBRANCH_RAND):
+    if event_cache is not None:
+        _fill_cached_ave_section(event_cache["rand"], hist_bin_dict, "RAND", t_bins)
+    else:
+        for i,evt in enumerate(TBRANCH_RAND):
 
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
+            ##############
+            # HARD CODED #
+            ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+            # Check if variable shift branch exists
+            try:
+                adj_MM = evt.MM_shift
+            except AttributeError:
+                adj_MM = evt.MM
+            adj_t = get_shifted_t(evt)
 
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ##############
+            ##############        
+            ##############
+            
+            if ParticleType == "kaon":
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+                NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            else:
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+                NOMMCUTS = apply_data_sub_cuts(evt)
 
-        if(NOMMCUTS):
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:       
-                    hist_bin_dict["H_MM_fit1sub_RAND_{}".format(j)].Fill(adj_MM)         
-                    hist_bin_dict["H_MM_pisub_RAND_{}".format(j)].Fill(adj_MM) 
-                    hist_bin_dict["H_MM_nosub_RAND_{}".format(j)].Fill(adj_MM)           
+            t_index = find_bin_index(adj_t, t_bins)
+            if t_index is None:
+                continue
 
-        if(ALLCUTS):
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_fit1sub_RAND_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_pisub_RAND_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_nosub_RAND_{}".format(t_index)].Fill(adj_MM)
 
-            # Loop through bins in t_rand and identify events in specified bins
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    hist_bin_dict["H_t_RAND_{}".format(j)].Fill(adj_t)
-                    hist_bin_dict["H_Q2_RAND_{}".format(j)].Fill(evt.Q2)
-                    hist_bin_dict["H_W_RAND_{}".format(j)].Fill(evt.W)                        
-                    hist_bin_dict["H_epsilon_RAND_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_RAND_{}".format(j)].Fill(adj_MM)
+            if(ALLCUTS):
+                hist_bin_dict["H_t_RAND_{}".format(t_index)].Fill(adj_t)
+                hist_bin_dict["H_Q2_RAND_{}".format(t_index)].Fill(evt.Q2)
+                hist_bin_dict["H_W_RAND_{}".format(t_index)].Fill(evt.W)
+                hist_bin_dict["H_epsilon_RAND_{}".format(t_index)].Fill(evt.epsilon)
+                hist_bin_dict["H_MM_RAND_{}".format(t_index)].Fill(adj_MM)
                     
     print("\nBinning dummy_rand...")
-    for i,evt in enumerate(TBRANCH_DUMMY_RAND):
+    if event_cache is not None:
+        _fill_cached_ave_section(event_cache["dummy_rand"], hist_bin_dict, "DUMMY_RAND", t_bins)
+    else:
+        for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
 
-        ##############
-        # HARD CODED #
-        ##############
+            ##############
+            # HARD CODED #
+            ##############
 
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+            adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
+            # Check if variable shift branch exists
+            try:
+                adj_MM = evt.MM_shift
+            except AttributeError:
+                adj_MM = evt.MM
+            adj_t = get_shifted_t(evt)
 
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ##############
+            ##############        
+            ##############
+            
+            if ParticleType == "kaon":
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+                NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            else:
+                ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
+                NOMMCUTS = apply_data_sub_cuts(evt)
 
-        if(NOMMCUTS):
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:         
-                    hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)       
-                    hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
-                    hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)].Fill(adj_MM)            
+            t_index = find_bin_index(adj_t, t_bins)
+            if t_index is None:
+                continue
 
-        if(ALLCUTS):
+            if(NOMMCUTS):
+                hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}".format(t_index)].Fill(adj_MM)
+                hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(t_index)].Fill(adj_MM)
 
-            # Loop through bins in t_dummy_rand and identify events in specified bins
-            for j in range(len(t_bins)-1):                
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    hist_bin_dict["H_t_DUMMY_RAND_{}".format(j)].Fill(adj_t)
-                    hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(j)].Fill(evt.Q2)
-                    hist_bin_dict["H_W_DUMMY_RAND_{}".format(j)].Fill(evt.W)                        
-                    hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(j)].Fill(evt.epsilon)
-                    hist_bin_dict["H_MM_DUMMY_RAND_{}".format(j)].Fill(adj_MM)
+            if(ALLCUTS):
+                hist_bin_dict["H_t_DUMMY_RAND_{}".format(t_index)].Fill(adj_t)
+                hist_bin_dict["H_Q2_DUMMY_RAND_{}".format(t_index)].Fill(evt.Q2)
+                hist_bin_dict["H_W_DUMMY_RAND_{}".format(t_index)].Fill(evt.W)
+                hist_bin_dict["H_epsilon_DUMMY_RAND_{}".format(t_index)].Fill(evt.epsilon)
+                hist_bin_dict["H_MM_DUMMY_RAND_{}".format(t_index)].Fill(adj_MM)
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -718,9 +767,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             
     return processed_dict
 
-def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict):
+def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
+    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache)
     
     binned_dict = {}
 
@@ -838,7 +887,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     mm_max = inpDict["mm_max"]    
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict)
+    event_cache = hist.get("_yield_data_event_cache")
+    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache)
 
     group_dict = {}
     bad_bins = set()  # <-- collect (tbin_index, phibin_index) that have sem==1000.0 anywhere
@@ -957,6 +1007,7 @@ def ave_per_bin_data(histlist, inpDict):
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
         binned_dict = calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict)
+        hist.pop("_yield_data_event_cache", None)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
                 
@@ -964,7 +1015,7 @@ def ave_per_bin_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
+def process_hist_simc(tree_simc, t_bins, inpDict, iteration, event_cache=None):
 
     processed_dict = {}
 
@@ -1013,26 +1064,29 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
         hist_bin_dict["H_epsilon_SIMC_{}".format(j)]  = TH1D("H_epsilon_SIMC_{}".format(j),"epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
 
     print("\nBinning simc...")
-    for i,evt in enumerate(TBRANCH_SIMC):
+    if event_cache is not None:
+        _fill_cached_ave_simc(event_cache, hist_bin_dict, t_bins)
+    else:
+        for i,evt in enumerate(TBRANCH_SIMC):
 
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
+            # Progress bar
+            Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
 
-        if ParticleType == "kaon":
-            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
-        else:
-            ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
+            if ParticleType == "kaon":
+                ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+            else:
+                ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
-        #Fill SIMC events
-        if(ALLCUTS):
+            #Fill SIMC events
+            if(ALLCUTS):
+                t_index = find_bin_index(-evt.t, t_bins)
+                if t_index is None:
+                    continue
 
-            # Loop through bins in t_simc and identify events in specified bins
-            for j in range(len(t_bins)-1):            
-                if t_bins[j] <= -evt.t < t_bins[j+1]:
-                    hist_bin_dict["H_t_SIMC_{}".format(j)].Fill(-evt.t, evt.iter_weight)
-                    hist_bin_dict["H_Q2_SIMC_{}".format(j)].Fill(evt.Q2, evt.iter_weight)
-                    hist_bin_dict["H_W_SIMC_{}".format(j)].Fill(evt.W, evt.iter_weight)
-                    hist_bin_dict["H_epsilon_SIMC_{}".format(j)].Fill(evt.epsilon, evt.iter_weight)                  
+                hist_bin_dict["H_t_SIMC_{}".format(t_index)].Fill(-evt.t, evt.iter_weight)
+                hist_bin_dict["H_Q2_SIMC_{}".format(t_index)].Fill(evt.Q2, evt.iter_weight)
+                hist_bin_dict["H_W_SIMC_{}".format(t_index)].Fill(evt.W, evt.iter_weight)
+                hist_bin_dict["H_epsilon_SIMC_{}".format(t_index)].Fill(evt.epsilon, evt.iter_weight)
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -1046,9 +1100,9 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration):
         
     return processed_dict                    
         
-def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration):
+def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration, event_cache=None):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, inpDict, iteration)
+    processed_dict = process_hist_simc(tree_simc, t_bins, inpDict, iteration, event_cache=event_cache)
     
     binned_dict = {}
     
@@ -1122,7 +1176,8 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
     mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration)
+    event_cache = hist.get("_yield_simc_event_cache")
+    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration, event_cache=event_cache)
     
     kin_hist_simc = binned_dict[kin_type]["kin_hist_simc"]
     
@@ -1224,6 +1279,7 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
         print("-"*25)
         aveDict[hist["phi_setting"]] = {}
         binned_dict = calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iteration)
+        hist.pop("_yield_simc_event_cache", None)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
         

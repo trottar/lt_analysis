@@ -29,6 +29,8 @@ from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
 
+from binning_helpers import find_bin_index, find_2d_bin_indices
+
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
@@ -68,9 +70,91 @@ def integral_with_stat_error(hist):
     return total, math.sqrt(max(variance, 0.0))
 
 
+def _clone_hist_for_plot(hist):
+    cloned_hist = hist.Clone()
+    cloned_hist.SetDirectory(0)
+    return cloned_hist
+
+
+def _init_ave_event_cache():
+    cache_template = {
+        "adj_t": [],
+        "adj_MM": [],
+        "Q2": [],
+        "W": [],
+        "epsilon": [],
+        "allcuts": [],
+        "nommcuts": [],
+        "mm_offset": [],
+    }
+    return {
+        key: {name: values.copy() for name, values in cache_template.items()}
+        for key in ("prompt", "dummy", "rand", "dummy_rand")
+    }
+
+
+def _append_ave_event(cache_section, adj_t, adj_MM, q2, w, epsilon, allcuts, nommcuts, mm_offset=0.0):
+    if not (allcuts or nommcuts):
+        return
+
+    cache_section["adj_t"].append(adj_t)
+    cache_section["adj_MM"].append(adj_MM)
+    cache_section["Q2"].append(q2)
+    cache_section["W"].append(w)
+    cache_section["epsilon"].append(epsilon)
+    cache_section["allcuts"].append(bool(allcuts))
+    cache_section["nommcuts"].append(bool(nommcuts))
+    cache_section["mm_offset"].append(mm_offset)
+
+
+def _freeze_ave_event_cache(event_cache):
+    frozen_cache = {}
+    for cache_key, cache_section in event_cache.items():
+        frozen_cache[cache_key] = {
+            "adj_t": np.asarray(cache_section["adj_t"], dtype=np.float64),
+            "adj_MM": np.asarray(cache_section["adj_MM"], dtype=np.float64),
+            "Q2": np.asarray(cache_section["Q2"], dtype=np.float64),
+            "W": np.asarray(cache_section["W"], dtype=np.float64),
+            "epsilon": np.asarray(cache_section["epsilon"], dtype=np.float64),
+            "allcuts": np.asarray(cache_section["allcuts"], dtype=bool),
+            "nommcuts": np.asarray(cache_section["nommcuts"], dtype=bool),
+            "mm_offset": np.asarray(cache_section["mm_offset"], dtype=np.float64),
+        }
+    return frozen_cache
+
+
+def _init_ave_simc_event_cache():
+    return {
+        "minus_t": [],
+        "Q2": [],
+        "W": [],
+        "epsilon": [],
+        "iter_weight": [],
+    }
+
+
+def _append_ave_simc_event(cache_section, minus_t, q2, w, epsilon, iter_weight):
+    cache_section["minus_t"].append(minus_t)
+    cache_section["Q2"].append(q2)
+    cache_section["W"].append(w)
+    cache_section["epsilon"].append(epsilon)
+    cache_section["iter_weight"].append(iter_weight)
+
+
+def _freeze_ave_simc_event_cache(event_cache):
+    return {
+        "minus_t": np.asarray(event_cache["minus_t"], dtype=np.float64),
+        "Q2": np.asarray(event_cache["Q2"], dtype=np.float64),
+        "W": np.asarray(event_cache["W"], dtype=np.float64),
+        "epsilon": np.asarray(event_cache["epsilon"], dtype=np.float64),
+        "iter_weight": np.asarray(event_cache["iter_weight"], dtype=np.float64),
+    }
+
+
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
+    ave_event_cache = _init_ave_event_cache()
     
     OutFilename = inpDict["OutFilename"] 
 
@@ -243,7 +327,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         
         # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)
+        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -251,33 +336,32 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
-            
-        if(NOMMCUTS):
-            # Loop through bins in t_data and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):                                
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
-                            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
-                            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break  
+        
+        if t_index is not None:
+            mm_offset = 0.0
+            if ALLCUTS:
+                mm_offset = evt.MM_shift-evt.MM
+            _append_ave_event(
+                ave_event_cache["prompt"],
+                adj_t,
+                adj_MM,
+                evt.Q2,
+                evt.W,
+                evt.epsilon,
+                ALLCUTS,
+                NOMMCUTS,
+                mm_offset,
+            )
 
-        if(ALLCUTS):
+        if NOMMCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
-            # Loop through bins in t_data and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Fill(adj_t)
-                            hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
-                            MM_offset_DATA = evt.MM_shift-evt.MM
-                            break
-                    break   
+        if ALLCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_t_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_t)
+            hist_bin_dict["H_MM_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            MM_offset_DATA = evt.MM_shift-evt.MM
 
     print("\nBinning dummy...")
     for i,evt in enumerate(TBRANCH_DUMMY):
@@ -304,7 +388,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         
         # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)
+        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -313,31 +398,26 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
-        if(NOMMCUTS):
-            # Loop through bins in t_data and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM) 
-                            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)             
-                            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break   
+        if t_index is not None:
+            _append_ave_event(
+                ave_event_cache["dummy"],
+                adj_t,
+                adj_MM,
+                evt.Q2,
+                evt.W,
+                evt.epsilon,
+                ALLCUTS,
+                NOMMCUTS,
+            )
 
-        if(ALLCUTS):                
+        if NOMMCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
-            # Loop through bins in t_dummy and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):             
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(adj_t)
-                            hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break   
+        if ALLCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_t_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_t)
+            hist_bin_dict["H_MM_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
     print("\nBinning rand...")
     for i,evt in enumerate(TBRANCH_RAND):
@@ -364,7 +444,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 
         # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)
+        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -372,33 +453,28 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         else:
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
+            
+        if t_index is not None:
+            _append_ave_event(
+                ave_event_cache["rand"],
+                adj_t,
+                adj_MM,
+                evt.Q2,
+                evt.W,
+                evt.epsilon,
+                ALLCUTS,
+                NOMMCUTS,
+            )
 
-        if(NOMMCUTS):
-            # Loop through bins in t_data and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])   
-                            hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)].Fill(adj_MM)             
-                            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break    
+        if NOMMCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
-        if(ALLCUTS):                
+        if ALLCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_t_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_t)
+            hist_bin_dict["H_MM_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
-            # Loop through bins in t_rand and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_RAND_{}_{}".format(j, k)].Fill(adj_t)
-                            hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break      
-                                      
     print("\nBinning dummy_rand...")
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
@@ -422,9 +498,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         ##############        
         ##############        
         
-       # Phase shift to right setting
+        # Phase shift to right setting
         #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)        
+        phi_shift = (evt.ph_q)*(180 / math.pi)
+        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
 
         if ParticleType == "kaon":
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
@@ -433,31 +510,26 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
             NOMMCUTS = apply_data_sub_cuts(evt)
 
-        if(NOMMCUTS):
-            # Loop through bins in t_data and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1]) 
-                            hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)               
-                            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break
+        if t_index is not None:
+            _append_ave_event(
+                ave_event_cache["dummy_rand"],
+                adj_t,
+                adj_MM,
+                evt.Q2,
+                evt.W,
+                evt.epsilon,
+                ALLCUTS,
+                NOMMCUTS,
+            )
 
-        if(ALLCUTS):                
+        if NOMMCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
-            # Loop through bins in t_dummy_rand and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= adj_t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):            
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print(phi_bins[k]," <= ",phi_shift," <= ",phi_bins[k+1])
-                            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_t)
-                            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
-                            break
-                    break
+        if ALLCUTS and t_index is not None and phi_index is not None:
+            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_t)
+            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
@@ -795,25 +867,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
             
-            # Clone dictionary
-            cloned_dict = {}
-
-            # Iterate through processed_dict to clone all objects
-            for key, sub_dict in processed_dict.items():
-                cloned_dict[key] = {}
-                for sub_key, obj in sub_dict.items():
-                    if is_hist(obj):
-                        # Clone the object and assign it to the new dictionary
-                        cloned_dict[key][sub_key] = obj.Clone()
-
-            # Optionally sort the keys in cloned_dict if needed
-            for key in cloned_dict.keys():
-                cloned_dict[key] = {sub_key: cloned_dict[key][sub_key]
-                                    for sub_key in sorted(cloned_dict[key].keys())}    
-
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
-            for i, (key,val) in enumerate(cloned_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+            plot_entry = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)]
+            for i, (key,val) in enumerate(plot_entry.items()):
 
                 # Track the absolute first and last plots across all iterations
                 is_absolute_first = (canvas_iter == 0)
@@ -826,15 +883,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     if "MM_DATA" in key:
                         # Create a new canvas for each plot
                         canvas2 = ROOT.TCanvas("canvas2_{}".format(canvas_iter), "Canvas", 800, 600)
-                        
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetLineColor(1)
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Draw()
+
+                        mm_nosub_plot = _clone_hist_for_plot(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
+                        mm_nosub_plot.SetLineColor(1)
+                        mm_nosub_plot.SetFillStyle(3001)  # Set fill style to dots
+                        mm_nosub_plot.SetFillColor(kBlack)  # Set fill color to black
+                        mm_nosub_plot.Draw()
                         if ParticleType == "kaon":
-                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].SetLineColor(2)
-                            subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Draw("same, E1")
-                        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].GetName())
+                            mm_sub_plot = _clone_hist_for_plot(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)])
+                            mm_sub_plot.SetLineColor(2)
+                            mm_sub_plot.Draw("same, E1")
+                        mm_nosub_plot.SetTitle(mm_nosub_plot.GetName())
                         
                         # Ensure correct PDF opening and closing
                         pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -853,15 +912,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                         # Create a new canvas for each plot
                         canvas3 = ROOT.TCanvas("canvas3_{}".format(canvas_iter), "Canvas", 800, 600)
-                        
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Draw("hist same")                        
+
+                        mm_pisub_plot = _clone_hist_for_plot(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)])
+                        mm_pisub_plot.SetLineColor(1)
+                        mm_pisub_plot.SetFillStyle(3001)  # Set fill style to dots
+                        mm_pisub_plot.SetFillColor(kBlack)  # Set fill color to black
+                        mm_pisub_plot.Draw("hist same")
                         if inpDict["bg_stat_scale1"] > 0.0:
-                            fitDict["background_fit1_{}_{}".format(j, k)][1].SetLineColor(3)
-                            fitDict["background_fit1_{}_{}".format(j, k)][1].Draw("same")
-                        hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].GetName())
+                            fit_plot = _clone_hist_for_plot(fitDict["background_fit1_{}_{}".format(j, k)][1])
+                            fit_plot.SetLineColor(3)
+                            fit_plot.Draw("same")
+                        mm_pisub_plot.SetTitle(mm_pisub_plot.GetName())
                         
                         # Ensure correct PDF opening and closing
                         pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -880,15 +941,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                         # Create a new canvas for each plot
                         canvas4 = ROOT.TCanvas("canvas4_{}".format(canvas_iter), "Canvas", 800, 600)
-                        
-                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetLineColor(1)                
-                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetFillStyle(3001)  # Set fill style to dots
-                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetFillColor(kBlack)  # Set fill color to black
-                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Draw("hist same")                        
+
+                        mm_fit1sub_plot = _clone_hist_for_plot(hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)])
+                        mm_fit1sub_plot.SetLineColor(1)
+                        mm_fit1sub_plot.SetFillStyle(3001)  # Set fill style to dots
+                        mm_fit1sub_plot.SetFillColor(kBlack)  # Set fill color to black
+                        mm_fit1sub_plot.Draw("hist same")
                         if inpDict.get("bg_stat_scale2", 0.0) > 0.0:
-                            fitDict["background_fit2_{}_{}".format(j, k)][1].SetLineColor(3)
-                            fitDict["background_fit2_{}_{}".format(j, k)][1].Draw("same")
-                        hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].GetName())
+                            fit_plot = _clone_hist_for_plot(fitDict["background_fit2_{}_{}".format(j, k)][1])
+                            fit_plot.SetLineColor(3)
+                            fit_plot.Draw("same")
+                        mm_fit1sub_plot.SetTitle(mm_fit1sub_plot.GetName())
                         
                         # Ensure correct PDF opening and closing
                         pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -907,8 +970,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                     # Create a new canvas for each plot
                     canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
-                    val.Draw()
-                    val.SetTitle(val.GetName())
+                    plot_hist = _clone_hist_for_plot(val)
+                    plot_hist.Draw()
+                    plot_hist.SetTitle(plot_hist.GetName())
                     
                     if "MM_DATA" in key:
                         
@@ -920,7 +984,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
+                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), plot_hist.Integral()))
                     
                     # Ensure correct PDF opening and closing
                     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
@@ -940,11 +1004,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
             
-    return processed_dict
+    return processed_dict, _freeze_ave_event_cache(ave_event_cache)
 
 def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    processed_dict, ave_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
     
     binned_dict = {}
 
@@ -1033,7 +1097,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
     if inpDict.get("bg_stat_scale2", 0.0) > 0.0:
         binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
 
-    return binned_dict
+    return binned_dict, ave_event_cache
 
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
@@ -1048,7 +1112,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict = bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    binned_dict, ave_event_cache = bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    hist["_yield_data_event_cache"] = ave_event_cache
 
     binned_t_data = binned_dict[kin_type]["binned_t_data"]
     binned_hist_data = binned_dict[kin_type]["binned_hist_data"]
@@ -1189,6 +1254,7 @@ def find_yield_data(histlist, inpDict):
 def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
     processed_dict = {}
+    ave_simc_event_cache = _init_ave_simc_event_cache()
     
     OutFilename = inpDict["OutFilename"] 
     
@@ -1263,6 +1329,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         # Wrap -pi to pi
         #phi_shift = (((evt.phipq + math.pi) % (2 * math.pi)) - math.pi)*(180 / math.pi)
         phi_shift = (evt.phipq)*(180 / math.pi)
+        t_index, phi_index = find_2d_bin_indices(-evt.t, phi_shift, t_bins, phi_bins)
         
         if ParticleType == "kaon":          
             ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
@@ -1270,19 +1337,21 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
 
         #Fill SIMC events
-        if(ALLCUTS):      
+        if(ALLCUTS):
+            if t_index is not None:
+                _append_ave_simc_event(
+                    ave_simc_event_cache,
+                    -evt.t,
+                    evt.Q2,
+                    evt.W,
+                    evt.epsilon,
+                    evt.iter_weight,
+                )
 
-            # Loop through bins in t_simc and identify events in specified bins
-            for j in range(len(t_bins)-1):
-                if t_bins[j] <= -evt.t < t_bins[j+1]:
-                    for k in range(len(phi_bins)-1):                                
-                        if phi_bins[k] <= phi_shift < phi_bins[k+1]:
-                            #print("SIMC Event {}: t-bin {} phi-bin {} phi value {}".format(i, j+1, k+1, phi_shift))
-                            hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)].Fill(-evt.t, evt.iter_weight)
-                            hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Fill(adj_missmass, evt.iter_weight)
-                            hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)].Fill(adj_missmass)
-                            break                            
-                    break
+            if t_index is not None and phi_index is not None:
+                hist_bin_dict["H_t_SIMC_{}_{}".format(t_index, phi_index)].Fill(-evt.t, evt.iter_weight)
+                hist_bin_dict["H_MM_SIMC_{}_{}".format(t_index, phi_index)].Fill(adj_missmass, evt.iter_weight)
+                hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(t_index, phi_index)].Fill(adj_missmass)
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
@@ -1308,25 +1377,10 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                       for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
 
-            # Clone dictionary
-            cloned_dict = {}
-
-            # Iterate through processed_dict to clone all objects
-            for key, sub_dict in processed_dict.items():
-                cloned_dict[key] = {}
-                for sub_key, obj in sub_dict.items():
-                    if is_hist(obj):
-                        # Clone the object and assign it to the new dictionary
-                        cloned_dict[key][sub_key] = obj.Clone()
-
-            # Optionally sort the keys in cloned_dict if needed
-            for key in cloned_dict.keys():
-                cloned_dict[key] = {sub_key: cloned_dict[key][sub_key]
-                                    for sub_key in sorted(cloned_dict[key].keys())}    
-            
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)
-            for i, (key,val) in enumerate(cloned_dict["t_bin{}phi_bin{}".format(j+1,k+1)].items()):
+            plot_entry = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)]
+            for i, (key,val) in enumerate(plot_entry.items()):
                 
                 # Create a new canvas for each plot
                 canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
@@ -1340,9 +1394,10 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                 if is_hist(val):
                     
                     if "MM_SIMC" in key:
-                        hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].SetLineColor(1)
-                        hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Draw()
-                        hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].SetTitle(hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].GetName())
+                        simc_plot = _clone_hist_for_plot(hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)])
+                        simc_plot.SetLineColor(1)
+                        simc_plot.Draw()
+                        simc_plot.SetTitle(simc_plot.GetName())
 
                         # Create a TLatex object to add text to the plot
                         text = ROOT.TLatex()
@@ -1352,11 +1407,12 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                         text.SetTextColor(ROOT.kBlack)
 
                         # Add the number of mesons to the plot
-                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), val.Integral()))
+                        text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), simc_plot.Integral()))
 
                     else:
-                        val.Draw()
-                        val.SetTitle(val.GetName())
+                        plot_hist = _clone_hist_for_plot(val)
+                        plot_hist.Draw()
+                        plot_hist.SetTitle(plot_hist.GetName())
 
                     # Ensure correct PDF opening and closing
                     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))
@@ -1376,11 +1432,11 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                     # Close the canvas to free up memory
                     canvas.Close()
                 
-    return processed_dict
+    return processed_dict, _freeze_ave_simc_event_cache(ave_simc_event_cache)
 
 def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
-    processed_dict = process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
+    processed_dict, ave_simc_event_cache = process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
     
     binned_dict = {}
 
@@ -1429,7 +1485,7 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
         "binned_unweighted_NumEvts_simc" : binned_unweighted_NumEvts_simc
     }
         
-    return binned_dict
+    return binned_dict, ave_simc_event_cache
 
 def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
@@ -1440,7 +1496,8 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data
-    binned_dict = bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
+    binned_dict, ave_simc_event_cache = bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
+    hist["_yield_simc_event_cache"] = ave_simc_event_cache
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]
