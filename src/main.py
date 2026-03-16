@@ -31,6 +31,8 @@ from functools import reduce
 import csv
 import json
 import shutil
+import atexit
+from time import perf_counter
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -201,6 +203,47 @@ phisetlist = ["Center", "Left", "Right"]
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
+analysis_start_time = perf_counter()
+stage_timings = []
+timing_summary_printed = False
+
+
+def format_elapsed(seconds):
+    if seconds < 60.0:
+        return "{:.2f} s".format(seconds)
+    minutes, remainder = divmod(seconds, 60.0)
+    if minutes < 60.0:
+        return "{:.0f} m {:.2f} s".format(minutes, remainder)
+    hours, minutes = divmod(minutes, 60.0)
+    return "{:.0f} h {:.0f} m {:.2f} s".format(hours, minutes, remainder)
+
+
+def record_stage_time(stage_name, start_time):
+    elapsed = perf_counter() - start_time
+    stage_timings.append((stage_name, elapsed))
+    print("\n[TIMER] {}: {}".format(stage_name, format_elapsed(elapsed)))
+    return elapsed
+
+
+def print_timing_summary():
+    global timing_summary_printed
+    if timing_summary_printed:
+        return
+
+    timing_summary_printed = True
+    total_elapsed = perf_counter() - analysis_start_time
+    print("\n" + "=" * 40)
+    print("Analysis Timing Summary")
+    print("=" * 40)
+    for index, (stage_name, elapsed) in enumerate(stage_timings, start=1):
+        print("{:02d}. {}: {}".format(index, stage_name, format_elapsed(elapsed)))
+    print("-" * 40)
+    print("Total elapsed: {}".format(format_elapsed(total_elapsed)))
+    print("=" * 40)
+
+
+atexit.register(print_timing_summary)
+
 sys.path.append("setup")
 from shift_MM import (
     add_derived_branch_to_file,
@@ -298,10 +341,13 @@ def run_shift_script(simc_root, data_root, theta_cm_deg, beam_energy_gev):
 mm_shift_summary = {}
 t_shift_summary = {}
 tree_names = get_data_tree_names(ParticleType)
+stage_start = perf_counter()
 for phiset in phisetlist:
+    setting_start = perf_counter()
     rootFileData = f"{OUTPATH}/{phiset}_{ParticleType}_{InDATAFilename}.root"
     if not os.path.exists(rootFileData):
         print(f"Skipping MM shift for {phiset}: data file {rootFileData} not found.")
+        record_stage_time("MM/t shift {}".format(phiset), setting_start)
         continue
 
     rootFileSimc = f"{OUTPATH}/Prod_Coin_Q{Q2}W{W}{phiset.lower()}_{EPSSET}e.root"
@@ -386,8 +432,11 @@ for phiset in phisetlist:
         }
         output_file_lst.append(t_plot_filename)
 
+    record_stage_time("MM/t shift {}".format(phiset), setting_start)
+
 inpDict["mm_shift_summary"] = mm_shift_summary
 inpDict["t_shift_summary"] = t_shift_summary
+record_stage_time("MM/t shift setup total", stage_start)
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
@@ -467,10 +516,14 @@ print("-"*25)
 # Default starting values no need to change
 inpDict["Epsmin"] = 0.0
 inpDict["Epsmax"] = 1.0
-
+stage_start = perf_counter()
 for phiset in phisetlist:
+    setting_start = perf_counter()
     # Call diamond cut script and append paramters to dictionary
     inpDict.update(DiamondPlot(ParticleType, Q2Val, inpDict["Q2min"], inpDict["Q2max"], WVal, inpDict["Wmin"], inpDict["Wmax"], phiset, tmin, tmax, inpDict))
+    record_stage_time("Diamond cut {}".format(phiset), setting_start)
+
+record_stage_time("Step 2 diamond cuts total", stage_start)
  
 print("\n\nDiamond cut polygon:")
 if inpDict.get("cut_mode") != "poly":
@@ -549,8 +602,12 @@ from rand_sub import rand_sub
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
 histlist = []
+stage_start = perf_counter()
 for phiset in phisetlist:
+    setting_start = perf_counter()
     histlist.append(rand_sub(phiset,inpDict))
+    record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
+record_stage_time("Step 3 rand_sub total", stage_start)
     
 print("\n\n")
 
@@ -579,8 +636,12 @@ sys.path.append("normalize")
 from get_eff_charge import find_events
 
 # Upate hist dictionary with effective charge
+stage_start = perf_counter()
 for hist in histlist:
+    setting_start = perf_counter()
     hist.update(find_events(hist, inpDict))
+    record_stage_time("Step 3 find_events {}".format(hist["phi_setting"]), setting_start)
+record_stage_time("Step 3 find_events total", stage_start)
 
 # ***Moved from main.py location below because needed for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
@@ -602,7 +663,9 @@ sys.path.append("simc_ana")
 from iter_weight import iter_weight
 
 # Upate hist dictionary with effective charge and simc histograms
+stage_start = perf_counter()
 for hist in histlist:
+    setting_start = perf_counter()
 
     # Names don't match so need to do some string rearrangement
     InSIMCFilename_original = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"  
@@ -630,14 +693,20 @@ for hist in histlist:
     else:
         print("ERROR: Issue with simc root file {}".format(rootFileSimc))
         sys.exit(2)
+    record_stage_time("Step 3 iter_weight {}".format(hist["phi_setting"]), setting_start)
+record_stage_time("Step 3 iter_weight total", stage_start)
 
 # SIMC
 sys.path.append("simc_ana")    
 from compare_simc import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
+stage_start = perf_counter()
 for hist in histlist:
-    hist.update(compare_simc(hist, inpDict))    
+    setting_start = perf_counter()
+    hist.update(compare_simc(hist, inpDict))
+    record_stage_time("Step 3 compare_simc {}".format(hist["phi_setting"]), setting_start)
+record_stage_time("Step 3 compare_simc total", stage_start)
 
 if DEBUG:
     # Show plot pdf for each setting
@@ -667,7 +736,8 @@ from find_bins import find_bins, check_bins
 
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
-
+	
+stage_start = perf_counter()
 if EPSSET == "low":
     bin_vals = find_bins(histlist, inpDict)
 
@@ -710,6 +780,8 @@ for hist in histlist:
 if EPSSET == "high":
     check_bins(histlist, inpDict)
 
+record_stage_time("Step 4 bin finding/check total", stage_start)
+
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
@@ -745,7 +817,9 @@ sys.path.append("plotting")
 from data_vs_simc import plot_data_vs_simc
 
 # Variable defines string of cuts applied during analysis
+stage_start = perf_counter()
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
+record_stage_time("Step 5 data_vs_simc plots", stage_start)
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
@@ -773,26 +847,36 @@ sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
 
 yieldDict = {}
+stage_start = perf_counter()
 yieldDict.update(find_yield_data(histlist, inpDict))
+record_stage_time("Step 6 data yields", stage_start)
+stage_start = perf_counter()
 yieldDict.update(find_yield_simc(histlist, inpDict))
+record_stage_time("Step 6 simc yields", stage_start)
 #sys.exit(2)
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio
 
 ratioDict = {}
+stage_start = perf_counter()
 ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
+record_stage_time("Step 6 ratios", stage_start)
 
 sys.path.append("binning")
 from ave_per_bin import ave_per_bin_data
 
 aveDict = {}
+stage_start = perf_counter()
 aveDict.update(ave_per_bin_data(histlist, inpDict))
+record_stage_time("Step 6 averages", stage_start)
 
 sys.path.append("plotting")
 from binned import plot_binned
 
+stage_start = perf_counter()
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
+record_stage_time("Step 6 plot_binned", stage_start)
 #notify_email(email_address="trotta@cua.edu")
 
 if DEBUG:
@@ -819,6 +903,7 @@ output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_"
 # Check that root file doesnt already exist    
 #if not os.path.exists(foutroot):
 #if os.path.exists(foutroot):
+stage_start = perf_counter()
 root_file = open_root_file(foutroot, "UPDATE")
 root_dir_cache = {}
 for hist in histlist:
@@ -858,6 +943,7 @@ if root_file.IsOpen():
     print("\nThe root file {} has been successfully closed.".format(foutroot))
 else:
     print("\nError: Unable to close the root file {}.".format(foutroot))
+record_stage_time("Step 6 ROOT histogram export", stage_start)
     
 # Add root file with data histograms        
 output_file_lst.append(foutroot)
@@ -869,6 +955,7 @@ output_file_lst.append(foutroot)
 combineDict = {}
 combineDict.update({"inpDict" : inpDict})
 tmp_lst = []
+stage_start = perf_counter()
 for hist in histlist:
     print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
     tmp_dict = {}
@@ -885,9 +972,12 @@ combineDict.update({ "histlist" : tmp_lst})
 with open(foutjson, 'w') as f_json:
     json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
+record_stage_time("Step 6 JSON export", stage_start)
 
 from physics_lists import create_lists
+stage_start = perf_counter()
 create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
+record_stage_time("Step 6 create_lists", stage_start)
 
 # Copy initial parameterization to specific particle type directory
 shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
@@ -922,6 +1012,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 '''
 
 if EPSSET == "high":
+    stage_start = perf_counter()
     
     # Save fortran scripts that contain iteration functional form of parameterization
     py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
@@ -986,6 +1077,7 @@ if EPSSET == "high":
     output_file_lst.append(aver_lo_file)
     aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
     output_file_lst.append(aver_hi_file)    
+    record_stage_time("Step 7 xsect separation", stage_start)
     
 ##############################
 # Step 8 of the lt_analysis: #
@@ -995,6 +1087,7 @@ if EPSSET == "high":
 '''
 
 # Create a new directory for each iteration in cache
+stage_start = perf_counter()
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
 
@@ -1079,6 +1172,8 @@ for f in output_file_lst:
 # All others should be saved once both are complete
 with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
     file.write(inpDict["cut_summary_lst"])
+record_stage_time("Step 8 cache/archive copy", stage_start)
+print_timing_summary()
 
 '''
 for hist in histlist:
