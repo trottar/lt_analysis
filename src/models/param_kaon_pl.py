@@ -32,15 +32,27 @@ pol_str = ""
 Q2 = ""
 W = ""
 equations = ""
+fun_Sig_L_optimized = None
+fun_Sig_T_optimized = None
+fun_Sig_LT_optimized = None
+fun_Sig_TT_optimized = None
+fun_wfactor_optimized = None
 
 # Then, set global variables which is called with arguments defined in xfit script
 def set_val(inp_pol_str, inp_Q2, inp_W):
     global pol_str, Q2, W, equations
+    global fun_Sig_L_optimized, fun_Sig_T_optimized
+    global fun_Sig_LT_optimized, fun_Sig_TT_optimized, fun_wfactor_optimized
     pol_str = inp_pol_str
     Q2 = inp_Q2
     W = inp_W
     # Load equations from model input file of given setting
     equations = load_equations(f"Q{Q2}W{W}.model")
+    fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
+    fun_Sig_T_optimized = prepare_equations(equations, 'sig_T')
+    fun_Sig_LT_optimized = prepare_equations(equations, 'sig_LT')
+    fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
+    fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
     if DEBUG:    
         logging.debug(f"Loaded equations: {equations}")
         
@@ -68,12 +80,15 @@ def iterWeight(arg_str):
         print(f"1 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
         print(f"2 | thetacm (deg): {thetacm * 180.0 / math.pi}, phicm (deg): {phicm * 180.0 / math.pi}")
 
-    # Grab functional forms from model input file
-    fun_Sig_L_optimized = prepare_equations(equations, 'sig_L')
-    fun_Sig_T_optimized = prepare_equations(equations, 'sig_T')
-    fun_Sig_LT_optimized = prepare_equations(equations, 'sig_LT')
-    fun_Sig_TT_optimized = prepare_equations(equations, 'sig_TT')
-    fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
+    if None in (
+        fun_Sig_L_optimized,
+        fun_Sig_T_optimized,
+        fun_Sig_LT_optimized,
+        fun_Sig_TT_optimized,
+        fun_wfactor_optimized,
+    ):
+        print("ERROR: Model equations were not initialized. Call set_val() before iterWeight().")
+        sys.exit(2)
 
     # Calculate SigL, SigT, SigLT, SigTT
     sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, thetacm, par1, par2, par3, par4)
