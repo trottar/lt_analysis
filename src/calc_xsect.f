@@ -206,13 +206,13 @@ c      pause
          
          do ip=1,nphi
 
-            phi=(ip-0.5)*2.*3.14159/nphi
+*            phi=(ip-0.5)*2.*3.14159/nphi
 
-*            if (phi.le.0.0) then
-*               phi=phi+2.*3.14159
-*            else if (phi.gt.2.*3.14159) then
-*               phi=phi-2.*3.14159
-*            end if
+            if (phi.le.0.0) then
+               phi=phi+2.*3.14159
+            else if (phi.gt.2.*3.14159) then
+               phi=phi-2.*3.14159
+            end if
             
             read(51,*) r,dr
 
@@ -239,7 +239,7 @@ c angle check
 *     Convert from ub/MeV^2 to ub/GeV^2
             x_mod=x_mod*1.d+06
 *     Convert from ub/GeV^2 to nb/GeV^2
-*            x_mod=x_mod*1.d+03
+            x_mod=x_mod*1.d+03
             x_real=x_mod*r
 *     Calculate xsect error (absolute error)
 *     Cross section error is same percent as ratio
