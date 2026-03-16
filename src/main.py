@@ -232,11 +232,24 @@ def print_timing_summary():
 
     timing_summary_printed = True
     total_elapsed = perf_counter() - analysis_start_time
+    summary_rows = list(stage_timings)
+    epsset_value = str(globals().get("EPSSET", "")).lower()
+    has_step7 = any(stage_name.startswith("Step 7") for stage_name, _ in summary_rows)
+    if (not has_step7) and epsset_value.startswith("low"):
+        step8_index = next(
+            (index for index, (stage_name, _) in enumerate(summary_rows) if stage_name.startswith("Step 8")),
+            len(summary_rows),
+        )
+        summary_rows.insert(step8_index, ("Step 7 xsect separation", None))
+
     print("\n" + "=" * 40)
     print("Analysis Timing Summary")
     print("=" * 40)
-    for index, (stage_name, elapsed) in enumerate(stage_timings, start=1):
-        print("{:02d}. {}: {}".format(index, stage_name, format_elapsed(elapsed)))
+    for index, (stage_name, elapsed) in enumerate(summary_rows, start=1):
+        if elapsed is None:
+            print("{:02d}. {}: skipped (low epsilon run)".format(index, stage_name))
+        else:
+            print("{:02d}. {}: {}".format(index, stage_name, format_elapsed(elapsed)))
     print("-" * 40)
     print("Total elapsed: {}".format(format_elapsed(total_elapsed)))
     print("=" * 40)
