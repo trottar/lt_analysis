@@ -16,6 +16,7 @@ import ROOT
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from array import array
 import sys, math, os, subprocess
+from time import perf_counter
 
 # Import the dynamic script
 import importlib.util
@@ -55,8 +56,30 @@ OUTPATH=lt.OUTPATH
 
 ################################################################################################################################################
 
+
+def _format_elapsed(seconds):
+    if seconds < 60.0:
+        return "{:.2f} s".format(seconds)
+    minutes, remainder = divmod(seconds, 60.0)
+    if minutes < 60.0:
+        return "{:.0f} m {:.2f} s".format(minutes, remainder)
+    hours, minutes = divmod(minutes, 60.0)
+    return "{:.0f} h {:.0f} m {:.2f} s".format(hours, minutes, remainder)
+
+
+def _print_iter_timer(label, elapsed, total_events=None):
+    if total_events and total_events > 0:
+        per_event_ms = (elapsed / total_events) * 1000.0
+        print("[TIMER] {}: {} ({:.3f} ms/event)".format(label, _format_elapsed(elapsed), per_event_ms))
+    else:
+        print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
+
+
+################################################################################################################################################
+
 def iter_weight(param_file, simc_root, inpDict, phi_setting):
-    
+    total_start = perf_counter()
+
     formatted_date  = inpDict["formatted_date"]
     try:
         iter_num = inpDict["iter_num"]
@@ -77,15 +100,18 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         print("ERROR: Invalid polarity...must be +1 or -1")
         sys.exit(2)
         
+    stage_start = perf_counter()
     param_arr = []
     with open(param_file, 'r') as f:
         for i, line in enumerate(f):
             columns = line.split()
             param_arr.append(str(columns[0]))
+    _print_iter_timer("iter_weight param load {}".format(phi_setting), perf_counter() - stage_start)
 
     if not os.path.isfile(simc_root):
         print("\n\nERROR: No simc file found called {}\n\n".format(simc_root))        
         
+    stage_start = perf_counter()
     InFile_SIMC = open_root_file(simc_root, "READ")
     TBRANCH_SIMC  = InFile_SIMC.Get("h10")
 
@@ -101,8 +127,10 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
         # Create a new ROOT file for writing
         new_InFile_SIMC = open_root_file(simc_root.replace(".root","_iter_{}.root".format(iter_num)), "UPDATE")
         new_TBRANCH_SIMC = ROOT.TTree("h10", "Iteration {}".format(iter_num))        
+    _print_iter_timer("iter_weight ROOT open/create {}".format(phi_setting), perf_counter() - stage_start)
 
     # Grab branches from previous iteration
+    stage_start = perf_counter()
     hsdelta_array = array( 'f', [0])
     hsyptar_array = array( 'f', [0])
     hsxptar_array = array( 'f', [0])
@@ -316,6 +344,7 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
 
     # Set pol_str, q2_set, w_set for param model script
     set_val(pol_str, q2_set, w_set)
+    _print_iter_timer("iter_weight branch setup {}".format(phi_setting), perf_counter() - stage_start)
     
     ################################################################################################################################################
     # Run over simc root branch to determine new weight
@@ -324,14 +353,23 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
     bad_events = []
     bad_weights = 0
     total_events = TBRANCH_SIMC.GetEntries()
+    progress_time = 0.0
+    get_entry_time = 0.0
+    iter_eval_time = 0.0
+    fill_time = 0.0
     
     print("\nRecalculating weight for %s simc..." % phi_setting)
+    loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_SIMC):
 
+      progress_start = perf_counter()
       # Progress bar
       Misc.progressBar(i, total_events,bar_length=25)
+      progress_time += perf_counter() - progress_start
 
+      get_entry_start = perf_counter()
       TBRANCH_SIMC.GetEntry(i)
+      get_entry_time += perf_counter() - get_entry_start
 
       if iter_num == 0:
 
@@ -353,7 +391,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
                     .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phicm, evt.sigcm, evt.Weight)+' '.join(param_arr)
 
+          iter_eval_start = perf_counter()
           iter_lst = iterWeight(inp_param)
+          iter_eval_time += perf_counter() - iter_eval_start
 
           # Check for bad events
           if iter_lst[0] == 0.0:
@@ -380,7 +420,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
                 print("\n\nWARNING: Weight mismatch for event {}...simc weight = {}, iter weight = {}".format(i, evt.Weight, iter_lst[0]))              
           '''
           
+          fill_start = perf_counter()
           new_TBRANCH_SIMC.Fill()
+          fill_time += perf_counter() - fill_start
 
       else:
 
@@ -406,7 +448,9 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           inp_param = '{} {} {} {} {} {} {} {} {} {} '\
                     .format(Q2, W, evt.Q2i, evt.Wi, evt.ti, evt.epscm, evt.thetacm, evt.phicm, evt.iter_sig, evt.iter_weight)+' '.join(param_arr)
           
+          iter_eval_start = perf_counter()
           iter_lst = iterWeight(inp_param)
+          iter_eval_time += perf_counter() - iter_eval_start
 
           # Check for bad events
           if iter_lst[0] == 0.0:
@@ -419,10 +463,24 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
 
+          fill_start = perf_counter()
           new_TBRANCH_SIMC.Fill()
+          fill_time += perf_counter() - fill_start
 
+    loop_elapsed = perf_counter() - loop_start
+    other_loop_time = max(loop_elapsed - progress_time - get_entry_time - iter_eval_time - fill_time, 0.0)
+    _print_iter_timer("iter_weight loop total {}".format(phi_setting), loop_elapsed, total_events)
+    _print_iter_timer("iter_weight loop progressBar {}".format(phi_setting), progress_time, total_events)
+    _print_iter_timer("iter_weight loop GetEntry {}".format(phi_setting), get_entry_time, total_events)
+    _print_iter_timer("iter_weight loop iterWeight {}".format(phi_setting), iter_eval_time, total_events)
+    _print_iter_timer("iter_weight loop Fill {}".format(phi_setting), fill_time, total_events)
+    _print_iter_timer("iter_weight loop other {}".format(phi_setting), other_loop_time, total_events)
+
+    stage_start = perf_counter()
     new_TBRANCH_SIMC.Write("h10",ROOT.TObject.kOverwrite)
     new_InFile_SIMC.Close()
     InFile_SIMC.Close()
+    _print_iter_timer("iter_weight write/close {}".format(phi_setting), perf_counter() - stage_start)
 
     print(f"\n\nThere were {len(bad_events)}/{total_events} bad events skipped...")
+    _print_iter_timer("iter_weight total {}".format(phi_setting), perf_counter() - total_start)
