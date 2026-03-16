@@ -197,23 +197,38 @@ def fit_tree_peak(
 
 
 def build_derived_tree(tree, branch_name, value_getter):
-    derived_value = array("f", [0.0])
+    return build_multi_derived_tree(
+        tree,
+        [(branch_name, value_getter)],
+    )
 
-    # Clone the tree without the old derived branch so the replacement branch
-    # is freshly written with the current alignment.
-    has_existing_shift_branch = bool(tree.GetBranch(branch_name))
-    if has_existing_shift_branch:
+
+def build_multi_derived_tree(tree, branch_specs):
+    derived_values = {
+        branch_name: array("f", [0.0])
+        for branch_name, _ in branch_specs
+    }
+    existing_branch_names = [
+        branch_name for branch_name, _ in branch_specs
+        if bool(tree.GetBranch(branch_name))
+    ]
+
+    # Clone the tree without the old derived branches so the replacement
+    # branches are freshly written with the current alignment.
+    for branch_name in existing_branch_names:
         tree.SetBranchStatus(branch_name, 0)
 
     new_tree = tree.CloneTree(0)
 
-    if has_existing_shift_branch:
+    for branch_name in existing_branch_names:
         tree.SetBranchStatus(branch_name, 1)
 
-    new_tree.Branch(branch_name, derived_value, f"{branch_name}/F")
+    for branch_name, _ in branch_specs:
+        new_tree.Branch(branch_name, derived_values[branch_name], f"{branch_name}/F")
 
     for evt in tree:
-        derived_value[0] = float(value_getter(evt))
+        for branch_name, value_getter in branch_specs:
+            derived_values[branch_name][0] = float(value_getter(evt))
         new_tree.Fill()
 
     return new_tree
@@ -228,6 +243,14 @@ def build_shifted_tree(tree, source_branch_name, shift_branch_name, shift):
 
 
 def add_derived_branch_to_file(filename, tree_names, branch_name, value_getter, action_label="Applying"):
+    return add_derived_branches_to_file(
+        filename,
+        tree_names,
+        [(branch_name, value_getter, action_label)],
+    )
+
+
+def add_derived_branches_to_file(filename, tree_names, branch_specs):
     root_file = TFile.Open(filename, "UPDATE")
     if not root_file or root_file.IsZombie():
         raise RuntimeError(f"Unable to open ROOT file for update: {filename}")
@@ -239,10 +262,17 @@ def add_derived_branch_to_file(filename, tree_names, branch_name, value_getter, 
             print(f"Tree '{tree_name}' not found in {filename}. Skipping.")
             continue
 
-        action = "Replacing" if tree.GetBranch(branch_name) else action_label
-        print(f"{action} branch {branch_name} in {filename}:{tree_name}")
+        for branch_name, _, action_label in branch_specs:
+            action = "Replacing" if tree.GetBranch(branch_name) else action_label
+            print(f"{action} branch {branch_name} in {filename}:{tree_name}")
         updated_trees.append(
-            (tree_name, build_derived_tree(tree, branch_name, value_getter))
+            (
+                tree_name,
+                build_multi_derived_tree(
+                    tree,
+                    [(branch_name, value_getter) for branch_name, value_getter, _ in branch_specs],
+                ),
+            )
         )
 
     root_file.cd()

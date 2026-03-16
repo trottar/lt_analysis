@@ -259,7 +259,7 @@ atexit.register(print_timing_summary)
 
 sys.path.append("setup")
 from shift_MM import (
-    add_derived_branch_to_file,
+    add_derived_branches_to_file,
     add_shift_branch_to_file,
     compute_mm_shift_details,
     get_data_tree_names,
@@ -393,10 +393,6 @@ for phiset in phisetlist:
         plot_xmax=mm_max,
     )
 
-    add_shift_branch_to_file(rootFileData, tree_names, "MM", mm_shift)
-    if os.path.exists(rootFileDummy):
-        add_shift_branch_to_file(rootFileDummy, tree_names, "MM", mm_shift)
-
     mm_shift_summary[phiset] = {
         "simc_peak": float(shift_values["simc_peak"]),
         "simc_peak_err": float(shift_values["simc_peak_err"]),
@@ -411,21 +407,25 @@ for phiset in phisetlist:
 
     if shift_values.get("t_shift") is not None:
         t_shift = float(shift_values["t_shift"])
+        print(f"Applying shift {mm_shift:+.6f} to MM in {rootFileData}")
+        if os.path.exists(rootFileDummy):
+            print(f"Applying shift {mm_shift:+.6f} to MM in {rootFileDummy}")
         print(f"Applying t shift = {t_shift:+.6f} in -t convention")
-        add_derived_branch_to_file(
+        shift_branch_specs = [
+            ("MM_shift", lambda evt, shift=mm_shift: getattr(evt, "MM") + shift, "Applying"),
+            ("t_shift", lambda evt, shift=t_shift: -getattr(evt, "MandelT") + shift, "Applying"),
+        ]
+        add_derived_branches_to_file(
             rootFileData,
             tree_names,
-            "t_shift",
-            lambda evt, shift=t_shift: -getattr(evt, "MandelT") + shift,
+            shift_branch_specs,
         )
         if os.path.exists(rootFileDummy):
-            add_derived_branch_to_file(
+            add_derived_branches_to_file(
                 rootFileDummy,
                 tree_names,
-                "t_shift",
-                lambda evt, shift=t_shift: -getattr(evt, "MandelT") + shift,
+                shift_branch_specs,
             )
-
         t_plot_filename = make_t_plot_filename(rootFileData)
         write_t_shift_plots(
             ParticleType,
@@ -444,6 +444,10 @@ for phiset in phisetlist:
             "plot_filename": t_plot_filename,
         }
         output_file_lst.append(t_plot_filename)
+    else:
+        add_shift_branch_to_file(rootFileData, tree_names, "MM", mm_shift)
+        if os.path.exists(rootFileDummy):
+            add_shift_branch_to_file(rootFileDummy, tree_names, "MM", mm_shift)
 
     record_stage_time("MM/t shift {}".format(phiset), setting_start)
 
