@@ -117,7 +117,7 @@ def set_val(inpDict):
     
 ###############################################################################################################################################
 
-def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
+def _compute_base_data_cuts(evt):
 
     ##############
     # HARD CODED #
@@ -125,16 +125,10 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-    # Check if variable shift branch exists
-    try:
-        adj_MM = evt.MM_shift
-    except AttributeError:
-        adj_MM = evt.MM
-    
     ##############
     ##############        
     ##############
-    
+
     #CUTs Definations 
     SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
     SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
@@ -149,11 +143,18 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
     #MMCUT =  (mm_min<=adj_MM) & (adj_MM<mm_max)
     #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
 
-    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-    #ALLCUTS = (-100000<=-evt.MandelT) # No cuts
+    return HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
 
 
-    return ALLCUTS
+def evaluate_data_cut_bools(evt, mm_min=0.7, mm_max=1.5):
+    # MM/t windows are intentionally excluded here to preserve the existing
+    # histogram-cut behavior used throughout the analysis.
+    base_cuts = _compute_base_data_cuts(evt)
+    return base_cuts, base_cuts
+
+
+def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
+    return _compute_base_data_cuts(evt)
 
 ###############################################################################################################################################
 
@@ -167,36 +168,7 @@ def get_shifted_t(evt):
 
 # Subtraction cuts
 def apply_data_sub_cuts(evt):
-
-    ##############
-    # HARD CODED #
-    ##############
-
-    adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-    
-    ##############
-    ##############        
-    ##############
-    
-    #CUTs Definations 
-    SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-    SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
-
-    HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-    HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-    # RLT: These are done via histogram cuts
-    Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
-
-    # RLT: These are done via histogram cuts
-    #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
-    #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE
-
-    # No MM cut    
-    ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
-    #ALLCUTS = (-100000<=-evt.MandelT) # No cuts
-
-    return ALLCUTS
+    return _compute_base_data_cuts(evt)
 
 ################################################################################################################################################
 

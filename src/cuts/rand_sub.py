@@ -135,7 +135,7 @@ def rand_sub(phi_setting, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, get_shifted_t, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -884,17 +884,18 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
+            NOHOLECUTS = base_all_cuts
+            NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
                 P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_rand_dummy_DATA.Fill(adj_MM)
@@ -1016,9 +1017,11 @@ def rand_sub(phi_setting, inpDict):
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
+            NOHOLECUTS = base_all_cuts
+            NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -1026,8 +1029,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_full_DUMMY.Fill(adj_MM)                        
@@ -1139,9 +1141,11 @@ def rand_sub(phi_setting, inpDict):
         ##############
 
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
+            NOHOLECUTS = base_all_cuts
+            NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -1149,8 +1153,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_rand_dummy_RAND.Fill(adj_MM)
@@ -1260,9 +1263,11 @@ def rand_sub(phi_setting, inpDict):
         ##############
 
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOHOLECUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
+            base_all_cuts, base_sub_cuts = evaluate_data_cut_bools(evt, mm_min, mm_max)
+            hole_rejected = hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            ALLCUTS = base_all_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
+            NOHOLECUTS = base_all_cuts
+            NOMMCUTS = base_sub_cuts and not hole_rejected #and evt.P_hgcer_npeSum == 0.0
             if(NOHOLECUTS):
                 # HGCer hole comparison            
                 P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -1270,8 +1275,7 @@ def rand_sub(phi_setting, inpDict):
                 P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
 
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
+            ALLCUTS, NOMMCUTS = evaluate_data_cut_bools(evt, mm_min, mm_max)
             
         if(NOMMCUTS):
             H_MM_full_DUMMY_RAND.Fill(adj_MM)
