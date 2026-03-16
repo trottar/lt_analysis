@@ -152,6 +152,134 @@ def _freeze_ave_simc_event_cache(event_cache):
     }
 
 
+def _init_hist_group_matrices(names, n_t, n_phi):
+    return {
+        name: [[None for _ in range(n_phi)] for _ in range(n_t)]
+        for name in names
+    }
+
+
+def _process_yield_data_tree(
+    tree,
+    cache_section,
+    hist_group,
+    has_mm_shift,
+    has_t_shift,
+    t_bins,
+    phi_bins,
+    particle_type,
+    hole_contains,
+    evaluate_event,
+    mm_min,
+    mm_max,
+    progress_bar,
+    update_mm_offset=False,
+):
+    mm_offset_data = None
+    total_entries = tree.GetEntries()
+    phi_scale = 180.0 / math.pi
+
+    for i, evt in enumerate(tree):
+        progress_bar(i, total_entries, bar_length=25)
+
+        if particle_type == "kaon":
+            base_allcuts, base_nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            allcuts = base_allcuts and not hole_rejected
+            nommcuts = base_nommcuts and not hole_rejected
+        else:
+            allcuts, nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
+
+        if not (allcuts or nommcuts):
+            continue
+
+        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
+        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+        phi_shift = evt.ph_q * phi_scale
+        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
+
+        if t_index is not None:
+            mm_offset = 0.0
+            if allcuts:
+                mm_offset = adj_MM - evt.MM
+            _append_ave_event(
+                cache_section,
+                adj_t,
+                adj_MM,
+                evt.Q2,
+                evt.W,
+                evt.epsilon,
+                allcuts,
+                nommcuts,
+                mm_offset,
+            )
+
+        if t_index is None or phi_index is None:
+            continue
+
+        if nommcuts:
+            hist_group["fit1sub"][t_index][phi_index].Fill(adj_MM)
+            hist_group["pisub"][t_index][phi_index].Fill(adj_MM)
+            hist_group["nosub"][t_index][phi_index].Fill(adj_MM)
+
+        if allcuts:
+            hist_group["t"][t_index][phi_index].Fill(adj_t)
+            hist_group["mm"][t_index][phi_index].Fill(adj_MM)
+            if update_mm_offset:
+                mm_offset_data = adj_MM - evt.MM
+
+    return mm_offset_data
+
+
+def _process_yield_simc_tree(
+    tree,
+    hist_group,
+    ave_simc_event_cache,
+    particle_type,
+    hole_contains,
+    apply_simc_cuts,
+    mm_min,
+    mm_max,
+    t_bins,
+    phi_bins,
+    progress_bar,
+):
+    total_entries = tree.GetEntries()
+    phi_scale = 180.0 / math.pi
+
+    for i, evt in enumerate(tree):
+        progress_bar(i, total_entries, bar_length=25)
+
+        if particle_type == "kaon":
+            allcuts = apply_simc_cuts(evt, mm_min, mm_max) and not hole_contains(evt.phgcer_x_det, evt.phgcer_y_det)
+        else:
+            allcuts = apply_simc_cuts(evt, mm_min, mm_max)
+
+        if not allcuts:
+            continue
+
+        minus_t = -evt.t
+        phi_shift = evt.phipq * phi_scale
+        t_index, phi_index = find_2d_bin_indices(minus_t, phi_shift, t_bins, phi_bins)
+
+        if t_index is not None:
+            _append_ave_simc_event(
+                ave_simc_event_cache,
+                minus_t,
+                evt.Q2,
+                evt.W,
+                evt.epsilon,
+                evt.iter_weight,
+            )
+
+        if t_index is None or phi_index is None:
+            continue
+
+        hist_group["t"][t_index][phi_index].Fill(minus_t, evt.iter_weight)
+        hist_group["mm"][t_index][phi_index].Fill(evt.missmass, evt.iter_weight)
+        hist_group["mm_unweighted"][t_index][phi_index].Fill(evt.missmass)
+
+
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
@@ -178,7 +306,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
+    from apply_cuts import evaluate_data_event, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -196,51 +324,14 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     TBRANCH_DUMMY  = tree_dummy.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
     TBRANCH_DUMMY_RAND  = tree_dummy.Get("Cut_{}_Events_rand_noRF".format(ParticleType.capitalize()))
 
-    ##############
-    # HARD CODED #
-    ##############
-    
-    # Adjusted HMS delta to fix hsxfp correlation
-    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
-    # Note: these momenta are from Dave's slides and may not reflect what is used here
-    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1.0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
-
-    c0_dict = {}
-
-    if ParticleType == "kaon":
-        for c0, p in zip(c0_list, h_momentum_list):
-            if p == 0.889:
-                c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
-            elif p == 0.968:
-                c0_dict["Q0p5W2p40_lowe"] = c0
-                c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
-                c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
-            elif p == 2.185:
-                c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
-                c0_dict["Q3p0W2p32_lowe"] = c0
-            elif p == 2.328:
-                c0_dict["Q4p4W2p74_lowe"] = c0
-            elif p == 3.266:
-                c0_dict["Q5p5W3p02_highe"] = c0            
-            elif p == 4.2:
-                c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
-            elif p == 4.712:
-                c0_dict["Q4p4W2p74_highe"] = c0            
-            elif p == 5.292:
-                c0_dict["Q2p1W2p95_highe"] = c0
-            elif p == 6.59:
-                c0_dict["Q3p0W2p32_highe"] = c0
-    else:
-        c0_dict["Q0p4W2p20_lowe"] = 0.0
-        c0_dict["Q0p4W2p20_highe"] = 0.0
-    
-    ##############
-    ##############        
-    ##############
-
     hist_bin_dict = {}
+    n_t = len(t_bins) - 1
+    n_phi = len(phi_bins) - 1
     dummy_norm_hist_dict = {}
+    data_hists = _init_hist_group_matrices(("mm", "fit1sub", "pisub", "nosub", "t"), n_t, n_phi)
+    dummy_hists = _init_hist_group_matrices(("mm", "fit1sub", "pisub", "nosub", "t"), n_t, n_phi)
+    rand_hists = _init_hist_group_matrices(("mm", "fit1sub", "pisub", "nosub", "t"), n_t, n_phi)
+    dummy_rand_hists = _init_hist_group_matrices(("mm", "fit1sub", "pisub", "nosub", "t"), n_t, n_phi)
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
@@ -280,6 +371,30 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_RAND_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
 
+            data_hists["mm"][j][k] = hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]
+            data_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)]
+            data_hists["pisub"][j][k] = hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)]
+            data_hists["nosub"][j][k] = hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]
+            data_hists["t"][j][k] = hist_bin_dict["H_t_DATA_{}_{}".format(j, k)]
+
+            rand_hists["mm"][j][k] = hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)]
+            rand_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)]
+            rand_hists["pisub"][j][k] = hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)]
+            rand_hists["nosub"][j][k] = hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)]
+            rand_hists["t"][j][k] = hist_bin_dict["H_t_RAND_{}_{}".format(j, k)]
+
+            dummy_hists["mm"][j][k] = hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]
+            dummy_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)]
+            dummy_hists["pisub"][j][k] = hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)]
+            dummy_hists["nosub"][j][k] = hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)]
+            dummy_hists["t"][j][k] = hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]
+
+            dummy_rand_hists["mm"][j][k] = hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]
+            dummy_rand_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)]
+            dummy_rand_hists["pisub"][j][k] = hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)]
+            dummy_rand_hists["nosub"][j][k] = hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)]
+            dummy_rand_hists["t"][j][k] = hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]
+
             # Pion subtraction by scaling simc to peak size
             if ParticleType == "kaon":
 
@@ -303,234 +418,84 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]  \
                     = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
                 
+    hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
+    has_mm_shift_data = bool(TBRANCH_DATA.GetBranch("MM_shift"))
+    has_mm_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("MM_shift"))
+    has_mm_shift_rand = bool(TBRANCH_RAND.GetBranch("MM_shift"))
+    has_mm_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("MM_shift"))
+    has_t_shift_data = bool(TBRANCH_DATA.GetBranch("t_shift"))
+    has_t_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("t_shift"))
+    has_t_shift_rand = bool(TBRANCH_RAND.GetBranch("t_shift"))
+    has_t_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("t_shift"))
+
     print("\nBinning data...")
-    for i,evt in enumerate(TBRANCH_DATA):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
-
-        ##############
-        ##############        
-        ##############
-        
-        # Phase shift to right setting
-        #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)
-        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
-
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
-        
-        if t_index is not None:
-            mm_offset = 0.0
-            if ALLCUTS:
-                mm_offset = evt.MM_shift-evt.MM
-            _append_ave_event(
-                ave_event_cache["prompt"],
-                adj_t,
-                adj_MM,
-                evt.Q2,
-                evt.W,
-                evt.epsilon,
-                ALLCUTS,
-                NOMMCUTS,
-                mm_offset,
-            )
-
-        if NOMMCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-
-        if ALLCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_t_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_t)
-            hist_bin_dict["H_MM_DATA_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            MM_offset_DATA = evt.MM_shift-evt.MM
+    MM_offset_DATA = _process_yield_data_tree(
+        TBRANCH_DATA,
+        ave_event_cache["prompt"],
+        data_hists,
+        has_mm_shift_data,
+        has_t_shift_data,
+        t_bins,
+        phi_bins,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+        update_mm_offset=True,
+    )
 
     print("\nBinning dummy...")
-    for i,evt in enumerate(TBRANCH_DUMMY):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
-
-        ##############
-        ##############        
-        ##############        
-        
-        # Phase shift to right setting
-        #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)
-        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
-
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
-
-        if t_index is not None:
-            _append_ave_event(
-                ave_event_cache["dummy"],
-                adj_t,
-                adj_MM,
-                evt.Q2,
-                evt.W,
-                evt.epsilon,
-                ALLCUTS,
-                NOMMCUTS,
-            )
-
-        if NOMMCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-
-        if ALLCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_t_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_t)
-            hist_bin_dict["H_MM_DUMMY_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+    _process_yield_data_tree(
+        TBRANCH_DUMMY,
+        ave_event_cache["dummy"],
+        dummy_hists,
+        has_mm_shift_dummy,
+        has_t_shift_dummy,
+        t_bins,
+        phi_bins,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+    )
 
     print("\nBinning rand...")
-    for i,evt in enumerate(TBRANCH_RAND):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
-
-        ##############
-        ##############        
-        ##############
-                
-        # Phase shift to right setting
-        #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)
-        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
-
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
-            
-        if t_index is not None:
-            _append_ave_event(
-                ave_event_cache["rand"],
-                adj_t,
-                adj_MM,
-                evt.Q2,
-                evt.W,
-                evt.epsilon,
-                ALLCUTS,
-                NOMMCUTS,
-            )
-
-        if NOMMCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-
-        if ALLCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_t_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_t)
-            hist_bin_dict["H_MM_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+    _process_yield_data_tree(
+        TBRANCH_RAND,
+        ave_event_cache["rand"],
+        rand_hists,
+        has_mm_shift_rand,
+        has_t_shift_rand,
+        t_bins,
+        phi_bins,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+    )
 
     print("\nBinning dummy_rand...")
-    for i,evt in enumerate(TBRANCH_DUMMY_RAND):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
-
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM
-        adj_t = get_shifted_t(evt)
-
-        ##############
-        ##############        
-        ##############        
-        
-        # Phase shift to right setting
-        #phi_shift = (evt.ph_q+math.pi)
-        phi_shift = (evt.ph_q)*(180 / math.pi)
-        t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
-
-        if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-            NOMMCUTS = apply_data_sub_cuts(evt) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) #and evt.P_hgcer_npeSum == 0.0
-        else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max)
-            NOMMCUTS = apply_data_sub_cuts(evt)
-
-        if t_index is not None:
-            _append_ave_event(
-                ave_event_cache["dummy_rand"],
-                adj_t,
-                adj_MM,
-                evt.Q2,
-                evt.W,
-                evt.epsilon,
-                ALLCUTS,
-                NOMMCUTS,
-            )
-
-        if NOMMCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
-
-        if ALLCUTS and t_index is not None and phi_index is not None:
-            hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_t)
-            hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(t_index, phi_index)].Fill(adj_MM)
+    _process_yield_data_tree(
+        TBRANCH_DUMMY_RAND,
+        ave_event_cache["dummy_rand"],
+        dummy_rand_hists,
+        has_mm_shift_dummy_rand,
+        has_t_shift_dummy_rand,
+        t_bins,
+        phi_bins,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+    )
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
@@ -1293,6 +1258,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     TBRANCH_SIMC  = tree_simc.Get("h10")
     
     hist_bin_dict = {}
+    n_t = len(t_bins) - 1
+    n_phi = len(phi_bins) - 1
+    simc_hists = _init_hist_group_matrices(("mm", "t", "mm_unweighted"), n_t, n_phi)
     
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -1304,55 +1272,28 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             #hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 1000, 0.0, 2.0)
             #hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]       = TH1D("H_t_SIMC_{}_{}".format(j, k),"-t", 100, 0.0, 2.0)
             #hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
+            simc_hists["mm"][j][k] = hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]
+            simc_hists["t"][j][k] = hist_bin_dict["H_t_SIMC_{}_{}".format(j, k)]
+            simc_hists["mm_unweighted"][j][k] = hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)]
 
     for hist in hist_bin_dict.values():
         hist.Sumw2()
 
     print("\nBinning simc...")
-    for i,evt in enumerate(TBRANCH_SIMC):
-
-        # Progress bar
-        Misc.progressBar(i, TBRANCH_SIMC.GetEntries(),bar_length=25)
-
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_missmass = evt.missmass
-
-        ##############
-        ##############        
-        ##############   
-
-        # Phase shift to right setting
-        # Wrap 0 to 2pi
-        #phi_shift = ((evt.phipq + math.pi) % (2 * math.pi))*(180 / math.pi)
-        # Wrap -pi to pi
-        #phi_shift = (((evt.phipq + math.pi) % (2 * math.pi)) - math.pi)*(180 / math.pi)
-        phi_shift = (evt.phipq)*(180 / math.pi)
-        t_index, phi_index = find_2d_bin_indices(-evt.t, phi_shift, t_bins, phi_bins)
-        
-        if ParticleType == "kaon":          
-            ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)          
-        else:
-            ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
-
-        #Fill SIMC events
-        if(ALLCUTS):
-            if t_index is not None:
-                _append_ave_simc_event(
-                    ave_simc_event_cache,
-                    -evt.t,
-                    evt.Q2,
-                    evt.W,
-                    evt.epsilon,
-                    evt.iter_weight,
-                )
-
-            if t_index is not None and phi_index is not None:
-                hist_bin_dict["H_t_SIMC_{}_{}".format(t_index, phi_index)].Fill(-evt.t, evt.iter_weight)
-                hist_bin_dict["H_MM_SIMC_{}_{}".format(t_index, phi_index)].Fill(adj_missmass, evt.iter_weight)
-                hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(t_index, phi_index)].Fill(adj_missmass)
+    hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
+    _process_yield_simc_tree(
+        TBRANCH_SIMC,
+        simc_hists,
+        ave_simc_event_cache,
+        ParticleType,
+        hole_contains,
+        apply_simc_cuts,
+        mm_min,
+        mm_max,
+        t_bins,
+        phi_bins,
+        Misc.progressBar,
+    )
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0

@@ -53,22 +53,23 @@ OUTPATH=lt.OUTPATH
 def calculate_ratio(kin_type, phiset, yieldDict):
 
     dict_lst = []
-    data_key_tuples = list(yieldDict["binned_DATA"][phiset][kin_type])
-    simc_key_tuples = list(yieldDict["binned_SIMC"][phiset][kin_type])
+    data_nested_dict = yieldDict["binned_DATA"][phiset][kin_type]
+    simc_nested_dict = yieldDict["binned_SIMC"][phiset][kin_type]
+    data_key_tuples = list(data_nested_dict)
+    simc_key_tuples = list(simc_nested_dict)
     # Sort data and simc t/phi bins to match 
     data_key_tuples = sorted(data_key_tuples, key=lambda x: (x[0], x[1]))    
     simc_key_tuples = sorted(simc_key_tuples, key=lambda x: (x[0], x[1]))
     for data_key_tuple,simc_key_tuple in zip(data_key_tuples,simc_key_tuples):
-        # Access the nested dictionary using the tuple key
-        data_nested_dict = yieldDict["binned_DATA"][phiset]
-        simc_nested_dict = yieldDict["binned_SIMC"][phiset]
         i = data_key_tuple[0] # t bin
         j = data_key_tuple[1] # phi bin
         # Fill histogram
-        yield_data = data_nested_dict[kin_type][data_key_tuple]["{}".format(kin_type)]
-        yield_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}".format(kin_type)]
-        yield_err_data = data_nested_dict[kin_type][data_key_tuple]["{}_err".format(kin_type)]
-        yield_err_simc = simc_nested_dict[kin_type][simc_key_tuple]["{}_err".format(kin_type)]        
+        data_entry = data_nested_dict[data_key_tuple]
+        simc_entry = simc_nested_dict[simc_key_tuple]
+        yield_data = data_entry[kin_type]
+        yield_simc = simc_entry[kin_type]
+        yield_err_data = data_entry["{}_err".format(kin_type)]
+        yield_err_simc = simc_entry["{}_err".format(kin_type)]
         #print("\nYield_data: {}".format(yield_data))
         #print("Yield_simc: {}".format(yield_simc))
         try:
@@ -82,10 +83,7 @@ def calculate_ratio(kin_type, phiset, yieldDict):
         except ZeroDivisionError:
             ratio = 0.0
             ratio_err = 0.0
-        if math.isnan(ratio):
-            ratio = 0.0
-            ratio_err = 0.0
-        if math.isinf(ratio):
+        if not math.isfinite(ratio):
             ratio = 0.0
             ratio_err = 0.0
         print("Ratio for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(i+1, j+1, ratio, ratio_err))
