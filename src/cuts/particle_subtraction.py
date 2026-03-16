@@ -68,6 +68,128 @@ def _print_sub_timer(label, elapsed, total_events=None):
         print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
 
 
+def _fill_particle_subtraction_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
+    fills["hgcer_xy"](evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
+    fills["hgcer_x_mm"](evt.P_hgcer_xAtCer, adj_MM, evt.P_hgcer_npeSum)
+    fills["hgcer_y_mm"](evt.P_hgcer_yAtCer, adj_MM, evt.P_hgcer_npeSum)
+
+    phi_shift = evt.ph_q
+
+    fills["mm_ct"](adj_MM, evt.CTime_ROC1)
+    fills["ct_beta"](evt.CTime_ROC1, evt.P_gtr_beta)
+    fills["mm_beta"](adj_MM, evt.P_gtr_beta)
+    fills["mm_h_cer"](adj_MM, evt.H_cer_npeSum)
+    fills["mm_h_cal"](adj_MM, evt.H_cal_etottracknorm)
+    fills["mm_p_cal"](adj_MM, evt.P_cal_etottracknorm)
+    fills["mm_p_hgcer"](adj_MM, evt.P_hgcer_npeSum)
+    fills["mm_p_aero"](adj_MM, evt.P_aero_npeSum)
+    fills["phiq_t"](phi_shift, adj_t)
+    fills["q2_w"](evt.Q2, evt.W)
+    fills["q2_t"](evt.Q2, adj_t)
+    fills["w_t"](evt.W, adj_t)
+    fills["eps_t"](evt.epsilon, adj_t)
+    fills["mm_t"](adj_MM, adj_t)
+
+    fills["h_ct"](evt.CTime_ROC1)
+    fills["h_ssxfp"](evt.ssxfp)
+    fills["h_ssyfp"](evt.ssyfp)
+    fills["h_ssxpfp"](evt.ssxpfp)
+    fills["h_ssypfp"](evt.ssypfp)
+    fills["h_ssdelta"](evt.ssdelta)
+    fills["h_ssxptar"](evt.ssxptar)
+    fills["h_ssyptar"](evt.ssyptar)
+    fills["h_hsxfp"](evt.hsxfp)
+    fills["h_hsyfp"](evt.hsyfp)
+    fills["h_hsxpfp"](evt.hsxpfp)
+    fills["h_hsypfp"](evt.hsypfp)
+    fills["h_hsdelta"](adj_hsdelta)
+    fills["h_hsxptar"](evt.hsxptar)
+    fills["h_hsyptar"](evt.hsyptar)
+    fills["h_ph_q"](phi_shift)
+    fills["h_th_q"](evt.th_q)
+    fills["h_ph_recoil"](evt.ph_recoil)
+    fills["h_th_recoil"](evt.th_recoil)
+    fills["h_pmiss"](evt.pmiss)
+    fills["h_emiss"](evt.emiss)
+    fills["h_pmx"](evt.pmx)
+    fills["h_pmy"](evt.pmy)
+    fills["h_pmz"](evt.pmz)
+    fills["h_q2"](evt.Q2)
+    fills["h_t"](adj_t)
+    fills["h_w"](evt.W)
+    fills["h_epsilon"](evt.epsilon)
+    fills["h_mm"](adj_MM)
+    fills["h_cal"](evt.H_cal_etottracknorm)
+    fills["h_cer"](evt.H_cer_npeSum)
+    fills["p_cal"](evt.P_cal_etottracknorm)
+    fills["p_hgcer"](evt.P_hgcer_npeSum)
+    fills["p_aero"](evt.P_aero_npeSum)
+
+
+def _process_particle_subtraction_tree(
+    tree,
+    print_label,
+    timer_label,
+    has_mm_shift,
+    has_t_shift,
+    mm_offset_data,
+    fills,
+    particle_type,
+    hole_contains,
+    evaluate_event,
+    mm_min,
+    mm_max,
+    progress_bar,
+    kaon_nomm_enabled=True,
+):
+    print(print_label)
+    entries = tree.GetEntries()
+    progress_time = 0.0
+    loop_start = perf_counter()
+    nohole_xy_fill = fills["nohole_xy"]
+    nohole_x_mm_fill = fills["nohole_x_mm"]
+    nohole_y_mm_fill = fills["nohole_y_mm"]
+    nomm_fill = fills["nomm"]
+
+    for i, evt in enumerate(tree):
+        progress_start = perf_counter()
+        progress_bar(i, entries, bar_length=25)
+        progress_time += perf_counter() - progress_start
+
+        if particle_type == "kaon":
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            pid_pass = evt.P_hgcer_npeSum > 2.0
+            allcuts = base_all_cuts and not hole_rejected and pid_pass
+            noholecuts = base_sub_cuts
+            nommcuts = base_sub_cuts and not hole_rejected and pid_pass
+        else:
+            allcuts, nommcuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+            noholecuts = False
+
+        if not (noholecuts or nommcuts or allcuts):
+            continue
+
+        adj_MM = evt.MM_shift if has_mm_shift else evt.MM + mm_offset_data
+
+        if noholecuts and nohole_xy_fill is not None:
+            nohole_xy_fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
+            nohole_x_mm_fill(evt.P_hgcer_xAtCer, adj_MM, evt.P_hgcer_npeSum)
+            nohole_y_mm_fill(evt.P_hgcer_yAtCer, adj_MM, evt.P_hgcer_npeSum)
+
+        if nommcuts and (particle_type != "kaon" or kaon_nomm_enabled):
+            nomm_fill(adj_MM)
+
+        if allcuts:
+            adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+            _fill_particle_subtraction_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills)
+
+    loop_elapsed = perf_counter() - loop_start
+    _print_sub_timer(timer_label, loop_elapsed, entries)
+    _print_sub_timer("{} progressBar".format(timer_label), progress_time, entries)
+    _print_sub_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
+
+
 def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
     total_start = perf_counter()
     setup_start = perf_counter()
@@ -426,478 +548,347 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     has_t_shift_rand = bool(TBRANCH_RAND.GetBranch("t_shift"))
     has_t_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("t_shift"))
 
-    print("\nGrabbing {} {} subtraction data...".format(phi_setting,SubtractedParticle))
-    data_entries = TBRANCH_DATA.GetEntries()
-    data_progress_time = 0.0
-    data_loop_start = perf_counter()
-    for i,evt in enumerate(TBRANCH_DATA):
+    if ParticleType == "kaon":
+        data_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill
+        data_nohole_x_mm_fill = P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill
+        data_nohole_y_mm_fill = P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill
+    else:
+        data_nohole_xy_fill = None
+        data_nohole_x_mm_fill = None
+        data_nohole_y_mm_fill = None
 
-        progress_start = perf_counter()
-        # Progress bar
-        Misc.progressBar(i, data_entries,bar_length=25)
-        data_progress_time += perf_counter() - progress_start
+    data_fills = {
+        "nohole_xy": data_nohole_xy_fill,
+        "nohole_x_mm": data_nohole_x_mm_fill,
+        "nohole_y_mm": data_nohole_y_mm_fill,
+        "nomm": H_MM_nosub_DATA.Fill,
+        "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_DATA.Fill,
+        "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_DATA.Fill,
+        "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_DATA.Fill,
+        "mm_ct": MM_vs_CoinTime_DATA.Fill,
+        "ct_beta": CoinTime_vs_beta_DATA.Fill,
+        "mm_beta": MM_vs_beta_DATA.Fill,
+        "mm_h_cer": MM_vs_H_cer_DATA.Fill,
+        "mm_h_cal": MM_vs_H_cal_DATA.Fill,
+        "mm_p_cal": MM_vs_P_cal_DATA.Fill,
+        "mm_p_hgcer": MM_vs_P_hgcer_DATA.Fill,
+        "mm_p_aero": MM_vs_P_aero_DATA.Fill,
+        "phiq_t": phiq_vs_t_DATA.Fill,
+        "q2_w": Q2_vs_W_DATA.Fill,
+        "q2_t": Q2_vs_t_DATA.Fill,
+        "w_t": W_vs_t_DATA.Fill,
+        "eps_t": EPS_vs_t_DATA.Fill,
+        "mm_t": MM_vs_t_DATA.Fill,
+        "h_ct": H_ct_DATA.Fill,
+        "h_ssxfp": H_ssxfp_DATA.Fill,
+        "h_ssyfp": H_ssyfp_DATA.Fill,
+        "h_ssxpfp": H_ssxpfp_DATA.Fill,
+        "h_ssypfp": H_ssypfp_DATA.Fill,
+        "h_ssdelta": H_ssdelta_DATA.Fill,
+        "h_ssxptar": H_ssxptar_DATA.Fill,
+        "h_ssyptar": H_ssyptar_DATA.Fill,
+        "h_hsxfp": H_hsxfp_DATA.Fill,
+        "h_hsyfp": H_hsyfp_DATA.Fill,
+        "h_hsxpfp": H_hsxpfp_DATA.Fill,
+        "h_hsypfp": H_hsypfp_DATA.Fill,
+        "h_hsdelta": H_hsdelta_DATA.Fill,
+        "h_hsxptar": H_hsxptar_DATA.Fill,
+        "h_hsyptar": H_hsyptar_DATA.Fill,
+        "h_ph_q": H_ph_q_DATA.Fill,
+        "h_th_q": H_th_q_DATA.Fill,
+        "h_ph_recoil": H_ph_recoil_DATA.Fill,
+        "h_th_recoil": H_th_recoil_DATA.Fill,
+        "h_pmiss": H_pmiss_DATA.Fill,
+        "h_emiss": H_emiss_DATA.Fill,
+        "h_pmx": H_pmx_DATA.Fill,
+        "h_pmy": H_pmy_DATA.Fill,
+        "h_pmz": H_pmz_DATA.Fill,
+        "h_q2": H_Q2_DATA.Fill,
+        "h_t": H_t_DATA.Fill,
+        "h_w": H_W_DATA.Fill,
+        "h_epsilon": H_epsilon_DATA.Fill,
+        "h_mm": H_MM_DATA.Fill,
+        "h_cal": H_cal_etottracknorm_DATA.Fill,
+        "h_cer": H_cer_npeSum_DATA.Fill,
+        "p_cal": P_cal_etottracknorm_DATA.Fill,
+        "p_hgcer": P_hgcer_npeSum_DATA.Fill,
+        "p_aero": P_aero_npeSum_DATA.Fill,
+    }
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_MM = evt.MM_shift if has_mm_shift_data else evt.MM + MM_offset_DATA
-        adj_t = evt.t_shift if has_t_shift_data else -evt.MandelT
-        
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            pid_pass = evt.P_hgcer_npeSum > 2.0
-            ALLCUTS = base_all_cuts and not hole_rejected and pid_pass
-            NOHOLECUTS = base_sub_cuts
-            NOMMCUTS = base_sub_cuts and not hole_rejected and pid_pass
-            if(NOHOLECUTS):
-                # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-        else:
-            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-
-        if(NOMMCUTS):
-            H_MM_nosub_DATA.Fill(adj_MM)            
-            
-        if(ALLCUTS):
-
-          # HGCer hole comparison
-          P_hgcer_xAtCer_vs_yAtCer_DATA.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_DATA.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_DATA.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-
-          # Phase shift to right setting
-          #phi_shift = (evt.ph_q+math.pi)
-          phi_shift = (evt.ph_q)          
-          
-          MM_vs_CoinTime_DATA.Fill(adj_MM, evt.CTime_ROC1)
-          CoinTime_vs_beta_DATA.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DATA.Fill(adj_MM,evt.P_gtr_beta)
-          MM_vs_H_cer_DATA.Fill(adj_MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_DATA.Fill(adj_MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DATA.Fill(adj_MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DATA.Fill(adj_MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DATA.Fill(adj_MM,evt.P_aero_npeSum)
-          # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DATA.Fill(phi_shift, adj_t)
-          Q2_vs_W_DATA.Fill(evt.Q2, evt.W)
-          Q2_vs_t_DATA.Fill(evt.Q2, adj_t)
-          W_vs_t_DATA.Fill(evt.W, adj_t)
-          EPS_vs_t_DATA.Fill(evt.epsilon, adj_t)
-          MM_vs_t_DATA.Fill(adj_MM, adj_t)
-          
-          H_ct_DATA.Fill(evt.CTime_ROC1)
-
-          H_ssxfp_DATA.Fill(evt.ssxfp)
-          H_ssyfp_DATA.Fill(evt.ssyfp)
-          H_ssxpfp_DATA.Fill(evt.ssxpfp)
-          H_ssypfp_DATA.Fill(evt.ssypfp)
-          H_ssdelta_DATA.Fill(evt.ssdelta)
-          H_ssxptar_DATA.Fill(evt.ssxptar)
-          H_ssyptar_DATA.Fill(evt.ssyptar)
-
-          H_hsxfp_DATA.Fill(evt.hsxfp)
-          H_hsyfp_DATA.Fill(evt.hsyfp)
-          H_hsxpfp_DATA.Fill(evt.hsxpfp)
-          H_hsypfp_DATA.Fill(evt.hsypfp)
-          H_hsdelta_DATA.Fill(adj_hsdelta)
-          H_hsxptar_DATA.Fill(evt.hsxptar)	
-          H_hsyptar_DATA.Fill(evt.hsyptar)
-
-          # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DATA.Fill((phi_shift))
-          H_th_q_DATA.Fill(evt.th_q)
-          H_ph_recoil_DATA.Fill(evt.ph_recoil)
-          H_th_recoil_DATA.Fill(evt.th_recoil)
-
-          H_pmiss_DATA.Fill(evt.pmiss)	
-          H_emiss_DATA.Fill(evt.emiss)	
-          #H_emiss_DATA.Fill(evt.emiss_nuc)
-          H_pmx_DATA.Fill(evt.pmx)
-          H_pmy_DATA.Fill(evt.pmy)
-          H_pmz_DATA.Fill(evt.pmz)
-          H_Q2_DATA.Fill(evt.Q2)
-          H_t_DATA.Fill(adj_t)
-          H_W_DATA.Fill(evt.W)
-          H_epsilon_DATA.Fill(evt.epsilon)
-          H_MM_DATA.Fill(adj_MM)
-          #H_MM_DATA.Fill(pow(adj_MM, 2))  
-          #H_MM_DATA.Fill(evt.Mrecoil)
-          
-          H_cal_etottracknorm_DATA.Fill(evt.H_cal_etottracknorm)
-          H_cer_npeSum_DATA.Fill(evt.H_cer_npeSum)
-
-          P_cal_etottracknorm_DATA.Fill(evt.P_cal_etottracknorm)
-          P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
-    data_loop_elapsed = perf_counter() - data_loop_start
-    _print_sub_timer("particle_subtraction data loop {}".format(phi_setting), data_loop_elapsed, data_entries)
-    _print_sub_timer("particle_subtraction data loop progressBar {}".format(phi_setting), data_progress_time, data_entries)
-    _print_sub_timer("particle_subtraction data loop other {}".format(phi_setting), max(data_loop_elapsed - data_progress_time, 0.0), data_entries)
+    _process_particle_subtraction_tree(
+        TBRANCH_DATA,
+        "\nGrabbing {} {} subtraction data...".format(phi_setting, SubtractedParticle),
+        "particle_subtraction data loop {}".format(phi_setting),
+        has_mm_shift_data,
+        has_t_shift_data,
+        MM_offset_DATA,
+        data_fills,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+    )
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} subtraction dummy...".format(phi_setting,SubtractedParticle))
-    dummy_entries = TBRANCH_DUMMY.GetEntries()
-    dummy_progress_time = 0.0
-    dummy_loop_start = perf_counter()
-    for i,evt in enumerate(TBRANCH_DUMMY):
+    if ParticleType == "kaon":
+        dummy_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill
+        dummy_nohole_x_mm_fill = P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill
+        dummy_nohole_y_mm_fill = P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill
+    else:
+        dummy_nohole_xy_fill = None
+        dummy_nohole_x_mm_fill = None
+        dummy_nohole_y_mm_fill = None
 
-        progress_start = perf_counter()
-        # Progress bar
-        Misc.progressBar(i, dummy_entries,bar_length=25)
-        dummy_progress_time += perf_counter() - progress_start
+    dummy_fills = {
+        "nohole_xy": dummy_nohole_xy_fill,
+        "nohole_x_mm": dummy_nohole_x_mm_fill,
+        "nohole_y_mm": dummy_nohole_y_mm_fill,
+        "nomm": H_MM_nosub_DUMMY.Fill,
+        "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_DUMMY.Fill,
+        "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_DUMMY.Fill,
+        "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_DUMMY.Fill,
+        "mm_ct": MM_vs_CoinTime_DUMMY.Fill,
+        "ct_beta": CoinTime_vs_beta_DUMMY.Fill,
+        "mm_beta": MM_vs_beta_DUMMY.Fill,
+        "mm_h_cer": MM_vs_H_cer_DUMMY.Fill,
+        "mm_h_cal": MM_vs_H_cal_DUMMY.Fill,
+        "mm_p_cal": MM_vs_P_cal_DUMMY.Fill,
+        "mm_p_hgcer": MM_vs_P_hgcer_DUMMY.Fill,
+        "mm_p_aero": MM_vs_P_aero_DUMMY.Fill,
+        "phiq_t": phiq_vs_t_DUMMY.Fill,
+        "q2_w": Q2_vs_W_DUMMY.Fill,
+        "q2_t": Q2_vs_t_DUMMY.Fill,
+        "w_t": W_vs_t_DUMMY.Fill,
+        "eps_t": EPS_vs_t_DUMMY.Fill,
+        "mm_t": MM_vs_t_DUMMY.Fill,
+        "h_ct": H_ct_DUMMY.Fill,
+        "h_ssxfp": H_ssxfp_DUMMY.Fill,
+        "h_ssyfp": H_ssyfp_DUMMY.Fill,
+        "h_ssxpfp": H_ssxpfp_DUMMY.Fill,
+        "h_ssypfp": H_ssypfp_DUMMY.Fill,
+        "h_ssdelta": H_ssdelta_DUMMY.Fill,
+        "h_ssxptar": H_ssxptar_DUMMY.Fill,
+        "h_ssyptar": H_ssyptar_DUMMY.Fill,
+        "h_hsxfp": H_hsxfp_DUMMY.Fill,
+        "h_hsyfp": H_hsyfp_DUMMY.Fill,
+        "h_hsxpfp": H_hsxpfp_DUMMY.Fill,
+        "h_hsypfp": H_hsypfp_DUMMY.Fill,
+        "h_hsdelta": H_hsdelta_DUMMY.Fill,
+        "h_hsxptar": H_hsxptar_DUMMY.Fill,
+        "h_hsyptar": H_hsyptar_DUMMY.Fill,
+        "h_ph_q": H_ph_q_DUMMY.Fill,
+        "h_th_q": H_th_q_DUMMY.Fill,
+        "h_ph_recoil": H_ph_recoil_DUMMY.Fill,
+        "h_th_recoil": H_th_recoil_DUMMY.Fill,
+        "h_pmiss": H_pmiss_DUMMY.Fill,
+        "h_emiss": H_emiss_DUMMY.Fill,
+        "h_pmx": H_pmx_DUMMY.Fill,
+        "h_pmy": H_pmy_DUMMY.Fill,
+        "h_pmz": H_pmz_DUMMY.Fill,
+        "h_q2": H_Q2_DUMMY.Fill,
+        "h_t": H_t_DUMMY.Fill,
+        "h_w": H_W_DUMMY.Fill,
+        "h_epsilon": H_epsilon_DUMMY.Fill,
+        "h_mm": H_MM_DUMMY.Fill,
+        "h_cal": H_cal_etottracknorm_DUMMY.Fill,
+        "h_cer": H_cer_npeSum_DUMMY.Fill,
+        "p_cal": P_cal_etottracknorm_DUMMY.Fill,
+        "p_hgcer": P_hgcer_npeSum_DUMMY.Fill,
+        "p_aero": P_aero_npeSum_DUMMY.Fill,
+    }
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_MM = evt.MM_shift if has_mm_shift_dummy else evt.MM + MM_offset_DATA
-        adj_t = evt.t_shift if has_t_shift_dummy else -evt.MandelT
-        
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            pid_pass = evt.P_hgcer_npeSum > 2.0
-            ALLCUTS = base_all_cuts and not hole_rejected and pid_pass
-            NOHOLECUTS = base_sub_cuts
-            NOMMCUTS = base_sub_cuts and not hole_rejected and pid_pass
-            if(NOHOLECUTS):
-                # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-        else:
-            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-
-        if(NOMMCUTS):
-            H_MM_nosub_DUMMY.Fill(adj_MM)
-            
-        if(ALLCUTS):
-
-          # HGCer hole comparison
-          P_hgcer_xAtCer_vs_yAtCer_DUMMY.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_DUMMY.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-
-          # Phase shift to right setting
-          #phi_shift = (evt.ph_q+math.pi)
-          phi_shift = (evt.ph_q)          
-          
-          MM_vs_CoinTime_DUMMY.Fill(adj_MM, evt.CTime_ROC1)
-          CoinTime_vs_beta_DUMMY.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DUMMY.Fill(adj_MM,evt.P_gtr_beta)
-          MM_vs_H_cer_DUMMY.Fill(adj_MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_DUMMY.Fill(adj_MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DUMMY.Fill(adj_MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DUMMY.Fill(adj_MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DUMMY.Fill(adj_MM,evt.P_aero_npeSum)
-          # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DUMMY.Fill(phi_shift, adj_t)
-          Q2_vs_W_DUMMY.Fill(evt.Q2, evt.W)
-          Q2_vs_t_DUMMY.Fill(evt.Q2, adj_t)
-          W_vs_t_DUMMY.Fill(evt.W, adj_t)
-          EPS_vs_t_DUMMY.Fill(evt.epsilon, adj_t)
-          MM_vs_t_DUMMY.Fill(adj_MM, adj_t)
-          
-          H_ct_DUMMY.Fill(evt.CTime_ROC1)
-
-          H_ssxfp_DUMMY.Fill(evt.ssxfp)
-          H_ssyfp_DUMMY.Fill(evt.ssyfp)
-          H_ssxpfp_DUMMY.Fill(evt.ssxpfp)
-          H_ssypfp_DUMMY.Fill(evt.ssypfp)
-          H_ssdelta_DUMMY.Fill(evt.ssdelta)
-          H_ssxptar_DUMMY.Fill(evt.ssxptar)
-          H_ssyptar_DUMMY.Fill(evt.ssyptar)
-
-          H_hsxfp_DUMMY.Fill(evt.hsxfp)
-          H_hsyfp_DUMMY.Fill(evt.hsyfp)
-          H_hsxpfp_DUMMY.Fill(evt.hsxpfp)
-          H_hsypfp_DUMMY.Fill(evt.hsypfp)
-          H_hsdelta_DUMMY.Fill(adj_hsdelta)
-          H_hsxptar_DUMMY.Fill(evt.hsxptar)	
-          H_hsyptar_DUMMY.Fill(evt.hsyptar)
-
-          # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DUMMY.Fill((phi_shift))
-          H_th_q_DUMMY.Fill(evt.th_q)
-          H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
-          H_th_recoil_DUMMY.Fill(evt.th_recoil)
-
-          H_pmiss_DUMMY.Fill(evt.pmiss)	
-          H_emiss_DUMMY.Fill(evt.emiss)	
-          #H_emiss_DUMMY.Fill(evt.emiss_nuc)
-          H_pmx_DUMMY.Fill(evt.pmx)
-          H_pmy_DUMMY.Fill(evt.pmy)
-          H_pmz_DUMMY.Fill(evt.pmz)
-          H_Q2_DUMMY.Fill(evt.Q2)
-          H_t_DUMMY.Fill(adj_t)
-          H_W_DUMMY.Fill(evt.W)
-          H_epsilon_DUMMY.Fill(evt.epsilon)
-          H_MM_DUMMY.Fill(adj_MM)
-          #H_MM_DUMMY.Fill(pow(adj_MM, 2))  
-          #H_MM_DUMMY.Fill(evt.Mrecoil)
-          
-          H_cal_etottracknorm_DUMMY.Fill(evt.H_cal_etottracknorm)
-          H_cer_npeSum_DUMMY.Fill(evt.H_cer_npeSum)
-
-          P_cal_etottracknorm_DUMMY.Fill(evt.P_cal_etottracknorm)
-          P_hgcer_npeSum_DUMMY.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_DUMMY.Fill(evt.P_aero_npeSum)
-    dummy_loop_elapsed = perf_counter() - dummy_loop_start
-    _print_sub_timer("particle_subtraction dummy loop {}".format(phi_setting), dummy_loop_elapsed, dummy_entries)
-    _print_sub_timer("particle_subtraction dummy loop progressBar {}".format(phi_setting), dummy_progress_time, dummy_entries)
-    _print_sub_timer("particle_subtraction dummy loop other {}".format(phi_setting), max(dummy_loop_elapsed - dummy_progress_time, 0.0), dummy_entries)
+    _process_particle_subtraction_tree(
+        TBRANCH_DUMMY,
+        "\nGrabbing {} {} subtraction dummy...".format(phi_setting, SubtractedParticle),
+        "particle_subtraction dummy loop {}".format(phi_setting),
+        has_mm_shift_dummy,
+        has_t_shift_dummy,
+        MM_offset_DATA,
+        dummy_fills,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+    )
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} subtraction random...".format(phi_setting,SubtractedParticle))
-    rand_entries = TBRANCH_RAND.GetEntries()
-    rand_progress_time = 0.0
-    rand_loop_start = perf_counter()
-    for i,evt in enumerate(TBRANCH_RAND):
+    if ParticleType == "kaon":
+        rand_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill
+        rand_nohole_x_mm_fill = P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill
+        rand_nohole_y_mm_fill = P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill
+    else:
+        rand_nohole_xy_fill = None
+        rand_nohole_x_mm_fill = None
+        rand_nohole_y_mm_fill = None
 
-        progress_start = perf_counter()
-        # Progress bar
-        Misc.progressBar(i, rand_entries,bar_length=25)
-        rand_progress_time += perf_counter() - progress_start
+    rand_fills = {
+        "nohole_xy": rand_nohole_xy_fill,
+        "nohole_x_mm": rand_nohole_x_mm_fill,
+        "nohole_y_mm": rand_nohole_y_mm_fill,
+        "nomm": H_MM_nosub_RAND.Fill,
+        "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_RAND.Fill,
+        "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_RAND.Fill,
+        "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_RAND.Fill,
+        "mm_ct": MM_vs_CoinTime_RAND.Fill,
+        "ct_beta": CoinTime_vs_beta_RAND.Fill,
+        "mm_beta": MM_vs_beta_RAND.Fill,
+        "mm_h_cer": MM_vs_H_cer_RAND.Fill,
+        "mm_h_cal": MM_vs_H_cal_RAND.Fill,
+        "mm_p_cal": MM_vs_P_cal_RAND.Fill,
+        "mm_p_hgcer": MM_vs_P_hgcer_RAND.Fill,
+        "mm_p_aero": MM_vs_P_aero_RAND.Fill,
+        "phiq_t": phiq_vs_t_RAND.Fill,
+        "q2_w": Q2_vs_W_RAND.Fill,
+        "q2_t": Q2_vs_t_RAND.Fill,
+        "w_t": W_vs_t_RAND.Fill,
+        "eps_t": EPS_vs_t_RAND.Fill,
+        "mm_t": MM_vs_t_RAND.Fill,
+        "h_ct": H_ct_RAND.Fill,
+        "h_ssxfp": H_ssxfp_RAND.Fill,
+        "h_ssyfp": H_ssyfp_RAND.Fill,
+        "h_ssxpfp": H_ssxpfp_RAND.Fill,
+        "h_ssypfp": H_ssypfp_RAND.Fill,
+        "h_ssdelta": H_ssdelta_RAND.Fill,
+        "h_ssxptar": H_ssxptar_RAND.Fill,
+        "h_ssyptar": H_ssyptar_RAND.Fill,
+        "h_hsxfp": H_hsxfp_RAND.Fill,
+        "h_hsyfp": H_hsyfp_RAND.Fill,
+        "h_hsxpfp": H_hsxpfp_RAND.Fill,
+        "h_hsypfp": H_hsypfp_RAND.Fill,
+        "h_hsdelta": H_hsdelta_RAND.Fill,
+        "h_hsxptar": H_hsxptar_RAND.Fill,
+        "h_hsyptar": H_hsyptar_RAND.Fill,
+        "h_ph_q": H_ph_q_RAND.Fill,
+        "h_th_q": H_th_q_RAND.Fill,
+        "h_ph_recoil": H_ph_recoil_RAND.Fill,
+        "h_th_recoil": H_th_recoil_RAND.Fill,
+        "h_pmiss": H_pmiss_RAND.Fill,
+        "h_emiss": H_emiss_RAND.Fill,
+        "h_pmx": H_pmx_RAND.Fill,
+        "h_pmy": H_pmy_RAND.Fill,
+        "h_pmz": H_pmz_RAND.Fill,
+        "h_q2": H_Q2_RAND.Fill,
+        "h_t": H_t_RAND.Fill,
+        "h_w": H_W_RAND.Fill,
+        "h_epsilon": H_epsilon_RAND.Fill,
+        "h_mm": H_MM_RAND.Fill,
+        "h_cal": H_cal_etottracknorm_RAND.Fill,
+        "h_cer": H_cer_npeSum_RAND.Fill,
+        "p_cal": P_cal_etottracknorm_RAND.Fill,
+        "p_hgcer": P_hgcer_npeSum_RAND.Fill,
+        "p_aero": P_aero_npeSum_RAND.Fill,
+    }
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_MM = evt.MM_shift if has_mm_shift_rand else evt.MM + MM_offset_DATA
-        adj_t = evt.t_shift if has_t_shift_rand else -evt.MandelT
-        
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            pid_pass = evt.P_hgcer_npeSum > 2.0
-            ALLCUTS = base_all_cuts and not hole_rejected and pid_pass
-            NOHOLECUTS = base_sub_cuts
-            NOMMCUTS = base_sub_cuts and not hole_rejected and pid_pass
-            if(NOHOLECUTS):
-                # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-        else:
-            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-
-        if(NOMMCUTS):
-            H_MM_nosub_RAND.Fill(adj_MM)
-            
-        if(ALLCUTS):
-
-          # HGCer hole comparison
-          P_hgcer_xAtCer_vs_yAtCer_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-
-          # Phase shift to right setting
-          #phi_shift = (evt.ph_q+math.pi)
-          phi_shift = (evt.ph_q)          
-          
-          MM_vs_CoinTime_RAND.Fill(adj_MM, evt.CTime_ROC1)
-          CoinTime_vs_beta_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_RAND.Fill(adj_MM,evt.P_gtr_beta)
-          MM_vs_H_cer_RAND.Fill(adj_MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_RAND.Fill(adj_MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_RAND.Fill(adj_MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_RAND.Fill(adj_MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_RAND.Fill(adj_MM,evt.P_aero_npeSum)
-          # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_RAND.Fill(phi_shift, adj_t)
-          Q2_vs_W_RAND.Fill(evt.Q2, evt.W)
-          Q2_vs_t_RAND.Fill(evt.Q2, adj_t)
-          W_vs_t_RAND.Fill(evt.W, adj_t)
-          EPS_vs_t_RAND.Fill(evt.epsilon, adj_t)
-          MM_vs_t_RAND.Fill(adj_MM, adj_t)
-          
-          H_ct_RAND.Fill(evt.CTime_ROC1)
-
-          H_ssxfp_RAND.Fill(evt.ssxfp)
-          H_ssyfp_RAND.Fill(evt.ssyfp)
-          H_ssxpfp_RAND.Fill(evt.ssxpfp)
-          H_ssypfp_RAND.Fill(evt.ssypfp)
-          H_ssdelta_RAND.Fill(evt.ssdelta)
-          H_ssxptar_RAND.Fill(evt.ssxptar)
-          H_ssyptar_RAND.Fill(evt.ssyptar)
-
-          H_hsxfp_RAND.Fill(evt.hsxfp)
-          H_hsyfp_RAND.Fill(evt.hsyfp)
-          H_hsxpfp_RAND.Fill(evt.hsxpfp)
-          H_hsypfp_RAND.Fill(evt.hsypfp)
-          H_hsdelta_RAND.Fill(adj_hsdelta)
-          H_hsxptar_RAND.Fill(evt.hsxptar)	
-          H_hsyptar_RAND.Fill(evt.hsyptar)
-
-          # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_RAND.Fill((phi_shift))
-          H_th_q_RAND.Fill(evt.th_q)
-          H_ph_recoil_RAND.Fill(evt.ph_recoil)
-          H_th_recoil_RAND.Fill(evt.th_recoil)
-
-          H_pmiss_RAND.Fill(evt.pmiss)	
-          H_emiss_RAND.Fill(evt.emiss)	
-          #H_emiss_RAND.Fill(evt.emiss_nuc)
-          H_pmx_RAND.Fill(evt.pmx)
-          H_pmy_RAND.Fill(evt.pmy)
-          H_pmz_RAND.Fill(evt.pmz)
-          H_Q2_RAND.Fill(evt.Q2)
-          H_t_RAND.Fill(adj_t)
-          H_W_RAND.Fill(evt.W)
-          H_epsilon_RAND.Fill(evt.epsilon)
-          H_MM_RAND.Fill(adj_MM)
-          #H_MM_RAND.Fill(pow(adj_MM, 2))  
-          #H_MM_RAND.Fill(evt.Mrecoil)
-          
-          H_cal_etottracknorm_RAND.Fill(evt.H_cal_etottracknorm)
-          H_cer_npeSum_RAND.Fill(evt.H_cer_npeSum)
-
-          P_cal_etottracknorm_RAND.Fill(evt.P_cal_etottracknorm)
-          P_hgcer_npeSum_RAND.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_RAND.Fill(evt.P_aero_npeSum)
-    rand_loop_elapsed = perf_counter() - rand_loop_start
-    _print_sub_timer("particle_subtraction random loop {}".format(phi_setting), rand_loop_elapsed, rand_entries)
-    _print_sub_timer("particle_subtraction random loop progressBar {}".format(phi_setting), rand_progress_time, rand_entries)
-    _print_sub_timer("particle_subtraction random loop other {}".format(phi_setting), max(rand_loop_elapsed - rand_progress_time, 0.0), rand_entries)
+    _process_particle_subtraction_tree(
+        TBRANCH_RAND,
+        "\nGrabbing {} {} subtraction random...".format(phi_setting, SubtractedParticle),
+        "particle_subtraction random loop {}".format(phi_setting),
+        has_mm_shift_rand,
+        has_t_shift_rand,
+        MM_offset_DATA,
+        rand_fills,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+    )
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    print("\nGrabbing {} {} subtraction dummy random...".format(phi_setting,SubtractedParticle))
-    dummy_rand_entries = TBRANCH_DUMMY_RAND.GetEntries()
-    dummy_rand_progress_time = 0.0
-    dummy_rand_loop_start = perf_counter()
-    for i,evt in enumerate(TBRANCH_DUMMY_RAND):
+    if ParticleType == "kaon":
+        dummy_rand_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill
+        dummy_rand_nohole_x_mm_fill = P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill
+        dummy_rand_nohole_y_mm_fill = P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill
+    else:
+        dummy_rand_nohole_xy_fill = None
+        dummy_rand_nohole_x_mm_fill = None
+        dummy_rand_nohole_y_mm_fill = None
 
-        progress_start = perf_counter()
-        # Progress bar
-        Misc.progressBar(i, dummy_rand_entries,bar_length=25)
-        dummy_rand_progress_time += perf_counter() - progress_start
+    dummy_rand_fills = {
+        "nohole_xy": dummy_rand_nohole_xy_fill,
+        "nohole_x_mm": dummy_rand_nohole_x_mm_fill,
+        "nohole_y_mm": dummy_rand_nohole_y_mm_fill,
+        "nomm": H_MM_nosub_DUMMY_RAND.Fill,
+        "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Fill,
+        "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill,
+        "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill,
+        "mm_ct": MM_vs_CoinTime_DUMMY_RAND.Fill,
+        "ct_beta": CoinTime_vs_beta_DUMMY_RAND.Fill,
+        "mm_beta": MM_vs_beta_DUMMY_RAND.Fill,
+        "mm_h_cer": MM_vs_H_cer_DUMMY_RAND.Fill,
+        "mm_h_cal": MM_vs_H_cal_DUMMY_RAND.Fill,
+        "mm_p_cal": MM_vs_P_cal_DUMMY_RAND.Fill,
+        "mm_p_hgcer": MM_vs_P_hgcer_DUMMY_RAND.Fill,
+        "mm_p_aero": MM_vs_P_aero_DUMMY_RAND.Fill,
+        "phiq_t": phiq_vs_t_DUMMY_RAND.Fill,
+        "q2_w": Q2_vs_W_DUMMY_RAND.Fill,
+        "q2_t": Q2_vs_t_DUMMY_RAND.Fill,
+        "w_t": W_vs_t_DUMMY_RAND.Fill,
+        "eps_t": EPS_vs_t_DUMMY_RAND.Fill,
+        "mm_t": MM_vs_t_DUMMY_RAND.Fill,
+        "h_ct": H_ct_DUMMY_RAND.Fill,
+        "h_ssxfp": H_ssxfp_DUMMY_RAND.Fill,
+        "h_ssyfp": H_ssyfp_DUMMY_RAND.Fill,
+        "h_ssxpfp": H_ssxpfp_DUMMY_RAND.Fill,
+        "h_ssypfp": H_ssypfp_DUMMY_RAND.Fill,
+        "h_ssdelta": H_ssdelta_DUMMY_RAND.Fill,
+        "h_ssxptar": H_ssxptar_DUMMY_RAND.Fill,
+        "h_ssyptar": H_ssyptar_DUMMY_RAND.Fill,
+        "h_hsxfp": H_hsxfp_DUMMY_RAND.Fill,
+        "h_hsyfp": H_hsyfp_DUMMY_RAND.Fill,
+        "h_hsxpfp": H_hsxpfp_DUMMY_RAND.Fill,
+        "h_hsypfp": H_hsypfp_DUMMY_RAND.Fill,
+        "h_hsdelta": H_hsdelta_DUMMY_RAND.Fill,
+        "h_hsxptar": H_hsxptar_DUMMY_RAND.Fill,
+        "h_hsyptar": H_hsyptar_DUMMY_RAND.Fill,
+        "h_ph_q": H_ph_q_DUMMY_RAND.Fill,
+        "h_th_q": H_th_q_DUMMY_RAND.Fill,
+        "h_ph_recoil": H_ph_recoil_DUMMY_RAND.Fill,
+        "h_th_recoil": H_th_recoil_DUMMY_RAND.Fill,
+        "h_pmiss": H_pmiss_DUMMY_RAND.Fill,
+        "h_emiss": H_emiss_DUMMY_RAND.Fill,
+        "h_pmx": H_pmx_DUMMY_RAND.Fill,
+        "h_pmy": H_pmy_DUMMY_RAND.Fill,
+        "h_pmz": H_pmz_DUMMY_RAND.Fill,
+        "h_q2": H_Q2_DUMMY_RAND.Fill,
+        "h_t": H_t_DUMMY_RAND.Fill,
+        "h_w": H_W_DUMMY_RAND.Fill,
+        "h_epsilon": H_epsilon_DUMMY_RAND.Fill,
+        "h_mm": H_MM_DUMMY_RAND.Fill,
+        "h_cal": H_cal_etottracknorm_DUMMY_RAND.Fill,
+        "h_cer": H_cer_npeSum_DUMMY_RAND.Fill,
+        "p_cal": P_cal_etottracknorm_DUMMY_RAND.Fill,
+        "p_hgcer": P_hgcer_npeSum_DUMMY_RAND.Fill,
+        "p_aero": P_aero_npeSum_DUMMY_RAND.Fill,
+    }
 
-        ##############
-        # HARD CODED #
-        ##############
-
-        adj_MM = evt.MM_shift if has_mm_shift_dummy_rand else evt.MM + MM_offset_DATA
-        adj_t = evt.t_shift if has_t_shift_dummy_rand else -evt.MandelT
-        
-        ##############
-        ##############        
-        ##############
-        
-        if ParticleType == "kaon":
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            pid_pass = evt.P_hgcer_npeSum > 2.0
-            ALLCUTS = base_all_cuts and not hole_rejected and pid_pass
-            NOHOLECUTS = base_sub_cuts
-            NOMMCUTS = base_sub_cuts and not hole_rejected and pid_pass
-            if(NOHOLECUTS):
-                # HGCer hole comparison            
-                P_hgcer_nohole_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-                P_hgcer_nohole_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-        else:
-            ALLCUTS, NOMMCUTS, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
-            
-            if(NOMMCUTS):
-                H_MM_nosub_DUMMY_RAND.Fill(adj_MM)
-            
-        if(ALLCUTS):
-
-          # HGCer hole comparison
-          P_hgcer_xAtCer_vs_yAtCer_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
-          P_hgcer_xAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_xAtCer,adj_MM, evt.P_hgcer_npeSum)
-          P_hgcer_yAtCer_vs_MM_DUMMY_RAND.Fill(evt.P_hgcer_yAtCer,adj_MM, evt.P_hgcer_npeSum)
-
-          # Phase shift to right setting
-          #phi_shift = (evt.ph_q+math.pi)
-          phi_shift = (evt.ph_q)          
-          
-          MM_vs_CoinTime_DUMMY_RAND.Fill(adj_MM, evt.CTime_ROC1)
-          CoinTime_vs_beta_DUMMY_RAND.Fill(evt.CTime_ROC1,evt.P_gtr_beta)
-          MM_vs_beta_DUMMY_RAND.Fill(adj_MM,evt.P_gtr_beta)
-          MM_vs_H_cer_DUMMY_RAND.Fill(adj_MM,evt.H_cer_npeSum)
-          MM_vs_H_cal_DUMMY_RAND.Fill(adj_MM,evt.H_cal_etottracknorm)
-          MM_vs_P_cal_DUMMY_RAND.Fill(adj_MM,evt.P_cal_etottracknorm)
-          MM_vs_P_hgcer_DUMMY_RAND.Fill(adj_MM,evt.P_hgcer_npeSum)
-          MM_vs_P_aero_DUMMY_RAND.Fill(adj_MM,evt.P_aero_npeSum)
-          # SIMC goes from 0 to 2pi so no need for +pi
-          phiq_vs_t_DUMMY_RAND.Fill(phi_shift, adj_t)
-          Q2_vs_W_DUMMY_RAND.Fill(evt.Q2, evt.W)
-          Q2_vs_t_DUMMY_RAND.Fill(evt.Q2, adj_t)
-          W_vs_t_DUMMY_RAND.Fill(evt.W, adj_t)
-          EPS_vs_t_DUMMY_RAND.Fill(evt.epsilon, adj_t)
-          MM_vs_t_DUMMY_RAND.Fill(adj_MM, adj_t)
-          
-          H_ct_DUMMY_RAND.Fill(evt.CTime_ROC1)
-
-          H_ssxfp_DUMMY_RAND.Fill(evt.ssxfp)
-          H_ssyfp_DUMMY_RAND.Fill(evt.ssyfp)
-          H_ssxpfp_DUMMY_RAND.Fill(evt.ssxpfp)
-          H_ssypfp_DUMMY_RAND.Fill(evt.ssypfp)
-          H_ssdelta_DUMMY_RAND.Fill(evt.ssdelta)
-          H_ssxptar_DUMMY_RAND.Fill(evt.ssxptar)
-          H_ssyptar_DUMMY_RAND.Fill(evt.ssyptar)
-
-          H_hsxfp_DUMMY_RAND.Fill(evt.hsxfp)
-          H_hsyfp_DUMMY_RAND.Fill(evt.hsyfp)
-          H_hsxpfp_DUMMY_RAND.Fill(evt.hsxpfp)
-          H_hsypfp_DUMMY_RAND.Fill(evt.hsypfp)
-          H_hsdelta_DUMMY_RAND.Fill(adj_hsdelta)
-          H_hsxptar_DUMMY_RAND.Fill(evt.hsxptar)	
-          H_hsyptar_DUMMY_RAND.Fill(evt.hsyptar)
-
-          # SIMC goes from 0 to 2pi so no need for +pi          
-          H_ph_q_DUMMY_RAND.Fill((phi_shift))
-          H_th_q_DUMMY_RAND.Fill(evt.th_q)
-          H_ph_recoil_DUMMY_RAND.Fill(evt.ph_recoil)
-          H_th_recoil_DUMMY_RAND.Fill(evt.th_recoil)
-
-          H_pmiss_DUMMY_RAND.Fill(evt.pmiss)	
-          H_emiss_DUMMY_RAND.Fill(evt.emiss)	
-          #H_emiss_DUMMY_RAND.Fill(evt.emiss_nuc)
-          H_pmx_DUMMY_RAND.Fill(evt.pmx)
-          H_pmy_DUMMY_RAND.Fill(evt.pmy)
-          H_pmz_DUMMY_RAND.Fill(evt.pmz)
-          H_Q2_DUMMY_RAND.Fill(evt.Q2)
-          H_t_DUMMY_RAND.Fill(adj_t)
-          H_W_DUMMY_RAND.Fill(evt.W)
-          H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
-          H_MM_DUMMY_RAND.Fill(adj_MM)
-          #H_MM_DUMMY_RAND.Fill(pow(adj_MM, 2))
-          #H_MM_DUMMY_RAND.Fill(evt.Mrecoil)
-          
-          H_cal_etottracknorm_DUMMY_RAND.Fill(evt.H_cal_etottracknorm)
-          H_cer_npeSum_DUMMY_RAND.Fill(evt.H_cer_npeSum)
-
-          P_cal_etottracknorm_DUMMY_RAND.Fill(evt.P_cal_etottracknorm)
-          P_hgcer_npeSum_DUMMY_RAND.Fill(evt.P_hgcer_npeSum)
-          P_aero_npeSum_DUMMY_RAND.Fill(evt.P_aero_npeSum)
-    dummy_rand_loop_elapsed = perf_counter() - dummy_rand_loop_start
-    _print_sub_timer("particle_subtraction dummy random loop {}".format(phi_setting), dummy_rand_loop_elapsed, dummy_rand_entries)
-    _print_sub_timer("particle_subtraction dummy random loop progressBar {}".format(phi_setting), dummy_rand_progress_time, dummy_rand_entries)
-    _print_sub_timer("particle_subtraction dummy random loop other {}".format(phi_setting), max(dummy_rand_loop_elapsed - dummy_rand_progress_time, 0.0), dummy_rand_entries)
+    _process_particle_subtraction_tree(
+        TBRANCH_DUMMY_RAND,
+        "\nGrabbing {} {} subtraction dummy random...".format(phi_setting, SubtractedParticle),
+        "particle_subtraction dummy random loop {}".format(phi_setting),
+        has_mm_shift_dummy_rand,
+        has_t_shift_dummy_rand,
+        MM_offset_DATA,
+        dummy_rand_fills,
+        ParticleType,
+        hole_contains,
+        evaluate_data_event,
+        mm_min,
+        mm_max,
+        Misc.progressBar,
+        kaon_nomm_enabled=False,
+    )
 
     # Data Random subtraction window
     stage_start = perf_counter()
