@@ -72,7 +72,8 @@ def integral_with_stat_error(hist):
 
 def _clone_hist_for_plot(hist):
     cloned_hist = hist.Clone()
-    cloned_hist.SetDirectory(0)
+    if hasattr(cloned_hist, "SetDirectory"):
+        cloned_hist.SetDirectory(0)
     return cloned_hist
 
 
