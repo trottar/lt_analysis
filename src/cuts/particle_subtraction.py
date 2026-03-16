@@ -19,6 +19,7 @@ import root_numpy as rnp
 import ROOT
 from ROOT import TH1D, TCutG, TFile
 import sys, os, math
+from time import perf_counter
 
 ################################################################################################################################################
 '''
@@ -49,7 +50,27 @@ from utility import open_root_file
 
 ################################################################################################################################################
 
+def _format_elapsed(seconds):
+    if seconds < 60.0:
+        return "{:.2f} s".format(seconds)
+    minutes, remainder = divmod(seconds, 60.0)
+    if minutes < 60.0:
+        return "{:.0f} m {:.2f} s".format(minutes, remainder)
+    hours, minutes = divmod(minutes, 60.0)
+    return "{:.0f} h {:.0f} m {:.2f} s".format(hours, minutes, remainder)
+
+
+def _print_sub_timer(label, elapsed, total_events=None):
+    if total_events and total_events > 0:
+        per_event_ms = (elapsed / total_events) * 1000.0
+        print("[TIMER] {}: {} ({:.3f} ms/event)".format(label, _format_elapsed(elapsed), per_event_ms))
+    else:
+        print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
+
+
 def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg=None):
+    total_start = perf_counter()
+    setup_start = perf_counter()
 
     W = inpDict["W"] 
     Q2 = inpDict["Q2"]
@@ -393,11 +414,18 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
+    _print_sub_timer("particle_subtraction setup {}".format(phi_setting), perf_counter() - setup_start)
+
     print("\nGrabbing {} {} subtraction data...".format(phi_setting,SubtractedParticle))
+    data_entries = TBRANCH_DATA.GetEntries()
+    data_progress_time = 0.0
+    data_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_DATA):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)        
+        Misc.progressBar(i, data_entries,bar_length=25)
+        data_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -503,15 +531,24 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
           P_cal_etottracknorm_DATA.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DATA.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
+    data_loop_elapsed = perf_counter() - data_loop_start
+    _print_sub_timer("particle_subtraction data loop {}".format(phi_setting), data_loop_elapsed, data_entries)
+    _print_sub_timer("particle_subtraction data loop progressBar {}".format(phi_setting), data_progress_time, data_entries)
+    _print_sub_timer("particle_subtraction data loop other {}".format(phi_setting), max(data_loop_elapsed - data_progress_time, 0.0), data_entries)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
     print("\nGrabbing {} {} subtraction dummy...".format(phi_setting,SubtractedParticle))
+    dummy_entries = TBRANCH_DUMMY.GetEntries()
+    dummy_progress_time = 0.0
+    dummy_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_DUMMY):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)        
+        Misc.progressBar(i, dummy_entries,bar_length=25)
+        dummy_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -617,15 +654,24 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
           P_cal_etottracknorm_DUMMY.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DUMMY.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DUMMY.Fill(evt.P_aero_npeSum)
+    dummy_loop_elapsed = perf_counter() - dummy_loop_start
+    _print_sub_timer("particle_subtraction dummy loop {}".format(phi_setting), dummy_loop_elapsed, dummy_entries)
+    _print_sub_timer("particle_subtraction dummy loop progressBar {}".format(phi_setting), dummy_progress_time, dummy_entries)
+    _print_sub_timer("particle_subtraction dummy loop other {}".format(phi_setting), max(dummy_loop_elapsed - dummy_progress_time, 0.0), dummy_entries)
 
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
     print("\nGrabbing {} {} subtraction random...".format(phi_setting,SubtractedParticle))
+    rand_entries = TBRANCH_RAND.GetEntries()
+    rand_progress_time = 0.0
+    rand_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_RAND):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)        
+        Misc.progressBar(i, rand_entries,bar_length=25)
+        rand_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -731,15 +777,24 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
           P_cal_etottracknorm_RAND.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_RAND.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_RAND.Fill(evt.P_aero_npeSum)
+    rand_loop_elapsed = perf_counter() - rand_loop_start
+    _print_sub_timer("particle_subtraction random loop {}".format(phi_setting), rand_loop_elapsed, rand_entries)
+    _print_sub_timer("particle_subtraction random loop progressBar {}".format(phi_setting), rand_progress_time, rand_entries)
+    _print_sub_timer("particle_subtraction random loop other {}".format(phi_setting), max(rand_loop_elapsed - rand_progress_time, 0.0), rand_entries)
           
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
     print("\nGrabbing {} {} subtraction dummy random...".format(phi_setting,SubtractedParticle))
+    dummy_rand_entries = TBRANCH_DUMMY_RAND.GetEntries()
+    dummy_rand_progress_time = 0.0
+    dummy_rand_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)        
+        Misc.progressBar(i, dummy_rand_entries,bar_length=25)
+        dummy_rand_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -845,8 +900,13 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
           P_cal_etottracknorm_DUMMY_RAND.Fill(evt.P_cal_etottracknorm)
           P_hgcer_npeSum_DUMMY_RAND.Fill(evt.P_hgcer_npeSum)
           P_aero_npeSum_DUMMY_RAND.Fill(evt.P_aero_npeSum)
+    dummy_rand_loop_elapsed = perf_counter() - dummy_rand_loop_start
+    _print_sub_timer("particle_subtraction dummy random loop {}".format(phi_setting), dummy_rand_loop_elapsed, dummy_rand_entries)
+    _print_sub_timer("particle_subtraction dummy random loop progressBar {}".format(phi_setting), dummy_rand_progress_time, dummy_rand_entries)
+    _print_sub_timer("particle_subtraction dummy random loop other {}".format(phi_setting), max(dummy_rand_loop_elapsed - dummy_rand_progress_time, 0.0), dummy_rand_entries)
 
     # Data Random subtraction window
+    stage_start = perf_counter()
     P_hgcer_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
     if ParticleType == "kaon":
         P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
@@ -1067,9 +1127,11 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_W_DUMMY.Add(H_W_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
+    _print_sub_timer("particle_subtraction random-window subtraction {}".format(phi_setting), perf_counter() - stage_start)
 
     ###
     # Data Normalization 
+    stage_start = perf_counter()
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
     if ParticleType == "kaon":
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
@@ -1235,6 +1297,8 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)
+    _print_sub_timer("particle_subtraction norm/dummy subtraction {}".format(phi_setting), perf_counter() - stage_start)
+    _print_sub_timer("particle_subtraction total {}".format(phi_setting), perf_counter() - total_start)
 
 ################################################################################################################################################
 
