@@ -135,11 +135,16 @@ def _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
     fills["h_w"](evt.W)
     fills["h_epsilon"](evt.epsilon)
     fills["h_mm"](adj_MM)
-    fills["h_cal"](evt.H_cal_etottracknorm)
-    fills["h_cer"](evt.H_cer_npeSum)
-    fills["p_cal"](evt.P_cal_etottracknorm)
-    fills["p_hgcer"](evt.P_hgcer_npeSum)
-    fills["p_aero"](evt.P_aero_npeSum)
+    if fills["h_cal"] is not None:
+        fills["h_cal"](evt.H_cal_etottracknorm)
+    if fills["h_cer"] is not None:
+        fills["h_cer"](evt.H_cer_npeSum)
+    if fills["p_cal"] is not None:
+        fills["p_cal"](evt.P_cal_etottracknorm)
+    if fills["p_hgcer"] is not None:
+        fills["p_hgcer"](evt.P_hgcer_npeSum)
+    if fills["p_aero"] is not None:
+        fills["p_aero"](evt.P_aero_npeSum)
 
 
 def _process_rand_sub_tree(
@@ -1150,11 +1155,11 @@ def rand_sub(phi_setting, inpDict):
         "h_w": H_W_DUMMY.Fill,
         "h_epsilon": H_epsilon_DUMMY.Fill,
         "h_mm": H_MM_DUMMY.Fill,
-        "h_cal": H_cal_etottracknorm_DUMMY.Fill,
-        "h_cer": H_cer_npeSum_DUMMY.Fill,
-        "p_cal": P_cal_etottracknorm_DUMMY.Fill,
-        "p_hgcer": P_hgcer_npeSum_DUMMY.Fill,
-        "p_aero": P_aero_npeSum_DUMMY.Fill,
+        "h_cal": None,
+        "h_cer": None,
+        "p_cal": None,
+        "p_hgcer": None,
+        "p_aero": None,
     }
     dummy_nomm_fills = (
         H_MM_full_DUMMY.Fill,
@@ -1243,11 +1248,11 @@ def rand_sub(phi_setting, inpDict):
         "h_w": H_W_RAND.Fill,
         "h_epsilon": H_epsilon_RAND.Fill,
         "h_mm": H_MM_RAND.Fill,
-        "h_cal": H_cal_etottracknorm_RAND.Fill,
-        "h_cer": H_cer_npeSum_RAND.Fill,
-        "p_cal": P_cal_etottracknorm_RAND.Fill,
-        "p_hgcer": P_hgcer_npeSum_RAND.Fill,
-        "p_aero": P_aero_npeSum_RAND.Fill,
+        "h_cal": None,
+        "h_cer": None,
+        "p_cal": None,
+        "p_hgcer": None,
+        "p_aero": None,
     }
     rand_nomm_fills = (
         H_MM_rand_dummy_RAND.Fill,
@@ -1338,11 +1343,11 @@ def rand_sub(phi_setting, inpDict):
         "h_w": H_W_DUMMY_RAND.Fill,
         "h_epsilon": H_epsilon_DUMMY_RAND.Fill,
         "h_mm": H_MM_DUMMY_RAND.Fill,
-        "h_cal": H_cal_etottracknorm_DUMMY_RAND.Fill,
-        "h_cer": H_cer_npeSum_DUMMY_RAND.Fill,
-        "p_cal": P_cal_etottracknorm_DUMMY_RAND.Fill,
-        "p_hgcer": P_hgcer_npeSum_DUMMY_RAND.Fill,
-        "p_aero": P_aero_npeSum_DUMMY_RAND.Fill,
+        "h_cal": None,
+        "h_cer": None,
+        "p_cal": None,
+        "p_hgcer": None,
+        "p_aero": None,
     }
     dummy_rand_nomm_fills = (
         H_MM_full_DUMMY_RAND.Fill,
