@@ -358,9 +358,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             glo_tmp.SetPointError(idx, 0.0, dx_error)
 
         LT_sep_x_lo_fun = LT_sep_x_fun_wrapper(lo_eps)
-        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, -180, 180, 4)
+        flo = TF1("lo_eps_fit", LT_sep_x_lo_fun, 0, 360, 4)
         LT_sep_x_lo_fun_unsep = LT_sep_x_fun_unsep_wrapper(lo_eps)
-        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, -PI, PI, 4)
+        flo_unsep = TF1("lo_eps_unsep", LT_sep_x_lo_fun_unsep, 0, 2*PI, 4)
         
         glo = glo_tmp.Clone("glo")
         ave_sig_lo = glo.GetMean(2)
@@ -393,9 +393,9 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             ghi_tmp.SetPointError(idx, 0.0, dx_error)
 
         LT_sep_x_hi_fun = LT_sep_x_fun_wrapper(hi_eps)
-        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, -180, 180, 4)
+        fhi = TF1("hi_eps_fit", LT_sep_x_hi_fun, 0, 360, 4)
         LT_sep_x_hi_fun_unsep = LT_sep_x_fun_unsep_wrapper(hi_eps)
-        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, -PI, PI, 4)
+        fhi_unsep = TF1("hi_eps_unsep", LT_sep_x_hi_fun_unsep, 0, 2*PI, 4)
             
         ghi = ghi_tmp.Clone("ghi")
         ave_sig_hi = ghi.GetMean(2)
@@ -479,7 +479,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
                 f"+ y*cos(2*x*({PI}/180))*[3]*[0]"               # ρ_TT·σₜ
                 f")"
             ),
-            -180, 180,
+            0, 360,
             0.0, 1.0
             #LOEPS-0.1, HIEPS+0.1
         )         
@@ -667,7 +667,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         c2.cd()
         
         glo.SetMarkerStyle(5)
-        glo.GetXaxis().SetLimits(-180, 180)
+        glo.GetXaxis().SetLimits(0, 360)
 
         ghi.SetMarkerColor(2)
         ghi.SetLineColor(2)
@@ -686,7 +686,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         g.GetXaxis().SetTitle("#it{#phi} [degree]")
         g.GetXaxis().CenterTitle()
-        g.GetXaxis().SetLimits(-180, 180)
+        g.GetXaxis().SetLimits(0, 360)
         g.GetXaxis().SetTitleSize(0.04)
         
         c2.Update()
