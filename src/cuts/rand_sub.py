@@ -23,6 +23,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
 import array
+from time import perf_counter
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
 from ROOT import kBlue, kBlack, kCyan, kRed, kGreen, kMagenta, kGray, kOrange, kAzure, kViolet
 from functools import reduce
@@ -61,7 +62,26 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 #ROOT.gStyle.SetOptStat(0)
 ################################################################################################################################################
 
+def _format_elapsed(seconds):
+    if seconds < 60.0:
+        return "{:.2f} s".format(seconds)
+    minutes, remainder = divmod(seconds, 60.0)
+    if minutes < 60.0:
+        return "{:.0f} m {:.2f} s".format(minutes, remainder)
+    hours, minutes = divmod(minutes, 60.0)
+    return "{:.0f} h {:.0f} m {:.2f} s".format(hours, minutes, remainder)
+
+
+def _print_rand_timer(label, elapsed, total_events=None):
+    if total_events and total_events > 0:
+        per_event_ms = (elapsed / total_events) * 1000.0
+        print("[TIMER] {}: {} ({:.3f} ms/event)".format(label, _format_elapsed(elapsed), per_event_ms))
+    else:
+        print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
+
 def rand_sub(phi_setting, inpDict):    
+    total_start = perf_counter()
+    setup_start = perf_counter()
 
     kinematics = inpDict["kinematics"] 
     W = inpDict["W"] 
@@ -830,15 +850,21 @@ def rand_sub(phi_setting, inpDict):
 
     # Fit background and subtract
     from background_fit import bg_fit
+    _print_rand_timer("rand_sub setup {}".format(phi_setting), perf_counter() - setup_start)
         
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
     print("\nGrabbing {} {} data...".format(phi_setting,ParticleType))
+    data_entries = TBRANCH_DATA.GetEntries()
+    data_progress_time = 0.0
+    data_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_DATA):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DATA.GetEntries(),bar_length=25)        
+        Misc.progressBar(i, data_entries,bar_length=25)
+        data_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -944,7 +970,7 @@ def rand_sub(phi_setting, inpDict):
           H_MM_DATA.Fill(adj_MM)
           #H_MM_DATA.Fill(pow(adj_MM, 2))
           #H_MM_DATA.Fill(evt.Mrecoil)
-          
+
           H_cal_etottracknorm_DATA.Fill(evt.H_cal_etottracknorm)
           H_cer_npeSum_DATA.Fill(evt.H_cer_npeSum)
 
@@ -953,15 +979,24 @@ def rand_sub(phi_setting, inpDict):
           P_aero_npeSum_DATA.Fill(evt.P_aero_npeSum)
 
           MM_offset_DATA = adj_MM-evt.MM
-          
+    data_loop_elapsed = perf_counter() - data_loop_start
+    _print_rand_timer("rand_sub data loop {}".format(phi_setting), data_loop_elapsed, data_entries)
+    _print_rand_timer("rand_sub data loop progressBar {}".format(phi_setting), data_progress_time, data_entries)
+    _print_rand_timer("rand_sub data loop other {}".format(phi_setting), max(data_loop_elapsed - data_progress_time, 0.0), data_entries)
+
     ################################################################################################################################################
     # Fill dummy histograms for various trees called above
 
     print("\nGrabbing {} {} dummy...".format(phi_setting,ParticleType))
+    dummy_entries = TBRANCH_DUMMY.GetEntries()
+    dummy_progress_time = 0.0
+    dummy_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_DUMMY):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY.GetEntries(),bar_length=25)
+        Misc.progressBar(i, dummy_entries,bar_length=25)
+        dummy_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -1054,8 +1089,8 @@ def rand_sub(phi_setting, inpDict):
           H_ph_recoil_DUMMY.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY.Fill(evt.th_recoil)
 
-          H_pmiss_DUMMY.Fill(evt.pmiss)	
-          H_emiss_DUMMY.Fill(evt.emiss)	
+          H_pmiss_DUMMY.Fill(evt.pmiss)
+          H_emiss_DUMMY.Fill(evt.emiss)
           #H_emiss_DUMMY.Fill(evt.emiss_nuc)
           H_pmx_DUMMY.Fill(evt.pmx)
           H_pmy_DUMMY.Fill(evt.pmy)
@@ -1065,17 +1100,26 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY.Fill(evt.W)
           H_epsilon_DUMMY.Fill(evt.epsilon)
           H_MM_DUMMY.Fill(adj_MM)
-          #H_MM_DUMMY.Fill(pow(adj_MM, 2))  
+          #H_MM_DUMMY.Fill(pow(adj_MM, 2))
           #H_MM_DUMMY.Fill(evt.Mrecoil)
-          
+    dummy_loop_elapsed = perf_counter() - dummy_loop_start
+    _print_rand_timer("rand_sub dummy loop {}".format(phi_setting), dummy_loop_elapsed, dummy_entries)
+    _print_rand_timer("rand_sub dummy loop progressBar {}".format(phi_setting), dummy_progress_time, dummy_entries)
+    _print_rand_timer("rand_sub dummy loop other {}".format(phi_setting), max(dummy_loop_elapsed - dummy_progress_time, 0.0), dummy_entries)
+
     ###################################################################################################################################################    
     # Fill random histograms for various trees called above
 
     print("\nGrabbing {} {} random data...".format(phi_setting,ParticleType))
+    rand_entries = TBRANCH_RAND.GetEntries()
+    rand_progress_time = 0.0
+    rand_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_RAND):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_RAND.GetEntries(),bar_length=25)
+        Misc.progressBar(i, rand_entries,bar_length=25)
+        rand_progress_time += perf_counter() - progress_start
         
         ##############
         # HARD CODED #
@@ -1179,15 +1223,24 @@ def rand_sub(phi_setting, inpDict):
           H_W_RAND.Fill(evt.W)
           H_epsilon_RAND.Fill(evt.epsilon)
           H_MM_RAND.Fill(adj_MM)
-          
+    rand_loop_elapsed = perf_counter() - rand_loop_start
+    _print_rand_timer("rand_sub random loop {}".format(phi_setting), rand_loop_elapsed, rand_entries)
+    _print_rand_timer("rand_sub random loop progressBar {}".format(phi_setting), rand_progress_time, rand_entries)
+    _print_rand_timer("rand_sub random loop other {}".format(phi_setting), max(rand_loop_elapsed - rand_progress_time, 0.0), rand_entries)
+
     ###################################################################################################################################################    
     # Fill dummy random histograms for various trees called above
 
     print("\nGrabbing {} {} dummy random data...".format(phi_setting,ParticleType))
+    dummy_rand_entries = TBRANCH_DUMMY_RAND.GetEntries()
+    dummy_rand_progress_time = 0.0
+    dummy_rand_loop_start = perf_counter()
     for i,evt in enumerate(TBRANCH_DUMMY_RAND):
 
+        progress_start = perf_counter()
         # Progress bar
-        Misc.progressBar(i, TBRANCH_DUMMY_RAND.GetEntries(),bar_length=25)
+        Misc.progressBar(i, dummy_rand_entries,bar_length=25)
+        dummy_rand_progress_time += perf_counter() - progress_start
 
         ##############
         # HARD CODED #
@@ -1278,8 +1331,8 @@ def rand_sub(phi_setting, inpDict):
           H_ph_recoil_DUMMY_RAND.Fill(evt.ph_recoil)
           H_th_recoil_DUMMY_RAND.Fill(evt.th_recoil)
           
-          H_pmiss_DUMMY_RAND.Fill(evt.pmiss)	
-          H_emiss_DUMMY_RAND.Fill(evt.emiss)	
+          H_pmiss_DUMMY_RAND.Fill(evt.pmiss)
+          H_emiss_DUMMY_RAND.Fill(evt.emiss)
           #H_emiss_DUMMY_RAND.Fill(evt.emiss_nuc)
           H_pmx_DUMMY_RAND.Fill(evt.pmx)
           H_pmy_DUMMY_RAND.Fill(evt.pmy)
@@ -1289,12 +1342,17 @@ def rand_sub(phi_setting, inpDict):
           H_W_DUMMY_RAND.Fill(evt.W)
           H_epsilon_DUMMY_RAND.Fill(evt.epsilon)
           H_MM_DUMMY_RAND.Fill(adj_MM)
+    dummy_rand_loop_elapsed = perf_counter() - dummy_rand_loop_start
+    _print_rand_timer("rand_sub dummy random loop {}".format(phi_setting), dummy_rand_loop_elapsed, dummy_rand_entries)
+    _print_rand_timer("rand_sub dummy random loop progressBar {}".format(phi_setting), dummy_rand_progress_time, dummy_rand_entries)
+    _print_rand_timer("rand_sub dummy random loop other {}".format(phi_setting), max(dummy_rand_loop_elapsed - dummy_rand_progress_time, 0.0), dummy_rand_entries)
           
     ################################################################################################################################################
     # Normalize dummy by effective charge and target correction
     # Normalize data by effective charge    
 
     # Data Random subtraction window
+    stage_start = perf_counter()
     P_hgcer_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
     if ParticleType == "kaon":
         P_hgcer_nohole_xAtCer_vs_yAtCer_RAND.Scale(1/nWindows)
@@ -1537,6 +1595,7 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DUMMY.Add(H_pmy_DUMMY_RAND,-1)
     H_pmz_DUMMY.Add(H_pmz_DUMMY_RAND,-1)
     H_ct_DUMMY.Add(H_ct_DUMMY_RAND,-1)
+    _print_rand_timer("rand_sub random-window subtraction {}".format(phi_setting), perf_counter() - stage_start)
 
     print("\n\n{} data total number of events (random subtraction only!): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
     print("{} dummy total number of events (random subtraction only!): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))  
@@ -1547,6 +1606,7 @@ def rand_sub(phi_setting, inpDict):
     ###################################################################################################################################
     ###
     # Data Normalization
+    stage_start = perf_counter()
     P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
     if ParticleType == "kaon":
         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(norm_factor_data)
@@ -1726,12 +1786,14 @@ def rand_sub(phi_setting, inpDict):
     H_pmy_DATA.Add(H_pmy_DUMMY,-1)
     H_pmz_DATA.Add(H_pmz_DUMMY,-1)
     H_ct_DATA.Add(H_ct_DUMMY,-1)      
+    _print_rand_timer("rand_sub norm/dummy subtraction {}".format(phi_setting), perf_counter() - stage_start)
 
     print("\n\n{} data total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
     print("{} dummy total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))      
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
+        stage_start = perf_counter()
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
@@ -1886,12 +1948,14 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
         H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1) 
+        _print_rand_timer("rand_sub pion subtraction {}".format(phi_setting), perf_counter() - stage_start)
 
     # Fit background and subtract
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
     inpDict["bg_stat_scale1"] = 0.50
+    stage_start = perf_counter()
 
     if  inpDict["bg_stat_scale1"] > 0.0:
         background_fit1 = bg_fit(phi_setting,
@@ -2027,7 +2091,9 @@ def rand_sub(phi_setting, inpDict):
         H_pmy_DATA.Scale(background_fit2[3])
         H_pmz_DATA.Scale(background_fit2[3])
         H_ct_DATA.Scale(background_fit2[3])     
+    _print_rand_timer("rand_sub background fits {}".format(phi_setting), perf_counter() - stage_start)
 
+    stage_start = perf_counter()
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
     histDict["phi_setting"] = phi_setting
@@ -2137,9 +2203,11 @@ def rand_sub(phi_setting, inpDict):
     histDict["MM_vs_P_aero_DATA"] = MM_vs_P_aero_DATA
     histDict["NumEvts_MM_DUMMY"] = H_MM_DUMMY.Integral()
     histDict["NumEvts_MM_DATA"] = H_MM_DATA.Integral()
+    _print_rand_timer("rand_sub histDict pack {}".format(phi_setting), perf_counter() - stage_start)
     
     ###
     # CT plots
+    stage_start = perf_counter()
     ct = TCanvas()
     l_ct = TLegend(0.115,0.65,0.33,0.95)
     l_ct.SetTextSize(0.0235)
@@ -2458,4 +2526,6 @@ def rand_sub(phi_setting, inpDict):
 
         c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')      
 
+    _print_rand_timer("rand_sub plotting {}".format(phi_setting), perf_counter() - stage_start)
+    _print_rand_timer("rand_sub total {}".format(phi_setting), perf_counter() - total_start)
     return histDict
