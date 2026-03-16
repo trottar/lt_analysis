@@ -24,6 +24,11 @@ tmin = ""
 tmax = ""
 cut_poly = []
 c0_dict = {}
+cut_poly_xmin = None
+cut_poly_xmax = None
+cut_poly_ymin = None
+cut_poly_ymax = None
+c0_value = 0.0
 
 
 def _sort_ccw_points(points):
@@ -40,6 +45,11 @@ def _point_in_convex_poly(x, y, poly, eps=1e-12):
     if poly is None or len(poly) < 3:
         return False
     px, py = float(x), float(y)
+    if (
+        cut_poly_xmin is not None
+        and (px < cut_poly_xmin or px > cut_poly_xmax or py < cut_poly_ymin or py > cut_poly_ymax)
+    ):
+        return False
     for i in range(len(poly)):
         a = poly[i]
         b = poly[(i + 1) % len(poly)]
@@ -53,6 +63,8 @@ def set_val(inpDict):
     global W, Q2, EPSSET, ParticleType
     global tmin, tmax
     global cut_poly
+    global cut_poly_xmin, cut_poly_xmax, cut_poly_ymin, cut_poly_ymax
+    global c0_value
     
     W = inpDict["W"] 
     Q2 = inpDict["Q2"] 
@@ -71,6 +83,10 @@ def set_val(inpDict):
         print("ERROR: Invalid polygon cut. Expected at least 3 vertices.")
         sys.exit(2)
     cut_poly = _sort_ccw_points(points)
+    cut_poly_xmin = min(p[0] for p in cut_poly)
+    cut_poly_xmax = max(p[0] for p in cut_poly)
+    cut_poly_ymin = min(p[1] for p in cut_poly)
+    cut_poly_ymax = max(p[1] for p in cut_poly)
     
     ##############
     # HARD CODED #
@@ -110,6 +126,11 @@ def set_val(inpDict):
     else:
         c0_dict["Q0p4W2p20_lowe"] = 0.0
         c0_dict["Q0p4W2p20_highe"] = 0.0
+
+    try:
+        c0_value = c0_dict["Q{}W{}_{}e".format(Q2, W, EPSSET)]
+    except KeyError:
+        c0_value = 0.0
             
     ##############
     ##############        
@@ -123,27 +144,29 @@ def _compute_base_data_cuts(evt):
     # HARD CODED #
     ##############
 
-    adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
+    adj_hsdelta = evt.hsdelta + c0_value * evt.hsxpfp
 
     ##############
     ##############        
     ##############
 
     #CUTs Definations 
-    SHMS_FixCut = (evt.P_hod_goodstarttime == 1) & (evt.P_dc_InsideDipoleExit == 1)
-    SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
+    if evt.P_hod_goodstarttime != 1 or evt.P_dc_InsideDipoleExit != 1:
+        return False
+    if evt.ssdelta < -10.0 or evt.ssdelta > 20.0 or evt.ssxptar < -0.06 or evt.ssxptar > 0.06 or evt.ssyptar < -0.04 or evt.ssyptar > 0.04:
+        return False
 
-    HMS_FixCut = (evt.H_hod_goodstarttime == 1) & (evt.H_dc_InsideDipoleExit == 1)
-    HMS_Acceptance = (adj_hsdelta>=-8.0) & (adj_hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
-
-    Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
+    if evt.H_hod_goodstarttime != 1 or evt.H_dc_InsideDipoleExit != 1:
+        return False
+    if adj_hsdelta < -8.0 or adj_hsdelta > 8.0 or evt.hsxptar < -0.08 or evt.hsxptar > 0.08 or evt.hsyptar < -0.045 or evt.hsyptar > 0.045:
+        return False
 
     # RLT: These are done via histogram cuts
     #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
     #MMCUT =  (mm_min<=adj_MM) & (adj_MM<mm_max)
     #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
 
-    return HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond
+    return _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
 
 
 def evaluate_data_cut_bools(evt, mm_min=0.7, mm_max=1.5):
