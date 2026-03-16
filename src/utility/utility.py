@@ -544,14 +544,8 @@ def hist_to_root(hist, file_name_or_root, directory_name, directory_cache=None):
 
     current_dir = get_root_directory(root_file, directory_name, directory_cache)
 
-    # Check if the histogram already exists in the file
-    existing_hist = current_dir.Get(hist.GetName())
-    if existing_hist:
-        current_dir.Delete(hist.GetName() + ";*")  # Delete existing histogram
-
     current_dir.cd()
-    cloned_hist = hist.Clone()
-    cloned_hist.Write()
+    hist.Write(hist.GetName(), ROOT.TObject.kOverwrite)
 
     if owns_root_file:
         root_file.Close()
