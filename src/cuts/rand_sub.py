@@ -153,6 +153,8 @@ def _process_rand_sub_tree(
     timer_label,
     has_mm_shift,
     has_t_shift,
+    tmin,
+    tmax,
     nomm_fills,
     fills,
     particle_type,
@@ -177,20 +179,25 @@ def _process_rand_sub_tree(
         progress_bar(i, entries, bar_length=25)
         progress_time += perf_counter() - progress_start
 
+        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
+        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+        mm_in_range = (mm_min <= adj_MM) and (adj_MM < mm_max)
+        t_in_range = (tmin <= adj_t) and (adj_t < tmax)
+
         if particle_type == "kaon":
             base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            allcuts = base_all_cuts and not hole_rejected
-            noholecuts = base_all_cuts
-            nommcuts = base_sub_cuts and not hole_rejected
+            allcuts = base_all_cuts and t_in_range and mm_in_range and not hole_rejected
+            noholecuts = base_all_cuts and t_in_range and mm_in_range
+            nommcuts = base_sub_cuts and t_in_range and not hole_rejected
         else:
-            allcuts, nommcuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+            allcuts = base_all_cuts and t_in_range and mm_in_range
+            nommcuts = base_sub_cuts and t_in_range
             noholecuts = False
 
         if not (noholecuts or nommcuts or allcuts):
             continue
-
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
 
         if noholecuts and nohole_xy_fill is not None:
             nohole_xy_fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -202,7 +209,6 @@ def _process_rand_sub_tree(
                 fill(adj_MM)
 
         if allcuts:
-            adj_t = evt.t_shift if has_t_shift else -evt.MandelT
             _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills)
             if update_mm_offset:
                 mm_offset_value = adj_MM - evt.MM
@@ -224,10 +230,10 @@ def rand_sub(phi_setting, inpDict):
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
     OutFilename = inpDict["OutFilename"] 
-    tmin = inpDict["tmin"] 
-    tmax = inpDict["tmax"]
-    mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]     
+    tmin = float(inpDict["tmin"])
+    tmax = float(inpDict["tmax"])
+    mm_min = float(inpDict["mm_min"])
+    mm_max = float(inpDict["mm_max"])
     NumtBins = inpDict["NumtBins"] 
     NumPhiBins = inpDict["NumPhiBins"] 
     runNumRight = inpDict["runNumRight"] 
@@ -1081,6 +1087,8 @@ def rand_sub(phi_setting, inpDict):
         "rand_sub data loop {}".format(phi_setting),
         has_mm_shift_data,
         has_t_shift_data,
+        tmin,
+        tmax,
         data_nomm_fills,
         data_fills,
         ParticleType,
@@ -1175,6 +1183,8 @@ def rand_sub(phi_setting, inpDict):
         "rand_sub dummy loop {}".format(phi_setting),
         has_mm_shift_dummy,
         has_t_shift_dummy,
+        tmin,
+        tmax,
         dummy_nomm_fills,
         dummy_fills,
         ParticleType,
@@ -1270,6 +1280,8 @@ def rand_sub(phi_setting, inpDict):
         "rand_sub random loop {}".format(phi_setting),
         has_mm_shift_rand,
         has_t_shift_rand,
+        tmin,
+        tmax,
         rand_nomm_fills,
         rand_fills,
         ParticleType,
@@ -1363,6 +1375,8 @@ def rand_sub(phi_setting, inpDict):
         "rand_sub dummy random loop {}".format(phi_setting),
         has_mm_shift_dummy_rand,
         has_t_shift_dummy_rand,
+        tmin,
+        tmax,
         dummy_rand_nomm_fills,
         dummy_rand_fills,
         ParticleType,
@@ -1578,7 +1592,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DUMMY.Add(MM_vs_beta_DUMMY_RAND,-1)
     MM_vs_H_cer_DUMMY.Add(MM_vs_H_cer_DUMMY_RAND,-1)
     MM_vs_H_cal_DUMMY.Add(MM_vs_H_cal_DUMMY_RAND,-1)
-    MM_vs_P_cal_DATA.Add(MM_vs_P_cal_RAND,-1)    
+    MM_vs_P_cal_DUMMY.Add(MM_vs_P_cal_DUMMY_RAND,-1)    
     MM_vs_P_hgcer_DUMMY.Add(MM_vs_P_hgcer_DUMMY_RAND,-1)
     MM_vs_P_aero_DUMMY.Add(MM_vs_P_aero_DUMMY_RAND,-1)    
     phiq_vs_t_DUMMY.Add(phiq_vs_t_DUMMY_RAND,-1)
@@ -1627,8 +1641,12 @@ def rand_sub(phi_setting, inpDict):
     print("{} dummy total number of events (random subtraction only!): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))  
 
     ###################################################################################################################################
-    # These are applied later, see plotting/data_vs_simc.py
-    # These must be applied after to find proper t-bins
+    # Apply the setting-level normalization/background treatment used by the
+    # Step 5 data-vs-SIMC overlay plots.
+    #
+    # Important: this is not the same path used for the final ratios in Step 6.
+    # The ratio code performs a separate per-(t,phi) yield extraction/background
+    # correction in binning/calculate_yield.py.
     ###################################################################################################################################
     ###
     # Data Normalization
@@ -1769,7 +1787,7 @@ def rand_sub(phi_setting, inpDict):
     MM_vs_beta_DATA.Add(MM_vs_beta_DUMMY,-1)
     MM_vs_H_cer_DATA.Add(MM_vs_H_cer_DUMMY,-1)
     MM_vs_H_cal_DATA.Add(MM_vs_H_cal_DUMMY,-1)
-    MM_vs_P_cal_DATA.Add(MM_vs_P_cal_RAND,-1)    
+    MM_vs_P_cal_DATA.Add(MM_vs_P_cal_DUMMY,-1)    
     MM_vs_P_hgcer_DATA.Add(MM_vs_P_hgcer_DUMMY,-1)
     MM_vs_P_aero_DATA.Add(MM_vs_P_aero_DUMMY,-1)    
     phiq_vs_t_DATA.Add(phiq_vs_t_DUMMY,-1)

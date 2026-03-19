@@ -74,10 +74,10 @@ def compare_simc(hist, inpDict):
     InDATAFilename = inpDict["InDATAFilename"]
     InDUMMYFilename = inpDict["InDUMMYFilename"]
     OutFilename = inpDict["OutFilename"]
-    tmin = inpDict["tmin"]
-    tmax = inpDict["tmax"]
-    mm_min = inpDict["mm_min"] 
-    mm_max = inpDict["mm_max"]    
+    tmin = float(inpDict["tmin"])
+    tmax = float(inpDict["tmax"])
+    mm_min = float(inpDict["mm_min"])
+    mm_max = float(inpDict["mm_max"])
     NumtBins = inpDict["NumtBins"]
     NumPhiBins = inpDict["NumPhiBins"]
     runNumRight = inpDict["runNumRight"]
@@ -201,10 +201,15 @@ def compare_simc(hist, inpDict):
       ##############        
       ##############        
       
+      adj_t = -evt.t
+      mm_in_range = (mm_min <= adj_missmass) and (adj_missmass < mm_max)
+      t_in_range = (tmin <= adj_t) and (adj_t < tmax)
+      base_cuts = apply_simc_cuts(evt, mm_min, mm_max)
+
       if ParticleType == "kaon":
           
-          ALLCUTS =  apply_simc_cuts(evt, mm_min, mm_max) and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
-          NOHOLECUTS =  apply_simc_cuts(evt, mm_min, mm_max)
+          ALLCUTS = base_cuts and t_in_range and mm_in_range and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+          NOHOLECUTS = base_cuts and t_in_range and mm_in_range
           
           if(NOHOLECUTS):
               # HGCer hole comparison            
@@ -212,7 +217,7 @@ def compare_simc(hist, inpDict):
           
       else:
 
-          ALLCUTS = apply_simc_cuts(evt, mm_min, mm_max)
+          ALLCUTS = base_cuts and t_in_range and mm_in_range
           
       #Fill SIMC events
       if(ALLCUTS):
@@ -226,7 +231,7 @@ def compare_simc(hist, inpDict):
           phi_shift = (evt.phipq)          
           
           # SIMC goes from 0 to 2pi so no need for +pi/2
-          polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), -evt.t)
+          polar_phiq_vs_t_SIMC.SetPoint(polar_phiq_vs_t_SIMC.GetN(), (phi_shift)*(180/math.pi), adj_t)
           
           H_Weight_SIMC.Fill(evt.iter_weight)
 
@@ -256,7 +261,7 @@ def compare_simc(hist, inpDict):
           #H_pmz_SIMC.Fill(evt.Pmz, evt.iter_weight)
           H_Q2_SIMC.Fill(evt.Q2, evt.iter_weight)
           H_W_SIMC.Fill(evt.W, evt.iter_weight)
-          H_t_SIMC.Fill(-evt.t, evt.iter_weight)
+          H_t_SIMC.Fill(adj_t, evt.iter_weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
           H_MM_SIMC.Fill(adj_missmass, evt.iter_weight)
           #H_MM_SIMC.Fill(adj_missmass, evt.iter_weight)

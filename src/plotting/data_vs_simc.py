@@ -97,6 +97,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
     efficiency_table = inpDict["efficiency_table"] 
     ParticleType = inpDict["ParticleType"]
 
+    # Step 5 uses the precomputed histograms from rand_sub.py/compare_simc.py.
+    # These overlays intentionally happen before Step 6 yield extraction, so they
+    # do not include the per-(t,phi) background treatment used to form the final
+    # data/SIMC ratios.
     # Create an empty list to store copied histograms
     histlist_copy = []
 
