@@ -141,9 +141,11 @@ def run_bash_script(filename, *args):
     # Ensure process completes
     process.wait()
 
-    # Exit with error code if an error is detected
-    if error_detected:
-        sys.exit(2)
+    # Exit with error code if an error is detected or the subprocess failed.
+    if error_detected or process.returncode != 0:
+        if process.returncode not in (None, 0) and not error_detected:
+            print(f"ERROR: {filename} exited with code {process.returncode}")
+        sys.exit(process.returncode if process.returncode not in (None, 0) else 2)
                 
 ################################################################################################################################################
                 
