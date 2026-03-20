@@ -1331,7 +1331,10 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     
     Q2 = inpDict["Q2"]
     W = inpDict["W"]
-    EPSSET = inpDict["EPSSET"]    
+    EPSSET = inpDict["EPSSET"]
+    POL = inpDict["POL"]
+    theta_cm_min = 0.0
+    theta_cm_max = 180.0
     
     ################################################################################################################################################
 
