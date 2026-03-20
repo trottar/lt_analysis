@@ -58,6 +58,12 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist
+from mm_background_subtraction import (
+    build_mm_background_weights,
+    build_mm_residual_weights,
+    clone_reset_hist,
+    mm_background_weight_from_value,
+)
 
 ##################################################################################################################################################
 
@@ -88,6 +94,9 @@ def _init_ave_event_cache():
         "allcuts": [],
         "nommcuts": [],
         "mm_offset": [],
+        "t_index": [],
+        "phi_index": [],
+        "phi_shift_deg": [],
     }
     return {
         key: {name: values.copy() for name, values in cache_template.items()}
@@ -95,7 +104,20 @@ def _init_ave_event_cache():
     }
 
 
-def _append_ave_event(cache_section, adj_t, adj_MM, q2, w, epsilon, allcuts, nommcuts, mm_offset=0.0):
+def _append_ave_event(
+    cache_section,
+    adj_t,
+    adj_MM,
+    q2,
+    w,
+    epsilon,
+    allcuts,
+    nommcuts,
+    mm_offset=0.0,
+    t_index=-1,
+    phi_index=-1,
+    phi_shift_deg=float("nan"),
+):
     if not (allcuts or nommcuts):
         return
 
@@ -107,6 +129,9 @@ def _append_ave_event(cache_section, adj_t, adj_MM, q2, w, epsilon, allcuts, nom
     cache_section["allcuts"].append(bool(allcuts))
     cache_section["nommcuts"].append(bool(nommcuts))
     cache_section["mm_offset"].append(mm_offset)
+    cache_section["t_index"].append(int(t_index))
+    cache_section["phi_index"].append(int(phi_index))
+    cache_section["phi_shift_deg"].append(phi_shift_deg)
 
 
 def _freeze_ave_event_cache(event_cache):
@@ -121,6 +146,9 @@ def _freeze_ave_event_cache(event_cache):
             "allcuts": np.asarray(cache_section["allcuts"], dtype=bool),
             "nommcuts": np.asarray(cache_section["nommcuts"], dtype=bool),
             "mm_offset": np.asarray(cache_section["mm_offset"], dtype=np.float64),
+            "t_index": np.asarray(cache_section["t_index"], dtype=np.int32),
+            "phi_index": np.asarray(cache_section["phi_index"], dtype=np.int32),
+            "phi_shift_deg": np.asarray(cache_section["phi_shift_deg"], dtype=np.float64),
         }
     return frozen_cache
 
@@ -151,6 +179,108 @@ def _freeze_ave_simc_event_cache(event_cache):
         "epsilon": np.asarray(event_cache["epsilon"], dtype=np.float64),
         "iter_weight": np.asarray(event_cache["iter_weight"], dtype=np.float64),
     }
+
+
+def _iter_yield_source_specs(data_event_cache, sub_event_cache, normfac_data, normfac_dummy, nWindows, scale_factor):
+    yield data_event_cache["prompt"], normfac_data
+    yield data_event_cache["rand"], -normfac_data / nWindows
+    yield data_event_cache["dummy"], -normfac_dummy
+    yield data_event_cache["dummy_rand"], normfac_dummy / nWindows
+
+    if sub_event_cache is None or scale_factor == 0.0:
+        return
+
+    yield sub_event_cache["prompt"], -scale_factor * normfac_data
+    yield sub_event_cache["rand"], scale_factor * normfac_data / nWindows
+    yield sub_event_cache["dummy"], scale_factor * normfac_dummy
+    yield sub_event_cache["dummy_rand"], -scale_factor * normfac_dummy / nWindows
+
+
+def _fill_yield_background_templates_for_bin(
+    template_hists,
+    source_specs,
+    mm_reference_hist,
+    mm_background_weights,
+    t_index,
+    phi_index,
+    particle_type,
+    pol,
+    residual_weights=None,
+):
+    for cache_section, coeff in source_specs:
+        if cache_section is None or coeff == 0.0:
+            continue
+
+        for idx, adj_mm in enumerate(cache_section["adj_MM"]):
+            if not cache_section["allcuts"][idx]:
+                continue
+            if int(cache_section["t_index"][idx]) != t_index or int(cache_section["phi_index"][idx]) != phi_index:
+                continue
+
+            event_weight = coeff * mm_background_weight_from_value(
+                adj_mm,
+                mm_reference_hist,
+                mm_background_weights,
+                residual_weights=residual_weights,
+            )
+            if event_weight == 0.0:
+                continue
+
+            adj_t = cache_section["adj_t"][idx]
+            q2 = cache_section["Q2"][idx]
+            w = cache_section["W"][idx]
+
+            template_hists["t"].Fill(adj_t, event_weight)
+            template_hists["Q2"].Fill(q2, event_weight)
+            template_hists["W"].Fill(w, event_weight)
+
+            theta_cm_deg = calculate_theta_cm_deg(particle_type, pol, w, q2, adj_t)
+            if math.isfinite(theta_cm_deg):
+                template_hists["theta_cm"].Fill(theta_cm_deg, event_weight)
+
+
+def _subtract_yield_mm_background_for_bin(
+    hist_bin_dict,
+    j,
+    k,
+    mm_reference_hist,
+    background_hist,
+    data_event_cache,
+    sub_event_cache,
+    normfac_data,
+    normfac_dummy,
+    nWindows,
+    scale_factor,
+    particle_type,
+    pol,
+    residual_weights=None,
+):
+    mm_background_weights = build_mm_background_weights(mm_reference_hist, background_hist)
+    template_hists = {
+        "t": clone_reset_hist(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)], "_bg_template"),
+        "Q2": clone_reset_hist(hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)], "_bg_template"),
+        "W": clone_reset_hist(hist_bin_dict["H_W_DATA_{}_{}".format(j, k)], "_bg_template"),
+        "theta_cm": clone_reset_hist(hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)], "_bg_template"),
+    }
+
+    _fill_yield_background_templates_for_bin(
+        template_hists,
+        _iter_yield_source_specs(data_event_cache, sub_event_cache, normfac_data, normfac_dummy, nWindows, scale_factor),
+        mm_reference_hist,
+        mm_background_weights,
+        j,
+        k,
+        particle_type,
+        pol,
+        residual_weights=residual_weights,
+    )
+
+    hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(template_hists["t"], -1)
+    hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(template_hists["Q2"], -1)
+    hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(template_hists["W"], -1)
+    hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(template_hists["theta_cm"], -1)
+
+    return mm_background_weights
 
 
 def _init_hist_group_matrices(names, n_t, n_phi):
@@ -215,6 +345,9 @@ def _process_yield_data_tree(
                 allcuts,
                 nommcuts,
                 mm_offset,
+                t_index=t_index if t_index is not None else -1,
+                phi_index=phi_index if phi_index is not None else -1,
+                phi_shift_deg=phi_shift,
             )
 
         if t_index is None or phi_index is None:
@@ -298,6 +431,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     processed_dict = {}
     support_hist_dict = _init_hist_group_matrices(("Q2", "W", "theta_cm", "mm"), len(t_bins) - 1, len(phi_bins) - 1)
     ave_event_cache = _init_ave_event_cache()
+    sub_event_cache = None
     
     OutFilename = inpDict["OutFilename"] 
 
@@ -560,6 +694,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
+        sub_event_cache = subDict.get("_sub_event_cache")
         
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
@@ -750,6 +885,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # ---- Statistic‑scale for this (t,phi) bin ----------------
             inpDict["bg_stat_scale1"] = 0.50
             # ----------------------------------------------------------------
+            residual_bg_weights1 = None
 
             if inpDict["bg_stat_scale1"] > 0.0:
                 # Fit background and subtract
@@ -763,10 +899,23 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     fit_name="Fit 1"
                 )
 
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit1_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit1_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit1_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit1_{}_{}".format(j, k)][3])
+                mm_stage1_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+                bg_weights1 = _subtract_yield_mm_background_for_bin(
+                    hist_bin_dict,
+                    j,
+                    k,
+                    mm_stage1_input,
+                    fitDict["background_fit1_{}_{}".format(j, k)][0],
+                    ave_event_cache,
+                    sub_event_cache,
+                    normfac_data,
+                    normfac_dummy,
+                    nWindows,
+                    arr_scale_factor[j][k],
+                    ParticleType,
+                    POL,
+                )
+                residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
                 hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][1], -1)
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][0], -1)                       
 
@@ -842,10 +991,23 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     fit_name="Fit 2"
                 )
 
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit2_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit2_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit2_{}_{}".format(j, k)][3])
-                hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Scale(fitDict["background_fit2_{}_{}".format(j, k)][3])
+                mm_stage2_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+                _subtract_yield_mm_background_for_bin(
+                    hist_bin_dict,
+                    j,
+                    k,
+                    mm_stage2_input,
+                    fitDict["background_fit2_{}_{}".format(j, k)][0],
+                    ave_event_cache,
+                    sub_event_cache,
+                    normfac_data,
+                    normfac_dummy,
+                    nWindows,
+                    arr_scale_factor[j][k],
+                    ParticleType,
+                    POL,
+                    residual_weights=residual_bg_weights1,
+                )
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit2_{}_{}".format(j, k)][0], -1)            
 
                 # Estimate fractional yield uncertainty from background_fit2 (covariance-propagated)
@@ -1065,11 +1227,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
             
-    return processed_dict, support_hist_dict, _freeze_ave_event_cache(ave_event_cache)
+    return processed_dict, support_hist_dict, _freeze_ave_event_cache(ave_event_cache), sub_event_cache
 
 def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
-    processed_dict, support_hist_dict, ave_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
     
     binned_dict = {}
 
@@ -1159,7 +1321,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
         binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
     binned_dict[kin_type]["support_hist_dict"] = support_hist_dict
 
-    return binned_dict, ave_event_cache
+    return binned_dict, ave_event_cache, sub_event_cache
 
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
@@ -1174,8 +1336,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_max = inpDict["mm_max"]
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict, ave_event_cache = bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    binned_dict, ave_event_cache, sub_event_cache = bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
     hist["_yield_data_event_cache"] = ave_event_cache
+    hist["_yield_sub_event_cache"] = sub_event_cache
     hist["_xsect_support_data"] = binned_dict[kin_type]["support_hist_dict"]
 
     binned_t_data = binned_dict[kin_type]["binned_t_data"]

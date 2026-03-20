@@ -54,6 +54,12 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range
+from mm_background_subtraction import (
+    build_mm_background_weights,
+    build_mm_residual_weights,
+    clone_reset_hist,
+    mm_background_weight_from_value,
+)
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -146,6 +152,161 @@ def _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
     if fills["p_aero"] is not None:
         fills["p_aero"](evt.P_aero_npeSum)
 
+
+def _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, weight, hists):
+    hists["hgcer_xy"].Fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, weight * evt.P_hgcer_npeSum)
+    hists["hgcer_x_mm"].Fill(evt.P_hgcer_xAtCer, adj_MM, weight * evt.P_hgcer_npeSum)
+    hists["hgcer_y_mm"].Fill(evt.P_hgcer_yAtCer, adj_MM, weight * evt.P_hgcer_npeSum)
+
+    phi_shift = evt.ph_q
+
+    hists["mm_ct"].Fill(adj_MM, evt.CTime_ROC1, weight)
+    hists["ct_beta"].Fill(evt.CTime_ROC1, evt.P_gtr_beta, weight)
+    hists["mm_beta"].Fill(adj_MM, evt.P_gtr_beta, weight)
+    hists["mm_h_cer"].Fill(adj_MM, evt.H_cer_npeSum, weight)
+    hists["mm_h_cal"].Fill(adj_MM, evt.H_cal_etottracknorm, weight)
+    hists["mm_p_cal"].Fill(adj_MM, evt.P_cal_etottracknorm, weight)
+    hists["mm_p_hgcer"].Fill(adj_MM, evt.P_hgcer_npeSum, weight)
+    hists["mm_p_aero"].Fill(adj_MM, evt.P_aero_npeSum, weight)
+    hists["phiq_t"].Fill(phi_shift, adj_t, weight)
+    hists["q2_w"].Fill(evt.Q2, evt.W, weight)
+    hists["q2_t"].Fill(evt.Q2, adj_t, weight)
+    hists["w_t"].Fill(evt.W, adj_t, weight)
+    hists["eps_t"].Fill(evt.epsilon, adj_t, weight)
+    hists["mm_t"].Fill(adj_MM, adj_t, weight)
+
+    hists["h_ct"].Fill(evt.CTime_ROC1, weight)
+    hists["h_ssxfp"].Fill(evt.ssxfp, weight)
+    hists["h_ssyfp"].Fill(evt.ssyfp, weight)
+    hists["h_ssxpfp"].Fill(evt.ssxpfp, weight)
+    hists["h_ssypfp"].Fill(evt.ssypfp, weight)
+    hists["h_ssdelta"].Fill(evt.ssdelta, weight)
+    hists["h_ssxptar"].Fill(evt.ssxptar, weight)
+    hists["h_ssyptar"].Fill(evt.ssyptar, weight)
+    hists["h_hsxfp"].Fill(evt.hsxfp, weight)
+    hists["h_hsyfp"].Fill(evt.hsyfp, weight)
+    hists["h_hsxpfp"].Fill(evt.hsxpfp, weight)
+    hists["h_hsypfp"].Fill(evt.hsypfp, weight)
+    hists["h_hsdelta"].Fill(adj_hsdelta, weight)
+    hists["h_hsxptar"].Fill(evt.hsxptar, weight)
+    hists["h_hsyptar"].Fill(evt.hsyptar, weight)
+    hists["h_ph_q"].Fill(phi_shift, weight)
+    hists["h_th_q"].Fill(evt.th_q, weight)
+    hists["h_ph_recoil"].Fill(evt.ph_recoil, weight)
+    hists["h_th_recoil"].Fill(evt.th_recoil, weight)
+    hists["h_pmiss"].Fill(evt.pmiss, weight)
+    hists["h_emiss"].Fill(evt.emiss, weight)
+    hists["h_pmx"].Fill(evt.pmx, weight)
+    hists["h_pmy"].Fill(evt.pmy, weight)
+    hists["h_pmz"].Fill(evt.pmz, weight)
+    hists["h_q2"].Fill(evt.Q2, weight)
+    hists["h_t"].Fill(adj_t, weight)
+    hists["h_w"].Fill(evt.W, weight)
+    hists["h_epsilon"].Fill(evt.epsilon, weight)
+    hists["h_cal"].Fill(evt.H_cal_etottracknorm, weight)
+    hists["h_cer"].Fill(evt.H_cer_npeSum, weight)
+    hists["p_cal"].Fill(evt.P_cal_etottracknorm, weight)
+    hists["p_hgcer"].Fill(evt.P_hgcer_npeSum, weight)
+    hists["p_aero"].Fill(evt.P_aero_npeSum, weight)
+
+
+def _create_rand_sub_bg_templates(target_hists):
+    return {
+        key: clone_reset_hist(hist, "_bg_template")
+        for key, hist in target_hists.items()
+        if hist is not None
+    }
+
+
+def _process_rand_sub_background_tree(
+    tree,
+    has_mm_shift,
+    has_t_shift,
+    tmin,
+    tmax,
+    template_hists,
+    particle_type,
+    hole_contains,
+    evaluate_event,
+    mm_min,
+    mm_max,
+    mm_reference_hist,
+    mm_background_weights,
+    source_coeff,
+    residual_weights=None,
+):
+    for evt in tree:
+        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
+        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+        mm_in_range = (mm_min <= adj_MM) and (adj_MM < mm_max)
+        t_in_range = (tmin <= adj_t) and (adj_t < tmax)
+
+        if particle_type == "kaon":
+            base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            allcuts = base_all_cuts and t_in_range and mm_in_range and not hole_rejected
+        else:
+            base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+            allcuts = base_all_cuts and t_in_range and mm_in_range
+
+        if not allcuts:
+            continue
+
+        event_weight = source_coeff * mm_background_weight_from_value(
+            adj_MM,
+            mm_reference_hist,
+            mm_background_weights,
+            residual_weights=residual_weights,
+        )
+        if event_weight == 0.0:
+            continue
+
+        _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, event_weight, template_hists)
+
+
+def _process_subtracted_particle_background_tree(
+    tree,
+    has_mm_shift,
+    mm_offset_data,
+    template_hists,
+    particle_type,
+    hole_contains,
+    mm_min,
+    mm_max,
+    mm_reference_hist,
+    mm_background_weights,
+    source_coeff,
+    residual_weights=None,
+):
+    for evt in tree:
+        base_all_cuts, _, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
+
+        if particle_type == "kaon":
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            pid_pass = evt.P_hgcer_npeSum > 2.0
+            allcuts = base_all_cuts and not hole_rejected and pid_pass
+        else:
+            allcuts = base_all_cuts
+
+        if not allcuts:
+            continue
+
+        try:
+            adj_MM = evt.MM_shift if has_mm_shift else evt.MM + mm_offset_data
+        except AttributeError:
+            adj_MM = evt.MM + mm_offset_data
+        adj_t = get_shifted_t(evt)
+
+        event_weight = source_coeff * mm_background_weight_from_value(
+            adj_MM,
+            mm_reference_hist,
+            mm_background_weights,
+            residual_weights=residual_weights,
+        )
+        if event_weight == 0.0:
+            continue
+
+        _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, event_weight, template_hists)
 
 def _process_rand_sub_tree(
     tree,
@@ -1994,12 +2155,78 @@ def rand_sub(phi_setting, inpDict):
         H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1) 
         _print_rand_timer("rand_sub pion subtraction {}".format(phi_setting), perf_counter() - stage_start)
 
+    data_bg_targets = {
+        "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_DATA,
+        "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_DATA,
+        "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_DATA,
+        "mm_ct": MM_vs_CoinTime_DATA,
+        "ct_beta": CoinTime_vs_beta_DATA,
+        "mm_beta": MM_vs_beta_DATA,
+        "mm_h_cer": MM_vs_H_cer_DATA,
+        "mm_h_cal": MM_vs_H_cal_DATA,
+        "mm_p_cal": MM_vs_P_cal_DATA,
+        "mm_p_hgcer": MM_vs_P_hgcer_DATA,
+        "mm_p_aero": MM_vs_P_aero_DATA,
+        "phiq_t": phiq_vs_t_DATA,
+        "q2_w": Q2_vs_W_DATA,
+        "q2_t": Q2_vs_t_DATA,
+        "w_t": W_vs_t_DATA,
+        "eps_t": EPS_vs_t_DATA,
+        "mm_t": MM_vs_t_DATA,
+        "h_ct": H_ct_DATA,
+        "h_ssxfp": H_ssxfp_DATA,
+        "h_ssyfp": H_ssyfp_DATA,
+        "h_ssxpfp": H_ssxpfp_DATA,
+        "h_ssypfp": H_ssypfp_DATA,
+        "h_ssdelta": H_ssdelta_DATA,
+        "h_ssxptar": H_ssxptar_DATA,
+        "h_ssyptar": H_ssyptar_DATA,
+        "h_hsxfp": H_hsxfp_DATA,
+        "h_hsyfp": H_hsyfp_DATA,
+        "h_hsxpfp": H_hsxpfp_DATA,
+        "h_hsypfp": H_hsypfp_DATA,
+        "h_hsdelta": H_hsdelta_DATA,
+        "h_hsxptar": H_hsxptar_DATA,
+        "h_hsyptar": H_hsyptar_DATA,
+        "h_ph_q": H_ph_q_DATA,
+        "h_th_q": H_th_q_DATA,
+        "h_ph_recoil": H_ph_recoil_DATA,
+        "h_th_recoil": H_th_recoil_DATA,
+        "h_pmiss": H_pmiss_DATA,
+        "h_emiss": H_emiss_DATA,
+        "h_pmx": H_pmx_DATA,
+        "h_pmy": H_pmy_DATA,
+        "h_pmz": H_pmz_DATA,
+        "h_q2": H_Q2_DATA,
+        "h_t": H_t_DATA,
+        "h_w": H_W_DATA,
+        "h_epsilon": H_epsilon_DATA,
+        "h_cal": H_cal_etottracknorm_DATA,
+        "h_cer": H_cer_npeSum_DATA,
+        "p_cal": P_cal_etottracknorm_DATA,
+        "p_hgcer": P_hgcer_npeSum_DATA,
+        "p_aero": P_aero_npeSum_DATA,
+    }
+
+    if ParticleType == "kaon":
+        sub_root_data = open_root_file(f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root")
+        sub_root_dummy = open_root_file(f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root")
+        TBRANCH_SUB_DATA = sub_root_data.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
+        TBRANCH_SUB_RAND = sub_root_data.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+        TBRANCH_SUB_DUMMY = sub_root_dummy.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
+        TBRANCH_SUB_DUMMY_RAND = sub_root_dummy.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+        has_mm_shift_sub_data = bool(TBRANCH_SUB_DATA.GetBranch("MM_shift"))
+        has_mm_shift_sub_rand = bool(TBRANCH_SUB_RAND.GetBranch("MM_shift"))
+        has_mm_shift_sub_dummy = bool(TBRANCH_SUB_DUMMY.GetBranch("MM_shift"))
+        has_mm_shift_sub_dummy_rand = bool(TBRANCH_SUB_DUMMY_RAND.GetBranch("MM_shift"))
+
     # Fit background and subtract
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
     inpDict["bg_stat_scale1"] = 0.50
     stage_start = perf_counter()
+    residual_bg_weights1 = None
 
     if  inpDict["bg_stat_scale1"] > 0.0:
         background_fit1 = bg_fit(phi_setting,
@@ -2011,60 +2238,138 @@ def rand_sub(phi_setting, inpDict):
                                 fit_name="Fit 1")
         # background_fit1[0] : scaled function   (use for subtraction)
         # background_fit1[1] : original function (use for drawing only)
+        mm_stage1_input = clone_reset_hist(H_MM_DATA, "_stage1_input")
+        mm_stage1_input.Add(H_MM_DATA)
+        bg_templates1 = _create_rand_sub_bg_templates(data_bg_targets)
+        bg_weights1 = build_mm_background_weights(mm_stage1_input, background_fit1[0])
 
-        # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
-        #P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(background_fit1[3])
-        #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(background_fit1[3])
-        #P_hgcer_xAtCer_vs_MM_DATA.Scale(background_fit1[3])
-        #P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(background_fit1[3])
-        #P_hgcer_yAtCer_vs_MM_DATA.Scale(background_fit1[3])
-        #P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(background_fit1[3])
-        #MM_vs_CoinTime_DATA.Scale(background_fit1[3])
-        #CoinTime_vs_beta_DATA.Scale(background_fit1[3])
-        #MM_vs_beta_DATA.Scale(background_fit1[3])
-        #MM_vs_H_cer_DATA.Scale(background_fit1[3])
-        #MM_vs_H_cal_DATA.Scale(background_fit1[3])
-        #MM_vs_P_cal_DATA.Scale(background_fit1[3])
-        #MM_vs_P_hgcer_DATA.Scale(background_fit1[3])
-        #MM_vs_P_aero_DATA.Scale(background_fit1[3])
-        #phiq_vs_t_DATA.Scale(background_fit1[3])
-        #Q2_vs_W_DATA.Scale(background_fit1[3])
-        #Q2_vs_t_DATA.Scale(background_fit1[3])
-        #W_vs_t_DATA.Scale(background_fit1[3])
-        #EPS_vs_t_DATA.Scale(background_fit1[3])
-        #MM_vs_t_DATA.Scale(background_fit1[3])
-        H_ssxfp_DATA.Scale(background_fit1[3])
-        H_ssyfp_DATA.Scale(background_fit1[3])
-        H_ssxpfp_DATA.Scale(background_fit1[3])
-        H_ssypfp_DATA.Scale(background_fit1[3])
-        H_hsxfp_DATA.Scale(background_fit1[3])
-        H_hsyfp_DATA.Scale(background_fit1[3])
-        H_hsxpfp_DATA.Scale(background_fit1[3])
-        H_hsypfp_DATA.Scale(background_fit1[3])
-        H_ssxptar_DATA.Scale(background_fit1[3])
-        H_ssyptar_DATA.Scale(background_fit1[3])
-        H_hsxptar_DATA.Scale(background_fit1[3])
-        H_hsyptar_DATA.Scale(background_fit1[3])
-        H_ssdelta_DATA.Scale(background_fit1[3])
-        H_hsdelta_DATA.Scale(background_fit1[3])
-        H_ph_q_DATA.Scale(background_fit1[3])
-        H_th_q_DATA.Scale(background_fit1[3])
-        H_ph_recoil_DATA.Scale(background_fit1[3])
-        H_th_recoil_DATA.Scale(background_fit1[3])
-        H_Q2_DATA.Scale(background_fit1[3])
-        H_W_DATA.Scale(background_fit1[3])
-        H_t_DATA.Scale(background_fit1[3])
-        H_epsilon_DATA.Scale(background_fit1[3])
+        _process_rand_sub_background_tree(
+            TBRANCH_DATA,
+            has_mm_shift_data,
+            has_t_shift_data,
+            tmin,
+            tmax,
+            bg_templates1,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage1_input,
+            bg_weights1,
+            norm_factor_data,
+        )
+        _process_rand_sub_background_tree(
+            TBRANCH_RAND,
+            has_mm_shift_rand,
+            has_t_shift_rand,
+            tmin,
+            tmax,
+            bg_templates1,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage1_input,
+            bg_weights1,
+            -norm_factor_data / nWindows,
+        )
+        _process_rand_sub_background_tree(
+            TBRANCH_DUMMY,
+            has_mm_shift_dummy,
+            has_t_shift_dummy,
+            tmin,
+            tmax,
+            bg_templates1,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage1_input,
+            bg_weights1,
+            -norm_factor_dummy,
+        )
+        _process_rand_sub_background_tree(
+            TBRANCH_DUMMY_RAND,
+            has_mm_shift_dummy_rand,
+            has_t_shift_dummy_rand,
+            tmin,
+            tmax,
+            bg_templates1,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage1_input,
+            bg_weights1,
+            norm_factor_dummy / nWindows,
+        )
+
+        if ParticleType == "kaon" and scale_factor != 0.0:
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_DATA,
+                has_mm_shift_sub_data,
+                MM_offset_DATA,
+                bg_templates1,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage1_input,
+                bg_weights1,
+                -scale_factor * norm_factor_data,
+            )
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_RAND,
+                has_mm_shift_sub_rand,
+                MM_offset_DATA,
+                bg_templates1,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage1_input,
+                bg_weights1,
+                scale_factor * norm_factor_data / nWindows,
+            )
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_DUMMY,
+                has_mm_shift_sub_dummy,
+                MM_offset_DATA,
+                bg_templates1,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage1_input,
+                bg_weights1,
+                scale_factor * norm_factor_dummy,
+            )
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_DUMMY_RAND,
+                has_mm_shift_sub_dummy_rand,
+                MM_offset_DATA,
+                bg_templates1,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage1_input,
+                bg_weights1,
+                -scale_factor * norm_factor_dummy / nWindows,
+            )
+
+        for key, hist in data_bg_targets.items():
+            hist.Add(bg_templates1[key], -1)
+
+        residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
         H_MM_fit2sub_DATA.Add(background_fit1[1], -1)
         H_MM_fit1sub_DATA.Add(background_fit1[1], -1)
         H_MM_DATA.Add(background_fit1[0], -1)
         H_MM_full_DATA.Add(background_fit1[1], -1)        
-        H_pmiss_DATA.Scale(background_fit1[3])
-        H_emiss_DATA.Scale(background_fit1[3])
-        H_pmx_DATA.Scale(background_fit1[3])
-        H_pmy_DATA.Scale(background_fit1[3])
-        H_pmz_DATA.Scale(background_fit1[3])
-        H_ct_DATA.Scale(background_fit1[3]) 
 
     # Fit background and subtract
     # --------------------------------------------------------------
@@ -2082,59 +2387,144 @@ def rand_sub(phi_setting, inpDict):
                                 fit_name="Fit 2")
         # background_fit2[0] : scaled function   (use for subtraction)
         # background_fit2[1] : original function (use for drawing only)
+        mm_stage2_input = clone_reset_hist(H_MM_DATA, "_stage2_input")
+        mm_stage2_input.Add(H_MM_DATA)
+        bg_templates2 = _create_rand_sub_bg_templates(data_bg_targets)
+        bg_weights2 = build_mm_background_weights(mm_stage2_input, background_fit2[0])
 
-        # RLT (4/16/2023): Commented out because they return empty sometimes, probably a TH2D vs TH1D issue
-        #P_hgcer_xAtCer_vs_yAtCer_DATA.Scale(background_fit2[3])
-        #P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Scale(background_fit2[3])
-        #P_hgcer_xAtCer_vs_MM_DATA.Scale(background_fit2[3])
-        #P_hgcer_nohole_xAtCer_vs_MM_DATA.Scale(background_fit2[3])
-        #P_hgcer_yAtCer_vs_MM_DATA.Scale(background_fit2[3])
-        #P_hgcer_nohole_yAtCer_vs_MM_DATA.Scale(background_fit2[3])
-        #MM_vs_CoinTime_DATA.Scale(background_fit2[3])
-        #CoinTime_vs_beta_DATA.Scale(background_fit2[3])
-        #MM_vs_beta_DATA.Scale(background_fit2[3])
-        #MM_vs_H_cer_DATA.Scale(background_fit2[3])
-        #MM_vs_H_cal_DATA.Scale(background_fit2[3])
-        #MM_vs_P_cal_DATA.Scale(background_fit2[3])
-        #MM_vs_P_hgcer_DATA.Scale(background_fit2[3])
-        #MM_vs_P_aero_DATA.Scale(background_fit2[3])
-        #phiq_vs_t_DATA.Scale(background_fit2[3])
-        #Q2_vs_W_DATA.Scale(background_fit2[3])
-        #Q2_vs_t_DATA.Scale(background_fit2[3])
-        #W_vs_t_DATA.Scale(background_fit2[3])
-        #EPS_vs_t_DATA.Scale(background_fit2[3])
-        #MM_vs_t_DATA.Scale(background_fit2[3])
-        H_ssxfp_DATA.Scale(background_fit2[3])
-        H_ssyfp_DATA.Scale(background_fit2[3])
-        H_ssxpfp_DATA.Scale(background_fit2[3])
-        H_ssypfp_DATA.Scale(background_fit2[3])
-        H_hsxfp_DATA.Scale(background_fit2[3])
-        H_hsyfp_DATA.Scale(background_fit2[3])
-        H_hsxpfp_DATA.Scale(background_fit2[3])
-        H_hsypfp_DATA.Scale(background_fit2[3])
-        H_ssxptar_DATA.Scale(background_fit2[3])
-        H_ssyptar_DATA.Scale(background_fit2[3])
-        H_hsxptar_DATA.Scale(background_fit2[3])
-        H_hsyptar_DATA.Scale(background_fit2[3])
-        H_ssdelta_DATA.Scale(background_fit2[3])
-        H_hsdelta_DATA.Scale(background_fit2[3])
-        H_ph_q_DATA.Scale(background_fit2[3])
-        H_th_q_DATA.Scale(background_fit2[3])
-        H_ph_recoil_DATA.Scale(background_fit2[3])
-        H_th_recoil_DATA.Scale(background_fit2[3])
-        H_Q2_DATA.Scale(background_fit2[3])
-        H_W_DATA.Scale(background_fit2[3])
-        H_t_DATA.Scale(background_fit2[3])
-        H_epsilon_DATA.Scale(background_fit2[3])
+        _process_rand_sub_background_tree(
+            TBRANCH_DATA,
+            has_mm_shift_data,
+            has_t_shift_data,
+            tmin,
+            tmax,
+            bg_templates2,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage2_input,
+            bg_weights2,
+            norm_factor_data,
+            residual_weights=residual_bg_weights1,
+        )
+        _process_rand_sub_background_tree(
+            TBRANCH_RAND,
+            has_mm_shift_rand,
+            has_t_shift_rand,
+            tmin,
+            tmax,
+            bg_templates2,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage2_input,
+            bg_weights2,
+            -norm_factor_data / nWindows,
+            residual_weights=residual_bg_weights1,
+        )
+        _process_rand_sub_background_tree(
+            TBRANCH_DUMMY,
+            has_mm_shift_dummy,
+            has_t_shift_dummy,
+            tmin,
+            tmax,
+            bg_templates2,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage2_input,
+            bg_weights2,
+            -norm_factor_dummy,
+            residual_weights=residual_bg_weights1,
+        )
+        _process_rand_sub_background_tree(
+            TBRANCH_DUMMY_RAND,
+            has_mm_shift_dummy_rand,
+            has_t_shift_dummy_rand,
+            tmin,
+            tmax,
+            bg_templates2,
+            ParticleType,
+            hole_contains,
+            evaluate_data_event,
+            mm_min,
+            mm_max,
+            mm_stage2_input,
+            bg_weights2,
+            norm_factor_dummy / nWindows,
+            residual_weights=residual_bg_weights1,
+        )
+
+        if ParticleType == "kaon" and scale_factor != 0.0:
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_DATA,
+                has_mm_shift_sub_data,
+                MM_offset_DATA,
+                bg_templates2,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage2_input,
+                bg_weights2,
+                -scale_factor * norm_factor_data,
+                residual_weights=residual_bg_weights1,
+            )
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_RAND,
+                has_mm_shift_sub_rand,
+                MM_offset_DATA,
+                bg_templates2,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage2_input,
+                bg_weights2,
+                scale_factor * norm_factor_data / nWindows,
+                residual_weights=residual_bg_weights1,
+            )
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_DUMMY,
+                has_mm_shift_sub_dummy,
+                MM_offset_DATA,
+                bg_templates2,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage2_input,
+                bg_weights2,
+                scale_factor * norm_factor_dummy,
+                residual_weights=residual_bg_weights1,
+            )
+            _process_subtracted_particle_background_tree(
+                TBRANCH_SUB_DUMMY_RAND,
+                has_mm_shift_sub_dummy_rand,
+                MM_offset_DATA,
+                bg_templates2,
+                ParticleType,
+                hole_contains,
+                mm_min,
+                mm_max,
+                mm_stage2_input,
+                bg_weights2,
+                -scale_factor * norm_factor_dummy / nWindows,
+                residual_weights=residual_bg_weights1,
+            )
+
+        for key, hist in data_bg_targets.items():
+            hist.Add(bg_templates2[key], -1)
+
         H_MM_fit2sub_DATA.Add(background_fit2[1], -1)
         H_MM_DATA.Add(background_fit2[0], -1)
         H_MM_full_DATA.Add(background_fit2[1], -1)
-        H_pmiss_DATA.Scale(background_fit2[3])
-        H_emiss_DATA.Scale(background_fit2[3])
-        H_pmx_DATA.Scale(background_fit2[3])
-        H_pmy_DATA.Scale(background_fit2[3])
-        H_pmz_DATA.Scale(background_fit2[3])
-        H_ct_DATA.Scale(background_fit2[3])     
     _print_rand_timer("rand_sub background fits {}".format(phi_setting), perf_counter() - stage_start)
 
     stage_start = perf_counter()

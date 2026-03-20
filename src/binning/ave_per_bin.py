@@ -57,6 +57,12 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist
+from mm_background_subtraction import (
+    build_mm_background_weights,
+    build_mm_residual_weights,
+    clone_reset_hist,
+    mm_background_weight_from_value,
+)
 
 ##################################################################################################################################################
 
@@ -103,6 +109,101 @@ def _fill_cached_ave_simc(cache_section, hist_group, t_bins):
         hist_group["Q2"][t_index].Fill(cache_section["Q2"][idx], iter_weight)
         hist_group["W"][t_index].Fill(cache_section["W"][idx], iter_weight)
         hist_group["epsilon"][t_index].Fill(cache_section["epsilon"][idx], iter_weight)
+
+
+def _iter_ave_source_specs(data_event_cache, sub_event_cache, normfac_data, normfac_dummy, nWindows, scale_factor):
+    yield data_event_cache["prompt"], normfac_data
+    yield data_event_cache["rand"], -normfac_data / nWindows
+    yield data_event_cache["dummy"], -normfac_dummy
+    yield data_event_cache["dummy_rand"], normfac_dummy / nWindows
+
+    if sub_event_cache is None or scale_factor == 0.0:
+        return
+
+    yield sub_event_cache["prompt"], -scale_factor * normfac_data
+    yield sub_event_cache["rand"], scale_factor * normfac_data / nWindows
+    yield sub_event_cache["dummy"], scale_factor * normfac_dummy
+    yield sub_event_cache["dummy_rand"], -scale_factor * normfac_dummy / nWindows
+
+
+def _fill_ave_background_templates_for_tbin(
+    template_hists,
+    source_specs,
+    mm_reference_hist,
+    mm_background_weights,
+    t_bins,
+    t_index,
+    residual_weights=None,
+):
+    for cache_section, coeff in source_specs:
+        if cache_section is None or coeff == 0.0:
+            continue
+
+        for idx, adj_mm in enumerate(cache_section["adj_MM"]):
+            if not cache_section["allcuts"][idx]:
+                continue
+
+            if "t_index" in cache_section:
+                event_t_index = int(cache_section["t_index"][idx])
+            else:
+                event_t_index = find_bin_index(cache_section["adj_t"][idx], t_bins)
+
+            if event_t_index != t_index:
+                continue
+
+            event_weight = coeff * mm_background_weight_from_value(
+                adj_mm,
+                mm_reference_hist,
+                mm_background_weights,
+                residual_weights=residual_weights,
+            )
+            if event_weight == 0.0:
+                continue
+
+            template_hists["Q2"].Fill(cache_section["Q2"][idx], event_weight)
+            template_hists["W"].Fill(cache_section["W"][idx], event_weight)
+            template_hists["t"].Fill(cache_section["adj_t"][idx], event_weight)
+            template_hists["epsilon"].Fill(cache_section["epsilon"][idx], event_weight)
+
+
+def _subtract_ave_mm_background_for_tbin(
+    hist_bin_dict,
+    j,
+    mm_reference_hist,
+    background_hist,
+    data_event_cache,
+    sub_event_cache,
+    normfac_data,
+    normfac_dummy,
+    nWindows,
+    scale_factor,
+    t_bins,
+    residual_weights=None,
+):
+    mm_background_weights = build_mm_background_weights(mm_reference_hist, background_hist)
+    template_hists = {
+        "Q2": clone_reset_hist(hist_bin_dict["H_Q2_DATA_{}".format(j)], "_bg_template"),
+        "W": clone_reset_hist(hist_bin_dict["H_W_DATA_{}".format(j)], "_bg_template"),
+        "t": clone_reset_hist(hist_bin_dict["H_t_DATA_{}".format(j)], "_bg_template"),
+        "epsilon": clone_reset_hist(hist_bin_dict["H_epsilon_DATA_{}".format(j)], "_bg_template"),
+    }
+
+    _fill_ave_background_templates_for_tbin(
+        template_hists,
+        _iter_ave_source_specs(data_event_cache, sub_event_cache, normfac_data, normfac_dummy, nWindows, scale_factor),
+        mm_reference_hist,
+        mm_background_weights,
+        t_bins,
+        j,
+        residual_weights=residual_weights,
+    )
+
+    hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(template_hists["Q2"], -1)
+    hist_bin_dict["H_W_DATA_{}".format(j)].Add(template_hists["W"], -1)
+    hist_bin_dict["H_t_DATA_{}".format(j)].Add(template_hists["t"], -1)
+    hist_bin_dict["H_epsilon_DATA_{}".format(j)].Add(template_hists["epsilon"], -1)
+
+    return mm_background_weights
 
 
 def _process_ave_data_tree(
@@ -194,7 +295,7 @@ def _process_ave_simc_tree(
         hist_group["epsilon"][t_index].Fill(evt.epsilon, evt.iter_weight)
 
 
-def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None):
+def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None, sub_event_cache=None):
 
     processed_dict = {}
 
@@ -612,6 +713,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
         inpDict["bg_stat_scale1"] = 0.50        
+        residual_bg_weights1 = None
         
         if inpDict["bg_stat_scale1"] > 0.0:
             fitDict["background_data_fit1_{}".format(j)] = bg_fit(
@@ -625,10 +727,30 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             )
             # ----------------------------------------------------------------
 
-            hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
+            can_subtract_with_templates = event_cache is not None and (ParticleType != "kaon" or sub_event_cache is not None)
+            if can_subtract_with_templates:
+                mm_stage1_input = hist_bin_dict["H_MM_DATA_{}".format(j)].Clone("{}_stage1_input".format(hist_bin_dict["H_MM_DATA_{}".format(j)].GetName()))
+                if hasattr(mm_stage1_input, "SetDirectory"):
+                    mm_stage1_input.SetDirectory(0)
+                bg_weights1 = _subtract_ave_mm_background_for_tbin(
+                    hist_bin_dict,
+                    j,
+                    mm_stage1_input,
+                    fitDict["background_data_fit1_{}".format(j)][0],
+                    event_cache,
+                    sub_event_cache,
+                    norm_factor_data,
+                    norm_factor_dummy,
+                    nWindows,
+                    scale_factor if ParticleType == "kaon" else 0.0,
+                    t_bins,
+                )
+                residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
+            else:
+                hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
+                hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
+                hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
+                hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
             hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][1], -1)
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)  
 
@@ -670,10 +792,30 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             )
             # ----------------------------------------------------------------
 
-            hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-            hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
+            can_subtract_with_templates = event_cache is not None and (ParticleType != "kaon" or sub_event_cache is not None)
+            if can_subtract_with_templates:
+                mm_stage2_input = hist_bin_dict["H_MM_DATA_{}".format(j)].Clone("{}_stage2_input".format(hist_bin_dict["H_MM_DATA_{}".format(j)].GetName()))
+                if hasattr(mm_stage2_input, "SetDirectory"):
+                    mm_stage2_input.SetDirectory(0)
+                _subtract_ave_mm_background_for_tbin(
+                    hist_bin_dict,
+                    j,
+                    mm_stage2_input,
+                    fitDict["background_data_fit2_{}".format(j)][0],
+                    event_cache,
+                    sub_event_cache,
+                    norm_factor_data,
+                    norm_factor_dummy,
+                    nWindows,
+                    scale_factor if ParticleType == "kaon" else 0.0,
+                    t_bins,
+                    residual_weights=residual_bg_weights1,
+                )
+            else:
+                hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
+                hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
+                hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
+                hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)  
 
             # Remove histograms with less than event_threshold entries and negative integrals
@@ -746,9 +888,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             
     return processed_dict
 
-def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None):
+def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None, sub_event_cache=None):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache)
+    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache, sub_event_cache=sub_event_cache)
     
     binned_dict = {}
 
@@ -867,7 +1009,8 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     event_cache = hist.get("_yield_data_event_cache")
-    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache)
+    sub_event_cache = hist.get("_yield_sub_event_cache")
+    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache, sub_event_cache=sub_event_cache)
 
     group_dict = {}
     bad_bins = set()  # <-- collect (tbin_index, phibin_index) that have sem==1000.0 anywhere
@@ -987,6 +1130,7 @@ def ave_per_bin_data(histlist, inpDict):
         aveDict[hist["phi_setting"]] = {}
         binned_dict = calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict)
         hist.pop("_yield_data_event_cache", None)
+        hist.pop("_yield_sub_event_cache", None)
         for kin_type in kinematic_types:
             aveDict[hist["phi_setting"]][kin_type] = binned_dict[kin_type]
                 

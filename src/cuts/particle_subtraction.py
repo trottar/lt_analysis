@@ -68,6 +68,56 @@ def _print_sub_timer(label, elapsed, total_events=None):
         print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
 
 
+def _init_sub_event_cache():
+    cache_template = {
+        "adj_t": [],
+        "adj_MM": [],
+        "Q2": [],
+        "W": [],
+        "epsilon": [],
+        "allcuts": [],
+        "nommcuts": [],
+        "t_index": [],
+        "phi_index": [],
+    }
+    return {
+        key: {name: values.copy() for name, values in cache_template.items()}
+        for key in ("prompt", "dummy", "rand", "dummy_rand")
+    }
+
+
+def _append_sub_event(cache_section, adj_t, adj_MM, q2, w, epsilon, allcuts, nommcuts, t_index=-1, phi_index=-1):
+    if not (allcuts or nommcuts):
+        return
+
+    cache_section["adj_t"].append(adj_t)
+    cache_section["adj_MM"].append(adj_MM)
+    cache_section["Q2"].append(q2)
+    cache_section["W"].append(w)
+    cache_section["epsilon"].append(epsilon)
+    cache_section["allcuts"].append(bool(allcuts))
+    cache_section["nommcuts"].append(bool(nommcuts))
+    cache_section["t_index"].append(int(t_index))
+    cache_section["phi_index"].append(int(phi_index))
+
+
+def _freeze_sub_event_cache(event_cache):
+    frozen_cache = {}
+    for cache_key, cache_section in event_cache.items():
+        frozen_cache[cache_key] = {
+            "adj_t": np.asarray(cache_section["adj_t"], dtype=np.float64),
+            "adj_MM": np.asarray(cache_section["adj_MM"], dtype=np.float64),
+            "Q2": np.asarray(cache_section["Q2"], dtype=np.float64),
+            "W": np.asarray(cache_section["W"], dtype=np.float64),
+            "epsilon": np.asarray(cache_section["epsilon"], dtype=np.float64),
+            "allcuts": np.asarray(cache_section["allcuts"], dtype=bool),
+            "nommcuts": np.asarray(cache_section["nommcuts"], dtype=bool),
+            "t_index": np.asarray(cache_section["t_index"], dtype=np.int32),
+            "phi_index": np.asarray(cache_section["phi_index"], dtype=np.int32),
+        }
+    return frozen_cache
+
+
 def _fill_particle_subtraction_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
     fills["hgcer_xy"](evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
     fills["hgcer_x_mm"](evt.P_hgcer_xAtCer, adj_MM, evt.P_hgcer_npeSum)
@@ -1723,6 +1773,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     ################################################################################################################################################
 
     hist_dict = {}
+    sub_event_cache = _init_sub_event_cache()
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -1841,6 +1892,18 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= adj_t < t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
+                            _append_sub_event(
+                                sub_event_cache["prompt"],
+                                adj_t,
+                                adj_MM,
+                                evt.Q2,
+                                evt.W,
+                                evt.epsilon,
+                                True,
+                                NOMMCUTS,
+                                t_index=j,
+                                phi_index=k,
+                            )
                             hist_dict["H_Q2_DATA_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_DATA_{}_{}".format(j, k)].Fill(evt.W)
                             if math.isfinite(theta_cm_deg):
@@ -1898,6 +1961,18 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= adj_t < t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
+                            _append_sub_event(
+                                sub_event_cache["dummy"],
+                                adj_t,
+                                adj_MM,
+                                evt.Q2,
+                                evt.W,
+                                evt.epsilon,
+                                True,
+                                NOMMCUTS,
+                                t_index=j,
+                                phi_index=k,
+                            )
                             hist_dict["H_Q2_DUMMY_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_DUMMY_{}_{}".format(j, k)].Fill(evt.W)
                             if math.isfinite(theta_cm_deg):
@@ -1955,6 +2030,18 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= adj_t < t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
+                            _append_sub_event(
+                                sub_event_cache["rand"],
+                                adj_t,
+                                adj_MM,
+                                evt.Q2,
+                                evt.W,
+                                evt.epsilon,
+                                True,
+                                NOMMCUTS,
+                                t_index=j,
+                                phi_index=k,
+                            )
                             hist_dict["H_Q2_RAND_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_RAND_{}_{}".format(j, k)].Fill(evt.W)
                             if math.isfinite(theta_cm_deg):
@@ -2013,6 +2100,18 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                 for k in range(len(phi_bins)-1):
                     if t_bins[j] <= adj_t < t_bins[j+1]:
                         if phi_bins[k] <= (phi_shift)*(180 / math.pi) < phi_bins[k+1]:
+                            _append_sub_event(
+                                sub_event_cache["dummy_rand"],
+                                adj_t,
+                                adj_MM,
+                                evt.Q2,
+                                evt.W,
+                                evt.epsilon,
+                                True,
+                                NOMMCUTS,
+                                t_index=j,
+                                phi_index=k,
+                            )
                             hist_dict["H_Q2_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.W)
                             if math.isfinite(theta_cm_deg):
@@ -2083,3 +2182,5 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)],-1)
+
+    subDict["_sub_event_cache"] = _freeze_sub_event_cache(sub_event_cache)
