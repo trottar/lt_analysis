@@ -271,6 +271,8 @@ def _process_subtracted_particle_background_tree(
     template_hists,
     particle_type,
     hole_contains,
+    evaluate_event,
+    shifted_t_getter,
     mm_min,
     mm_max,
     mm_reference_hist,
@@ -279,7 +281,7 @@ def _process_subtracted_particle_background_tree(
     residual_weights=None,
 ):
     for evt in tree:
-        base_all_cuts, _, adj_hsdelta = evaluate_data_event(evt, mm_min, mm_max)
+        base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
 
         if particle_type == "kaon":
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
@@ -295,7 +297,7 @@ def _process_subtracted_particle_background_tree(
             adj_MM = evt.MM_shift if has_mm_shift else evt.MM + mm_offset_data
         except AttributeError:
             adj_MM = evt.MM + mm_offset_data
-        adj_t = get_shifted_t(evt)
+        adj_t = shifted_t_getter(evt)
 
         event_weight = source_coeff * mm_background_weight_from_value(
             adj_MM,
@@ -2316,6 +2318,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates1,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
@@ -2329,6 +2333,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates1,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
@@ -2342,6 +2348,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates1,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
@@ -2355,6 +2363,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates1,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
@@ -2469,6 +2479,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates2,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
@@ -2483,6 +2495,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates2,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
@@ -2497,6 +2511,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates2,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
@@ -2511,6 +2527,8 @@ def rand_sub(phi_setting, inpDict):
                 bg_templates2,
                 ParticleType,
                 hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
