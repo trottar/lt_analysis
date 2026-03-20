@@ -1173,6 +1173,10 @@ for f in output_file_lst:
             f_new = f.replace(OUTPATH,new_dir+"/root")
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
+        if ".npz" in f:
+            f_new = f.replace(OUTPATH,new_dir)
+            print("\nCopying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
         f_arr = f.split("/")
         f_tmp = f_arr.pop()

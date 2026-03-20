@@ -283,14 +283,20 @@ for i,row in file_df_dict['setting_df'].iterrows():
 ################################################################################################################################################
 
 def load_xsect_support(eps_tag):
-    support_path = os.path.join(
-        OUTPATH,
-        "{}_xsect_support_Q{}W{}_{}.npz".format(ParticleType, Q2, W, eps_tag),
+    support_name = "{}_xsect_support_Q{}W{}_{}.npz".format(ParticleType, Q2, W, eps_tag)
+    support_candidates = (
+        os.path.join(OUTPATH, support_name),
+        os.path.join(LTANAPATH, "src", ParticleType, support_name),
     )
-    if not os.path.exists(support_path):
-        print("Optional xsect support file not found: {}".format(support_path))
-        return None
-    return np.load(support_path)
+    for support_path in support_candidates:
+        if os.path.exists(support_path):
+            return np.load(support_path)
+    raise FileNotFoundError(
+        "Required xsect support file not found for {}. Looked in: {}".format(
+            eps_tag,
+            ", ".join(support_candidates),
+        )
+    )
 
 
 def get_support_matrix(support, kind, variable, setting, field):
