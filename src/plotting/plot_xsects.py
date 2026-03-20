@@ -218,7 +218,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'W', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.Q{}W{}.dat".format(ParticleType, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'th_pos', "tbin"])        
+                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'theta_cm', "tbin"]).sort_values(by='tbin').reset_index(drop=True)
         
         if row['EPSVAL'] == float(LOEPS):
             file_df_dict['aver_loeps'] = file_to_df( \
@@ -281,6 +281,221 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
             
 ################################################################################################################################################
+
+def load_xsect_support(eps_tag):
+    support_path = os.path.join(
+        OUTPATH,
+        "{}_xsect_support_Q{}W{}_{}.npz".format(ParticleType, Q2, W, eps_tag),
+    )
+    if not os.path.exists(support_path):
+        print("Optional xsect support file not found: {}".format(support_path))
+        return None
+    return np.load(support_path)
+
+
+def get_support_matrix(support, kind, variable, setting, field):
+    return support["{}_{}_{}_{}".format(kind, variable, setting.lower(), field)]
+
+
+def sum_hist_over_phi(values, errors):
+    return np.sum(values, axis=0), np.sqrt(np.sum(np.square(errors), axis=0))
+
+
+def combine_hist_over_settings(support, kind, variable, settings, t_index):
+    values_total = None
+    errors_sq_total = None
+
+    for setting in settings:
+        values = get_support_matrix(support, kind, variable, setting, "values")[t_index]
+        errors = get_support_matrix(support, kind, variable, setting, "errors")[t_index]
+        summed_values, summed_errors = sum_hist_over_phi(values, errors)
+        if values_total is None:
+            values_total = np.zeros_like(summed_values)
+            errors_sq_total = np.zeros_like(summed_errors)
+        values_total += summed_values
+        errors_sq_total += np.square(summed_errors)
+
+    return values_total, np.sqrt(errors_sq_total)
+
+
+def combine_map_over_settings(support, kind, variable, settings, t_index):
+    values_total = None
+    for setting in settings:
+        values = get_support_matrix(support, kind, variable, setting, "values")[t_index]
+        if values_total is None:
+            values_total = np.zeros_like(values)
+        values_total += values
+    return values_total
+
+
+def plot_hist_overlay(ax, edges, data_values, data_errors, simc_values, simc_errors, title, xlabel, central_line=None):
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    ax.errorbar(
+        centers,
+        data_values,
+        yerr=np.maximum(data_errors, 0.0),
+        fmt='o',
+        color='black',
+        markersize=3,
+        markerfacecolor='none',
+        capsize=2,
+        label='Data',
+    )
+    ax.step(centers, simc_values, where='mid', color='tab:green', linewidth=1.5, label='SIMC')
+    if central_line is not None and np.isfinite(central_line):
+        ax.axvline(central_line, color='tab:red', linestyle='--', linewidth=1.2, label='Central Value')
+    ax.set_title(title, fontsize=16)
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel('Counts', fontsize=14)
+    ax.tick_params(axis='both', labelsize=12)
+    ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+    ax.legend(fontsize=10)
+
+
+def plot_phi_map(fig, ax, phi_edges, y_edges, values, title, ylabel):
+    mesh = ax.pcolormesh(phi_edges, y_edges, values.T, shading='auto')
+    ax.set_title(title, fontsize=14)
+    ax.set_xlabel('$\\phi$ (deg)', fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.tick_params(axis='both', labelsize=12)
+    fig.colorbar(mesh, ax=ax)
+
+
+def append_xsect_support_pages(pdf, support, epsilon_label):
+    if support is None:
+        return
+
+    settings = [str(setting) for setting in support["settings"]]
+    aveline = file_df_dict["avek_file"]
+    central_q2 = aveline["Q2"].to_numpy()
+    central_w = aveline["W"].to_numpy()
+    central_theta = aveline["theta_cm"].to_numpy()
+
+    mm_edges = support["mm_edges"]
+    q2_edges = support["q2_edges"]
+    w_edges = support["w_edges"]
+    theta_edges = support["theta_cm_edges"]
+    phi_edges = support["phi_bins"]
+
+    for k in range(NumtBins):
+        fig, axes = plt.subplots(len(settings), 1, figsize=(12, max(4, 3.5 * len(settings))), sharex=True)
+        axes = np.atleast_1d(axes)
+        for idx, setting in enumerate(settings):
+            data_values = get_support_matrix(support, "data", "mm", setting, "values")[k]
+            data_errors = get_support_matrix(support, "data", "mm", setting, "errors")[k]
+            simc_values = get_support_matrix(support, "simc", "mm", setting, "values")[k]
+            simc_errors = get_support_matrix(support, "simc", "mm", setting, "errors")[k]
+            data_sum, data_err_sum = sum_hist_over_phi(data_values, data_errors)
+            simc_sum, simc_err_sum = sum_hist_over_phi(simc_values, simc_errors)
+            plot_hist_overlay(
+                axes[idx],
+                mm_edges,
+                data_sum,
+                data_err_sum,
+                simc_sum,
+                simc_err_sum,
+                "{} {} MM, {} setting, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), setting, t_bin_centers[k]),
+                'MM',
+            )
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+
+    for k in range(NumtBins):
+        data_mm, data_mm_err = combine_hist_over_settings(support, "data", "mm", settings, k)
+        simc_mm, simc_mm_err = combine_hist_over_settings(support, "simc", "mm", settings, k)
+        fig, ax = plt.subplots(figsize=(12, 8))
+        plot_hist_overlay(
+            ax,
+            mm_edges,
+            data_mm,
+            data_mm_err,
+            simc_mm,
+            simc_mm_err,
+            "{} {} MM, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), t_bin_centers[k]),
+            'MM',
+        )
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+
+    one_d_pages = (
+        ("q2", q2_edges, central_q2, '$Q^2$'),
+        ("w", w_edges, central_w, 'W'),
+        ("theta_cm", theta_edges, central_theta, '$\\theta_{cm}$ (deg)'),
+    )
+    for variable, edges, central_values, xlabel in one_d_pages:
+        for k in range(NumtBins):
+            data_values, data_errors = combine_hist_over_settings(support, "data", variable, settings, k)
+            simc_values, simc_errors = combine_hist_over_settings(support, "simc", variable, settings, k)
+            fig, ax = plt.subplots(figsize=(12, 8))
+            plot_hist_overlay(
+                ax,
+                edges,
+                data_values,
+                data_errors,
+                simc_values,
+                simc_errors,
+                "{} {} {}, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), xlabel, t_bin_centers[k]),
+                xlabel,
+                central_line=central_values[k],
+            )
+            plt.tight_layout()
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
+
+    for k in range(NumtBins):
+        fig, axes = plt.subplots(len(settings), 2, figsize=(14, max(4, 3.5 * len(settings))), sharex=True, sharey=True)
+        axes = np.atleast_2d(axes)
+        for idx, setting in enumerate(settings):
+            data_map = get_support_matrix(support, "data", "mm", setting, "values")[k]
+            simc_map = get_support_matrix(support, "simc", "mm", setting, "values")[k]
+            plot_phi_map(fig, axes[idx, 0], phi_edges, mm_edges, data_map, "{} {} MM vs $\\phi$, {} Data, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers[k]), 'MM')
+            plot_phi_map(fig, axes[idx, 1], phi_edges, mm_edges, simc_map, "{} {} MM vs $\\phi$, {} SIMC, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers[k]), 'MM')
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+
+    two_d_pages = (
+        ("mm", mm_edges, 'MM'),
+        ("q2", q2_edges, '$Q^2$'),
+        ("w", w_edges, 'W'),
+        ("theta_cm", theta_edges, '$\\theta_{cm}$ (deg)'),
+    )
+    for variable, edges, ylabel in two_d_pages:
+        for k in range(NumtBins):
+            data_map = combine_map_over_settings(support, "data", variable, settings, k)
+            simc_map = combine_map_over_settings(support, "simc", variable, settings, k)
+            fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+            plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+            plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+            plt.tight_layout()
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
+
+    central_pages = (
+        ("Q2", central_q2, aveline["dQ2"].to_numpy(), '$Q^2$'),
+        ("W", central_w, aveline["dW"].to_numpy(), 'W'),
+        ("theta_cm", central_theta, None, '$\\theta_{cm}$ (deg)'),
+    )
+    for _, values, errors, ylabel in central_pages:
+        fig, ax = plt.subplots(figsize=(12, 8))
+        if errors is None:
+            ax.plot(t_bin_centers, values, marker='o', color='tab:red')
+        else:
+            ax.errorbar(t_bin_centers, values, yerr=np.maximum(errors, 0.0), marker='o', linestyle='None', color='tab:red', markerfacecolor='none', capsize=2)
+        ax.set_title("{} central {} vs t".format(epsilon_label, ylabel), fontsize=18)
+        ax.set_xlabel('-t', fontsize=14)
+        ax.set_ylabel(ylabel, fontsize=14)
+        ax.tick_params(axis='both', labelsize=12)
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5)
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+
+
+support_loeps = load_xsect_support("lowe")
+support_hieps = load_xsect_support("highe")
 
 # Create a PdfPages object to manage the PDF file
 with PdfPages(outputpdf) as pdf:
@@ -1143,5 +1358,8 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+
+    append_xsect_support_pages(pdf, support_loeps, "Low $\\epsilon$")
+    append_xsect_support_pages(pdf, support_hieps, "High $\\epsilon$")
 
     '''

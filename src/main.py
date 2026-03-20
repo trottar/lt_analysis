@@ -862,6 +862,7 @@ output_file_lst.append(outputpdf)
 
 sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
+from xsect_support import write_xsect_support
 
 yieldDict = {}
 stage_start = perf_counter()
@@ -870,6 +871,10 @@ record_stage_time("Step 6 data yields", stage_start)
 stage_start = perf_counter()
 yieldDict.update(find_yield_simc(histlist, inpDict))
 record_stage_time("Step 6 simc yields", stage_start)
+
+stage_start = perf_counter()
+write_xsect_support(histlist, inpDict, output_file_lst)
+record_stage_time("Step 6 xsect support", stage_start)
 #sys.exit(2)
 
 sys.path.append("binning")
