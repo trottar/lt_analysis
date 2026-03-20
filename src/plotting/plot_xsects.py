@@ -899,6 +899,9 @@ with PdfPages(outputpdf) as pdf:
 
         j+=1
 
+    append_xsect_support_pages(pdf, support_loeps, "Low $\\epsilon$")
+    append_xsect_support_pages(pdf, support_hieps, "High $\\epsilon$")
+
     '''
     # Create a figure with 4 subplots
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
@@ -1364,8 +1367,5 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
-
-    append_xsect_support_pages(pdf, support_loeps, "Low $\\epsilon$")
-    append_xsect_support_pages(pdf, support_hieps, "High $\\epsilon$")
 
     '''
