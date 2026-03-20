@@ -489,11 +489,16 @@ output_file_lst.append(outputpdf)
 
 # ***Grabbing data yield and average values from previous iteration rather than rebinning***
 sys.path.append("binning")
-from calculate_yield import grab_yield_data, find_yield_simc
+from calculate_yield import find_yield_data, grab_yield_data, find_yield_simc
+from xsect_support import write_xsect_support
 
 yieldDict = {}
 yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
+# Build data-side support histograms for the xsect PDF without changing
+# the iterative yield inputs, which still come from the previous iteration.
+find_yield_data(histlist, inpDict)
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
+write_xsect_support(histlist, inpDict, output_file_lst)
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio
