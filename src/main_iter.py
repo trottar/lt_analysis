@@ -574,6 +574,8 @@ for hist in histlist:
     for i, (key, val) in enumerate(hist.items()):
         # Progress bar
         Misc.progressBar(i, len(hist.items())-1,bar_length=25)
+        if key.startswith("_"):
+            continue
         if not is_root_obj(val):
             tmp_dict[key] = val
     tmp_lst.append(tmp_dict)
