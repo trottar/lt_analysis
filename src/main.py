@@ -319,7 +319,7 @@ def get_shift_theta_and_beam(phiset):
 
 def run_shift_script(simc_root, data_root, theta_cm_deg, beam_energy_gev):
     
-    print("\nRunning shift script for theta_cm = {:.2f} deg and beam energy = {:.2f} GeV".format(theta_cm_deg, beam_energy_gev))
+    print("\nRunning shift script for theta_cm = {:.3f} deg and beam energy = {:.3f} GeV".format(theta_cm_deg, beam_energy_gev))
 
     command = [
         "bash",
