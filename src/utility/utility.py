@@ -557,6 +557,12 @@ def hist_to_root(hist, file_name_or_root, directory_name, directory_cache=None):
 def custom_encoder(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.bool_):
+        return bool(obj)
     raise TypeError("Type not serializable")
 
 ################################################################################################################################################
