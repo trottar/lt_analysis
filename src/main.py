@@ -275,13 +275,13 @@ def get_shift_theta_and_beam(phiset):
             "run_nums": [run for run in runNumRight.split(" ") if run],
             "ptheta_vals": pThetaValRight,
             "beam_vals": EbeamValRight,
-            "sign": 1.0,
+            "sign": -1.0,
         },
         "Left": {
             "run_nums": [run for run in runNumLeft.split(" ") if run],
             "ptheta_vals": pThetaValLeft,
             "beam_vals": EbeamValLeft,
-            "sign": -1.0,
+            "sign": 1.0,
         },
         "Center": {
             "run_nums": [run for run in runNumCenter.split(" ") if run],
