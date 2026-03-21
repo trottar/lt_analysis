@@ -23,7 +23,7 @@
 *=======================================================================
 
       subroutine calc_tshift_kaon(q2g, wg, theta_cm_signed, mmshift,
-     *     tinc)
+     *     tincg)
 
       implicit none
 
@@ -35,7 +35,7 @@
       real*8 mmshift, tshift, tshiftg
       real*8 phix, thkplab0, thkplab1
       real*8 betacm, gammacm, pgamtemp, pkptemp
-      real*8 t0, t1, w, ang, q2g, wg, tinc, theta_cm_signed
+      real*8 t0, t1, w, ang, q2g, wg, tinc, tincg, theta_cm_signed
       real*8 thgam
 
 c     stuff for linux_suppl.inc
@@ -50,6 +50,8 @@ c     stuff for linux_suppl.inc
       mpg = mp/1000.d0
       mL  = 1115.683d0
       pi  = 3.14156d0
+
+      tinc = tincg * 1000.d0
 
 c     The analysis convention uses signed theta for left/right,
 c     but the t-channel calculation is always forward.

@@ -35,7 +35,7 @@ def run_t_shift_program(executable, q2, w, theta_cm_deg, mm_shift_apply, beam_en
         input="\n".join(input_lines) + "\n",
         capture_output=True,
         text=True,
-        check=True,
+        check=False,
     )
 
     if process.returncode != 0:

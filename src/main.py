@@ -317,7 +317,7 @@ def get_shift_theta_and_beam(phiset):
         theta_cm_deg = setting["sign"] * theta_delta
     '''
 
-    theta_cm_deg = float(ptheta_vals[chosen_index]) * math.pi / 180.0
+    theta_cm_deg = float(ptheta_vals[chosen_index])
 
     return theta_cm_deg, beam_energy_gev
 
