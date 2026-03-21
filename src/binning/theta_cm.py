@@ -28,7 +28,7 @@ def _select_target_recoil_mass_sq(pol):
     return MN, MN2, MP, MP2
 
 
-def calculate_theta_cm_rad(particle_type, pol, w, q2, minus_t):
+def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
     m3, m32 = _select_particle_mass_sq(particle_type)
     m2, m22, m4, m42 = _select_target_recoil_mass_sq(pol)
 
@@ -54,13 +54,28 @@ def calculate_theta_cm_rad(particle_type, pol, w, q2, minus_t):
         return float("nan")
 
     tmin = -((e1cm - e3cm) ** 2 - (p1cm - p3cm) ** 2)
-    sin_sq = (minus_t - tmin) / denom
+    sin_half_sq = (minus_t - tmin) / denom
 
-    if not math.isfinite(sin_sq):
+    if not math.isfinite(sin_half_sq):
         return float("nan")
 
-    sin_sq = min(max(sin_sq, 0.0), 1.0)
-    return 2.0 * math.asin(math.sqrt(sin_sq))
+    return min(max(sin_half_sq, 0.0), 1.0)
+
+
+def calculate_sin_theta_cm(particle_type, pol, w, q2, minus_t):
+    sin_half_sq = _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t)
+    if not math.isfinite(sin_half_sq):
+        return float("nan")
+
+    return 2.0 * math.sqrt(sin_half_sq * max(1.0 - sin_half_sq, 0.0))
+
+
+def calculate_theta_cm_rad(particle_type, pol, w, q2, minus_t):
+    sin_half_sq = _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t)
+    if not math.isfinite(sin_half_sq):
+        return float("nan")
+
+    return 2.0 * math.asin(math.sqrt(sin_half_sq))
 
 
 def calculate_theta_cm_deg(particle_type, pol, w, q2, minus_t):

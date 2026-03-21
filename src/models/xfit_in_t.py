@@ -197,7 +197,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     w_set = float(w_set.replace("p","."))
     with open(ave_file_in, 'r') as f:
         for line in f:
-            ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
+            ww, ww_e, qq, qq_e, tt, tt_e, sin_theta_cm, it = map(float, line.strip().split())
 
             # Grab functional form from model input file
             fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
@@ -209,7 +209,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             g_vec.append(g)
             w_vec.append(ww)
             q2_vec.append(qq)
-            th_vec.append(theta_cm)
+            th_vec.append(sin_theta_cm)
             
     # Revert changes for rest of script
     q2_set = str(q2_set).replace(".","p")

@@ -83,7 +83,7 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
             ("mm", "mm"),
             ("Q2", "q2"),
             ("W", "w"),
-            ("theta_cm", "theta_cm"),
+            ("theta_cm", "sin_theta_cm"),
         )
 
         for hist in histlist:

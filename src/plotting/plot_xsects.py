@@ -218,7 +218,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'W', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.Q{}W{}.dat".format(ParticleType, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'theta_cm', "tbin"]).sort_values(by='tbin').reset_index(drop=True)
+                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'sin_theta_cm', "tbin"]).sort_values(by='tbin').reset_index(drop=True)
         
         if row['EPSVAL'] == float(LOEPS):
             file_df_dict['aver_loeps'] = file_to_df( \
@@ -246,7 +246,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
 
         if row['EPSVAL'] == float(HIEPS):
             file_df_dict['aver_hieps'] = file_to_df( \
@@ -274,11 +274,11 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
         file_df_dict['sep_file'] = file_to_df( \
                                                LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat" \
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
+                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'sin_th_cm'])
             
 ################################################################################################################################################
 
@@ -375,12 +375,12 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     aveline = file_df_dict["avek_file"]
     central_q2 = aveline["Q2"].to_numpy()
     central_w = aveline["W"].to_numpy()
-    central_theta = aveline["theta_cm"].to_numpy()
+    central_theta = aveline["sin_theta_cm"].to_numpy()
 
     mm_edges = support["mm_edges"]
     q2_edges = support["q2_edges"]
     w_edges = support["w_edges"]
-    theta_edges = support["theta_cm_edges"]
+    theta_edges = support["sin_theta_cm_edges"]
     phi_edges = support["phi_bins"]
 
     for k in range(NumtBins):
@@ -428,7 +428,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     one_d_pages = (
         ("q2", q2_edges, central_q2, '$Q^2$'),
         ("w", w_edges, central_w, 'W'),
-        ("theta_cm", theta_edges, central_theta, '$\\theta_{cm}$ (deg)'),
+        ("sin_theta_cm", theta_edges, central_theta, '$\\sin(\\theta_{cm})$'),
     )
     for variable, edges, central_values, xlabel in one_d_pages:
         for k in range(NumtBins):
@@ -466,7 +466,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         ("mm", mm_edges, 'MM'),
         ("q2", q2_edges, '$Q^2$'),
         ("w", w_edges, 'W'),
-        ("theta_cm", theta_edges, '$\\theta_{cm}$ (deg)'),
+        ("sin_theta_cm", theta_edges, '$\\sin(\\theta_{cm})$'),
     )
     for variable, edges, ylabel in two_d_pages:
         for k in range(NumtBins):
@@ -482,7 +482,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     central_pages = (
         ("Q2", central_q2, aveline["dQ2"].to_numpy(), '$Q^2$'),
         ("W", central_w, aveline["dW"].to_numpy(), 'W'),
-        ("theta_cm", central_theta, None, '$\\theta_{cm}$ (deg)'),
+        ("sin(theta_cm)", central_theta, None, '$\\sin(\\theta_{cm})$'),
     )
     for _, values, errors, ylabel in central_pages:
         fig, ax = plt.subplots(figsize=(12, 8))

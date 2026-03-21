@@ -53,7 +53,7 @@ def fun_Sig_L_wrapper(wfactor, q2, w, theta):
         return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in radians (-pi, pi)
+# theta_cm is the stored sin(theta_cm) quantity.
 def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
@@ -68,7 +68,7 @@ def fun_Sig_T_wrapper(wfactor, q2, w, theta):
         return fun_Sig_T(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in radians (-pi, pi)
+# theta_cm is the stored sin(theta_cm) quantity.
 def fun_Sig_T(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
@@ -83,7 +83,7 @@ def fun_Sig_LT_wrapper(wfactor, q2, w, theta):
         return fun_Sig_LT(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in radians (-pi, pi)
+# theta_cm is the stored sin(theta_cm) quantity.
 def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
@@ -98,7 +98,7 @@ def fun_Sig_TT_wrapper(wfactor, q2, w, theta):
         return fun_Sig_TT(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# Theta_cm in radians (-pi, pi)
+# theta_cm is the stored sin(theta_cm) quantity.
 def fun_Sig_TT(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))

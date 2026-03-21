@@ -64,7 +64,7 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       
       integer nt,nphi
 
-      real r,dr,w,dw,q2,dq2,tt,dtt,th_cm,th_pos
+      real r,dr,w,dw,q2,dq2,tt,dtt,sin_th_cm,sin_th_pos
       real tm,tmn,tmx
       real eps_mod,th_mod,x_mod
       real x_real,dx_real
@@ -188,7 +188,7 @@ c      pause
          WRITE(*,*) '============'
          WRITE(*,*) 'Values read:'
          WRITE(*,*) '============'         
-         read(52,*) w,dw,q2,dq2,tt,dtt,th_pos
+         read(52,*) w,dw,q2,dq2,tt,dtt,sin_th_pos
          WRITE(*,*) 'Numtbins: ', nt
          WRITE(*,*) 'tbin: ', it
          WRITE(*,*) 'tmin: ', tmn
@@ -197,12 +197,9 @@ c      pause
          
          tm=(t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
          
-         th_cm=th_pos
-
-*     Convert back to radians
-         th_cm=th_cm*3.14159D0/180.D0
+         sin_th_cm=sin_th_pos
          WRITE(*,*) 't-bin center: ', tm
-         WRITE(*,*) 'th_cm (deg): ', th_cm*180./3.14159
+         WRITE(*,*) 'sin(th_cm): ', sin_th_cm
          
          do ip=1,nphi
 
@@ -230,9 +227,9 @@ c      pause
             call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
      *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
-c angle check
-            if (abs(th_mod-th_cm).gt.1.e-4) then
-               write(6,*)' Angle error ',th_mod,th_cm
+c sin(theta_cm) check
+            if (abs(th_mod-sin_th_cm).gt.1.e-4) then
+               write(6,*)' Sin(theta) error ',th_mod,sin_th_cm
                stop
             endif
             
@@ -261,8 +258,8 @@ c angle check
             if (isnan(q2)) q2 = 0.0            
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
-     *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
- 40         format(3G15.5,f8.5,2f7.2,4f8.5)
+     *           th_mod,phi*180./3.14159,tm,w,q2
+ 40         format(3G15.5,2f8.5,f7.2,3f8.5)
 
             print *,"--------------"            
             print *,"xmodel inputs"
@@ -287,7 +284,7 @@ c angle check
 
 c        Write out kinematics for Henk.
          if(npol_set.gt.0) write(99,'(5f8.3,2x,2f6.2)')
-     *   w,q2,eps_mod,th_mod*180./3.14159,tm,eps_set,q2_set
+     *   w,q2,eps_mod,th_mod,tm,eps_set,q2_set
 
       end do                    !t
 

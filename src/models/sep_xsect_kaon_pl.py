@@ -29,12 +29,10 @@ def import_model(inp_model, arg_str):
     args = list(map(float, arg_str.split()))
 
     # Extract individual values from the list
-    q2_set, w_set, theta_cm, tt, qq, ww, *params = args
+    q2_set, w_set, sin_theta_cm, tt, qq, ww, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
 
-    # Convert degrees to radians
-    print(f"sep_xsect_kaon_pl.py: theta_cm = {theta_cm}")
-    theta_cm = theta_cm * math.pi/180
+    print(f"sep_xsect_kaon_pl.py: sin(theta_cm) = {sin_theta_cm}")
     
     # Load equations from model input file of given setting
     equations = load_equations(f"Q{str(q2_set).replace('.','p')}W{str(w_set).replace('.','p')}.model")
@@ -47,10 +45,10 @@ def import_model(inp_model, arg_str):
     fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
 
     # Calculate SigL, SigT, SigLT, SigTT
-    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
-    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par5, par6, par7, par8)
-    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
-    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)
+    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par1, par2, par3, par4)
+    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par5, par6, par7, par8)
+    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par9, par10, par11, par12)
+    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par13, par14, par15, par16)
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)
         
     modelDict = {

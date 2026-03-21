@@ -212,7 +212,7 @@ def load_average_kinematics(q2_set, w_set):
                 fields = line.strip().split()
                 if len(fields) != 8:
                     continue
-                ww, dww, qq, dqq, tt, dtt, theta_cm, tbin = map(float, fields)
+                ww, dww, qq, dqq, tt, dtt, sin_theta_cm, tbin = map(float, fields)
                 avek_by_tbin[int(round(tbin))] = {
                     "W": ww,
                     "dW": dww,
@@ -220,7 +220,7 @@ def load_average_kinematics(q2_set, w_set):
                     "dQ2": dqq,
                     "t": tt,
                     "dt": dtt,
-                    "theta_cm": theta_cm,
+                    "sin_theta_cm": sin_theta_cm,
                 }
     except IOError:
         print("Error reading average kinematics file {}.".format(avek_path))
@@ -803,7 +803,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         hi_cross_sec_err[i] = math.sqrt(propagated_variance(covariance, [1.0, hi_eps, 0.0, 0.0]))
 
         print(f"\n=== Bin {i+1} Summary ===")
-        print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
+        print(f"  t = {t_list[i]:.3f} GeV²   sin(theta_cm) = {theta_list[i]:.4f}   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
         print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
         print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
         print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")

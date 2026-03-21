@@ -134,7 +134,7 @@ c     equation is actually for -t
       t0 = (pgamx-pkpx0)**2 + (pgamy-pkpy0)**2 +
      *     (pgamz-pkpz0)**2 - (nu-ekp0)**2
       t1 = (pgamx-pkpx1)**2 + (pgamy-pkpy1)**2 +
-     *     (pgamz-pkpz1)**2 - (nu-ekp0)**2
+     *     (pgamz-pkpz1)**2 - (nu-ekp1)**2
 
       tshift = t1 - t0
       tshiftg = tshift/1.d6

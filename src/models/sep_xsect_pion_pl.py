@@ -113,7 +113,7 @@ def import_model(inp_model, arg_str):
             try:
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
-                f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*math.sin(theta_cm)
+                f = (par[0]*math.exp(par[1]*abs(tt))+par[2]/abs(tt))*theta_cm
                 #f = (par[0]+par[2]/abs(tt))*math.sin(theta_cm)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
@@ -140,7 +140,7 @@ def import_model(inp_model, arg_str):
                 #  RLT (7/11/2024): Moved below for Q2dep func form
                 f_tt=abs(tt)/(abs(tt)+mkpl**2)**2 # pole factor
                 ##
-                f = (par[0]*qq*math.exp(-qq))*f_tt*(math.sin(theta_cm)**2)
+                f = (par[0]*qq*math.exp(-qq))*f_tt*(theta_cm**2)
                 # RLT (4/23/2024): Marco's thesis functional forms
                 #f = par[0] * math.exp(-par[1]*abs(tt)) * (1.0 / (1 + (qq**2)*par[2]))
                 ##

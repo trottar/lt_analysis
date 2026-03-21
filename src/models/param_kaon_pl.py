@@ -67,18 +67,10 @@ def iterWeight(arg_str):
     # Phi_cm & Theta_cm in radians (-pi, pi)
     q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
-    #print(f"param_kaon_pl.py: theta_cm = {theta_cm}, phi_cm = {phi_cm}")
-
-    # Wrap 0 to 2pi
-    #theta_cm = theta_cm % (2 * math.pi)
-    #phi_cm = phi_cm % (2 * math.pi)
-    # Wrap -pi to pi
-    thetacm = ((theta_cm + math.pi) % (2 * math.pi)) - math.pi
+    # SIMC still provides the full CM angle in radians; convert to the
+    # stored model quantity expected by the updated parameterizations.
+    sin_theta_cm = math.sin(theta_cm)
     phicm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
-
-    if theta_cm != thetacm:
-        print(f"1 | theta_cm (deg): {theta_cm * 180.0 / math.pi}, phi_cm (deg): {phi_cm * 180.0 / math.pi}")
-        print(f"2 | thetacm (deg): {thetacm * 180.0 / math.pi}, phicm (deg): {phicm * 180.0 / math.pi}")
 
     if None in (
         fun_Sig_L_optimized,
@@ -91,10 +83,10 @@ def iterWeight(arg_str):
         sys.exit(2)
 
     # Calculate SigL, SigT, SigLT, SigTT
-    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, thetacm, par1, par2, par3, par4)
-    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, thetacm, par5, par6, par7, par8)
-    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, thetacm, par9, par10, par11, par12)
-    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, thetacm, par13, par14, par15, par16)
+    sig_L = fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par1, par2, par3, par4)
+    sig_T = fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par5, par6, par7, par8)
+    sig_LT = fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par9, par10, par11, par12)
+    sig_TT = fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par13, par14, par15, par16)
 
     # Calculate W-factor
     wfactor = fun_wfactor_optimized(q2_set, w_set, qq, ww, tt)    

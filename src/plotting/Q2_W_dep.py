@@ -295,7 +295,7 @@ for key, values in settings.items():
                 file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                                 inp_dir+"/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                                 .format(pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                                , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                                , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
 
             if row['EPSVAL'] == float(HIEPS):
                 file_df_dict['aver_hieps'] = file_to_df( \
@@ -323,11 +323,11 @@ for key, values in settings.items():
                 file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                                 inp_dir+"/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                                 .format(pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                                , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                                , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
             file_df_dict['sep_file'] = file_to_df( \
                                                    inp_dir+"/xsects/x_sep.{}_Q{}W{}.dat" \
                                                    .format(pol_str, Q2.replace("p",""), W.replace("p","")) \
-                                                   , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
+                                                   , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'sin_th_cm'])
 
     comb_dict["Q{}W{}".format(Q2,W)] = file_df_dict
     
@@ -404,7 +404,7 @@ for tmin, tmax in tmin_tmax_pairs:
 
         def siglt_func(data, p9, p10):
             q2, t, theta = data
-            siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*np.exp(-p10*(abs(t)))
+            siglt=(p9/(1+q2))*theta*np.exp(-p10*(abs(t)))
             ##
             ##ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
             ##siglt=(p9/(1+q2))*np.sin(theta*(PI/180))*ft*np.exp(-p10*(abs(t))) # Testing
@@ -413,7 +413,7 @@ for tmin, tmax in tmin_tmax_pairs:
         def sigtt_func(data, p13, p14):
             q2, t, theta = data
             ft = abs(t) / (abs(t) + mkpl**2)**2 # pole term
-            sigtt=(p13/(1+q2))*(np.sin(theta*(PI/180))**2)*ft*np.exp(-p14*(q2))
+            sigtt=(p13/(1+q2))*(theta**2)*ft*np.exp(-p14*(q2))
             return sigtt
 
         # Create a figure and axis objects for Q2 plot
@@ -548,7 +548,7 @@ for tmin, tmax in tmin_tmax_pairs:
             #theta_fit = np.linspace(df['th_cm'].min(), df['th_cm'].max(), 100)
             q2_fit = np.linspace(df['Q2'].min(), df['Q2'].max(), 10000)
             t_fit = np.linspace(0.0001, 2.0, 10000)
-            theta_fit = np.linspace(0.0, 360.0, 10000)
+            theta_fit = np.linspace(0.0, 1.0, 10000)
                 
             if sig == "sigL":
                 # Perform exponential fit
@@ -564,13 +564,13 @@ for tmin, tmax in tmin_tmax_pairs:
                 y_fit = sigt_func((q2_fit, t_fit), p5, p6, p7, p8)
             if sig == "sigLT":
                 # Perform exponential fit
-                popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
+                popt, _ = curve_fit(siglt_func, (df['Q2'], df['t'], df['sin_th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
                 p9, p10 = popt
                 param_str = f"{p9:.3e}, {p10:.3e}"
                 y_fit = siglt_func((q2_fit, t_fit, theta_fit), p9, p10)
             if sig == "sigTT":
                 # Perform exponential fit
-                popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
+                popt, _ = curve_fit(sigtt_func, (df['Q2'], df['t'], df['sin_th_cm']), scaled_sig, sigma=d_scaled_sig, absolute_sigma=True, maxfev = 100000)
                 p13, p14 = popt
                 param_str = f"{p13:.3e}, {p14:.3e}"
                 y_fit = sigtt_func((q2_fit, t_fit, theta_fit), p13, p14)

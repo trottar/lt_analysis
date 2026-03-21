@@ -46,7 +46,7 @@ sig_T = (par5 * math.exp(-par6 * (math.fabs(tt))) + par7 * (math.fabs(tt))) * (Q
 
 # Longitudinal-Transverse interference term
 # 0th
-sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
+sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * theta_cm
 #####
 #sig_LT = (par9 * math.exp(-math.fabs(par10 * tt)) + par11 / math.fabs(tt)) * math.sin(theta_cm)
 ##sig_LT = par9 * math.exp(-math.fabs(par10 * tt)) * math.sin(theta_cm)
@@ -56,7 +56,7 @@ sig_LT = (par9 * math.exp(par10 * math.fabs(tt)) + par11 / math.fabs(tt)) * math
 
 # Transverse-Transverse interference term
 # 0th
-sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
+sig_TT = (par13 * Qdep_TT) * ft * (theta_cm**2)
 #####
 #sig_TT = (par13 * Qdep_TT) * ft * (math.sin(theta_cm)**2)
 ##sig_TT = (par13 / math.fabs(tt)**par14) * (math.sin(theta_cm)**2)

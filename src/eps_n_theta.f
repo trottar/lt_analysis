@@ -1,6 +1,6 @@
       subroutine eps_n_theta(pid,npol,Eb,ww,qq,tt,theta_cm,eps)
 
-c     To calculate model theta_pq in CM and epsilon. This subroutine is largely
+c     To calculate sin(theta_cm) in CM and epsilon. This subroutine is largely
 c     based on theta_cm.f function, which in turn is based Jochen's script.
 
       implicit none
@@ -12,6 +12,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
 
       REAL s,omega,q,tmin
       REAL p1cm,p3cm,e1cm,e3cm,p1lab
+      REAL sin_half_sq
 
       REAL m2,m3,m4
       REAL m12,m22,m32,m42
@@ -65,18 +66,15 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       p3cm=sqrt(e3cm*e3cm-m32)
       tmin=-((e1cm-e3cm)**2-(p1cm-p3cm)**2) !-t_min calculation (tt=-t)
 
-      if (tt.ge.tmin) then
-         theta_cm=2*asin(sqrt((tt-tmin)/(4*p1cm*p3cm)))
-      else
-         theta_cm=-1.
-         print*, 'eps_n_theta: tt=',tt,' <  tmin=',tmin
-         return
-      endif
+      sin_half_sq=(tt-tmin)/(4*p1cm*p3cm)
+      if (sin_half_sq.lt.0.) sin_half_sq=0.
+      if (sin_half_sq.gt.1.) sin_half_sq=1.
+      theta_cm=2.*sqrt(sin_half_sq*(1.-sin_half_sq))
       
       eps=1.+2.*(qq+omega**2)/(4.*Eb*(Eb-omega)-qq)
       eps=1./eps
 
 c      write(*,'(a13,7(F8.5,1x))')
-c     *     'eps_n_theta: ',ww,qq,t,tmin,theta_cm,eps,omega
+c     *     'eps_n_theta: ',ww,qq,t,tmin,sin(theta_cm),eps,omega
 
       end
