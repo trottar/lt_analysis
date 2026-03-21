@@ -292,15 +292,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
     sig_hi = TGraphErrors()
     sig_diff_g = TGraphErrors()
     
-    nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:theta:phi:t:w:Q2")
+    nlo = TNtuple("nlo", "nlo", "x/F:dx:x_mod:eps:sin_theta:phi:t:w:Q2")
     nlo.ReadFile(fn_lo)
     
-    nhi = TNtuple("nhi", "nhi", "x/F:dx:x_mod:eps:theta:phi:t:w:Q2")
+    nhi = TNtuple("nhi", "nhi", "x/F:dx:x_mod:eps:sin_theta:phi:t:w:Q2")
     nhi.ReadFile(fn_hi)
 
     q2_list = []
     w_list = []
-    theta_list = []
+    sin_theta_list = []
     t_list = []
     lo_eps_list = []
     hi_eps_list = []
@@ -310,7 +310,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         if evt.t not in t_list:
             q2_list.append(evt.Q2)
             w_list.append(evt.w)
-            theta_list.append(evt.theta)
+            sin_theta_list.append(evt.sin_theta)
             t_list.append(evt.t)
             lo_eps_list.append(evt.eps)
 
@@ -803,7 +803,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         hi_cross_sec_err[i] = math.sqrt(propagated_variance(covariance, [1.0, hi_eps, 0.0, 0.0]))
 
         print(f"\n=== Bin {i+1} Summary ===")
-        print(f"  t = {t_list[i]:.3f} GeV²   sin(theta_cm) = {theta_list[i]:.4f}   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
+        print(f"  t = {t_list[i]:.3f} GeV²   sin(theta_cm) = {sin_theta_list[i]:.4f}   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
         print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
         print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
         print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
@@ -821,7 +821,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             with open(fn_sep, mode) as f:
                 f.write("{} {} {} {} {} {} {} {} {} {} {} {} {}\n".format(
                     sig_l, sig_l_err, sig_t, sig_t_err, sig_lt, sig_lt_err, sig_tt, sig_tt_err,
-                    red_chi2, t_list[i], w_list[i], q2_list[i], theta_list[i]))
+                    red_chi2, t_list[i], w_list[i], q2_list[i], sin_theta_list[i]))
         except IOError:
             print("Error writing to file {}.".format(fn_sep))
 

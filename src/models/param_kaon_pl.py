@@ -65,11 +65,11 @@ def iterWeight(arg_str):
 
     # Extract individual values from the list
     # Phi_cm & Theta_cm in radians (-pi, pi)
-    q2_set, w_set, qq, ww, tt, eps, theta_cm, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
+    q2_set, w_set, qq, ww, tt, eps, theta_cm_rad, phi_cm, sig_prev_iter, weight_prev_iter, *params = args
     par1, par2, par3, par4, par5, par6, par7, par8, par9, par10, par11, par12, par13, par14, par15, par16 = params
     # SIMC still provides the full CM angle in radians; convert to the
     # stored model quantity expected by the updated parameterizations.
-    sin_theta_cm = math.sin(theta_cm)
+    sin_theta_cm = math.sin(theta_cm_rad)
     phicm = ((phi_cm + math.pi) % (2 * math.pi)) - math.pi
 
     if None in (

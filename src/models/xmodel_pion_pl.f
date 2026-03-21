@@ -25,7 +25,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       parameter (mkpl=0.493677)
       
       real wfactor
-      real thetacm
+      real sin_thetacm
 
       integer i, test
 
@@ -66,7 +66,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       
 *     Calculate model sin(thetacm) and epsilon at first.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,
-     *     thetacm,eps_mod)
+     *     sin_thetacm,eps_mod)
 
 *     Model sigL, sigT, sigTT, sigLT.
 
@@ -81,9 +81,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       sigT=(par(5) + par(6)*log(q2_set))
      >     +((par(7)+par(8)*log(q2_set))*f_tav)
       sigLT=((par(9)/abs(tm))*exp((par(10)/abs(tm)))+(par(11)/abs(tm)))
-     >     *thetacm
+     >     *sin_thetacm
       sigTT=((par(13)/abs(tm)**3)*exp((par(14)*abs(tm)))
-     >     +(par(15)/abs(tm)))*f_tm*thetacm**2
+     >     +(par(15)/abs(tm)))*f_tm*sin_thetacm**2
       
 c     Correct for W.
       g_W=1./(W**2-targ**2)**2       ! W factor
@@ -106,7 +106,7 @@ c      sigL=sigL*0.90-0.1
 
       x_mod=sig
       
-      th_mod=thetacm
+      th_mod=sin_thetacm
       
       end
 
