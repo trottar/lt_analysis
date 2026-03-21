@@ -23,8 +23,7 @@ def to_float(value):
 def run_t_shift_program(executable, q2, w, theta_cm_deg, mm_shift_apply, beam_energy_gev):
     # tshift_kaonff.f expects the opposite MM-shift convention:
     # MM_expt = MM_correct + MMshift.
-    #mm_shift_fortran_mev = -1000.0 * mm_shift_apply
-    mm_shift_fortran_mev = -mm_shift_apply
+    mm_shift_fortran_mev = -1000.0 * mm_shift_apply
     beam_energy_mev = 1000.0 * beam_energy_gev
 
     input_lines = [

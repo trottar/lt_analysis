@@ -307,8 +307,8 @@ def get_shift_theta_and_beam(phiset):
             chosen_index = idx
             break
 
-    beam_energy_gev = float(beam_vals[chosen_index])
-
+    #beam_energy_gev = float(beam_vals[chosen_index])
+    beam_energy_gev = 10.6
     '''
     if phiset == "Center":
         theta_cm_deg = 0.0
