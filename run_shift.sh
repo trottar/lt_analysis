@@ -30,11 +30,13 @@ if [[ "${PARTICLE_TYPE}" == "kaon" ]]; then
     TSHIFT_INC="${SRC_DIR}/linux_suppl.inc"
     TSHIFT_EXE="${SRC_DIR}/tshift_kaonff"
 
-    echo "Compiling tshift_kaonff.f..." >&2
-    (
-        cd "${SRC_DIR}"
-        gfortran -o tshift_kaonff tshift_kaonff.f
-    ) >&2
+    if [[ ! -x "${TSHIFT_EXE}" || "${TSHIFT_SRC}" -nt "${TSHIFT_EXE}" || "${TSHIFT_INC}" -nt "${TSHIFT_EXE}" ]]; then
+        echo "Compiling tshift_kaonff.f..." >&2
+        (
+            cd "${SRC_DIR}"
+            gfortran -o tshift_kaonff tshift_kaonff.f
+        ) >&2
+    fi
 fi
 
 python3 "${SRC_DIR}/setup/calc_shift_values.py" \
