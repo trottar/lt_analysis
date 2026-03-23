@@ -23,11 +23,13 @@ x_unsep.*
 Eb*
 par.*
 #*.csv
+*.npz
 
 # Fortran
 average_kinematics
 average_ratios
 calc_xsect
+tshift_kaonff
 fort.99
 
 # Active fortran scripts
