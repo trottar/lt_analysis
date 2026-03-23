@@ -67,7 +67,7 @@ c     enough space for the sets
       
       real eps_set(2)
 
-      real th_mod
+      real sin_th_mod
       
       character*60 fn
       character*2 pol
@@ -321,8 +321,8 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
       do it=1,ntbins
          tm=(t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
-     &        th_mod,eps_mod)
-         sinthetacm_only(it)=th_mod
+     &        sin_th_mod,eps_mod)
+         sinthetacm_only(it)=sin_th_mod
       end do
 
 c     Save data.
