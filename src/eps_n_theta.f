@@ -1,17 +1,19 @@
       subroutine eps_n_theta(pid,npol,Eb,ww,qq,tt,sin_theta_cm,eps)
 
 c     Calculates sin(theta_cm) and epsilon.
-c     Unphysical theta kinematics return sin_theta_cm = -1.d0
+c     Unphysical theta kinematics return sin_theta_cm = -1.0
 
       implicit none
 
       character*4 pid
       integer npol
-      double precision Eb,ww,qq,tt,sin_theta_cm,eps
+      real Eb,ww,qq,tt,sin_theta_cm,eps
+c     Keep the interface real to match the legacy fixed-form callers.
 
       double precision s,omega,q,tmin,tmax,raw,denom,tol
       double precision p1cm,p3cm,e1cm,e3cm,p1lab,p3cm_sq
       double precision sin_half_sq
+      double precision Eb_d,ww_d,qq_d,tt_d,eps_d
 
       double precision m2,m3,m4
       double precision m12,m22,m32,m42
@@ -29,8 +31,13 @@ c     Unphysical theta kinematics return sin_theta_cm = -1.d0
       parameter (mK2   = 0.24387d0)
       parameter (tol   = 1.0d-10)
 
-      sin_theta_cm = -1.d0
-      eps = -1.d0
+      sin_theta_cm = -1.0
+      eps = -1.0
+
+      Eb_d = dble(Eb)
+      ww_d = dble(ww)
+      qq_d = dble(qq)
+      tt_d = dble(tt)
 
 c     Check particle type and set parameters accordingly
       if (pid .eq. 'kaon') then
@@ -56,18 +63,19 @@ c     Check particle type and set parameters accordingly
          m42 = mp2
       endif
 
-      if (ww .le. 0.d0 .or. qq .lt. 0.d0 .or. tt .lt. 0.d0) return
+      if (ww_d .le. 0.d0 .or. qq_d .lt. 0.d0 .or. tt_d .lt. 0.d0)
+     *     return
 
-      s     = ww*ww
-      omega = (s + qq - m22)/(2.d0*m2)
-      q     = sqrt(max(qq + omega*omega, 0.d0))
-      m12   = -qq
+      s     = ww_d*ww_d
+      omega = (s + qq_d - m22)/(2.d0*m2)
+      q     = sqrt(max(qq_d + omega*omega, 0.d0))
+      m12   = -qq_d
 
-      e1cm = (s + m12 - m22)/(2.d0*ww)
-      e3cm = (s + m32 - m42)/(2.d0*ww)
+      e1cm = (s + m12 - m22)/(2.d0*ww_d)
+      e3cm = (s + m32 - m42)/(2.d0*ww_d)
 
       p1lab = q
-      p1cm  = p1lab*m2/ww
+      p1cm  = p1lab*m2/ww_d
 
       p3cm_sq = e3cm*e3cm - m32
       if (p1cm .le. 0.d0) return
@@ -81,18 +89,19 @@ c     tt = -t, so tmin here is really (-t)_min
       tmin = -((e1cm - e3cm)**2 - (p1cm - p3cm)**2)
       tmax = tmin + denom
 
-      raw = (tt - tmin)/denom
+      raw = (tt_d - tmin)/denom
 
 c     Reject truly unphysical points; only clip tiny numerical leakage
       if (raw .lt. -tol .or. raw .gt. 1.d0 + tol) then
-         sin_theta_cm = -1.d0
+         sin_theta_cm = -1.0
       else
          sin_half_sq = min(1.d0, max(0.d0, raw))
-         sin_theta_cm = 2.d0*sqrt(sin_half_sq*(1.d0 - sin_half_sq))
+         sin_theta_cm = sngl(2.d0*sqrt(sin_half_sq*(1.d0-sin_half_sq)))
       endif
 
-      eps = 1.d0 + 2.d0*(qq + omega*omega)/(4.d0*Eb*(Eb - omega) - qq)
-      eps = 1.d0/eps
+      eps_d = 1.d0 + 2.d0*(qq_d + omega*omega)
+     *     /(4.d0*Eb_d*(Eb_d - omega) - qq_d)
+      eps = sngl(1.d0/eps_d)
 
       return
       end
