@@ -1550,7 +1550,7 @@ def find_yield_data(histlist, inpDict):
 def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
     processed_dict = {}
-    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "theta_cm", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
+    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
     ave_simc_event_cache = _init_ave_simc_event_cache()
     
     OutFilename = inpDict["OutFilename"] 
