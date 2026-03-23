@@ -13,13 +13,15 @@ MLAMBDA2 = 1.244749
 MK = 0.493677
 MK2 = 0.24387
 
+_TOL = 1.0e-10
+
 
 def _select_particle_mass_sq(particle_type):
     if particle_type == "kaon":
         return MK, MK2
     if particle_type == "pion":
         return MPI, MPI2
-    raise ValueError("Unsupported particle type: {}".format(particle_type))
+    raise ValueError(f"Unsupported particle type: {particle_type}")
 
 
 def _select_target_recoil_mass_sq(pol):
@@ -38,28 +40,29 @@ def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
     s = w * w
     omega = (s + q2 - m22) / (2.0 * m2)
     q = math.sqrt(max(q2 + omega * omega, 0.0))
-    m12 = -q2
+    m12 = -q2  # virtual photon mass^2
 
     e1cm = (s + m12 - m22) / (2.0 * w)
     e3cm = (s + m32 - m42) / (2.0 * w)
     p1cm = q * m2 / w
+
     p3cm_sq = e3cm * e3cm - m32
-
-    if p1cm <= 0.0 or p3cm_sq <= 0.0:
+    if p1cm <= 0.0 or p3cm_sq < -_TOL:
         return float("nan")
+    p3cm = math.sqrt(max(p3cm_sq, 0.0))
 
-    p3cm = math.sqrt(p3cm_sq)
     denom = 4.0 * p1cm * p3cm
-    if denom <= 0.0:
+    if denom <= _TOL:
         return float("nan")
 
-    tmin = -((e1cm - e3cm) ** 2 - (p1cm - p3cm) ** 2)
-    sin_half_sq = (minus_t - tmin) / denom
+    minus_t_min = -((e1cm - e3cm) ** 2 - (p1cm - p3cm) ** 2)
+    raw = (minus_t - minus_t_min) / denom
 
-    if not math.isfinite(sin_half_sq):
+    # reject truly unphysical points; only clip tiny floating-point leakage
+    if raw < -_TOL or raw > 1.0 + _TOL:
         return float("nan")
 
-    return min(max(sin_half_sq, 0.0), 1.0)
+    return min(max(raw, 0.0), 1.0)
 
 
 def calculate_sin_theta_cm(particle_type, pol, w, q2, minus_t):
@@ -67,7 +70,7 @@ def calculate_sin_theta_cm(particle_type, pol, w, q2, minus_t):
     if not math.isfinite(sin_half_sq):
         return float("nan")
 
-    return 2.0 * math.sqrt(sin_half_sq * max(1.0 - sin_half_sq, 0.0))
+    return 2.0 * math.sqrt(sin_half_sq * (1.0 - sin_half_sq))
 
 
 def calculate_theta_cm_rad(particle_type, pol, w, q2, minus_t):
