@@ -31,6 +31,8 @@ from functools import reduce
 import csv
 import json
 import shutil
+import atexit
+from time import perf_counter
 
 ##################################################################################################################################################
 # Importing utility functions
@@ -116,6 +118,60 @@ output_file_lst.append(OUTPATH + "/" + f"table_{ParticleType}_{kinematics}" + ".
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
 
+analysis_start_time = perf_counter()
+stage_timings = []
+timing_summary_printed = False
+
+
+def format_elapsed(seconds):
+    if seconds < 60.0:
+        return "{:.2f} s".format(seconds)
+    minutes, remainder = divmod(seconds, 60.0)
+    if minutes < 60.0:
+        return "{:.0f} m {:.2f} s".format(minutes, remainder)
+    hours, minutes = divmod(minutes, 60.0)
+    return "{:.0f} h {:.0f} m {:.2f} s".format(hours, minutes, remainder)
+
+
+def record_stage_time(stage_name, start_time):
+    elapsed = perf_counter() - start_time
+    stage_timings.append((stage_name, elapsed))
+    print("\n[TIMER] {}: {}".format(stage_name, format_elapsed(elapsed)))
+    return elapsed
+
+
+def print_timing_summary():
+    global timing_summary_printed
+    if timing_summary_printed:
+        return
+
+    timing_summary_printed = True
+    total_elapsed = perf_counter() - analysis_start_time
+    summary_rows = list(stage_timings)
+    epsset_value = str(globals().get("EPSSET", "")).lower()
+    has_step7 = any(stage_name.startswith("Step 7") for stage_name, _ in summary_rows)
+    if (not has_step7) and epsset_value.startswith("low"):
+        step8_index = next(
+            (index for index, (stage_name, _) in enumerate(summary_rows) if stage_name.startswith("Step 8")),
+            len(summary_rows),
+        )
+        summary_rows.insert(step8_index, ("Step 7 xsect separation", None))
+
+    print("\n" + "=" * 40)
+    print("Analysis Timing Summary")
+    print("=" * 40)
+    for index, (stage_name, elapsed) in enumerate(summary_rows, start=1):
+        if elapsed is None:
+            print("{:02d}. {}: skipped (low epsilon run)".format(index, stage_name))
+        else:
+            print("{:02d}. {}: {}".format(index, stage_name, format_elapsed(elapsed)))
+    print("-" * 40)
+    print("Total elapsed: {}".format(format_elapsed(total_elapsed)))
+    print("=" * 40)
+
+
+atexit.register(print_timing_summary)
+
 ################################
 # Step 1-4 of the lt_analysis: #
 ################################
@@ -129,6 +185,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 '''
     
 # Find last iteration, based of closest date
+stage_start = perf_counter()
 f_iter = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
 closest_date = last_iter(f_iter, formatted_date)
 print("\n\n")
@@ -221,8 +278,10 @@ shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/fu
 
 # Save input model
 output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
+record_stage_time("Iteration previous-output setup", stage_start)
 
 if EPSSET == "low":
+    stage_start = perf_counter()
 #if EPSSET == "low":
     # Save python script that contain separated xsect models for xfit script
     py_xfit = 'models/xfit_{}_{}.py'.format(ParticleType, pol_str)
@@ -241,6 +300,7 @@ if EPSSET == "low":
     x_fit_in_t(ParticleType, pol_str, closest_date, Q2, W, inpDict, output_file_lst)
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_xfit_in_t_Q{}W{}*.pdf".format(ParticleType, Q2, W))
+    record_stage_time("Iteration x_fit_in_t optimization", stage_start)
 
 # ***Parameter file for new iteration!***
 # ***These parameters are newly generated for this iteration above. See README for more info on procedure!***
@@ -268,6 +328,7 @@ from find_bins import check_bins
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
+stage_start = perf_counter()
 try:
     output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
     with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
@@ -305,6 +366,7 @@ for hist in histlist:
     hist["phi_bins"] = phi_bins
 
 check_bins(histlist, inpDict)
+record_stage_time("Step 4 bin finding/check total", stage_start)
 
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
@@ -382,6 +444,8 @@ from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
 
 # Upate hist dictionary with effective charge and simc histograms
+iter_stage_start = perf_counter()
+compare_stage_start = perf_counter()
 for hist in histlist:
     if iter_num > 1:
         # SIMC file with weight from last iteration
@@ -404,17 +468,23 @@ for hist in histlist:
         # Make sure new simc root file exists
         if os.path.exists(new_simc_root):
             # Function to calculation new weight and apply it to simc root file 
+            setting_start = perf_counter()
             iter_weight(new_param_file, new_simc_root, inpDict, hist["phi_setting"])
+            record_stage_time("Step 5 iter_weight {}".format(hist["phi_setting"]), setting_start)
             if iter_num > 1:
                 # SIMC file with weight from last iteration
                 new_simc_root = new_simc_root.replace("iter_{}".format(iter_num-1),"iter_{}".format(iter_num))
             else:
                 # SIMC file with weight from last iteration
-                new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(iter_num))            
+                new_simc_root = new_simc_root.replace(".root","_iter_{}.root".format(iter_num))
+            setting_start = perf_counter()
             hist.update(compare_simc(new_simc_root, hist, inpDict))
+            record_stage_time("Step 5 compare_simc {}".format(hist["phi_setting"]), setting_start)
         else:
             print("ERROR: {} not properly copied to {}".format(old_simc_root, new_simc_root))
             sys.exit(2)
+record_stage_time("Step 5 iter_weight total", iter_stage_start)
+record_stage_time("Step 5 compare_simc total", compare_stage_start)
             
 if DEBUG:
     # Show plot pdf for each setting
@@ -428,7 +498,9 @@ sys.path.append("plotting")
 from iter_check import plot_iteration
 
 # Comparison plots of 0th to current iteration
+stage_start = perf_counter()
 plot_iteration(histlist, phisetlist, inpDict)
+record_stage_time("Step 5 iter_check plots", stage_start)
 
 for hist in histlist:
     print("\n\n{} data total number of events: {:.3e}".format(hist["phi_setting"], hist["NumEvts_MM_DATA"]))
@@ -446,7 +518,9 @@ if DEBUG:
 from data_vs_simc import plot_data_vs_simc
 
 # Variable defines string of cuts applied during analysis
+stage_start = perf_counter()
 cut_summary_lst = plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict)
+record_stage_time("Step 5 data_vs_simc plots", stage_start)
 
 if DEBUG:
     show_pdf_with_evince(outputpdf)
@@ -476,26 +550,38 @@ from calculate_yield import grab_yield_data, find_yield_simc
 from xsect_support import write_xsect_support
 
 yieldDict = {}
+stage_start = perf_counter()
 yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
+record_stage_time("Step 6 data yields", stage_start)
+stage_start = perf_counter()
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
+record_stage_time("Step 6 simc yields", stage_start)
+stage_start = perf_counter()
 write_xsect_support(histlist, inpDict, output_file_lst)
+record_stage_time("Step 6 xsect support", stage_start)
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio
 
 ratioDict = {}
+stage_start = perf_counter()
 ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
+record_stage_time("Step 6 ratios", stage_start)
 
 sys.path.append("binning")
 from ave_per_bin import grab_ave_data
 
 aveDict = {}
+stage_start = perf_counter()
 aveDict.update(grab_ave_data(histlist, inpDict))
+record_stage_time("Step 6 averages", stage_start)
 
 sys.path.append("plotting")
 from binned import plot_binned
 
+stage_start = perf_counter()
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
+record_stage_time("Step 6 plot_binned", stage_start)
 #notify_email(email_address="trotta@cua.edu")
 
 if DEBUG:
@@ -519,6 +605,7 @@ if DEBUG:
 output_file_lst.append(outputpdf.replace("{}_".format(ParticleType),"{}_binned_".format(ParticleType)))    
 
 # Save histograms to root file
+stage_start = perf_counter()
 root_file = open_root_file(foutroot, "UPDATE")
 root_dir_cache = {}
 for hist in histlist:
@@ -548,6 +635,7 @@ if root_file.IsOpen():
 else:
     print("\nError: Unable to close the root file {}.".format(foutroot))
 output_file_lst.append(foutroot)
+record_stage_time("Step 6 ROOT histogram export", stage_start)
 
 # Create combined dictionary of all non-histogram information
 combineDict = {}
@@ -568,12 +656,16 @@ combineDict.update({ "histlist" : tmp_lst})
 
 # Save combined dictionary to json file
 # Open the file in write mode and use json.dump() to save the dictionary to JSON
+stage_start = perf_counter()
 with open(foutjson, 'w') as f_json:
     json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
+record_stage_time("Step 6 JSON export", stage_start)
 
 from physics_lists import create_lists
+stage_start = perf_counter()
 create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
+record_stage_time("Step 6 create_lists", stage_start)
 
 # Redefinition from above, but should be the same! This is just to stay consistent with main.py
 # ***Parameter files from last and this iteration!***
@@ -603,6 +695,7 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 * Calculate the unseparated cross section
 '''
 
+stage_start = perf_counter()
 if EPSSET == "high":
 
     # ***param python script is moved from main.py location to before weight iteration***
@@ -668,6 +761,7 @@ if EPSSET == "high":
     x_fit_in_t(ParticleType, pol_str, formatted_date, Q2, W, inpDict, output_file_lst, skip_optimization=True)
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_lt_fit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    record_stage_time("Step 7 xsect separation", stage_start)
     
 ##############################
 # Step 8 of the lt_analysis: #
@@ -679,6 +773,7 @@ if EPSSET == "high":
 # ***Moved creation of iteration directory up from where it is in main.py. Now is near the new weight calculation***
 # ***Likewise for SIMC root/hist files***
 
+stage_start = perf_counter()
 if EPSSET == "high":
     f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(iter_num))
     shutil.copy(f_iter,f_iter_new)
@@ -795,3 +890,5 @@ if EPSSET == "high":
     #sys.path.append("setup")
     #from compare_iterations import compare_iters
     #compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS)
+record_stage_time("Step 8 cache/archive copy", stage_start)
+print_timing_summary()

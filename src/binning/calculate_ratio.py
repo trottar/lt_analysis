@@ -116,7 +116,7 @@ def find_ratio(histlist, inpDict, yieldDict):
         print("\n\n")
         print("-"*25)
         print("-"*25)
-        print("Finding data yields for {}...".format(hist["phi_setting"]))
+        print("Finding ratios for {}...".format(hist["phi_setting"]))
         print("-"*25)
         print("-"*25)
         ratioDict[hist["phi_setting"]] = {}
