@@ -345,6 +345,14 @@ def combine_2d_map_over_settings(support, kind, variable, settings, t_index):
     return values_total
 
 
+def get_scale_to_reference(values, reference_values):
+    numerator = float(np.sum(reference_values))
+    denominator = float(np.sum(values))
+    if not np.isfinite(numerator) or not np.isfinite(denominator) or denominator <= 0.0:
+        return 1.0
+    return numerator / denominator
+
+
 def plot_hist_overlay(
     ax,
     edges,
@@ -481,8 +489,9 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_color = 'tab:green'
             if variable == "sin_theta_cm":
                 extra_simc_values, _ = combine_hist_over_settings(support, "simc", "sin_theta_cm_true", settings, k)
+                extra_simc_values = extra_simc_values * get_scale_to_reference(extra_simc_values, simc_values)
                 simc_label = 'SIMC Recon'
-                extra_simc_label = 'SIMC True'
+                extra_simc_label = 'SIMC True (scaled)'
             fig, ax = plt.subplots(figsize=(12, 8))
             plot_hist_overlay(
                 ax,
@@ -528,10 +537,11 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_map = combine_map_over_settings(support, "simc", variable, settings, k)
             if variable == "sin_theta_cm":
                 simc_true_map = combine_map_over_settings(support, "simc", "sin_theta_cm_true", settings, k)
+                simc_true_map = simc_true_map * get_scale_to_reference(simc_true_map, simc_map)
                 fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
                 plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
                 plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
-                plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True scaled to Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
             else:
                 fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
                 plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
