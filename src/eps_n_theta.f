@@ -1,4 +1,4 @@
-      subroutine eps_n_sin_theta(pid,npol,Eb,ww,qq,tt,sin_theta_cm,eps)
+      subroutine eps_n_theta(pid,npol,Eb,ww,qq,tt,sin_theta_cm,eps)
 
 c     Calculates sin(theta_cm) and epsilon.
 c     Unphysical theta kinematics return sin_theta_cm = -1.d0
