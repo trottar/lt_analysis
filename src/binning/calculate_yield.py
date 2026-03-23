@@ -103,7 +103,9 @@ def _get_simc_true_sin_theta_cm(evt, particle_type, pol):
         theta_cm_true = float("nan")
 
     if math.isfinite(theta_cm_true):
-        return math.sin(theta_cm_true)
+        # SIMC can store theta_cm on a signed (-pi, pi) convention, while the
+        # plotted quantity is sin(theta_cm) on the physical [0, pi] branch.
+        return abs(math.sin(theta_cm_true))
 
     try:
         minus_t_true = -evt.ti
