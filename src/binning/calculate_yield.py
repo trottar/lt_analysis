@@ -95,6 +95,23 @@ def _fill_t_vs_tmin_hist(hist, particle_type, pol, w, q2, minus_t, weight=None):
         hist.Fill(minus_tmin, minus_t, weight)
 
 
+def _get_simc_true_sin_theta_cm(evt, particle_type, pol):
+    """Prefer the native SIMC truth theta_cm branch; fall back to kinematic reconstruction."""
+    try:
+        theta_cm_true = float(evt.thetacm)
+    except AttributeError:
+        theta_cm_true = float("nan")
+
+    if math.isfinite(theta_cm_true):
+        return math.sin(theta_cm_true)
+
+    try:
+        minus_t_true = -evt.ti
+        return calculate_sin_theta_cm(particle_type, pol, evt.Wi, evt.Q2i, minus_t_true)
+    except AttributeError:
+        return float("nan")
+
+
 def _init_ave_event_cache():
     cache_template = {
         "adj_t": [],
@@ -432,11 +449,7 @@ def _process_yield_simc_tree(
         minus_t = -evt.t
         phi_shift = evt.phipq * phi_scale
         sin_theta_cm = calculate_sin_theta_cm(particle_type, pol, evt.W, evt.Q2, minus_t)
-        try:
-            minus_t_true = -evt.ti
-            sin_theta_cm_true = calculate_sin_theta_cm(particle_type, pol, evt.Wi, evt.Q2i, minus_t_true)
-        except AttributeError:
-            sin_theta_cm_true = float("nan")
+        sin_theta_cm_true = _get_simc_true_sin_theta_cm(evt, particle_type, pol)
         t_index, phi_index = find_2d_bin_indices(minus_t, phi_shift, t_bins, phi_bins)
 
         if t_index is not None:
