@@ -57,6 +57,36 @@ def _cleanup_support(histlist):
         hist.pop("_xsect_support_simc", None)
 
 
+def _load_support_from_saved_histograms(hist, hist_prefix):
+    t_bins = hist.get("t_bins", [])
+    phi_bins = hist.get("phi_bins", [])
+    n_t = max(len(t_bins) - 1, 0)
+    n_phi = max(len(phi_bins) - 1, 0)
+    if n_t == 0 or n_phi == 0:
+        return None
+
+    key_templates = {
+        "mm": "H_MM_{}_{}_{}",
+        "Q2": "H_Q2_{}_{}_{}",
+        "W": "H_W_{}_{}_{}",
+        "theta_cm": "H_theta_cm_{}_{}_{}",
+    }
+    support_dict = {
+        key: [[None for _ in range(n_phi)] for _ in range(n_t)]
+        for key in key_templates
+    }
+
+    for support_key, template in key_templates.items():
+        for j in range(n_t):
+            for k in range(n_phi):
+                support_hist = hist.get(template.format(hist_prefix, j, k))
+                if support_hist is None:
+                    return None
+                support_dict[support_key][j][k] = support_hist
+
+    return support_dict
+
+
 def write_xsect_support(histlist, inpDict, output_file_lst=None):
     particle_type = inpDict["ParticleType"]
     q2 = inpDict["Q2"]
@@ -90,6 +120,11 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
             setting_key = hist["phi_setting"].lower()
             data_support = hist.get("_xsect_support_data")
             simc_support = hist.get("_xsect_support_simc")
+
+            if data_support is None:
+                data_support = _load_support_from_saved_histograms(hist, "DATA")
+                if data_support is not None:
+                    hist["_xsect_support_data"] = data_support
 
             if data_support is None or simc_support is None:
                 print("WARNING: Missing xsect support histograms for {} {}".format(inpDict["EPSSET"], hist["phi_setting"]))
