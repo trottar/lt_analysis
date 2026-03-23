@@ -28,12 +28,12 @@ def _select_target_recoil_mass_sq(pol):
     return MN, MN2, MP, MP2
 
 
-def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
+def _calculate_tmin_and_denom(particle_type, pol, w, q2):
     m3, m32 = _select_particle_mass_sq(particle_type)
     m2, m22, m4, m42 = _select_target_recoil_mass_sq(pol)
 
-    if w <= 0.0 or q2 < 0.0 or minus_t < 0.0:
-        return float("nan")
+    if w <= 0.0 or q2 < 0.0:
+        return float("nan"), float("nan")
 
     s = w * w
     omega = (s + q2 - m22) / (2.0 * m2)
@@ -46,14 +46,33 @@ def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
     p3cm_sq = e3cm * e3cm - m32
 
     if p1cm <= 0.0 or p3cm_sq <= 0.0:
-        return float("nan")
+        return float("nan"), float("nan")
 
     p3cm = math.sqrt(p3cm_sq)
     denom = 4.0 * p1cm * p3cm
     if denom <= 0.0:
-        return float("nan")
+        return float("nan"), float("nan")
 
     tmin = -((e1cm - e3cm) ** 2 - (p1cm - p3cm) ** 2)
+    if not math.isfinite(tmin):
+        return float("nan"), float("nan")
+
+    return tmin, denom
+
+
+def calculate_tmin(particle_type, pol, w, q2):
+    tmin, _ = _calculate_tmin_and_denom(particle_type, pol, w, q2)
+    return tmin
+
+
+def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
+    if minus_t < 0.0:
+        return float("nan")
+
+    tmin, denom = _calculate_tmin_and_denom(particle_type, pol, w, q2)
+    if not math.isfinite(tmin) or not math.isfinite(denom):
+        return float("nan")
+
     sin_half_sq = (minus_t - tmin) / denom
 
     if not math.isfinite(sin_half_sq):

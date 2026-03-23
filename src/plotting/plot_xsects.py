@@ -334,7 +334,33 @@ def combine_map_over_settings(support, kind, variable, settings, t_index):
     return values_total
 
 
-def plot_hist_overlay(ax, edges, data_values, data_errors, simc_values, simc_errors, title, xlabel, central_line=None):
+def combine_2d_map_over_settings(support, kind, variable, settings, t_index):
+    values_total = None
+    for setting in settings:
+        values = get_support_matrix(support, kind, variable, setting, "values")[t_index]
+        summed_values = np.sum(values, axis=0)
+        if values_total is None:
+            values_total = np.zeros_like(summed_values)
+        values_total += summed_values
+    return values_total
+
+
+def plot_hist_overlay(
+    ax,
+    edges,
+    data_values,
+    data_errors,
+    simc_values,
+    simc_errors,
+    title,
+    xlabel,
+    central_line=None,
+    simc_label='SIMC',
+    simc_color='tab:green',
+    extra_simc_values=None,
+    extra_simc_label=None,
+    extra_simc_color='tab:blue',
+):
     centers = 0.5 * (edges[:-1] + edges[1:])
     ax.errorbar(
         centers,
@@ -347,7 +373,9 @@ def plot_hist_overlay(ax, edges, data_values, data_errors, simc_values, simc_err
         capsize=2,
         label='Data',
     )
-    ax.step(centers, simc_values, where='mid', color='tab:green', linewidth=1.5, label='SIMC')
+    ax.step(centers, simc_values, where='mid', color=simc_color, linewidth=1.5, label=simc_label)
+    if extra_simc_values is not None:
+        ax.step(centers, extra_simc_values, where='mid', color=extra_simc_color, linewidth=1.5, label=extra_simc_label)
     if central_line is not None and np.isfinite(central_line):
         ax.axvline(central_line, color='tab:red', linestyle='--', linewidth=1.2, label='Central Value')
     ax.set_title(title, fontsize=16)
@@ -367,6 +395,15 @@ def plot_phi_map(fig, ax, phi_edges, y_edges, values, title, ylabel):
     fig.colorbar(mesh, ax=ax)
 
 
+def plot_density_map(fig, ax, x_edges, y_edges, values, title, xlabel, ylabel):
+    mesh = ax.pcolormesh(x_edges, y_edges, values.T, shading='auto')
+    ax.set_title(title, fontsize=14)
+    ax.set_xlabel(xlabel, fontsize=14)
+    ax.set_ylabel(ylabel, fontsize=14)
+    ax.tick_params(axis='both', labelsize=12)
+    fig.colorbar(mesh, ax=ax)
+
+
 def append_xsect_support_pages(pdf, support, epsilon_label):
     if support is None:
         return
@@ -381,7 +418,10 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     q2_edges = support["q2_edges"]
     w_edges = support["w_edges"]
     theta_edges = support["sin_theta_cm_edges"]
+    theta_true_edges = support["sin_theta_cm_true_edges"]
     phi_edges = support["phi_bins"]
+    t_vs_tmin_x_edges = support["t_vs_tmin_x_edges"]
+    t_vs_tmin_y_edges = support["t_vs_tmin_y_edges"]
 
     for k in range(NumtBins):
         fig, axes = plt.subplots(len(settings), 1, figsize=(12, max(4, 3.5 * len(settings))), sharex=True)
@@ -434,6 +474,15 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         for k in range(NumtBins):
             data_values, data_errors = combine_hist_over_settings(support, "data", variable, settings, k)
             simc_values, simc_errors = combine_hist_over_settings(support, "simc", variable, settings, k)
+            extra_simc_values = None
+            extra_simc_label = None
+            extra_simc_color = 'tab:blue'
+            simc_label = 'SIMC'
+            simc_color = 'tab:green'
+            if variable == "sin_theta_cm":
+                extra_simc_values, _ = combine_hist_over_settings(support, "simc", "sin_theta_cm_true", settings, k)
+                simc_label = 'SIMC Recon'
+                extra_simc_label = 'SIMC True'
             fig, ax = plt.subplots(figsize=(12, 8))
             plot_hist_overlay(
                 ax,
@@ -445,6 +494,11 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 "{} {} {}, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), xlabel, t_bin_centers[k]),
                 xlabel,
                 central_line=central_values[k],
+                simc_label=simc_label,
+                simc_color=simc_color,
+                extra_simc_values=extra_simc_values,
+                extra_simc_label=extra_simc_label,
+                extra_simc_color=extra_simc_color,
             )
             plt.tight_layout()
             pdf.savefig(fig, bbox_inches='tight')
@@ -472,12 +526,47 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         for k in range(NumtBins):
             data_map = combine_map_over_settings(support, "data", variable, settings, k)
             simc_map = combine_map_over_settings(support, "simc", variable, settings, k)
-            fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
-            plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
-            plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+            if variable == "sin_theta_cm":
+                simc_true_map = combine_map_over_settings(support, "simc", "sin_theta_cm_true", settings, k)
+                fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
+                plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+            else:
+                fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+                plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
             plt.tight_layout()
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
+
+    for k in range(NumtBins):
+        data_map = combine_2d_map_over_settings(support, "data", "t_vs_tmin", settings, k)
+        simc_map = combine_2d_map_over_settings(support, "simc", "t_vs_tmin", settings, k)
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+        plot_density_map(
+            fig,
+            axes[0],
+            t_vs_tmin_x_edges,
+            t_vs_tmin_y_edges,
+            data_map,
+            "{} -t vs -t_{{min}}, all settings Data, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+            '$-t_{min}$',
+            '$-t$',
+        )
+        plot_density_map(
+            fig,
+            axes[1],
+            t_vs_tmin_x_edges,
+            t_vs_tmin_y_edges,
+            simc_map,
+            "{} -t vs -t_{{min}}, all settings SIMC, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+            '$-t_{min}$',
+            '$-t$',
+        )
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
 
     central_pages = (
         ("Q2", central_q2, aveline["dQ2"].to_numpy(), '$Q^2$'),

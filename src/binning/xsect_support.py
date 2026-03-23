@@ -18,6 +18,18 @@ def _hist_to_arrays(hist):
     return values, errors, edges
 
 
+def _hist2d_to_arrays(hist):
+    n_x = hist.GetNbinsX()
+    n_y = hist.GetNbinsY()
+    values = np.zeros((n_x, n_y), dtype=np.float64)
+    for ix in range(1, n_x + 1):
+        for iy in range(1, n_y + 1):
+            values[ix - 1, iy - 1] = hist.GetBinContent(ix, iy)
+    x_edges = np.array([hist.GetXaxis().GetBinLowEdge(i) for i in range(1, n_x + 2)], dtype=np.float64)
+    y_edges = np.array([hist.GetYaxis().GetBinLowEdge(i) for i in range(1, n_y + 2)], dtype=np.float64)
+    return values, x_edges, y_edges
+
+
 def _matrix_to_arrays(hist_matrix):
     n_t = len(hist_matrix)
     n_phi = len(hist_matrix[0]) if n_t > 0 else 0
@@ -51,6 +63,37 @@ def _matrix_to_arrays(hist_matrix):
     return values, errors, edges
 
 
+def _matrix2d_to_arrays(hist_matrix):
+    n_t = len(hist_matrix)
+    n_phi = len(hist_matrix[0]) if n_t > 0 else 0
+    sample_hist = None
+
+    for row in hist_matrix:
+        for hist in row:
+            if hist is not None:
+                sample_hist = hist
+                break
+        if sample_hist is not None:
+            break
+
+    if sample_hist is None:
+        return None, None, None
+
+    sample_values, x_edges, y_edges = _hist2d_to_arrays(sample_hist)
+    n_x, n_y = sample_values.shape
+    values = np.zeros((n_t, n_phi, n_x, n_y), dtype=np.float64)
+
+    for j in range(n_t):
+        for k in range(n_phi):
+            hist = hist_matrix[j][k]
+            if hist is None:
+                continue
+            hist_values, _, _ = _hist2d_to_arrays(hist)
+            values[j, k, :, :] = hist_values
+
+    return values, x_edges, y_edges
+
+
 def _cleanup_support(histlist):
     for hist in histlist:
         hist.pop("_xsect_support_data", None)
@@ -70,6 +113,7 @@ def _load_support_from_saved_histograms(hist, hist_prefix):
         "Q2": "H_Q2_{}_{}_{}",
         "W": "H_W_{}_{}_{}",
         "theta_cm": "H_theta_cm_{}_{}_{}",
+        "t_vs_tmin": "H_t_vs_tmin_{}_{}_{}",
     }
     support_dict = {
         key: [[None for _ in range(n_phi)] for _ in range(n_t)]
@@ -115,6 +159,12 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
             ("W", "w"),
             ("theta_cm", "sin_theta_cm"),
         )
+        map2d_variable_map = (
+            ("t_vs_tmin", "t_vs_tmin"),
+        )
+        simc_only_variable_map = (
+            ("theta_cm_true", "sin_theta_cm_true"),
+        )
 
         for hist in histlist:
             setting_key = hist["phi_setting"].lower()
@@ -147,6 +197,34 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
                 if not np.allclose(edges, simc_edges):
                     print("WARNING: Support histogram edges do not match for {} {}".format(hist["phi_setting"], support_key))
                     return None
+
+            for support_key, file_key in map2d_variable_map:
+                data_values, data_x_edges, data_y_edges = _matrix2d_to_arrays(data_support[support_key])
+                simc_values, simc_x_edges, simc_y_edges = _matrix2d_to_arrays(simc_support[support_key])
+
+                if data_values is None or simc_values is None:
+                    print("WARNING: Incomplete 2D xsect support histograms for {} {} {}".format(inpDict["EPSSET"], hist["phi_setting"], support_key))
+                    return None
+
+                payload["{}_x_edges".format(file_key)] = data_x_edges
+                payload["{}_y_edges".format(file_key)] = data_y_edges
+                payload["data_{}_{}_values".format(file_key, setting_key)] = data_values
+                payload["simc_{}_{}_values".format(file_key, setting_key)] = simc_values
+
+                if not np.allclose(data_x_edges, simc_x_edges) or not np.allclose(data_y_edges, simc_y_edges):
+                    print("WARNING: 2D support histogram edges do not match for {} {}".format(hist["phi_setting"], support_key))
+                    return None
+
+            for support_key, file_key in simc_only_variable_map:
+                simc_values, simc_errors, simc_edges = _matrix_to_arrays(simc_support[support_key])
+
+                if simc_values is None:
+                    print("WARNING: Missing SIMC-only xsect support histograms for {} {} {}".format(inpDict["EPSSET"], hist["phi_setting"], support_key))
+                    return None
+
+                payload["{}_edges".format(file_key)] = simc_edges
+                payload["simc_{}_{}_values".format(file_key, setting_key)] = simc_values
+                payload["simc_{}_{}_errors".format(file_key, setting_key)] = simc_errors
 
         np.savez_compressed(support_path, **payload)
         if output_file_lst is not None:
