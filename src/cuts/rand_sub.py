@@ -236,21 +236,19 @@ def _process_rand_sub_background_tree(
     residual_weights=None,
 ):
     for evt in tree:
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
-        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
-        mm_in_range = (mm_min <= adj_MM) and (adj_MM < mm_max)
-        t_in_range = (tmin <= adj_t) and (adj_t < tmax)
-
         if particle_type == "kaon":
             base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            allcuts = base_all_cuts and t_in_range and mm_in_range and not hole_rejected
+            allcuts = base_all_cuts and not hole_rejected
         else:
             base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            allcuts = base_all_cuts and t_in_range and mm_in_range
+            allcuts = base_all_cuts
 
         if not allcuts:
             continue
+
+        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
+        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
 
         event_weight = source_coeff * mm_background_weight_from_value(
             adj_MM,
@@ -281,7 +279,7 @@ def _process_subtracted_particle_background_tree(
     residual_weights=None,
 ):
     for evt in tree:
-        base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+        base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_data)
 
         if particle_type == "kaon":
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
@@ -342,25 +340,23 @@ def _process_rand_sub_tree(
         progress_bar(i, entries, bar_length=25)
         progress_time += perf_counter() - progress_start
 
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
-        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
-        mm_in_range = (mm_min <= adj_MM) and (adj_MM < mm_max)
-        t_in_range = (tmin <= adj_t) and (adj_t < tmax)
-
         if particle_type == "kaon":
             base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            allcuts = base_all_cuts and t_in_range and mm_in_range and not hole_rejected
-            noholecuts = base_all_cuts and t_in_range and mm_in_range
-            nommcuts = base_sub_cuts and t_in_range and not hole_rejected
+            allcuts = base_all_cuts and not hole_rejected
+            noholecuts = base_all_cuts
+            nommcuts = base_sub_cuts and not hole_rejected
         else:
             base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            allcuts = base_all_cuts and t_in_range and mm_in_range
-            nommcuts = base_sub_cuts and t_in_range
+            allcuts = base_all_cuts
+            nommcuts = base_sub_cuts
             noholecuts = False
 
         if not (noholecuts or nommcuts or allcuts):
             continue
+
+        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
+        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
 
         if noholecuts and nohole_xy_fill is not None:
             nohole_xy_fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)

@@ -202,14 +202,12 @@ def compare_simc(hist, inpDict):
       ##############        
       
       adj_t = -evt.t
-      mm_in_range = (mm_min <= adj_missmass) and (adj_missmass < mm_max)
-      t_in_range = (tmin <= adj_t) and (adj_t < tmax)
       base_cuts = apply_simc_cuts(evt, mm_min, mm_max)
 
       if ParticleType == "kaon":
           
-          ALLCUTS = base_cuts and t_in_range and mm_in_range and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
-          NOHOLECUTS = base_cuts and t_in_range and mm_in_range
+          ALLCUTS = base_cuts and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
+          NOHOLECUTS = base_cuts
           
           if(NOHOLECUTS):
               # HGCer hole comparison            
@@ -217,7 +215,7 @@ def compare_simc(hist, inpDict):
           
       else:
 
-          ALLCUTS = base_cuts and t_in_range and mm_in_range
+          ALLCUTS = base_cuts
           
       #Fill SIMC events
       if(ALLCUTS):

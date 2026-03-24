@@ -13,6 +13,12 @@
 import numpy as np
 import sys, os, math
 
+BINNING_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "binning"))
+if BINNING_PATH not in sys.path:
+    sys.path.append(BINNING_PATH)
+
+from theta_cm import calculate_tmin
+
 ###############################################################################################################################################
 # Establish global variables so that they're not called each iteration of loop
 
@@ -20,6 +26,7 @@ import sys, os, math
 W = ""
 Q2 = ""
 EPSSET = ""
+POL = ""
 tmin = ""
 tmax = ""
 cut_poly = []
@@ -29,6 +36,7 @@ cut_poly_xmax = None
 cut_poly_ymin = None
 cut_poly_ymax = None
 c0_value = 0.0
+TMIN_RESOLUTION_THRESHOLD = 1e-5
 
 
 def _sort_ccw_points(points):
@@ -60,7 +68,7 @@ def _point_in_convex_poly(x, y, poly, eps=1e-12):
 # Then, set global variables which is called with arguments
 def set_val(inpDict):
     
-    global W, Q2, EPSSET, ParticleType
+    global W, Q2, EPSSET, POL, ParticleType
     global tmin, tmax
     global cut_poly
     global cut_poly_xmin, cut_poly_xmax, cut_poly_ymin, cut_poly_ymax
@@ -69,6 +77,7 @@ def set_val(inpDict):
     W = inpDict["W"] 
     Q2 = inpDict["Q2"] 
     EPSSET = inpDict["EPSSET"]
+    POL = inpDict["POL"]
     ParticleType = inpDict["ParticleType"]
 
     tmin = float(inpDict["tmin"] )
@@ -161,30 +170,51 @@ def _compute_base_data_cut_state(evt):
     if adj_hsdelta < -8.0 or adj_hsdelta > 8.0 or evt.hsxptar < -0.08 or evt.hsxptar > 0.08 or evt.hsyptar < -0.045 or evt.hsyptar > 0.045:
         return False, adj_hsdelta
 
-    # RLT: These are done via histogram cuts
-    #t_RANGE =  (tmin<=-evt.MandelT) & (-evt.MandelT<tmax)
-    #MMCUT =  (mm_min<=adj_MM) & (adj_MM<mm_max)
-    #ALLCUTS = HMS_FixCut and HMS_Acceptance and SHMS_FixCut and SHMS_Acceptance and Diamond and t_RANGE and MMCUT
-
     return _point_in_convex_poly(evt.Q2, evt.W, cut_poly), adj_hsdelta
 
 
-def evaluate_data_event(evt, mm_min=0.7, mm_max=1.5):
-    # MM/t windows are intentionally excluded here to preserve the existing
-    # histogram-cut behavior used throughout the analysis.
+def _in_window(value, lower, upper):
+    return (lower <= value) and (value < upper)
+
+
+def _passes_tmin_resolution(minus_t, w, q2):
+    minus_tmin = calculate_tmin(ParticleType, POL, float(w), float(q2))
+    if not (math.isfinite(minus_t) and math.isfinite(minus_tmin)):
+        return False
+    return (minus_t - minus_tmin) > TMIN_RESOLUTION_THRESHOLD
+
+
+def get_shifted_mm(evt, mm_offset=0.0):
+    try:
+        return evt.MM_shift
+    except AttributeError:
+        return evt.MM + mm_offset
+
+
+def _compute_data_cut_state(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
     base_cuts, adj_hsdelta = _compute_base_data_cut_state(evt)
-    return base_cuts, base_cuts, adj_hsdelta
+    if not base_cuts:
+        return False, False, adj_hsdelta
+
+    adj_t = get_shifted_t(evt)
+    adj_mm = get_shifted_mm(evt, mm_offset=mm_offset)
+    t_in_range = _in_window(adj_t, tmin, tmax)
+    tmin_resolved = _passes_tmin_resolution(adj_t, evt.W, evt.Q2)
+    mm_in_range = _in_window(adj_mm, mm_min, mm_max)
+    return base_cuts and t_in_range and tmin_resolved and mm_in_range, base_cuts and t_in_range and tmin_resolved, adj_hsdelta
 
 
-def evaluate_data_cut_bools(evt, mm_min=0.7, mm_max=1.5):
-    # MM/t windows are intentionally excluded here to preserve the existing
-    # histogram-cut behavior used throughout the analysis.
-    base_cuts, _ = _compute_base_data_cut_state(evt)
-    return base_cuts, base_cuts
+def evaluate_data_event(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
+    return _compute_data_cut_state(evt, mm_min, mm_max, mm_offset)
 
 
-def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5):
-    return _compute_base_data_cut_state(evt)[0]
+def evaluate_data_cut_bools(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
+    allcuts, subcuts, _ = _compute_data_cut_state(evt, mm_min, mm_max, mm_offset)
+    return allcuts, subcuts
+
+
+def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
+    return _compute_data_cut_state(evt, mm_min, mm_max, mm_offset)[0]
 
 ###############################################################################################################################################
 
@@ -197,8 +227,8 @@ def get_shifted_t(evt):
         return -evt.MandelT
 
 # Subtraction cuts
-def apply_data_sub_cuts(evt):
-    return _compute_base_data_cut_state(evt)[0]
+def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
+    return _compute_data_cut_state(evt, mm_min, mm_max, mm_offset)[1]
 
 ################################################################################################################################################
 
@@ -224,12 +254,11 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
 
     Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
 
-    # RLT: These are done via histogram cuts
-    #t_RANGE =  (tmin<=-evt.t) & (-evt.t<tmax)
-    #MMCUT =  (mm_min<=adj_missmass) & (adj_missmass<mm_max)      
-    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_RANGE and MMCUT    
-
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond
+    minus_t = -evt.t
+    t_in_range = _in_window(minus_t, tmin, tmax)
+    tmin_resolved = _passes_tmin_resolution(minus_t, evt.W, evt.Q2)
+    mm_in_range = _in_window(adj_missmass, mm_min, mm_max)
+    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved and mm_in_range
     #ALLCUTS = (-100000<=-evt.t) # No cuts
 
     return ALLCUTS
