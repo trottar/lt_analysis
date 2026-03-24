@@ -13,6 +13,8 @@ MLAMBDA2 = 1.244749
 MK = 0.493677
 MK2 = 0.24387
 
+_TOL = 1.0e-10
+
 
 def _select_particle_mass_sq(particle_type):
     if particle_type == "kaon":
@@ -45,12 +47,12 @@ def _calculate_tmin_and_denom(particle_type, pol, w, q2):
     p1cm = q * m2 / w
     p3cm_sq = e3cm * e3cm - m32
 
-    if p1cm <= 0.0 or p3cm_sq <= 0.0:
+    if p1cm <= 0.0 or p3cm_sq < -_TOL:
         return float("nan"), float("nan")
 
-    p3cm = math.sqrt(p3cm_sq)
+    p3cm = math.sqrt(max(p3cm_sq, 0.0))
     denom = 4.0 * p1cm * p3cm
-    if denom <= 0.0:
+    if denom <= _TOL:
         return float("nan"), float("nan")
 
     tmin = -((e1cm - e3cm) ** 2 - (p1cm - p3cm) ** 2)
@@ -73,12 +75,15 @@ def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
     if not math.isfinite(tmin) or not math.isfinite(denom):
         return float("nan")
 
-    sin_half_sq = (minus_t - tmin) / denom
+    raw = (minus_t - tmin) / denom
 
-    if not math.isfinite(sin_half_sq):
+    if not math.isfinite(raw):
         return float("nan")
 
-    return min(max(sin_half_sq, 0.0), 1.0)
+    if raw < -_TOL or raw > 1.0 + _TOL:
+        return float("nan")
+
+    return min(max(raw, 0.0), 1.0)
 
 
 def calculate_sin_theta_cm(particle_type, pol, w, q2, minus_t):

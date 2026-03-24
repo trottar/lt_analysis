@@ -10,7 +10,7 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       integer npol
       real Eb,ww,qq,tt,sin_theta_cm,eps
 
-      REAL s,omega,q,tmin
+      REAL s,omega,q,tmin,raw,denom,tol,p3cm_sq
       REAL p1cm,p3cm,e1cm,e3cm,p1lab
       REAL sin_half_sq
 
@@ -28,6 +28,10 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       parameter (mlamb2=1.244749) !mlamb^2      
       parameter (mK=0.493677)   !mK
       parameter (mK2=0.24387)   !mK2    
+      parameter (tol=1.0e-10)
+
+      sin_theta_cm=-1.
+      eps=-1.
 
       ! Check particle type and set parameters accordingly
       if (pid == "kaon") then
@@ -53,6 +57,8 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
          m42=mp2
       end if
 
+      if (ww.le.0. .or. qq.lt.0. .or. tt.lt.0.) return
+
       s=ww*ww
       omega=(s+qq-m22)/(2*m2)
       q=sqrt(qq+omega**2)
@@ -63,13 +69,22 @@ c     based on theta_cm.f function, which in turn is based Jochen's script.
       e3cm=(s+m32-m42)/(2*ww)
       p1lab=q
       p1cm=p1lab*m2/ww
-      p3cm=sqrt(e3cm*e3cm-m32)
+      p3cm_sq=e3cm*e3cm-m32
+      if (p1cm.le.0.) return
+      if (p3cm_sq.lt.-tol) return
+      p3cm=sqrt(amax1(p3cm_sq,0.))
       tmin=-((e1cm-e3cm)**2-(p1cm-p3cm)**2) !-t_min calculation (tt=-t)
 
-      sin_half_sq=(tt-tmin)/(4*p1cm*p3cm)
-      if (sin_half_sq.lt.0.) sin_half_sq=0.
-      if (sin_half_sq.gt.1.) sin_half_sq=1.
-      sin_theta_cm=2.*sqrt(sin_half_sq*(1.-sin_half_sq))
+      denom=4.*p1cm*p3cm
+      if (denom.le.tol) return
+
+      raw=(tt-tmin)/denom
+      if (raw.lt.-tol .or. raw.gt.1.+tol) then
+         sin_theta_cm=-1.
+      else
+         sin_half_sq=amin1(1.,amax1(0.,raw))
+         sin_theta_cm=2.*sqrt(sin_half_sq*(1.-sin_half_sq))
+      endif
       
       eps=1.+2.*(qq+omega**2)/(4.*Eb*(Eb-omega)-qq)
       eps=1./eps
