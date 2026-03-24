@@ -218,7 +218,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
     if row['Q2'] == float(Q2.replace("p",".")):
         file_df_dict['beam_file'] = file_to_df(LTANAPATH+"/src/{}/beam/Eb_KLT.dat".format(ParticleType), ['ebeam', 'Q2', 'W', 'EPSVAL'])
         file_df_dict['avek_file'] = file_to_df(LTANAPATH+"/src/{}/averages/avek.Q{}W{}.dat".format(ParticleType, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'sin_theta_cm', "tbin"]).sort_values(by='tbin').reset_index(drop=True)
+                                               , ['W', 'dW', 'Q2', 'dQ2', 't', 'dt', 'theta_cm', "tbin"]).sort_values(by='tbin').reset_index(drop=True)
         
         if row['EPSVAL'] == float(LOEPS):
             file_df_dict['aver_loeps'] = file_to_df( \
@@ -246,7 +246,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
 
         if row['EPSVAL'] == float(HIEPS):
             file_df_dict['aver_hieps'] = file_to_df( \
@@ -274,11 +274,11 @@ for i,row in file_df_dict['setting_df'].iterrows():
             file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                             LTANAPATH+"/src/{}/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                             .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                            , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
         file_df_dict['sep_file'] = file_to_df( \
                                                LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat" \
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
-                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'sin_th_cm'])
+                                               , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
             
 ################################################################################################################################################
 
@@ -420,13 +420,13 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     aveline = file_df_dict["avek_file"]
     central_q2 = aveline["Q2"].to_numpy()
     central_w = aveline["W"].to_numpy()
-    central_theta = aveline["sin_theta_cm"].to_numpy()
+    central_theta = aveline["theta_cm"].to_numpy()
 
     mm_edges = support["mm_edges"]
     q2_edges = support["q2_edges"]
     w_edges = support["w_edges"]
-    theta_edges = support["sin_theta_cm_edges"]
-    theta_true_edges = support["sin_theta_cm_true_edges"]
+    theta_edges = support["theta_cm_edges"]
+    theta_true_edges = support["theta_cm_true_edges"]
     phi_edges = support["phi_bins"]
     t_vs_tmin_x_edges = support["t_vs_tmin_x_edges"]
     t_vs_tmin_y_edges = support["t_vs_tmin_y_edges"]
@@ -476,7 +476,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     one_d_pages = (
         ("q2", q2_edges, central_q2, '$Q^2$'),
         ("w", w_edges, central_w, 'W'),
-        ("sin_theta_cm", theta_edges, central_theta, '$\\sin(\\theta_{cm})$'),
+        ("theta_cm", theta_edges, central_theta, '$\\theta_{cm}$ (deg)'),
     )
     for variable, edges, central_values, xlabel in one_d_pages:
         for k in range(NumtBins):
@@ -487,8 +487,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             extra_simc_color = 'tab:blue'
             simc_label = 'SIMC'
             simc_color = 'tab:green'
-            if variable == "sin_theta_cm":
-                extra_simc_values, _ = combine_hist_over_settings(support, "simc", "sin_theta_cm_true", settings, k)
+            if variable == "theta_cm":
+                extra_simc_values, _ = combine_hist_over_settings(support, "simc", "theta_cm_true", settings, k)
                 extra_simc_values = extra_simc_values * get_scale_to_reference(extra_simc_values, simc_values)
                 simc_label = 'SIMC Recon'
                 extra_simc_label = 'SIMC True (scaled)'
@@ -529,14 +529,14 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         ("mm", mm_edges, 'MM'),
         ("q2", q2_edges, '$Q^2$'),
         ("w", w_edges, 'W'),
-        ("sin_theta_cm", theta_edges, '$\\sin(\\theta_{cm})$'),
+        ("theta_cm", theta_edges, '$\\theta_{cm}$ (deg)'),
     )
     for variable, edges, ylabel in two_d_pages:
         for k in range(NumtBins):
             data_map = combine_map_over_settings(support, "data", variable, settings, k)
             simc_map = combine_map_over_settings(support, "simc", variable, settings, k)
-            if variable == "sin_theta_cm":
-                simc_true_map = combine_map_over_settings(support, "simc", "sin_theta_cm_true", settings, k)
+            if variable == "theta_cm":
+                simc_true_map = combine_map_over_settings(support, "simc", "theta_cm_true", settings, k)
                 simc_true_map = simc_true_map * get_scale_to_reference(simc_true_map, simc_map)
                 fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
                 plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
@@ -581,7 +581,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     central_pages = (
         ("Q2", central_q2, aveline["dQ2"].to_numpy(), '$Q^2$'),
         ("W", central_w, aveline["dW"].to_numpy(), 'W'),
-        ("sin(theta_cm)", central_theta, None, '$\\sin(\\theta_{cm})$'),
+        ("theta_cm", central_theta, None, '$\\theta_{cm}$ (deg)'),
     )
     for _, values, errors, ylabel in central_pages:
         fig, ax = plt.subplots(figsize=(12, 8))

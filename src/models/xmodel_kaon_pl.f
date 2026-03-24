@@ -2,7 +2,7 @@
 * xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
       subroutine xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
-     *     ww,qq,tt,phi,eps_mod,sin_th_mod,x_mod,par_fn)
+     *     ww,qq,tt,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
 
@@ -14,7 +14,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
       integer npol_set
       real Eb,q2_set,w_set,eps_set
       real ww,qq,tt,phi
-      real eps_mod,sin_th_mod,x_mod
+      real eps_mod,th_mod,x_mod
 
       real mtar,mp,mn,pi
       real mpipl, mkpl
@@ -25,7 +25,7 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
       parameter (mkpl=0.493677)
       
       real wfactor
-      real sin_theta_cm
+      real theta_cm
 
       integer i, test
 
@@ -65,9 +65,9 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
       end do      
  9    close(57)      
       
-*     Calculate model sin(theta_cm) and epsilon at first.
+*     Calculate model theta_cm and epsilon at first.
       call eps_n_theta(pid,npol_set,Eb,ww,qq,tt,
-     *     sin_theta_cm,eps_mod)
+     *     theta_cm,eps_mod)
 
 *     Model sig_L, sig_T, sig_TT, sig_LT.
 
@@ -91,11 +91,10 @@ c     To calculate model cross-section, sig_T+eps*sig_L+ interfer._terms.
       sig_T=(par(5)*exp(-par(6)*(abs(tt)))+par(7)*(abs(tt)))
      >     *(Qdep_T**par(8))
       
-      sig_LT=(par(9)*exp(par(10)*abs(tt))+par(11)/abs(tt))
-     >     *sin_theta_cm
+      sig_LT=(par(9)*exp(par(10)*abs(tt))+par(11)/abs(tt))*sin(theta_cm)
       
       sig_TT=((-par(13)*abs(tt)+par(14))*(abs(tt)
-     >     **(qq/par(15)))-par(16)*qq)*sin_theta_cm**2
+     >     **(qq/par(15)))-par(16)*qq)*sin(theta_cm)**2
       
 c     Correct for W.
       wfactor=1./(ww**2-mtar**2)**2  ! W factor
@@ -124,7 +123,7 @@ c     Correct for W.
 
       x_mod=sig
       
-      sin_th_mod=sin_theta_cm
+      th_mod=theta_cm
       
       end
 

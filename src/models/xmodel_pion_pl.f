@@ -2,7 +2,7 @@
 * xmodel for K^+ for KaonLT 2018-19
 *=======================================================================      
       subroutine xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
-     *     w,q2,tm,phi,eps_mod,sin_th_mod,x_mod,par_fn)
+     *     w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
 c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
 
@@ -14,7 +14,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       integer npol_set
       real Eb,q2_set,w_set,eps_set
       real w,q2,tm,phi
-      real eps_mod,sin_th_mod,x_mod
+      real eps_mod,th_mod,x_mod
 
       real targ,mp,mn,pi
       real mpipl, mkpl
@@ -25,7 +25,7 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       parameter (mkpl=0.493677)
       
       real wfactor
-      real sin_thetacm
+      real thetacm
 
       integer i, test
 
@@ -64,9 +64,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       end do      
  9    close(57)      
       
-*     Calculate model sin(thetacm) and epsilon at first.
+*     Calculate model thetacm and epsilon at first.
       call eps_n_theta(pid,npol_set,Eb,w,q2,tm,
-     *     sin_thetacm,eps_mod)
+     *     thetacm,eps_mod)
 
 *     Model sigL, sigT, sigTT, sigLT.
 
@@ -81,9 +81,9 @@ c     To calculate model cross-section, sigT+eps*sigL+ interfer._terms.
       sigT=(par(5) + par(6)*log(q2_set))
      >     +((par(7)+par(8)*log(q2_set))*f_tav)
       sigLT=((par(9)/abs(tm))*exp((par(10)/abs(tm)))+(par(11)/abs(tm)))
-     >     *sin_thetacm
+     >     *sin(thetacm)
       sigTT=((par(13)/abs(tm)**3)*exp((par(14)*abs(tm)))
-     >     +(par(15)/abs(tm)))*f_tm*sin_thetacm**2
+     >     +(par(15)/abs(tm)))*f_tm*sin(thetacm)**2
       
 c     Correct for W.
       g_W=1./(W**2-targ**2)**2       ! W factor
@@ -106,7 +106,7 @@ c      sigL=sigL*0.90-0.1
 
       x_mod=sig
       
-      sin_th_mod=sin_thetacm
+      th_mod=thetacm
       
       end
 

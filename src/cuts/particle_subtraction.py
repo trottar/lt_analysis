@@ -1739,7 +1739,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
     sys.path.append("binning")
-    from theta_cm import calculate_sin_theta_cm, calculate_tmin
+    from theta_cm import calculate_theta_cm_deg, calculate_tmin
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -1867,7 +1867,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         except AttributeError:
             adj_MM = evt.MM + MM_offset_DATA
         adj_t = get_shifted_t(evt)
-        sin_theta_cm = calculate_sin_theta_cm(ParticleType, POL, evt.W, evt.Q2, adj_t)
+        theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
         
         ##############
@@ -1911,8 +1911,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             )
                             hist_dict["H_Q2_DATA_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_DATA_{}_{}".format(j, k)].Fill(evt.W)
-                            if math.isfinite(sin_theta_cm):
-                                hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Fill(sin_theta_cm)
+                            if math.isfinite(theta_cm_deg):
+                                hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(adj_t)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
@@ -1939,7 +1939,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         except AttributeError:
             adj_MM = evt.MM + MM_offset_DATA
         adj_t = get_shifted_t(evt)
-        sin_theta_cm = calculate_sin_theta_cm(ParticleType, POL, evt.W, evt.Q2, adj_t)
+        theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
 
         ##############
@@ -1983,8 +1983,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             )
                             hist_dict["H_Q2_DUMMY_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_DUMMY_{}_{}".format(j, k)].Fill(evt.W)
-                            if math.isfinite(sin_theta_cm):
-                                hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Fill(sin_theta_cm)
+                            if math.isfinite(theta_cm_deg):
+                                hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(adj_t)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
@@ -2011,7 +2011,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         except AttributeError:
             adj_MM = evt.MM + MM_offset_DATA
         adj_t = get_shifted_t(evt)
-        sin_theta_cm = calculate_sin_theta_cm(ParticleType, POL, evt.W, evt.Q2, adj_t)
+        theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
 
         ##############
@@ -2055,8 +2055,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             )
                             hist_dict["H_Q2_RAND_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_RAND_{}_{}".format(j, k)].Fill(evt.W)
-                            if math.isfinite(sin_theta_cm):
-                                hist_dict["H_theta_cm_RAND_{}_{}".format(j, k)].Fill(sin_theta_cm)
+                            if math.isfinite(theta_cm_deg):
+                                hist_dict["H_theta_cm_RAND_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_RAND_{}_{}".format(j, k)].Fill(adj_t)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_RAND_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
@@ -2083,7 +2083,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         except AttributeError:
             adj_MM = evt.MM + MM_offset_DATA
         adj_t = get_shifted_t(evt)
-        sin_theta_cm = calculate_sin_theta_cm(ParticleType, POL, evt.W, evt.Q2, adj_t)
+        theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
 
         ##############
@@ -2128,8 +2128,8 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             )
                             hist_dict["H_Q2_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.Q2)
                             hist_dict["H_W_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.W)
-                            if math.isfinite(sin_theta_cm):
-                                hist_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)].Fill(sin_theta_cm)
+                            if math.isfinite(theta_cm_deg):
+                                hist_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_t)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_DUMMY_RAND_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)

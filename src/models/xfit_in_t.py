@@ -155,14 +155,14 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     tt0, tt1, tt2, tt3 = 0, 0, 0, 0
 
     fn_sep = "{}/src/{}/xsects/x_sep.{}_Q{}W{}.dat".format(LTANAPATH, ParticleType, pol_str, q2_set.replace("p",""), w_set.replace("p",""))
-    nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:w:q2:sin_thetacm")
+    nsep = TNtuple("nsep", "nsep", "sigl:sigl_e:sigt:sigt_e:siglt:siglt_e:sigtt:sigtt_e:chi:t:w:q2:thetacm")
     nsep.ReadFile(fn_sep)
 
     '''
     print("Reading {}...".format(fn_sep))
     for entry in nsep:
-        print("sigl: {}, sigl_e: {}, sigt: {}, sigt_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, w: {}, q2: {}, sin_thetacm: {}".format(
-            entry.sigl, entry.sigl_e, entry.sigt, entry.sigt_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.w, entry.q2, entry.sin_thetacm
+        print("sigl: {}, sigl_e: {}, sigt: {}, sigt_e: {}, siglt: {}, siglt_e: {}, sigtt: {}, sigtt_e: {}, chi: {}, t: {}, w: {}, q2: {}, thetacm: {}".format(
+            entry.sigl, entry.sigl_e, entry.sigt, entry.sigt_e, entry.siglt, entry.siglt_e, entry.sigtt, entry.sigtt_e, entry.chi, entry.t, entry.w, entry.q2, entry.thetacm
         ))
     '''
 
@@ -197,7 +197,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
     w_set = float(w_set.replace("p","."))
     with open(ave_file_in, 'r') as f:
         for line in f:
-            ww, ww_e, qq, qq_e, tt, tt_e, sin_theta_cm, it = map(float, line.strip().split())
+            ww, ww_e, qq, qq_e, tt, tt_e, theta_cm, it = map(float, line.strip().split())
 
             # Grab functional form from model input file
             fun_wfactor_optimized = prepare_equations(equations, 'wfactor')
@@ -209,7 +209,7 @@ def x_fit_in_t(ParticleType, pol_str, dir_iter, q2_set, w_set, inpDict, output_f
             g_vec.append(g)
             w_vec.append(ww)
             q2_vec.append(qq)
-            th_vec.append(sin_theta_cm)
+            th_vec.append(theta_cm)
             
     # Revert changes for rest of script
     q2_set = str(q2_set).replace(".","p")

@@ -64,9 +64,9 @@ c     Calculate unseparated cross-sections. Now settings are for the piplus data
       
       integer nt,nphi
 
-      real r,dr,w,dw,q2,dq2,tt,dtt,sin_th_cm,sin_th_pos
+      real r,dr,w,dw,q2,dq2,tt,dtt,th_cm,th_pos
       real tm,tmn,tmx
-      real eps_mod,sin_th_mod,x_mod
+      real eps_mod,th_mod,x_mod
       real x_real,dx_real
 
       integer ipol
@@ -188,7 +188,7 @@ c      pause
          WRITE(*,*) '============'
          WRITE(*,*) 'Values read:'
          WRITE(*,*) '============'         
-         read(52,*) w,dw,q2,dq2,tt,dtt,sin_th_pos
+         read(52,*) w,dw,q2,dq2,tt,dtt,th_pos
          WRITE(*,*) 'Numtbins: ', nt
          WRITE(*,*) 'tbin: ', it
          WRITE(*,*) 'tmin: ', tmn
@@ -197,9 +197,12 @@ c      pause
          
          tm=(t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
          
-         sin_th_cm=sin_th_pos
+         th_cm=th_pos
+
+*     Convert back to radians
+         th_cm=th_cm*3.14159D0/180.D0
          WRITE(*,*) 't-bin center: ', tm
-         WRITE(*,*) 'sin(th_cm): ', sin_th_cm
+         WRITE(*,*) 'th_cm (deg): ', th_cm*180./3.14159
          
          do ip=1,nphi
 
@@ -225,11 +228,11 @@ c      pause
             print *,'dratio',dr
             
             call xmodel(pid,npol_set,Eb,q2_set,w_set,eps_set,
-     *           w,q2,tm,phi,eps_mod,sin_th_mod,x_mod,par_fn)
+     *           w,q2,tm,phi,eps_mod,th_mod,x_mod,par_fn)
 
-c sin(theta_cm) check
-            if (abs(sin_th_mod-sin_th_cm).gt.1.e-4) then
-               write(6,*)' Sin(theta) error ',sin_th_mod,sin_th_cm
+c angle check
+            if (abs(th_mod-th_cm).gt.1.e-4) then
+               write(6,*)' Angle error ',th_mod,th_cm
                stop
             endif
             
@@ -250,7 +253,7 @@ c sin(theta_cm) check
             if (isnan(x_mod) .or. x_mod <= 1e-6)
      >         x_mod = 0.0                      
             if (isnan(eps_mod)) eps_mod = 0.0
-            if (isnan(sin_th_mod)) sin_th_mod = 0.0
+            if (isnan(th_mod)) th_mod = 0.0
             if (isnan(phi)) phi = 0.0            
             if (isnan(tt)) tt = 0.0
             if (isnan(tm)) tm = 0.0
@@ -258,8 +261,8 @@ c sin(theta_cm) check
             if (isnan(q2)) q2 = 0.0            
             
             write(61,40) x_real,dx_real,x_mod,eps_mod,
-     *           sin_th_mod,phi*180./3.14159,tm,w,q2
- 40         format(3G15.5,2f8.5,f7.2,3f8.5)
+     *           th_mod*180./3.14159,phi*180./3.14159,tm,w,q2
+ 40         format(3G15.5,f8.5,2f7.2,4f8.5)
 
             print *,"--------------"            
             print *,"xmodel inputs"
@@ -273,7 +276,7 @@ c sin(theta_cm) check
             print *,"tm: ", tm
             print *,"phi: ", phi
             print *,"eps_mod: ", eps_mod
-            print *,"sin_th_mod: ", sin_th_mod
+            print *,"th_mod: ", th_mod
             print *,"x_mod: ", x_mod
             print *,"x_real: ", x_real
             print *,"dx_real: ", dx_real
@@ -284,7 +287,7 @@ c sin(theta_cm) check
 
 c        Write out kinematics for Henk.
          if(npol_set.gt.0) write(99,'(5f8.3,2x,2f6.2)')
-     *   w,q2,eps_mod,sin_th_mod,tm,eps_set,q2_set
+     *   w,q2,eps_mod,th_mod*180./3.14159,tm,eps_set,q2_set
 
       end do                    !t
 

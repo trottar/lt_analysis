@@ -47,7 +47,7 @@ c     enough space for the sets
       real, dimension(nbin,2,2) :: aW,eW,aQ2,eQ2
       real, dimension(nbin,2,2) :: att,ett
 
-      real, dimension(nbin) :: sinthetacm_only
+      real, dimension(nbin) :: thetacm_only
 
       real, dimension(nbin) :: eps_lo,eps_hi
       
@@ -67,7 +67,7 @@ c     enough space for the sets
       
       real eps_set(2)
 
-      real sin_th_mod
+      real th_mod
       
       character*60 fn
       character*2 pol
@@ -300,7 +300,7 @@ c     Average over neg. and pos. settings.
          errtt(it)=1./sqrt(errtt(it))
       end do
 
-c     sin(theta_cm) for neg. and pos. settings. It's turned out the same for
+c     Thetacm for neg. and pos. settings. It's turned out the same for
 c     low and high epsilons, but different for negatives and positives.
 c     So calculate for high eps., neg.-s and pos.-s.
       
@@ -321,8 +321,8 @@ c      Eb=Eb/1000.               !Mev -> Gev units.
       do it=1,ntbins
          tm=(t_bin_boundary(it) + t_bin_boundary(it+1)) / 2
          call eps_n_theta(pid,pol_set,Eb,aveW(it),aveQ2(it),tm,
-     &        sin_th_mod,eps_mod)
-         sinthetacm_only(it)=sin_th_mod
+     &        th_mod,eps_mod)
+         thetacm_only(it)=th_mod*180./3.14159
       end do
 
 c     Save data.
@@ -335,15 +335,15 @@ c     Save data.
       write(*,*)'=========================='      
       open(77,file=fn)
       do it=1,ntbins
-         write(77,'(7f9.5,i3)')
+         write(77,'(6f9.5,f10.2,i3)')
      *        aveW(it),errW(it),aveQ2(it),errQ2(it),
-     *        avett(it), errtt(it), sinthetacm_only(it),it
+     *        avett(it), errtt(it), thetacm_only(it),it
          write(*,*)'--------------------------'         
          write(*,*) 't-bin: ', it
          write(*,*) 'avet: ', avett(it), errtt(it)
          write(*,*) 'ave Q2: ', aveQ2(it),errQ2(it)
          write(*,*) 'ave W: ', aveW(it),errW(it)
-         write(*,*) 'sin(thetacm): ', sinthetacm_only(it)
+         write(*,*) 'thetacm: ', thetacm_only(it)
       end do
       close(77)
       write(*,*)'=========================='      

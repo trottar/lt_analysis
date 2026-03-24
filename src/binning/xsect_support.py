@@ -157,13 +157,13 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
             ("mm", "mm"),
             ("Q2", "q2"),
             ("W", "w"),
-            ("theta_cm", "sin_theta_cm"),
+            ("theta_cm", "theta_cm"),
         )
         map2d_variable_map = (
             ("t_vs_tmin", "t_vs_tmin"),
         )
         simc_only_variable_map = (
-            ("theta_cm_true", "sin_theta_cm_true"),
+            ("theta_cm_true", "theta_cm_true"),
         )
 
         for hist in histlist:

@@ -49,61 +49,61 @@ def set_val(inp_pol_str, inp_Q2, inp_W):
 ################################################################################################################################################
 
 def fun_Sig_L_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, sin_theta_cm=theta):
-        return fun_Sig_L(g, qq, ww, sin_theta_cm, x, par)
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_L(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# sin_theta_cm is the stored sin(theta_cm) quantity.
-def fun_Sig_L(g, qq, ww, sin_theta_cm, x, par):
+# Theta_cm in radians (-pi, pi)
+def fun_Sig_L(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]  
-    #print(f"xfit_kaon_pl.py sigL: t = {tt}, Q2 = {qq}, W = {ww}, sin_theta_cm = {sin_theta_cm}")
+    #print(f"xfit_kaon_pl.py sigL: t = {tt}, Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigL
-    return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par1, par2, par3, par4)
+    return fun_Sig_L_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
 def fun_Sig_T_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, sin_theta_cm=theta):
-        return fun_Sig_T(g, qq, ww, sin_theta_cm, x, par)
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_T(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# sin_theta_cm is the stored sin(theta_cm) quantity.
-def fun_Sig_T(g, qq, ww, sin_theta_cm, x, par):
+# Theta_cm in radians (-pi, pi)
+def fun_Sig_T(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par1, par2, par3, par4 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    #print(f"xfit_kaon_pl.py sigT: Q2 = {qq}, W = {ww}, sin_theta_cm = {sin_theta_cm}")
+    #print(f"xfit_kaon_pl.py sigT: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigT
-    return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par1, par2, par3, par4)
+    return fun_Sig_T_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par1, par2, par3, par4)
 
 def fun_Sig_LT_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, sin_theta_cm=theta):
-        return fun_Sig_LT(g, qq, ww, sin_theta_cm, x, par)
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_LT(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# sin_theta_cm is the stored sin(theta_cm) quantity.
-def fun_Sig_LT(g, qq, ww, sin_theta_cm, x, par):
+# Theta_cm in radians (-pi, pi)
+def fun_Sig_LT(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par9, par10, par11, par12 = [par[i] if i < len(par) else 0.0 for i in range(4)]
-    #print(f"xfit_kaon_pl.py sigLT: Q2 = {qq}, W = {ww}, sin_theta_cm = {sin_theta_cm}")
+    #print(f"xfit_kaon_pl.py sigLT: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigLT
-    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par9, par10, par11, par12)
+    return fun_Sig_LT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par9, par10, par11, par12)
 
 def fun_Sig_TT_wrapper(wfactor, q2, w, theta):
-    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, sin_theta_cm=theta):
-        return fun_Sig_TT(g, qq, ww, sin_theta_cm, x, par)
+    def tmp_func(x, par, g=wfactor, qq=q2, ww=w, theta_cm=theta):
+        return fun_Sig_TT(g, qq, ww, theta_cm, x, par)
     return tmp_func
 
-# sin_theta_cm is the stored sin(theta_cm) quantity.
-def fun_Sig_TT(g, qq, ww, sin_theta_cm, x, par):
+# Theta_cm in radians (-pi, pi)
+def fun_Sig_TT(g, qq, ww, theta_cm, x, par):
     tt = abs(x[0])
     q2_set = float(Q2.replace("p","."))
     w_set = float(W.replace("p","."))
     par13, par14, par15, par16 = [par[i] if i < len(par) else 0.0 for i in range(4)]  
-    #print(f"xfit_kaon_pl.py sigTT: Q2 = {qq}, W = {ww}, sin_theta_cm = {sin_theta_cm}")
+    #print(f"xfit_kaon_pl.py sigTT: Q2 = {qq}, W = {ww}, theta_cm = {theta_cm}")
     # Calculate SigTT
-    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, sin_theta_cm, par13, par14, par15, par16)
+    return fun_Sig_TT_optimized(q2_set, w_set, qq, ww, tt, theta_cm, par13, par14, par15, par16)

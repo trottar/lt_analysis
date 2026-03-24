@@ -86,14 +86,6 @@ def _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t):
     return min(max(raw, 0.0), 1.0)
 
 
-def calculate_sin_theta_cm(particle_type, pol, w, q2, minus_t):
-    sin_half_sq = _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t)
-    if not math.isfinite(sin_half_sq):
-        return float("nan")
-
-    return 2.0 * math.sqrt(sin_half_sq * max(1.0 - sin_half_sq, 0.0))
-
-
 def calculate_theta_cm_rad(particle_type, pol, w, q2, minus_t):
     sin_half_sq = _calculate_half_angle_sin_sq(particle_type, pol, w, q2, minus_t)
     if not math.isfinite(sin_half_sq):

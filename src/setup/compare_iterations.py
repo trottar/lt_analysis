@@ -304,7 +304,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                     file_df_dict['unsep_file_loeps'] = file_to_df( \
                                                                     inp_dir+"/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                                     .format(pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100) \
-                                                                    , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                                    , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
 
                 if row['EPSVAL'] == float(HIEPS):
                     file_df_dict['aver_hieps'] = file_to_df( \
@@ -332,11 +332,11 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                     file_df_dict['unsep_file_hieps'] = file_to_df( \
                                                                     inp_dir+"/xsects/x_unsep.{}_Q{}W{}_{:.0f}.dat" \
                                                                     .format(pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100) \
-                                                                    , ['x_real', 'dx_real', 'x_mod', 'eps', 'sin_th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
+                                                                    , ['x_real', 'dx_real', 'x_mod', 'eps', 'th_cm', 'phi', 't', 'W', 'Q2']).sort_values(by='t')
                 file_df_dict['sep_file'] = file_to_df( \
                                                        inp_dir+"/xsects/x_sep.{}_Q{}W{}.dat" \
                                                        .format(pol_str, Q2.replace("p",""), W.replace("p","")) \
-                                                       , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'sin_th_cm'])
+                                                       , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
                 
                 file_df_dict["params"] = pd.DataFrame(param_arr, columns=["params"])
                 file_df_dict["date"] = pd.DataFrame([date], columns=["date"])
@@ -451,7 +451,7 @@ def compare_iters(pol_str, ParticleType, Q2, W, LOEPS, HIEPS):
                     inp_param = '{} {} {} {} {} {} '.format(
                         iteration_data[date]['Q2'].replace("p","."), 
                         iteration_data[date]['W'].replace("p","."), 
-                        row['sin_th_cm'],
+                        row['th_cm'],
                         row['t'], 
                         row['Q2'], 
                         row['W']
