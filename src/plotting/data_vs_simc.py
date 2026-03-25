@@ -125,182 +125,9 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     ################################################################################################################################################
     
-    for hist in histlist_copy:
-                
-        '''
-        hist["H_hsdelta_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_hsxptar_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_hsyptar_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssxfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssyfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssxpfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssypfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_hsxfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_hsyfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_hsxpfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_hsypfp_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssdelta_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssxptar_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ssyptar_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_q_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_Q2_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_t_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_epsilon_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_MM_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_th_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ph_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ph_q_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_th_q_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_ph_recoil_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_th_recoil_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_pmiss_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_emiss_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_pmx_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_pmy_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_pmz_SIMC"].Scale(hist["normfac_simc"])
-        hist["H_W_SIMC"].Scale(hist["normfac_simc"])
-        
-        hist["H_hsdelta_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_hsxptar_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_hsyptar_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssxfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssyfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssxpfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssypfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_hsxfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_hsyfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_hsxpfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_hsypfp_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssdelta_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssxptar_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ssyptar_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_q_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_Q2_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_t_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_epsilon_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_MM_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_th_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ph_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ph_q_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_th_q_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ph_recoil_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_th_recoil_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_pmiss_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_emiss_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_pmx_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_pmy_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_pmz_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_W_DUMMY"].Scale(hist["normfac_dummy"])
-        hist["H_ct_DUMMY"].Scale(hist["normfac_dummy"])
-        
-        hist["H_hsdelta_DATA"].Scale(hist["normfac_data"])
-        hist["H_hsxptar_DATA"].Scale(hist["normfac_data"])
-        hist["H_hsyptar_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssxfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssyfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssxpfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssypfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_hsxfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_hsyfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_hsxpfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_hsypfp_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssdelta_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssxptar_DATA"].Scale(hist["normfac_data"])
-        hist["H_ssyptar_DATA"].Scale(hist["normfac_data"])
-        hist["H_q_DATA"].Scale(hist["normfac_data"])
-        hist["H_Q2_DATA"].Scale(hist["normfac_data"])
-        hist["H_t_DATA"].Scale(hist["normfac_data"])
-        hist["H_epsilon_DATA"].Scale(hist["normfac_data"])
-        hist["H_MM_DATA"].Scale(hist["normfac_data"])
-        hist["H_th_DATA"].Scale(hist["normfac_data"])
-        hist["H_ph_DATA"].Scale(hist["normfac_data"])
-        hist["H_ph_q_DATA"].Scale(hist["normfac_data"])
-        hist["H_th_q_DATA"].Scale(hist["normfac_data"])
-        hist["H_ph_recoil_DATA"].Scale(hist["normfac_data"])
-        hist["H_th_recoil_DATA"].Scale(hist["normfac_data"])
-        hist["H_pmiss_DATA"].Scale(hist["normfac_data"])
-        hist["H_emiss_DATA"].Scale(hist["normfac_data"])
-        hist["H_pmx_DATA"].Scale(hist["normfac_data"])
-        hist["H_pmy_DATA"].Scale(hist["normfac_data"])
-        hist["H_pmz_DATA"].Scale(hist["normfac_data"])
-        hist["H_W_DATA"].Scale(hist["normfac_data"])
-        hist["H_ct_DATA"].Scale(hist["normfac_data"])
-        
-        hist["H_hsdelta_DATA"].Add(hist["H_hsdelta_DUMMY"],-1)
-        hist["H_hsxptar_DATA"].Add(hist["H_hsxptar_DUMMY"],-1)
-        hist["H_hsyptar_DATA"].Add(hist["H_hsyptar_DUMMY"],-1)
-        hist["H_ssxfp_DATA"].Add(hist["H_ssxfp_DUMMY"],-1)
-        hist["H_ssyfp_DATA"].Add(hist["H_ssyfp_DUMMY"],-1)
-        hist["H_ssxpfp_DATA"].Add(hist["H_ssxpfp_DUMMY"],-1)
-        hist["H_ssypfp_DATA"].Add(hist["H_ssypfp_DUMMY"],-1)
-        hist["H_hsxfp_DATA"].Add(hist["H_hsxfp_DUMMY"],-1)
-        hist["H_hsyfp_DATA"].Add(hist["H_hsyfp_DUMMY"],-1)
-        hist["H_hsxpfp_DATA"].Add(hist["H_hsxpfp_DUMMY"],-1)
-        hist["H_hsypfp_DATA"].Add(hist["H_hsypfp_DUMMY"],-1)
-        hist["H_ssdelta_DATA"].Add(hist["H_ssdelta_DUMMY"],-1)
-        hist["H_ssxptar_DATA"].Add(hist["H_ssxptar_DUMMY"],-1)
-        hist["H_ssyptar_DATA"].Add(hist["H_ssyptar_DUMMY"],-1)
-        hist["H_q_DATA"].Add(hist["H_q_DUMMY"],-1)
-        hist["H_Q2_DATA"].Add(hist["H_Q2_DUMMY"],-1)
-        hist["H_t_DATA"].Add(hist["H_t_DUMMY"],-1)
-        hist["H_epsilon_DATA"].Add(hist["H_epsilon_DUMMY"],-1)
-        hist["H_MM_DATA"].Add(hist["H_MM_DUMMY"],-1)
-        hist["H_th_DATA"].Add(hist["H_th_DUMMY"],-1)
-        hist["H_ph_DATA"].Add(hist["H_ph_DUMMY"],-1)
-        hist["H_ph_q_DATA"].Add(hist["H_ph_q_DUMMY"],-1)
-        hist["H_th_q_DATA"].Add(hist["H_th_q_DUMMY"],-1)
-        hist["H_ph_recoil_DATA"].Add(hist["H_ph_recoil_DUMMY"],-1)
-        hist["H_th_recoil_DATA"].Add(hist["H_th_recoil_DUMMY"],-1)
-        hist["H_pmiss_DATA"].Add(hist["H_pmiss_DUMMY"],-1)
-        hist["H_emiss_DATA"].Add(hist["H_emiss_DUMMY"],-1)
-        hist["H_pmx_DATA"].Add(hist["H_pmx_DUMMY"],-1)
-        hist["H_pmy_DATA"].Add(hist["H_pmy_DUMMY"],-1)
-        hist["H_pmz_DATA"].Add(hist["H_pmz_DUMMY"],-1)
-        hist["H_W_DATA"].Add(hist["H_W_DUMMY"],-1)
-        hist["H_ct_DATA"].Add(hist["H_ct_DUMMY"],-1)
-        '''
-        
-        ##############
-        # HARD CODED #
-        ##############
-
-        # Scale MC to data for better comparison
-        '''
-        hist["H_hsdelta_SIMC"].Scale(hist["H_hsdelta_DATA"].Integral()/hist["H_hsdelta_SIMC"].Integral())
-        hist["H_hsxptar_SIMC"].Scale(hist["H_hsxptar_DATA"].Integral()/hist["H_hsxptar_SIMC"].Integral())
-        hist["H_hsyptar_SIMC"].Scale(hist["H_hsyptar_DATA"].Integral()/hist["H_hsyptar_SIMC"].Integral())
-        hist["H_ssxfp_SIMC"].Scale(hist["H_ssxfp_DATA"].Integral()/hist["H_ssxfp_SIMC"].Integral())
-        hist["H_ssyfp_SIMC"].Scale(hist["H_ssyfp_DATA"].Integral()/hist["H_ssyfp_SIMC"].Integral())
-        hist["H_ssxpfp_SIMC"].Scale(hist["H_ssxpfp_DATA"].Integral()/hist["H_ssxpfp_SIMC"].Integral())
-        hist["H_ssypfp_SIMC"].Scale(hist["H_ssypfp_DATA"].Integral()/hist["H_ssypfp_SIMC"].Integral())
-        hist["H_hsxfp_SIMC"].Scale(hist["H_hsxfp_DATA"].Integral()/hist["H_hsxfp_SIMC"].Integral())
-        hist["H_hsyfp_SIMC"].Scale(hist["H_hsyfp_DATA"].Integral()/hist["H_hsyfp_SIMC"].Integral())
-        hist["H_hsxpfp_SIMC"].Scale(hist["H_hsxpfp_DATA"].Integral()/hist["H_hsxpfp_SIMC"].Integral())
-        hist["H_hsypfp_SIMC"].Scale(hist["H_hsypfp_DATA"].Integral()/hist["H_hsypfp_SIMC"].Integral())
-        hist["H_ssdelta_SIMC"].Scale(hist["H_ssdelta_DATA"].Integral()/hist["H_ssdelta_SIMC"].Integral())
-        hist["H_ssxptar_SIMC"].Scale(hist["H_ssxptar_DATA"].Integral()/hist["H_ssxptar_SIMC"].Integral())
-        hist["H_ssyptar_SIMC"].Scale(hist["H_ssyptar_DATA"].Integral()/hist["H_ssyptar_SIMC"].Integral())
-        #hist["H_q_SIMC"].Scale(hist["H_q_DATA"].Integral()/hist["H_q_SIMC"].Integral())
-        hist["H_Q2_SIMC"].Scale(hist["H_Q2_DATA"].Integral()/hist["H_Q2_SIMC"].Integral())
-        hist["H_t_SIMC"].Scale(hist["H_t_DATA"].Integral()/hist["H_t_SIMC"].Integral())
-        hist["H_epsilon_SIMC"].Scale(hist["H_epsilon_DATA"].Integral()/hist["H_epsilon_SIMC"].Integral())
-        hist["H_MM_SIMC"].Scale(hist["H_MM_DATA"].Integral()/hist["H_MM_SIMC"].Integral())
-        #hist["H_th_SIMC"].Scale(hist["H_th_DATA"].Integral()/hist["H_th_SIMC"].Integral())
-        #hist["H_ph_SIMC"].Scale(hist["H_ph_DATA"].Integral()/hist["H_ph_SIMC"].Integral())
-        hist["H_ph_q_SIMC"].Scale(hist["H_ph_q_DATA"].Integral()/hist["H_ph_q_SIMC"].Integral())
-        hist["H_th_q_SIMC"].Scale(hist["H_th_q_DATA"].Integral()/hist["H_th_q_SIMC"].Integral())
-        #hist["H_ph_recoil_SIMC"].Scale(hist["H_ph_recoil_DATA"].Integral()/hist["H_ph_recoil_SIMC"].Integral())
-        #hist["H_th_recoil_SIMC"].Scale(hist["H_th_recoil_DATA"].Integral()/hist["H_th_recoil_SIMC"].Integral())
-        hist["H_pmiss_SIMC"].Scale(hist["H_pmiss_DATA"].Integral()/hist["H_pmiss_SIMC"].Integral())
-        hist["H_emiss_SIMC"].Scale(hist["H_emiss_DATA"].Integral()/hist["H_emiss_SIMC"].Integral())
-        #hist["H_pmx_SIMC"].Scale(hist["H_pmx_DATA"].Integral()/hist["H_pmx_SIMC"].Integral())
-        #hist["H_pmy_SIMC"].Scale(hist["H_pmy_DATA"].Integral()/hist["H_pmy_SIMC"].Integral())
-        #hist["H_pmz_SIMC"].Scale(hist["H_pmz_DATA"].Integral()/hist["H_pmz_SIMC"].Integral())
-        hist["H_W_SIMC"].Scale(hist["H_W_DATA"].Integral()/hist["H_W_SIMC"].Integral())
-        '''
-        ##############
-        ##############
-        ##############
+    # Histograms arriving here are already physics normalized upstream in
+    # rand_sub.py / compare_simc.py. This plotting step should never
+    # renormalize or area-match SIMC to data.
         
     # Creating clone of efficiency plots because otherwise things
     # crash due to pointer issues with TMultiGraph's Add() function
@@ -436,17 +263,17 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     t_bins = np.sort(t_bins)
     tBin_line = TLine()
-    events_between = []
+    yields_between = []
     for j in range(0, len(t_bins)-1):
-        events_between_tmp = []
+        yields_between_tmp = []
         for i,hist in enumerate(histlist_copy):
             b = t_bins[j]
             # Find the bins corresponding to the given bin centers
             bin1 = hist["H_t_DATA"].FindBin(t_bins[j])
             bin2 = hist["H_t_DATA"].FindBin(t_bins[j+1])
-            # Get the content of the bins and calculate the number of events between them
-            events_between_tmp.append(sum(hist["H_t_DATA"].GetBinContent(k) / hist["normfac_data"] for k in range(bin1, bin2+1)))
-        events_between.append(sum(events_between_tmp))
+            # Sum the already physics-normalized yield in the displayed t-range.
+            yields_between_tmp.append(sum(hist["H_t_DATA"].GetBinContent(k) for k in range(bin1, bin2+1)))
+        yields_between.append(sum(yields_between_tmp))
 
         
     for j in range(0, len(t_bins)-1):
@@ -455,7 +282,7 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
             tBin_line.SetLineColor(7)
         else:
             tBin_line.SetLineColor(7)
-        l_t.AddEntry(tBin_line,"Evts in {:.2f}-{:.2f}: {:.0f}".format(t_bins[j],t_bins[j+1], events_between[j]))     
+        l_t.AddEntry(tBin_line,"Yield in {:.2f}-{:.2f}: {:.3e}".format(t_bins[j],t_bins[j+1], yields_between[j]))
         tBin_line.SetLineWidth(4)
         tBin_line.DrawLine(b,0,b,binmax)
         

@@ -747,10 +747,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                 )
                 residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
             else:
-                hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-                hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-                hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
-                hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit1_{}".format(j)][3])
+                raise RuntimeError(
+                    "Missing cached yield-event templates for ave_per_bin stage-1 MM background subtraction. "
+                    "Legacy histogram rescaling fallback is disabled to preserve physics normalization."
+                )
             hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][1], -1)
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit1_{}".format(j)][0], -1)  
 
@@ -812,10 +812,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     residual_weights=residual_bg_weights1,
                 )
             else:
-                hist_bin_dict["H_Q2_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-                hist_bin_dict["H_W_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-                hist_bin_dict["H_t_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
-                hist_bin_dict["H_epsilon_DATA_{}".format(j)].Scale(fitDict["background_data_fit2_{}".format(j)][3])
+                raise RuntimeError(
+                    "Missing cached yield-event templates for ave_per_bin stage-2 MM background subtraction. "
+                    "Legacy histogram rescaling fallback is disabled to preserve physics normalization."
+                )
             hist_bin_dict["H_MM_DATA_{}".format(j)].Add(fitDict["background_data_fit2_{}".format(j)][0], -1)  
 
             # Remove histograms with less than event_threshold entries and negative integrals
