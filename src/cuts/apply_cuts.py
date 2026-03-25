@@ -38,7 +38,7 @@ cut_poly_ymax = None
 c0_value = 0.0
 #TMIN_RESOLUTION_THRESHOLD = 0.0
 #TMIN_RESOLUTION_THRESHOLD = -1e-3 # 1 MeV^2, adjust as needed based on resolution studies
-TMIN_RESOLUTION_THRESHOLD = -10.0 # 1 GeV^2, adjust as needed based on resolution studies
+TMIN_RESOLUTION_THRESHOLD = -1.0 # 1 GeV^2, adjust as needed based on resolution studies
 
 
 def _sort_ccw_points(points):
@@ -203,7 +203,8 @@ def _compute_data_cut_state(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
     t_in_range = _in_window(adj_t, tmin, tmax)
     tmin_resolved = _passes_tmin_resolution(adj_t, evt.W, evt.Q2)
     mm_in_range = _in_window(adj_mm, mm_min, mm_max)
-    return base_cuts and t_in_range and tmin_resolved and mm_in_range, base_cuts and t_in_range and tmin_resolved, adj_hsdelta
+    #return base_cuts and t_in_range and tmin_resolved and mm_in_range, base_cuts and t_in_range and tmin_resolved, adj_hsdelta
+    return base_cuts and t_in_range and mm_in_range, base_cuts and t_in_range, adj_hsdelta
 
 
 def evaluate_data_event(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -260,7 +261,7 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     t_in_range = _in_window(minus_t, tmin, tmax)
     tmin_resolved = _passes_tmin_resolution(minus_t, evt.W, evt.Q2)
     mm_in_range = _in_window(adj_missmass, mm_min, mm_max)
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved and mm_in_range
-    #ALLCUTS = (-100000<=-evt.t) # No cuts
+    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved and mm_in_range
+    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and mm_in_range
 
     return ALLCUTS
