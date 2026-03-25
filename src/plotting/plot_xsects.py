@@ -348,9 +348,19 @@ def combine_2d_map_over_settings(support, kind, variable, settings, t_index):
 def get_scale_to_reference(values, reference_values):
     numerator = float(np.sum(reference_values))
     denominator = float(np.sum(values))
-    if not np.isfinite(numerator) or not np.isfinite(denominator) or denominator <= 0.0:
+    if (
+        not np.isfinite(numerator)
+        or not np.isfinite(denominator)
+        or numerator <= 0.0
+        or denominator <= 0.0
+    ):
         return 1.0
     return numerator / denominator
+
+
+def scale_hist_to_reference(values, errors, reference_values):
+    scale = get_scale_to_reference(values, reference_values)
+    return values * scale, errors * scale, scale
 
 
 def plot_hist_overlay(
@@ -441,6 +451,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_errors = get_support_matrix(support, "simc", "mm", setting, "errors")[k]
             data_sum, data_err_sum = sum_hist_over_phi(data_values, data_errors)
             simc_sum, simc_err_sum = sum_hist_over_phi(simc_values, simc_errors)
+            simc_sum, simc_err_sum, _ = scale_hist_to_reference(simc_sum, simc_err_sum, data_sum)
             plot_hist_overlay(
                 axes[idx],
                 mm_edges,
@@ -450,6 +461,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 simc_err_sum,
                 "{} {} MM, {} setting, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), setting, t_bin_centers[k]),
                 'MM',
+                simc_label='SIMC (scaled)',
             )
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
@@ -458,6 +470,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     for k in range(NumtBins):
         data_mm, data_mm_err = combine_hist_over_settings(support, "data", "mm", settings, k)
         simc_mm, simc_mm_err = combine_hist_over_settings(support, "simc", "mm", settings, k)
+        simc_mm, simc_mm_err, _ = scale_hist_to_reference(simc_mm, simc_mm_err, data_mm)
         fig, ax = plt.subplots(figsize=(12, 8))
         plot_hist_overlay(
             ax,
@@ -468,6 +481,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_mm_err,
             "{} {} MM, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), t_bin_centers[k]),
             'MM',
+            simc_label='SIMC (scaled)',
         )
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
@@ -482,15 +496,16 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         for k in range(NumtBins):
             data_values, data_errors = combine_hist_over_settings(support, "data", variable, settings, k)
             simc_values, simc_errors = combine_hist_over_settings(support, "simc", variable, settings, k)
+            simc_values, simc_errors, _ = scale_hist_to_reference(simc_values, simc_errors, data_values)
             extra_simc_values = None
             extra_simc_label = None
             extra_simc_color = 'tab:blue'
-            simc_label = 'SIMC'
+            simc_label = 'SIMC (scaled)'
             simc_color = 'tab:green'
             if variable == "theta_cm":
                 extra_simc_values, _ = combine_hist_over_settings(support, "simc", "theta_cm_true", settings, k)
-                extra_simc_values = extra_simc_values * get_scale_to_reference(extra_simc_values, simc_values)
-                simc_label = 'SIMC Recon'
+                extra_simc_values = extra_simc_values * get_scale_to_reference(extra_simc_values, data_values)
+                simc_label = 'SIMC Recon (scaled)'
                 extra_simc_label = 'SIMC True (scaled)'
             fig, ax = plt.subplots(figsize=(12, 8))
             plot_hist_overlay(
