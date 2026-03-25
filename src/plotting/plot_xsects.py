@@ -306,18 +306,15 @@ print_plot_timer("setup/data load", setup_start)
 
 def load_xsect_support(eps_tag):
     support_name = "{}_xsect_support_Q{}W{}_{}.npz".format(ParticleType, Q2, W, eps_tag)
-    support_candidates = (
-        os.path.join(OUTPATH, support_name),
-        os.path.join(LTANAPATH, "src", ParticleType, support_name),
-    )
-    for support_path in support_candidates:
-        if os.path.exists(support_path):
-            with np.load(support_path) as support_npz:
-                return {key: support_npz[key] for key in support_npz.files}
+    support_path = os.path.join(OUTPATH, support_name)
+    if os.path.exists(support_path):
+        print("Loading xsect support {} from {}".format(eps_tag, support_path))
+        with np.load(support_path) as support_npz:
+            return {key: support_npz[key] for key in support_npz.files}
     raise FileNotFoundError(
-        "Required xsect support file not found for {}. Looked in: {}".format(
+        "Required xsect support file not found for {} at {}".format(
             eps_tag,
-            ", ".join(support_candidates),
+            support_path,
         )
     )
 
