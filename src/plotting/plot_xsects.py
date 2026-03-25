@@ -21,6 +21,7 @@ from scipy.optimize import curve_fit
 import math
 import re
 import sys, os
+from time import perf_counter
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -33,6 +34,25 @@ if len(sys.argv)-1!=10:
 # Suppress the OptimizeWarning
 warnings.filterwarnings("ignore", category=RuntimeWarning)    
 ###############################################################################################################################################
+
+
+def format_elapsed(seconds):
+    if seconds < 60.0:
+        return "{:.2f} s".format(seconds)
+    minutes, remainder = divmod(seconds, 60.0)
+    if minutes < 60.0:
+        return "{:.0f} m {:.2f} s".format(minutes, remainder)
+    hours, minutes = divmod(minutes, 60.0)
+    return "{:.0f} h {:.0f} m {:.2f} s".format(hours, minutes, remainder)
+
+
+def print_plot_timer(stage_name, start_time):
+    elapsed = perf_counter() - start_time
+    print("[TIMER] plot_xsects {}: {}".format(stage_name, format_elapsed(elapsed)))
+    return elapsed
+
+
+plot_xsects_start = perf_counter()
 
 ParticleType = sys.argv[1]
 POL = sys.argv[2]
@@ -157,6 +177,7 @@ def fix_spacing(f_name):
             output.write('\n'.join(lines))
 
 # Fix file spacing to work in pandas
+setup_start = perf_counter()
 fix_spacing(LTANAPATH+"/src/{}/averages/avek.Q{}W{}.dat".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
 fix_spacing(LTANAPATH+"/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(LOEPS)*100))
 fix_spacing(LTANAPATH+"/src/{}/averages/aver.{}_Q{}W{}_{:.0f}.dat".format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100))
@@ -279,6 +300,7 @@ for i,row in file_df_dict['setting_df'].iterrows():
                                                LTANAPATH+"/src/{}/xsects/x_sep.{}_Q{}W{}.dat" \
                                                .format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")) \
                                                , ['sigL', 'dsigL', 'sigT', 'dsigT', 'sigLT', 'dsigLT', 'sigTT', 'dsigTT', 'chisq', 't', 'W', 'Q2', 'th_cm'])
+print_plot_timer("setup/data load", setup_start)
             
 ################################################################################################################################################
 
@@ -614,10 +636,13 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         plt.close(fig)
 
 
+support_start = perf_counter()
 support_loeps = load_xsect_support("lowe")
 support_hieps = load_xsect_support("highe")
+print_plot_timer("support load", support_start)
 
 # Create a PdfPages object to manage the PDF file
+pdf_stage_start = perf_counter()
 with PdfPages(outputpdf) as pdf:
     
     # Create a figure and axis objects
@@ -658,6 +683,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -710,6 +736,7 @@ with PdfPages(outputpdf) as pdf:
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
 
     ##########
     # Fit ratio data vs Phi
@@ -790,6 +817,7 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=14)
         plt.tight_layout(rect=[0,0,1,0.96])
         pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
 
     ##########
     # Plot the fit parameters A, B, C vs t and fit them with three models
@@ -910,6 +938,7 @@ with PdfPages(outputpdf) as pdf:
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
 
     ### HERE 1
 
@@ -1010,6 +1039,7 @@ with PdfPages(outputpdf) as pdf:
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
 
         j+=1
 
@@ -1047,6 +1077,7 @@ with PdfPages(outputpdf) as pdf:
     # Adjust layout
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
 
     ### HERE 2
 
@@ -1226,6 +1257,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
 
     # Create a figure and axis objects for W plot
     fig, axes = plt.subplots(1, 1, figsize=(12, 8), sharex=True)
@@ -1262,6 +1294,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
         
     ###
         
@@ -1293,6 +1326,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
 
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
@@ -1321,6 +1355,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
     
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
@@ -1350,6 +1385,7 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
     
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
@@ -1379,6 +1415,7 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
     
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -1411,6 +1448,7 @@ with PdfPages(outputpdf) as pdf:
 
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
     
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
@@ -1441,6 +1479,7 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
     
     fig, axes = plt.subplots(2, 2, figsize=(12, 8), sharex=True)
 
@@ -1481,5 +1520,6 @@ with PdfPages(outputpdf) as pdf:
         
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
+    plt.close(fig)
 
     '''
