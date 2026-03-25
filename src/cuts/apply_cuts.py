@@ -36,7 +36,7 @@ cut_poly_xmax = None
 cut_poly_ymin = None
 cut_poly_ymax = None
 c0_value = 0.0
-TMIN_RESOLUTION_THRESHOLD = 1e-5
+TMIN_RESOLUTION_THRESHOLD = 1e-6 # 0.001 MeV^2, adjust as needed based on resolution studies
 
 
 def _sort_ccw_points(points):

@@ -645,6 +645,7 @@ print_plot_timer("support load", support_start)
 pdf_stage_start = perf_counter()
 with PdfPages(outputpdf) as pdf:
     
+    stage_start = perf_counter()
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
 
@@ -683,7 +684,6 @@ with PdfPages(outputpdf) as pdf:
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     pdf.savefig(fig, bbox_inches='tight')
-    plt.close(fig)
 
     # Loop through t bins and plot data
     for k in range(NumtBins):
@@ -736,10 +736,11 @@ with PdfPages(outputpdf) as pdf:
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         pdf.savefig(fig, bbox_inches='tight')
-        plt.close(fig)
+    print_plot_timer("ratio pages", stage_start)
 
     ##########
     # Fit ratio data vs Phi
+    stage_start = perf_counter()
 
     # functional form in φ [degrees]
     def R_model(phi_deg, A, B, C):
@@ -817,10 +818,11 @@ with PdfPages(outputpdf) as pdf:
         ax.legend(fontsize=14)
         plt.tight_layout(rect=[0,0,1,0.96])
         pdf.savefig(fig, bbox_inches='tight')
-        plt.close(fig)
+    print_plot_timer("ratio phi fits", stage_start)
 
     ##########
     # Plot the fit parameters A, B, C vs t and fit them with three models
+    stage_start = perf_counter()
 
     # analytic t-dependence models
     def f_linear(t, a, b):      return a + b * t
@@ -884,10 +886,12 @@ with PdfPages(outputpdf) as pdf:
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
+    print_plot_timer("coefficient pages", stage_start)
 
     ###########
 
     ### HERE 0
+    stage_start = perf_counter()
 
     # Create a single figure and axis object for all phi bins
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -938,7 +942,6 @@ with PdfPages(outputpdf) as pdf:
     ax.grid(True, which='both', linestyle='--', linewidth=0.5)
     plt.tight_layout()
     pdf.savefig(fig, bbox_inches='tight')
-    plt.close(fig)
 
     ### HERE 1
 
@@ -1039,12 +1042,12 @@ with PdfPages(outputpdf) as pdf:
         ax.grid(True, which='both', linestyle='--', linewidth=0.5)
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
-        plt.close(fig)
 
         j+=1
 
     append_xsect_support_pages(pdf, support_loeps, "Low $\\epsilon$")
     append_xsect_support_pages(pdf, support_hieps, "High $\\epsilon$")
+    print_plot_timer("unsep/support pages", stage_start)
 
     '''
     # Create a figure with 4 subplots
@@ -1523,3 +1526,5 @@ with PdfPages(outputpdf) as pdf:
     plt.close(fig)
 
     '''
+print_plot_timer("pdf generation total", pdf_stage_start)
+print_plot_timer("total", plot_xsects_start)
