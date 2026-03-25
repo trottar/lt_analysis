@@ -312,7 +312,8 @@ def load_xsect_support(eps_tag):
     )
     for support_path in support_candidates:
         if os.path.exists(support_path):
-            return np.load(support_path)
+            with np.load(support_path) as support_npz:
+                return {key: support_npz[key] for key in support_npz.files}
     raise FileNotFoundError(
         "Required xsect support file not found for {}. Looked in: {}".format(
             eps_tag,
@@ -463,16 +464,43 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     t_vs_tmin_x_edges = support["t_vs_tmin_x_edges"]
     t_vs_tmin_y_edges = support["t_vs_tmin_y_edges"]
 
+    hist_sum_cache = {}
+    combined_hist_cache = {}
+    combined_map_cache = {}
+    combined_2d_map_cache = {}
+
+    def cached_hist_sum(kind, variable, setting, t_index):
+        cache_key = (kind, variable, setting, t_index)
+        if cache_key not in hist_sum_cache:
+            values = get_support_matrix(support, kind, variable, setting, "values")[t_index]
+            errors = get_support_matrix(support, kind, variable, setting, "errors")[t_index]
+            hist_sum_cache[cache_key] = sum_hist_over_phi(values, errors)
+        return hist_sum_cache[cache_key]
+
+    def cached_combined_hist(kind, variable, t_index):
+        cache_key = (kind, variable, t_index)
+        if cache_key not in combined_hist_cache:
+            combined_hist_cache[cache_key] = combine_hist_over_settings(support, kind, variable, settings, t_index)
+        return combined_hist_cache[cache_key]
+
+    def cached_combined_map(kind, variable, t_index):
+        cache_key = (kind, variable, t_index)
+        if cache_key not in combined_map_cache:
+            combined_map_cache[cache_key] = combine_map_over_settings(support, kind, variable, settings, t_index)
+        return combined_map_cache[cache_key]
+
+    def cached_combined_2d_map(kind, variable, t_index):
+        cache_key = (kind, variable, t_index)
+        if cache_key not in combined_2d_map_cache:
+            combined_2d_map_cache[cache_key] = combine_2d_map_over_settings(support, kind, variable, settings, t_index)
+        return combined_2d_map_cache[cache_key]
+
     for k in range(NumtBins):
         fig, axes = plt.subplots(len(settings), 1, figsize=(12, max(4, 3.5 * len(settings))), sharex=True)
         axes = np.atleast_1d(axes)
         for idx, setting in enumerate(settings):
-            data_values = get_support_matrix(support, "data", "mm", setting, "values")[k]
-            data_errors = get_support_matrix(support, "data", "mm", setting, "errors")[k]
-            simc_values = get_support_matrix(support, "simc", "mm", setting, "values")[k]
-            simc_errors = get_support_matrix(support, "simc", "mm", setting, "errors")[k]
-            data_sum, data_err_sum = sum_hist_over_phi(data_values, data_errors)
-            simc_sum, simc_err_sum = sum_hist_over_phi(simc_values, simc_errors)
+            data_sum, data_err_sum = cached_hist_sum("data", "mm", setting, k)
+            simc_sum, simc_err_sum = cached_hist_sum("simc", "mm", setting, k)
             simc_sum, simc_err_sum, _ = scale_hist_to_reference(simc_sum, simc_err_sum, data_sum)
             plot_hist_overlay(
                 axes[idx],
@@ -490,8 +518,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         plt.close(fig)
 
     for k in range(NumtBins):
-        data_mm, data_mm_err = combine_hist_over_settings(support, "data", "mm", settings, k)
-        simc_mm, simc_mm_err = combine_hist_over_settings(support, "simc", "mm", settings, k)
+        data_mm, data_mm_err = cached_combined_hist("data", "mm", k)
+        simc_mm, simc_mm_err = cached_combined_hist("simc", "mm", k)
         simc_mm, simc_mm_err, _ = scale_hist_to_reference(simc_mm, simc_mm_err, data_mm)
         fig, ax = plt.subplots(figsize=(12, 8))
         plot_hist_overlay(
@@ -516,8 +544,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     )
     for variable, edges, central_values, xlabel in one_d_pages:
         for k in range(NumtBins):
-            data_values, data_errors = combine_hist_over_settings(support, "data", variable, settings, k)
-            simc_values, simc_errors = combine_hist_over_settings(support, "simc", variable, settings, k)
+            data_values, data_errors = cached_combined_hist("data", variable, k)
+            simc_values, simc_errors = cached_combined_hist("simc", variable, k)
             simc_values, simc_errors, _ = scale_hist_to_reference(simc_values, simc_errors, data_values)
             extra_simc_values = None
             extra_simc_label = None
@@ -525,7 +553,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_label = 'SIMC (scaled)'
             simc_color = 'tab:green'
             if variable == "theta_cm":
-                extra_simc_values, _ = combine_hist_over_settings(support, "simc", "theta_cm_true", settings, k)
+                extra_simc_values, _ = cached_combined_hist("simc", "theta_cm_true", k)
                 extra_simc_values = extra_simc_values * get_scale_to_reference(extra_simc_values, data_values)
                 simc_label = 'SIMC Recon (scaled)'
                 extra_simc_label = 'SIMC True (scaled)'
@@ -570,10 +598,10 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     )
     for variable, edges, ylabel in two_d_pages:
         for k in range(NumtBins):
-            data_map = combine_map_over_settings(support, "data", variable, settings, k)
-            simc_map = combine_map_over_settings(support, "simc", variable, settings, k)
+            data_map = cached_combined_map("data", variable, k)
+            simc_map = cached_combined_map("simc", variable, k)
             if variable == "theta_cm":
-                simc_true_map = combine_map_over_settings(support, "simc", "theta_cm_true", settings, k)
+                simc_true_map = cached_combined_map("simc", "theta_cm_true", k)
                 simc_true_map = simc_true_map * get_scale_to_reference(simc_true_map, simc_map)
                 fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
                 plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
@@ -588,8 +616,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             plt.close(fig)
 
     for k in range(NumtBins):
-        data_map = combine_2d_map_over_settings(support, "data", "t_vs_tmin", settings, k)
-        simc_map = combine_2d_map_over_settings(support, "simc", "t_vs_tmin", settings, k)
+        data_map = cached_combined_2d_map("data", "t_vs_tmin", k)
+        simc_map = cached_combined_2d_map("simc", "t_vs_tmin", k)
         fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
         plot_density_map(
             fig,
