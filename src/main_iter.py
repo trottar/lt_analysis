@@ -219,6 +219,10 @@ if EPSSET == "low":
         if ".txt" not in f and ".npz" not in f and not os.path.isdir(prev_iter_dir+'/'+f) and '.py' not in f and '.f' not in f and 'iter' not in f:
             print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
             shutil.copy(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType))
+    files = [f for f in os.listdir(prev_iter_dir+'/') if f.endswith('.npz')]
+    for f in files:
+        print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, OUTPATH))
+        shutil.copy(prev_iter_dir+'/'+f, OUTPATH)
     files = os.listdir(prev_iter_dir+'/averages/')
     for f in files:
         print("\nCopying {} to {}".format(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
@@ -801,8 +805,7 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".npz" in f:
-            create_dir(new_dir+"/root")
-            f_new = f.replace(OUTPATH,new_dir+"/root")
+            f_new = f.replace(OUTPATH,new_dir)
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:

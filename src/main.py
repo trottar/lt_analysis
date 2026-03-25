@@ -1182,8 +1182,7 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".npz" in f:
-            create_dir(new_dir+"/root")
-            f_new = f.replace(OUTPATH,new_dir+"/root")
+            f_new = f.replace(OUTPATH,new_dir)
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
