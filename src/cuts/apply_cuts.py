@@ -251,10 +251,6 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssxptar>=-0.06) & (evt.ssxptar<=0.06) & (evt.ssyptar>=-0.04) & (evt.ssyptar<=0.04)
     HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsxptar>=-0.08) & (evt.hsxptar<=0.08) & (evt.hsyptar>=-0.045) & (evt.hsyptar<=0.045)
 
-    ## testing...
-    #SHMS_Acceptance = (evt.ssdelta>=-10.0) & (evt.ssdelta<=20.0) & (evt.ssyptar>=-0.06) & (evt.ssyptar<=0.06) & (evt.ssxptar>=-0.04) & (evt.ssxptar<=0.04)
-    #HMS_Acceptance = (evt.hsdelta>=-8.0) & (evt.hsdelta<=8.0) & (evt.hsyptar>=-0.08) & (evt.hsyptar<=0.08) & (evt.hsxptar>=-0.045) & (evt.hsxptar<=0.045)
-
     Diamond = _point_in_convex_poly(evt.Q2, evt.W, cut_poly)
 
     minus_t = -evt.t
