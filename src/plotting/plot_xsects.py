@@ -368,24 +368,6 @@ def combine_2d_map_over_settings(support, kind, variable, settings, t_index):
     return values_total
 
 
-def get_scale_to_reference(values, reference_values):
-    numerator = float(np.sum(reference_values))
-    denominator = float(np.sum(values))
-    if (
-        not np.isfinite(numerator)
-        or not np.isfinite(denominator)
-        or numerator <= 0.0
-        or denominator <= 0.0
-    ):
-        return 1.0
-    return numerator / denominator
-
-
-def scale_hist_to_reference(values, errors, reference_values):
-    scale = get_scale_to_reference(values, reference_values)
-    return values * scale, errors * scale, scale
-
-
 def plot_hist_overlay(
     ax,
     edges,
@@ -501,7 +483,6 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         for idx, setting in enumerate(settings):
             data_sum, data_err_sum = cached_hist_sum("data", "mm", setting, k)
             simc_sum, simc_err_sum = cached_hist_sum("simc", "mm", setting, k)
-            simc_sum, simc_err_sum, _ = scale_hist_to_reference(simc_sum, simc_err_sum, data_sum)
             plot_hist_overlay(
                 axes[idx],
                 mm_edges,
@@ -511,7 +492,6 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 simc_err_sum,
                 "{} {} MM, {} setting, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), setting, t_bin_centers[k]),
                 'MM',
-                simc_label='SIMC (scaled)',
             )
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
@@ -520,7 +500,6 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     for k in range(NumtBins):
         data_mm, data_mm_err = cached_combined_hist("data", "mm", k)
         simc_mm, simc_mm_err = cached_combined_hist("simc", "mm", k)
-        simc_mm, simc_mm_err, _ = scale_hist_to_reference(simc_mm, simc_mm_err, data_mm)
         fig, ax = plt.subplots(figsize=(12, 8))
         plot_hist_overlay(
             ax,
@@ -531,7 +510,6 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_mm_err,
             "{} {} MM, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), t_bin_centers[k]),
             'MM',
-            simc_label='SIMC (scaled)',
         )
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
@@ -546,17 +524,15 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         for k in range(NumtBins):
             data_values, data_errors = cached_combined_hist("data", variable, k)
             simc_values, simc_errors = cached_combined_hist("simc", variable, k)
-            simc_values, simc_errors, _ = scale_hist_to_reference(simc_values, simc_errors, data_values)
             extra_simc_values = None
             extra_simc_label = None
             extra_simc_color = 'tab:blue'
-            simc_label = 'SIMC (scaled)'
+            simc_label = 'SIMC'
             simc_color = 'tab:green'
             if variable == "theta_cm":
                 extra_simc_values, _ = cached_combined_hist("simc", "theta_cm_true", k)
-                extra_simc_values = extra_simc_values * get_scale_to_reference(extra_simc_values, data_values)
-                simc_label = 'SIMC Recon (scaled)'
-                extra_simc_label = 'SIMC True (scaled)'
+                simc_label = 'SIMC Recon'
+                extra_simc_label = 'SIMC True'
             fig, ax = plt.subplots(figsize=(12, 8))
             plot_hist_overlay(
                 ax,
@@ -602,11 +578,10 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_map = cached_combined_map("simc", variable, k)
             if variable == "theta_cm":
                 simc_true_map = cached_combined_map("simc", "theta_cm_true", k)
-                simc_true_map = simc_true_map * get_scale_to_reference(simc_true_map, simc_map)
                 fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
                 plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
                 plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
-                plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True scaled to Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
             else:
                 fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
                 plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
