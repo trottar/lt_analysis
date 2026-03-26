@@ -1143,11 +1143,6 @@ if EPSSET == "high":
             if os.path.exists(f_simc_hist):
                 output_file_lst.append(f_simc_hist)    
 
-    for eps in ["highe", "lowe"]:
-        support_npz = f"{OUTPATH}/{ParticleType}_xsect_support_Q{Q2}W{W}_{eps}.npz"
-        if os.path.exists(support_npz) and support_npz not in output_file_lst:
-            output_file_lst.append(support_npz)
-
     # Update iteration file of dates
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
@@ -1163,6 +1158,13 @@ if EPSSET == "high":
     f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_0") # Zeroth iteration
     print("\nCopying {} to {}".format(f_path,f_path_new))
     shutil.copy(f_path,f_path_new)
+
+support_prefix = f"{ParticleType}_xsect_support_Q{Q2}W{W}_"
+for f in os.listdir(OUTPATH):
+    if f.startswith(support_prefix) and f.endswith(".npz"):
+        support_npz = os.path.join(OUTPATH, f)
+        if support_npz not in output_file_lst:
+            output_file_lst.append(support_npz)
 
 for f in output_file_lst:
     if OUTPATH in f:
@@ -1187,7 +1189,8 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".npz" in f:
-            f_new = f.replace(OUTPATH,new_dir)
+            create_dir(new_dir+"/root")
+            f_new = f.replace(OUTPATH,new_dir+"/root")
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:

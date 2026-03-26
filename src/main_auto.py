@@ -155,23 +155,17 @@ if not os.path.exists(prev_iter_dir):
     print("\n\n\tERROR: {} does not exist...".format(prev_iter_dir))
     sys.exit(2)
 
-for eps in ["lowe", "highe"]:
-    support_name = f"{ParticleType}_xsect_support_Q{Q2}W{W}_{eps}.npz"
-    support_candidates = [
-        os.path.join(prev_iter_dir, support_name),
-        os.path.join(prev_iter_dir, "root", support_name),
-        os.path.join(prev_iter_dir_cache, support_name),
-        os.path.join(prev_iter_dir_cache, "root", support_name),
-    ]
-    copied_support = False
-    for support_path in support_candidates:
-        if os.path.exists(support_path):
+support_prefix = f"{ParticleType}_xsect_support_Q{Q2}W{W}_"
+copied_support_files = set()
+for support_dir in [os.path.join(prev_iter_dir, "root"), prev_iter_dir]:
+    if not os.path.isdir(support_dir):
+        continue
+    for f in os.listdir(support_dir):
+        if f.startswith(support_prefix) and f.endswith(".npz") and f not in copied_support_files:
+            support_path = os.path.join(support_dir, f)
             print("\nCopying {} to {}".format(support_path, OUTPATH))
             shutil.copy(support_path, OUTPATH)
-            copied_support = True
-            break
-    if not copied_support:
-        print("\nWARNING: Could not locate cached xsect support file {}".format(support_name))
+            copied_support_files.add(f)
 
 if EPSSET == "low":
     # Copy all files from previous iteration to OUTPATH to assure consistency
@@ -758,12 +752,14 @@ if EPSSET == "high":
 # ***Moved creation of iteration directory up from where it is in main.py. Now is near the new weight calculation***
 # ***Likewise for SIMC root/hist files***
 
-if EPSSET == "high":
-
-    for eps in ["highe", "lowe"]:
-        support_npz = f"{OUTPATH}/{ParticleType}_xsect_support_Q{Q2}W{W}_{eps}.npz"
-        if os.path.exists(support_npz) and support_npz not in output_file_lst:
+support_prefix = f"{ParticleType}_xsect_support_Q{Q2}W{W}_"
+for f in os.listdir(OUTPATH):
+    if f.startswith(support_prefix) and f.endswith(".npz"):
+        support_npz = os.path.join(OUTPATH, f)
+        if support_npz not in output_file_lst:
             output_file_lst.append(support_npz)
+
+if EPSSET == "high":
     f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(iter_num))
     shutil.copy(f_iter,f_iter_new)
 
@@ -790,7 +786,8 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
         if ".npz" in f:
-            f_new = f.replace(OUTPATH,new_dir)
+            create_dir(new_dir+"/root")
+            f_new = f.replace(OUTPATH,new_dir+"/root")
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
