@@ -780,6 +780,10 @@ if EPSSET == "high":
 
 stage_start = perf_counter()
 if EPSSET == "high":
+    for eps in ["highe", "lowe"]:
+        support_npz = f"{OUTPATH}/{ParticleType}_xsect_support_Q{Q2}W{W}_{eps}.npz"
+        if os.path.exists(support_npz) and support_npz not in output_file_lst:
+            output_file_lst.append(support_npz)
     f_iter_new = f_iter.replace(LTANAPATH,new_dir).replace("iter","iter_{}".format(iter_num))
     shutil.copy(f_iter,f_iter_new)
 

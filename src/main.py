@@ -1143,6 +1143,11 @@ if EPSSET == "high":
             if os.path.exists(f_simc_hist):
                 output_file_lst.append(f_simc_hist)    
 
+    for eps in ["highe", "lowe"]:
+        support_npz = f"{OUTPATH}/{ParticleType}_xsect_support_Q{Q2}W{W}_{eps}.npz"
+        if os.path.exists(support_npz) and support_npz not in output_file_lst:
+            output_file_lst.append(support_npz)
+
     # Update iteration file of dates
     f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
     # Check if the file exists
