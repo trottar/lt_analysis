@@ -304,26 +304,49 @@ print_plot_timer("setup/data load", setup_start)
             
 ################################################################################################################################################
 
+def get_current_iter_num():
+    iter_candidates = []
+    root_iter_pattern = re.compile(r"_iter_(\d+)\.root$")
+    simc_key = "_Simc_Q{}W{}_".format(Q2, W)
+
+    for file_name in os.listdir(OUTPATH):
+        if not file_name.endswith(".root"):
+            continue
+        if simc_key not in file_name:
+            continue
+        iter_match = root_iter_pattern.search(file_name)
+        if iter_match:
+            iter_candidates.append(int(iter_match.group(1)))
+
+    return max(iter_candidates) if iter_candidates else 0
+
+
 def load_xsect_support(eps_tag):
     support_prefix = "{}_xsect_support_Q{}W{}_{}".format(ParticleType, Q2, W, eps_tag)
-    support_candidates = []
-    for file_name in os.listdir(OUTPATH):
-        if not file_name.startswith(support_prefix) or not file_name.endswith(".npz"):
-            continue
-        iter_match = re.search(r"_iter_(\d+)\.npz$", file_name)
-        iter_num = int(iter_match.group(1)) if iter_match else -1
-        support_candidates.append((iter_num, os.path.join(OUTPATH, file_name)))
-    if support_candidates:
-        support_candidates.sort(key=lambda item: item[0])
-        support_path = support_candidates[-1][1]
+    current_iter = get_current_iter_num()
+
+    if current_iter > 0:
+        support_name = "{}_iter_{}.npz".format(support_prefix, current_iter)
+    else:
+        support_name = "{}.npz".format(support_prefix)
+
+    support_path = os.path.join(OUTPATH, support_name)
+    if os.path.exists(support_path):
         print("Loading xsect support {} from {}".format(eps_tag, support_path))
         with np.load(support_path) as support_npz:
             return {key: support_npz[key] for key in support_npz.files}
+
+    available_candidates = sorted(
+        file_name
+        for file_name in os.listdir(OUTPATH)
+        if file_name.startswith(support_prefix) and file_name.endswith(".npz")
+    )
     raise FileNotFoundError(
-        "Required xsect support file not found for {} with prefix {} in {}".format(
+        "Required xsect support file not found for {}. Expected {} in {}. Available candidates: {}".format(
             eps_tag,
-            support_prefix,
+            support_name,
             OUTPATH,
+            ", ".join(available_candidates) if available_candidates else "none",
         )
     )
 

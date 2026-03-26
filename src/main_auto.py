@@ -552,7 +552,9 @@ yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
 # the iterative yield inputs, which still come from the previous iteration.
 find_yield_data(histlist, inpDict)
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
-write_xsect_support(histlist, inpDict, output_file_lst)
+support_path = write_xsect_support(histlist, inpDict, output_file_lst)
+if support_path is None:
+    raise RuntimeError("Failed to write xsect support file for iteration {} {} epsilon.".format(inpDict.get("iter_num", 0), inpDict["EPSSET"]))
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio

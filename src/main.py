@@ -881,7 +881,9 @@ yieldDict.update(find_yield_simc(histlist, inpDict))
 record_stage_time("Step 6 simc yields", stage_start)
 
 stage_start = perf_counter()
-write_xsect_support(histlist, inpDict, output_file_lst)
+support_path = write_xsect_support(histlist, inpDict, output_file_lst)
+if support_path is None:
+    raise RuntimeError("Failed to write xsect support file for {} epsilon.".format(inpDict["EPSSET"]))
 record_stage_time("Step 6 xsect support", stage_start)
 #sys.exit(2)
 
