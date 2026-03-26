@@ -136,12 +136,15 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
     q2 = inpDict["Q2"]
     w = inpDict["W"]
     eps_tag = "{}e".format(inpDict["EPSSET"])
+    iter_num = int(inpDict.get("iter_num", 0) or 0)
+    support_name = "{}_xsect_support_Q{}W{}_{}".format(particle_type, q2, w, eps_tag)
+    if iter_num > 0:
+        support_name += "_iter_{}".format(iter_num)
+    support_name += ".npz"
     support_path = os.path.join(
         OUTPATH,
-        "{}_xsect_support_Q{}W{}_{}.npz".format(particle_type, q2, w, eps_tag),
+        support_name,
     )
-    if os.path.exists(support_path):
-        os.remove(support_path)
 
     payload = {}
 
