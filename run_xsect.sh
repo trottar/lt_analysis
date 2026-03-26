@@ -50,7 +50,7 @@ while getopts 'h' flag; do
         echo
         echo "The following flags can be called for the heep analysis..."
         echo "    -h, help"
-	echo "     Q2=arg1, W=arg2 ParticleType=arg3 POL=arg4 NumtBins=arg5 NumPhiBins=arg6"
+		echo "     Q2=arg1, W=arg2 ParticleType=arg3 POL=arg4 NumtBins=arg5 NumPhiBins=arg6 IterNum=arg7"
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
@@ -103,6 +103,11 @@ POL=$4
 
 NumtBins=$5
 NumPhiBins=$6
+IterNum=$7
+
+if [[ -z "$IterNum" ]]; then
+    IterNum=0
+fi
 
 ##############
 # HARD CODED #
@@ -248,7 +253,7 @@ echo "Generating xsect plots..."
 # Define input and output file names
 OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
 cd "${LTANAPATH}/src/plotting/"
-python3 plot_xsects.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename}
+python3 plot_xsects.py ${ParticleType} ${POL} ${Q2} ${W} ${LOEPS} ${HIEPS} ${NumtBins} ${NumPhiBins} ${KIN} ${OutUnsepxsectsFilename} ${IterNum}
 # Check the exit status of the Python script
 if [ $? -ne 0 ]; then
     echo
