@@ -569,9 +569,7 @@ stage_start = perf_counter()
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
 record_stage_time("Step 6 simc yields", stage_start)
 stage_start = perf_counter()
-support_path = write_xsect_support(histlist, inpDict, output_file_lst)
-if support_path is None:
-    raise RuntimeError("Failed to write xsect support file for iteration {} {} epsilon.".format(inpDict.get("iter_num", 0), inpDict["EPSSET"]))
+write_xsect_support(histlist, inpDict, output_file_lst)
 record_stage_time("Step 6 xsect support", stage_start)
 
 sys.path.append("binning")
