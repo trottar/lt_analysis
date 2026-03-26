@@ -1077,7 +1077,7 @@ if EPSSET == "high":
     # if still iterating weights
     try: 
         # Run the xsect bash script to get ratio, average kinematics, xsects
-        run_bash_script('{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"]), "0")        
+        run_bash_script('{}/run_xsect.sh'.format(LTANAPATH), Q2, W, ParticleType, POL, str(inpDict["NumtBins"]), str(inpDict["NumPhiBins"]))        
     except Exception as e:
         print("1 ERROR: {}".format(e))
         sys.exit(2)

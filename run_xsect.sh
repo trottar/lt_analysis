@@ -250,6 +250,7 @@ fi
 echo
 echo
 echo "Generating xsect plots..."
+echo "[XSECT SUPPORT][run_xsect] IterNum=${IterNum} Q2=${Q2} W=${W} ParticleType=${ParticleType} KIN=${KIN}"
 # Define input and output file names
 OutUnsepxsectsFilename="${ParticleType}_xsects_${KIN}"
 cd "${LTANAPATH}/src/plotting/"

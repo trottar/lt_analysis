@@ -548,11 +548,29 @@ from xsect_support import write_xsect_support
 
 yieldDict = {}
 yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
+print("[XSECT SUPPORT][main_auto] iter_num={}, EPSSET={}, Q2={}, W={}".format(iter_num, inpDict["EPSSET"], Q2, W))
 # Build data-side support histograms for the xsect PDF without changing
 # the iterative yield inputs, which still come from the previous iteration.
 find_yield_data(histlist, inpDict)
+for hist in histlist:
+    print(
+        "[XSECT SUPPORT][main_auto] after find_yield_data {} data_support={} simc_support={}".format(
+            hist["phi_setting"],
+            hist.get("_xsect_support_data") is not None,
+            hist.get("_xsect_support_simc") is not None,
+        )
+    )
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
-write_xsect_support(histlist, inpDict, output_file_lst)
+for hist in histlist:
+    print(
+        "[XSECT SUPPORT][main_auto] after find_yield_simc {} data_support={} simc_support={}".format(
+            hist["phi_setting"],
+            hist.get("_xsect_support_data") is not None,
+            hist.get("_xsect_support_simc") is not None,
+        )
+    )
+support_path = write_xsect_support(histlist, inpDict, output_file_lst)
+print("[XSECT SUPPORT][main_auto] write_xsect_support returned {}".format(support_path))
 
 sys.path.append("binning")
 from calculate_ratio import find_ratio

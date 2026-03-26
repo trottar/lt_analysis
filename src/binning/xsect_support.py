@@ -150,7 +150,17 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
 
     try:
         if not histlist:
+            print("[XSECT SUPPORT][writer] Empty histlist for {}".format(support_path))
             return None
+
+        print(
+            "[XSECT SUPPORT][writer] Preparing {} (iter_num={}, eps={}, settings={})".format(
+                support_path,
+                iter_num,
+                inpDict["EPSSET"],
+                ",".join(hist["phi_setting"] for hist in histlist),
+            )
+        )
 
         payload["t_bins"] = np.asarray(histlist[0]["t_bins"], dtype=np.float64)
         payload["phi_bins"] = np.asarray(histlist[0]["phi_bins"], dtype=np.float64)
@@ -173,14 +183,29 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
             setting_key = hist["phi_setting"].lower()
             data_support = hist.get("_xsect_support_data")
             simc_support = hist.get("_xsect_support_simc")
+            print(
+                "[XSECT SUPPORT][writer] {} initial data_support={} simc_support={}".format(
+                    hist["phi_setting"],
+                    data_support is not None,
+                    simc_support is not None,
+                )
+            )
 
             if data_support is None:
                 data_support = _load_support_from_saved_histograms(hist, "DATA")
                 if data_support is not None:
                     hist["_xsect_support_data"] = data_support
+                    print("[XSECT SUPPORT][writer] {} loaded data support from saved histograms".format(hist["phi_setting"]))
 
             if data_support is None or simc_support is None:
-                print("WARNING: Missing xsect support histograms for {} {}".format(inpDict["EPSSET"], hist["phi_setting"]))
+                print(
+                    "WARNING: Missing xsect support histograms for {} {} (data_support={}, simc_support={})".format(
+                        inpDict["EPSSET"],
+                        hist["phi_setting"],
+                        data_support is not None,
+                        simc_support is not None,
+                    )
+                )
                 return None
 
             for support_key, file_key in variable_map:
@@ -229,9 +254,12 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
                 payload["simc_{}_{}_values".format(file_key, setting_key)] = simc_values
                 payload["simc_{}_{}_errors".format(file_key, setting_key)] = simc_errors
 
+        print("[XSECT SUPPORT][writer] Saving {} payload entries to {}".format(len(payload), support_path))
         np.savez_compressed(support_path, **payload)
         if output_file_lst is not None:
             output_file_lst.append(support_path)
+            print("[XSECT SUPPORT][writer] Added {} to output_file_lst".format(support_path))
+        print("[XSECT SUPPORT][writer] Wrote {}".format(support_path))
         return support_path
     finally:
         _cleanup_support(histlist)

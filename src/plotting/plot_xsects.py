@@ -314,6 +314,13 @@ def load_xsect_support(eps_tag):
         support_name = "{}.npz".format(support_prefix)
 
     support_path = os.path.join(OUTPATH, support_name)
+    print(
+        "[XSECT SUPPORT][plot_xsects] IterNum={} eps_tag={} expecting {}".format(
+            IterNum,
+            eps_tag,
+            support_path,
+        )
+    )
     if os.path.exists(support_path):
         print("Loading xsect support {} from {}".format(eps_tag, support_path))
         with np.load(support_path) as support_npz:
