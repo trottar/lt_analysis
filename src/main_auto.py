@@ -163,10 +163,6 @@ if EPSSET == "low":
         if ".txt" not in f and ".npz" not in f and not os.path.isdir(prev_iter_dir+'/'+f) and '.py' not in f and '.f' not in f and 'iter' not in f:
             print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType)))
             shutil.copy(prev_iter_dir+'/'+f, '{}/src/{}/'.format(LTANAPATH, ParticleType))
-    files = [f for f in os.listdir(prev_iter_dir+'/') if f.endswith('.npz')]
-    for f in files:
-        print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, OUTPATH))
-        shutil.copy(prev_iter_dir+'/'+f, OUTPATH)
     files = os.listdir(prev_iter_dir+'/averages/')
     for f in files:
         print("\nCopying {} to {}".format(prev_iter_dir+'/averages/'+f, '{}/src/{}/averages/'.format(LTANAPATH, ParticleType)))
@@ -204,6 +200,11 @@ if EPSSET == "low":
     for f in files:
         print("\nCopying {} to {}".format(prev_iter_dir+'/json/'+f, OUTPATH))
         shutil.copy(prev_iter_dir+'/json/'+f, OUTPATH)
+
+files = [f for f in os.listdir(prev_iter_dir+'/') if f.endswith('.npz')]
+for f in files:
+    print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, OUTPATH))
+    shutil.copy(prev_iter_dir+'/'+f, OUTPATH)
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
