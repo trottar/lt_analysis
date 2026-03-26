@@ -558,7 +558,7 @@ output_file_lst.append(outputpdf)
 
 # ***Grabbing data yield and average values from previous iteration rather than rebinning***
 sys.path.append("binning")
-from calculate_yield import find_yield_data, grab_yield_data, find_yield_simc
+from calculate_yield import grab_yield_data, find_yield_simc
 from xsect_support import write_xsect_support
 
 yieldDict = {}
@@ -566,20 +566,6 @@ stage_start = perf_counter()
 yieldDict.update(grab_yield_data(histlist, phisetlist, inpDict))
 record_stage_time("Step 6 data yields", stage_start)
 print("[XSECT SUPPORT][main_iter] iter_num={}, EPSSET={}, Q2={}, W={}".format(iter_num, inpDict["EPSSET"], Q2, W))
-stage_start = perf_counter()
-# Rebuild the data-side support histograms for the current binning so the
-# iteration-specific xsect support NPZ can be written, while still using the
-# saved data yields for the actual ratio/xsect chain.
-find_yield_data(histlist, inpDict)
-for hist in histlist:
-    print(
-        "[XSECT SUPPORT][main_iter] after find_yield_data {} data_support={} simc_support={}".format(
-            hist["phi_setting"],
-            hist.get("_xsect_support_data") is not None,
-            hist.get("_xsect_support_simc") is not None,
-        )
-    )
-record_stage_time("Step 6 data support", stage_start)
 stage_start = perf_counter()
 yieldDict.update(find_yield_simc(histlist, inpDict, iteration=True))
 for hist in histlist:
