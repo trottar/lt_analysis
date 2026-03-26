@@ -131,6 +131,37 @@ def _load_support_from_saved_histograms(hist, hist_prefix):
     return support_dict
 
 
+def _load_base_support_npz(particle_type, q2, w, eps_tag):
+    support_name = "{}_xsect_support_Q{}W{}_{}.npz".format(particle_type, q2, w, eps_tag)
+    support_path = os.path.join(OUTPATH, support_name)
+
+    if os.path.exists(support_path):
+        with np.load(support_path) as support_npz:
+            return {key: np.array(support_npz[key]) for key in support_npz.files}, support_path
+
+    return None, support_path
+
+
+def _get_saved_1d_support_arrays(saved_support, file_key, setting_key):
+    if saved_support is None:
+        return None, None, None
+    return (
+        saved_support.get("data_{}_{}_values".format(file_key, setting_key)),
+        saved_support.get("data_{}_{}_errors".format(file_key, setting_key)),
+        saved_support.get("{}_edges".format(file_key)),
+    )
+
+
+def _get_saved_2d_support_arrays(saved_support, file_key, setting_key):
+    if saved_support is None:
+        return None, None, None
+    return (
+        saved_support.get("data_{}_{}_values".format(file_key, setting_key)),
+        saved_support.get("{}_x_edges".format(file_key)),
+        saved_support.get("{}_y_edges".format(file_key)),
+    )
+
+
 def write_xsect_support(histlist, inpDict, output_file_lst=None):
     particle_type = inpDict["ParticleType"]
     q2 = inpDict["Q2"]
@@ -166,6 +197,15 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
         payload["phi_bins"] = np.asarray(histlist[0]["phi_bins"], dtype=np.float64)
         payload["settings"] = np.asarray([hist["phi_setting"] for hist in histlist], dtype="<U16")
 
+        saved_support = None
+        saved_support_path = None
+        if iter_num > 0:
+            saved_support, saved_support_path = _load_base_support_npz(particle_type, q2, w, eps_tag)
+            if saved_support is not None:
+                print("[XSECT SUPPORT][writer] Loaded fixed 0th-iteration data support from {}".format(saved_support_path))
+            else:
+                print("[XSECT SUPPORT][writer] Missing required 0th-iteration support NPZ {}".format(saved_support_path))
+
         variable_map = (
             ("mm", "mm"),
             ("Q2", "q2"),
@@ -197,19 +237,23 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
                     hist["_xsect_support_data"] = data_support
                     print("[XSECT SUPPORT][writer] {} loaded data support from saved histograms".format(hist["phi_setting"]))
 
-            if data_support is None or simc_support is None:
+            if (iter_num == 0 and data_support is None) or (iter_num > 0 and saved_support is None) or simc_support is None:
                 print(
-                    "WARNING: Missing xsect support histograms for {} {} (data_support={}, simc_support={})".format(
+                    "WARNING: Missing xsect support histograms for {} {} (data_support={}, saved_support={}, simc_support={})".format(
                         inpDict["EPSSET"],
                         hist["phi_setting"],
                         data_support is not None,
+                        saved_support is not None,
                         simc_support is not None,
                     )
                 )
                 return None
 
             for support_key, file_key in variable_map:
-                data_values, data_errors, edges = _matrix_to_arrays(data_support[support_key])
+                if iter_num == 0:
+                    data_values, data_errors, edges = _matrix_to_arrays(data_support[support_key])
+                else:
+                    data_values, data_errors, edges = _get_saved_1d_support_arrays(saved_support, file_key, setting_key)
                 simc_values, simc_errors, simc_edges = _matrix_to_arrays(simc_support[support_key])
 
                 if data_values is None or simc_values is None:
@@ -227,7 +271,10 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
                     return None
 
             for support_key, file_key in map2d_variable_map:
-                data_values, data_x_edges, data_y_edges = _matrix2d_to_arrays(data_support[support_key])
+                if iter_num == 0:
+                    data_values, data_x_edges, data_y_edges = _matrix2d_to_arrays(data_support[support_key])
+                else:
+                    data_values, data_x_edges, data_y_edges = _get_saved_2d_support_arrays(saved_support, file_key, setting_key)
                 simc_values, simc_x_edges, simc_y_edges = _matrix2d_to_arrays(simc_support[support_key])
 
                 if data_values is None or simc_values is None:
