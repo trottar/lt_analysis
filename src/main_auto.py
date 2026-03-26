@@ -155,6 +155,24 @@ if not os.path.exists(prev_iter_dir):
     print("\n\n\tERROR: {} does not exist...".format(prev_iter_dir))
     sys.exit(2)
 
+for eps in ["lowe", "highe"]:
+    support_name = f"{ParticleType}_xsect_support_Q{Q2}W{W}_{eps}.npz"
+    support_candidates = [
+        os.path.join(prev_iter_dir, support_name),
+        os.path.join(prev_iter_dir, "root", support_name),
+        os.path.join(prev_iter_dir_cache, support_name),
+        os.path.join(prev_iter_dir_cache, "root", support_name),
+    ]
+    copied_support = False
+    for support_path in support_candidates:
+        if os.path.exists(support_path):
+            print("\nCopying {} to {}".format(support_path, OUTPATH))
+            shutil.copy(support_path, OUTPATH)
+            copied_support = True
+            break
+    if not copied_support:
+        print("\nWARNING: Could not locate cached xsect support file {}".format(support_name))
+
 if EPSSET == "low":
     # Copy all files from previous iteration to OUTPATH to assure consistency
     # List all files in the source directory
@@ -200,11 +218,6 @@ if EPSSET == "low":
     for f in files:
         print("\nCopying {} to {}".format(prev_iter_dir+'/json/'+f, OUTPATH))
         shutil.copy(prev_iter_dir+'/json/'+f, OUTPATH)
-
-files = [f for f in os.listdir(prev_iter_dir+'/') if f.endswith('.npz')]
-for f in files:
-    print("\nCopying {} to {}".format(prev_iter_dir+'/'+f, OUTPATH))
-    shutil.copy(prev_iter_dir+'/'+f, OUTPATH)
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
