@@ -219,12 +219,12 @@ BG_MODELS = {
                     "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
                     "n_par":      2,                    
                     "sidebands": {                
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
-                        "left":  (1.12, 1.15),
-                        "right": (1.16, 1.21), 
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21), 
                     }
                 },   
 
@@ -234,12 +234,12 @@ BG_MODELS = {
                     "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
                     "n_par":      2,                    
                     "sidebands": {                
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
-                        "left":  (1.12, 1.15),
-                        "right": (1.16, 1.21), 
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21), 
                     }
                 },     
 
@@ -249,12 +249,12 @@ BG_MODELS = {
                     "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
                     "n_par":      2,                    
                     "sidebands": {                
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
-                        "left":  (1.12, 1.15),
-                        "right": (1.16, 1.21), 
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21), 
                     }
                 },     
 
@@ -264,12 +264,12 @@ BG_MODELS = {
                     "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
                     "n_par":      2,                    
                     "sidebands": {                
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
-                        "left":  (1.12, 1.15),
-                        "right": (1.16, 1.21), 
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21), 
                     }
                 },      
 
@@ -279,12 +279,12 @@ BG_MODELS = {
                     "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
                     "n_par":      2,                    
                     "sidebands": {                
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
-                        "left":  (1.12, 1.15),
-                        "right": (1.16, 1.21), 
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21), 
                     }
                 },   
             },
@@ -295,12 +295,12 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {                
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
-                        "left":  (1.05, 1.10),
-                        "right": (1.12, 1.17),   
+                        #"left":  (1.05, 1.10),
+                        #"right": (1.12, 1.17),   
                     }
                 },   
 
@@ -309,12 +309,12 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        #"left":  (1.05, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.22), #Q4p4W2p74              
+                        "left":  (1.05, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.22), #Q4p4W2p74              
                         #"left":  (1.06, 1.11),
                         #"right": (1.14, 1.20),
-                        "left":  (1.05, 1.10),
-                        "right": (1.12, 1.17),                 
+                        #"left":  (1.05, 1.10),
+                        #"right": (1.12, 1.17),                 
                     }
                 },     
 
@@ -323,12 +323,12 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74                 
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74                 
                         #"left":  (1.08, 1.10),
                         #"right": (1.18, 1.23),
-                        "left":  (1.05, 1.10),
-                        "right": (1.12, 1.17),                 
+                        #"left":  (1.05, 1.10),
+                        #"right": (1.12, 1.17),                 
                     }
                 },     
 
@@ -337,12 +337,12 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        #"left":  (1.05, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.22), #Q4p4W2p74
+                        "left":  (1.05, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.22), #Q4p4W2p74
                         #"left":  (1.08, 1.10),
                         #"right": (1.18, 1.20),                
-                        "left":  (1.05, 1.10),
-                        "right": (1.12, 1.17),                 
+                        #"left":  (1.05, 1.10),
+                        #"right": (1.12, 1.17),                 
                     }
                 },      
 
@@ -351,12 +351,12 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74 
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74 
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                 
-                        "left":  (1.05, 1.10),
-                        "right": (1.12, 1.17),                 
+                        #"left":  (1.05, 1.10),
+                        #"right": (1.12, 1.17),                 
                     }
                 },   
         },
