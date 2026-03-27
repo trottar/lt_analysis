@@ -456,6 +456,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     central_w = aveline["W"].to_numpy()
     central_theta = aveline["theta_cm"].to_numpy()
 
+    t_edges = support["t_bins"]
     mm_edges = support["mm_edges"]
     q2_edges = support["q2_edges"]
     w_edges = support["w_edges"]
@@ -465,16 +466,24 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     t_vs_tmin_x_edges = support["t_vs_tmin_x_edges"]
     t_vs_tmin_y_edges = support["t_vs_tmin_y_edges"]
 
+    matrix_cache = {}
     hist_sum_cache = {}
     combined_hist_cache = {}
     combined_map_cache = {}
     combined_2d_map_cache = {}
+    mm_vs_t_cache = {}
+
+    def cached_matrix(kind, variable, setting, field):
+        cache_key = (kind, variable, setting, field)
+        if cache_key not in matrix_cache:
+            matrix_cache[cache_key] = get_support_matrix(support, kind, variable, setting, field)
+        return matrix_cache[cache_key]
 
     def cached_hist_sum(kind, variable, setting, t_index):
         cache_key = (kind, variable, setting, t_index)
         if cache_key not in hist_sum_cache:
-            values = get_support_matrix(support, kind, variable, setting, "values")[t_index]
-            errors = get_support_matrix(support, kind, variable, setting, "errors")[t_index]
+            values = cached_matrix(kind, variable, setting, "values")[t_index]
+            errors = cached_matrix(kind, variable, setting, "errors")[t_index]
             hist_sum_cache[cache_key] = sum_hist_over_phi(values, errors)
         return hist_sum_cache[cache_key]
 
@@ -495,6 +504,12 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         if cache_key not in combined_2d_map_cache:
             combined_2d_map_cache[cache_key] = combine_2d_map_over_settings(support, kind, variable, settings, t_index)
         return combined_2d_map_cache[cache_key]
+
+    def cached_mm_vs_t_map(kind, setting):
+        cache_key = (kind, setting)
+        if cache_key not in mm_vs_t_cache:
+            mm_vs_t_cache[cache_key] = np.sum(cached_matrix(kind, "mm", setting, "values"), axis=1)
+        return mm_vs_t_cache[cache_key]
 
     for k in range(NumtBins):
         fig, axes = plt.subplots(len(settings), 1, figsize=(12, max(4, 3.5 * len(settings))), sharex=True)
@@ -528,6 +543,34 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             simc_mm,
             simc_mm_err,
             "{} {} MM, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), t_bin_centers[k]),
+            'MM',
+        )
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+
+    for setting in settings:
+        data_map = cached_mm_vs_t_map("data", setting)
+        simc_map = cached_mm_vs_t_map("simc", setting)
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+        plot_density_map(
+            fig,
+            axes[0],
+            t_edges,
+            mm_edges,
+            data_map,
+            "{} {} MM vs t, {} Data".format(epsilon_label, ParticleType.capitalize(), setting),
+            '-t',
+            'MM',
+        )
+        plot_density_map(
+            fig,
+            axes[1],
+            t_edges,
+            mm_edges,
+            simc_map,
+            "{} {} MM vs t, {} SIMC".format(epsilon_label, ParticleType.capitalize(), setting),
+            '-t',
             'MM',
         )
         plt.tight_layout()
@@ -577,8 +620,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         fig, axes = plt.subplots(len(settings), 2, figsize=(14, max(4, 3.5 * len(settings))), sharex=True, sharey=True)
         axes = np.atleast_2d(axes)
         for idx, setting in enumerate(settings):
-            data_map = get_support_matrix(support, "data", "mm", setting, "values")[k]
-            simc_map = get_support_matrix(support, "simc", "mm", setting, "values")[k]
+            data_map = cached_matrix("data", "mm", setting, "values")[k]
+            simc_map = cached_matrix("simc", "mm", setting, "values")[k]
             plot_phi_map(fig, axes[idx, 0], phi_edges, mm_edges, data_map, "{} {} MM vs $\\phi$, {} Data, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers[k]), 'MM')
             plot_phi_map(fig, axes[idx, 1], phi_edges, mm_edges, simc_map, "{} {} MM vs $\\phi$, {} SIMC, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers[k]), 'MM')
         plt.tight_layout()
@@ -633,6 +676,19 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             '$-t_{min}$',
             '$-t$',
         )
+        boundary_min = max(t_vs_tmin_x_edges[0], t_vs_tmin_y_edges[0])
+        boundary_max = min(t_vs_tmin_x_edges[-1], t_vs_tmin_y_edges[-1])
+        if boundary_max > boundary_min:
+            for ax in np.atleast_1d(axes):
+                ax.plot(
+                    [boundary_min, boundary_max],
+                    [boundary_min, boundary_max],
+                    color='tab:red',
+                    linestyle='--',
+                    linewidth=1.2,
+                    label='$-t = -t_{min}$',
+                )
+                ax.legend(fontsize=10)
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
