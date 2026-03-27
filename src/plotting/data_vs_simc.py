@@ -966,18 +966,25 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     Cepst.Print(outputpdf)
 
-    CMMt = TCanvas()
+    CMMt = TCanvas("CMMt", "MM_vs_t_Data_Simc", 1200, max(400, 400 * len(histlist_copy)))
 
-    CMMt.Divide(2,2)
+    CMMt.Divide(2, max(1, len(histlist_copy)))
 
     for i,hist in enumerate(histlist_copy):
-        CMMt.cd(i+1)
+        data_pad = (2 * i) + 1
+        simc_pad = data_pad + 1
 
-        # Set color representing zero events to transparent (alpha = 0)
+        CMMt.cd(data_pad)
         hist["MM_vs_t_DATA"].SetMinimum(1)
         hist["MM_vs_t_DATA"].SetLineColor(i+1)
-        hist["MM_vs_t_DATA"].Draw("same, COLZ")
-        hist["MM_vs_t_DATA"].SetTitle(phisetlist[i])
+        hist["MM_vs_t_DATA"].SetTitle(phisetlist[i] + " Data")
+        hist["MM_vs_t_DATA"].Draw("COLZ")
+
+        CMMt.cd(simc_pad)
+        hist["MM_vs_t_SIMC"].SetMinimum(1)
+        hist["MM_vs_t_SIMC"].SetLineColor(i+(len(phisetlist)+1))
+        hist["MM_vs_t_SIMC"].SetTitle(phisetlist[i] + " Simc")
+        hist["MM_vs_t_SIMC"].Draw("COLZ")
 
     CMMt.Print(outputpdf)
     
