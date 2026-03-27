@@ -974,6 +974,19 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         data_pad = (2 * i) + 1
         simc_pad = data_pad + 1
 
+        mm_vs_t_simc = hist.get("MM_vs_t_SIMC")
+        if mm_vs_t_simc is None:
+            mm_vs_t_simc = TH1D_to_TH2D(
+                hist["H_MM_SIMC"],
+                hist["H_t_SIMC"],
+                h2d_name="MM_vs_t_SIMC_fallback_{}".format(i),
+                title="{} Simc;MM;t".format(phisetlist[i]),
+                n_bins=25,
+                z_min=1e-12,
+                z_max=hist["MM_vs_t_DATA"].GetMaximum(),
+            )
+            hist["MM_vs_t_SIMC"] = mm_vs_t_simc
+
         CMMt.cd(data_pad)
         hist["MM_vs_t_DATA"].SetMinimum(1)
         hist["MM_vs_t_DATA"].SetLineColor(i+1)
@@ -981,10 +994,10 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["MM_vs_t_DATA"].Draw("COLZ")
 
         CMMt.cd(simc_pad)
-        hist["MM_vs_t_SIMC"].SetMinimum(1)
-        hist["MM_vs_t_SIMC"].SetLineColor(i+(len(phisetlist)+1))
-        hist["MM_vs_t_SIMC"].SetTitle(phisetlist[i] + " Simc")
-        hist["MM_vs_t_SIMC"].Draw("COLZ")
+        mm_vs_t_simc.SetMinimum(1)
+        mm_vs_t_simc.SetLineColor(i+(len(phisetlist)+1))
+        mm_vs_t_simc.SetTitle(phisetlist[i] + " Simc")
+        mm_vs_t_simc.Draw("COLZ")
 
     CMMt.Print(outputpdf)
     

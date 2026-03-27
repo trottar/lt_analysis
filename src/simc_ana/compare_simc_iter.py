@@ -183,7 +183,8 @@ def compare_simc(rootFileSimc, hist, inpDict):
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_SIMC  = TH1D("H_MM_SIMC",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])    
+    H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    MM_vs_t_SIMC = TH2D("MM_vs_t_SIMC", "Missing Mass vs t; MM; t", 100, inpDict["mm_min"], inpDict["mm_max"], 100, inpDict["tmin"], inpDict["tmax"])
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
     H_ph_SIMC  = TH1D("H_ph_SIMC","Y' tar", 100, -0.1, 0.1)
     H_ph_q_SIMC  = TH1D("H_ph_q_SIMC","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -283,6 +284,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
           H_t_SIMC.Fill(adj_t, evt.iter_weight)
           H_epsilon_SIMC.Fill(evt.epsilon, evt.iter_weight)
           H_MM_SIMC.Fill(adj_missmass, evt.iter_weight)
+          MM_vs_t_SIMC.Fill(adj_missmass, adj_t, evt.iter_weight)
           #H_MM_SIMC.Fill(math.sqrt(evt.Em**2-evt.Pm**2), evt.iter_weight)
           H_MM_unweighted_SIMC.Fill(adj_missmass)
               
@@ -306,6 +308,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     H_epsilon_SIMC.Scale(normfac_simc)
     H_MM_SIMC.Scale(normfac_simc)
     H_MM_unweighted_SIMC.Scale(normfac_simc)
+    MM_vs_t_SIMC.Scale(normfac_simc)
     H_th_SIMC.Scale(normfac_simc)
     H_ph_SIMC.Scale(normfac_simc)
     H_ph_q_SIMC.Scale(normfac_simc)
@@ -345,6 +348,7 @@ def compare_simc(rootFileSimc, hist, inpDict):
     histDict["H_t_SIMC"] =     H_t_SIMC
     histDict["H_epsilon_SIMC"] =     H_epsilon_SIMC
     histDict["H_MM_SIMC"] =     H_MM_SIMC
+    histDict["MM_vs_t_SIMC"] =     MM_vs_t_SIMC
     histDict["H_th_SIMC"] =     H_th_SIMC
     histDict["H_ph_SIMC"] =     H_ph_SIMC
     histDict["H_ph_q_SIMC"] =     H_ph_q_SIMC
