@@ -15,6 +15,7 @@ import root_pandas as rpd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.lines import Line2D
 import warnings
 from collections import defaultdict
 from scipy.optimize import curve_fit
@@ -111,6 +112,9 @@ Import separated xsects model
 sys.path.append("../models")
 if pol_str == "pl" and ParticleType == "kaon":
     from sep_xsect_kaon_pl import import_model
+
+sys.path.append("../binning")
+from theta_cm import calculate_tmin
 
 ###############################################################################################################################################
 '''
@@ -446,6 +450,92 @@ def plot_density_map(fig, ax, x_edges, y_edges, values, title, xlabel, ylabel):
     fig.colorbar(mesh, ax=ax)
 
 
+def build_q2_w_tmin_grid(q2_edges, w_edges):
+    q2_centers = 0.5 * (q2_edges[:-1] + q2_edges[1:])
+    w_centers = 0.5 * (w_edges[:-1] + w_edges[1:])
+    q2_grid, w_grid = np.meshgrid(q2_centers, w_centers, indexing='xy')
+    tmin_grid = np.empty_like(q2_grid, dtype=np.float64)
+
+    for iy, w_val in enumerate(w_centers):
+        for ix, q2_val in enumerate(q2_centers):
+            tmin_grid[iy, ix] = calculate_tmin(ParticleType, POL, w_val, q2_val)
+
+    return q2_grid, w_grid, tmin_grid
+
+
+def overlay_q2_w_phase_space(ax, q2_grid, w_grid, tmin_grid, minus_t_values, central_q2_value, central_w_value):
+    finite_mask = np.isfinite(tmin_grid)
+    contour_levels = []
+    if np.any(finite_mask):
+        tmin_min = np.nanmin(tmin_grid[finite_mask])
+        tmin_max = np.nanmax(tmin_grid[finite_mask])
+        for minus_t in minus_t_values:
+            if np.isfinite(minus_t) and tmin_min <= minus_t <= tmin_max:
+                contour_levels.append(float(minus_t))
+
+    contour_levels = sorted(set(contour_levels))
+    contour_colors = {
+        round(minus_t_values[0], 12): 'tab:blue',
+        round(minus_t_values[1], 12): 'tab:red',
+        round(minus_t_values[2], 12): 'tab:blue',
+    }
+    contour_styles = {
+        round(minus_t_values[0], 12): '--',
+        round(minus_t_values[1], 12): '-',
+        round(minus_t_values[2], 12): '--',
+    }
+
+    for level in contour_levels:
+        rounded_level = round(level, 12)
+        ax.contour(
+            q2_grid,
+            w_grid,
+            tmin_grid,
+            levels=[level],
+            colors=[contour_colors.get(rounded_level, 'tab:blue')],
+            linewidths=1.3,
+            linestyles=[contour_styles.get(rounded_level, '--')],
+        )
+
+    if np.isfinite(central_q2_value) and np.isfinite(central_w_value):
+        ax.plot(
+            central_q2_value,
+            central_w_value,
+            marker='o',
+            markersize=7,
+            markerfacecolor='none',
+            markeredgewidth=1.5,
+            color='tab:red',
+        )
+
+    legend_handles = []
+    if np.isfinite(central_q2_value) and np.isfinite(central_w_value):
+        legend_handles.append(
+            Line2D(
+                [0],
+                [0],
+                marker='o',
+                markersize=7,
+                markerfacecolor='none',
+                markeredgewidth=1.5,
+                color='tab:red',
+                linestyle='None',
+                label='Central $(Q^2, W)$',
+            )
+        )
+
+    if contour_levels:
+        legend_handles.extend(
+            [
+                Line2D([0], [0], color='tab:blue', linestyle='--', linewidth=1.3, label='$-t$ bin edges'),
+                Line2D([0], [0], color='tab:red', linestyle='-', linewidth=1.3, label='$-t$ bin center'),
+            ]
+        )
+
+    if legend_handles:
+        ax.legend(handles=legend_handles, fontsize=10, loc='best')
+
+
 def append_xsect_support_pages(pdf, support, epsilon_label):
     if support is None:
         return
@@ -460,6 +550,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     mm_edges = support["mm_edges"]
     q2_edges = support["q2_edges"]
     w_edges = support["w_edges"]
+    q2_w_x_edges = support.get("q2_w_x_edges")
+    q2_w_y_edges = support.get("q2_w_y_edges")
     theta_edges = support["theta_cm_edges"]
     theta_true_edges = support["theta_cm_true_edges"]
     phi_edges = support["phi_bins"]
@@ -472,6 +564,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     combined_map_cache = {}
     combined_2d_map_cache = {}
     mm_vs_t_cache = {}
+    q2_w_tmin_cache = None
 
     def cached_matrix(kind, variable, setting, field):
         cache_key = (kind, variable, setting, field)
@@ -510,6 +603,14 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         if cache_key not in mm_vs_t_cache:
             mm_vs_t_cache[cache_key] = np.sum(cached_matrix(kind, "mm", setting, "values"), axis=1)
         return mm_vs_t_cache[cache_key]
+
+    def cached_q2_w_tmin_grid():
+        nonlocal q2_w_tmin_cache
+        if q2_w_x_edges is None or q2_w_y_edges is None:
+            return None
+        if q2_w_tmin_cache is None:
+            q2_w_tmin_cache = build_q2_w_tmin_grid(q2_w_x_edges, q2_w_y_edges)
+        return q2_w_tmin_cache
 
     for k in range(NumtBins):
         fig, axes = plt.subplots(len(settings), 1, figsize=(12, max(4, 3.5 * len(settings))), sharex=True)
@@ -576,6 +677,51 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
+
+    if q2_w_x_edges is not None and q2_w_y_edges is not None:
+        q2_w_tmin_grid = cached_q2_w_tmin_grid()
+        for k in range(NumtBins):
+            data_map = cached_combined_2d_map("data", "q2_w", k)
+            simc_map = cached_combined_2d_map("simc", "q2_w", k)
+            fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+            plot_density_map(
+                fig,
+                axes[0],
+                q2_w_x_edges,
+                q2_w_y_edges,
+                data_map,
+                "{} $Q^2$ vs W, all settings Data, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+                '$Q^2$',
+                'W',
+            )
+            plot_density_map(
+                fig,
+                axes[1],
+                q2_w_x_edges,
+                q2_w_y_edges,
+                simc_map,
+                "{} $Q^2$ vs W, all settings SIMC, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+                '$Q^2$',
+                'W',
+            )
+
+            if q2_w_tmin_grid is not None:
+                q2_grid, w_grid, tmin_grid = q2_w_tmin_grid
+                minus_t_guides = (t_edges[k], t_bin_centers[k], t_edges[k + 1])
+                for ax in np.atleast_1d(axes):
+                    overlay_q2_w_phase_space(
+                        ax,
+                        q2_grid,
+                        w_grid,
+                        tmin_grid,
+                        minus_t_guides,
+                        central_q2[k],
+                        central_w[k],
+                    )
+
+            plt.tight_layout()
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
 
     one_d_pages = (
         ("q2", q2_edges, central_q2, '$Q^2$'),

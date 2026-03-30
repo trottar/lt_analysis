@@ -261,6 +261,7 @@ def _fill_yield_background_templates_for_bin(
             template_hists["t"].Fill(adj_t, event_weight)
             template_hists["Q2"].Fill(q2, event_weight)
             template_hists["W"].Fill(w, event_weight)
+            template_hists["q2_w"].Fill(q2, w, event_weight)
             _fill_t_vs_tmin_hist(
                 template_hists["t_vs_tmin"],
                 particle_type,
@@ -297,6 +298,7 @@ def _subtract_yield_mm_background_for_bin(
         "t": clone_reset_hist(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)], "_bg_template"),
         "Q2": clone_reset_hist(hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)], "_bg_template"),
         "W": clone_reset_hist(hist_bin_dict["H_W_DATA_{}_{}".format(j, k)], "_bg_template"),
+        "q2_w": clone_reset_hist(hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)], "_bg_template"),
         "theta_cm": clone_reset_hist(hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)], "_bg_template"),
         "t_vs_tmin": clone_reset_hist(hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)], "_bg_template"),
     }
@@ -316,6 +318,7 @@ def _subtract_yield_mm_background_for_bin(
     hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(template_hists["t"], -1)
     hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(template_hists["Q2"], -1)
     hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(template_hists["W"], -1)
+    hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(template_hists["q2_w"], -1)
     hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(template_hists["theta_cm"], -1)
     hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(template_hists["t_vs_tmin"], -1)
 
@@ -401,6 +404,7 @@ def _process_yield_data_tree(
             hist_group["t"][t_index][phi_index].Fill(adj_t)
             hist_group["Q2"][t_index][phi_index].Fill(evt.Q2)
             hist_group["W"][t_index][phi_index].Fill(evt.W)
+            hist_group["q2_w"][t_index][phi_index].Fill(evt.Q2, evt.W)
             if math.isfinite(theta_cm_deg):
                 hist_group["theta_cm"][t_index][phi_index].Fill(theta_cm_deg)
             _fill_t_vs_tmin_hist(
@@ -468,6 +472,7 @@ def _process_yield_simc_tree(
         hist_group["t"][t_index][phi_index].Fill(minus_t, evt.iter_weight)
         hist_group["Q2"][t_index][phi_index].Fill(evt.Q2, evt.iter_weight)
         hist_group["W"][t_index][phi_index].Fill(evt.W, evt.iter_weight)
+        hist_group["q2_w"][t_index][phi_index].Fill(evt.Q2, evt.W, evt.iter_weight)
         if math.isfinite(theta_cm_deg):
             hist_group["theta_cm"][t_index][phi_index].Fill(theta_cm_deg, evt.iter_weight)
         if math.isfinite(theta_cm_true_deg):
@@ -488,7 +493,7 @@ def _process_yield_simc_tree(
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
     processed_dict = {}
-    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
+    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
     ave_event_cache = _init_ave_event_cache()
     sub_event_cache = None
     
@@ -540,10 +545,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     n_t = len(t_bins) - 1
     n_phi = len(phi_bins) - 1
     dummy_norm_hist_dict = {}
-    data_hists = _init_hist_group_matrices(("Q2", "W", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
-    dummy_hists = _init_hist_group_matrices(("Q2", "W", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
-    rand_hists = _init_hist_group_matrices(("Q2", "W", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
-    dummy_rand_hists = _init_hist_group_matrices(("Q2", "W", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
+    data_hists = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
+    dummy_hists = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
+    rand_hists = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
+    dummy_rand_hists = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin"), n_t, n_phi)
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
@@ -561,6 +566,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)] = TH1D("H_Q2_DATA_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
             hist_bin_dict["H_W_DATA_{}_{}".format(j, k)] = TH1D("H_W_DATA_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+            hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_DATA_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)] = TH1D("H_theta_cm_DATA_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_DATA_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DATA_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
@@ -571,6 +577,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_RAND_{}_{}".format(j, k)] = TH1D("H_Q2_RAND_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
             hist_bin_dict["H_W_RAND_{}_{}".format(j, k)] = TH1D("H_W_RAND_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+            hist_bin_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_RAND_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_RAND_{}_{}".format(j, k)] = TH1D("H_theta_cm_RAND_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_RAND_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
             hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
@@ -581,6 +588,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_DUMMY_{}_{}".format(j, k)] = TH1D("H_Q2_DUMMY_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
             hist_bin_dict["H_W_DUMMY_{}_{}".format(j, k)] = TH1D("H_W_DUMMY_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+            hist_bin_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_DUMMY_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)] = TH1D("H_theta_cm_DUMMY_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
             hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DUMMY_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
@@ -591,6 +599,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_Q2_DUMMY_RAND_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
             hist_bin_dict["H_W_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_W_DUMMY_RAND_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+            hist_bin_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_theta_cm_DUMMY_RAND_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
             hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
@@ -601,6 +610,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             data_hists["Q2"][j][k] = hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)]
             data_hists["W"][j][k] = hist_bin_dict["H_W_DATA_{}_{}".format(j, k)]
+            data_hists["q2_w"][j][k] = hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)]
             data_hists["theta_cm"][j][k] = hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)]
             data_hists["mm"][j][k] = hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]
             data_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)]
@@ -611,6 +621,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             rand_hists["Q2"][j][k] = hist_bin_dict["H_Q2_RAND_{}_{}".format(j, k)]
             rand_hists["W"][j][k] = hist_bin_dict["H_W_RAND_{}_{}".format(j, k)]
+            rand_hists["q2_w"][j][k] = hist_bin_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)]
             rand_hists["theta_cm"][j][k] = hist_bin_dict["H_theta_cm_RAND_{}_{}".format(j, k)]
             rand_hists["mm"][j][k] = hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)]
             rand_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)]
@@ -621,6 +632,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             dummy_hists["Q2"][j][k] = hist_bin_dict["H_Q2_DUMMY_{}_{}".format(j, k)]
             dummy_hists["W"][j][k] = hist_bin_dict["H_W_DUMMY_{}_{}".format(j, k)]
+            dummy_hists["q2_w"][j][k] = hist_bin_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)]
             dummy_hists["theta_cm"][j][k] = hist_bin_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)]
             dummy_hists["mm"][j][k] = hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]
             dummy_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)]
@@ -631,6 +643,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             dummy_rand_hists["Q2"][j][k] = hist_bin_dict["H_Q2_DUMMY_RAND_{}_{}".format(j, k)]
             dummy_rand_hists["W"][j][k] = hist_bin_dict["H_W_DUMMY_RAND_{}_{}".format(j, k)]
+            dummy_rand_hists["q2_w"][j][k] = hist_bin_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)]
             dummy_rand_hists["theta_cm"][j][k] = hist_bin_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)]
             dummy_rand_hists["mm"][j][k] = hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]
             dummy_rand_hists["fit1sub"][j][k] = hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)]
@@ -644,6 +657,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_DATA_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_DATA_{}_{}".format(j, k)] = TH1D("H_W_SUB_DATA_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+                subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
                 subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)] = TH1D("H_theta_cm_SUB_DATA_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)]       = TH1D("H_t_SUB_DATA_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
@@ -653,6 +667,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 subDict["H_Q2_SUB_RAND_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_RAND_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_RAND_{}_{}".format(j, k)] = TH1D("H_W_SUB_RAND_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+                subDict["H_Q2_vs_W_SUB_RAND_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_SUB_RAND_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
                 subDict["H_theta_cm_SUB_RAND_{}_{}".format(j, k)] = TH1D("H_theta_cm_SUB_RAND_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
                 subDict["H_t_SUB_RAND_{}_{}".format(j, k)]       = TH1D("H_t_SUB_RAND_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_t_vs_tmin_SUB_RAND_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_RAND_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
@@ -662,6 +677,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 subDict["H_Q2_SUB_DUMMY_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_DUMMY_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_DUMMY_{}_{}".format(j, k)] = TH1D("H_W_SUB_DUMMY_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+                subDict["H_Q2_vs_W_SUB_DUMMY_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_SUB_DUMMY_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
                 subDict["H_theta_cm_SUB_DUMMY_{}_{}".format(j, k)] = TH1D("H_theta_cm_SUB_DUMMY_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
                 subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)]       = TH1D("H_t_SUB_DUMMY_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_t_vs_tmin_SUB_DUMMY_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_DUMMY_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
@@ -671,6 +687,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
                 subDict["H_Q2_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_DUMMY_RAND_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_W_SUB_DUMMY_RAND_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+                subDict["H_Q2_vs_W_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_SUB_DUMMY_RAND_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
                 subDict["H_theta_cm_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_theta_cm_SUB_DUMMY_RAND_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
                 subDict["H_t_SUB_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_SUB_DUMMY_RAND_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_t_vs_tmin_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_DUMMY_RAND_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
@@ -784,6 +801,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             
             hist_bin_dict["H_Q2_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_W_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_bin_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_theta_cm_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
@@ -794,6 +812,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_Q2_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_W_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_theta_cm_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)],-1)
@@ -804,6 +823,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_W_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_bin_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
@@ -814,6 +834,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             hist_bin_dict["H_Q2_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_Q2_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_W_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_W_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_bin_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)],-1)
@@ -825,6 +846,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Data Normalization
             hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
@@ -836,6 +858,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Dummy Normalization
             hist_bin_dict["H_Q2_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             hist_bin_dict["H_W_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
+            hist_bin_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             hist_bin_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
@@ -851,6 +874,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Dummy subtraction            
             hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_Q2_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_W_DUMMY_{}_{}".format(j, k)], -1)
+            hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)], -1)
             hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)], -1)
@@ -947,6 +971,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 # Scale pion to subtraction proper peak
                 subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_W_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
                 subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
@@ -956,6 +981,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 # Apply pion subtraction
                 hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(subDict["H_W_SUB_DATA_{}_{}".format(j, k)],-1)
+                hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
                 hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)],-1)
@@ -1145,6 +1171,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             support_hist_dict["Q2"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)])
             support_hist_dict["W"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_W_DATA_{}_{}".format(j, k)])
+            support_hist_dict["q2_w"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)])
             support_hist_dict["theta_cm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)])
             support_hist_dict["mm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
             support_hist_dict["t_vs_tmin"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)])
@@ -1563,7 +1590,7 @@ def find_yield_data(histlist, inpDict):
 def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
 
     processed_dict = {}
-    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
+    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
     ave_simc_event_cache = _init_ave_simc_event_cache()
     
     OutFilename = inpDict["OutFilename"] 
@@ -1609,7 +1636,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     hist_bin_dict = {}
     n_t = len(t_bins) - 1
     n_phi = len(phi_bins) - 1
-    simc_hists = _init_hist_group_matrices(("Q2", "W", "theta_cm", "theta_cm_true", "mm", "t", "mm_unweighted", "t_vs_tmin"), n_t, n_phi)
+    simc_hists = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t", "mm_unweighted", "t_vs_tmin"), n_t, n_phi)
     
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -1617,6 +1644,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
             hist_bin_dict["H_Q2_SIMC_{}_{}".format(j, k)] = TH1D("H_Q2_SIMC_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
             hist_bin_dict["H_W_SIMC_{}_{}".format(j, k)] = TH1D("H_W_SIMC_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
+            hist_bin_dict["H_Q2_vs_W_SIMC_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_SIMC_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_SIMC_{}_{}".format(j, k)] = TH1D("H_theta_cm_SIMC_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_theta_cm_true_SIMC_{}_{}".format(j, k)] = TH1D("H_theta_cm_true_SIMC_{}_{}".format(j, k), "theta_cm true", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]       = TH1D("H_MM_SIMC_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
@@ -1628,6 +1656,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             #hist_bin_dict["H_MM_SIMC_unweighted_{}_{}".format(j, k)] = TH1D("H_MM_SIMC_unweighted_{}_{}".format(j, k),"MM", 100, 0.0, 2.0)
             simc_hists["Q2"][j][k] = hist_bin_dict["H_Q2_SIMC_{}_{}".format(j, k)]
             simc_hists["W"][j][k] = hist_bin_dict["H_W_SIMC_{}_{}".format(j, k)]
+            simc_hists["q2_w"][j][k] = hist_bin_dict["H_Q2_vs_W_SIMC_{}_{}".format(j, k)]
             simc_hists["theta_cm"][j][k] = hist_bin_dict["H_theta_cm_SIMC_{}_{}".format(j, k)]
             simc_hists["theta_cm_true"][j][k] = hist_bin_dict["H_theta_cm_true_SIMC_{}_{}".format(j, k)]
             simc_hists["mm"][j][k] = hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)]
@@ -1666,6 +1695,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             # Normalize for yields
             hist_bin_dict["H_Q2_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_W_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
+            hist_bin_dict["H_Q2_vs_W_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_theta_cm_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_theta_cm_true_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
             hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)].Scale(normfac_simc)
@@ -1682,6 +1712,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
             support_hist_dict["Q2"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_Q2_SIMC_{}_{}".format(j, k)])
             support_hist_dict["W"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_W_SIMC_{}_{}".format(j, k)])
+            support_hist_dict["q2_w"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_Q2_vs_W_SIMC_{}_{}".format(j, k)])
             support_hist_dict["theta_cm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_theta_cm_SIMC_{}_{}".format(j, k)])
             support_hist_dict["theta_cm_true"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_theta_cm_true_SIMC_{}_{}".format(j, k)])
             support_hist_dict["mm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_MM_SIMC_{}_{}".format(j, k)])

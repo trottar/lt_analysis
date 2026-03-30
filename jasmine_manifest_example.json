@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "min_size_mb": 200,
+    "target_archive_size_gb": 4,
+    "max_archive_size_gb": 20,
+    "stage_dir": "/tmp/jasmine_stage",
+    "jput_bin": "/site/bin/jput",
+    "jput_n_flag": false,
+    "max_pairs_per_request": 32
+  },
+  "jobs": [
+    {
+      "source": "/cache/hallc/my_analysis/run_01234",
+      "destination": "/mss/hallc/scratch/username/run_01234/",
+      "recursive": true,
+      "archive_prefix": "run_01234_smallfiles",
+      "preserve_tree": true
+    },
+    {
+      "source": "/cache/hallc/my_analysis/summary.pdf",
+      "destination": "/mss/hallc/scratch/username/reports/",
+      "recursive": false,
+      "archive_prefix": "reports",
+      "preserve_tree": false
+    }
+  ]
+}

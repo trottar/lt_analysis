@@ -112,6 +112,7 @@ def _load_support_from_saved_histograms(hist, hist_prefix):
         "mm": "H_MM_{}_{}_{}",
         "Q2": "H_Q2_{}_{}_{}",
         "W": "H_W_{}_{}_{}",
+        "q2_w": "H_Q2_vs_W_{}_{}_{}",
         "theta_cm": "H_theta_cm_{}_{}_{}",
         "t_vs_tmin": "H_t_vs_tmin_{}_{}_{}",
     }
@@ -213,6 +214,7 @@ def write_xsect_support(histlist, inpDict, output_file_lst=None):
             ("theta_cm", "theta_cm"),
         )
         map2d_variable_map = (
+            ("q2_w", "q2_w"),
             ("t_vs_tmin", "t_vs_tmin"),
         )
         simc_only_variable_map = (
