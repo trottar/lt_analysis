@@ -72,6 +72,7 @@ if [[ "${HOST}" = *"farm"* ]]; then
 	source /apps/root/6.18.04/setroot_CUE.bash
     fi
     cd "$ANALYSISPATH"
+    echo $ANALYSISPATH
     source "hcana"
     cd "$REPLAYPATH"
     source "$REPLAYPATH/setup.sh"
