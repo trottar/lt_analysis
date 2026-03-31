@@ -61,6 +61,9 @@ normalize_ltsep_dir() {
 }
 
 REPLAY_OUTPUT_DIR="$(normalize_ltsep_dir "${ROOTPATH}")"
+SCALER_OUTPUT_DIR="${UTILPATH}/ROOTfiles/Scalers"
+SCALER_OUTPUT_FILE="${SCALER_OUTPUT_DIR}/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root"
+BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 
 # Source stuff depending upon hostname. Change or add more as needed  
 if [[ "${HOST}" = *"farm"* ]]; then
@@ -80,17 +83,30 @@ cd $REPLAYPATH
 
 # ###################################################################################################################################################
 ###################################################################################################################################################
-if [ ! -f "$UTILPATH/ROOTfiles/Scalers/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-    eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})\""
+mkdir -p "${SCALER_OUTPUT_DIR}"
+
+if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
+    if ! eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})\""; then
+        echo "ERROR: scaler replay failed for run ${RUNNUMBER}"
+        exit 1
+    fi
+    if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
+        echo "ERROR: scaler replay did not create ${SCALER_OUTPUT_FILE}"
+        exit 1
+    fi
     cd "$REPLAYPATH/CALIBRATION/bcm_current_map"
     root -b -l<<EOF 
 .L ScalerCalib.C
-.x run.C("${UTILPATH}/ROOTfiles/Scalers/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root")
+.x run.C("${SCALER_OUTPUT_FILE}")
 .q  
 EOF
-    mv bcmcurrent_${RUNNUMBER}_.param $REPLAYPATH/PARAM/HMS/BCM/CALIB/bcmcurrent_$RUNNUMBER.param
+    if [ ! -f "${BCM_PARAM_FILE}" ]; then
+        echo "ERROR: bcm calibration did not create ${BCM_PARAM_FILE}"
+        exit 1
+    fi
+    mv "${BCM_PARAM_FILE}" "$REPLAYPATH/PARAM/HMS/BCM/CALIB/bcmcurrent_$RUNNUMBER.param"
     cd $REPLAYPATH
-else echo "Scaler replayfile already found for this run in $REPLAYPATH/ROOTfiles/Scalers - Skipping scaler replay step"
+else echo "Scaler replayfile already found for this run in ${SCALER_OUTPUT_DIR} - Skipping scaler replay step"
 fi
 
 sleep 3
