@@ -151,8 +151,8 @@ python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-
 
 What it uses:
 
-- replay source: `${ROOTPATH}/${ANATYPE}LT`
-- skim source: `${SKIMPATH}/${ANATYPE}LT`
+- replay source: the ltsep-resolved replay ROOT directory
+- skim source: the ltsep-resolved skim ROOT directory
 - replay tape destination: `destination` from the manifest
 - skim tape destination: `skim_destination` from the manifest
 

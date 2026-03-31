@@ -46,6 +46,20 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 
 # #################################################################################################################################################
 
+normalize_ltsep_dir() {
+    local base_dir="$1"
+    local leaf="${ANATYPE}LT"
+    if [[ "${base_dir}" == *"/${leaf}" ]]; then
+        printf '%s\n' "${base_dir}"
+    elif [[ "${base_dir}" == *"None"* ]]; then
+        printf '%s\n' "${base_dir/None/${leaf}}"
+    else
+        printf '%s\n' "${base_dir}/${leaf}"
+    fi
+}
+
+REPLAY_OUTPUT_DIR="$(normalize_ltsep_dir "${ROOTPATH}")"
+
 # Source stuff depending upon hostname. Change or add more as needed  
 if [[ "${HOST}" = *"farm"* ]]; then
     if [[ "${HOST}" != *"ifarm"* ]]; then
@@ -79,7 +93,7 @@ fi
 
 sleep 3
 
-if [ ! -f "$UTILPATH/ROOTfiles/Analysis/${ANATYPE}LT/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-	eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C($RUNNUMBER,$MAXEVENTS)\""| tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
-else echo "Replayfile already found for this run in $UTILPATH/ROOTfiles/Analysis/${ANATYPE}LT/ - Skipping replay step"
+if [ ! -f "${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
+		eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C($RUNNUMBER,$MAXEVENTS)\""| tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
+else echo "Replayfile already found for this run in ${REPLAY_OUTPUT_DIR}/ - Skipping replay step"
 fi

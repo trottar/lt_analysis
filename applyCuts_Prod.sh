@@ -480,7 +480,19 @@ if [[ $Q2 = "0p5" && $W = "2p40" ]]; then
     else
 	KIN="Q0p5W2p40_${EPSILON}e"
     fi
-fi    
+fi
+
+normalize_ltsep_dir() {
+    local base_dir="$1"
+    local leaf="${ANATYPE}LT"
+    if [[ "${base_dir}" == *"/${leaf}" ]]; then
+        printf '%s\n' "${base_dir}"
+    elif [[ "${base_dir}" == *"None"* ]]; then
+        printf '%s\n' "${base_dir/None/${leaf}}"
+    else
+        printf '%s\n' "${base_dir}/${leaf}"
+    fi
+}
 
 if [[ $TargetType = "dummy" ]]; then
     DataType="dummy"
@@ -489,8 +501,36 @@ else
 fi
 
 cd "${LTANAPATH}/src/setup"
-SKIM_OUTPUT_DIR="${SKIMPATH}/${ANATYPE}LT"
+SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
+
+run_applycuts_particle() {
+    local phi_label="$1"
+    local particle="$2"
+    local out_f_file="${SKIM_OUTPUT_DIR}/${particle}_${RUNNUM}_-1_Raw_Data.root"
+    local log_file="${LTANAPATH}/log/${phi_label}_${particle}_${RUNNUM}_${KIN}.log"
+
+    if [ -e "$out_f_file" ]; then
+        echo "$out_f_file already exists. Skipping analysis for ${particle}."
+        if [[ $m_flag = "true" ]]; then
+            python3 shift_MM.py "${RUNNUM}" "${particle}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}" || return $?
+        fi
+        return 0
+    fi
+
+    rm -f "$log_file"
+    python3 Analysed_Prod.py "${RUNNUM}" "${particle}" "${ANATYPE}_coin_replay_production" |& tee -a "$log_file"
+    local rc=${PIPESTATUS[0]}
+    if [[ $rc -ne 0 ]]; then
+        return $rc
+    fi
+
+    if [[ $m_flag = "true" ]]; then
+        python3 shift_MM.py "${RUNNUM}" "${particle}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}" || return $?
+    fi
+
+    return 0
+}
 
 if [[ $p_flag = "true" ]]; then
 
@@ -509,18 +549,10 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing right ${DataType} ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	# Check if file already exists and delete if so
-	out_f_file="${SKIM_OUTPUT_DIR}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
-	if [ -e "$out_f_file" ]; then
-	    echo "$out_f_file already exists. Removing..."
-	    echo
-	    echo
-	    rm "$out_f_file"
-	fi
-	rm -f ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${ParticleType}_${RUNNUM}_${KIN}.log
-	if [[ $m_flag = "true" ]]; then
-	    	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	run_applycuts_particle "Right" "${ParticleType}"
+	rc=$?
+	if [[ $rc -ne 0 ]]; then
+	    exit $rc
 	fi
 	echo
     fi
@@ -535,19 +567,11 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing left ${DataType} ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	# Check if file already exists and delete if so
-	out_f_file="${SKIM_OUTPUT_DIR}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
-	if [ -e "$out_f_file" ]; then
-	    echo "$out_f_file already exists. Removing..."
-	    echo
-	    echo
-	    rm "$out_f_file"
+	run_applycuts_particle "Left" "${ParticleType}"
+	rc=$?
+	if [[ $rc -ne 0 ]]; then
+	    exit $rc
 	fi
-	rm -f ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${ParticleType}_${RUNNUM}_${KIN}.log
-	if [[ $m_flag = "true" ]]; then
-	    	python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
-	fi	
     fi
 
     # Checks that array isn't empty
@@ -560,18 +584,10 @@ if [[ $p_flag = "true" ]]; then
 	echo "Analysing center ${DataType} ${ParticleType} run ${RUNNUM}..."
 	echo "------------------------------------------------------"
 	echo
-	# Check if file already exists and delete if so
-	out_f_file="${SKIM_OUTPUT_DIR}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
-	if [ -e "$out_f_file" ]; then
-	    echo "$out_f_file already exists. Removing..."
-	    echo
-	    echo
-	    rm "$out_f_file"
-	fi
-	rm -f ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log	
-	python3 Analysed_Prod.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${ParticleType}_${RUNNUM}_${KIN}.log
-	if [[ $m_flag = "true" ]]; then
-	    python3 shift_MM.py "${RUNNUM}" "${ParticleType}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	run_applycuts_particle "Center" "${ParticleType}"
+	rc=$?
+	if [[ $rc -ne 0 ]]; then
+	    exit $rc
 	fi
     fi
 
@@ -594,18 +610,10 @@ else
 	    echo "Analysing right ${DataType} ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
-	    # Check if file already exists and delete if so
-	    out_f_file="${SKIM_OUTPUT_DIR}/${i}_${RUNNUM}_-1_Raw_Data.root"
-	    if [ -e "$out_f_file" ]; then
-		echo "$out_f_file already exists. Removing..."
-		echo
-		echo
-		rm "$out_f_file"
-	    fi
-	    rm -f ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Right_${i}_${RUNNUM}_${KIN}.log	    
-	    if [[ $m_flag = "true" ]]; then
-			python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    run_applycuts_particle "Right" "${i}"
+	    rc=$?
+	    if [[ $rc -ne 0 ]]; then
+		exit $rc
 	    fi
 	    echo
 	fi
@@ -620,18 +628,10 @@ else
 	    echo "Analysing left ${DataType} ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
-	    # Check if file already exists and delete if so
-	    out_f_file="${SKIM_OUTPUT_DIR}/${i}_${RUNNUM}_-1_Raw_Data.root"
-	    if [ -e "$out_f_file" ]; then
-		echo "$out_f_file already exists. Removing..."
-		echo
-		echo
-		rm "$out_f_file"
-	    fi
-	    rm -f ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Left_${i}_${RUNNUM}_${KIN}.log
-	    if [[ $m_flag = "true" ]]; then
-			python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    run_applycuts_particle "Left" "${i}"
+	    rc=$?
+	    if [[ $rc -ne 0 ]]; then
+		exit $rc
 	    fi
 	fi
 
@@ -645,18 +645,10 @@ else
 	    echo "Analysing center ${DataType} ${i} run ${RUNNUM}..."
 	    echo "------------------------------------------------------"
 	    echo
-	    # Check if file already exists and delete if so
-	    out_f_file="${SKIM_OUTPUT_DIR}/${i}_${RUNNUM}_-1_Raw_Data.root"
-	    if [ -e "$out_f_file" ]; then
-		echo "$out_f_file already exists. Removing..."
-		echo
-		echo
-		rm "$out_f_file"
-	    fi
-	    rm -f ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log	    
-	    python3 Analysed_Prod.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" |& tee -a ${LTANAPATH}/log/Center_${i}_${RUNNUM}_${KIN}.log
-	    if [[ $m_flag = "true" ]]; then
-			python3 shift_MM.py "${RUNNUM}" "${i}" "${ANATYPE}_coin_replay_production" "${KIN}" "${PHIVAL}" "${TargetType}"
+	    run_applycuts_particle "Center" "${i}"
+	    rc=$?
+	    if [[ $rc -ne 0 ]]; then
+		exit $rc
 	    fi
 	fi
     done
