@@ -86,7 +86,7 @@ cd $REPLAYPATH
 mkdir -p "${SCALER_OUTPUT_DIR}"
 
 if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
-    if ! eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})\""; then
+    if ! "${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})"; then
         echo "ERROR: scaler replay failed for run ${RUNNUMBER}"
         exit 1
     fi
@@ -112,6 +112,6 @@ fi
 sleep 3
 
 if [ ! -f "${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-		eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C($RUNNUMBER,$MAXEVENTS)\""| tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
+			"${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C($RUNNUMBER,$MAXEVENTS)" | tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
 else echo "Replayfile already found for this run in ${REPLAY_OUTPUT_DIR}/ - Skipping replay step"
 fi
