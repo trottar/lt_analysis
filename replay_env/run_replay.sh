@@ -71,8 +71,8 @@ if [[ "${HOST}" = *"farm"* ]]; then
 	source /site/12gev_phys/softenv.sh 2.3
 	source /apps/root/6.18.04/setroot_CUE.bash
     fi
-    cd "$HCANAPATH"
-    source "$HCANAPATH/setup.sh"
+    cd "$ANALYSISPATH"
+    source "hcana"
     cd "$REPLAYPATH"
     source "$REPLAYPATH/setup.sh"
 elif [[ "${HOST}" = *"qcd"* ]]; then
@@ -80,7 +80,7 @@ elif [[ "${HOST}" = *"qcd"* ]]; then
 fi
 
 cd $REPLAYPATH
-echo "Replay path is $REPLAYPATH"
+
 # ###################################################################################################################################################
 ###################################################################################################################################################
 mkdir -p "${SCALER_OUTPUT_DIR}"
