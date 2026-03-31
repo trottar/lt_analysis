@@ -533,7 +533,7 @@ def print_summary(
     existing_job_names: Set[str],
 ) -> None:
     print(f"Family prefix   : {family_prefix}")
-    print(f"JSON directory   : {expand_path(args.json_dir)}")
+    print(f"Manifest directory: {expand_path(args.manifest_dir)}")
     print(f"Workflow         : {workflow}")
     print(f"Replay script    : {expand_path(args.replay_script)}")
     print(f"Account          : {args.account}")
