@@ -94,10 +94,10 @@ if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
         echo "ERROR: scaler replay did not create ${SCALER_OUTPUT_FILE}"
         exit 1
     fi
-    cd "$REPLAYPATH/CALIBRATION/bcm_current_map"
+    cd "$REPLAYPATH"
     root -b -l<<EOF 
-.L ScalerCalib.C
-.x run.C("${SCALER_OUTPUT_FILE}")
+.L ${REPLAYPATH}/ScalerCalib.C
+.x ${REPLAYPATH}/run.C("${SCALER_OUTPUT_FILE}")
 .q  
 EOF
     if [ ! -f "${BCM_PARAM_FILE}" ]; then
