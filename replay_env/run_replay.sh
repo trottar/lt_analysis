@@ -63,6 +63,8 @@ normalize_ltsep_dir() {
 REPLAY_OUTPUT_DIR="$(normalize_ltsep_dir "${ROOTPATH}")"
 SCALER_OUTPUT_DIR="${UTILPATH}/ROOTfiles/Scalers"
 SCALER_OUTPUT_FILE="${SCALER_OUTPUT_DIR}/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root"
+SCALER_REPORT_DIR="${UTILPATH}/REPORT_OUTPUT/Scalers"
+SCALER_REPORT_FILE="${SCALER_REPORT_DIR}/${ANATYPE}_output_coin_scalers_Summary_${RUNNUMBER}_${MAXEVENTS}.report"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 
 # Source stuff depending upon hostname. Change or add more as needed  
@@ -74,14 +76,19 @@ source "$REPLAYPATH/setup.sh"
 # ###################################################################################################################################################
 ###################################################################################################################################################
 mkdir -p "${SCALER_OUTPUT_DIR}"
+mkdir -p "${SCALER_REPORT_DIR}"
 
 if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
-    if ! "${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C(${RUNNUMBER},${MAXEVENTS})"; then
+    "${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C(${RUNNUMBER},${MAXEVENTS})" | tee "${SCALER_REPORT_FILE}"
+    scaler_rc=${PIPESTATUS[0]}
+    if [ "${scaler_rc}" -ne 0 ]; then
         echo "ERROR: scaler replay failed for run ${RUNNUMBER}"
-        exit 1
+        echo "ERROR: see ${SCALER_REPORT_FILE}"
+        exit "${scaler_rc}"
     fi
     if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
         echo "ERROR: scaler replay did not create ${SCALER_OUTPUT_FILE}"
+        echo "ERROR: see ${SCALER_REPORT_FILE}"
         exit 1
     fi
     cd "$REPLAYPATH"
