@@ -71,7 +71,6 @@ if [[ "${HOST}" = *"farm"* ]]; then
 	source /site/12gev_phys/softenv.sh 2.3
 	source /apps/root/6.18.04/setroot_CUE.bash
     fi
-    cd "$HCANAPATH"
     source "$HCANAPATH/setup.sh"
     cd "$REPLAYPATH"
     source "$REPLAYPATH/setup.sh"
