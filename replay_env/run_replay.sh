@@ -106,7 +106,7 @@ if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
         echo "ERROR: see ${SCALER_REPORT_FILE}"
         exit 1
     fi
-    cd "$REPLAYPATH"
+     cd "$REPLAYPATH/CALIBRATION/bcm_current_map"
     root -b -l<<EOF 
 .L ScalerCalib.C
 .x run.C("${SCALER_OUTPUT_FILE}")
