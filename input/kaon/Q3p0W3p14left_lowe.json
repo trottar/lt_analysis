@@ -14,8 +14,9 @@
     {
       "runs_file": "/u/group/c-kaonlt/USERS/$USER/hallc_replay_lt/UTIL_KAONLT/run_list/KaonLT/Q3p0W3p14left_lowe",
       "source": "/lustre24/expphy/volatile/hallc/c-kaonlt/$USER/OUTPUT/Analysis/KaonLT",
-      "destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/ROOTfiles/Analysis/General",
-      "tar_destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/REPORT_OUTPUT/Analysis/General",
+      "destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/ROOTfiles/Analysis/KaonLT",
+      "skim_destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/Skim_ROOTfiles/Analysis/KaonLT",
+      "tar_destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/REPORT_OUTPUT/Analysis/KaonLT",
       "archive_prefix_template": "FullReplay_run_{run}_KaonLT",
       "run_match_regex_template": "(^|[^0-9]){run}([^0-9]|$)",
       "recursive": true,
@@ -23,3 +24,5 @@
     }
   ]
 }
+
+

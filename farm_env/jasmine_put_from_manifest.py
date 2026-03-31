@@ -48,6 +48,7 @@ DEFAULT_MANIFEST_DIR = REPO_ROOT / "input" / "kaon"
 VALID_PHI = {"center", "left", "right"}
 VALID_EPSILON = {"high", "low"}
 VALID_TARGET = {"lh2", "data", "dummy"}
+VALID_DESTINATION_KINDS = {"replay", "skim"}
 
 
 def render_run_template(value, run):
@@ -106,6 +107,7 @@ class PlannedPut:
 class JobConfig:
     source: Path
     destination: Path
+    skim_destination: Optional[Path] = None
     recursive: bool = True
     archive_prefix: Optional[str] = None
     preserve_tree: bool = True
@@ -129,6 +131,7 @@ class Settings:
     target_archive_size_bytes: int
     max_archive_size_bytes: int
     stage_dir: Path
+    destination_kind: str
     submit: bool
     cleanup_archives: bool
     submission: SubmissionConfig
@@ -167,6 +170,12 @@ def parse_args() -> argparse.Namespace:
         "--stage-dir",
         default=None,
         help=f"Override staging directory (default: {DEFAULT_STAGE_DIR})",
+    )
+    parser.add_argument(
+        "--destination-kind",
+        choices=sorted(VALID_DESTINATION_KINDS),
+        default="replay",
+        help="Which manifest destination to use: replay or skim (default: replay)",
     )
     return parser.parse_args()
 
@@ -295,6 +304,7 @@ def resolve_settings(manifest: Dict, cli: argparse.Namespace) -> Settings:
         target_archive_size_bytes=int(target_archive_size_gb * GB),
         max_archive_size_bytes=int(max_archive_size_gb * GB),
         stage_dir=stage_dir,
+        destination_kind=str(cli.destination_kind),
         submit=cli.submit,
         cleanup_archives=not cli.keep_archives,
         submission=submission,
@@ -333,11 +343,16 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
             tar_destination = None
             if tar_destination_value is not None:
                 tar_destination = Path(expandvars(str(tar_destination_value))).expanduser()
+            skim_destination_value = entry.get("skim_destination")
+            skim_destination = None
+            if skim_destination_value is not None:
+                skim_destination = Path(expandvars(str(skim_destination_value))).expanduser()
 
             resolved.append(
                 JobConfig(
                     source=source,
                     destination=destination,
+                    skim_destination=skim_destination,
                     recursive=recursive,
                     archive_prefix=entry.get("archive_prefix"),
                     preserve_tree=preserve_tree,
@@ -357,6 +372,7 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
         destination_template = entry.get("destination_template", entry.get("destination"))
         archive_prefix_template = entry.get("archive_prefix_template", entry.get("archive_prefix"))
         tar_destination_template = entry.get("tar_destination_template", entry.get("tar_destination"))
+        skim_destination_template = entry.get("skim_destination_template", entry.get("skim_destination"))
         run_match_regex_template = entry.get("run_match_regex_template")
 
         if source_template is None:
@@ -376,6 +392,9 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
             tar_destination = None
             if tar_destination_template is not None:
                 tar_destination = Path(render_run_template(tar_destination_template, run)).expanduser()
+            skim_destination = None
+            if skim_destination_template is not None:
+                skim_destination = Path(render_run_template(skim_destination_template, run)).expanduser()
             run_match_regex = None
             if run_match_regex_template is not None:
                 run_match_regex = render_run_template(run_match_regex_template, run)
@@ -384,6 +403,7 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
                 JobConfig(
                     source=source,
                     destination=destination,
+                    skim_destination=skim_destination,
                     recursive=recursive,
                     archive_prefix=archive_prefix,
                     preserve_tree=preserve_tree,
@@ -401,6 +421,17 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
 def ensure_supported_destination(destination: Path) -> None:
     if not str(destination).startswith("/mss/"):
         raise ValueError(f"Destination must be under /mss/: {destination}")
+
+
+def resolve_job_destination(job: JobConfig, settings: Settings) -> Path:
+    if settings.destination_kind == "skim":
+        if job.skim_destination is None:
+            raise ValueError(
+                f"Manifest job for source {job.source} is missing 'skim_destination' "
+                f"but --destination-kind=skim was requested."
+            )
+        return job.skim_destination
+    return job.destination
 
 
 
@@ -491,8 +522,9 @@ def resolve_tar_destination(job: JobConfig) -> Path:
 
 
 def plan_job(job: JobConfig, settings: Settings) -> List[PlannedPut]:
-    ensure_supported_destination(job.destination)
-    tar_mss_dir = resolve_tar_destination(job)
+    job_destination = resolve_job_destination(job, settings)
+    ensure_supported_destination(job_destination)
+    tar_mss_dir = resolve_tar_destination(job) if settings.destination_kind == "replay" else job_destination
     ensure_supported_destination(tar_mss_dir)
 
     files = list(iter_source_files(job))
@@ -510,7 +542,7 @@ def plan_job(job: JobConfig, settings: Settings) -> List[PlannedPut]:
         planned.append(
             PlannedPut(
                 local_path=entry.path,
-                mss_dir=job.destination,
+                mss_dir=job_destination,
                 reason="direct>=threshold",
                 size_bytes=entry.size_bytes,
                 members=[entry],

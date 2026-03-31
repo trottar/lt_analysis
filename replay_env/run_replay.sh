@@ -3,9 +3,8 @@
 # Created - 20/July/21, Author - Muhammad Junaid (mjo147@uregina.ca), University of Regina, Canada (Copyright (c) junaid) #
 # 28/11/21 - Version 2 - Utilises new ltsep package by Richard Trotta
 # 19/01/22 - Version 3 - Target type is now an argument
+# 20/03/26 - Version 4 - RLT, moved to lt_analysis and slimmed unnecessary parts
 ###########################################################################################################################
-# This version of script is for shift workers at JLAB
-# Executes the replay script and python analysis script and at the end python plotting script
 # To run this script, execute ./scriptname $RUNNUMBER$
 
 #################################################################################################################################################
