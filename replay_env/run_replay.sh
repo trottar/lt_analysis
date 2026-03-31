@@ -65,6 +65,8 @@ SCALER_OUTPUT_DIR="${UTILPATH}/ROOTfiles/Scalers"
 SCALER_OUTPUT_FILE="${SCALER_OUTPUT_DIR}/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root"
 SCALER_REPORT_DIR="${UTILPATH}/REPORT_OUTPUT/Scalers"
 SCALER_REPORT_FILE="${SCALER_REPORT_DIR}/${ANATYPE}_output_coin_scalers_Summary_${RUNNUMBER}_${MAXEVENTS}.report"
+SCALER_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C"
+FULL_REPLAY_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 
 # Source stuff depending upon hostname. Change or add more as needed  
@@ -73,13 +75,26 @@ source /apps/root/6.18.04/setroot_CUE.bash
 
 cd $REPLAYPATH
 source "$REPLAYPATH/setup.sh"
+
+if [ ! -x "${REPLAYPATH}/hcana" ]; then
+    echo "ERROR: hcana not found or not executable at ${REPLAYPATH}/hcana"
+    exit 1
+fi
+if [ ! -f "${SCALER_MACRO_FILE}" ]; then
+    echo "ERROR: scaler macro not found at ${SCALER_MACRO_FILE}"
+    exit 1
+fi
+if [ ! -f "${FULL_REPLAY_MACRO_FILE}" ]; then
+    echo "ERROR: full replay macro not found at ${FULL_REPLAY_MACRO_FILE}"
+    exit 1
+fi
 # ###################################################################################################################################################
 ###################################################################################################################################################
 mkdir -p "${SCALER_OUTPUT_DIR}"
 mkdir -p "${SCALER_REPORT_DIR}"
 
 if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
-    "${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C(${RUNNUMBER},${MAXEVENTS})" | tee "${SCALER_REPORT_FILE}"
+    "${REPLAYPATH}/hcana" -l -q -b "${SCALER_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee "${SCALER_REPORT_FILE}"
     scaler_rc=${PIPESTATUS[0]}
     if [ "${scaler_rc}" -ne 0 ]; then
         echo "ERROR: scaler replay failed for run ${RUNNUMBER}"
@@ -109,7 +124,7 @@ fi
 sleep 3
 
 if [ ! -f "${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-			"${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C(${RUNNUMBER},${MAXEVENTS})" | tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
+			"${REPLAYPATH}/hcana" -l -q -b "${FULL_REPLAY_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
 			replay_rc=${PIPESTATUS[0]}
 			if [ "${replay_rc}" -ne 0 ]; then
 			    echo "ERROR: full replay failed for run ${RUNNUMBER}"
