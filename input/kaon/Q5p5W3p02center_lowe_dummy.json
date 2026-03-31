@@ -1,0 +1,25 @@
+{
+  "defaults": {
+    "min_size_mb": 200,
+    "target_archive_size_gb": 4,
+    "max_archive_size_gb": 20,
+    "stage_dir": "/scratch/$USER",
+    "submit": {
+      "jput_bin": "jput",
+      "command_mode": "src_dest",
+      "extra_args": []
+    }
+  },
+  "jobs": [
+    {
+      "runs_file": "/u/group/c-kaonlt/USERS/$USER/hallc_replay_lt/UTIL_KAONLT/run_list/KaonLT/Q5p5W3p02center_lowe_dummy",
+      "source": "/lustre24/expphy/volatile/hallc/c-kaonlt/$USER/OUTPUT/Analysis/KaonLT",
+      "destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/ROOTfiles/Analysis/General",
+      "tar_destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/REPORT_OUTPUT/Analysis/General",
+      "archive_prefix_template": "FullReplay_run_{run}_KaonLT",
+      "run_match_regex_template": "(^|[^0-9]){run}([^0-9]|$)",
+      "recursive": true,
+      "preserve_tree": true
+    }
+  ]
+}
