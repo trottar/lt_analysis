@@ -10,7 +10,7 @@
 #################################################################################################################################################
 
 echo "Starting analysis of Kaon events"
-echo "I take as arguments the run number and max number of events!"
+echo "I take as arguments the run number!"
 # Input params - run number and max number of events
 RUNNUMBER=$1
 if [[ -z "$1" ]]; then
@@ -66,19 +66,11 @@ SCALER_OUTPUT_FILE="${SCALER_OUTPUT_DIR}/coin_${ANATYPE}LT_replay_scalers_${RUNN
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 
 # Source stuff depending upon hostname. Change or add more as needed  
-if [[ "${HOST}" = *"farm"* ]]; then
-    if [[ "${HOST}" != *"ifarm"* ]]; then
-	source /site/12gev_phys/softenv.sh 2.3
-	source /apps/root/6.18.04/setroot_CUE.bash
-    fi
-    cd "$REPLAYPATH"
-    source "$REPLAYPATH/setup.sh"
-elif [[ "${HOST}" = *"qcd"* ]]; then
-    source "$REPLAYPATH/setup.sh" 
-fi
+source /site/12gev_phys/softenv.sh 2.3
+source /apps/root/6.18.04/setroot_CUE.bash
 
 cd $REPLAYPATH
-
+source "$REPLAYPATH/setup.sh"
 # ###################################################################################################################################################
 ###################################################################################################################################################
 mkdir -p "${SCALER_OUTPUT_DIR}"
