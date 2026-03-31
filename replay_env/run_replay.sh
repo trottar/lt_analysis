@@ -65,6 +65,20 @@ SCALER_OUTPUT_DIR="${UTILPATH}/ROOTfiles/Scalers"
 SCALER_OUTPUT_FILE="${SCALER_OUTPUT_DIR}/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 
+# Source stuff depending upon hostname. Change or add more as needed  
+if [[ "${HOST}" = *"farm"* ]]; then
+    if [[ "${HOST}" != *"ifarm"* ]]; then
+	source /site/12gev_phys/softenv.sh 2.3
+	source /apps/root/6.18.04/setroot_CUE.bash
+    fi
+    cd "$HCANAPATH"
+    source "$HCANAPATH/setup.sh"
+    cd "$REPLAYPATH"
+    source "$REPLAYPATH/setup.sh"
+elif [[ "${HOST}" = *"qcd"* ]]; then
+    source "$REPLAYPATH/setup.sh" 
+fi
+
 cd $REPLAYPATH
 
 # ###################################################################################################################################################
@@ -72,7 +86,7 @@ cd $REPLAYPATH
 mkdir -p "${SCALER_OUTPUT_DIR}"
 
 if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
-    if ! "${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})"; then
+    if ! "${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C(${RUNNUMBER},${MAXEVENTS})"; then
         echo "ERROR: scaler replay failed for run ${RUNNUMBER}"
         exit 1
     fi
@@ -98,6 +112,11 @@ fi
 sleep 3
 
 if [ ! -f "${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-			"${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C($RUNNUMBER,$MAXEVENTS)" | tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
+			"${REPLAYPATH}/hcana" -l -q -b "${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C(${RUNNUMBER},${MAXEVENTS})" | tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
+			replay_rc=${PIPESTATUS[0]}
+			if [ "${replay_rc}" -ne 0 ]; then
+			    echo "ERROR: full replay failed for run ${RUNNUMBER}"
+			    exit "${replay_rc}"
+			fi
 else echo "Replayfile already found for this run in ${REPLAY_OUTPUT_DIR}/ - Skipping replay step"
 fi
