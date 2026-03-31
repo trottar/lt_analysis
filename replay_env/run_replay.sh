@@ -21,9 +21,9 @@ MAXEVENTS=-1
 
 # Runs script in the ltsep python package that grabs current path enviroment
 if [[ ${HOSTNAME} = *"cdaq"* ]]; then
-    PATHFILE_INFO=`python3 /home/cdaq/kaonLT-2021/hallc_replay_lt/UTIL_KAON/bin/python/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
-elif [[ "${HOSTNAME}" = *"farm"* ]]; then
-    PATHFILE_INFO=`python3 /u/home/${USER}/.local/lib/python3.4/site-packages/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
+    PATHFILE_INFO=`python3 /home/cdaq/pionLT-2021/hallc_replay_lt/UTIL_PION/bin/python/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
+elif [[ ${HOSTNAME} = *"farm"* ]]; then
+    PATHFILE_INFO=`python3 $replay_lt_env/lib/python3.9/site-packages/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
 fi
 
 # Split the string we get to individual variables, easier for printing and use later
@@ -43,6 +43,8 @@ SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
 ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
 USER=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
 HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
+SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
 # #################################################################################################################################################
 
