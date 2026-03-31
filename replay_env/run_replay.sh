@@ -108,8 +108,8 @@ if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
     fi
     cd "$REPLAYPATH"
     root -b -l<<EOF 
-.L ${REPLAYPATH}/ScalerCalib.C
-.x ${REPLAYPATH}/run.C("${SCALER_OUTPUT_FILE}")
+.L ScalerCalib.C
+.x run.C("${SCALER_OUTPUT_FILE}")
 .q  
 EOF
     if [ ! -f "${BCM_PARAM_FILE}" ]; then
