@@ -14,9 +14,10 @@ REPLAY_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_replay.py"
 APPLYCUTS_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_applycuts.py"
 REBALANCE_SCRIPT="${SCRIPT_DIR}/farm_env/rebalance_swif.py"
 WORKFLOW_PREFIX="kaonlt"
+DEFAULT_MANIFEST_DIR="${SCRIPT_DIR}/input/kaon"
 
-# Flag definitions (flags: h, s, r, a, n, c, w)
-while getopts 'hsrancw:' flag; do
+# Flag definitions (flags: h, s, r, a, n, c, w, m)
+while getopts 'hsrancw:m:' flag; do
     case "${flag}" in
         h)
         echo "--------------------------------------------------------------"
@@ -35,11 +36,14 @@ while getopts 'hsrancw:' flag; do
         echo "    -n, do not call 'swif2 run' after submit/rebalance"
         echo "    -c, use applyCuts mode instead of replay mode"
         echo "    -w, override workflow name"
+        echo "    -m, override manifest directory (default: input/kaon)"
         echo
         echo "Notes..."
-        echo "    Replay mode scans all matching JSON variants in input/kaon and submits"
+        echo "    Replay mode scans all matching JSON variants in the selected manifest"
+        echo "    directory and submits"
         echo "    one replay job per unique run."
-        echo "    applyCuts mode scans the same variants and submits one job per"
+        echo "    applyCuts mode scans the same selected manifest directory and"
+        echo "    submits one job per"
         echo "    manifest variant + run, but only when replay output exists."
         echo
         echo "Examples..."
@@ -47,6 +51,7 @@ while getopts 'hsrancw:' flag; do
         echo "    ./run_farm.sh -s 3p0 3p14"
         echo "    ./run_farm.sh -c 3p0 3p14"
         echo "    ./run_farm.sh -c -s 3p0 3p14"
+        echo "    ./run_farm.sh -m input/kaon_test -s 3p0 3p14"
         echo "    ./run_farm.sh -r 3p0 3p14"
         echo "    ./run_farm.sh -r -c -a -n 3p0 3p14"
         echo
@@ -65,6 +70,7 @@ while getopts 'hsrancw:' flag; do
         n) no_run_flag='true' ;;
         c) cuts_flag='true' ;;
         w) workflow_override="${OPTARG}" ;;
+        m) manifest_dir="${OPTARG}" ;;
         *)
         exit 1
         ;;
@@ -146,6 +152,10 @@ else
     WORKFLOW="${WORKFLOW_PREFIX}_${FAMILY}${WORKFLOW_SUFFIX}"
 fi
 
+if [[ -z "${manifest_dir}" ]]; then
+    manifest_dir="${DEFAULT_MANIFEST_DIR}"
+fi
+
 if [[ "${rebalance_flag}" = "true" ]]; then
     echo
     echo "---------------------------------------------------------"
@@ -176,11 +186,12 @@ echo
 echo "Preparing ${MODE} submission for Q2=${Q2}, W=${W}..."
 echo
 echo "                        WORKFLOW = ${WORKFLOW}"
+echo "                    MANIFEST DIR = ${manifest_dir}"
 echo
 echo "---------------------------------------------------------"
 echo
 
-submit_cmd=(python3 "${MODE_SCRIPT}" "${Q2}" "${W}" --workflow-name "${WORKFLOW}")
+submit_cmd=(python3 "${MODE_SCRIPT}" "${Q2}" "${W}" --workflow-name "${WORKFLOW}" --manifest-dir "${manifest_dir}")
 if [[ "${submit_flag}" = "true" ]]; then
     submit_cmd+=(--submit)
 fi

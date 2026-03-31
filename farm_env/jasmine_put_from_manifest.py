@@ -162,6 +162,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("w", help="W token, for example 3p14 or W3p14")
     parser.add_argument("target", help="Target type: lh2/data or dummy")
     parser.add_argument(
+        "--manifest-dir",
+        default=str(DEFAULT_MANIFEST_DIR),
+        help=f"Directory containing KaonLT manifests (default: {DEFAULT_MANIFEST_DIR})",
+    )
+    parser.add_argument(
         "--submit",
         action="store_true",
         help="Actually invoke submission commands. Default is dry-run.",
@@ -224,8 +229,9 @@ def resolve_manifest_path(cli: argparse.Namespace) -> Path:
     if epsilon == "low" and phi == "right":
         raise ValueError("No low-epsilon right-setting manifest exists in input/kaon.")
 
+    manifest_dir = Path(expandvars(str(cli.manifest_dir))).expanduser()
     manifest_stem = build_manifest_stem(phi, epsilon, q2, w, target)
-    manifest_path = DEFAULT_MANIFEST_DIR / f"{manifest_stem}.json"
+    manifest_path = manifest_dir / f"{manifest_stem}.json"
 
     if not manifest_path.exists():
         raise FileNotFoundError(

@@ -35,7 +35,7 @@ from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
-DEFAULT_JSON_DIR = str(REPO_ROOT / "input" / "kaon")
+DEFAULT_MANIFEST_DIR = str(REPO_ROOT / "input" / "kaon")
 DEFAULT_REPLAY_SCRIPT = str(REPO_ROOT / "replay_env" / "run_replay.sh")
 DEFAULT_WORKFLOW_PREFIX = "kaonlt"
 DEFAULT_ACCOUNT = "c-kaonlt"
@@ -83,9 +83,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("q2", help="Q value without prefix, e.g. 5p5")
     parser.add_argument("w", help="W value without prefix, e.g. 3p02")
     parser.add_argument(
+        "--manifest-dir",
         "--json-dir",
-        default=DEFAULT_JSON_DIR,
-        help=f"Directory containing KaonLT JSON files (default: {DEFAULT_JSON_DIR})",
+        dest="manifest_dir",
+        default=DEFAULT_MANIFEST_DIR,
+        help=f"Directory containing KaonLT manifest JSON files (default: {DEFAULT_MANIFEST_DIR})",
     )
     parser.add_argument(
         "--replay-script",
@@ -659,7 +661,7 @@ def validate_replay_script(path_text: str) -> None:
 def main() -> int:
     args = parse_args()
     family_prefix = normalize_family(args.q2, args.w)
-    json_dir = expand_path(args.json_dir)
+    json_dir = expand_path(args.manifest_dir)
     validate_replay_script(args.replay_script)
 
     variants = discover_json_variants(json_dir, family_prefix, args.family_regex)

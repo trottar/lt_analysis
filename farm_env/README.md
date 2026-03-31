@@ -17,6 +17,9 @@ The wrapper scans all matching manifests under `input/kaon` for the requested
 family, so all supported phi/epsilon/target variants are included
 automatically.
 
+For isolated testing, you can point the wrapper at a separate manifest tree with
+`-m`, for example `input/kaon_test`.
+
 ## Basic Usage
 
 From the repo root:
@@ -69,6 +72,12 @@ That prints a replay dry-run plan. Nothing is submitted unless `-s` is used.
 
 - Override the auto-generated workflow name.
 
+`-m <manifest-dir>`
+
+- Override the manifest directory scanned by replay/applyCuts submission.
+- Default is `input/kaon`.
+- Useful for small test manifests stored separately from production.
+
 ## Replay Mode
 
 Default mode:
@@ -76,11 +85,12 @@ Default mode:
 ```bash
 ./run_farm.sh 3p0 3p14
 ./run_farm.sh -s 3p0 3p14
+./run_farm.sh -m input/kaon_test -s 3p0 3p14
 ```
 
 This calls `farm_env/submit_replay.py`, which:
 
-- finds all matching `Q{Q2}W{W}*.json` manifests under `input/kaon`
+- finds all matching `Q{Q2}W{W}*.json` manifests under the selected manifest directory
 - merges runs across those manifests
 - submits one replay job per unique run
 
@@ -97,11 +107,12 @@ Use `-c`:
 ```bash
 ./run_farm.sh -c 3p0 3p14
 ./run_farm.sh -c -s 3p0 3p14
+./run_farm.sh -c -m input/kaon_test -s 3p0 3p14
 ```
 
 This calls `farm_env/submit_applycuts.py`, which:
 
-- finds all matching manifests under `input/kaon`
+- finds all matching manifests under the selected manifest directory
 - keeps each manifest variant separate
 - submits one job per manifest variant + run
 - only plans a job if the full replay ROOT file already exists in the ltsep
@@ -141,12 +152,14 @@ Replay upload:
 
 ```bash
 python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind replay
+python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --manifest-dir input/kaon_test --product-kind replay
 ```
 
 Skim upload:
 
 ```bash
 python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind skim
+python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --manifest-dir input/kaon_test --product-kind skim
 ```
 
 What it uses:
