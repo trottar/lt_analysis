@@ -78,12 +78,12 @@ cd $REPLAYPATH
 
 # ###################################################################################################################################################
 ###################################################################################################################################################
-if [ ! -f "$UTILPATH/ROOTfiles/Scalers/coin_{ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-    eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/SCALERS/replay_{ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})\""
+if [ ! -f "$UTILPATH/ROOTfiles/Scalers/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
+    eval "$REPLAYPATH/hcana -l -q -b \"SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_scalers.C($RUNNUMBER,${MAXEVENTS})\""
     cd "$REPLAYPATH/CALIBRATION/bcm_current_map"
     root -b -l<<EOF 
 .L ScalerCalib.C
-.x run.C("${UTILPATH}/ROOTfiles/Scalers/coin_{ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root")
+.x run.C("${UTILPATH}/ROOTfiles/Scalers/coin_${ANATYPE}LT_replay_scalers_${RUNNUMBER}_${MAXEVENTS}.root")
 .q  
 EOF
     mv bcmcurrent_${RUNNUMBER}_.param $REPLAYPATH/PARAM/HMS/BCM/CALIB/bcmcurrent_$RUNNUMBER.param
