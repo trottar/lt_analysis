@@ -13,7 +13,6 @@
   "jobs": [
     {
       "runs_file": "/u/group/c-kaonlt/USERS/$USER/hallc_replay_lt/UTIL_KAONLT/run_list/KaonLT/Q5p5W3p02center_highe",
-      "source": "/lustre24/expphy/volatile/hallc/c-kaonlt/$USER/OUTPUT/Analysis/KaonLT",
       "destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/ROOTfiles/Analysis/KaonLT",
       "skim_destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/Skim_ROOTfiles/Analysis/KaonLT",
       "tar_destination": "/mss/hallc/kaonlt/Pass4_Apr_2026/REPORT_OUTPUT/Analysis/KaonLT",

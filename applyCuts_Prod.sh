@@ -16,15 +16,16 @@ UTILPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f5`
 PACKAGEPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f6`
 OUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f7`
 ROOTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f8`
-REPORTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f9`
-CUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f10`
-PARAMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f11`
-SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f12`
-ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
-USER=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
-HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
-SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
-LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+SKIMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f9`
+REPORTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f10`
+CUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f11`
+PARAMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f12`
+SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
+ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
+USER=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
+HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
+SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
 # Flag definitions (flags: h, p)
 while getopts 'hpm' flag; do
@@ -488,6 +489,8 @@ else
 fi
 
 cd "${LTANAPATH}/src/setup"
+SKIM_OUTPUT_DIR="${SKIMPATH}/${ANATYPE}LT"
+mkdir -p "${SKIM_OUTPUT_DIR}"
 
 if [[ $p_flag = "true" ]]; then
 
@@ -507,7 +510,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "------------------------------------------------------"
 	echo
 	# Check if file already exists and delete if so
-	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
+	out_f_file="${SKIM_OUTPUT_DIR}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
@@ -533,7 +536,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "------------------------------------------------------"
 	echo
 	# Check if file already exists and delete if so
-	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
+	out_f_file="${SKIM_OUTPUT_DIR}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
@@ -558,7 +561,7 @@ if [[ $p_flag = "true" ]]; then
 	echo "------------------------------------------------------"
 	echo
 	# Check if file already exists and delete if so
-	out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
+	out_f_file="${SKIM_OUTPUT_DIR}/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
 	if [ -e "$out_f_file" ]; then
 	    echo "$out_f_file already exists. Removing..."
 	    echo
@@ -592,7 +595,7 @@ else
 	    echo "------------------------------------------------------"
 	    echo
 	    # Check if file already exists and delete if so
-	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
+	    out_f_file="${SKIM_OUTPUT_DIR}/${i}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
 		echo "$out_f_file already exists. Removing..."
 		echo
@@ -618,7 +621,7 @@ else
 	    echo "------------------------------------------------------"
 	    echo
 	    # Check if file already exists and delete if so
-	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
+	    out_f_file="${SKIM_OUTPUT_DIR}/${i}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
 		echo "$out_f_file already exists. Removing..."
 		echo
@@ -643,7 +646,7 @@ else
 	    echo "------------------------------------------------------"
 	    echo
 	    # Check if file already exists and delete if so
-	    out_f_file="${LTANAPATH}/OUTPUT/Analysis/${ANATYPE}LT/${ParticleType}_${RUNNUM}_-1_Raw_Data.root"
+	    out_f_file="${SKIM_OUTPUT_DIR}/${i}_${RUNNUM}_-1_Raw_Data.root"
 	    if [ -e "$out_f_file" ]; then
 		echo "$out_f_file already exists. Removing..."
 		echo

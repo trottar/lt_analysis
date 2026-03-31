@@ -1,27 +1,21 @@
 # Farm Workflow Helpers
 
-This directory contains the Python helpers used by the repo-root wrapper
+This directory contains the Python helpers wrapped by the repo-root script
 `run_farm.sh`.
-
-`run_farm.sh` lives in the base `lt_analysis` directory and is the main entry
-point for farm replay workflow work. It wraps:
-
-- `farm_env/submit_replay.py`
-- `farm_env/rebalance_swif.py`
 
 ## What `run_farm.sh` Does
 
-Given `Q2` and `W`, the wrapper can do one of two things:
+From the base `lt_analysis` directory, `run_farm.sh` manages two workflow
+families for a `Q2/W` setting:
 
-1. Submit replay jobs for that kinematic family.
-2. Inspect and rebalance an existing SWIF2 workflow for that family.
+- replay submission
+- applyCuts submission
 
-In submit mode, it automatically scans all matching JSON manifests under
-`input/kaon` for the requested `Q2/W` family. That means all matching settings
-for that family are included automatically, including dummy variants when those
-JSONs exist.
+It can also rebalance either workflow after jobs have been submitted.
 
-Dry-run is the default in both modes.
+The wrapper scans all matching manifests under `input/kaon` for the requested
+family, so all supported phi/epsilon/target variants are included
+automatically.
 
 ## Basic Usage
 
@@ -37,7 +31,7 @@ Example:
 ./run_farm.sh 3p0 3p14
 ```
 
-That prints the replay submission plan without actually submitting anything.
+That prints a replay dry-run plan. Nothing is submitted unless `-s` is used.
 
 ## Flags
 
@@ -47,14 +41,14 @@ That prints the replay submission plan without actually submitting anything.
 
 `-s`
 
-- Actually submit jobs via `farm_env/submit_replay.py`.
+- Actually submit jobs for the selected mode.
 - Without `-s`, submit mode is dry-run only.
 
 `-r`
 
 - Switch to rebalance mode.
-- In this mode the wrapper calls `farm_env/rebalance_swif.py` for the workflow
-  derived from `Q2`, `W`, and `USER`.
+- In this mode the wrapper calls `farm_env/rebalance_swif.py` for the selected
+  workflow name.
 
 `-a`
 
@@ -66,41 +60,122 @@ That prints the replay submission plan without actually submitting anything.
 
 - Do not call `swif2 run` after submit or rebalance.
 
+`-c`
+
+- Use applyCuts mode instead of replay mode.
+- Replay is still the default if `-c` is omitted.
+
 `-w <workflow-name>`
 
 - Override the auto-generated workflow name.
 
-## Common Examples
+## Replay Mode
 
-Dry-run submit:
+Default mode:
 
 ```bash
 ./run_farm.sh 3p0 3p14
-```
-
-Actually submit jobs:
-
-```bash
 ./run_farm.sh -s 3p0 3p14
 ```
 
-Dry-run rebalance of an existing workflow:
+This calls `farm_env/submit_replay.py`, which:
+
+- finds all matching `Q{Q2}W{W}*.json` manifests under `input/kaon`
+- merges runs across those manifests
+- submits one replay job per unique run
+
+Default workflow name:
+
+```text
+kaonlt_Q{Q2}W{W}_${USER}
+```
+
+## applyCuts Mode
+
+Use `-c`:
+
+```bash
+./run_farm.sh -c 3p0 3p14
+./run_farm.sh -c -s 3p0 3p14
+```
+
+This calls `farm_env/submit_applycuts.py`, which:
+
+- finds all matching manifests under `input/kaon`
+- keeps each manifest variant separate
+- submits one job per manifest variant + run
+- only plans a job if the full replay ROOT file already exists in the ltsep
+  replay ROOT area
+- skips the job if both skim outputs already exist in the ltsep skim ROOT area
+- runs `applyCuts_Prod.sh` once per planned job, letting that script process
+  both kaon and pion for the run
+
+Default workflow name:
+
+```text
+kaonlt_Q{Q2}W{W}_applycuts_${USER}
+```
+
+## Rebalancing
+
+Replay workflow:
 
 ```bash
 ./run_farm.sh -r 3p0 3p14
-```
-
-Apply rebalance changes but do not rerun the workflow:
-
-```bash
 ./run_farm.sh -r -a -n 3p0 3p14
 ```
 
-Use a custom workflow name:
+applyCuts workflow:
 
 ```bash
-./run_farm.sh -s -w my_custom_workflow 3p0 3p14
+./run_farm.sh -r -c 3p0 3p14
+./run_farm.sh -r -c -a -n 3p0 3p14
 ```
+
+## Jasmine Uploads
+
+`farm_env/jasmine_put_from_manifest.py` now resolves volatile source roots from
+ltsep at runtime instead of storing them in the manifests.
+
+Replay upload:
+
+```bash
+python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind replay
+```
+
+Skim upload:
+
+```bash
+python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind skim
+```
+
+What it uses:
+
+- replay source: `${ROOTPATH}/${ANATYPE}LT`
+- skim source: `${SKIMPATH}/${ANATYPE}LT`
+- replay tape destination: `destination` from the manifest
+- skim tape destination: `skim_destination` from the manifest
+
+Small files are still tar-grouped before `jput` submission.
+
+## Helper Scripts
+
+`submit_replay.py`
+
+- Plans or submits one replay job per unique run.
+
+`submit_applycuts.py`
+
+- Plans or submits one applyCuts job per manifest variant + run.
+
+`rebalance_swif.py`
+
+- Inspects an existing SWIF2 workflow and proposes or applies resource bumps.
+
+`jasmine_put_from_manifest.py`
+
+- Packages replay or skim products for tape using the manifest plus ltsep path
+  discovery.
 
 ## Supported Kinematics
 
@@ -111,25 +186,9 @@ Use a custom workflow name:
 - `Q2=2p1`, `W=2p95`
 - `Q2=0p5`, `W=2p40`
 
-## Helper Scripts
-
-`submit_replay.py`
-
-- Finds all JSON manifests matching `Q{Q2}W{W}*.json` under `input/kaon`.
-- Merges run lists across those variants.
-- Plans or submits one SWIF2 job per unique run.
-
-`rebalance_swif.py`
-
-- Looks for problem jobs in an existing SWIF2 workflow.
-- Detects likely memory, disk, or time-limit failures.
-- Plans or applies `swif2 modify-jobs` resource bumps.
-
 ## Notes
 
-- The wrapper expects to be run from the repo root so that `run_farm.sh` can
-  find `farm_env/` and `input/kaon/`.
-- `submit_replay.py` and `rebalance_swif.py` can still be run directly, but
-  `run_farm.sh` is the intended convenience entrypoint.
-- Full end-to-end execution still depends on the farm environment, available
-  run lists, and `swif2`.
+- Run everything from the repo root so `run_farm.sh` can find `farm_env/`,
+  `input/kaon/`, and `applyCuts_Prod.sh`.
+- Full submission and real file checks still depend on the farm environment,
+  ltsep, and visible replay/skim storage trees.

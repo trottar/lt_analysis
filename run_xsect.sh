@@ -27,15 +27,16 @@ UTILPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f5`
 PACKAGEPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f6`
 OUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f7`
 ROOTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f8`
-REPORTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f9`
-CUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f10`
-PARAMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f11`
-SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f12`
-ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
-USER=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
-HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
-SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
-LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+SKIMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f9`
+REPORTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f10`
+CUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f11`
+PARAMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f12`
+SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
+ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
+USER=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
+HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
+SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
 # Flag definitions (flags: h)
 while getopts 'h' flag; do

@@ -74,7 +74,14 @@ REPLAYPATH=lt.REPLAYPATH
 UTILPATH=lt.UTILPATH
 LTANAPATH=lt.LTANAPATH
 ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
+SKIMPATH=lt.SKIMPATH
+if str(SKIMPATH).endswith(f"{ANATYPE}LT"):
+    SKIM_OUTPATH = str(SKIMPATH)
+elif "None" in str(SKIMPATH):
+    SKIM_OUTPATH = str(SKIMPATH).replace("None", f"{ANATYPE}LT")
+else:
+    SKIM_OUTPATH = os.path.join(str(SKIMPATH), f"{ANATYPE}LT")
+os.makedirs(SKIM_OUTPATH, exist_ok=True)
 
 proc_root = lt.setup_ana()
 c = proc_root[0] # Cut object
@@ -269,7 +276,7 @@ def main():
 
     term_search = ParticleType.capitalize()
     
-    out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (OUTPATH, ParticleType, runNum, MaxEvent)
+    out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (SKIM_OUTPATH, ParticleType, runNum, MaxEvent)
         
     print("\n\nSaving data to new root files...")
     for i in range (0, len(data_keys)):

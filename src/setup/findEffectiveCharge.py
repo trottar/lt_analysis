@@ -34,6 +34,7 @@ lt=Root(os.path.realpath(__file__))
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
 OUTPATH=lt.OUTPATH
+SKIMPATH=lt.SKIMPATH
 ANATYPE=lt.ANATYPE
 LTANAPATH=lt.LTANAPATH
 
@@ -47,6 +48,12 @@ from utility import check_runs_in_effcharge
 
 if "None" in OUTPATH:
     OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
+if str(SKIMPATH).endswith(f"{ANATYPE}LT"):
+    SKIM_OUTPATH = str(SKIMPATH)
+elif "None" in str(SKIMPATH):
+    SKIM_OUTPATH = str(SKIMPATH).replace("None", f"{ANATYPE}LT")
+else:
+    SKIM_OUTPATH = os.path.join(str(SKIMPATH), f"{ANATYPE}LT")
 
 OutFilename = f"table_{ParticleType}_{kinematics}"
 foutcsv = OUTPATH + "/" + OutFilename + ".csv"
@@ -88,7 +95,7 @@ for runNum in RUNLIST:
     else:
     
         # Check if run number exists in analysed root files
-        if check_runs_in_effcharge(runNum, ParticleType, "{}/OUTPUT/Analysis/{}LT".format(LTANAPATH, ANATYPE)):
+        if check_runs_in_effcharge(runNum, ParticleType, SKIM_OUTPATH):
 
             efficiency = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency")
             efficiency_err = getEfficiencyValue(runNum,efficiency_table,foutcsv,"efficiency_err")

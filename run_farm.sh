@@ -10,39 +10,45 @@
 #
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_replay.py"
+REPLAY_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_replay.py"
+APPLYCUTS_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_applycuts.py"
 REBALANCE_SCRIPT="${SCRIPT_DIR}/farm_env/rebalance_swif.py"
 WORKFLOW_PREFIX="kaonlt"
 
-# Flag definitions (flags: h, s, r, a, n, w)
-while getopts 'hsranw:' flag; do
+# Flag definitions (flags: h, s, r, a, n, c, w)
+while getopts 'hsrancw:' flag; do
     case "${flag}" in
         h)
         echo "--------------------------------------------------------------"
         echo "./run_farm.sh -{flags} {variable arguments, see help}"
         echo
-        echo "Description: Submit or rebalance KaonLT replay SWIF2 workflows"
-        echo "             for a Q2/W family using the farm_env helpers."
+        echo "Description: Submit or rebalance KaonLT replay or applyCuts"
+        echo "             SWIF2 workflows for a Q2/W family."
         echo "--------------------------------------------------------------"
         echo
         echo "The following flags can be called..."
         echo "    Q2=arg1, W=arg2"
         echo "    -h, help"
-        echo "    -s, actually submit jobs via submit_replay.py (default is dry-run)"
+        echo "    -s, actually submit jobs (default is dry-run)"
         echo "    -r, rebalance an existing workflow instead of submitting jobs"
         echo "    -a, with -r, actually apply modify-jobs commands (default is dry-run)"
         echo "    -n, do not call 'swif2 run' after submit/rebalance"
+        echo "    -c, use applyCuts mode instead of replay mode"
         echo "    -w, override workflow name"
         echo
         echo "Notes..."
-        echo "    Submit mode automatically scans all matching JSON variants in input/kaon"
-        echo "    for the requested Q2/W family, so all targets/settings are included."
+        echo "    Replay mode scans all matching JSON variants in input/kaon and submits"
+        echo "    one replay job per unique run."
+        echo "    applyCuts mode scans the same variants and submits one job per"
+        echo "    manifest variant + run, but only when replay output exists."
         echo
         echo "Examples..."
         echo "    ./run_farm.sh 3p0 3p14"
         echo "    ./run_farm.sh -s 3p0 3p14"
+        echo "    ./run_farm.sh -c 3p0 3p14"
+        echo "    ./run_farm.sh -c -s 3p0 3p14"
         echo "    ./run_farm.sh -r 3p0 3p14"
-        echo "    ./run_farm.sh -r -a -n 3p0 3p14"
+        echo "    ./run_farm.sh -r -c -a -n 3p0 3p14"
         echo
         echo "Available Kinematics..."
         echo "                      Q2=5p5, W=3p02"
@@ -57,6 +63,7 @@ while getopts 'hsranw:' flag; do
         r) rebalance_flag='true' ;;
         a) apply_flag='true' ;;
         n) no_run_flag='true' ;;
+        c) cuts_flag='true' ;;
         w) workflow_override="${OPTARG}" ;;
         *)
         exit 1
@@ -66,8 +73,13 @@ done
 
 shift $((OPTIND - 1))
 
-if [[ ! -f "${SUBMIT_SCRIPT}" ]]; then
-    echo "Submit helper not found: ${SUBMIT_SCRIPT}"
+if [[ ! -f "${REPLAY_SUBMIT_SCRIPT}" ]]; then
+    echo "Replay submit helper not found: ${REPLAY_SUBMIT_SCRIPT}"
+    exit 1
+fi
+
+if [[ ! -f "${APPLYCUTS_SUBMIT_SCRIPT}" ]]; then
+    echo "applyCuts submit helper not found: ${APPLYCUTS_SUBMIT_SCRIPT}"
     exit 1
 fi
 
@@ -118,17 +130,27 @@ fi
 
 FAMILY="Q${Q2}W${W}"
 USER_NAME="${USER:-user}"
+if [[ "${cuts_flag}" = "true" ]]; then
+    MODE="applyCuts"
+    MODE_SCRIPT="${APPLYCUTS_SUBMIT_SCRIPT}"
+    WORKFLOW_SUFFIX="_applycuts_${USER_NAME}"
+else
+    MODE="replay"
+    MODE_SCRIPT="${REPLAY_SUBMIT_SCRIPT}"
+    WORKFLOW_SUFFIX="_${USER_NAME}"
+fi
+
 if [[ -n "${workflow_override}" ]]; then
     WORKFLOW="${workflow_override}"
 else
-    WORKFLOW="${WORKFLOW_PREFIX}_${FAMILY}_${USER_NAME}"
+    WORKFLOW="${WORKFLOW_PREFIX}_${FAMILY}${WORKFLOW_SUFFIX}"
 fi
 
 if [[ "${rebalance_flag}" = "true" ]]; then
     echo
     echo "---------------------------------------------------------"
     echo
-    echo "Inspecting SWIF2 workflow for Q2=${Q2}, W=${W}..."
+    echo "Inspecting ${MODE} SWIF2 workflow for Q2=${Q2}, W=${W}..."
     echo
     echo "                        WORKFLOW = ${WORKFLOW}"
     echo
@@ -151,14 +173,14 @@ fi
 echo
 echo "---------------------------------------------------------"
 echo
-echo "Preparing replay submission for Q2=${Q2}, W=${W}..."
+echo "Preparing ${MODE} submission for Q2=${Q2}, W=${W}..."
 echo
 echo "                        WORKFLOW = ${WORKFLOW}"
 echo
 echo "---------------------------------------------------------"
 echo
 
-submit_cmd=(python3 "${SUBMIT_SCRIPT}" "${Q2}" "${W}" --workflow-name "${WORKFLOW}")
+submit_cmd=(python3 "${MODE_SCRIPT}" "${Q2}" "${W}" --workflow-name "${WORKFLOW}")
 if [[ "${submit_flag}" = "true" ]]; then
     submit_cmd+=(--submit)
 fi

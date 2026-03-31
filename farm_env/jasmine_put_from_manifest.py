@@ -34,6 +34,11 @@ from os.path import expandvars
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Sequence
 
+try:
+    from ltsep_paths import LtsepPaths, resolve_ltsep_paths
+except ModuleNotFoundError:
+    from farm_env.ltsep_paths import LtsepPaths, resolve_ltsep_paths
+
 MB = 1024 ** 2
 GB = 1024 ** 3
 DEFAULT_MIN_SIZE_MB = 200
@@ -48,7 +53,7 @@ DEFAULT_MANIFEST_DIR = REPO_ROOT / "input" / "kaon"
 VALID_PHI = {"center", "left", "right"}
 VALID_EPSILON = {"high", "low"}
 VALID_TARGET = {"lh2", "data", "dummy"}
-VALID_DESTINATION_KINDS = {"replay", "skim"}
+VALID_PRODUCT_KINDS = {"replay", "skim"}
 
 
 def render_run_template(value, run):
@@ -131,7 +136,7 @@ class Settings:
     target_archive_size_bytes: int
     max_archive_size_bytes: int
     stage_dir: Path
-    destination_kind: str
+    product_kind: str
     submit: bool
     cleanup_archives: bool
     submission: SubmissionConfig
@@ -146,8 +151,8 @@ def parse_args() -> argparse.Namespace:
         ),
         epilog=(
             "Examples:\n"
-            "  ./jasmine_put_from_manifest.py center high 3p0 3p14 lh2\n"
-            "  ./jasmine_put_from_manifest.py left low 4p4 2p74 dummy --submit"
+            "  ./jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind replay\n"
+            "  ./jasmine_put_from_manifest.py left low 4p4 2p74 dummy --product-kind skim --submit"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -172,10 +177,10 @@ def parse_args() -> argparse.Namespace:
         help=f"Override staging directory (default: {DEFAULT_STAGE_DIR})",
     )
     parser.add_argument(
-        "--destination-kind",
-        choices=sorted(VALID_DESTINATION_KINDS),
+        "--product-kind",
+        choices=sorted(VALID_PRODUCT_KINDS),
         default="replay",
-        help="Which manifest destination to use: replay or skim (default: replay)",
+        help="Which product family to upload: replay or skim (default: replay)",
     )
     return parser.parse_args()
 
@@ -304,7 +309,7 @@ def resolve_settings(manifest: Dict, cli: argparse.Namespace) -> Settings:
         target_archive_size_bytes=int(target_archive_size_gb * GB),
         max_archive_size_bytes=int(max_archive_size_gb * GB),
         stage_dir=stage_dir,
-        destination_kind=str(cli.destination_kind),
+        product_kind=str(cli.product_kind),
         submit=cli.submit,
         cleanup_archives=not cli.keep_archives,
         submission=submission,
@@ -312,12 +317,20 @@ def resolve_settings(manifest: Dict, cli: argparse.Namespace) -> Settings:
 
 
 
-def resolve_jobs(manifest: Dict) -> List[JobConfig]:
+def resolve_product_source_root(settings: Settings, paths: LtsepPaths) -> Path:
+    if settings.product_kind == "replay":
+        return paths.replay_source_dir
+    return paths.skim_source_dir
+
+
+
+def resolve_jobs(manifest: Dict, settings: Settings, paths: LtsepPaths) -> List[JobConfig]:
     jobs = manifest.get("jobs")
     if not isinstance(jobs, list) or not jobs:
         raise ValueError("Manifest must contain a non-empty 'jobs' list")
 
     resolved: List[JobConfig] = []
+    source_root = resolve_product_source_root(settings, paths).resolve()
 
     for index, entry in enumerate(jobs, start=1):
         if not isinstance(entry, dict):
@@ -331,13 +344,15 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
         if runs is not None and runs_file is not None:
             raise ValueError(f"jobs[{index}] cannot define both 'runs' and 'runs_file'")
 
+        archive_prefix_default = "FullReplay" if settings.product_kind == "replay" else "ApplyCuts"
+
         # Single fixed job with no run expansion
         if runs is None and runs_file is None:
-            try:
-                source = Path(expandvars(entry["source"])).expanduser().resolve()
-                destination = Path(expandvars(entry["destination"])).expanduser()
-            except KeyError as exc:
-                raise ValueError(f"jobs[{index}] missing key: {exc.args[0]}") from exc
+            destination_value = entry.get("destination")
+            if destination_value is None:
+                raise ValueError(f"jobs[{index}] missing 'destination'")
+            source = source_root
+            destination = Path(expandvars(str(destination_value))).expanduser()
 
             tar_destination_value = entry.get("tar_destination")
             tar_destination = None
@@ -354,7 +369,7 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
                     destination=destination,
                     skim_destination=skim_destination,
                     recursive=recursive,
-                    archive_prefix=entry.get("archive_prefix"),
+                    archive_prefix=entry.get("archive_prefix") or f"{archive_prefix_default}_{paths.anatype}LT",
                     preserve_tree=preserve_tree,
                     tar_subdir=entry.get("tar_subdir"),
                     tar_destination=tar_destination,
@@ -368,27 +383,30 @@ def resolve_jobs(manifest: Dict) -> List[JobConfig]:
         if not isinstance(runs, list) or not runs:
             raise ValueError(f"jobs[{index}] 'runs' must be a non-empty list")
 
-        source_template = entry.get("source_template", entry.get("source"))
         destination_template = entry.get("destination_template", entry.get("destination"))
         archive_prefix_template = entry.get("archive_prefix_template", entry.get("archive_prefix"))
+        skim_archive_prefix_template = entry.get("skim_archive_prefix_template")
         tar_destination_template = entry.get("tar_destination_template", entry.get("tar_destination"))
         skim_destination_template = entry.get("skim_destination_template", entry.get("skim_destination"))
         run_match_regex_template = entry.get("run_match_regex_template")
 
-        if source_template is None:
-            raise ValueError(f"jobs[{index}] missing 'source_template' (or 'source')")
         if destination_template is None:
             raise ValueError(f"jobs[{index}] missing 'destination_template' (or 'destination')")
-        if runs_file is not None and entry.get("source_template") is None and run_match_regex_template is None:
-            raise ValueError(
-                f"jobs[{index}] uses runs_file with a fixed source, so you must provide "
-                f"'run_match_regex_template' to avoid reprocessing the entire source tree for every run"
-            )
+        if run_match_regex_template is None:
+            run_match_regex_template = DEFAULT_RUN_MATCH_REGEX_TEMPLATE
 
         for run in runs:
-            source = Path(render_run_template(source_template, run)).expanduser().resolve()
+            source = source_root
             destination = Path(render_run_template(destination_template, run)).expanduser()
-            archive_prefix = render_run_template(archive_prefix_template, run)
+            if settings.product_kind == "skim":
+                if skim_archive_prefix_template is not None:
+                    archive_prefix = render_run_template(skim_archive_prefix_template, run)
+                else:
+                    archive_prefix = f"ApplyCuts_run_{int(run)}_{paths.anatype}LT"
+            elif archive_prefix_template is not None:
+                archive_prefix = render_run_template(archive_prefix_template, run)
+            else:
+                archive_prefix = f"{archive_prefix_default}_run_{int(run)}_{paths.anatype}LT"
             tar_destination = None
             if tar_destination_template is not None:
                 tar_destination = Path(render_run_template(tar_destination_template, run)).expanduser()
@@ -424,11 +442,11 @@ def ensure_supported_destination(destination: Path) -> None:
 
 
 def resolve_job_destination(job: JobConfig, settings: Settings) -> Path:
-    if settings.destination_kind == "skim":
+    if settings.product_kind == "skim":
         if job.skim_destination is None:
             raise ValueError(
                 f"Manifest job for source {job.source} is missing 'skim_destination' "
-                f"but --destination-kind=skim was requested."
+                f"but --product-kind=skim was requested."
             )
         return job.skim_destination
     return job.destination
@@ -524,7 +542,7 @@ def resolve_tar_destination(job: JobConfig) -> Path:
 def plan_job(job: JobConfig, settings: Settings) -> List[PlannedPut]:
     job_destination = resolve_job_destination(job, settings)
     ensure_supported_destination(job_destination)
-    tar_mss_dir = resolve_tar_destination(job) if settings.destination_kind == "replay" else job_destination
+    tar_mss_dir = resolve_tar_destination(job) if settings.product_kind == "replay" else job_destination
     ensure_supported_destination(tar_mss_dir)
 
     files = list(iter_source_files(job))
@@ -739,9 +757,12 @@ def main() -> int:
         return 2
 
     settings = resolve_settings(manifest, cli)
-    jobs = resolve_jobs(manifest)
+    paths = resolve_ltsep_paths(__file__)
+    jobs = resolve_jobs(manifest, settings, paths)
 
     print(f"Using manifest: {manifest_path}")
+    print(f"Product kind : {settings.product_kind}")
+    print(f"Source root  : {resolve_product_source_root(settings, paths)}")
 
     warnings = validate_environment(settings)
     if warnings:
@@ -766,4 +787,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(130)
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        raise SystemExit(1)
