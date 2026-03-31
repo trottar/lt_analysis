@@ -44,7 +44,7 @@ GB = 1024 ** 3
 DEFAULT_MIN_SIZE_MB = 200
 DEFAULT_TARGET_ARCHIVE_SIZE_GB = 4
 DEFAULT_MAX_ARCHIVE_SIZE_GB = 20
-DEFAULT_STAGE_DIR = "/tmp/jasmine_stage"
+DEFAULT_STAGE_DIR = "/scratch/$USER/jasmine_stage"
 DEFAULT_JPUT = shutil.which("jput") or "jput"
 DEFAULT_RUN_MATCH_REGEX_TEMPLATE = r"(^|[^0-9]){run}([^0-9]|$)"
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -156,11 +156,16 @@ def parse_args() -> argparse.Namespace:
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("phi", help="Phi setting: center, left, or right")
-    parser.add_argument("epsilon", help="Epsilon setting: high or low")
-    parser.add_argument("q2", help="Q2 token, for example 3p0 or Q3p0")
-    parser.add_argument("w", help="W token, for example 3p14 or W3p14")
-    parser.add_argument("target", help="Target type: lh2/data or dummy")
+    parser.add_argument("phi", nargs="?", help="Phi setting: center, left, or right")
+    parser.add_argument("epsilon", nargs="?", help="Epsilon setting: high or low")
+    parser.add_argument("q2", nargs="?", help="Q2 token, for example 3p0 or Q3p0")
+    parser.add_argument("w", nargs="?", help="W token, for example 3p14 or W3p14")
+    parser.add_argument("target", nargs="?", help="Target type: lh2/data or dummy")
+    parser.add_argument(
+        "--manifest-path",
+        default=None,
+        help="Exact manifest path to use. Overrides phi/epsilon/Q2/W/target selection.",
+    )
     parser.add_argument(
         "--manifest-dir",
         default=str(DEFAULT_MANIFEST_DIR),
@@ -186,6 +191,12 @@ def parse_args() -> argparse.Namespace:
         choices=sorted(VALID_PRODUCT_KINDS),
         default="replay",
         help="Which product family to upload: replay or skim (default: replay)",
+    )
+    parser.add_argument(
+        "--run",
+        type=int,
+        default=None,
+        help="Restrict processing to a single run contained in the selected manifest.",
     )
     return parser.parse_args()
 
@@ -214,6 +225,17 @@ def build_manifest_stem(phi: str, epsilon: str, q2: str, w: str, target: str) ->
 
 
 def resolve_manifest_path(cli: argparse.Namespace) -> Path:
+    if cli.manifest_path is not None:
+        manifest_path = Path(expandvars(str(cli.manifest_path))).expanduser()
+        if not manifest_path.exists():
+            raise FileNotFoundError(f"Manifest path does not exist: {manifest_path}")
+        return manifest_path
+
+    if not all([cli.phi, cli.epsilon, cli.q2, cli.w, cli.target]):
+        raise ValueError(
+            "Provide either --manifest-path or all of phi, epsilon, Q2, W, and target."
+        )
+
     phi = normalize_named_token("phi", cli.phi)
     epsilon = normalize_named_token("epsilon", cli.epsilon)
     q2 = normalize_kinematics_token("Q2", cli.q2, "q")
@@ -330,7 +352,9 @@ def resolve_product_source_root(settings: Settings, paths: LtsepPaths) -> Path:
 
 
 
-def resolve_jobs(manifest: Dict, settings: Settings, paths: LtsepPaths) -> List[JobConfig]:
+def resolve_jobs(
+    manifest: Dict, settings: Settings, paths: LtsepPaths, cli: argparse.Namespace
+) -> List[JobConfig]:
     jobs = manifest.get("jobs")
     if not isinstance(jobs, list) or not jobs:
         raise ValueError("Manifest must contain a non-empty 'jobs' list")
@@ -389,6 +413,11 @@ def resolve_jobs(manifest: Dict, settings: Settings, paths: LtsepPaths) -> List[
         if not isinstance(runs, list) or not runs:
             raise ValueError(f"jobs[{index}] 'runs' must be a non-empty list")
 
+        if cli.run is not None:
+            runs = [run for run in runs if int(run) == int(cli.run)]
+            if not runs:
+                continue
+
         destination_template = entry.get("destination_template", entry.get("destination"))
         archive_prefix_template = entry.get("archive_prefix_template", entry.get("archive_prefix"))
         skim_archive_prefix_template = entry.get("skim_archive_prefix_template")
@@ -437,6 +466,9 @@ def resolve_jobs(manifest: Dict, settings: Settings, paths: LtsepPaths) -> List[
                     run_match_regex=run_match_regex,
                 )
             )
+
+    if cli.run is not None and not resolved:
+        raise ValueError(f"Run {cli.run} was not found in the selected manifest.")
 
     return resolved
 
@@ -764,7 +796,7 @@ def main() -> int:
 
     settings = resolve_settings(manifest, cli)
     paths = resolve_ltsep_paths(__file__)
-    jobs = resolve_jobs(manifest, settings, paths)
+    jobs = resolve_jobs(manifest, settings, paths, cli)
 
     print(f"Using manifest: {manifest_path}")
     print(f"Product kind : {settings.product_kind}")

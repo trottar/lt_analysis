@@ -93,6 +93,7 @@ This calls `farm_env/submit_replay.py`, which:
 - finds all matching `Q{Q2}W{W}*.json` manifests under the selected manifest directory
 - merges runs across those manifests
 - submits one replay job per unique run
+- adds one dependent Jasmine replay-upload job per run by default
 
 Default workflow name:
 
@@ -115,6 +116,7 @@ This calls `farm_env/submit_applycuts.py`, which:
 - finds all matching manifests under the selected manifest directory
 - keeps each manifest variant separate
 - submits one job per manifest variant + run
+- adds one dependent Jasmine skim-upload job per planned run by default
 - only plans a job if the full replay ROOT file already exists in the ltsep
   replay ROOT area
 - skips the job if both skim outputs already exist in the ltsep skim ROOT area
@@ -168,6 +170,7 @@ What it uses:
 - skim source: the ltsep-resolved skim ROOT directory
 - replay tape destination: `destination` from the manifest
 - skim tape destination: `skim_destination` from the manifest
+- default staging area: `/scratch/$USER/jasmine_stage`
 
 Small files are still tar-grouped before `jput` submission.
 

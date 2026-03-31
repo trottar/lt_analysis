@@ -37,6 +37,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_MANIFEST_DIR = str(REPO_ROOT / "input" / "kaon")
 DEFAULT_APPLYCUTS_SCRIPT = str(REPO_ROOT / "applyCuts_Prod.sh")
+DEFAULT_JASMINE_SCRIPT = str(REPO_ROOT / "farm_env" / "jasmine_put_from_manifest.py")
 DEFAULT_WORKFLOW_PREFIX = "kaonlt"
 DEFAULT_ACCOUNT = "c-kaonlt"
 DEFAULT_PARTITION = "production"
@@ -46,6 +47,11 @@ DEFAULT_RAM = "6g"
 DEFAULT_DISK = "25g"
 DEFAULT_TIME = "4h"
 DEFAULT_SWIF2 = os.environ.get("SWIF2_BIN", "swif2")
+DEFAULT_PYTHON_BIN = os.environ.get("PYTHON_BIN", "python3")
+DEFAULT_JASMINE_RAM = "4g"
+DEFAULT_JASMINE_DISK = "20g"
+DEFAULT_JASMINE_TIME = "12h"
+DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -179,6 +185,43 @@ def parse_args() -> argparse.Namespace:
         "--no-run",
         action="store_true",
         help="With --submit, do not issue 'swif2 run' after adding jobs.",
+    )
+    parser.add_argument(
+        "--no-auto-jasmine",
+        dest="auto_jasmine",
+        action="store_false",
+        default=True,
+        help="Do not add dependent Jasmine tape-upload jobs.",
+    )
+    parser.add_argument(
+        "--jasmine-script",
+        default=DEFAULT_JASMINE_SCRIPT,
+        help=f"Jasmine helper script to execute per run (default: {DEFAULT_JASMINE_SCRIPT})",
+    )
+    parser.add_argument(
+        "--python-bin",
+        default=DEFAULT_PYTHON_BIN,
+        help=f"Python executable used for Jasmine jobs (default: {DEFAULT_PYTHON_BIN})",
+    )
+    parser.add_argument(
+        "--jasmine-ram",
+        default=DEFAULT_JASMINE_RAM,
+        help=f"RAM per Jasmine upload job (default: {DEFAULT_JASMINE_RAM})",
+    )
+    parser.add_argument(
+        "--jasmine-disk",
+        default=DEFAULT_JASMINE_DISK,
+        help=f"Disk per Jasmine upload job (default: {DEFAULT_JASMINE_DISK})",
+    )
+    parser.add_argument(
+        "--jasmine-time",
+        default=DEFAULT_JASMINE_TIME,
+        help=f"Wall time per Jasmine upload job (default: {DEFAULT_JASMINE_TIME})",
+    )
+    parser.add_argument(
+        "--jasmine-stage-root",
+        default=DEFAULT_JASMINE_STAGE_ROOT,
+        help=f"Stage root passed to Jasmine jobs (default: {DEFAULT_JASMINE_STAGE_ROOT})",
     )
     return parser.parse_args()
 
@@ -469,6 +512,70 @@ def build_add_job_command(
     ]
 
 
+def jasmine_job_name(plan: RunPlan) -> str:
+    return safe_name(f"{plan.job_name}_jasmine")
+
+
+def jasmine_stage_dir(args: argparse.Namespace, plan: RunPlan) -> str:
+    return str(Path(os.path.expandvars(args.jasmine_stage_root)).expanduser() / jasmine_job_name(plan))
+
+
+def build_jasmine_add_job_command(
+    swif2_bin: str,
+    workflow: str,
+    account: str,
+    partition: str,
+    plan: RunPlan,
+    family_prefix: str,
+    args: argparse.Namespace,
+) -> List[str]:
+    jasmine_script = str(expand_path(args.jasmine_script))
+    return [
+        swif2_bin,
+        "add-job",
+        workflow,
+        "-account",
+        account,
+        "-partition",
+        partition,
+        "-name",
+        jasmine_job_name(plan),
+        "-cores",
+        "1",
+        "-ram",
+        args.jasmine_ram,
+        "-disk",
+        args.jasmine_disk,
+        "-time",
+        args.jasmine_time,
+        "-tag",
+        "run",
+        str(plan.run),
+        "-tag",
+        "family",
+        family_prefix,
+        "-tag",
+        "variant",
+        plan.variant.family,
+        "-tag",
+        "stage",
+        "jasmine_skim",
+        "-antecedent",
+        plan.job_name,
+        args.python_bin,
+        jasmine_script,
+        "--manifest-path",
+        str(plan.variant.path),
+        "--run",
+        str(plan.run),
+        "--product-kind",
+        "skim",
+        "--stage-dir",
+        jasmine_stage_dir(args, plan),
+        "--submit",
+    ]
+
+
 def print_summary(
     family_prefix: str,
     variants: Sequence[JsonVariant],
@@ -482,6 +589,9 @@ def print_summary(
     print(f"Manifest directory: {expand_path(args.manifest_dir)}")
     print(f"Workflow         : {workflow}")
     print(f"applyCuts script : {expand_path(args.applycuts_script)}")
+    print(f"Auto Jasmine     : {'yes' if args.auto_jasmine else 'no'}")
+    if args.auto_jasmine:
+        print(f"Jasmine script   : {expand_path(args.jasmine_script)}")
     print(f"Replay source    : {paths.replay_source_dir}")
     print(f"Skim source      : {paths.skim_source_dir}")
     print(f"Account          : {args.account}")
@@ -528,6 +638,21 @@ def print_summary(
                 args,
             )
             print("         cmd     : " + " ".join(shlex.quote(x) for x in cmd))
+            if args.auto_jasmine:
+                upload_job = jasmine_job_name(plan)
+                upload_status = "SKIP existing" if upload_job in existing_job_names and args.skip_existing else "ADD"
+                upload_cmd = build_jasmine_add_job_command(
+                    args.swif2_bin,
+                    workflow,
+                    args.account,
+                    args.partition,
+                    plan,
+                    family_prefix,
+                    args,
+                )
+                print(f"[{upload_status}] upload job={upload_job} antecedent={plan.job_name}")
+                print(f"         manifest: {plan.variant.path}")
+                print("         cmd     : " + " ".join(shlex.quote(x) for x in upload_cmd))
     print()
 
 
@@ -545,34 +670,68 @@ def submit_jobs(
         print()
 
     applycuts_script = str(expand_path(args.applycuts_script))
+    existing_names = set(existing_job_names)
     rc = 0
     for plan in plans:
         if not plan.should_add:
             continue
-        if args.skip_existing and plan.job_name in existing_job_names:
+
+        if args.skip_existing and plan.job_name in existing_names:
             print(f"Skipping existing job: {plan.job_name}")
+        else:
+            cmd = build_add_job_command(
+                args.swif2_bin,
+                workflow,
+                args.account,
+                args.partition,
+                applycuts_script,
+                plan,
+                family_prefix,
+                args,
+            )
+            print("Adding job:")
+            print("  " + " ".join(shlex.quote(x) for x in cmd))
+            result = run_command(cmd, capture=True)
+            if result.stdout:
+                print(result.stdout.rstrip())
+            if result.stderr:
+                print(result.stderr.rstrip(), file=sys.stderr)
+            if result.returncode != 0:
+                rc = result.returncode
+                print(f"ERROR: add-job failed for {plan.job_name}", file=sys.stderr)
+                break
+            existing_names.add(plan.job_name)
+            print()
+
+        if not args.auto_jasmine:
             continue
-        cmd = build_add_job_command(
+
+        upload_job = jasmine_job_name(plan)
+        if args.skip_existing and upload_job in existing_names:
+            print(f"Skipping existing job: {upload_job}")
+            continue
+
+        upload_cmd = build_jasmine_add_job_command(
             args.swif2_bin,
             workflow,
             args.account,
             args.partition,
-            applycuts_script,
             plan,
             family_prefix,
             args,
         )
         print("Adding job:")
-        print("  " + " ".join(shlex.quote(x) for x in cmd))
-        result = run_command(cmd, capture=True)
+        print("  " + " ".join(shlex.quote(x) for x in upload_cmd))
+        result = run_command(upload_cmd, capture=True)
         if result.stdout:
             print(result.stdout.rstrip())
         if result.stderr:
             print(result.stderr.rstrip(), file=sys.stderr)
         if result.returncode != 0:
             rc = result.returncode
-            print(f"ERROR: add-job failed for {plan.job_name}", file=sys.stderr)
+            print(f"ERROR: add-job failed for {upload_job}", file=sys.stderr)
             break
+        existing_names.add(upload_job)
         print()
 
     if rc != 0:
@@ -600,11 +759,19 @@ def validate_applycuts_script(path_text: str) -> None:
         raise PermissionError(f"applyCuts script is not executable: {path}")
 
 
+def validate_jasmine_script(path_text: str) -> None:
+    path = expand_path(path_text)
+    if not path.exists():
+        raise FileNotFoundError(f"Jasmine script does not exist: {path}")
+
+
 def main() -> int:
     args = parse_args()
     family_prefix = normalize_family(args.q2, args.w)
     json_dir = expand_path(args.manifest_dir)
     validate_applycuts_script(args.applycuts_script)
+    if args.auto_jasmine:
+        validate_jasmine_script(args.jasmine_script)
     paths = resolve_ltsep_paths(__file__)
 
     variants = discover_json_variants(json_dir, family_prefix, args.family_regex)
