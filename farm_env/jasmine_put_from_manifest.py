@@ -726,25 +726,21 @@ def print_plan(plans: Sequence[PlannedPut], settings: Settings) -> None:
 
 
 
-def run_command(cmd: Sequence[str] | str) -> int:
+def run_command(cmd: Sequence[str]) -> int:
     print("Executing:")
-    if isinstance(cmd, str):
-        print("  " + cmd)
-        popen_cmd = cmd
-        use_shell = True
-    else:
-        print("  " + " ".join(shlex.quote(x) for x in cmd))
-        popen_cmd = list(cmd)
-        use_shell = False
+    print("  " + " ".join(shlex.quote(x) for x in cmd))
     print()
-    proc = subprocess.Popen(
-        popen_cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        bufsize=1,
-        shell=use_shell,
-    )
+    try:
+        proc = subprocess.Popen(
+            list(cmd),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+    except FileNotFoundError:
+        print(f"ERROR: submission command not found in PATH: {cmd[0]}", file=sys.stderr)
+        return 127
     assert proc.stdout is not None
     for line in proc.stdout:
         print(line.rstrip())
@@ -753,15 +749,7 @@ def run_command(cmd: Sequence[str] | str) -> int:
 
 
 def build_submit_invocation(plan: PlannedPut, settings: Settings) -> List[str]:
-    logical_cmd = build_submit_command(plan, settings)
-    # Match the user's working utility pattern: let a bash shell in the farm
-    # environment resolve the Jasmine client command at execution time.
-    shell_cmd = (
-        f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
-        f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
-        f"fi; " + " ".join(shlex.quote(token) for token in logical_cmd)
-    )
-    return ["bash", "-lc", shell_cmd]
+    return build_submit_command(plan, settings)
 
 
 def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
@@ -892,7 +880,7 @@ def main() -> int:
         for msg in warnings:
             print(f"* {msg}")
         print()
-    print(f"Submission bin: {settings.submission.jput_bin} (via bash -lc)")
+    print(f"Submission bin: {settings.submission.jput_bin}")
 
     all_plans: List[PlannedPut] = []
     for job in jobs:
