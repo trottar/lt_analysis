@@ -75,8 +75,11 @@ SCALER_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_coin_s
 FULL_REPLAY_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 BCM_CALIB_DIR="${REPLAYPATH}/CALIBRATION/bcm_current_map"
+FULL_REPLAY_REPORT_DIR="${UTILPATH}/REPORT_OUTPUT/Analysis/${ANATYPE}LT"
+FULL_REPLAY_REPORT_FILE="${FULL_REPLAY_REPORT_DIR}/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report"
 FULL_REPLAY_OUTPUT_FILE="${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root"
 SWIF_OUTPUT_FILE="${JOB_LAUNCH_DIR}/$(basename "${FULL_REPLAY_OUTPUT_FILE}")"
+SWIF_REPORT_OUTPUT_FILE="${JOB_LAUNCH_DIR}/$(basename "${FULL_REPLAY_REPORT_FILE}")"
 
 # Source farm environment when available.
 if [[ -f /site/12gev_phys/softenv.sh ]]; then
@@ -109,6 +112,7 @@ fi
 ###################################################################################################################################################
 mkdir -p "${SCALER_OUTPUT_DIR}"
 mkdir -p "${SCALER_REPORT_DIR}"
+mkdir -p "${FULL_REPLAY_REPORT_DIR}"
 
 if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
     "${REPLAYPATH}/hcana" -l -q -b "${SCALER_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee "${SCALER_REPORT_FILE}"
@@ -157,17 +161,22 @@ fi
 sleep 3
 
 if [ ! -f "${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-				"${REPLAYPATH}/hcana" -l -q -b "${FULL_REPLAY_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
-				replay_rc=${PIPESTATUS[0]}
-				if [ "${replay_rc}" -ne 0 ]; then
-				    echo "ERROR: full replay failed for run ${RUNNUMBER}"
-				    exit "${replay_rc}"
-				fi
+				"${REPLAYPATH}/hcana" -l -q -b "${FULL_REPLAY_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee "${FULL_REPLAY_REPORT_FILE}"
+					replay_rc=${PIPESTATUS[0]}
+					if [ "${replay_rc}" -ne 0 ]; then
+					    echo "ERROR: full replay failed for run ${RUNNUMBER}"
+					    exit "${replay_rc}"
+					fi
 else echo "Replayfile already found for this run in ${REPLAY_OUTPUT_DIR}/ - Skipping replay step"
 fi
 
 if [ ! -f "${FULL_REPLAY_OUTPUT_FILE}" ]; then
     echo "ERROR: replay output file not found at ${FULL_REPLAY_OUTPUT_FILE}"
+    exit 1
+fi
+
+if [ ! -f "${FULL_REPLAY_REPORT_FILE}" ]; then
+    echo "ERROR: replay report file not found at ${FULL_REPLAY_REPORT_FILE}"
     exit 1
 fi
 
@@ -178,4 +187,12 @@ if [ "${copy_rc}" -ne 0 ]; then
     exit "${copy_rc}"
 fi
 
+cp -f "${FULL_REPLAY_REPORT_FILE}" "${SWIF_REPORT_OUTPUT_FILE}"
+report_copy_rc=$?
+if [ "${report_copy_rc}" -ne 0 ]; then
+    echo "ERROR: failed to stage replay report into ${SWIF_REPORT_OUTPUT_FILE}"
+    exit "${report_copy_rc}"
+fi
+
 echo "Staged SWIF output copy at ${SWIF_OUTPUT_FILE}"
+echo "Staged SWIF report copy at ${SWIF_REPORT_OUTPUT_FILE}"

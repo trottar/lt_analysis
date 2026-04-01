@@ -71,6 +71,7 @@ class JsonVariant:
     partition: str
     runs_files: Tuple[Path, ...]
     replay_destinations: Tuple[Path, ...]
+    report_destinations: Tuple[Path, ...]
 
 
 @dataclass(frozen=True)
@@ -91,6 +92,7 @@ class RunPlan:
     resources: ResourceRequest
     representative_manifest: Path
     replay_destination: Path
+    report_destination: Optional[Path]
     cache_file: Optional[Path]
     cache_ready: bool
     cache_reason: str
@@ -320,6 +322,10 @@ def replay_output_basename(run: int) -> str:
     return f"Kaon_coin_replay_production_{run}_-1.root"
 
 
+def replay_report_basename(run: int) -> str:
+    return f"Kaon_output_coin_production_Summary_{run}_-1.report"
+
+
 def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Optional[str]) -> List[JsonVariant]:
     if not json_dir.exists():
         raise FileNotFoundError(f"JSON directory does not exist: {json_dir}")
@@ -336,6 +342,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
         data = load_json(path)
         runs_files = extract_runs_files(data)
         replay_destinations = extract_replay_destinations(data)
+        report_destinations = extract_report_destinations(data)
         partition = extract_partition(data)
         if not runs_files or not replay_destinations:
             continue
@@ -346,6 +353,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
                 partition=partition,
                 runs_files=tuple(runs_files),
                 replay_destinations=tuple(replay_destinations),
+                report_destinations=tuple(report_destinations),
             )
         )
 
@@ -386,6 +394,20 @@ def extract_replay_destinations(data: Dict) -> List[Path]:
     return destinations
 
 
+def extract_report_destinations(data: Dict) -> List[Path]:
+    jobs = data.get("jobs", [])
+    destinations: List[Path] = []
+    if not isinstance(jobs, list):
+        return destinations
+    for entry in jobs:
+        if not isinstance(entry, dict):
+            continue
+        destination = entry.get("tar_destination")
+        if isinstance(destination, str) and destination.strip():
+            destinations.append(expand_path(destination))
+    return destinations
+
+
 def extract_partition(data: Dict) -> str:
     defaults = data.get("defaults", {})
     if not isinstance(defaults, dict):
@@ -415,10 +437,11 @@ def read_runs_file(path: Path) -> List[int]:
 
 def collect_runs(
     variants: Sequence[JsonVariant],
-) -> Tuple[Dict[int, Set[str]], Dict[int, Path], Dict[int, Set[Path]]]:
+) -> Tuple[Dict[int, Set[str]], Dict[int, Path], Dict[int, Set[Path]], Dict[int, Set[Path]]]:
     runs_to_variants: Dict[int, Set[str]] = {}
     runs_to_manifest: Dict[int, Path] = {}
     runs_to_destinations: Dict[int, Set[Path]] = {}
+    runs_to_report_destinations: Dict[int, Set[Path]] = {}
     for variant in variants:
         for runs_file in variant.runs_files:
             runs = read_runs_file(runs_file)
@@ -427,7 +450,9 @@ def collect_runs(
                 if run not in runs_to_manifest:
                     runs_to_manifest[run] = variant.path
                 runs_to_destinations.setdefault(run, set()).update(variant.replay_destinations)
-    return runs_to_variants, runs_to_manifest, runs_to_destinations
+                if variant.report_destinations:
+                    runs_to_report_destinations.setdefault(run, set()).update(variant.report_destinations)
+    return runs_to_variants, runs_to_manifest, runs_to_destinations, runs_to_report_destinations
 
 
 def resolve_run_destinations(runs_to_destinations: Dict[int, Set[Path]]) -> Dict[int, Path]:
@@ -445,6 +470,29 @@ def resolve_run_destinations(runs_to_destinations: Dict[int, Set[Path]]) -> Dict
         joined = "\n".join(conflicts)
         raise ValueError(
             "Replay manifests disagree on the MSS destination for one or more runs.\n"
+            f"{joined}"
+        )
+    return resolved
+
+
+def resolve_optional_run_destinations(runs_to_destinations: Dict[int, Set[Path]]) -> Dict[int, Optional[Path]]:
+    resolved: Dict[int, Optional[Path]] = {}
+    conflicts: List[str] = []
+    for run, destinations in sorted(runs_to_destinations.items()):
+        unique_destinations = sorted(set(destinations))
+        if not unique_destinations:
+            resolved[run] = None
+            continue
+        if len(unique_destinations) != 1:
+            conflicts.append(
+                f"run {run}: " + ", ".join(str(destination) for destination in unique_destinations)
+            )
+            continue
+        resolved[run] = unique_destinations[0]
+    if conflicts:
+        joined = "\n".join(conflicts)
+        raise ValueError(
+            "Replay manifests disagree on the REPORT_OUTPUT destination for one or more runs.\n"
             f"{joined}"
         )
     return resolved
@@ -576,6 +624,7 @@ def build_run_plans(
     runs_to_variants: Dict[int, Set[str]],
     runs_to_manifest: Dict[int, Path],
     runs_to_destinations: Dict[int, Path],
+    runs_to_report_destinations: Dict[int, Optional[Path]],
     args: argparse.Namespace,
 ) -> Tuple[List[RunPlan], List[str]]:
     warnings: List[str] = []
@@ -617,6 +666,7 @@ def build_run_plans(
                 resources=resources,
                 representative_manifest=runs_to_manifest[run],
                 replay_destination=runs_to_destinations[run],
+                report_destination=runs_to_report_destinations.get(run),
                 cache_file=cache_file,
                 cache_ready=cache_ready,
                 cache_reason=cache_reason,
@@ -700,6 +750,7 @@ def build_add_job_command(
     family_prefix: str,
 ) -> List[str]:
     replay_output_name = replay_output_basename(plan.run)
+    replay_report_name = replay_report_basename(plan.run)
     cmd = [
         swif2_bin,
         "add-job",
@@ -730,9 +781,16 @@ def build_add_job_command(
         "-output",
         replay_output_name,
         to_mss_output_file_uri(plan.replay_destination / replay_output_name),
-        replay_script,
-        str(plan.run),
     ]
+    if plan.report_destination is not None:
+        cmd.extend(
+            [
+                "-output",
+                replay_report_name,
+                to_mss_output_file_uri(plan.report_destination / replay_report_name),
+            ]
+        )
+    cmd.extend([replay_script, str(plan.run)])
     return cmd
 
 
@@ -858,6 +916,8 @@ def print_summary(
             print(f"    runs_file: {runs_file}")
         for destination in variant.replay_destinations:
             print(f"    replay_mss_destination: {destination}")
+        for destination in variant.report_destinations:
+            print(f"    report_mss_destination: {destination}")
     print()
 
     duplicate_runs = {run: fams for run, fams in runs_to_variants.items() if len(fams) > 1}
@@ -897,6 +957,8 @@ def print_summary(
         )
         print(f"         variants: {', '.join(plan.variants)}")
         print(f"         replay_mss_destination: {plan.replay_destination}")
+        if plan.report_destination is not None:
+            print(f"         report_mss_destination: {plan.report_destination}")
         cmd = build_add_job_command(
             args.swif2_bin,
             workflow,
@@ -1084,16 +1146,18 @@ def main() -> int:
         raise SystemExit(f"No JSON variants found for family prefix {family_prefix} in {json_dir}")
     partition = args.partition or resolve_family_partition(variants)
 
-    runs_to_variants, runs_to_manifest, runs_to_destination_sets = collect_runs(variants)
+    runs_to_variants, runs_to_manifest, runs_to_destination_sets, runs_to_report_destination_sets = collect_runs(variants)
     if not runs_to_variants:
         raise SystemExit("No runs were discovered from the matched JSON files")
     runs_to_destinations = resolve_run_destinations(runs_to_destination_sets)
+    runs_to_report_destinations = resolve_optional_run_destinations(runs_to_report_destination_sets)
 
     plans, size_warnings = build_run_plans(
         family_prefix,
         runs_to_variants,
         runs_to_manifest,
         runs_to_destinations,
+        runs_to_report_destinations,
         args,
     )
     workflow = workflow_name(args, family_prefix)
