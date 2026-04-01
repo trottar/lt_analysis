@@ -102,8 +102,14 @@ This calls `farm_env/submit_replay.py`, which:
 
 - finds all matching `Q{Q2}W{W}*.json` manifests under the selected manifest directory
 - merges runs across those manifests
+- checks whether each run's raw `coin_all_*.dat` file is already present in cache
+- requests cache staging for missing raw files before replay submission
 - submits one replay job per unique run
 - adds one dependent Jasmine replay-upload job per run by default
+
+Runs whose raw data are not yet cache-ready are not submitted in that pass, which
+prevents replay jobs from failing immediately when the input file is still on
+tape.
 
 Default workflow name:
 

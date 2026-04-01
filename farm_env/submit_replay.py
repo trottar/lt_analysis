@@ -8,6 +8,7 @@ Behavior:
   whose names begin with `Q{q2}W{w}`.
 - Each JSON may contain one or more jobs[*].runs_file entries.
 - All runs from all matched JSON files are merged into one unique run set.
+- Missing raw cache files are requested for staging before replay submission.
 - Exactly one SWIF2 job is submitted per unique run number.
 - Each job runs:
     replay_env/run_replay.sh <run>
@@ -52,6 +53,8 @@ DEFAULT_JASMINE_RAM = "4g"
 DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
+DEFAULT_RAW_CACHE_GLOB_TEMPLATE = "/cache/hallc/raw/coin_all_{run5}.dat"
+DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {cache_file}"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -81,6 +84,10 @@ class RunPlan:
     variants: Tuple[str, ...]
     resources: ResourceRequest
     representative_manifest: Path
+    cache_file: Optional[Path]
+    cache_ready: bool
+    cache_reason: str
+    cache_request_command: Tuple[str, ...] = ()
 
 
 def parse_args() -> argparse.Namespace:
@@ -160,6 +167,32 @@ def parse_args() -> argparse.Namespace:
             "Use {run} for the run number and shell wildcards if needed. Example: "
             "'/cache/hallc/raw/*_{run}_*.dat'"
         ),
+    )
+    parser.add_argument(
+        "--raw-cache-glob-template",
+        action="append",
+        default=[],
+        help=(
+            "Optional glob template used to locate the replay raw data in cache. "
+            "Repeatable. Supports {run} and {run5}. "
+            f"Default: {DEFAULT_RAW_CACHE_GLOB_TEMPLATE}"
+        ),
+    )
+    parser.add_argument(
+        "--cache-request-template",
+        default=DEFAULT_CACHE_REQUEST_TEMPLATE,
+        help=(
+            "Command template used to request a missing raw cache file. "
+            "Supports {run}, {run5}, and {cache_file}. "
+            f"Default: {DEFAULT_CACHE_REQUEST_TEMPLATE}"
+        ),
+    )
+    parser.add_argument(
+        "--no-cache-request",
+        dest="request_missing_cache",
+        action="store_false",
+        default=True,
+        help="Do not request raw-file staging when the cache file is missing.",
     )
     parser.add_argument(
         "--workflow-name",
@@ -257,6 +290,16 @@ def safe_name(text: str) -> str:
     return cleaned or "kaonlt"
 
 
+def render_template(template: str, run: int, extra: Optional[Dict[str, str]] = None) -> str:
+    values = {
+        "run": str(run),
+        "run5": f"{int(run):05d}",
+    }
+    if extra:
+        values.update(extra)
+    return os.path.expandvars(template).format(**values)
+
+
 def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Optional[str]) -> List[JsonVariant]:
     if not json_dir.exists():
         raise FileNotFoundError(f"JSON directory does not exist: {json_dir}")
@@ -351,7 +394,7 @@ def estimate_run_input_bytes(
     warnings: List[str] = []
 
     for template in templates:
-        pattern = os.path.expandvars(template).format(run=run)
+        pattern = render_template(template, run)
         for match in glob.glob(os.path.expanduser(pattern)):
             path = Path(match)
             if path.exists() and path.is_file():
@@ -369,6 +412,36 @@ def estimate_run_input_bytes(
     if not matched_paths:
         return None, warnings
     return total_bytes, warnings
+
+
+def raw_cache_templates(args: argparse.Namespace) -> List[str]:
+    templates = list(args.raw_cache_glob_template)
+    if templates:
+        return templates
+    return [DEFAULT_RAW_CACHE_GLOB_TEMPLATE]
+
+
+def find_cached_raw_file(run: int, templates: Sequence[str]) -> Optional[Path]:
+    matches: List[Path] = []
+    for template in templates:
+        pattern = render_template(template, run)
+        for match in glob.glob(os.path.expanduser(pattern)):
+            path = Path(match)
+            if path.exists() and path.is_file():
+                matches.append(path.resolve())
+    if not matches:
+        return None
+    matches = sorted(set(matches))
+    return matches[0]
+
+
+def build_cache_request_command(args: argparse.Namespace, run: int, cache_file: Path) -> List[str]:
+    command_text = render_template(
+        args.cache_request_template,
+        run,
+        extra={"cache_file": str(cache_file)},
+    )
+    return shlex.split(command_text)
 
 
 
@@ -425,6 +498,18 @@ def build_run_plans(
     plans: List[RunPlan] = []
 
     for run in sorted(runs_to_variants):
+        cache_file = find_cached_raw_file(run, raw_cache_templates(args))
+        cache_ready = cache_file is not None
+        cache_reason = "cache_ready" if cache_ready else "missing_cache"
+        cache_request_command: Tuple[str, ...] = ()
+        if not cache_ready:
+            nominal_cache_file = Path(
+                render_template(raw_cache_templates(args)[0], run)
+            ).expanduser()
+            cache_file = nominal_cache_file
+            if args.request_missing_cache:
+                cache_request_command = tuple(build_cache_request_command(args, run, cache_file))
+
         est_bytes, size_warnings = estimate_run_input_bytes(
             run,
             args.size_glob_template,
@@ -447,6 +532,10 @@ def build_run_plans(
                 variants=tuple(sorted(runs_to_variants[run])),
                 resources=resources,
                 representative_manifest=runs_to_manifest[run],
+                cache_file=cache_file,
+                cache_ready=cache_ready,
+                cache_reason=cache_reason,
+                cache_request_command=cache_request_command,
             )
         )
 
@@ -680,6 +769,16 @@ def print_summary(
     print("Planned SWIF2 jobs")
     print("-" * 80)
     for plan in plans:
+        if not plan.cache_ready:
+            print(
+                f"[WAIT {plan.cache_reason}] run={plan.run} job={plan.job_name} "
+                f"cache={plan.cache_file}"
+            )
+            if plan.cache_request_command:
+                print("         request : " + " ".join(shlex.quote(x) for x in plan.cache_request_command))
+            else:
+                print("         request : disabled")
+            continue
         status = "SKIP existing" if plan.job_name in existing_job_names and args.skip_existing else "ADD"
         print(
             f"[{status}] run={plan.run} job={plan.job_name} "
@@ -724,16 +823,43 @@ def submit_jobs(
     existing_job_names: Set[str],
     args: argparse.Namespace,
 ) -> int:
+    replay_script = str(expand_path(args.replay_script))
+    existing_names = set(existing_job_names)
+    rc = 0
+    eligible_plans = [plan for plan in plans if plan.cache_ready]
+
+    missing_cache_plans = [plan for plan in plans if not plan.cache_ready]
+    for plan in missing_cache_plans:
+        if not plan.cache_request_command:
+            print(f"Cache missing for run {plan.run}; no request command configured.")
+            continue
+        print(f"Requesting cache staging for run {plan.run}:")
+        print("  " + " ".join(shlex.quote(x) for x in plan.cache_request_command))
+        result = run_command(plan.cache_request_command, capture=True)
+        if result.stdout:
+            print(result.stdout.rstrip())
+        if result.stderr:
+            print(result.stderr.rstrip(), file=sys.stderr)
+        if result.returncode != 0:
+            rc = result.returncode
+            print(f"ERROR: cache request failed for run {plan.run}", file=sys.stderr)
+            return rc
+        print()
+
+    if not eligible_plans:
+        print("No cache-ready replay jobs to submit yet.")
+        print("Missing raw files were requested for staging where configured.")
+        return rc
+
     created, create_cmd = ensure_workflow(args.swif2_bin, workflow, args.max_concurrent, submit=True)
     if created:
         print("Created workflow:")
         print("  " + " ".join(shlex.quote(x) for x in create_cmd))
         print()
 
-    replay_script = str(expand_path(args.replay_script))
-    existing_names = set(existing_job_names)
-    rc = 0
     for plan in plans:
+        if not plan.cache_ready:
+            continue
         replay_exists = plan.job_name in existing_names
         if args.skip_existing and replay_exists:
             print(f"Skipping existing job: {plan.job_name}")
