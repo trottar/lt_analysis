@@ -14,11 +14,12 @@ REPLAY_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_replay.py"
 APPLYCUTS_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_applycuts.py"
 REBALANCE_SCRIPT="${SCRIPT_DIR}/farm_env/rebalance_swif.py"
 JASMINE_SCRIPT="${SCRIPT_DIR}/farm_env/jasmine_put_from_manifest.py"
+DIAGNOSE_SCRIPT="${SCRIPT_DIR}/farm_env/diagnose_swif_failures.py"
 WORKFLOW_PREFIX="kaonlt"
 DEFAULT_MANIFEST_DIR="${SCRIPT_DIR}/input/kaon"
 
-# Flag definitions (flags: h, s, r, a, n, c, j, w, m, A, P)
-while getopts 'hsrancjw:m:A:P:' flag; do
+# Flag definitions (flags: h, s, r, a, n, c, j, d, w, m, A, P)
+while getopts 'hsrancjdw:m:A:P:' flag; do
     case "${flag}" in
         h)
         echo "--------------------------------------------------------------"
@@ -37,6 +38,7 @@ while getopts 'hsrancjw:m:A:P:' flag; do
         echo "    -n, do not call 'swif2 run' after submit/rebalance"
         echo "    -c, use applyCuts mode instead of replay mode"
         echo "    -j, use interactive Jasmine upload mode"
+        echo "    -d, diagnose failed jobs in an existing workflow"
         echo "    -w, override workflow name"
         echo "    -m, override manifest directory (default: input/kaon)"
         echo "    -A, override SWIF/Slurm account (default from helper)"
@@ -65,6 +67,8 @@ while getopts 'hsrancjw:m:A:P:' flag; do
         echo "    ./run_farm.sh -r -c -a -n 3p0 3p14"
         echo "    ./run_farm.sh -j -m input/kaon_test 3p0 3p14"
         echo "    ./run_farm.sh -j -c -m input/kaon_test -s 3p0 3p14"
+        echo "    ./run_farm.sh -d 3p0 3p14"
+        echo "    ./run_farm.sh -d -c 3p0 3p14"
         echo
         echo "Available Kinematics..."
         echo "                      Q2=5p5, W=3p02"
@@ -81,6 +85,7 @@ while getopts 'hsrancjw:m:A:P:' flag; do
         n) no_run_flag='true' ;;
         c) cuts_flag='true' ;;
         j) upload_flag='true' ;;
+        d) diagnose_flag='true' ;;
         w) workflow_override="${OPTARG}" ;;
         m) manifest_dir="${OPTARG}" ;;
         A) account_override="${OPTARG}" ;;
@@ -113,6 +118,11 @@ if [[ ! -f "${JASMINE_SCRIPT}" ]]; then
     exit 1
 fi
 
+if [[ ! -f "${DIAGNOSE_SCRIPT}" ]]; then
+    echo "Diagnose helper not found: ${DIAGNOSE_SCRIPT}"
+    exit 1
+fi
+
 if [[ "${rebalance_flag}" = "true" && "${submit_flag}" = "true" ]]; then
     echo "Please choose either submit mode or rebalance mode, not both."
     exit 1
@@ -120,6 +130,16 @@ fi
 
 if [[ "${upload_flag}" = "true" && "${rebalance_flag}" = "true" ]]; then
     echo "Please choose either Jasmine upload mode or rebalance mode, not both."
+    exit 1
+fi
+
+if [[ "${diagnose_flag}" = "true" && "${rebalance_flag}" = "true" ]]; then
+    echo "Please choose either diagnose mode or rebalance mode, not both."
+    exit 1
+fi
+
+if [[ "${diagnose_flag}" = "true" && "${upload_flag}" = "true" ]]; then
+    echo "Please choose either diagnose mode or Jasmine upload mode, not both."
     exit 1
 fi
 
@@ -133,8 +153,23 @@ if [[ "${upload_flag}" = "true" && "${apply_flag}" = "true" ]]; then
     exit 1
 fi
 
+if [[ "${diagnose_flag}" = "true" && "${apply_flag}" = "true" ]]; then
+    echo "The -a flag is not used in diagnose mode."
+    exit 1
+fi
+
 if [[ "${upload_flag}" = "true" && "${no_run_flag}" = "true" ]]; then
     echo "The -n flag is not used in Jasmine upload mode."
+    exit 1
+fi
+
+if [[ "${diagnose_flag}" = "true" && "${submit_flag}" = "true" ]]; then
+    echo "The -s flag is not used in diagnose mode."
+    exit 1
+fi
+
+if [[ "${diagnose_flag}" = "true" && "${no_run_flag}" = "true" ]]; then
+    echo "The -n flag is not used in diagnose mode."
     exit 1
 fi
 
@@ -192,6 +227,23 @@ if [[ -z "${manifest_dir}" ]]; then
     manifest_dir="${DEFAULT_MANIFEST_DIR}"
 elif [[ "${manifest_dir}" != /* ]]; then
     manifest_dir="${SCRIPT_DIR}/${manifest_dir}"
+fi
+
+if [[ "${diagnose_flag}" = "true" ]]; then
+    echo
+    echo "---------------------------------------------------------"
+    echo
+    echo "Diagnosing failed ${MODE} jobs for Q2=${Q2}, W=${W}..."
+    echo
+    echo "                        WORKFLOW = ${WORKFLOW}"
+    echo
+    echo "---------------------------------------------------------"
+    echo
+
+    diagnose_cmd=(python3 "${DIAGNOSE_SCRIPT}" "${WORKFLOW}")
+    echo "Running: ${diagnose_cmd[*]}"
+    "${diagnose_cmd[@]}"
+    exit $?
 fi
 
 if [[ "${upload_flag}" = "true" ]]; then

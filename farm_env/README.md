@@ -75,6 +75,12 @@ That prints a replay dry-run plan. Nothing is submitted unless `-s` is used.
 - Combine with `-c` to upload skim products instead of replay products.
 - Use `-s` to actually invoke `jput`; otherwise the Jasmine helper stays in dry-run mode.
 
+`-d`
+
+- Diagnose failed jobs in an existing workflow.
+- Replay diagnosis is the default in this mode.
+- Combine with `-c` to diagnose the applyCuts workflow instead.
+
 `-w <workflow-name>`
 
 - Override the auto-generated workflow name.
@@ -195,6 +201,27 @@ applyCuts workflow:
 ./run_farm.sh -r -c 3p0 3p14
 ./run_farm.sh -r -c -a -n 3p0 3p14
 ```
+
+## Failure Diagnosis
+
+Replay workflow:
+
+```bash
+./run_farm.sh -d 3p0 3p14
+```
+
+applyCuts workflow:
+
+```bash
+./run_farm.sh -d -c 3p0 3p14
+```
+
+This calls `farm_env/diagnose_swif_failures.py`, which:
+
+- filters the workflow to current problem jobs
+- runs `swif2 show-job` for each failed job
+- groups failures into resource-related vs other categories
+- prints retry vs rebalance suggestions
 
 ## Jasmine Uploads
 
