@@ -53,8 +53,9 @@ DEFAULT_JASMINE_RAM = "4g"
 DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
-DEFAULT_RAW_CACHE_GLOB_TEMPLATE = "/cache/hallc/raw/coin_all_{run5}.dat"
-DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {cache_file}"
+DEFAULT_RAW_CACHE_GLOB_TEMPLATE = "/cache/hallc/spring17/raw/coin_all_{run5}.dat"
+DEFAULT_RAW_MSS_TEMPLATE = "/mss/hallc/spring17/raw/coin_all_{run5}.dat"
+DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -165,7 +166,7 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Optional glob template used to estimate per-run input size. Repeatable. "
             "Use {run} for the run number and shell wildcards if needed. Example: "
-            "'/cache/hallc/raw/*_{run}_*.dat'"
+            "'/cache/hallc/spring17/raw/*_{run}_*.dat'"
         ),
     )
     parser.add_argument(
@@ -183,8 +184,17 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_CACHE_REQUEST_TEMPLATE,
         help=(
             "Command template used to request a missing raw cache file. "
-            "Supports {run}, {run5}, and {cache_file}. "
+            "Supports {run}, {run5}, {cache_file}, and {mss_file}. "
             f"Default: {DEFAULT_CACHE_REQUEST_TEMPLATE}"
+        ),
+    )
+    parser.add_argument(
+        "--raw-mss-template",
+        default=DEFAULT_RAW_MSS_TEMPLATE,
+        help=(
+            "Template for the MSS-backed raw file used when requesting cache staging. "
+            "Supports {run} and {run5}. "
+            f"Default: {DEFAULT_RAW_MSS_TEMPLATE}"
         ),
     )
     parser.add_argument(
@@ -436,10 +446,11 @@ def find_cached_raw_file(run: int, templates: Sequence[str]) -> Optional[Path]:
 
 
 def build_cache_request_command(args: argparse.Namespace, run: int, cache_file: Path) -> List[str]:
+    mss_file = render_template(args.raw_mss_template, run)
     command_text = render_template(
         args.cache_request_template,
         run,
-        extra={"cache_file": str(cache_file)},
+        extra={"cache_file": str(cache_file), "mss_file": mss_file},
     )
     return shlex.split(command_text)
 
