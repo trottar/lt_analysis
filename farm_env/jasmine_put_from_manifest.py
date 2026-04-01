@@ -753,7 +753,15 @@ def run_command(cmd: Sequence[str] | str) -> int:
 
 
 def build_submit_invocation(plan: PlannedPut, settings: Settings) -> List[str]:
-    return " ".join(shlex.quote(token) for token in build_submit_command(plan, settings))
+    logical_cmd = build_submit_command(plan, settings)
+    # Match the user's working utility pattern: let a bash shell in the farm
+    # environment resolve the Jasmine client command at execution time.
+    shell_cmd = (
+        f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
+        f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
+        f"fi; " + " ".join(shlex.quote(token) for token in logical_cmd)
+    )
+    return ["bash", "-lc", shell_cmd]
 
 
 def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
@@ -846,12 +854,6 @@ def shell_can_run_submission_binary(jput_bin: str) -> bool:
 
 def validate_environment(settings: Settings) -> List[str]:
     warnings: List[str] = []
-    sub = settings.submission
-    resolved_jput = resolve_submission_binary_path(sub.jput_bin)
-    shell_resolves_jput = shell_can_run_submission_binary(sub.jput_bin) if resolved_jput is None else False
-    if resolved_jput is None and not shell_resolves_jput:
-        warnings.append(f"submission binary not found in PATH and not found as a file: {sub.jput_bin}")
-
     home = Path.home()
     probable_cert_paths = [
         home / ".globus" / "usercert.pem",
@@ -890,10 +892,7 @@ def main() -> int:
         for msg in warnings:
             print(f"* {msg}")
         print()
-    if resolve_submission_binary_path(settings.submission.jput_bin):
-        print(f"Submission bin: {settings.submission.jput_bin}")
-    else:
-        print(f"Submission bin: shell command ({settings.submission.jput_bin})")
+    print(f"Submission bin: {settings.submission.jput_bin} (via bash -lc)")
 
     all_plans: List[PlannedPut] = []
     for job in jobs:
