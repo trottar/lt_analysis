@@ -49,7 +49,9 @@ while getopts 'hsrancw:m:A:P:' flag; do
         echo "    applyCuts mode scans the same selected manifest directory and"
         echo "    submits one job per"
         echo "    manifest variant + run, plus a dependent Jasmine skim upload"
-        echo "    job by default, but only when replay output exists."
+        echo "    job by default, but only when the replay ROOT file exists on"
+        echo "    MSS and is already present in cache (requesting jcache staging"
+        echo "    first when needed)."
         echo
         echo "Examples..."
         echo "    ./run_farm.sh 3p0 3p14"
@@ -161,6 +163,8 @@ fi
 
 if [[ -z "${manifest_dir}" ]]; then
     manifest_dir="${DEFAULT_MANIFEST_DIR}"
+elif [[ "${manifest_dir}" != /* ]]; then
+    manifest_dir="${SCRIPT_DIR}/${manifest_dir}"
 fi
 
 if [[ "${rebalance_flag}" = "true" ]]; then

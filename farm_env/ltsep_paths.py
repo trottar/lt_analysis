@@ -39,6 +39,7 @@ PATH_FIELD_NAMES = (
 class LtsepPaths:
     rootpath: Path
     skimpath: Path
+    cachepath: Path
     anatype: str
     user: str
     host: str
@@ -50,6 +51,16 @@ class LtsepPaths:
     @property
     def skim_source_dir(self) -> Path:
         return _analysis_dir(self.skimpath, self.anatype)
+
+    def cache_path_from_mss(self, mss_path: Path) -> Path:
+        mss_text = str(mss_path)
+        cache_text = str(self.cachepath)
+        if cache_text and mss_text.startswith("/mss/hallc/kaonlt"):
+            suffix = mss_text[len("/mss/hallc/kaonlt"):].lstrip("/")
+            return Path(cache_text).expanduser() / suffix
+        if mss_text.startswith("/mss/"):
+            return Path("/cache" + mss_text[4:]).expanduser()
+        return mss_path
 
 
 def _normalize_base(path_value: object) -> Path:
@@ -104,6 +115,7 @@ def resolve_ltsep_paths(caller_path: Optional[str] = None) -> LtsepPaths:
     return LtsepPaths(
         rootpath=_normalize_base(lt.ROOTPATH),
         skimpath=_normalize_base(lt.SKIMPATH),
+        cachepath=_normalize_base(getattr(lt, "CACHEPATH", "/cache/hallc/kaonlt")),
         anatype=str(lt.ANATYPE),
         user=str(lt.USER),
         host=str(lt.HOST),

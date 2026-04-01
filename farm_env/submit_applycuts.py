@@ -7,7 +7,10 @@ Behavior:
 - The script discovers all matching JSON files under `input/kaon`.
 - Each manifest variant keeps its own run list and submission context.
 - Exactly one SWIF2 job is planned per manifest variant + run.
-- A job is only planned when the full replay ROOT file already exists.
+- Replay readiness is determined from the replay ROOT file on MSS, with
+  ltsep `CACHEPATH` used to derive the cached replay ROOT prerequisite.
+- Missing replay cache files are requested via jcache before applyCuts
+  submission.
 - A job is skipped when both kaon and pion skim outputs already exist.
 - Each submitted job runs `applyCuts_Prod.sh` once, which in turn runs both
   kaon and pion passes for the requested run.
@@ -52,6 +55,7 @@ DEFAULT_JASMINE_RAM = "4g"
 DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
+DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -71,6 +75,7 @@ class JsonVariant:
     epsilon: str
     target: str
     runs_files: Tuple[Path, ...]
+    replay_destinations: Tuple[Path, ...]
 
 
 @dataclass(frozen=True)
@@ -78,11 +83,13 @@ class RunPlan:
     variant: JsonVariant
     run: int
     job_name: str
-    replay_file: Optional[Path]
+    replay_mss_file: Optional[Path]
+    replay_cache_file: Optional[Path]
     skim_kaon: Path
     skim_pion: Path
     status: str
     reason: str
+    cache_request_command: Tuple[str, ...] = ()
 
     @property
     def should_add(self) -> bool:
@@ -223,6 +230,22 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_JASMINE_STAGE_ROOT,
         help=f"Stage root passed to Jasmine jobs (default: {DEFAULT_JASMINE_STAGE_ROOT})",
     )
+    parser.add_argument(
+        "--cache-request-template",
+        default=DEFAULT_CACHE_REQUEST_TEMPLATE,
+        help=(
+            "Command template used to request a missing replay ROOT cache file. "
+            "Supports {run}, {run5}, {mss_file}, and {cache_file}. "
+            f"Default: {DEFAULT_CACHE_REQUEST_TEMPLATE}"
+        ),
+    )
+    parser.add_argument(
+        "--no-cache-request",
+        dest="request_missing_cache",
+        action="store_false",
+        default=True,
+        help="Do not request replay ROOT cache staging when the cache file is missing.",
+    )
     return parser.parse_args()
 
 
@@ -248,6 +271,20 @@ def safe_name(text: str) -> str:
 def load_json(path: Path) -> Dict:
     with path.open("r", encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def extract_replay_destinations(data: Dict) -> List[Path]:
+    jobs = data.get("jobs", [])
+    destinations: List[Path] = []
+    if not isinstance(jobs, list):
+        return destinations
+    for entry in jobs:
+        if not isinstance(entry, dict):
+            continue
+        destination = entry.get("destination")
+        if isinstance(destination, str) and destination.strip():
+            destinations.append(expand_path(destination))
+    return destinations
 
 
 def extract_runs_files(data: Dict) -> List[Path]:
@@ -291,11 +328,12 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
             continue
         data = load_json(path)
         runs_files = extract_runs_files(data)
-        if not runs_files:
+        replay_destinations = extract_replay_destinations(data)
+        if not runs_files or not replay_destinations:
             continue
         variants.append(
             JsonVariant(
-                path=path,
+                path=path.resolve(),
                 family=path.stem,
                 q2=parsed["q2"],
                 w=parsed["w"],
@@ -303,6 +341,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
                 epsilon=parsed["epsilon"],
                 target=parsed["target"],
                 runs_files=tuple(runs_files),
+                replay_destinations=tuple(replay_destinations),
             )
         )
 
@@ -333,15 +372,36 @@ def runs_for_variant(variant: JsonVariant) -> List[int]:
     return sorted(runs)
 
 
-def find_replay_file(paths: LtsepPaths, run: int) -> Optional[Path]:
-    exact = paths.replay_source_dir / f"{paths.anatype}_coin_replay_production_{run}_-1.root"
-    if exact.exists():
-        return exact
+def render_template(template: str, run: int, extra: Optional[Dict[str, str]] = None) -> str:
+    values = {
+        "run": str(run),
+        "run5": f"{int(run):05d}",
+    }
+    if extra:
+        values.update(extra)
+    return os.path.expandvars(template).format(**values)
 
-    matches = sorted(paths.replay_source_dir.glob(f"*coin_replay_production_{run}_-1.root"))
-    if matches:
-        return matches[0]
+
+def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Optional[Path]:
+    exact_name = f"{anatype}_coin_replay_production_{run}_-1.root"
+    glob_name = f"*coin_replay_production_{run}_-1.root"
+    for destination in variant.replay_destinations:
+        exact = destination / exact_name
+        if exact.exists():
+            return exact
+        matches = sorted(destination.glob(glob_name))
+        if matches:
+            return matches[0]
     return None
+
+
+def build_cache_request_command(args: argparse.Namespace, run: int, mss_file: Path, cache_file: Path) -> List[str]:
+    command_text = render_template(
+        args.cache_request_template,
+        run,
+        extra={"mss_file": str(mss_file), "cache_file": str(cache_file)},
+    )
+    return shlex.split(command_text)
 
 
 def skim_files_for_run(paths: LtsepPaths, run: int) -> Tuple[Path, Path]:
@@ -352,24 +412,29 @@ def skim_files_for_run(paths: LtsepPaths, run: int) -> Tuple[Path, Path]:
     )
 
 
-def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant]) -> List[RunPlan]:
+def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: argparse.Namespace) -> List[RunPlan]:
     plans: List[RunPlan] = []
     for variant in variants:
         for run in runs_for_variant(variant):
-            replay_file = find_replay_file(paths, run)
+            replay_mss_file = find_replay_mss_file(variant, paths.anatype, run)
+            replay_cache_file = (
+                paths.cache_path_from_mss(replay_mss_file) if replay_mss_file is not None else None
+            )
             skim_kaon, skim_pion = skim_files_for_run(paths, run)
+            cache_request_command: Tuple[str, ...] = ()
 
-            if replay_file is None:
+            if replay_mss_file is None:
                 plans.append(
                     RunPlan(
                         variant=variant,
                         run=run,
                         job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
-                        replay_file=None,
+                        replay_mss_file=None,
+                        replay_cache_file=None,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
                         status="SKIP",
-                        reason="missing_replay_root",
+                        reason="missing_replay_mss",
                     )
                 )
                 continue
@@ -380,11 +445,33 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant]) -> List[
                         variant=variant,
                         run=run,
                         job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
-                        replay_file=replay_file,
+                        replay_mss_file=replay_mss_file,
+                        replay_cache_file=replay_cache_file,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
                         status="SKIP",
                         reason="skim_outputs_already_exist",
+                    )
+                )
+                continue
+
+            if replay_cache_file is None or not replay_cache_file.exists():
+                if args.request_missing_cache and replay_cache_file is not None:
+                    cache_request_command = tuple(
+                        build_cache_request_command(args, run, replay_mss_file, replay_cache_file)
+                    )
+                plans.append(
+                    RunPlan(
+                        variant=variant,
+                        run=run,
+                        job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
+                        replay_mss_file=replay_mss_file,
+                        replay_cache_file=replay_cache_file,
+                        skim_kaon=skim_kaon,
+                        skim_pion=skim_pion,
+                        status="WAIT",
+                        reason="missing_replay_cache",
+                        cache_request_command=cache_request_command,
                     )
                 )
                 continue
@@ -394,11 +481,12 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant]) -> List[
                     variant=variant,
                     run=run,
                     job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
-                    replay_file=replay_file,
+                    replay_mss_file=replay_mss_file,
+                    replay_cache_file=replay_cache_file,
                     skim_kaon=skim_kaon,
                     skim_pion=skim_pion,
                     status="ADD",
-                    reason="replay_ready",
+                    reason="replay_cache_ready",
                 )
             )
 
@@ -592,7 +680,7 @@ def print_summary(
     print(f"Auto Jasmine     : {'yes' if args.auto_jasmine else 'no'}")
     if args.auto_jasmine:
         print(f"Jasmine script   : {expand_path(args.jasmine_script)}")
-    print(f"Replay source    : {paths.replay_source_dir}")
+    print(f"Replay cache root: {paths.cachepath}")
     print(f"Skim source      : {paths.skim_source_dir}")
     print(f"Account          : {args.account}")
     print(f"Partition        : {args.partition}")
@@ -607,6 +695,8 @@ def print_summary(
         print(f"    phi={variant.phi} epsilon={variant.epsilon} target={variant.target}")
         for runs_file in variant.runs_files:
             print(f"    runs_file: {runs_file}")
+        for destination in variant.replay_destinations:
+            print(f"    replay_mss_destination: {destination}")
     print()
 
     print("Planned SWIF2 jobs")
@@ -619,13 +709,19 @@ def print_summary(
             else:
                 status = "ADD"
         else:
-            status = f"SKIP {plan.reason}"
+            status = f"{plan.status} {plan.reason}"
         print(f"[{status}] run={plan.run} variant={plan.variant.family} job={plan.job_name}")
-        if plan.replay_file is None:
-            print(f"         replay  : missing under {paths.replay_source_dir}")
+        if plan.replay_mss_file is None:
+            print("         replay_mss   : missing")
         else:
-            print(f"         replay  : {plan.replay_file}")
+            print(f"         replay_mss   : {plan.replay_mss_file}")
+        if plan.replay_cache_file is None:
+            print("         replay_cache : missing")
+        else:
+            print(f"         replay_cache : {plan.replay_cache_file}")
         print(f"         skim    : {plan.skim_kaon.name}, {plan.skim_pion.name}")
+        if plan.cache_request_command:
+            print("         request : " + " ".join(shlex.quote(x) for x in plan.cache_request_command))
         if plan.should_add:
             cmd = build_add_job_command(
                 args.swif2_bin,
@@ -663,6 +759,29 @@ def submit_jobs(
     existing_job_names: Set[str],
     args: argparse.Namespace,
 ) -> int:
+    waiting_plans = [plan for plan in plans if plan.status == "WAIT"]
+    for plan in waiting_plans:
+        if not plan.cache_request_command:
+            continue
+        print("Requesting replay cache staging:")
+        print("  " + " ".join(shlex.quote(x) for x in plan.cache_request_command))
+        result = run_command(plan.cache_request_command, capture=True)
+        if result.stdout:
+            print(result.stdout.rstrip())
+        if result.stderr:
+            print(result.stderr.rstrip(), file=sys.stderr)
+        if result.returncode != 0:
+            print(f"ERROR: cache request failed for run {plan.run}", file=sys.stderr)
+            return result.returncode
+        print()
+
+    eligible_plans = [plan for plan in plans if plan.should_add]
+    if not eligible_plans:
+        print("No cache-ready applyCuts jobs to submit yet.")
+        if waiting_plans and args.request_missing_cache:
+            print("Missing replay ROOT files were requested for cache staging where configured.")
+        return 0
+
     created, create_cmd = ensure_workflow(args.swif2_bin, workflow, args.max_concurrent, submit=True)
     if created:
         print("Created workflow:")
@@ -672,7 +791,7 @@ def submit_jobs(
     applycuts_script = str(expand_path(args.applycuts_script))
     existing_names = set(existing_job_names)
     rc = 0
-    for plan in plans:
+    for plan in eligible_plans:
         if not plan.should_add:
             continue
 
@@ -778,7 +897,7 @@ def main() -> int:
     if not variants:
         raise SystemExit(f"No JSON variants found for family prefix {family_prefix} in {json_dir}")
 
-    plans = build_run_plans(paths, variants)
+    plans = build_run_plans(paths, variants, args)
     if not plans:
         raise SystemExit("No runs were discovered from the matched JSON files")
 

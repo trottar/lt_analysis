@@ -131,10 +131,11 @@ This calls `farm_env/submit_applycuts.py`, which:
 
 - finds all matching manifests under the selected manifest directory
 - keeps each manifest variant separate
-- submits one job per manifest variant + run
+- treats each manifest `destination` as the authoritative replay ROOT location on MSS
+- maps that MSS replay file into the ltsep `CACHEPATH` tree
+- requests `jcache get` for missing replay cache files before applyCuts submission
+- only submits one job per manifest variant + run once the replay ROOT file is cache-ready
 - adds one dependent Jasmine skim-upload job per planned run by default
-- only plans a job if the full replay ROOT file already exists in the ltsep
-  replay ROOT area
 - skips the job if both skim outputs already exist in the ltsep skim ROOT area
 - runs `applyCuts_Prod.sh` once per planned job, letting that script process
   both kaon and pion for the run

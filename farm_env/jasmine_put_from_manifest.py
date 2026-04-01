@@ -227,9 +227,11 @@ def build_manifest_stem(phi: str, epsilon: str, q2: str, w: str, target: str) ->
 def resolve_manifest_path(cli: argparse.Namespace) -> Path:
     if cli.manifest_path is not None:
         manifest_path = Path(expandvars(str(cli.manifest_path))).expanduser()
+        if not manifest_path.is_absolute():
+            manifest_path = (REPO_ROOT / manifest_path).resolve()
         if not manifest_path.exists():
             raise FileNotFoundError(f"Manifest path does not exist: {manifest_path}")
-        return manifest_path
+        return manifest_path.resolve()
 
     if not all([cli.phi, cli.epsilon, cli.q2, cli.w, cli.target]):
         raise ValueError(
@@ -252,6 +254,8 @@ def resolve_manifest_path(cli: argparse.Namespace) -> Path:
         raise ValueError("No low-epsilon right-setting manifest exists in input/kaon.")
 
     manifest_dir = Path(expandvars(str(cli.manifest_dir))).expanduser()
+    if not manifest_dir.is_absolute():
+        manifest_dir = (REPO_ROOT / manifest_dir).resolve()
     manifest_stem = build_manifest_stem(phi, epsilon, q2, w, target)
     manifest_path = manifest_dir / f"{manifest_stem}.json"
 
@@ -261,7 +265,7 @@ def resolve_manifest_path(cli: argparse.Namespace) -> Path:
             f"target={target}: {manifest_path}"
         )
 
-    return manifest_path
+    return manifest_path.resolve()
 
 
 

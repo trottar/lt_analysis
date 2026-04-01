@@ -329,7 +329,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
             continue
         variants.append(
             JsonVariant(
-                path=path,
+                path=path.resolve(),
                 family=path.stem,
                 runs_files=tuple(runs_files),
             )
