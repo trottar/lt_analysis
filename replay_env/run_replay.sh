@@ -73,6 +73,7 @@ SCALER_REPORT_FILE="${SCALER_REPORT_DIR}/${ANATYPE}_output_coin_scalers_Summary_
 SCALER_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_coin_scalers.C"
 FULL_REPLAY_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
+BCM_CALIB_DIR="${REPLAYPATH}/CALIBRATION/bcm_current_map"
 
 # Source farm environment when available.
 if [[ -f /site/12gev_phys/softenv.sh ]]; then
@@ -119,22 +120,34 @@ if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
         echo "ERROR: see ${SCALER_REPORT_FILE}"
         exit 1
     fi
-        if ! command -v root >/dev/null 2>&1; then
-            echo "ERROR: root command not found after sourcing replay environment"
-            exit 1
-        fi
-        cd "$REPLAYPATH" || exit 1
-	    root -b -l<<EOF 
-.L ${REPLAYPATH}/ScalerCalib.C
-.x ${REPLAYPATH}/run.C("${SCALER_OUTPUT_FILE}")
-.q  
+    if ! command -v root >/dev/null 2>&1; then
+        echo "ERROR: root command not found after sourcing replay environment"
+        exit 1
+    fi
+    if [ ! -d "${BCM_CALIB_DIR}" ]; then
+        echo "ERROR: bcm calibration directory not found at ${BCM_CALIB_DIR}"
+        exit 1
+    fi
+    if [ ! -f "${BCM_CALIB_DIR}/ScalerCalib.C" ]; then
+        echo "ERROR: bcm calibration macro not found at ${BCM_CALIB_DIR}/ScalerCalib.C"
+        exit 1
+    fi
+    if [ ! -f "${BCM_CALIB_DIR}/run.C" ]; then
+        echo "ERROR: bcm runner macro not found at ${BCM_CALIB_DIR}/run.C"
+        exit 1
+    fi
+    cd "${BCM_CALIB_DIR}" || exit 1
+    root -b -l <<EOF
+.L ScalerCalib.C
+.x run.C("${SCALER_OUTPUT_FILE}")
+.q
 EOF
     if [ ! -f "${BCM_PARAM_FILE}" ]; then
         echo "ERROR: bcm calibration did not create ${BCM_PARAM_FILE}"
         exit 1
     fi
     mv "${BCM_PARAM_FILE}" "$REPLAYPATH/PARAM/HMS/BCM/CALIB/bcmcurrent_$RUNNUMBER.param"
-	    cd "$REPLAYPATH" || exit 1
+    cd "$REPLAYPATH" || exit 1
 else echo "Scaler replayfile already found for this run in ${SCALER_OUTPUT_DIR} - Skipping scaler replay step"
 fi
 
