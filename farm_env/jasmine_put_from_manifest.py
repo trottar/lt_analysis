@@ -25,7 +25,6 @@ import argparse
 import json
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 import tarfile
@@ -45,9 +44,7 @@ DEFAULT_MIN_SIZE_MB = 200
 DEFAULT_TARGET_ARCHIVE_SIZE_GB = 4
 DEFAULT_MAX_ARCHIVE_SIZE_GB = 20
 DEFAULT_STAGE_DIR = "/scratch/$USER/jasmine_stage"
-DEFAULT_JPUT = shutil.which("jput") or "jput"
-DEFAULT_SOFTENV = "/site/12gev_phys/softenv.sh"
-DEFAULT_SOFTENV_VERSION = "2.3"
+DEFAULT_JPUT = "/usr/bin/jput"
 DEFAULT_RUN_MATCH_REGEX_TEMPLATE = r"(^|[^0-9]){run}([^0-9]|$)"
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -748,10 +745,6 @@ def run_command(cmd: Sequence[str]) -> int:
 
 
 
-def build_submit_invocation(plan: PlannedPut, settings: Settings) -> List[str]:
-    return build_submit_command(plan, settings)
-
-
 def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
     staged_archives: List[Path] = []
     exit_code = 0
@@ -762,7 +755,7 @@ def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
                 staged_archives.append(plan.local_path)
 
         for plan in plans:
-            cmd = build_submit_invocation(plan, settings)
+            cmd = build_submit_command(plan, settings)
             rc = run_command(cmd)
             if rc != 0:
                 exit_code = rc
@@ -777,68 +770,6 @@ def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
                 except OSError as exc:
                     print(f"WARN: failed to remove staged archive {path}: {exc}", file=sys.stderr)
     return exit_code
-
-
-
-def resolve_submission_binary_path(jput_bin: str) -> Optional[str]:
-    expanded = expandvars(str(jput_bin))
-    candidate = Path(expanded).expanduser()
-
-    if candidate.exists():
-        return str(candidate.resolve())
-
-    direct = shutil.which(expanded)
-    if direct:
-        return direct
-
-    name_only = candidate.name or expanded
-    fallback = shutil.which(name_only)
-    if fallback:
-        return fallback
-
-    bash_path = shutil.which("bash")
-    if bash_path:
-        probe_commands = [
-            f"command -v {shlex.quote(name_only)}",
-            (
-                f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
-                f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
-                f"fi; command -v {shlex.quote(name_only)}"
-            ),
-        ]
-        for probe_command in probe_commands:
-            probe = subprocess.run(
-                [bash_path, "-lc", probe_command],
-                text=True,
-                capture_output=True,
-                check=False,
-            )
-            resolved = probe.stdout.strip().splitlines()
-            if probe.returncode == 0 and resolved:
-                return resolved[0].strip()
-
-    return None
-
-
-def shell_can_run_submission_binary(jput_bin: str) -> bool:
-    bash_path = shutil.which("bash")
-    if not bash_path:
-        return False
-
-    name_only = Path(expandvars(str(jput_bin))).expanduser().name or str(jput_bin)
-    probe_command = (
-        f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
-        f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
-        f"fi; type {shlex.quote(name_only)} >/dev/null 2>&1"
-    )
-    probe = subprocess.run(
-        [bash_path, "-lc", probe_command],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    return probe.returncode == 0
-
 
 def validate_environment(settings: Settings) -> List[str]:
     warnings: List[str] = []

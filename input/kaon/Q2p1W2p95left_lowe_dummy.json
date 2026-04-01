@@ -5,7 +5,7 @@
     "max_archive_size_gb": 20,
     "stage_dir": "/scratch/$USER",
     "submit": {
-      "jput_bin": "jput",
+      "jput_bin": "/usr/bin/jput",
       "command_mode": "src_dest",
       "extra_args": []
     }
