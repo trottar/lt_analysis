@@ -128,6 +128,7 @@ class JobConfig:
 class SubmissionConfig:
     jput_bin: str
     resolved_jput_bin: Optional[str]
+    shell_resolves_jput: bool
     command_mode: str
     command_template: Optional[List[str]]
     extra_args: List[str]
@@ -315,6 +316,7 @@ def resolve_submission(defaults: Dict) -> SubmissionConfig:
     return SubmissionConfig(
         jput_bin=str(submit_cfg.get("jput_bin", DEFAULT_JPUT)),
         resolved_jput_bin=None,
+        shell_resolves_jput=False,
         command_mode=command_mode,
         command_template=command_template,
         extra_args=[str(x) for x in extra_args],
@@ -746,6 +748,21 @@ def run_command(cmd: Sequence[str]) -> int:
 
 
 
+def build_submit_invocation(plan: PlannedPut, settings: Settings) -> List[str]:
+    logical_cmd = build_submit_command(plan, settings)
+    sub = settings.submission
+    if sub.resolved_jput_bin is not None:
+        return logical_cmd
+    if sub.shell_resolves_jput:
+        shell_cmd = (
+            f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
+            f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
+            f"fi; " + " ".join(shlex.quote(token) for token in logical_cmd)
+        )
+        return ["bash", "-lc", shell_cmd]
+    return logical_cmd
+
+
 def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
     staged_archives: List[Path] = []
     exit_code = 0
@@ -756,7 +773,7 @@ def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
                 staged_archives.append(plan.local_path)
 
         for plan in plans:
-            cmd = build_submit_command(plan, settings)
+            cmd = build_submit_invocation(plan, settings)
             rc = run_command(cmd)
             if rc != 0:
                 exit_code = rc
@@ -814,12 +831,36 @@ def resolve_submission_binary_path(jput_bin: str) -> Optional[str]:
     return None
 
 
+def shell_can_run_submission_binary(jput_bin: str) -> bool:
+    bash_path = shutil.which("bash")
+    if not bash_path:
+        return False
+
+    name_only = Path(expandvars(str(jput_bin))).expanduser().name or str(jput_bin)
+    probe_command = (
+        f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
+        f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
+        f"fi; type {shlex.quote(name_only)} >/dev/null 2>&1"
+    )
+    probe = subprocess.run(
+        [bash_path, "-lc", probe_command],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return probe.returncode == 0
+
+
 def validate_environment(settings: Settings) -> List[str]:
     warnings: List[str] = []
     sub = settings.submission
     resolved_jput = resolve_submission_binary_path(sub.jput_bin)
     settings.submission.resolved_jput_bin = resolved_jput
+    shell_resolves_jput = False
     if resolved_jput is None:
+        shell_resolves_jput = shell_can_run_submission_binary(sub.jput_bin)
+    settings.submission.shell_resolves_jput = shell_resolves_jput
+    if resolved_jput is None and not shell_resolves_jput:
         warnings.append(f"submission binary not found in PATH and not found as a file: {sub.jput_bin}")
 
     home = Path.home()
@@ -862,6 +903,8 @@ def main() -> int:
         print()
     if settings.submission.resolved_jput_bin:
         print(f"Submission bin: {settings.submission.resolved_jput_bin}")
+    elif settings.submission.shell_resolves_jput:
+        print(f"Submission bin: shell command ({settings.submission.jput_bin})")
     else:
         print(f"Submission bin: unresolved ({settings.submission.jput_bin})")
 
@@ -876,7 +919,7 @@ def main() -> int:
         print("Use --submit to create tarballs and invoke the configured submission command.")
         return 0
 
-    if settings.submission.resolved_jput_bin is None:
+    if settings.submission.resolved_jput_bin is None and not settings.submission.shell_resolves_jput:
         print(
             f"ERROR: submission binary could not be resolved for submit mode: {settings.submission.jput_bin}",
             file=sys.stderr,
