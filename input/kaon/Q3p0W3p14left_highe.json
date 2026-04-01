@@ -5,9 +5,9 @@
     "max_archive_size_gb": 20,
     "stage_dir": "/scratch/$USER",
     "submit": {
-      "jput_bin": "/usr/bin/jput",
+      "jput_bin": "/opt/jasmine/54.10.31/bin/jasmine-client",
       "command_mode": "src_dest",
-      "extra_args": []
+      "extra_args": ["jlab.jasmine.client.jput"]
     }
   },
   "jobs": [
