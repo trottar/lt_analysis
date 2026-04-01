@@ -78,6 +78,16 @@ That prints a replay dry-run plan. Nothing is submitted unless `-s` is used.
 - Default is `input/kaon`.
 - Useful for small test manifests stored separately from production.
 
+`-A <account>`
+
+- Override the SWIF/Slurm account passed through to the submit helper.
+- The current default helper account is `hallc`.
+
+`-P <partition>`
+
+- Override the SWIF/Slurm partition passed through to the submit helper.
+- The current default helper partition is `production`.
+
 ## Replay Mode
 
 Default mode:

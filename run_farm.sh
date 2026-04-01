@@ -16,8 +16,8 @@ REBALANCE_SCRIPT="${SCRIPT_DIR}/farm_env/rebalance_swif.py"
 WORKFLOW_PREFIX="kaonlt"
 DEFAULT_MANIFEST_DIR="${SCRIPT_DIR}/input/kaon"
 
-# Flag definitions (flags: h, s, r, a, n, c, w, m)
-while getopts 'hsrancw:m:' flag; do
+# Flag definitions (flags: h, s, r, a, n, c, w, m, A, P)
+while getopts 'hsrancw:m:A:P:' flag; do
     case "${flag}" in
         h)
         echo "--------------------------------------------------------------"
@@ -37,6 +37,8 @@ while getopts 'hsrancw:m:' flag; do
         echo "    -c, use applyCuts mode instead of replay mode"
         echo "    -w, override workflow name"
         echo "    -m, override manifest directory (default: input/kaon)"
+        echo "    -A, override SWIF/Slurm account (default from helper)"
+        echo "    -P, override SWIF/Slurm partition (default from helper)"
         echo
         echo "Notes..."
         echo "    Replay mode scans all matching JSON variants in the selected manifest"
@@ -73,6 +75,8 @@ while getopts 'hsrancw:m:' flag; do
         c) cuts_flag='true' ;;
         w) workflow_override="${OPTARG}" ;;
         m) manifest_dir="${OPTARG}" ;;
+        A) account_override="${OPTARG}" ;;
+        P) partition_override="${OPTARG}" ;;
         *)
         exit 1
         ;;
@@ -199,6 +203,12 @@ if [[ "${submit_flag}" = "true" ]]; then
 fi
 if [[ "${no_run_flag}" = "true" ]]; then
     submit_cmd+=(--no-run)
+fi
+if [[ -n "${account_override}" ]]; then
+    submit_cmd+=(--account "${account_override}")
+fi
+if [[ -n "${partition_override}" ]]; then
+    submit_cmd+=(--partition "${partition_override}")
 fi
 
 echo "Running: ${submit_cmd[*]}"
