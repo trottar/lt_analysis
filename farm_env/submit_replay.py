@@ -69,6 +69,7 @@ SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
 class JsonVariant:
     path: Path
     family: str
+    partition: str
     runs_files: Tuple[Path, ...]
     replay_destinations: Tuple[Path, ...]
 
@@ -132,10 +133,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--partition",
-        default=DEFAULT_PARTITION,
+        default=None,
         help=(
-            "SWIF2 partition / Slurm partition (default: production). "
-            "Use priority for small debug tests."
+            "SWIF2 partition / Slurm partition. Defaults to defaults.partition "
+            f"from the manifest, or {DEFAULT_PARTITION} when unspecified."
         ),
     )
     parser.add_argument(
@@ -332,12 +333,14 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
         data = load_json(path)
         runs_files = extract_runs_files(data)
         replay_destinations = extract_replay_destinations(data)
+        partition = extract_partition(data)
         if not runs_files or not replay_destinations:
             continue
         variants.append(
             JsonVariant(
                 path=path.resolve(),
                 family=path.stem,
+                partition=partition,
                 runs_files=tuple(runs_files),
                 replay_destinations=tuple(replay_destinations),
             )
@@ -378,6 +381,14 @@ def extract_replay_destinations(data: Dict) -> List[Path]:
         if isinstance(destination, str) and destination.strip():
             destinations.append(expand_path(destination))
     return destinations
+
+
+def extract_partition(data: Dict) -> str:
+    defaults = data.get("defaults", {})
+    if not isinstance(defaults, dict):
+        return DEFAULT_PARTITION
+    partition = str(defaults.get("partition", DEFAULT_PARTITION)).strip()
+    return partition or DEFAULT_PARTITION
 
 
 
@@ -434,6 +445,18 @@ def resolve_run_destinations(runs_to_destinations: Dict[int, Set[Path]]) -> Dict
             f"{joined}"
         )
     return resolved
+
+
+def resolve_family_partition(variants: Sequence[JsonVariant]) -> str:
+    partitions = sorted({variant.partition for variant in variants})
+    if not partitions:
+        return DEFAULT_PARTITION
+    if len(partitions) != 1:
+        raise ValueError(
+            "Matched replay manifests disagree on defaults.partition: "
+            + ", ".join(partitions)
+        )
+    return partitions[0]
 
 
 
@@ -796,6 +819,7 @@ def print_summary(
     runs_to_variants: Dict[int, Set[str]],
     plans: Sequence[RunPlan],
     workflow: str,
+    partition: str,
     args: argparse.Namespace,
     size_warnings: Sequence[str],
     existing_job_names: Set[str],
@@ -806,7 +830,10 @@ def print_summary(
     print(f"Replay script    : {expand_path(args.replay_script)}")
     print("Replay MSS copy  : SWIF -output")
     print(f"Account          : {args.account}")
-    print(f"Partition        : {args.partition}")
+    if args.partition:
+        print(f"Partition        : {partition} (CLI override)")
+    else:
+        print(f"Partition        : {partition} (manifest defaults.partition)")
     print(f"Runs discovered  : {len(runs_to_variants)} unique")
     print(f"Variants matched : {len(variants)}")
     print()
@@ -815,6 +842,7 @@ def print_summary(
     print("-" * 80)
     for variant in variants:
         print(f"* {variant.path.name}")
+        print(f"    partition: {variant.partition}")
         for runs_file in variant.runs_files:
             print(f"    runs_file: {runs_file}")
         for destination in variant.replay_destinations:
@@ -862,7 +890,7 @@ def print_summary(
             args.swif2_bin,
             workflow,
             args.account,
-            args.partition,
+            partition,
             str(expand_path(args.replay_script)),
             plan,
             family_prefix,
@@ -875,7 +903,7 @@ def print_summary(
                 args.swif2_bin,
                 workflow,
                 args.account,
-                args.partition,
+                partition,
                 plan,
                 family_prefix,
                 args,
@@ -892,6 +920,7 @@ def submit_jobs(
     family_prefix: str,
     plans: Sequence[RunPlan],
     existing_job_names: Set[str],
+    partition: str,
     args: argparse.Namespace,
 ) -> int:
     replay_script = str(expand_path(args.replay_script))
@@ -939,7 +968,7 @@ def submit_jobs(
                 args.swif2_bin,
                 workflow,
                 args.account,
-                args.partition,
+                partition,
                 replay_script,
                 plan,
                 family_prefix,
@@ -970,7 +999,7 @@ def submit_jobs(
             args.swif2_bin,
             workflow,
             args.account,
-            args.partition,
+            partition,
             plan,
             family_prefix,
             args,
@@ -1042,6 +1071,7 @@ def main() -> int:
     variants = discover_json_variants(json_dir, family_prefix, args.family_regex)
     if not variants:
         raise SystemExit(f"No JSON variants found for family prefix {family_prefix} in {json_dir}")
+    partition = args.partition or resolve_family_partition(variants)
 
     runs_to_variants, runs_to_manifest, runs_to_destination_sets = collect_runs(variants)
     if not runs_to_variants:
@@ -1065,6 +1095,7 @@ def main() -> int:
         runs_to_variants,
         plans,
         workflow,
+        partition,
         args,
         size_warnings,
         existing_job_names,
@@ -1081,7 +1112,7 @@ def main() -> int:
         print("Dry run only. Use --submit to create/update the workflow and add jobs.")
         return 0
 
-    return submit_jobs(workflow, family_prefix, plans, existing_job_names, args)
+    return submit_jobs(workflow, family_prefix, plans, existing_job_names, partition, args)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 {
   "defaults": {
+    "partition": "priority",
     "min_size_mb": 200,
     "target_archive_size_gb": 4,
     "max_archive_size_gb": 20,

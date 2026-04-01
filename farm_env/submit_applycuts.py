@@ -78,6 +78,7 @@ class JsonVariant:
     phi: str
     epsilon: str
     target: str
+    partition: str
     runs_files: Tuple[Path, ...]
     replay_destinations: Tuple[Path, ...]
 
@@ -140,8 +141,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--partition",
-        default=DEFAULT_PARTITION,
-        help="SWIF2 partition / Slurm partition (default: production).",
+        default=None,
+        help=(
+            "SWIF2 partition / Slurm partition. Defaults to defaults.partition "
+            f"from the manifest, or {DEFAULT_PARTITION} when unspecified."
+        ),
     )
     parser.add_argument(
         "--max-concurrent",
@@ -277,6 +281,14 @@ def load_json(path: Path) -> Dict:
         return json.load(handle)
 
 
+def extract_partition(data: Dict) -> str:
+    defaults = data.get("defaults", {})
+    if not isinstance(defaults, dict):
+        return DEFAULT_PARTITION
+    partition = str(defaults.get("partition", DEFAULT_PARTITION)).strip()
+    return partition or DEFAULT_PARTITION
+
+
 def extract_replay_destinations(data: Dict) -> List[Path]:
     jobs = data.get("jobs", [])
     destinations: List[Path] = []
@@ -331,6 +343,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
         if parsed is None:
             continue
         data = load_json(path)
+        partition = extract_partition(data)
         runs_files = extract_runs_files(data)
         replay_destinations = extract_replay_destinations(data)
         if not runs_files or not replay_destinations:
@@ -344,6 +357,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
                 phi=parsed["phi"],
                 epsilon=parsed["epsilon"],
                 target=parsed["target"],
+                partition=partition,
                 runs_files=tuple(runs_files),
                 replay_destinations=tuple(replay_destinations),
             )
@@ -502,6 +516,10 @@ def workflow_name(args: argparse.Namespace, family_prefix: str) -> str:
         return safe_name(args.workflow_name)
     user = os.environ.get("USER", "user")
     return safe_name(f"{args.workflow_prefix}_{family_prefix}_applycuts_{user}")
+
+
+def effective_partition(variant: JsonVariant, args: argparse.Namespace) -> str:
+    return args.partition or variant.partition
 
 
 def run_command(cmd: Sequence[str], capture: bool = False) -> subprocess.CompletedProcess:
@@ -686,7 +704,10 @@ def print_summary(
     print(f"Replay cache root: {paths.cachepath}")
     print(f"Skim source      : {paths.skim_source_dir}")
     print(f"Account          : {args.account}")
-    print(f"Partition        : {args.partition}")
+    if args.partition:
+        print(f"Partition        : {args.partition} (CLI override)")
+    else:
+        print("Partition        : per-manifest defaults.partition")
     print(f"Variants matched : {len(variants)}")
     print(f"Runs inspected   : {len(plans)}")
     print()
@@ -696,6 +717,7 @@ def print_summary(
     for variant in variants:
         print(f"* {variant.path.name}")
         print(f"    phi={variant.phi} epsilon={variant.epsilon} target={variant.target}")
+        print(f"    partition: {variant.partition}")
         for runs_file in variant.runs_files:
             print(f"    runs_file: {runs_file}")
         for destination in variant.replay_destinations:
@@ -730,7 +752,7 @@ def print_summary(
                 args.swif2_bin,
                 workflow,
                 args.account,
-                args.partition,
+                effective_partition(plan.variant, args),
                 applycuts_script,
                 plan,
                 family_prefix,
@@ -744,7 +766,7 @@ def print_summary(
                     args.swif2_bin,
                     workflow,
                     args.account,
-                    args.partition,
+                    effective_partition(plan.variant, args),
                     plan,
                     family_prefix,
                     args,
@@ -805,7 +827,7 @@ def submit_jobs(
                 args.swif2_bin,
                 workflow,
                 args.account,
-                args.partition,
+                effective_partition(plan.variant, args),
                 applycuts_script,
                 plan,
                 family_prefix,
@@ -837,7 +859,7 @@ def submit_jobs(
             args.swif2_bin,
             workflow,
             args.account,
-            args.partition,
+            effective_partition(plan.variant, args),
             plan,
             family_prefix,
             args,
