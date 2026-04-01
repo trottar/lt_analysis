@@ -18,6 +18,7 @@ if [[ -z "$1" ]]; then
     echo "Please provide a run number as input"
 fi
 MAXEVENTS=-1
+JOB_LAUNCH_DIR="$(pwd)"
 
 # Runs a repo-local ltsep wrapper so batch jobs do not depend on upstream
 # getPathDict.py calling os.getlogin() on worker nodes.
@@ -74,6 +75,8 @@ SCALER_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_coin_s
 FULL_REPLAY_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 BCM_CALIB_DIR="${REPLAYPATH}/CALIBRATION/bcm_current_map"
+FULL_REPLAY_OUTPUT_FILE="${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root"
+SWIF_OUTPUT_DIR="${JOB_LAUNCH_DIR}/swif_output"
 
 # Source farm environment when available.
 if [[ -f /site/12gev_phys/softenv.sh ]]; then
@@ -154,11 +157,26 @@ fi
 sleep 3
 
 if [ ! -f "${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root" ]; then
-			"${REPLAYPATH}/hcana" -l -q -b "${FULL_REPLAY_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
-			replay_rc=${PIPESTATUS[0]}
-			if [ "${replay_rc}" -ne 0 ]; then
-			    echo "ERROR: full replay failed for run ${RUNNUMBER}"
-			    exit "${replay_rc}"
-			fi
+				"${REPLAYPATH}/hcana" -l -q -b "${FULL_REPLAY_MACRO_FILE}(${RUNNUMBER},${MAXEVENTS})" |& tee $UTILPATH/REPORT_OUTPUT/Analysis/${ANATYPE}LT/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report
+				replay_rc=${PIPESTATUS[0]}
+				if [ "${replay_rc}" -ne 0 ]; then
+				    echo "ERROR: full replay failed for run ${RUNNUMBER}"
+				    exit "${replay_rc}"
+				fi
 else echo "Replayfile already found for this run in ${REPLAY_OUTPUT_DIR}/ - Skipping replay step"
 fi
+
+if [ ! -f "${FULL_REPLAY_OUTPUT_FILE}" ]; then
+    echo "ERROR: replay output file not found at ${FULL_REPLAY_OUTPUT_FILE}"
+    exit 1
+fi
+
+mkdir -p "${SWIF_OUTPUT_DIR}"
+cp -f "${FULL_REPLAY_OUTPUT_FILE}" "${SWIF_OUTPUT_DIR}/"
+copy_rc=$?
+if [ "${copy_rc}" -ne 0 ]; then
+    echo "ERROR: failed to stage replay output into ${SWIF_OUTPUT_DIR}"
+    exit "${copy_rc}"
+fi
+
+echo "Staged SWIF output copy at ${SWIF_OUTPUT_DIR}/$(basename "${FULL_REPLAY_OUTPUT_FILE}")"

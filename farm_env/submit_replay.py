@@ -16,9 +16,8 @@ Behavior:
   --size-glob-template values, the script estimates the input size for a run by
   summing matching file sizes and applies a tiered heuristic. Otherwise it falls
   back to conservative Hall-C replay defaults.
-- Tape upload is a separate interactive-ifarm step via
-  `farm_env/jasmine_put_from_manifest.py`; this submitter no longer creates
-  dependent Jasmine worker jobs.
+- Replay output is registered with SWIF `-output` and transferred to MSS after
+  the job finishes.
 
 Dry-run is the default. Use --submit to create/modify the workflow and add jobs.
 """
@@ -60,6 +59,7 @@ DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
 DEFAULT_RAW_CACHE_GLOB_TEMPLATE = "/cache/hallc/spring17/raw/coin_all_{run5}.dat"
 DEFAULT_RAW_MSS_TEMPLATE = "/mss/hallc/spring17/raw/coin_all_{run5}.dat"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
+SWIF_OUTPUT_DIR_NAME = "swif_output"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -70,6 +70,7 @@ class JsonVariant:
     path: Path
     family: str
     runs_files: Tuple[Path, ...]
+    replay_destinations: Tuple[Path, ...]
 
 
 @dataclass(frozen=True)
@@ -89,6 +90,7 @@ class RunPlan:
     variants: Tuple[str, ...]
     resources: ResourceRequest
     representative_manifest: Path
+    replay_destination: Path
     cache_file: Optional[Path]
     cache_ready: bool
     cache_reason: str
@@ -329,13 +331,15 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
             continue
         data = load_json(path)
         runs_files = extract_runs_files(data)
-        if not runs_files:
+        replay_destinations = extract_replay_destinations(data)
+        if not runs_files or not replay_destinations:
             continue
         variants.append(
             JsonVariant(
                 path=path.resolve(),
                 family=path.stem,
                 runs_files=tuple(runs_files),
+                replay_destinations=tuple(replay_destinations),
             )
         )
 
@@ -362,6 +366,20 @@ def extract_runs_files(data: Dict) -> List[Path]:
     return runs_files
 
 
+def extract_replay_destinations(data: Dict) -> List[Path]:
+    jobs = data.get("jobs", [])
+    destinations: List[Path] = []
+    if not isinstance(jobs, list):
+        return destinations
+    for entry in jobs:
+        if not isinstance(entry, dict):
+            continue
+        destination = entry.get("destination")
+        if isinstance(destination, str) and destination.strip():
+            destinations.append(expand_path(destination))
+    return destinations
+
+
 
 def read_runs_file(path: Path) -> List[int]:
     if not path.exists():
@@ -381,9 +399,12 @@ def read_runs_file(path: Path) -> List[int]:
 
 
 
-def collect_runs(variants: Sequence[JsonVariant]) -> Tuple[Dict[int, Set[str]], Dict[int, Path]]:
+def collect_runs(
+    variants: Sequence[JsonVariant],
+) -> Tuple[Dict[int, Set[str]], Dict[int, Path], Dict[int, Set[Path]]]:
     runs_to_variants: Dict[int, Set[str]] = {}
     runs_to_manifest: Dict[int, Path] = {}
+    runs_to_destinations: Dict[int, Set[Path]] = {}
     for variant in variants:
         for runs_file in variant.runs_files:
             runs = read_runs_file(runs_file)
@@ -391,7 +412,28 @@ def collect_runs(variants: Sequence[JsonVariant]) -> Tuple[Dict[int, Set[str]], 
                 runs_to_variants.setdefault(run, set()).add(variant.family)
                 if run not in runs_to_manifest:
                     runs_to_manifest[run] = variant.path
-    return runs_to_variants, runs_to_manifest
+                runs_to_destinations.setdefault(run, set()).update(variant.replay_destinations)
+    return runs_to_variants, runs_to_manifest, runs_to_destinations
+
+
+def resolve_run_destinations(runs_to_destinations: Dict[int, Set[Path]]) -> Dict[int, Path]:
+    resolved: Dict[int, Path] = {}
+    conflicts: List[str] = []
+    for run, destinations in sorted(runs_to_destinations.items()):
+        unique_destinations = sorted(set(destinations))
+        if len(unique_destinations) != 1:
+            conflicts.append(
+                f"run {run}: " + ", ".join(str(destination) for destination in unique_destinations)
+            )
+            continue
+        resolved[run] = unique_destinations[0]
+    if conflicts:
+        joined = "\n".join(conflicts)
+        raise ValueError(
+            "Replay manifests disagree on the MSS destination for one or more runs.\n"
+            f"{joined}"
+        )
+    return resolved
 
 
 
@@ -507,6 +549,7 @@ def build_run_plans(
     family_prefix: str,
     runs_to_variants: Dict[int, Set[str]],
     runs_to_manifest: Dict[int, Path],
+    runs_to_destinations: Dict[int, Path],
     args: argparse.Namespace,
 ) -> Tuple[List[RunPlan], List[str]]:
     warnings: List[str] = []
@@ -547,6 +590,7 @@ def build_run_plans(
                 variants=tuple(sorted(runs_to_variants[run])),
                 resources=resources,
                 representative_manifest=runs_to_manifest[run],
+                replay_destination=runs_to_destinations[run],
                 cache_file=cache_file,
                 cache_ready=cache_ready,
                 cache_reason=cache_reason,
@@ -628,7 +672,7 @@ def build_add_job_command(
     replay_script: str,
     plan: RunPlan,
     family_prefix: str,
-) -> List[str]:
+    ) -> List[str]:
     cmd = [
         swif2_bin,
         "add-job",
@@ -656,10 +700,20 @@ def build_add_job_command(
         "-tag",
         "variant_count",
         str(len(plan.variants)),
+        "-output",
+        f"match:{SWIF_OUTPUT_DIR_NAME}/*_coin_replay_production_{plan.run}_-1.root",
+        to_mss_output_dir_uri(plan.replay_destination),
         replay_script,
         str(plan.run),
     ]
     return cmd
+
+
+def to_mss_output_dir_uri(destination: Path) -> str:
+    text = str(destination).rstrip("/")
+    if text.startswith("mss:"):
+        return text if text.endswith("/") else text + "/"
+    return f"mss:{text}/"
 
 
 def jasmine_job_name(plan: RunPlan) -> str:
@@ -750,7 +804,7 @@ def print_summary(
     print(f"Manifest directory: {expand_path(args.manifest_dir)}")
     print(f"Workflow         : {workflow}")
     print(f"Replay script    : {expand_path(args.replay_script)}")
-    print("Jasmine uploads  : manual ifarm step")
+    print("Replay MSS copy  : SWIF -output")
     print(f"Account          : {args.account}")
     print(f"Partition        : {args.partition}")
     print(f"Runs discovered  : {len(runs_to_variants)} unique")
@@ -763,6 +817,8 @@ def print_summary(
         print(f"* {variant.path.name}")
         for runs_file in variant.runs_files:
             print(f"    runs_file: {runs_file}")
+        for destination in variant.replay_destinations:
+            print(f"    replay_mss_destination: {destination}")
     print()
 
     duplicate_runs = {run: fams for run, fams in runs_to_variants.items() if len(fams) > 1}
@@ -801,6 +857,7 @@ def print_summary(
             f"heuristic={plan.resources.reason}"
         )
         print(f"         variants: {', '.join(plan.variants)}")
+        print(f"         replay_mss_destination: {plan.replay_destination}")
         cmd = build_add_job_command(
             args.swif2_bin,
             workflow,
@@ -986,11 +1043,18 @@ def main() -> int:
     if not variants:
         raise SystemExit(f"No JSON variants found for family prefix {family_prefix} in {json_dir}")
 
-    runs_to_variants, runs_to_manifest = collect_runs(variants)
+    runs_to_variants, runs_to_manifest, runs_to_destination_sets = collect_runs(variants)
     if not runs_to_variants:
         raise SystemExit("No runs were discovered from the matched JSON files")
+    runs_to_destinations = resolve_run_destinations(runs_to_destination_sets)
 
-    plans, size_warnings = build_run_plans(family_prefix, runs_to_variants, runs_to_manifest, args)
+    plans, size_warnings = build_run_plans(
+        family_prefix,
+        runs_to_variants,
+        runs_to_manifest,
+        runs_to_destinations,
+        args,
+    )
     workflow = workflow_name(args, family_prefix)
 
     existing_job_names = get_existing_job_names(args.swif2_bin, workflow) if swif_status_exists(args.swif2_bin, workflow) else set()

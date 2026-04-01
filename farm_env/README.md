@@ -118,13 +118,11 @@ This calls `farm_env/submit_replay.py`, which:
 - checks whether each run's raw `coin_all_*.dat` file is already present in cache
 - requests cache staging for missing raw files before replay submission
 - submits one replay job per unique run
+- registers the replay ROOT output with SWIF `-output` so it is copied to MSS after job completion
 
 Runs whose raw data are not yet cache-ready are not submitted in that pass, which
 prevents replay jobs from failing immediately when the input file is still on
 tape.
-
-Replay uploads to MSS are run separately from an interactive ifarm session with
-`farm_env/jasmine_put_from_manifest.py`.
 
 Default workflow name:
 
