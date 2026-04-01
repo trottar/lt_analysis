@@ -125,6 +125,7 @@ class JobConfig:
 @dataclass
 class SubmissionConfig:
     jput_bin: str
+    resolved_jput_bin: Optional[str]
     command_mode: str
     command_template: Optional[List[str]]
     extra_args: List[str]
@@ -311,6 +312,7 @@ def resolve_submission(defaults: Dict) -> SubmissionConfig:
 
     return SubmissionConfig(
         jput_bin=str(submit_cfg.get("jput_bin", DEFAULT_JPUT)),
+        resolved_jput_bin=None,
         command_mode=command_mode,
         command_template=command_template,
         extra_args=[str(x) for x in extra_args],
@@ -658,12 +660,13 @@ def maybe_check_existing_stub(plan: PlannedPut) -> bool:
 
 def build_submit_command(plan: PlannedPut, settings: Settings) -> List[str]:
     sub = settings.submission
+    jput_bin = sub.resolved_jput_bin or sub.jput_bin
     if sub.command_mode == "src_dest":
-        return [sub.jput_bin, *sub.extra_args, str(plan.local_path), with_trailing_slash(plan.mss_dir)]
+        return [jput_bin, *sub.extra_args, str(plan.local_path), with_trailing_slash(plan.mss_dir)]
 
     if sub.command_mode == "template":
         replacements = {
-            "{jput_bin}": sub.jput_bin,
+            "{jput_bin}": jput_bin,
             "{src}": str(plan.local_path),
             "{dest}": with_trailing_slash(plan.mss_dir),
             "{dest_stub}": str(plan.destination_stub),
@@ -769,10 +772,43 @@ def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
 
 
 
+def resolve_submission_binary_path(jput_bin: str) -> Optional[str]:
+    expanded = expandvars(str(jput_bin))
+    candidate = Path(expanded).expanduser()
+
+    if candidate.exists():
+        return str(candidate.resolve())
+
+    direct = shutil.which(expanded)
+    if direct:
+        return direct
+
+    name_only = candidate.name or expanded
+    fallback = shutil.which(name_only)
+    if fallback:
+        return fallback
+
+    bash_path = shutil.which("bash")
+    if bash_path:
+        probe = subprocess.run(
+            [bash_path, "-lc", f"command -v {shlex.quote(name_only)}"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        resolved = probe.stdout.strip().splitlines()
+        if probe.returncode == 0 and resolved:
+            return resolved[0].strip()
+
+    return None
+
+
 def validate_environment(settings: Settings) -> List[str]:
     warnings: List[str] = []
     sub = settings.submission
-    if shutil.which(Path(sub.jput_bin).name) is None and not Path(sub.jput_bin).exists():
+    resolved_jput = resolve_submission_binary_path(sub.jput_bin)
+    settings.submission.resolved_jput_bin = resolved_jput
+    if resolved_jput is None:
         warnings.append(f"submission binary not found in PATH and not found as a file: {sub.jput_bin}")
 
     home = Path.home()
@@ -813,6 +849,10 @@ def main() -> int:
         for msg in warnings:
             print(f"* {msg}")
         print()
+    if settings.submission.resolved_jput_bin:
+        print(f"Submission bin: {settings.submission.resolved_jput_bin}")
+    else:
+        print(f"Submission bin: unresolved ({settings.submission.jput_bin})")
 
     all_plans: List[PlannedPut] = []
     for job in jobs:
@@ -824,6 +864,13 @@ def main() -> int:
         print("Dry run only. No submission commands were executed.")
         print("Use --submit to create tarballs and invoke the configured submission command.")
         return 0
+
+    if settings.submission.resolved_jput_bin is None:
+        print(
+            f"ERROR: submission binary could not be resolved for submit mode: {settings.submission.jput_bin}",
+            file=sys.stderr,
+        )
+        return 2
 
     return submit(all_plans, settings)
 
