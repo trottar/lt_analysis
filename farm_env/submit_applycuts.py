@@ -41,6 +41,7 @@ REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_MANIFEST_DIR = str(REPO_ROOT / "input" / "kaon")
 DEFAULT_APPLYCUTS_SCRIPT = str(REPO_ROOT / "applyCuts_Prod.sh")
 DEFAULT_JASMINE_SCRIPT = str(REPO_ROOT / "farm_env" / "jasmine_put_from_manifest.py")
+DEFAULT_SOFTENV_WRAPPER = str(REPO_ROOT / "farm_env" / "run_with_softenv.sh")
 DEFAULT_WORKFLOW_PREFIX = "kaonlt"
 DEFAULT_ACCOUNT = "hallc"
 DEFAULT_PARTITION = "production"
@@ -55,8 +56,6 @@ DEFAULT_JASMINE_RAM = "4g"
 DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
-DEFAULT_SOFTENV = "/site/12gev_phys/softenv.sh"
-DEFAULT_SOFTENV_VERSION = "2.3"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
@@ -610,28 +609,6 @@ def jasmine_stage_dir(args: argparse.Namespace, plan: RunPlan) -> str:
     return str(Path(os.path.expandvars(args.jasmine_stage_root)).expanduser() / jasmine_job_name(plan))
 
 
-def build_jasmine_shell_command(plan: RunPlan, args: argparse.Namespace) -> str:
-    python_cmd = [
-        args.python_bin,
-        str(expand_path(args.jasmine_script)),
-        "--manifest-path",
-        str(plan.variant.path),
-        "--run",
-        str(plan.run),
-        "--product-kind",
-        "skim",
-        "--stage-dir",
-        jasmine_stage_dir(args, plan),
-        "--submit",
-    ]
-    quoted_python = " ".join(shlex.quote(str(token)) for token in python_cmd)
-    return (
-        f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
-        f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
-        f"fi; {quoted_python}"
-    )
-
-
 def build_jasmine_add_job_command(
     swif2_bin: str,
     workflow: str,
@@ -641,6 +618,7 @@ def build_jasmine_add_job_command(
     family_prefix: str,
     args: argparse.Namespace,
 ) -> List[str]:
+    softenv_wrapper = str(expand_path(DEFAULT_SOFTENV_WRAPPER))
     return [
         swif2_bin,
         "add-job",
@@ -673,9 +651,18 @@ def build_jasmine_add_job_command(
         "jasmine_skim",
         "-antecedent",
         plan.job_name,
-        "bash",
-        "-lc",
-        build_jasmine_shell_command(plan, args),
+        softenv_wrapper,
+        args.python_bin,
+        str(expand_path(args.jasmine_script)),
+        "--manifest-path",
+        str(plan.variant.path),
+        "--run",
+        str(plan.run),
+        "--product-kind",
+        "skim",
+        "--stage-dir",
+        jasmine_stage_dir(args, plan),
+        "--submit",
     ]
 
 
@@ -899,6 +886,14 @@ def validate_jasmine_script(path_text: str) -> None:
         raise FileNotFoundError(f"Jasmine script does not exist: {path}")
 
 
+def validate_softenv_wrapper(path_text: str) -> None:
+    path = expand_path(path_text)
+    if not path.exists():
+        raise FileNotFoundError(f"Softenv wrapper does not exist: {path}")
+    if not os.access(path, os.X_OK):
+        raise PermissionError(f"Softenv wrapper is not executable: {path}")
+
+
 def main() -> int:
     args = parse_args()
     family_prefix = normalize_family(args.q2, args.w)
@@ -906,6 +901,7 @@ def main() -> int:
     validate_applycuts_script(args.applycuts_script)
     if args.auto_jasmine:
         validate_jasmine_script(args.jasmine_script)
+        validate_softenv_wrapper(DEFAULT_SOFTENV_WRAPPER)
     paths = resolve_ltsep_paths(__file__)
 
     variants = discover_json_variants(json_dir, family_prefix, args.family_regex)
