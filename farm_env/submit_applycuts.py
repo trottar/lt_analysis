@@ -55,6 +55,8 @@ DEFAULT_JASMINE_RAM = "4g"
 DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
+DEFAULT_SOFTENV = "/site/12gev_phys/softenv.sh"
+DEFAULT_SOFTENV_VERSION = "2.3"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
@@ -608,6 +610,28 @@ def jasmine_stage_dir(args: argparse.Namespace, plan: RunPlan) -> str:
     return str(Path(os.path.expandvars(args.jasmine_stage_root)).expanduser() / jasmine_job_name(plan))
 
 
+def build_jasmine_shell_command(plan: RunPlan, args: argparse.Namespace) -> str:
+    python_cmd = [
+        args.python_bin,
+        str(expand_path(args.jasmine_script)),
+        "--manifest-path",
+        str(plan.variant.path),
+        "--run",
+        str(plan.run),
+        "--product-kind",
+        "skim",
+        "--stage-dir",
+        jasmine_stage_dir(args, plan),
+        "--submit",
+    ]
+    quoted_python = " ".join(shlex.quote(str(token)) for token in python_cmd)
+    return (
+        f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
+        f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
+        f"fi; {quoted_python}"
+    )
+
+
 def build_jasmine_add_job_command(
     swif2_bin: str,
     workflow: str,
@@ -617,7 +641,6 @@ def build_jasmine_add_job_command(
     family_prefix: str,
     args: argparse.Namespace,
 ) -> List[str]:
-    jasmine_script = str(expand_path(args.jasmine_script))
     return [
         swif2_bin,
         "add-job",
@@ -650,17 +673,9 @@ def build_jasmine_add_job_command(
         "jasmine_skim",
         "-antecedent",
         plan.job_name,
-        args.python_bin,
-        jasmine_script,
-        "--manifest-path",
-        str(plan.variant.path),
-        "--run",
-        str(plan.run),
-        "--product-kind",
-        "skim",
-        "--stage-dir",
-        jasmine_stage_dir(args, plan),
-        "--submit",
+        "bash",
+        "-lc",
+        build_jasmine_shell_command(plan, args),
     ]
 
 

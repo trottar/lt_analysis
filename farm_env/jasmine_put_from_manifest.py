@@ -46,6 +46,8 @@ DEFAULT_TARGET_ARCHIVE_SIZE_GB = 4
 DEFAULT_MAX_ARCHIVE_SIZE_GB = 20
 DEFAULT_STAGE_DIR = "/scratch/$USER/jasmine_stage"
 DEFAULT_JPUT = shutil.which("jput") or "jput"
+DEFAULT_SOFTENV = "/site/12gev_phys/softenv.sh"
+DEFAULT_SOFTENV_VERSION = "2.3"
 DEFAULT_RUN_MATCH_REGEX_TEMPLATE = r"(^|[^0-9]){run}([^0-9]|$)"
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -790,15 +792,24 @@ def resolve_submission_binary_path(jput_bin: str) -> Optional[str]:
 
     bash_path = shutil.which("bash")
     if bash_path:
-        probe = subprocess.run(
-            [bash_path, "-lc", f"command -v {shlex.quote(name_only)}"],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        resolved = probe.stdout.strip().splitlines()
-        if probe.returncode == 0 and resolved:
-            return resolved[0].strip()
+        probe_commands = [
+            f"command -v {shlex.quote(name_only)}",
+            (
+                f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
+                f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
+                f"fi; command -v {shlex.quote(name_only)}"
+            ),
+        ]
+        for probe_command in probe_commands:
+            probe = subprocess.run(
+                [bash_path, "-lc", probe_command],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            resolved = probe.stdout.strip().splitlines()
+            if probe.returncode == 0 and resolved:
+                return resolved[0].strip()
 
     return None
 
