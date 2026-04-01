@@ -127,8 +127,6 @@ class JobConfig:
 @dataclass
 class SubmissionConfig:
     jput_bin: str
-    resolved_jput_bin: Optional[str]
-    shell_resolves_jput: bool
     command_mode: str
     command_template: Optional[List[str]]
     extra_args: List[str]
@@ -315,8 +313,6 @@ def resolve_submission(defaults: Dict) -> SubmissionConfig:
 
     return SubmissionConfig(
         jput_bin=str(submit_cfg.get("jput_bin", DEFAULT_JPUT)),
-        resolved_jput_bin=None,
-        shell_resolves_jput=False,
         command_mode=command_mode,
         command_template=command_template,
         extra_args=[str(x) for x in extra_args],
@@ -664,7 +660,7 @@ def maybe_check_existing_stub(plan: PlannedPut) -> bool:
 
 def build_submit_command(plan: PlannedPut, settings: Settings) -> List[str]:
     sub = settings.submission
-    jput_bin = sub.resolved_jput_bin or sub.jput_bin
+    jput_bin = sub.jput_bin
     if sub.command_mode == "src_dest":
         return [jput_bin, *sub.extra_args, str(plan.local_path), with_trailing_slash(plan.mss_dir)]
 
@@ -730,16 +726,24 @@ def print_plan(plans: Sequence[PlannedPut], settings: Settings) -> None:
 
 
 
-def run_command(cmd: Sequence[str]) -> int:
+def run_command(cmd: Sequence[str] | str) -> int:
     print("Executing:")
-    print("  " + " ".join(shlex.quote(x) for x in cmd))
+    if isinstance(cmd, str):
+        print("  " + cmd)
+        popen_cmd = cmd
+        use_shell = True
+    else:
+        print("  " + " ".join(shlex.quote(x) for x in cmd))
+        popen_cmd = list(cmd)
+        use_shell = False
     print()
     proc = subprocess.Popen(
-        list(cmd),
+        popen_cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
+        shell=use_shell,
     )
     assert proc.stdout is not None
     for line in proc.stdout:
@@ -749,18 +753,7 @@ def run_command(cmd: Sequence[str]) -> int:
 
 
 def build_submit_invocation(plan: PlannedPut, settings: Settings) -> List[str]:
-    logical_cmd = build_submit_command(plan, settings)
-    sub = settings.submission
-    if sub.resolved_jput_bin is not None:
-        return logical_cmd
-    if sub.shell_resolves_jput:
-        shell_cmd = (
-            f"if [[ -f {shlex.quote(DEFAULT_SOFTENV)} ]]; then "
-            f"source {shlex.quote(DEFAULT_SOFTENV)} {shlex.quote(DEFAULT_SOFTENV_VERSION)} >/dev/null 2>&1; "
-            f"fi; " + " ".join(shlex.quote(token) for token in logical_cmd)
-        )
-        return ["bash", "-lc", shell_cmd]
-    return logical_cmd
+    return " ".join(shlex.quote(token) for token in build_submit_command(plan, settings))
 
 
 def submit(plans: Sequence[PlannedPut], settings: Settings) -> int:
@@ -855,11 +848,7 @@ def validate_environment(settings: Settings) -> List[str]:
     warnings: List[str] = []
     sub = settings.submission
     resolved_jput = resolve_submission_binary_path(sub.jput_bin)
-    settings.submission.resolved_jput_bin = resolved_jput
-    shell_resolves_jput = False
-    if resolved_jput is None:
-        shell_resolves_jput = shell_can_run_submission_binary(sub.jput_bin)
-    settings.submission.shell_resolves_jput = shell_resolves_jput
+    shell_resolves_jput = shell_can_run_submission_binary(sub.jput_bin) if resolved_jput is None else False
     if resolved_jput is None and not shell_resolves_jput:
         warnings.append(f"submission binary not found in PATH and not found as a file: {sub.jput_bin}")
 
@@ -901,12 +890,10 @@ def main() -> int:
         for msg in warnings:
             print(f"* {msg}")
         print()
-    if settings.submission.resolved_jput_bin:
-        print(f"Submission bin: {settings.submission.resolved_jput_bin}")
-    elif settings.submission.shell_resolves_jput:
-        print(f"Submission bin: shell command ({settings.submission.jput_bin})")
+    if resolve_submission_binary_path(settings.submission.jput_bin):
+        print(f"Submission bin: {settings.submission.jput_bin}")
     else:
-        print(f"Submission bin: unresolved ({settings.submission.jput_bin})")
+        print(f"Submission bin: shell command ({settings.submission.jput_bin})")
 
     all_plans: List[PlannedPut] = []
     for job in jobs:
@@ -918,13 +905,6 @@ def main() -> int:
         print("Dry run only. No submission commands were executed.")
         print("Use --submit to create tarballs and invoke the configured submission command.")
         return 0
-
-    if settings.submission.resolved_jput_bin is None and not settings.submission.shell_resolves_jput:
-        print(
-            f"ERROR: submission binary could not be resolved for submit mode: {settings.submission.jput_bin}",
-            file=sys.stderr,
-        )
-        return 2
 
     return submit(all_plans, settings)
 
