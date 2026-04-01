@@ -76,7 +76,7 @@ FULL_REPLAY_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATY
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 BCM_CALIB_DIR="${REPLAYPATH}/CALIBRATION/bcm_current_map"
 FULL_REPLAY_OUTPUT_FILE="${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root"
-SWIF_OUTPUT_DIR="${JOB_LAUNCH_DIR}/swif_output"
+SWIF_OUTPUT_FILE="${JOB_LAUNCH_DIR}/$(basename "${FULL_REPLAY_OUTPUT_FILE}")"
 
 # Source farm environment when available.
 if [[ -f /site/12gev_phys/softenv.sh ]]; then
@@ -171,12 +171,11 @@ if [ ! -f "${FULL_REPLAY_OUTPUT_FILE}" ]; then
     exit 1
 fi
 
-mkdir -p "${SWIF_OUTPUT_DIR}"
-cp -f "${FULL_REPLAY_OUTPUT_FILE}" "${SWIF_OUTPUT_DIR}/"
+cp -f "${FULL_REPLAY_OUTPUT_FILE}" "${SWIF_OUTPUT_FILE}"
 copy_rc=$?
 if [ "${copy_rc}" -ne 0 ]; then
-    echo "ERROR: failed to stage replay output into ${SWIF_OUTPUT_DIR}"
+    echo "ERROR: failed to stage replay output into ${SWIF_OUTPUT_FILE}"
     exit "${copy_rc}"
 fi
 
-echo "Staged SWIF output copy at ${SWIF_OUTPUT_DIR}/$(basename "${FULL_REPLAY_OUTPUT_FILE}")"
+echo "Staged SWIF output copy at ${SWIF_OUTPUT_FILE}"

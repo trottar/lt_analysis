@@ -59,7 +59,6 @@ DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
 DEFAULT_RAW_CACHE_GLOB_TEMPLATE = "/cache/hallc/spring17/raw/coin_all_{run5}.dat"
 DEFAULT_RAW_MSS_TEMPLATE = "/mss/hallc/spring17/raw/coin_all_{run5}.dat"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
-SWIF_OUTPUT_DIR_NAME = "swif_output"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -315,6 +314,10 @@ def render_template(template: str, run: int, extra: Optional[Dict[str, str]] = N
     if extra:
         values.update(extra)
     return os.path.expandvars(template).format(**values)
+
+
+def replay_output_basename(run: int) -> str:
+    return f"Kaon_coin_replay_production_{run}_-1.root"
 
 
 def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Optional[str]) -> List[JsonVariant]:
@@ -695,7 +698,8 @@ def build_add_job_command(
     replay_script: str,
     plan: RunPlan,
     family_prefix: str,
-    ) -> List[str]:
+) -> List[str]:
+    replay_output_name = replay_output_basename(plan.run)
     cmd = [
         swif2_bin,
         "add-job",
@@ -724,8 +728,8 @@ def build_add_job_command(
         "variant_count",
         str(len(plan.variants)),
         "-output",
-        f"match:{SWIF_OUTPUT_DIR_NAME}/*_coin_replay_production_{plan.run}_-1.root",
-        to_mss_output_dir_uri(plan.replay_destination),
+        replay_output_name,
+        to_mss_output_file_uri(plan.replay_destination / replay_output_name),
         replay_script,
         str(plan.run),
     ]
@@ -737,6 +741,13 @@ def to_mss_output_dir_uri(destination: Path) -> str:
     if text.startswith("mss:"):
         return text if text.endswith("/") else text + "/"
     return f"mss:{text}/"
+
+
+def to_mss_output_file_uri(destination: Path) -> str:
+    text = str(destination)
+    if text.startswith("mss:"):
+        return text
+    return f"mss:{text}"
 
 
 def jasmine_job_name(plan: RunPlan) -> str:
