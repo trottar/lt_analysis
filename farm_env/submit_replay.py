@@ -96,7 +96,8 @@ class RunPlan:
     cache_file: Optional[Path]
     cache_ready: bool
     cache_reason: str
-    existing_mss_outputs: Tuple[Path, ...] = ()
+    replay_output_exists: bool = False
+    report_output_exists: bool = False
     cache_request_command: Tuple[str, ...] = ()
 
 
@@ -335,6 +336,12 @@ def replay_report_mss_output_file(plan: RunPlan) -> Optional[Path]:
     if plan.report_destination is None:
         return None
     return plan.report_destination / replay_report_basename(plan.run)
+
+
+def plan_has_missing_mss_output(plan: RunPlan) -> bool:
+    report_missing = plan.report_destination is not None and not plan.report_output_exists
+    root_missing = not plan.replay_output_exists
+    return root_missing or report_missing
 
 
 def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Optional[str]) -> List[JsonVariant]:
@@ -671,14 +678,12 @@ def build_run_plans(
         job_name = safe_name(f"{family_prefix}_run{run}")
         replay_destination = runs_to_destinations[run]
         report_destination = runs_to_report_destinations.get(run)
-        existing_mss_outputs: List[Path] = []
         replay_target = replay_destination / replay_output_basename(run)
-        if replay_target.exists():
-            existing_mss_outputs.append(replay_target)
+        replay_output_exists = replay_target.exists()
+        report_output_exists = False
         if report_destination is not None:
             report_target = report_destination / replay_report_basename(run)
-            if report_target.exists():
-                existing_mss_outputs.append(report_target)
+            report_output_exists = report_target.exists()
         plans.append(
             RunPlan(
                 run=run,
@@ -691,7 +696,8 @@ def build_run_plans(
                 cache_file=cache_file,
                 cache_ready=cache_ready,
                 cache_reason=cache_reason,
-                existing_mss_outputs=tuple(existing_mss_outputs),
+                replay_output_exists=replay_output_exists,
+                report_output_exists=report_output_exists,
                 cache_request_command=cache_request_command,
             )
         )
@@ -800,11 +806,16 @@ def build_add_job_command(
         "-tag",
         "variant_count",
         str(len(plan.variants)),
-        "-output",
-        replay_output_name,
-        to_mss_output_file_uri(plan.replay_destination / replay_output_name),
     ]
-    if plan.report_destination is not None:
+    if not plan.replay_output_exists:
+        cmd.extend(
+            [
+                "-output",
+                replay_output_name,
+                to_mss_output_file_uri(plan.replay_destination / replay_output_name),
+            ]
+        )
+    if plan.report_destination is not None and not plan.report_output_exists:
         cmd.extend(
             [
                 "-output",
@@ -970,12 +981,20 @@ def print_summary(
             else:
                 print("         request : disabled")
             continue
-        if plan.existing_mss_outputs:
+        if not plan_has_missing_mss_output(plan):
             print(f"[SKIP existing_mss_output] run={plan.run} job={plan.job_name}")
-            for output_path in plan.existing_mss_outputs:
-                print(f"         existing_mss_output: {output_path}")
+            print(f"         existing_mss_output: {replay_mss_output_file(plan)}")
+            if plan.report_destination is not None:
+                print(f"         existing_mss_output: {replay_report_mss_output_file(plan)}")
             continue
+        status_parts: List[str] = []
+        if plan.replay_output_exists:
+            status_parts.append("root_exists")
+        if plan.report_output_exists:
+            status_parts.append("report_exists")
         status = "SKIP existing" if plan.job_name in existing_job_names and args.skip_existing else "ADD"
+        if status_parts:
+            status += " (" + ", ".join(status_parts) + ")"
         print(
             f"[{status}] run={plan.run} job={plan.job_name} "
             f"ram={plan.resources.ram} disk={plan.resources.disk} time={plan.resources.time} "
@@ -984,8 +1003,12 @@ def print_summary(
         )
         print(f"         variants: {', '.join(plan.variants)}")
         print(f"         replay_mss_destination: {plan.replay_destination}")
+        if plan.replay_output_exists:
+            print(f"         existing_root_mss_output: {replay_mss_output_file(plan)}")
         if plan.report_destination is not None:
             print(f"         report_mss_destination: {plan.report_destination}")
+            if plan.report_output_exists:
+                print(f"         existing_report_mss_output: {replay_report_mss_output_file(plan)}")
         cmd = build_add_job_command(
             args.swif2_bin,
             workflow,
@@ -1026,7 +1049,7 @@ def submit_jobs(
     replay_script = str(expand_path(args.replay_script))
     existing_names = set(existing_job_names)
     rc = 0
-    eligible_plans = [plan for plan in plans if plan.cache_ready and not plan.existing_mss_outputs]
+    eligible_plans = [plan for plan in plans if plan.cache_ready and plan_has_missing_mss_output(plan)]
 
     missing_cache_plans = [plan for plan in plans if not plan.cache_ready]
     for plan in missing_cache_plans:
@@ -1060,10 +1083,11 @@ def submit_jobs(
     for plan in plans:
         if not plan.cache_ready:
             continue
-        if plan.existing_mss_outputs:
-            print(f"Skipping run {plan.run}; one or more MSS outputs already exist:")
-            for output_path in plan.existing_mss_outputs:
-                print(f"  {output_path}")
+        if not plan_has_missing_mss_output(plan):
+            print(f"Skipping run {plan.run}; all requested MSS outputs already exist:")
+            print(f"  {replay_mss_output_file(plan)}")
+            if plan.report_destination is not None:
+                print(f"  {replay_report_mss_output_file(plan)}")
             print()
             continue
         replay_exists = plan.job_name in existing_names
@@ -1090,7 +1114,7 @@ def submit_jobs(
                 stderr_text = result.stderr or ""
                 stdout_text = result.stdout or ""
                 if "File already exists on tape" in stderr_text or "File already exists on tape" in stdout_text:
-                    print(f"Skipping run {plan.run}; SWIF reports an existing MSS output.")
+                    print(f"Skipping run {plan.run}; SWIF reports an existing MSS output conflict.")
                     print()
                     continue
                 rc = result.returncode
