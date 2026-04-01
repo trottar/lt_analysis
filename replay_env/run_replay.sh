@@ -78,8 +78,10 @@ BCM_CALIB_DIR="${REPLAYPATH}/CALIBRATION/bcm_current_map"
 FULL_REPLAY_REPORT_DIR="${UTILPATH}/REPORT_OUTPUT/Analysis/${ANATYPE}LT"
 FULL_REPLAY_REPORT_FILE="${FULL_REPLAY_REPORT_DIR}/${ANATYPE}_output_coin_production_Summary_${RUNNUMBER}_${MAXEVENTS}.report"
 FULL_REPLAY_OUTPUT_FILE="${REPLAY_OUTPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUMBER}_${MAXEVENTS}.root"
+REPORT_TARBALL_BASENAME="${SWIF_REPORT_TARBALL_BASENAME:-FullReplay_run_${RUNNUMBER}_${ANATYPE}LT.tar}"
 SWIF_OUTPUT_FILE="${JOB_LAUNCH_DIR}/$(basename "${FULL_REPLAY_OUTPUT_FILE}")"
 SWIF_REPORT_OUTPUT_FILE="${JOB_LAUNCH_DIR}/$(basename "${FULL_REPLAY_REPORT_FILE}")"
+SWIF_REPORT_TARBALL_FILE="${JOB_LAUNCH_DIR}/${REPORT_TARBALL_BASENAME}"
 
 # Source farm environment when available.
 if [[ -f /site/12gev_phys/softenv.sh ]]; then
@@ -180,6 +182,26 @@ if [ ! -f "${FULL_REPLAY_REPORT_FILE}" ]; then
     exit 1
 fi
 
+shopt -s nullglob
+REPORT_ARTIFACTS=( "${FULL_REPLAY_REPORT_DIR}"/*"${RUNNUMBER}_${MAXEVENTS}"* )
+shopt -u nullglob
+if [ "${#REPORT_ARTIFACTS[@]}" -eq 0 ]; then
+    echo "ERROR: no replay report artifacts found for run ${RUNNUMBER} in ${FULL_REPLAY_REPORT_DIR}"
+    exit 1
+fi
+
+REPORT_ARTIFACT_NAMES=()
+for report_artifact in "${REPORT_ARTIFACTS[@]}"; do
+    if [ -f "${report_artifact}" ]; then
+        REPORT_ARTIFACT_NAMES+=( "$(basename "${report_artifact}")" )
+    fi
+done
+
+if [ "${#REPORT_ARTIFACT_NAMES[@]}" -eq 0 ]; then
+    echo "ERROR: no replay report files found for run ${RUNNUMBER} in ${FULL_REPLAY_REPORT_DIR}"
+    exit 1
+fi
+
 cp -f "${FULL_REPLAY_OUTPUT_FILE}" "${SWIF_OUTPUT_FILE}"
 copy_rc=$?
 if [ "${copy_rc}" -ne 0 ]; then
@@ -194,5 +216,13 @@ if [ "${report_copy_rc}" -ne 0 ]; then
     exit "${report_copy_rc}"
 fi
 
+tar -cf "${SWIF_REPORT_TARBALL_FILE}" -C "${FULL_REPLAY_REPORT_DIR}" "${REPORT_ARTIFACT_NAMES[@]}"
+tar_rc=$?
+if [ "${tar_rc}" -ne 0 ]; then
+    echo "ERROR: failed to create replay report tarball at ${SWIF_REPORT_TARBALL_FILE}"
+    exit "${tar_rc}"
+fi
+
 echo "Staged SWIF output copy at ${SWIF_OUTPUT_FILE}"
 echo "Staged SWIF report copy at ${SWIF_REPORT_OUTPUT_FILE}"
+echo "Staged SWIF report tarball at ${SWIF_REPORT_TARBALL_FILE}"

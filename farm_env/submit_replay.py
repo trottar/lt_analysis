@@ -72,6 +72,7 @@ class JsonVariant:
     runs_files: Tuple[Path, ...]
     replay_destinations: Tuple[Path, ...]
     report_destinations: Tuple[Path, ...]
+    archive_prefix_templates: Tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -93,11 +94,13 @@ class RunPlan:
     representative_manifest: Path
     replay_destination: Path
     report_destination: Optional[Path]
+    report_tarball_basename: Optional[str]
     cache_file: Optional[Path]
     cache_ready: bool
     cache_reason: str
     replay_output_exists: bool = False
     report_output_exists: bool = False
+    tarball_output_exists: bool = False
     cache_request_command: Tuple[str, ...] = ()
 
 
@@ -328,6 +331,10 @@ def replay_report_basename(run: int) -> str:
     return f"Kaon_output_coin_production_Summary_{run}_-1.report"
 
 
+def default_report_tarball_basename(run: int) -> str:
+    return f"FullReplay_run_{run}_KaonLT.tar"
+
+
 def replay_mss_output_file(plan: RunPlan) -> Path:
     return plan.replay_destination / replay_output_basename(plan.run)
 
@@ -338,10 +345,17 @@ def replay_report_mss_output_file(plan: RunPlan) -> Optional[Path]:
     return plan.report_destination / replay_report_basename(plan.run)
 
 
+def replay_report_tarball_mss_output_file(plan: RunPlan) -> Optional[Path]:
+    if plan.report_destination is None or plan.report_tarball_basename is None:
+        return None
+    return plan.report_destination / plan.report_tarball_basename
+
+
 def plan_has_missing_mss_output(plan: RunPlan) -> bool:
     report_missing = plan.report_destination is not None and not plan.report_output_exists
+    tarball_missing = plan.report_tarball_basename is not None and not plan.tarball_output_exists
     root_missing = not plan.replay_output_exists
-    return root_missing or report_missing
+    return root_missing or report_missing or tarball_missing
 
 
 def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Optional[str]) -> List[JsonVariant]:
@@ -361,6 +375,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
         runs_files = extract_runs_files(data)
         replay_destinations = extract_replay_destinations(data)
         report_destinations = extract_report_destinations(data)
+        archive_prefix_templates = extract_archive_prefix_templates(data)
         partition = extract_partition(data)
         if not runs_files or not replay_destinations:
             continue
@@ -372,6 +387,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
                 runs_files=tuple(runs_files),
                 replay_destinations=tuple(replay_destinations),
                 report_destinations=tuple(report_destinations),
+                archive_prefix_templates=tuple(archive_prefix_templates),
             )
         )
 
@@ -426,6 +442,20 @@ def extract_report_destinations(data: Dict) -> List[Path]:
     return destinations
 
 
+def extract_archive_prefix_templates(data: Dict) -> List[str]:
+    jobs = data.get("jobs", [])
+    templates: List[str] = []
+    if not isinstance(jobs, list):
+        return templates
+    for entry in jobs:
+        if not isinstance(entry, dict):
+            continue
+        template = entry.get("archive_prefix_template", entry.get("archive_prefix"))
+        if isinstance(template, str) and template.strip():
+            templates.append(template.strip())
+    return templates
+
+
 def extract_partition(data: Dict) -> str:
     defaults = data.get("defaults", {})
     if not isinstance(defaults, dict):
@@ -455,11 +485,18 @@ def read_runs_file(path: Path) -> List[int]:
 
 def collect_runs(
     variants: Sequence[JsonVariant],
-) -> Tuple[Dict[int, Set[str]], Dict[int, Path], Dict[int, Set[Path]], Dict[int, Set[Path]]]:
+) -> Tuple[
+    Dict[int, Set[str]],
+    Dict[int, Path],
+    Dict[int, Set[Path]],
+    Dict[int, Set[Path]],
+    Dict[int, Set[str]],
+]:
     runs_to_variants: Dict[int, Set[str]] = {}
     runs_to_manifest: Dict[int, Path] = {}
     runs_to_destinations: Dict[int, Set[Path]] = {}
     runs_to_report_destinations: Dict[int, Set[Path]] = {}
+    runs_to_archive_prefix_templates: Dict[int, Set[str]] = {}
     for variant in variants:
         for runs_file in variant.runs_files:
             runs = read_runs_file(runs_file)
@@ -470,7 +507,15 @@ def collect_runs(
                 runs_to_destinations.setdefault(run, set()).update(variant.replay_destinations)
                 if variant.report_destinations:
                     runs_to_report_destinations.setdefault(run, set()).update(variant.report_destinations)
-    return runs_to_variants, runs_to_manifest, runs_to_destinations, runs_to_report_destinations
+                if variant.archive_prefix_templates:
+                    runs_to_archive_prefix_templates.setdefault(run, set()).update(variant.archive_prefix_templates)
+    return (
+        runs_to_variants,
+        runs_to_manifest,
+        runs_to_destinations,
+        runs_to_report_destinations,
+        runs_to_archive_prefix_templates,
+    )
 
 
 def resolve_run_destinations(runs_to_destinations: Dict[int, Set[Path]]) -> Dict[int, Path]:
@@ -511,6 +556,27 @@ def resolve_optional_run_destinations(runs_to_destinations: Dict[int, Set[Path]]
         joined = "\n".join(conflicts)
         raise ValueError(
             "Replay manifests disagree on the REPORT_OUTPUT destination for one or more runs.\n"
+            f"{joined}"
+        )
+    return resolved
+
+
+def resolve_optional_run_templates(runs_to_templates: Dict[int, Set[str]]) -> Dict[int, Optional[str]]:
+    resolved: Dict[int, Optional[str]] = {}
+    conflicts: List[str] = []
+    for run, templates in sorted(runs_to_templates.items()):
+        unique_templates = sorted(set(templates))
+        if not unique_templates:
+            resolved[run] = None
+            continue
+        if len(unique_templates) != 1:
+            conflicts.append(f"run {run}: " + ", ".join(unique_templates))
+            continue
+        resolved[run] = unique_templates[0]
+    if conflicts:
+        joined = "\n".join(conflicts)
+        raise ValueError(
+            "Replay manifests disagree on the archive_prefix_template for one or more runs.\n"
             f"{joined}"
         )
     return resolved
@@ -643,6 +709,7 @@ def build_run_plans(
     runs_to_manifest: Dict[int, Path],
     runs_to_destinations: Dict[int, Path],
     runs_to_report_destinations: Dict[int, Optional[Path]],
+    runs_to_archive_prefix_templates: Dict[int, Optional[str]],
     args: argparse.Namespace,
 ) -> Tuple[List[RunPlan], List[str]]:
     warnings: List[str] = []
@@ -678,12 +745,21 @@ def build_run_plans(
         job_name = safe_name(f"{family_prefix}_run{run}")
         replay_destination = runs_to_destinations[run]
         report_destination = runs_to_report_destinations.get(run)
+        archive_prefix_template = runs_to_archive_prefix_templates.get(run)
+        report_tarball_basename = (
+            render_template(archive_prefix_template, run) + ".tar"
+            if archive_prefix_template
+            else default_report_tarball_basename(run)
+        )
         replay_target = replay_destination / replay_output_basename(run)
         replay_output_exists = replay_target.exists()
         report_output_exists = False
+        tarball_output_exists = False
         if report_destination is not None:
             report_target = report_destination / replay_report_basename(run)
             report_output_exists = report_target.exists()
+            tarball_target = report_destination / report_tarball_basename
+            tarball_output_exists = tarball_target.exists()
         plans.append(
             RunPlan(
                 run=run,
@@ -693,11 +769,13 @@ def build_run_plans(
                 representative_manifest=runs_to_manifest[run],
                 replay_destination=replay_destination,
                 report_destination=report_destination,
+                report_tarball_basename=report_tarball_basename,
                 cache_file=cache_file,
                 cache_ready=cache_ready,
                 cache_reason=cache_reason,
                 replay_output_exists=replay_output_exists,
                 report_output_exists=report_output_exists,
+                tarball_output_exists=tarball_output_exists,
                 cache_request_command=cache_request_command,
             )
         )
@@ -779,6 +857,7 @@ def build_add_job_command(
 ) -> List[str]:
     replay_output_name = replay_output_basename(plan.run)
     replay_report_name = replay_report_basename(plan.run)
+    replay_report_tarball_name = plan.report_tarball_basename
     cmd = [
         swif2_bin,
         "add-job",
@@ -823,7 +902,25 @@ def build_add_job_command(
                 to_mss_output_file_uri(plan.report_destination / replay_report_name),
             ]
         )
-    cmd.extend([replay_script, str(plan.run)])
+    if plan.report_destination is not None and replay_report_tarball_name is not None and not plan.tarball_output_exists:
+        cmd.extend(
+            [
+                "-output",
+                replay_report_tarball_name,
+                to_mss_output_file_uri(plan.report_destination / replay_report_tarball_name),
+            ]
+        )
+    if replay_report_tarball_name is not None:
+        cmd.extend(
+            [
+                "/usr/bin/env",
+                f"SWIF_REPORT_TARBALL_BASENAME={replay_report_tarball_name}",
+                replay_script,
+                str(plan.run),
+            ]
+        )
+    else:
+        cmd.extend([replay_script, str(plan.run)])
     return cmd
 
 
@@ -986,12 +1083,16 @@ def print_summary(
             print(f"         existing_mss_output: {replay_mss_output_file(plan)}")
             if plan.report_destination is not None:
                 print(f"         existing_mss_output: {replay_report_mss_output_file(plan)}")
+            if plan.report_tarball_basename is not None and replay_report_tarball_mss_output_file(plan) is not None:
+                print(f"         existing_mss_output: {replay_report_tarball_mss_output_file(plan)}")
             continue
         status_parts: List[str] = []
         if plan.replay_output_exists:
             status_parts.append("root_exists")
         if plan.report_output_exists:
             status_parts.append("report_exists")
+        if plan.tarball_output_exists:
+            status_parts.append("tarball_exists")
         status = "SKIP existing" if plan.job_name in existing_job_names and args.skip_existing else "ADD"
         if status_parts:
             status += " (" + ", ".join(status_parts) + ")"
@@ -1009,6 +1110,10 @@ def print_summary(
             print(f"         report_mss_destination: {plan.report_destination}")
             if plan.report_output_exists:
                 print(f"         existing_report_mss_output: {replay_report_mss_output_file(plan)}")
+            if plan.report_tarball_basename is not None:
+                print(f"         report_tarball: {plan.report_tarball_basename}")
+                if plan.tarball_output_exists:
+                    print(f"         existing_tarball_mss_output: {replay_report_tarball_mss_output_file(plan)}")
         cmd = build_add_job_command(
             args.swif2_bin,
             workflow,
@@ -1088,6 +1193,8 @@ def submit_jobs(
             print(f"  {replay_mss_output_file(plan)}")
             if plan.report_destination is not None:
                 print(f"  {replay_report_mss_output_file(plan)}")
+            if replay_report_tarball_mss_output_file(plan) is not None:
+                print(f"  {replay_report_tarball_mss_output_file(plan)}")
             print()
             continue
         replay_exists = plan.job_name in existing_names
@@ -1209,11 +1316,18 @@ def main() -> int:
         raise SystemExit(f"No JSON variants found for family prefix {family_prefix} in {json_dir}")
     partition = args.partition or resolve_family_partition(variants)
 
-    runs_to_variants, runs_to_manifest, runs_to_destination_sets, runs_to_report_destination_sets = collect_runs(variants)
+    (
+        runs_to_variants,
+        runs_to_manifest,
+        runs_to_destination_sets,
+        runs_to_report_destination_sets,
+        runs_to_archive_prefix_template_sets,
+    ) = collect_runs(variants)
     if not runs_to_variants:
         raise SystemExit("No runs were discovered from the matched JSON files")
     runs_to_destinations = resolve_run_destinations(runs_to_destination_sets)
     runs_to_report_destinations = resolve_optional_run_destinations(runs_to_report_destination_sets)
+    runs_to_archive_prefix_templates = resolve_optional_run_templates(runs_to_archive_prefix_template_sets)
 
     plans, size_warnings = build_run_plans(
         family_prefix,
@@ -1221,6 +1335,7 @@ def main() -> int:
         runs_to_manifest,
         runs_to_destinations,
         runs_to_report_destinations,
+        runs_to_archive_prefix_templates,
         args,
     )
     workflow = workflow_name(args, family_prefix)
