@@ -87,12 +87,16 @@ def _ensure_safe_getlogin() -> None:
         os.getlogin = _safe_login_name  # type: ignore[assignment]
 
 
-def resolve_ltsep_root(caller_path: Optional[str] = None):
+def create_ltsep_root(caller_path: Optional[str] = None, *root_args):
     _ensure_safe_getlogin()
     from ltsep import Root
 
     probe = os.path.realpath(caller_path or __file__)
-    return Root(probe, "Plot_LTSep")
+    return Root(probe, *root_args)
+
+
+def resolve_ltsep_root(caller_path: Optional[str] = None):
+    return create_ltsep_root(caller_path, "Plot_LTSep")
 
 
 def resolve_ltsep_paths(caller_path: Optional[str] = None) -> LtsepPaths:

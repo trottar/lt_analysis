@@ -12,6 +12,7 @@
 #
 import pandas as pd
 import sys,os
+from pathlib import Path
 
 ###############################################################################################################################################
 
@@ -19,10 +20,12 @@ import sys,os
 ltsep package import and pathing definitions
 '''
 
-# Import package for cuts
-from ltsep import Root
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+from farm_env.ltsep_paths import create_ltsep_root
 
-lt=Root(os.path.realpath(__file__))
+lt=create_ltsep_root(os.path.realpath(__file__))
 
 # Add this to all files for more dynamic pathing
 UTILPATH=lt.UTILPATH
@@ -112,4 +115,3 @@ def getEfficiencyValue(runNum,efficiency_table,foutcsv,table_val):
         ################################################################################################################################################
 
         return pTheta_val
-

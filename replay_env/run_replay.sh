@@ -19,11 +19,16 @@ if [[ -z "$1" ]]; then
 fi
 MAXEVENTS=-1
 
-# Runs script in the ltsep python package that grabs current path enviroment
-if [[ ${HOSTNAME} = *"cdaq"* ]]; then
-    PATHFILE_INFO=`python3 /home/cdaq/pionLT-2021/hallc_replay_lt/UTIL_PION/bin/python/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
-elif [[ ${HOSTNAME} = *"farm"* ]]; then
-    PATHFILE_INFO=`python3 $replay_lt_env/lib/python3.9/site-packages/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
+# Runs a repo-local ltsep wrapper so batch jobs do not depend on upstream
+# getPathDict.py calling os.getlogin() on worker nodes.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
+PATHFILE_INFO="$(python3 "${LTSEP_FIELDS_SCRIPT}" "$PWD")"
+path_rc=$?
+if [[ "${path_rc}" -ne 0 || -z "${PATHFILE_INFO}" ]]; then
+    echo "ERROR: failed to resolve ltsep paths via ${LTSEP_FIELDS_SCRIPT}" >&2
+    exit 1
 fi
 
 # Split the string we get to individual variables, easier for printing and use later
@@ -69,12 +74,20 @@ SCALER_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/SCALERS/replay_${ANATYPE}LT_coin_s
 FULL_REPLAY_MACRO_FILE="${REPLAYPATH}/SCRIPTS/COIN/PRODUCTION/FullReplay_${ANATYPE}LT_Phys_Prod.C"
 BCM_PARAM_FILE="bcmcurrent_${RUNNUMBER}_.param"
 
-# Source stuff depending upon hostname. Change or add more as needed  
-source /site/12gev_phys/softenv.sh 2.3
-source /apps/root/6.18.04/setroot_CUE.bash
+# Source farm environment when available.
+if [[ -f /site/12gev_phys/softenv.sh ]]; then
+    source /site/12gev_phys/softenv.sh 2.3
+fi
+if [[ -f /apps/root/6.18.04/setroot_CUE.bash ]]; then
+    source /apps/root/6.18.04/setroot_CUE.bash
+fi
 
-cd $REPLAYPATH
-source "$REPLAYPATH/setup.sh"
+cd "$REPLAYPATH" || exit 1
+if [ ! -f "${REPLAYPATH}/setup.sh" ]; then
+    echo "ERROR: replay setup script not found at ${REPLAYPATH}/setup.sh"
+    exit 1
+fi
+source "${REPLAYPATH}/setup.sh"
 
 if [ ! -x "${REPLAYPATH}/hcana" ]; then
     echo "ERROR: hcana not found or not executable at ${REPLAYPATH}/hcana"
@@ -106,10 +119,14 @@ if [ ! -f "${SCALER_OUTPUT_FILE}" ]; then
         echo "ERROR: see ${SCALER_REPORT_FILE}"
         exit 1
     fi
-     cd "$REPLAYPATH/CALIBRATION/bcm_current_map"
-    root -b -l<<EOF 
-.L ScalerCalib.C
-.x run.C("${SCALER_OUTPUT_FILE}")
+        if ! command -v root >/dev/null 2>&1; then
+            echo "ERROR: root command not found after sourcing replay environment"
+            exit 1
+        fi
+        cd "$REPLAYPATH" || exit 1
+	    root -b -l<<EOF 
+.L ${REPLAYPATH}/ScalerCalib.C
+.x ${REPLAYPATH}/run.C("${SCALER_OUTPUT_FILE}")
 .q  
 EOF
     if [ ! -f "${BCM_PARAM_FILE}" ]; then
@@ -117,7 +134,7 @@ EOF
         exit 1
     fi
     mv "${BCM_PARAM_FILE}" "$REPLAYPATH/PARAM/HMS/BCM/CALIB/bcmcurrent_$RUNNUMBER.param"
-    cd $REPLAYPATH
+	    cd "$REPLAYPATH" || exit 1
 else echo "Scaler replayfile already found for this run in ${SCALER_OUTPUT_DIR} - Skipping scaler replay step"
 fi
 

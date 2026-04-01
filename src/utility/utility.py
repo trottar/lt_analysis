@@ -25,18 +25,21 @@ import random
 import math
 import re
 import sys, os, subprocess
+from pathlib import Path
 
 ################################################################################################################################################
 '''
 ltsep package import and pathing definitions
 '''
 
-# Import package for cuts
-from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+from farm_env.ltsep_paths import create_ltsep_root
 
-lt=Root(os.path.realpath(__file__),"Plot_LTSep")
+lt=create_ltsep_root(os.path.realpath(__file__),"Plot_LTSep")
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding

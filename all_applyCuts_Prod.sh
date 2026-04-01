@@ -12,11 +12,20 @@
 #
 
 
-# Runs script in the ltsep python package that grabs current path enviroment
-if [[ ${HOSTNAME} = *"cdaq"* ]]; then
-    PATHFILE_INFO=`python3 /home/cdaq/pionLT-2021/hallc_replay_lt/UTIL_PION/bin/python/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
-elif [[ ${HOSTNAME} = *"farm"* ]]; then
-    PATHFILE_INFO=`python3 $replay_lt_env/lib/python3.9/site-packages/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
+# Runs a repo-local ltsep wrapper so batch jobs do not depend on upstream
+# getPathDict.py calling os.getlogin() on worker nodes.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="${SCRIPT_DIR}"
+LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
+if [[ ! -f "${LTSEP_FIELDS_SCRIPT}" ]]; then
+    REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+    LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
+fi
+PATHFILE_INFO="$(python3 "${LTSEP_FIELDS_SCRIPT}" "$PWD")"
+path_rc=$?
+if [[ "${path_rc}" -ne 0 || -z "${PATHFILE_INFO}" ]]; then
+    echo "ERROR: failed to resolve ltsep paths via ${LTSEP_FIELDS_SCRIPT}" >&2
+    exit 1
 fi
 
 # Split the string we get to individual variables, easier for printing and use later

@@ -24,6 +24,7 @@ import scipy
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
+from pathlib import Path
 
 ##################################################################################################################################################
 
@@ -60,12 +61,14 @@ if ParticleType == "proton":
 ltsep package import and pathing definitions
 '''
 
-# Import package for cuts
-from ltsep import Root
 # Import package for progress bar
 from ltsep import Misc
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+from farm_env.ltsep_paths import create_ltsep_root
     
-lt=Root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts)
+lt=create_ltsep_root(os.path.realpath(__file__),"Prod",ROOTPrefix,runNum,MaxEvent,cut_f,cuts)
 
 # Add this to all files for more dynamic pathing
 USER=lt.USER # Grab user info for file finding
