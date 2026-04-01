@@ -13,11 +13,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPLAY_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_replay.py"
 APPLYCUTS_SUBMIT_SCRIPT="${SCRIPT_DIR}/farm_env/submit_applycuts.py"
 REBALANCE_SCRIPT="${SCRIPT_DIR}/farm_env/rebalance_swif.py"
+JASMINE_SCRIPT="${SCRIPT_DIR}/farm_env/jasmine_put_from_manifest.py"
 WORKFLOW_PREFIX="kaonlt"
 DEFAULT_MANIFEST_DIR="${SCRIPT_DIR}/input/kaon"
 
-# Flag definitions (flags: h, s, r, a, n, c, w, m, A, P)
-while getopts 'hsrancw:m:A:P:' flag; do
+# Flag definitions (flags: h, s, r, a, n, c, j, w, m, A, P)
+while getopts 'hsrancjw:m:A:P:' flag; do
     case "${flag}" in
         h)
         echo "--------------------------------------------------------------"
@@ -35,6 +36,7 @@ while getopts 'hsrancw:m:A:P:' flag; do
         echo "    -a, with -r, actually apply modify-jobs commands (default is dry-run)"
         echo "    -n, do not call 'swif2 run' after submit/rebalance"
         echo "    -c, use applyCuts mode instead of replay mode"
+        echo "    -j, use interactive Jasmine upload mode"
         echo "    -w, override workflow name"
         echo "    -m, override manifest directory (default: input/kaon)"
         echo "    -A, override SWIF/Slurm account (default from helper)"
@@ -42,16 +44,16 @@ while getopts 'hsrancw:m:A:P:' flag; do
         echo
         echo "Notes..."
         echo "    Replay mode scans all matching JSON variants in the selected manifest"
-        echo "    directory and submits"
-        echo "    one replay job per unique run, first requesting raw-file cache staging"
-        echo "    for missing coin_all data, plus a dependent Jasmine replay"
-        echo "    upload job by default."
+        echo "    directory and submits one replay job per unique run, first"
+        echo "    requesting raw-file cache staging for missing coin_all data."
         echo "    applyCuts mode scans the same selected manifest directory and"
-        echo "    submits one job per"
-        echo "    manifest variant + run, plus a dependent Jasmine skim upload"
-        echo "    job by default, but only when the replay ROOT file exists on"
-        echo "    MSS and is already present in cache (requesting jcache staging"
-        echo "    first when needed)."
+        echo "    submits one job per manifest variant + run, but only when the"
+        echo "    replay ROOT file exists on MSS and is already present in cache"
+        echo "    (requesting jcache staging first when needed)."
+        echo "    Jasmine uploads are run separately from an interactive ifarm"
+        echo "    session, but can be launched from this same wrapper with -j."
+        echo "    In Jasmine mode, replay upload is the default and -c switches"
+        echo "    the upload product kind to skim."
         echo
         echo "Examples..."
         echo "    ./run_farm.sh 3p0 3p14"
@@ -61,6 +63,8 @@ while getopts 'hsrancw:m:A:P:' flag; do
         echo "    ./run_farm.sh -m input/kaon_test -s 3p0 3p14"
         echo "    ./run_farm.sh -r 3p0 3p14"
         echo "    ./run_farm.sh -r -c -a -n 3p0 3p14"
+        echo "    ./run_farm.sh -j -m input/kaon_test 3p0 3p14"
+        echo "    ./run_farm.sh -j -c -m input/kaon_test -s 3p0 3p14"
         echo
         echo "Available Kinematics..."
         echo "                      Q2=5p5, W=3p02"
@@ -76,6 +80,7 @@ while getopts 'hsrancw:m:A:P:' flag; do
         a) apply_flag='true' ;;
         n) no_run_flag='true' ;;
         c) cuts_flag='true' ;;
+        j) upload_flag='true' ;;
         w) workflow_override="${OPTARG}" ;;
         m) manifest_dir="${OPTARG}" ;;
         A) account_override="${OPTARG}" ;;
@@ -103,13 +108,33 @@ if [[ ! -f "${REBALANCE_SCRIPT}" ]]; then
     exit 1
 fi
 
+if [[ ! -f "${JASMINE_SCRIPT}" ]]; then
+    echo "Jasmine helper not found: ${JASMINE_SCRIPT}"
+    exit 1
+fi
+
 if [[ "${rebalance_flag}" = "true" && "${submit_flag}" = "true" ]]; then
     echo "Please choose either submit mode or rebalance mode, not both."
     exit 1
 fi
 
+if [[ "${upload_flag}" = "true" && "${rebalance_flag}" = "true" ]]; then
+    echo "Please choose either Jasmine upload mode or rebalance mode, not both."
+    exit 1
+fi
+
 if [[ "${rebalance_flag}" != "true" && "${apply_flag}" = "true" ]]; then
     echo "The -a flag is only valid together with -r."
+    exit 1
+fi
+
+if [[ "${upload_flag}" = "true" && "${apply_flag}" = "true" ]]; then
+    echo "The -a flag is not used in Jasmine upload mode."
+    exit 1
+fi
+
+if [[ "${upload_flag}" = "true" && "${no_run_flag}" = "true" ]]; then
+    echo "The -n flag is not used in Jasmine upload mode."
     exit 1
 fi
 
@@ -149,10 +174,12 @@ if [[ "${cuts_flag}" = "true" ]]; then
     MODE="applyCuts"
     MODE_SCRIPT="${APPLYCUTS_SUBMIT_SCRIPT}"
     WORKFLOW_SUFFIX="_applycuts_${USER_NAME}"
+    JASMINE_PRODUCT_KIND="skim"
 else
     MODE="replay"
     MODE_SCRIPT="${REPLAY_SUBMIT_SCRIPT}"
     WORKFLOW_SUFFIX="_${USER_NAME}"
+    JASMINE_PRODUCT_KIND="replay"
 fi
 
 if [[ -n "${workflow_override}" ]]; then
@@ -165,6 +192,40 @@ if [[ -z "${manifest_dir}" ]]; then
     manifest_dir="${DEFAULT_MANIFEST_DIR}"
 elif [[ "${manifest_dir}" != /* ]]; then
     manifest_dir="${SCRIPT_DIR}/${manifest_dir}"
+fi
+
+if [[ "${upload_flag}" = "true" ]]; then
+    shopt -s nullglob
+    matched_manifests=( "${manifest_dir}/${FAMILY}"*.json )
+    shopt -u nullglob
+
+    if [[ ${#matched_manifests[@]} -eq 0 ]]; then
+        echo "No manifests found for ${FAMILY} in ${manifest_dir}"
+        exit 1
+    fi
+
+    echo
+    echo "---------------------------------------------------------"
+    echo
+    echo "Preparing interactive Jasmine ${JASMINE_PRODUCT_KIND} upload for Q2=${Q2}, W=${W}..."
+    echo
+    echo "                    MANIFEST DIR = ${manifest_dir}"
+    echo "                   PRODUCT KIND = ${JASMINE_PRODUCT_KIND}"
+    echo
+    echo "---------------------------------------------------------"
+    echo
+
+    for manifest_path in "${matched_manifests[@]}"; do
+        upload_cmd=(python3 "${JASMINE_SCRIPT}" --manifest-path "${manifest_path}" --product-kind "${JASMINE_PRODUCT_KIND}")
+        if [[ "${submit_flag}" = "true" ]]; then
+            upload_cmd+=(--submit)
+        fi
+
+        echo "Running: ${upload_cmd[*]}"
+        "${upload_cmd[@]}" || exit $?
+        echo
+    done
+    exit 0
 fi
 
 if [[ "${rebalance_flag}" = "true" ]]; then

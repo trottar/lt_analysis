@@ -68,6 +68,13 @@ That prints a replay dry-run plan. Nothing is submitted unless `-s` is used.
 - Use applyCuts mode instead of replay mode.
 - Replay is still the default if `-c` is omitted.
 
+`-j`
+
+- Use interactive Jasmine upload mode instead of SWIF submit/rebalance mode.
+- Replay upload is the default in this mode.
+- Combine with `-c` to upload skim products instead of replay products.
+- Use `-s` to actually invoke `jput`; otherwise the Jasmine helper stays in dry-run mode.
+
 `-w <workflow-name>`
 
 - Override the auto-generated workflow name.
@@ -105,11 +112,13 @@ This calls `farm_env/submit_replay.py`, which:
 - checks whether each run's raw `coin_all_*.dat` file is already present in cache
 - requests cache staging for missing raw files before replay submission
 - submits one replay job per unique run
-- adds one dependent Jasmine replay-upload job per run by default
 
 Runs whose raw data are not yet cache-ready are not submitted in that pass, which
 prevents replay jobs from failing immediately when the input file is still on
 tape.
+
+Replay uploads to MSS are run separately from an interactive ifarm session with
+`farm_env/jasmine_put_from_manifest.py`.
 
 Default workflow name:
 
@@ -135,16 +144,41 @@ This calls `farm_env/submit_applycuts.py`, which:
 - maps that MSS replay file into the ltsep `CACHEPATH` tree
 - requests `jcache get` for missing replay cache files before applyCuts submission
 - only submits one job per manifest variant + run once the replay ROOT file is cache-ready
-- adds one dependent Jasmine skim-upload job per planned run by default
 - skips the job if both skim outputs already exist in the ltsep skim ROOT area
 - runs `applyCuts_Prod.sh` once per planned job, letting that script process
   both kaon and pion for the run
+
+Skim uploads to MSS are run separately from an interactive ifarm session with
+`farm_env/jasmine_put_from_manifest.py`.
 
 Default workflow name:
 
 ```text
 kaonlt_Q{Q2}W{W}_applycuts_${USER}
 ```
+
+## Jasmine Upload Mode
+
+Use `-j` from an interactive ifarm/login-node session after the SWIF workflow has
+finished.
+
+Replay upload:
+
+```bash
+./run_farm.sh -j -m input/kaon_test 3p0 3p14
+./run_farm.sh -j -m input/kaon_test -s 3p0 3p14
+```
+
+Skim upload:
+
+```bash
+./run_farm.sh -j -c -m input/kaon_test 3p0 3p14
+./run_farm.sh -j -c -m input/kaon_test -s 3p0 3p14
+```
+
+This mode scans all matching manifests in the selected manifest directory and
+runs `farm_env/jasmine_put_from_manifest.py --manifest-path ...` once per
+matched manifest.
 
 ## Rebalancing
 
@@ -167,11 +201,15 @@ applyCuts workflow:
 `farm_env/jasmine_put_from_manifest.py` now resolves volatile source roots from
 ltsep at runtime instead of storing them in the manifests.
 
+Run it from an interactive ifarm/login-node session after the SWIF workflow has
+finished. Do not schedule Jasmine uploads as SWIF worker-node jobs.
+
 Replay upload:
 
 ```bash
 python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind replay
 python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --manifest-dir input/kaon_test --product-kind replay
+python farm_env/jasmine_put_from_manifest.py --manifest-path input/kaon_test/Q3p0W3p14center_lowe.json --product-kind replay --submit
 ```
 
 Skim upload:
@@ -179,6 +217,7 @@ Skim upload:
 ```bash
 python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --product-kind skim
 python farm_env/jasmine_put_from_manifest.py center high 3p0 3p14 lh2 --manifest-dir input/kaon_test --product-kind skim
+python farm_env/jasmine_put_from_manifest.py --manifest-path input/kaon_test/Q3p0W3p14center_lowe.json --product-kind skim --submit
 ```
 
 What it uses:

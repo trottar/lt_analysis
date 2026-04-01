@@ -16,6 +16,9 @@ Behavior:
   --size-glob-template values, the script estimates the input size for a run by
   summing matching file sizes and applies a tiered heuristic. Otherwise it falls
   back to conservative Hall-C replay defaults.
+- Tape upload is a separate interactive-ifarm step via
+  `farm_env/jasmine_put_from_manifest.py`; this submitter no longer creates
+  dependent Jasmine worker jobs.
 
 Dry-run is the default. Use --submit to create/modify the workflow and add jobs.
 """
@@ -246,38 +249,38 @@ def parse_args() -> argparse.Namespace:
         "--no-auto-jasmine",
         dest="auto_jasmine",
         action="store_false",
-        default=True,
-        help="Do not add dependent Jasmine tape-upload jobs.",
+        default=False,
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--jasmine-script",
         default=DEFAULT_JASMINE_SCRIPT,
-        help=f"Jasmine helper script to execute per run (default: {DEFAULT_JASMINE_SCRIPT})",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--python-bin",
         default=DEFAULT_PYTHON_BIN,
-        help=f"Python executable used for Jasmine jobs (default: {DEFAULT_PYTHON_BIN})",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--jasmine-ram",
         default=DEFAULT_JASMINE_RAM,
-        help=f"RAM per Jasmine upload job (default: {DEFAULT_JASMINE_RAM})",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--jasmine-disk",
         default=DEFAULT_JASMINE_DISK,
-        help=f"Disk per Jasmine upload job (default: {DEFAULT_JASMINE_DISK})",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--jasmine-time",
         default=DEFAULT_JASMINE_TIME,
-        help=f"Wall time per Jasmine upload job (default: {DEFAULT_JASMINE_TIME})",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--jasmine-stage-root",
         default=DEFAULT_JASMINE_STAGE_ROOT,
-        help=f"Stage root passed to Jasmine jobs (default: {DEFAULT_JASMINE_STAGE_ROOT})",
+        help=argparse.SUPPRESS,
     )
     return parser.parse_args()
 
@@ -747,9 +750,7 @@ def print_summary(
     print(f"Manifest directory: {expand_path(args.manifest_dir)}")
     print(f"Workflow         : {workflow}")
     print(f"Replay script    : {expand_path(args.replay_script)}")
-    print(f"Auto Jasmine     : {'yes' if args.auto_jasmine else 'no'}")
-    if args.auto_jasmine:
-        print(f"Jasmine script   : {expand_path(args.jasmine_script)}")
+    print("Jasmine uploads  : manual ifarm step")
     print(f"Account          : {args.account}")
     print(f"Partition        : {args.partition}")
     print(f"Runs discovered  : {len(runs_to_variants)} unique")
@@ -974,12 +975,12 @@ def validate_softenv_wrapper(path_text: str) -> None:
 
 def main() -> int:
     args = parse_args()
+    # Jasmine uploads are intentionally run manually from an interactive ifarm
+    # session, not from SWIF worker jobs.
+    args.auto_jasmine = False
     family_prefix = normalize_family(args.q2, args.w)
     json_dir = expand_path(args.manifest_dir)
     validate_replay_script(args.replay_script)
-    if args.auto_jasmine:
-        validate_jasmine_script(args.jasmine_script)
-        validate_softenv_wrapper(DEFAULT_SOFTENV_WRAPPER)
 
     variants = discover_json_variants(json_dir, family_prefix, args.family_regex)
     if not variants:
