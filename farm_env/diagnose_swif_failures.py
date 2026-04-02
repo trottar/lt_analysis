@@ -26,6 +26,7 @@ DEFAULT_SWIF2 = os.environ.get("SWIF2_BIN", "swif2")
 MEMORY_PAT = re.compile(r"(out[_ -]?of[_ -]?memory|oom|memory limit|maxrss|exceeded memory)", re.I)
 TIME_PAT = re.compile(r"(time[_ -]?limit|timed out|due to time limit|wall ?time)", re.I)
 DISK_PAT = re.compile(r"(no space left on device|disk full|disk quota|scratch|no space)", re.I)
+SUBMIT_TIMEOUT_PAT = re.compile(r"Command timed out:\s*sbatch\b", re.I)
 SITE_PAT = re.compile(r"(site[_ -]?launch[_ -]?fail|invalid account|partition)", re.I)
 CACHE_PAT = re.compile(r"(jcache|cache|coin_all_|raw file|missing raw|staging)", re.I)
 PATH_PAT = re.compile(r"(not found|no such file|does not exist|permission denied|macro .* not found)", re.I)
@@ -93,6 +94,13 @@ def parse_show_job_output(text: str) -> Dict[str, str]:
 
 def classify_failure(problem: str, details: str) -> tuple[str, str]:
     haystack = f"{problem} {details}"
+    if SUBMIT_TIMEOUT_PAT.search(details) or (
+        problem.strip().upper() == "SWIF_SYSTEM_ERROR" and "sbatch" in details and "timed out" in details.lower()
+    ):
+        return (
+            "scheduler_submit_timeout",
+            "This is a SWIF/Slurm submit timeout before the job starts; retry these jobs first rather than increasing wall time.",
+        )
     if MEMORY_PAT.search(haystack):
         return ("resource_memory", "Increase RAM for these jobs, then rerun them.")
     if TIME_PAT.search(haystack):
@@ -153,6 +161,8 @@ def print_group(name: str, jobs: Sequence[FailedJob], workflow: str, swif2_bin: 
     names = " ".join(job.job_name for job in jobs)
     if name.startswith("resource_"):
         print(f"  Next step   : consider resource bumping before retry")
+    elif name == "scheduler_submit_timeout":
+        print(f"  Next step   : simple retry first; only escalate if this keeps happening")
     else:
         print(f"  Next step   : inspect logs for one job, then retry if appropriate")
     print(f"  Inspect one : {swif2_bin} show-job -workflow {workflow} -name {jobs[0].job_name}")
@@ -191,6 +201,8 @@ def main() -> int:
         print("* For script/path/cache-like failures, fix the underlying issue first, then retry only those failed jobs.")
     if resource_groups:
         print("* For memory/time/disk failures, rebalance resources before retrying.")
+    if "scheduler_submit_timeout" in groups:
+        print("* For scheduler submit timeouts, retry the failed jobs first; these are not wall-time failures inside your script.")
     print("* After retries or resource changes, run:")
     print(f"    {args.swif2_bin} run {args.workflow}")
     return 0
