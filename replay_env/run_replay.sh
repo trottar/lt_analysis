@@ -18,7 +18,7 @@ if [[ -z "$1" ]]; then
     echo "Please provide a run number as input"
 fi
 MAXEVENTS=-1
-JOB_LAUNCH_DIR="$(pwd)"
+JOB_LAUNCH_DIR="${SWIF_JOB_WORK_DIR:-${SWIF_JOB_STAGE_DIR:-$(pwd)}}"
 
 # Runs a repo-local ltsep wrapper so batch jobs do not depend on upstream
 # getPathDict.py calling os.getlogin() on worker nodes.
