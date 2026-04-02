@@ -11,12 +11,11 @@ Behavior:
   ltsep `CACHEPATH` used to derive the cached replay ROOT prerequisite.
 - Missing replay cache files are requested via jcache before applyCuts
   submission.
-- A job is skipped when both kaon and pion skim outputs already exist.
 - Each submitted job runs `applyCuts_Prod.sh` once, which in turn runs both
   kaon and pion passes for the requested run.
-- Tape upload is a separate interactive-ifarm step via
-  `farm_env/jasmine_put_from_manifest.py`; this submitter no longer creates
-  dependent Jasmine worker jobs.
+- applyCuts stages skim ROOT files into the node-local SWIF working directory,
+  and SWIF `-output` exports the missing skim files to MSS automatically.
+- A job is skipped only when all requested skim MSS outputs already exist.
 
 Dry-run is the default. Use --submit to create/modify the workflow and add jobs.
 """
@@ -81,6 +80,7 @@ class JsonVariant:
     partition: str
     runs_files: Tuple[Path, ...]
     replay_destinations: Tuple[Path, ...]
+    skim_destination: Path
 
 
 @dataclass(frozen=True)
@@ -90,8 +90,11 @@ class RunPlan:
     job_name: str
     replay_mss_file: Optional[Path]
     replay_cache_file: Optional[Path]
+    skim_destination: Path
     skim_kaon: Path
     skim_pion: Path
+    skim_kaon_output_exists: bool
+    skim_pion_output_exists: bool
     status: str
     reason: str
     cache_request_command: Tuple[str, ...] = ()
@@ -303,6 +306,20 @@ def extract_replay_destinations(data: Dict) -> List[Path]:
     return destinations
 
 
+def extract_skim_destinations(data: Dict) -> List[Path]:
+    jobs = data.get("jobs", [])
+    destinations: List[Path] = []
+    if not isinstance(jobs, list):
+        return destinations
+    for entry in jobs:
+        if not isinstance(entry, dict):
+            continue
+        destination = entry.get("skim_destination")
+        if isinstance(destination, str) and destination.strip():
+            destinations.append(expand_path(destination))
+    return destinations
+
+
 def extract_runs_files(data: Dict) -> List[Path]:
     jobs = data.get("jobs", [])
     runs_files: List[Path] = []
@@ -346,8 +363,14 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
         partition = extract_partition(data)
         runs_files = extract_runs_files(data)
         replay_destinations = extract_replay_destinations(data)
-        if not runs_files or not replay_destinations:
+        skim_destinations = tuple(dict.fromkeys(extract_skim_destinations(data)))
+        if not runs_files or not replay_destinations or not skim_destinations:
             continue
+        if len(skim_destinations) != 1:
+            destinations_text = ", ".join(str(destination) for destination in skim_destinations)
+            raise ValueError(
+                f"Manifest {path} defines multiple skim_destination values: {destinations_text}"
+            )
         variants.append(
             JsonVariant(
                 path=path.resolve(),
@@ -360,6 +383,7 @@ def discover_json_variants(json_dir: Path, family_prefix: str, family_regex: Opt
                 partition=partition,
                 runs_files=tuple(runs_files),
                 replay_destinations=tuple(replay_destinations),
+                skim_destination=skim_destinations[0],
             )
         )
 
@@ -425,9 +449,25 @@ def build_cache_request_command(args: argparse.Namespace, run: int, mss_file: Pa
 def skim_files_for_run(paths: LtsepPaths, run: int) -> Tuple[Path, Path]:
     base = paths.skim_source_dir
     return (
-        base / f"kaon_{run}_-1_Raw_Data.root",
-        base / f"pion_{run}_-1_Raw_Data.root",
+        base / skim_output_basename("kaon", run),
+        base / skim_output_basename("pion", run),
     )
+
+
+def skim_output_basename(particle: str, run: int) -> str:
+    return f"{particle}_{run}_-1_Raw_Data.root"
+
+
+def skim_mss_output_file_for(skim_destination: Path, run: int, particle: str) -> Path:
+    return skim_destination / skim_output_basename(particle, run)
+
+
+def skim_mss_output_file(plan: RunPlan, particle: str) -> Path:
+    return skim_mss_output_file_for(plan.skim_destination, plan.run, particle)
+
+
+def plan_has_missing_mss_output(plan: RunPlan) -> bool:
+    return not (plan.skim_kaon_output_exists and plan.skim_pion_output_exists)
 
 
 def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: argparse.Namespace) -> List[RunPlan]:
@@ -439,36 +479,49 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                 paths.cache_path_from_mss(replay_mss_file) if replay_mss_file is not None else None
             )
             skim_kaon, skim_pion = skim_files_for_run(paths, run)
+            skim_kaon_output_exists = skim_mss_output_file_for(
+                variant.skim_destination, run, "kaon"
+            ).exists()
+            skim_pion_output_exists = skim_mss_output_file_for(
+                variant.skim_destination, run, "pion"
+            ).exists()
             cache_request_command: Tuple[str, ...] = ()
+            job_name = safe_name(f"{variant.family}_run{run}_applycuts")
+
+            if skim_kaon_output_exists and skim_pion_output_exists:
+                plans.append(
+                    RunPlan(
+                        variant=variant,
+                        run=run,
+                        job_name=job_name,
+                        replay_mss_file=replay_mss_file,
+                        replay_cache_file=replay_cache_file,
+                        skim_destination=variant.skim_destination,
+                        skim_kaon=skim_kaon,
+                        skim_pion=skim_pion,
+                        skim_kaon_output_exists=skim_kaon_output_exists,
+                        skim_pion_output_exists=skim_pion_output_exists,
+                        status="SKIP",
+                        reason="existing_mss_output",
+                    )
+                )
+                continue
 
             if replay_mss_file is None:
                 plans.append(
                     RunPlan(
                         variant=variant,
                         run=run,
-                        job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
+                        job_name=job_name,
                         replay_mss_file=None,
                         replay_cache_file=None,
+                        skim_destination=variant.skim_destination,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
+                        skim_kaon_output_exists=skim_kaon_output_exists,
+                        skim_pion_output_exists=skim_pion_output_exists,
                         status="SKIP",
                         reason="missing_replay_mss",
-                    )
-                )
-                continue
-
-            if skim_kaon.exists() and skim_pion.exists():
-                plans.append(
-                    RunPlan(
-                        variant=variant,
-                        run=run,
-                        job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
-                        replay_mss_file=replay_mss_file,
-                        replay_cache_file=replay_cache_file,
-                        skim_kaon=skim_kaon,
-                        skim_pion=skim_pion,
-                        status="SKIP",
-                        reason="skim_outputs_already_exist",
                     )
                 )
                 continue
@@ -482,11 +535,14 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                     RunPlan(
                         variant=variant,
                         run=run,
-                        job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
+                        job_name=job_name,
                         replay_mss_file=replay_mss_file,
                         replay_cache_file=replay_cache_file,
+                        skim_destination=variant.skim_destination,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
+                        skim_kaon_output_exists=skim_kaon_output_exists,
+                        skim_pion_output_exists=skim_pion_output_exists,
                         status="WAIT",
                         reason="missing_replay_cache",
                         cache_request_command=cache_request_command,
@@ -498,11 +554,14 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                 RunPlan(
                     variant=variant,
                     run=run,
-                    job_name=safe_name(f"{variant.family}_run{run}_applycuts"),
+                    job_name=job_name,
                     replay_mss_file=replay_mss_file,
                     replay_cache_file=replay_cache_file,
+                    skim_destination=variant.skim_destination,
                     skim_kaon=skim_kaon,
                     skim_pion=skim_pion,
+                    skim_kaon_output_exists=skim_kaon_output_exists,
+                    skim_pion_output_exists=skim_pion_output_exists,
                     status="ADD",
                     reason="replay_cache_ready",
                 )
@@ -582,7 +641,7 @@ def build_add_job_command(
     family_prefix: str,
     args: argparse.Namespace,
 ) -> List[str]:
-    return [
+    cmd = [
         swif2_bin,
         "add-job",
         workflow,
@@ -612,14 +671,42 @@ def build_add_job_command(
         "-tag",
         "stage",
         "applycuts",
-        applycuts_script,
-        plan.variant.epsilon,
-        plan.variant.phi,
-        plan.variant.q2,
-        plan.variant.w,
-        plan.variant.target,
-        str(plan.run),
     ]
+    if not plan.skim_kaon_output_exists:
+        cmd.extend(
+            [
+                "-output",
+                skim_output_basename("kaon", plan.run),
+                to_mss_output_file_uri(skim_mss_output_file(plan, "kaon")),
+            ]
+        )
+    if not plan.skim_pion_output_exists:
+        cmd.extend(
+            [
+                "-output",
+                skim_output_basename("pion", plan.run),
+                to_mss_output_file_uri(skim_mss_output_file(plan, "pion")),
+            ]
+        )
+    cmd.extend(
+        [
+            applycuts_script,
+            plan.variant.epsilon,
+            plan.variant.phi,
+            plan.variant.q2,
+            plan.variant.w,
+            plan.variant.target,
+            str(plan.run),
+        ]
+    )
+    return cmd
+
+
+def to_mss_output_file_uri(destination: Path) -> str:
+    text = str(destination)
+    if text.startswith("mss:"):
+        return text
+    return f"mss:{text}"
 
 
 def jasmine_job_name(plan: RunPlan) -> str:
@@ -700,7 +787,7 @@ def print_summary(
     print(f"Manifest directory: {expand_path(args.manifest_dir)}")
     print(f"Workflow         : {workflow}")
     print(f"applyCuts script : {expand_path(args.applycuts_script)}")
-    print("Jasmine uploads  : manual ifarm step")
+    print("Skim MSS copy    : SWIF -output")
     print(f"Replay cache root: {paths.cachepath}")
     print(f"Skim source      : {paths.skim_source_dir}")
     print(f"Account          : {args.account}")
@@ -722,17 +809,30 @@ def print_summary(
             print(f"    runs_file: {runs_file}")
         for destination in variant.replay_destinations:
             print(f"    replay_mss_destination: {destination}")
+        print(f"    skim_mss_destination: {variant.skim_destination}")
     print()
 
     print("Planned SWIF2 jobs")
     print("-" * 80)
     applycuts_script = str(expand_path(args.applycuts_script))
     for plan in plans:
+        if plan.status == "SKIP" and plan.reason == "existing_mss_output":
+            print(f"[SKIP existing_mss_output] run={plan.run} variant={plan.variant.family} job={plan.job_name}")
+            print(f"         existing_mss_output: {skim_mss_output_file(plan, 'kaon')}")
+            print(f"         existing_mss_output: {skim_mss_output_file(plan, 'pion')}")
+            continue
         if plan.should_add:
             if args.skip_existing and plan.job_name in existing_job_names:
                 status = "SKIP existing"
             else:
                 status = "ADD"
+            status_parts: List[str] = []
+            if plan.skim_kaon_output_exists:
+                status_parts.append("kaon_exists")
+            if plan.skim_pion_output_exists:
+                status_parts.append("pion_exists")
+            if status_parts:
+                status += " (" + ", ".join(status_parts) + ")"
         else:
             status = f"{plan.status} {plan.reason}"
         print(f"[{status}] run={plan.run} variant={plan.variant.family} job={plan.job_name}")
@@ -744,7 +844,12 @@ def print_summary(
             print("         replay_cache : missing")
         else:
             print(f"         replay_cache : {plan.replay_cache_file}")
-        print(f"         skim    : {plan.skim_kaon.name}, {plan.skim_pion.name}")
+        print(f"         skim_mss_destination : {plan.skim_destination}")
+        print(f"         skim_local_source    : {plan.skim_kaon}, {plan.skim_pion}")
+        if plan.skim_kaon_output_exists:
+            print(f"         existing_kaon_mss_output: {skim_mss_output_file(plan, 'kaon')}")
+        if plan.skim_pion_output_exists:
+            print(f"         existing_pion_mss_output: {skim_mss_output_file(plan, 'pion')}")
         if plan.cache_request_command:
             print("         request : " + " ".join(shlex.quote(x) for x in plan.cache_request_command))
         if plan.should_add:
@@ -802,9 +907,11 @@ def submit_jobs(
 
     eligible_plans = [plan for plan in plans if plan.should_add]
     if not eligible_plans:
-        print("No cache-ready applyCuts jobs to submit yet.")
         if waiting_plans and args.request_missing_cache:
+            print("No cache-ready applyCuts jobs to submit yet.")
             print("Missing replay ROOT files were requested for cache staging where configured.")
+        else:
+            print("No applyCuts jobs need submission; requested skim MSS outputs already exist.")
         return 0
 
     created, create_cmd = ensure_workflow(args.swif2_bin, workflow, args.max_concurrent, submit=True)
@@ -817,9 +924,6 @@ def submit_jobs(
     existing_names = set(existing_job_names)
     rc = 0
     for plan in eligible_plans:
-        if not plan.should_add:
-            continue
-
         if args.skip_existing and plan.job_name in existing_names:
             print(f"Skipping existing job: {plan.job_name}")
         else:
@@ -841,6 +945,12 @@ def submit_jobs(
             if result.stderr:
                 print(result.stderr.rstrip(), file=sys.stderr)
             if result.returncode != 0:
+                stderr_text = result.stderr or ""
+                stdout_text = result.stdout or ""
+                if "File already exists on tape" in stderr_text or "File already exists on tape" in stdout_text:
+                    print(f"Skipping run {plan.run}; SWIF reports an existing MSS output conflict.")
+                    print()
+                    continue
                 rc = result.returncode
                 print(f"ERROR: add-job failed for {plan.job_name}", file=sys.stderr)
                 break

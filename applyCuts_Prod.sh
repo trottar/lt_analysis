@@ -1,5 +1,7 @@
 #! /bin/bash
 
+JOB_LAUNCH_DIR="$(pwd)"
+
 # Runs a repo-local ltsep wrapper so batch jobs do not depend on upstream
 # getPathDict.py calling os.getlogin() on worker nodes.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -511,6 +513,26 @@ cd "${LTANAPATH}/src/setup"
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 
+stage_swif_output_copy() {
+    local source_file="$1"
+    local staged_file="${JOB_LAUNCH_DIR}/$(basename "${source_file}")"
+
+    if [[ ! -f "${source_file}" ]]; then
+        echo "ERROR: expected skim output not found at ${source_file}"
+        return 1
+    fi
+
+    cp -f "${source_file}" "${staged_file}"
+    local copy_rc=$?
+    if [[ "${copy_rc}" -ne 0 ]]; then
+        echo "ERROR: failed to stage skim output into ${staged_file}"
+        return "${copy_rc}"
+    fi
+
+    echo "Staged SWIF skim output copy at ${staged_file}"
+    return 0
+}
+
 run_applycuts_particle() {
     local phi_label="$1"
     local particle="$2"
@@ -519,7 +541,8 @@ run_applycuts_particle() {
 
     if [ -e "$out_f_file" ]; then
         echo "$out_f_file already exists. Skipping analysis for ${particle}."
-        return 0
+        stage_swif_output_copy "$out_f_file"
+        return $?
     fi
 
     rm -f "$log_file"
@@ -529,7 +552,13 @@ run_applycuts_particle() {
         return $rc
     fi
 
-    return 0
+    if [[ ! -f "$out_f_file" ]]; then
+        echo "ERROR: expected skim output not found at ${out_f_file}"
+        return 1
+    fi
+
+    stage_swif_output_copy "$out_f_file"
+    return $?
 }
 
 if [[ $p_flag = "true" ]]; then
