@@ -27,6 +27,7 @@ MEMORY_PAT = re.compile(r"(out[_ -]?of[_ -]?memory|oom|memory limit|maxrss|excee
 TIME_PAT = re.compile(r"(time[_ -]?limit|timed out|due to time limit|wall ?time)", re.I)
 DISK_PAT = re.compile(r"(no space left on device|disk full|disk quota|scratch|no space)", re.I)
 SUBMIT_TIMEOUT_PAT = re.compile(r"Command timed out:\s*sbatch\b", re.I)
+OUTPUT_EXISTS_PAT = re.compile(r"File already exists on tape:", re.I)
 SITE_PAT = re.compile(r"(site[_ -]?launch[_ -]?fail|invalid account|partition)", re.I)
 CACHE_PAT = re.compile(r"(jcache|cache|coin_all_|raw file|missing raw|staging)", re.I)
 PATH_PAT = re.compile(r"(not found|no such file|does not exist|permission denied|macro .* not found)", re.I)
@@ -94,6 +95,11 @@ def parse_show_job_output(text: str) -> Dict[str, str]:
 
 def classify_failure(problem: str, details: str) -> tuple[str, str]:
     haystack = f"{problem} {details}"
+    if problem.strip().upper() == "SWIF_OUTPUT_FAIL" and OUTPUT_EXISTS_PAT.search(details):
+        return (
+            "output_exists_on_tape",
+            "These jobs completed, but SWIF could not export because the target MSS file already exists; do not retry unchanged jobs.",
+        )
     if SUBMIT_TIMEOUT_PAT.search(details) or (
         problem.strip().upper() == "SWIF_SYSTEM_ERROR" and "sbatch" in details and "timed out" in details.lower()
     ):
@@ -203,6 +209,8 @@ def main() -> int:
         print("* For memory/time/disk failures, rebalance resources before retrying.")
     if "scheduler_submit_timeout" in groups:
         print("* For scheduler submit timeouts, retry the failed jobs first; these are not wall-time failures inside your script.")
+    if "output_exists_on_tape" in groups:
+        print("* For output-exists-on-tape jobs, treat the MSS copy as already present; skip/recreate those jobs only if you need a different destination or a clean workflow state.")
     print("* After retries or resource changes, run:")
     print(f"    {args.swif2_bin} run {args.workflow}")
     return 0
