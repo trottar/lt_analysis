@@ -26,6 +26,7 @@ DEFAULT_SWIF2 = os.environ.get("SWIF2_BIN", "swif2")
 MEMORY_PAT = re.compile(r"(out[_ -]?of[_ -]?memory|oom|memory limit|maxrss|exceeded memory)", re.I)
 TIME_PAT = re.compile(r"(time[_ -]?limit|timed out|due to time limit|wall ?time)", re.I)
 DISK_PAT = re.compile(r"(no space left on device|disk|scratch)", re.I)
+SUBMIT_TIMEOUT_PAT = re.compile(r"Command timed out:\s*sbatch\b", re.I)
 
 
 @dataclass(frozen=True)
@@ -81,6 +82,14 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
         ram_bytes = int(job.get("site_job_ram_bytes") or 0)
         disk_bytes = int(job.get("site_job_disk_bytes") or 0)
         time_secs = int(job.get("site_job_time_secs") or 0)
+        if SUBMIT_TIMEOUT_PAT.search(details) or (
+            problem.strip().upper() == "SWIF_SYSTEM_ERROR"
+            and "sbatch" in details
+            and "timed out" in details.lower()
+        ):
+            # This is a scheduler submit timeout before the job actually starts.
+            # Retrying is the right default; resource bumping is not.
+            continue
         haystack = f"{problem} {details}"
         categories: Set[str] = set()
         if MEMORY_PAT.search(haystack):
