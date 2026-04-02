@@ -15,6 +15,7 @@ fi
 resolve_ltsep_python() {
     local shell_user="${USER:-$(id -un 2>/dev/null)}"
     local -a candidates=()
+    local import_probe='import importlib; m=importlib.import_module("ltsep"); getattr(m, "Root", None) or getattr(importlib.import_module("ltsep.ltsep"), "Root")'
 
     if [[ -n "${LTSEP_PYTHON:-}" ]]; then
         candidates+=("${LTSEP_PYTHON}")
@@ -39,13 +40,13 @@ resolve_ltsep_python() {
     for candidate in "${candidates[@]}"; do
         if [[ "${candidate}" == */* ]]; then
             [[ -x "${candidate}" ]] || continue
-            if "${candidate}" -c 'import ltsep' >/dev/null 2>&1; then
+            if "${candidate}" -c "${import_probe}" >/dev/null 2>&1; then
                 printf '%s\n' "${candidate}"
                 return 0
             fi
         else
             resolved="$(command -v "${candidate}" 2>/dev/null)" || continue
-            if [[ -n "${resolved}" ]] && "${resolved}" -c 'import ltsep' >/dev/null 2>&1; then
+            if [[ -n "${resolved}" ]] && "${resolved}" -c "${import_probe}" >/dev/null 2>&1; then
                 printf '%s\n' "${resolved}"
                 return 0
             fi

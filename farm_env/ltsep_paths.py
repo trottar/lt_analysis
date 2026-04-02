@@ -100,7 +100,10 @@ def _ensure_safe_getlogin() -> None:
 
 def create_ltsep_root(caller_path: Optional[str] = None, *root_args):
     _ensure_safe_getlogin()
-    from ltsep import Root
+    try:
+        from ltsep import Root
+    except ImportError:
+        from ltsep.ltsep import Root
 
     probe = os.path.realpath(caller_path or __file__)
     return Root(probe, *root_args)
