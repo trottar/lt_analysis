@@ -25,57 +25,7 @@ JOB_LAUNCH_DIR="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
-
-resolve_ltsep_python() {
-    local shell_user="${USER:-$(id -un 2>/dev/null)}"
-    local -a candidates=()
-    local import_probe='import importlib; m=importlib.import_module("ltsep"); getattr(m, "Root", None) or getattr(importlib.import_module("ltsep.ltsep"), "Root")'
-
-    if [[ -n "${LTSEP_PYTHON:-}" ]]; then
-        candidates+=("${LTSEP_PYTHON}")
-    fi
-    if [[ -n "${REPLAY_LT_ENV:-}" ]]; then
-        candidates+=("${REPLAY_LT_ENV}/bin/python3" "${REPLAY_LT_ENV}/bin/python")
-    fi
-    if [[ -n "${replay_lt_env:-}" ]]; then
-        candidates+=("${replay_lt_env}/bin/python3" "${replay_lt_env}/bin/python")
-    fi
-    if [[ -n "${shell_user}" ]]; then
-        candidates+=(
-            "/u/group/c-kaonlt/USERS/${shell_user}/replay_lt_env/bin/python3"
-            "/u/group/c-kaonlt/USERS/${shell_user}/replay_lt_env/bin/python"
-            "/group/c-kaonlt/USERS/${shell_user}/replay_lt_env/bin/python3"
-            "/group/c-kaonlt/USERS/${shell_user}/replay_lt_env/bin/python"
-        )
-    fi
-    candidates+=("python3" "python" "/usr/bin/python3" "/usr/bin/python")
-
-    local candidate resolved
-    for candidate in "${candidates[@]}"; do
-        if [[ "${candidate}" == */* ]]; then
-            [[ -x "${candidate}" ]] || continue
-            if "${candidate}" -c "${import_probe}" >/dev/null 2>&1; then
-                printf '%s\n' "${candidate}"
-                return 0
-            fi
-        else
-            resolved="$(command -v "${candidate}" 2>/dev/null)" || continue
-            if [[ -n "${resolved}" ]] && "${resolved}" -c "${import_probe}" >/dev/null 2>&1; then
-                printf '%s\n' "${resolved}"
-                return 0
-            fi
-        fi
-    done
-    return 1
-}
-
-LTSEP_PYTHON="$(resolve_ltsep_python)"
-if [[ -z "${LTSEP_PYTHON}" ]]; then
-    echo "ERROR: could not find a Python interpreter that imports ltsep" >&2
-    exit 1
-fi
-
-PATHFILE_INFO="$("${LTSEP_PYTHON}" "${LTSEP_FIELDS_SCRIPT}" "${REPO_ROOT}")"
+PATHFILE_INFO="$(python3 "${LTSEP_FIELDS_SCRIPT}" "${REPO_ROOT}")"
 path_rc=$?
 if [[ "${path_rc}" -ne 0 || -z "${PATHFILE_INFO}" ]]; then
     echo "ERROR: failed to resolve ltsep paths via ${LTSEP_FIELDS_SCRIPT}" >&2
