@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import shlex
@@ -33,6 +34,9 @@ class ProblemJob:
     problem: str
     details: str
     categories: frozenset[str]
+    ram_bytes: int = 0
+    disk_bytes: int = 0
+    time_secs: int = 0
 
 
 
@@ -74,6 +78,9 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
             continue
         problem = str(job.get("job_attempt_problem", ""))
         details = str(job.get("job_attempt_problem_details", ""))
+        ram_bytes = int(job.get("site_job_ram_bytes") or 0)
+        disk_bytes = int(job.get("site_job_disk_bytes") or 0)
+        time_secs = int(job.get("site_job_time_secs") or 0)
         haystack = f"{problem} {details}"
         categories: Set[str] = set()
         if MEMORY_PAT.search(haystack):
@@ -89,6 +96,9 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
                     problem=problem,
                     details=details,
                     categories=frozenset(categories),
+                    ram_bytes=ram_bytes,
+                    disk_bytes=disk_bytes,
+                    time_secs=time_secs,
                 )
             )
     return problems
@@ -96,13 +106,20 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
 
 
 def build_modify_commands(args: argparse.Namespace, problems: Sequence[ProblemJob]) -> List[List[str]]:
-    grouped: Dict[str, List[str]] = defaultdict(list)
+    grouped: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
     for problem in problems:
-        for category in sorted(problem.categories):
-            grouped[category].append(problem.job_name)
+        if "memory" in problem.categories and problem.ram_bytes > 0:
+            new_ram = str(int(math.ceil(problem.ram_bytes * args.ram_mult)))
+            grouped["memory"][new_ram].append(problem.job_name)
+        if "time" in problem.categories and problem.time_secs > 0:
+            new_time = str(int(math.ceil(problem.time_secs * args.time_mult)))
+            grouped["time"][new_time].append(problem.job_name)
+        if "disk" in problem.categories and problem.disk_bytes > 0:
+            new_disk = str(int(math.ceil(problem.disk_bytes * args.disk_mult)))
+            grouped["disk"][new_disk].append(problem.job_name)
 
     commands: List[List[str]] = []
-    if grouped.get("memory"):
+    for new_ram, names in sorted(grouped.get("memory", {}).items()):
         commands.append(
             [
                 args.swif2_bin,
@@ -110,12 +127,12 @@ def build_modify_commands(args: argparse.Namespace, problems: Sequence[ProblemJo
                 args.workflow,
                 "-names",
                 "-ram",
-                "mult",
-                str(args.ram_mult),
-                *sorted(set(grouped["memory"])),
+                "set",
+                new_ram,
+                *sorted(set(names)),
             ]
         )
-    if grouped.get("time"):
+    for new_time, names in sorted(grouped.get("time", {}).items()):
         commands.append(
             [
                 args.swif2_bin,
@@ -123,12 +140,12 @@ def build_modify_commands(args: argparse.Namespace, problems: Sequence[ProblemJo
                 args.workflow,
                 "-names",
                 "-time",
-                "mult",
-                str(args.time_mult),
-                *sorted(set(grouped["time"])),
+                "set",
+                new_time,
+                *sorted(set(names)),
             ]
         )
-    if grouped.get("disk"):
+    for new_disk, names in sorted(grouped.get("disk", {}).items()):
         commands.append(
             [
                 args.swif2_bin,
@@ -136,9 +153,9 @@ def build_modify_commands(args: argparse.Namespace, problems: Sequence[ProblemJo
                 args.workflow,
                 "-names",
                 "-disk",
-                "mult",
-                str(args.disk_mult),
-                *sorted(set(grouped["disk"])),
+                "set",
+                new_disk,
+                *sorted(set(names)),
             ]
         )
     return commands
