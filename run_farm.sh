@@ -38,7 +38,7 @@ while getopts 'hsrancjdw:m:A:P:' flag; do
         echo "    -n, do not call 'swif2 run' after submit/rebalance"
         echo "    -c, use applyCuts mode instead of replay mode"
         echo "    -j, use interactive Jasmine upload mode"
-        echo "    -d, diagnose failed jobs in an existing workflow"
+        echo "    -d, diagnose failed jobs and validate completed ROOT outputs in cache"
         echo "    -w, override workflow name"
         echo "    -m, override manifest directory (default: input/kaon)"
         echo "    -A, override SWIF/Slurm account (default from helper)"

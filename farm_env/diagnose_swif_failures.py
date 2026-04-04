@@ -19,7 +19,8 @@ import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence
+from pathlib import Path
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 DEFAULT_SWIF2 = os.environ.get("SWIF2_BIN", "swif2")
 
@@ -32,6 +33,16 @@ SITE_PAT = re.compile(r"(site[_ -]?launch[_ -]?fail|invalid account|partition)",
 CACHE_PAT = re.compile(r"(jcache|cache|coin_all_|raw file|missing raw|staging)", re.I)
 PATH_PAT = re.compile(r"(not found|no such file|does not exist|permission denied|macro .* not found)", re.I)
 
+CACHE_ROOT_CANDIDATES = tuple(
+    dict.fromkeys(
+        [
+            os.environ.get("CACHEPATH", "").strip(),
+            "/lustre/expphy/cache/hallc/kaonlt",
+            "/cache/hallc/kaonlt",
+        ]
+    )
+)
+
 
 @dataclass(frozen=True)
 class FailedJob:
@@ -43,6 +54,16 @@ class FailedJob:
     slurm_exitcode: str = ""
     slurm_state: str = ""
     slurm_id: str = ""
+
+
+@dataclass(frozen=True)
+class RootOutputCheck:
+    job_name: str
+    local_name: str
+    remote_path: str
+    cache_path: str
+    status: str
+    detail: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -83,6 +104,27 @@ def load_problem_job_names(swif2_bin: str, workflow: str) -> List[str]:
     return names
 
 
+def load_done_job_names(swif2_bin: str, workflow: str) -> List[str]:
+    cmd = [swif2_bin, "status", workflow, "-jobs", "-display", "json"]
+    result = run_command(cmd, capture=True)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Failed to query workflow {workflow}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
+    payload = json.loads(result.stdout)
+    jobs = payload.get("jobs", [])
+    names: List[str] = []
+    for job in jobs:
+        if not isinstance(job, dict):
+            continue
+        if str(job.get("job_attempt_status", "")).lower() != "done":
+            continue
+        job_name = str(job.get("job_name", "")).strip()
+        if job_name:
+            names.append(job_name)
+    return names
+
+
 def parse_show_job_output(text: str) -> Dict[str, str]:
     data: Dict[str, str] = {}
     for raw in text.splitlines():
@@ -91,6 +133,23 @@ def parse_show_job_output(text: str) -> Dict[str, str]:
         key, value = raw.split("=", 1)
         data[key.strip()] = value.strip()
     return data
+
+
+def parse_show_job_outputs(text: str) -> List[Tuple[str, str]]:
+    outputs: List[Tuple[str, str]] = []
+    pending_local: Optional[str] = None
+    for raw in text.splitlines():
+        if "=" not in raw:
+            continue
+        key, value = raw.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if key == "local":
+            pending_local = value
+        elif key == "remote":
+            outputs.append((pending_local or "", value))
+            pending_local = None
+    return outputs
 
 
 def classify_failure(problem: str, details: str) -> tuple[str, str]:
@@ -147,6 +206,101 @@ def inspect_failed_job(swif2_bin: str, workflow: str, job_name: str) -> FailedJo
     )
 
 
+def validate_root_file(path: Path) -> Tuple[str, str]:
+    if not path.exists():
+        return ("missing_cache_file", "file does not exist in cache")
+    try:
+        size_bytes = path.stat().st_size
+    except OSError as exc:
+        return ("cache_stat_error", str(exc))
+    if size_bytes <= 0:
+        return ("zero_size_file", "file exists but has zero size")
+
+    root_exc: Optional[Exception] = None
+    try:
+        import ROOT  # type: ignore
+
+        ROOT.gROOT.SetBatch(True)
+        root_file = ROOT.TFile.Open(str(path), "READ")
+        if not root_file:
+            return ("unreadable_root", "ROOT.TFile.Open returned null")
+        try:
+            if root_file.IsZombie():
+                return ("zombie_root_file", "ROOT marked file as zombie")
+            if root_file.TestBit(ROOT.TFile.kRecovered):
+                return ("recovered_root_file", "ROOT marked file as recovered")
+            keys = root_file.GetListOfKeys()
+            key_count = int(keys.GetSize()) if keys is not None else 0
+            return ("healthy_root_file", f"ROOT opened successfully; keys={key_count}; size={size_bytes}")
+        finally:
+            root_file.Close()
+    except Exception as exc:  # pragma: no cover - depends on runtime env
+        root_exc = exc
+
+    try:
+        import uproot  # type: ignore
+
+        with uproot.open(path) as handle:
+            key_count = len(handle.keys())
+        return ("healthy_root_file", f"uproot opened successfully; keys={key_count}; size={size_bytes}")
+    except Exception as exc:  # pragma: no cover - depends on runtime env
+        if root_exc is not None:
+            return ("unreadable_root", f"ROOT failed: {root_exc}; uproot failed: {exc}")
+        return ("unreadable_root", f"uproot failed: {exc}")
+
+
+def derive_cache_path_from_mss(mss_path: Path) -> Path:
+    mss_text = str(mss_path)
+    candidates: List[Path] = []
+    if mss_text.startswith("/mss/hallc/kaonlt"):
+        suffix = mss_text[len("/mss/hallc/kaonlt"):].lstrip("/")
+        for root in CACHE_ROOT_CANDIDATES:
+            if root:
+                candidates.append(Path(root).expanduser() / suffix)
+    elif mss_text.startswith("/mss/"):
+        candidates.append(Path("/cache" + mss_text[4:]).expanduser())
+        candidates.append(Path("/lustre/expphy/cache" + mss_text[4:]).expanduser())
+    else:
+        candidates.append(mss_path)
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0] if candidates else mss_path
+
+
+def inspect_success_root_outputs(swif2_bin: str, workflow: str, job_name: str) -> List[RootOutputCheck]:
+    cmd = [swif2_bin, "show-job", "-workflow", workflow, "-name", job_name]
+    result = run_command(cmd, capture=True)
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Failed to inspect job {job_name}\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
+
+    outputs = parse_show_job_outputs(result.stdout)
+    if not outputs:
+        return []
+
+    checks: List[RootOutputCheck] = []
+    for local_name, remote_name in outputs:
+        if not remote_name.lower().endswith(".root"):
+            continue
+        remote_path = Path(remote_name)
+        cache_path = derive_cache_path_from_mss(remote_path)
+        status, detail = validate_root_file(cache_path)
+        checks.append(
+            RootOutputCheck(
+                job_name=job_name,
+                local_name=local_name,
+                remote_path=str(remote_path),
+                cache_path=str(cache_path),
+                status=status,
+                detail=detail,
+            )
+        )
+    return checks
+
+
 def grouped(items: Iterable[FailedJob]) -> Dict[str, List[FailedJob]]:
     groups: Dict[str, List[FailedJob]] = defaultdict(list)
     for item in items:
@@ -176,27 +330,74 @@ def print_group(name: str, jobs: Sequence[FailedJob], workflow: str, swif2_bin: 
     print()
 
 
+def print_success_root_checks(checks: Sequence[RootOutputCheck]) -> None:
+    print("Completed ROOT Cache Checks")
+    print("-" * 80)
+    if not checks:
+        print("No completed ROOT outputs were found to inspect.")
+        return
+
+    grouped_checks: Dict[str, List[RootOutputCheck]] = defaultdict(list)
+    for check in checks:
+        grouped_checks[check.status].append(check)
+
+    total = len(checks)
+    healthy = len(grouped_checks.get("healthy_root_file", []))
+    suspicious = total - healthy
+    print(f"ROOT outputs inspected : {total}")
+    print(f"Healthy cache files    : {healthy}")
+    print(f"Suspicious cache files : {suspicious}")
+    print()
+
+    if suspicious == 0:
+        print("All inspected cache ROOT files opened cleanly.")
+        return
+
+    for status in sorted(grouped_checks):
+        if status == "healthy_root_file":
+            continue
+        bucket = grouped_checks[status]
+        print(f"[{status}] count={len(bucket)}")
+        for check in bucket:
+            print(f"* {check.job_name}")
+            print(f"    local      : {check.local_name}")
+            print(f"    remote     : {check.remote_path}")
+            print(f"    cache      : {check.cache_path}")
+            print(f"    detail     : {check.detail}")
+        print()
+
+
 def main() -> int:
     args = parse_args()
     problem_names = load_problem_job_names(args.swif2_bin, args.workflow)
-    if not problem_names:
-        print("No current failed/problem jobs found.")
-        return 0
+    done_names = load_done_job_names(args.swif2_bin, args.workflow)
 
     if args.limit > 0:
         problem_names = problem_names[: args.limit]
+        done_names = done_names[: args.limit]
 
     failed_jobs = [inspect_failed_job(args.swif2_bin, args.workflow, job_name) for job_name in problem_names]
-    groups = grouped(failed_jobs)
+    groups = grouped(failed_jobs) if failed_jobs else {}
+    root_checks: List[RootOutputCheck] = []
+    for job_name in done_names:
+        root_checks.extend(inspect_success_root_outputs(args.swif2_bin, args.workflow, job_name))
 
     print(f"Workflow: {args.workflow}")
     print(f"Failed jobs inspected: {len(failed_jobs)}")
+    print(f"Completed jobs inspected: {len(done_names)}")
     print()
 
     print("Failure groups")
     print("-" * 80)
-    for group_name in sorted(groups):
-        print_group(group_name, groups[group_name], args.workflow, args.swif2_bin)
+    if not groups:
+        print("No current failed/problem jobs found.")
+        print()
+    else:
+        for group_name in sorted(groups):
+            print_group(group_name, groups[group_name], args.workflow, args.swif2_bin)
+
+    print_success_root_checks(root_checks)
+    print()
 
     resource_groups = [name for name in groups if name.startswith("resource_")]
     non_resource_groups = [name for name in groups if not name.startswith("resource_")]
@@ -211,6 +412,9 @@ def main() -> int:
         print("* For scheduler submit timeouts, retry the failed jobs first; these are not wall-time failures inside your script.")
     if "output_exists_on_tape" in groups:
         print("* For output-exists-on-tape jobs, treat the MSS copy as already present; skip/recreate those jobs only if you need a different destination or a clean workflow state.")
+    suspicious_root_checks = [check for check in root_checks if check.status != "healthy_root_file"]
+    if suspicious_root_checks:
+        print("* For suspicious cache ROOT files, inspect or restage those cache entries before trusting the completed job.")
     print("* After retries or resource changes, run:")
     print(f"    {args.swif2_bin} run {args.workflow}")
     return 0
