@@ -221,16 +221,25 @@ def validate_root_file(path: Path) -> Tuple[str, str]:
         import ROOT  # type: ignore
 
         ROOT.gROOT.SetBatch(True)
-        root_file = ROOT.TFile.Open(str(path), "READ")
+        previous_error_level = int(getattr(ROOT, "gErrorIgnoreLevel", 0))
+        try:
+            ROOT.gErrorIgnoreLevel = ROOT.kError
+            root_file = ROOT.TFile.Open(str(path), "READ")
+        finally:
+            ROOT.gErrorIgnoreLevel = previous_error_level
         if not root_file:
             return ("unreadable_root", "ROOT.TFile.Open returned null")
         try:
+            if not root_file.IsOpen():
+                return ("unreadable_root", "ROOT opened a handle but file is not open")
             if root_file.IsZombie():
                 return ("zombie_root_file", "ROOT marked file as zombie")
             if root_file.TestBit(ROOT.TFile.kRecovered):
                 return ("recovered_root_file", "ROOT marked file as recovered")
             keys = root_file.GetListOfKeys()
             key_count = int(keys.GetSize()) if keys is not None else 0
+            if key_count <= 0:
+                return ("root_file_has_no_keys", f"ROOT opened file but found no keys; size={size_bytes}")
             return ("healthy_root_file", f"ROOT opened successfully; keys={key_count}; size={size_bytes}")
         finally:
             root_file.Close()
@@ -242,6 +251,8 @@ def validate_root_file(path: Path) -> Tuple[str, str]:
 
         with uproot.open(path) as handle:
             key_count = len(handle.keys())
+        if key_count <= 0:
+            return ("root_file_has_no_keys", f"uproot opened file but found no keys; size={size_bytes}")
         return ("healthy_root_file", f"uproot opened successfully; keys={key_count}; size={size_bytes}")
     except Exception as exc:  # pragma: no cover - depends on runtime env
         if root_exc is not None:
