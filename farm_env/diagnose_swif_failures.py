@@ -319,6 +319,13 @@ def grouped(items: Iterable[FailedJob]) -> Dict[str, List[FailedJob]]:
     return dict(groups)
 
 
+def format_root_check_progress(job_name: str, current: int, total: int) -> str:
+    match = re.search(r"run(\d+)", job_name, re.I)
+    run_label = match.group(1) if match else "unknown"
+    percent = (100.0 * current / total) if total else 100.0
+    return f"[ROOT check {current}/{total} | {percent:5.1f}%] run={run_label} job={job_name}"
+
+
 def print_group(name: str, jobs: Sequence[FailedJob], workflow: str, swif2_bin: str) -> None:
     print(f"[{name}] count={len(jobs)}")
     for job in jobs:
@@ -390,7 +397,11 @@ def main() -> int:
     failed_jobs = [inspect_failed_job(args.swif2_bin, args.workflow, job_name) for job_name in problem_names]
     groups = grouped(failed_jobs) if failed_jobs else {}
     root_checks: List[RootOutputCheck] = []
-    for job_name in done_names:
+    completed_total = len(done_names)
+    if completed_total:
+        print(f"Checking completed ROOT outputs in cache ({completed_total} jobs)...", flush=True)
+    for index, job_name in enumerate(done_names, start=1):
+        print(format_root_check_progress(job_name, index, completed_total), flush=True)
         root_checks.extend(inspect_success_root_outputs(args.swif2_bin, args.workflow, job_name))
 
     print(f"Workflow: {args.workflow}")
