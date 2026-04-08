@@ -152,16 +152,18 @@ def _apply_named_cuts(column_data, cut_names):
     cut_results = {}
 
     for i, cut_name in enumerate(cut_names):
-        Misc.progressBar(i, len(cut_names)-1, bar_length=25)
+        print("\nApplying {}...".format(cut_name), flush=True)
         fast_cut_indices = _coerce_cut_indices(c.add_cut(event_index, cut_name), n_rows)
 
         if fast_cut_indices is not None:
             reference_cut = np.asarray(c.add_cut(reference_column, cut_name))
             if np.array_equal(reference_column[fast_cut_indices], reference_cut):
                 cut_results[cut_name] = [column[fast_cut_indices] for column in numeric_columns]
+                Misc.progressBar(i, len(cut_names)-1, bar_length=25)
                 continue
 
         cut_results[cut_name] = [c.add_cut(column, cut_name) for column in numeric_columns]
+        Misc.progressBar(i, len(cut_names)-1, bar_length=25)
 
     return cut_results
 
