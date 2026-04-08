@@ -580,17 +580,25 @@ resolve_real_path() {
 
 build_replay_input_dir() {
     local analysis_leaf="${ANATYPE}LT"
-    local base_path="$1"
+    local base_path="${1%/}"
 
-    if [[ "${base_path}" == *"/Analysis/${analysis_leaf}" ]]; then
-        printf '%s\n' "${base_path}"
-    elif [[ "${base_path}" == *"/Analysis" ]]; then
-        printf '%s/%s\n' "${base_path}" "${analysis_leaf}"
-    elif [[ "${base_path}" == *"None"* ]]; then
-        printf '%s\n' "${base_path/None/Analysis/${analysis_leaf}}"
-    else
-        printf '%s/Analysis/%s\n' "${base_path}" "${analysis_leaf}"
-    fi
+    case "${base_path}" in
+        */Analysis/"${analysis_leaf}")
+            printf '%s\n' "${base_path}"
+            ;;
+        */Analysis)
+            printf '%s/%s\n' "${base_path}" "${analysis_leaf}"
+            ;;
+        */ROOTfiles)
+            printf '%s/Analysis/%s\n' "${base_path}" "${analysis_leaf}"
+            ;;
+        */None)
+            printf '%s/Analysis/%s\n' "${base_path%/None}" "${analysis_leaf}"
+            ;;
+        *)
+            printf '%s/Analysis/%s\n' "${base_path}" "${analysis_leaf}"
+            ;;
+    esac
 }
 
 build_replay_input_file() {
