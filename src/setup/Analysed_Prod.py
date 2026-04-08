@@ -353,16 +353,11 @@ def main():
         print("\n[{}/{}] Preparing {}...".format(output_index, len(output_keys), data_keys[i]), flush=True)
         structured_array = _build_structured_array_from_columns(data.get(data_keys[i]), DFHeader, data_keys[i])
         if structured_array is None:
-            Misc.progressBar(output_index-1, len(output_keys)-1, bar_length=25)
-            sys.stdout.flush()
             continue
 
         # Save the structured array to ROOT file
         print("[{}/{}] Writing {} to {}...".format(output_index, len(output_keys), data_keys[i], out_f_file), flush=True)
         rnp.array2root(structured_array, out_f_file, mode='recreate' if i == 0 else 'update', treename=data_keys[i])
-        
-        Misc.progressBar(output_index-1, len(output_keys)-1, bar_length=25)
-        sys.stdout.flush()
 
 if __name__ == '__main__':
     main()
