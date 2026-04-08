@@ -311,13 +311,16 @@ def main():
     data_keys = list(data.keys()) # Create a list of all the keys in all dicts added above, each is an array of data
 
     term_search = ParticleType.capitalize()
+    output_keys = [key for key in data_keys if term_search in key]
     
     out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (SKIM_OUTPATH, ParticleType, runNum, MaxEvent)
         
     print("\n\nSaving data to new root files...")
+    output_index = 0
     for i in range (0, len(data_keys)):
         if(term_search in data_keys[i]):
             DFHeader=list(COIN_Data_Header)
+            output_index += 1
         else:
             continue
             # Uncomment the line below if you want .csv file output, WARNING the files can be very large and take a long time to process!                                                                      
@@ -328,14 +331,17 @@ def main():
         #elif (i != 0):
         #    pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i], mode ='a')
         
+        print("\n[{}/{}] Preparing {}...".format(output_index, len(output_keys), data_keys[i]))
         structured_array = _build_structured_array_from_columns(data.get(data_keys[i]), DFHeader, data_keys[i])
         if structured_array is None:
+            Misc.progressBar(output_index-1, len(output_keys)-1, bar_length=25)
             continue
 
         # Save the structured array to ROOT file
+        print("[{}/{}] Writing {} to {}...".format(output_index, len(output_keys), data_keys[i], out_f_file))
         rnp.array2root(structured_array, out_f_file, mode='recreate' if i == 0 else 'update', treename=data_keys[i])
         
-        Misc.progressBar(i, len(data_keys)-1,bar_length=25)
+        Misc.progressBar(output_index-1, len(output_keys)-1, bar_length=25)
 
 if __name__ == '__main__':
     main()
