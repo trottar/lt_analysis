@@ -115,6 +115,57 @@ def _build_structured_array_from_columns(column_data, headers, tree_name):
     return np.core.records.fromarrays(numeric_columns, names=headers)
 
 
+def _coerce_cut_indices(index_values, n_rows):
+    raw_indices = np.asarray(index_values)
+    if raw_indices.size == 0:
+        return np.asarray([], dtype=np.int64)
+
+    if np.issubdtype(raw_indices.dtype, np.integer):
+        cut_indices = raw_indices.astype(np.int64, copy=False)
+    elif np.issubdtype(raw_indices.dtype, np.floating):
+        if not np.all(np.isfinite(raw_indices)):
+            return None
+        rounded_indices = np.rint(raw_indices)
+        if not np.allclose(raw_indices, rounded_indices):
+            return None
+        cut_indices = rounded_indices.astype(np.int64, copy=False)
+    else:
+        return None
+
+    if np.any(cut_indices < 0) or np.any(cut_indices >= n_rows):
+        return None
+
+    return cut_indices
+
+
+def _apply_named_cuts(column_data, cut_names):
+    numeric_columns = [np.asarray(column) for column in column_data]
+    if not numeric_columns:
+        return {cut_name: [] for cut_name in cut_names}
+
+    n_rows = len(numeric_columns[0])
+    if any(len(column) != n_rows for column in numeric_columns):
+        raise ValueError("All columns must have the same number of rows before cuts are applied.")
+
+    event_index = np.arange(n_rows, dtype=np.int64)
+    reference_column = numeric_columns[0]
+    cut_results = {}
+
+    for i, cut_name in enumerate(cut_names):
+        Misc.progressBar(i, len(cut_names)-1, bar_length=25)
+        fast_cut_indices = _coerce_cut_indices(c.add_cut(event_index, cut_name), n_rows)
+
+        if fast_cut_indices is not None:
+            reference_cut = np.asarray(c.add_cut(reference_column, cut_name))
+            if np.array_equal(reference_column[fast_cut_indices], reference_cut):
+                cut_results[cut_name] = [column[fast_cut_indices] for column in numeric_columns]
+                continue
+
+        cut_results[cut_name] = [c.add_cut(column, cut_name) for column in numeric_columns]
+
+    return cut_results
+
+
 #################################################################################################################################################################
 
 def coin_kaon():
@@ -127,29 +178,21 @@ def coin_kaon():
 
     # Create array of arrays of pions after cuts, all events, prompt and random          
 
-    Cut_COIN_Kaon_tmp = NoCut_COIN_Kaon
-    coin_ek_cut_all_noRF_tmp = []
-    coin_ek_cut_prompt_noRF_tmp = []
-    coin_ek_cut_rand_noRF_tmp = []
-    coin_ek_cut_all_RF_tmp = []
-    coin_ek_cut_prompt_RF_tmp = []
-    coin_ek_cut_rand_RF_tmp = []
+    kaon_cut_results = _apply_named_cuts(NoCut_COIN_Kaon, [
+        "coin_ek_cut_all_noRF",
+        "coin_ek_cut_prompt_noRF",
+        "coin_ek_cut_rand_noRF",
+        "coin_ek_cut_all_RF",
+        "coin_ek_cut_prompt_RF",
+        "coin_ek_cut_rand_RF",
+    ])
 
-    for i, arr in enumerate(Cut_COIN_Kaon_tmp):
-        Misc.progressBar(i, len(Cut_COIN_Kaon_tmp)-1,bar_length=25)
-        coin_ek_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_all_noRF"))
-        coin_ek_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_prompt_noRF"))
-        coin_ek_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_ek_cut_rand_noRF"))
-        coin_ek_cut_all_RF_tmp.append(c.add_cut(arr, "coin_ek_cut_all_RF"))
-        coin_ek_cut_prompt_RF_tmp.append(c.add_cut(arr, "coin_ek_cut_prompt_RF"))
-        coin_ek_cut_rand_RF_tmp.append(c.add_cut(arr, "coin_ek_cut_rand_RF"))
-
-    Cut_Kaon_Events_all_noRF = list(coin_ek_cut_all_noRF_tmp)
-    Cut_Kaon_Events_prompt_noRF = list(coin_ek_cut_prompt_noRF_tmp)
-    Cut_Kaon_Events_rand_noRF = list(coin_ek_cut_rand_noRF_tmp)
-    Cut_Kaon_Events_all_RF = list(coin_ek_cut_all_RF_tmp)
-    Cut_Kaon_Events_prompt_RF = list(coin_ek_cut_prompt_RF_tmp)
-    Cut_Kaon_Events_rand_RF = list(coin_ek_cut_rand_RF_tmp)
+    Cut_Kaon_Events_all_noRF = kaon_cut_results["coin_ek_cut_all_noRF"]
+    Cut_Kaon_Events_prompt_noRF = kaon_cut_results["coin_ek_cut_prompt_noRF"]
+    Cut_Kaon_Events_rand_noRF = kaon_cut_results["coin_ek_cut_rand_noRF"]
+    Cut_Kaon_Events_all_RF = kaon_cut_results["coin_ek_cut_all_RF"]
+    Cut_Kaon_Events_prompt_RF = kaon_cut_results["coin_ek_cut_prompt_RF"]
+    Cut_Kaon_Events_rand_RF = kaon_cut_results["coin_ek_cut_rand_RF"]
     
     COIN_Kaon = {
         "Uncut_Kaon_Events" : Uncut_COIN_Kaon,
@@ -175,34 +218,21 @@ def coin_pion():
 
     # Create array of arrays of pions after cuts, all events, prompt and random          
 
-    Cut_COIN_Pion_tmp = NoCut_COIN_Pion
-    coin_epi_cut_all_noRF_tmp = []
-    coin_epi_cut_prompt_noRF_tmp = []
-    coin_epi_cut_rand_noRF_tmp = []
-    coin_epi_cut_all_RF_tmp = []
-    coin_epi_cut_prompt_RF_tmp = []
-    coin_epi_cut_rand_RF_tmp = []
+    pion_cut_results = _apply_named_cuts(NoCut_COIN_Pion, [
+        "coin_epi_cut_all_noRF",
+        "coin_epi_cut_prompt_noRF",
+        "coin_epi_cut_rand_noRF",
+        "coin_epi_cut_all_RF",
+        "coin_epi_cut_prompt_RF",
+        "coin_epi_cut_rand_RF",
+    ])
 
-    for i, arr in enumerate(Cut_COIN_Pion_tmp):
-        Misc.progressBar(i, len(Cut_COIN_Pion_tmp)-1,bar_length=25)
-        coin_epi_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_all_noRF"))
-        coin_epi_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_prompt_noRF"))
-        coin_epi_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_epi_cut_rand_noRF"))
-        coin_epi_cut_all_RF_tmp.append(c.add_cut(arr, "coin_epi_cut_all_RF"))
-        coin_epi_cut_prompt_RF_tmp.append(c.add_cut(arr, "coin_epi_cut_prompt_RF"))
-        coin_epi_cut_rand_RF_tmp.append(c.add_cut(arr, "coin_epi_cut_rand_RF"))
-
-    Cut_Pion_Events_all_noRF = list(coin_epi_cut_all_noRF_tmp)
-
-    Cut_Pion_Events_prompt_noRF = list(coin_epi_cut_prompt_noRF_tmp)
-
-    Cut_Pion_Events_rand_noRF = list(coin_epi_cut_rand_noRF_tmp)
-
-    Cut_Pion_Events_all_RF = list(coin_epi_cut_all_RF_tmp)
-
-    Cut_Pion_Events_prompt_RF = list(coin_epi_cut_prompt_RF_tmp)
-
-    Cut_Pion_Events_rand_RF = list(coin_epi_cut_rand_RF_tmp)
+    Cut_Pion_Events_all_noRF = pion_cut_results["coin_epi_cut_all_noRF"]
+    Cut_Pion_Events_prompt_noRF = pion_cut_results["coin_epi_cut_prompt_noRF"]
+    Cut_Pion_Events_rand_noRF = pion_cut_results["coin_epi_cut_rand_noRF"]
+    Cut_Pion_Events_all_RF = pion_cut_results["coin_epi_cut_all_RF"]
+    Cut_Pion_Events_prompt_RF = pion_cut_results["coin_epi_cut_prompt_RF"]
+    Cut_Pion_Events_rand_RF = pion_cut_results["coin_epi_cut_rand_RF"]
     
     COIN_Pion = {
         "Uncut_Pion_Events" : Uncut_COIN_Pion,
@@ -228,34 +258,21 @@ def coin_proton():
 
     # Create array of arrays of protons after cuts, all events, prompt and random          
 
-    Cut_COIN_Proton_tmp = NoCut_COIN_Proton
-    coin_ep_cut_all_noRF_tmp = []
-    coin_ep_cut_prompt_noRF_tmp = []
-    coin_ep_cut_rand_noRF_tmp = []
-    coin_ep_cut_all_RF_tmp = []
-    coin_ep_cut_prompt_RF_tmp = []
-    coin_ep_cut_rand_RF_tmp = []
+    proton_cut_results = _apply_named_cuts(NoCut_COIN_Proton, [
+        "coin_ep_cut_all_noRF",
+        "coin_ep_cut_prompt_noRF",
+        "coin_ep_cut_rand_noRF",
+        "coin_ep_cut_all_RF",
+        "coin_ep_cut_prompt_RF",
+        "coin_ep_cut_rand_RF",
+    ])
 
-    for i, arr in enumerate(Cut_COIN_Proton_tmp):
-        Misc.progressBar(i, len(Cut_COIN_Proton_tmp)-1,bar_length=25)
-        coin_ep_cut_all_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_all_noRF"))
-        coin_ep_cut_prompt_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_prompt_noRF"))
-        coin_ep_cut_rand_noRF_tmp.append(c.add_cut(arr, "coin_ep_cut_rand_noRF"))
-        coin_ep_cut_all_RF_tmp.append(c.add_cut(arr, "coin_ep_cut_all_RF"))
-        coin_ep_cut_prompt_RF_tmp.append(c.add_cut(arr, "coin_ep_cut_prompt_RF"))
-        coin_ep_cut_rand_RF_tmp.append(c.add_cut(arr, "coin_ep_cut_rand_RF"))
-
-    Cut_Proton_Events_all_noRF = list(coin_ep_cut_all_noRF_tmp)
-
-    Cut_Proton_Events_prompt_noRF = list(coin_ep_cut_prompt_noRF_tmp)
-
-    Cut_Proton_Events_rand_noRF = list(coin_ep_cut_rand_noRF_tmp)
-
-    Cut_Proton_Events_all_RF = list(coin_ep_cut_all_RF_tmp)
-
-    Cut_Proton_Events_prompt_RF = list(coin_ep_cut_prompt_RF_tmp)
-
-    Cut_Proton_Events_rand_RF = list(coin_ep_cut_rand_RF_tmp)
+    Cut_Proton_Events_all_noRF = proton_cut_results["coin_ep_cut_all_noRF"]
+    Cut_Proton_Events_prompt_noRF = proton_cut_results["coin_ep_cut_prompt_noRF"]
+    Cut_Proton_Events_rand_noRF = proton_cut_results["coin_ep_cut_rand_noRF"]
+    Cut_Proton_Events_all_RF = proton_cut_results["coin_ep_cut_all_RF"]
+    Cut_Proton_Events_prompt_RF = proton_cut_results["coin_ep_cut_prompt_RF"]
+    Cut_Proton_Events_rand_RF = proton_cut_results["coin_ep_cut_rand_RF"]
     
     COIN_Proton = {
         "Uncut_Proton_Events" : Uncut_COIN_Proton,
