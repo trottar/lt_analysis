@@ -564,7 +564,6 @@ else
 fi
 
 cd "${LTANAPATH}/src/setup"
-ROOT_INPUT_DIR="$(normalize_ltsep_dir "${ROOTPATH}")"
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 PATH_DIAGNOSTICS_DONE=0
@@ -577,6 +576,48 @@ resolve_real_path() {
     else
         printf '%s\n' "${input_path}"
     fi
+}
+
+resolve_replay_input_file() {
+    local replay_basename="${ANATYPE}_coin_replay_production_${RUNNUM}_-1.root"
+    local analysis_leaf="${ANATYPE}LT"
+    local -a candidates=(
+        "${ROOTPATH}/Analysis/${analysis_leaf}/${replay_basename}"
+        "${ROOTPATH}/${analysis_leaf}/${replay_basename}"
+        "${ROOTPATH}/${replay_basename}"
+    )
+
+    if [[ "${ROOTPATH}" == *"/Analysis/${analysis_leaf}" ]]; then
+        candidates=(
+            "${ROOTPATH}/${replay_basename}"
+            "${ROOTPATH%/Analysis/${analysis_leaf}}/Analysis/${analysis_leaf}/${replay_basename}"
+            "${ROOTPATH%/Analysis/${analysis_leaf}}/${analysis_leaf}/${replay_basename}"
+        )
+    elif [[ "${ROOTPATH}" == *"/Analysis" ]]; then
+        candidates=(
+            "${ROOTPATH}/${analysis_leaf}/${replay_basename}"
+            "${ROOTPATH%/Analysis}/Analysis/${analysis_leaf}/${replay_basename}"
+            "${ROOTPATH%/Analysis}/${analysis_leaf}/${replay_basename}"
+        )
+    fi
+
+    if [[ "${ROOTPATH}" == *"None"* ]]; then
+        candidates+=(
+            "${ROOTPATH/None/Analysis/${analysis_leaf}}/${replay_basename}"
+            "${ROOTPATH/None/${analysis_leaf}}/${replay_basename}"
+        )
+    fi
+
+    local candidate
+    for candidate in "${candidates[@]}"; do
+        if [[ -e "${candidate}" ]]; then
+            printf '%s\n' "${candidate}"
+            return 0
+        fi
+    done
+
+    printf '%s\n' "${candidates[0]}"
+    return 1
 }
 
 cache_path_to_mss_path() {
@@ -598,10 +639,14 @@ cache_path_to_mss_path() {
 
 print_applycuts_path_diagnostics() {
     local replay_input_file="$1"
-    echo "Replay input dir  : ${ROOT_INPUT_DIR}"
-    echo "Replay input real : $(resolve_real_path "${ROOT_INPUT_DIR}")"
+    local replay_input_dir
+    replay_input_dir="$(dirname "${replay_input_file}")"
+    echo "Replay ROOTPATH   : ${ROOTPATH}"
+    echo "Replay input dir  : ${replay_input_dir}"
+    echo "Replay input real : $(resolve_real_path "${replay_input_dir}")"
     echo "Replay input file : ${replay_input_file}"
     echo "Replay file real  : $(resolve_real_path "${replay_input_file}")"
+    echo "Skim base path    : ${SKIMPATH}"
     echo "Skim output dir   : ${SKIM_OUTPUT_DIR}"
     echo "Skim output real  : $(resolve_real_path "${SKIM_OUTPUT_DIR}")"
 }
@@ -671,7 +716,8 @@ stage_swif_output_copy() {
 run_applycuts_particle() {
     local phi_label="$1"
     local particle="$2"
-    local replay_input_file="${ROOT_INPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUM}_-1.root"
+    local replay_input_file
+    replay_input_file="$(resolve_replay_input_file)"
     local out_f_file="${SKIM_OUTPUT_DIR}/${particle}_${RUNNUM}_-1_Raw_Data.root"
     local log_file="${LTANAPATH}/log/${phi_label}_${particle}_${RUNNUM}_${KIN}.log"
 
