@@ -657,12 +657,18 @@ ensure_cache_backed_replay_input_ready() {
                 echo "ERROR: replay input resolves into cache, but MSS path could not be derived from ${replay_input_real}"
                 return 2
             fi
+            if [[ "${replay_input_mss}" != /mss/hallc/kaonlt/* ]]; then
+                echo "ERROR: derived MSS recovery path looks invalid: ${replay_input_mss}"
+                return 2
+            fi
             if ! command -v jcache >/dev/null 2>&1; then
                 echo "ERROR: replay input resolves into cache, but jcache is not available to request ${replay_input_mss}"
                 return 2
             fi
             echo "Replay input resolves into cache and is not currently available."
-            echo "Requesting recovery from tape:"
+            echo "Resolved cache replay file : ${replay_input_real}"
+            echo "Derived MSS recovery file  : ${replay_input_mss}"
+            echo "Requesting recovery from tape with:"
             echo "  jcache get ${replay_input_mss}"
             jcache get "${replay_input_mss}"
             local jcache_rc=$?
