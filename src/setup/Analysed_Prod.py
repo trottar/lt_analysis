@@ -111,14 +111,13 @@ def _build_structured_array_from_columns(column_data, headers, tree_name):
     structured_array = np.empty(n_rows, dtype=structured_dtype)
 
     print("Converting {} columns for {}...".format(len(headers), tree_name), flush=True)
+    print("Starting with column 1/{}: {}...".format(len(headers), headers[0]), flush=True)
     Misc.progressBar(0, len(headers)-1, bar_length=25)
     sys.stdout.flush()
 
     for i, (header, column) in enumerate(zip(headers, column_data)):
-        print("\r[{:>2}/{}] Converting {}...".format(i+1, len(headers), header), end="", flush=True)
         numeric_column = np.asarray(column, dtype=np.float64)
         if len(numeric_column) != n_rows:
-            print("")
             print("WARNING: Skipping {} due to mismatched column lengths.".format(tree_name))
             return None
         structured_array[header] = numeric_column
