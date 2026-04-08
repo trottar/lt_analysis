@@ -102,17 +102,28 @@ def _build_structured_array_from_columns(column_data, headers, tree_name):
         print("WARNING: Skipping {} due to issues with column names.".format(tree_name))
         return None
 
-    numeric_columns = [np.asarray(column, dtype=np.float64) for column in column_data]
-    if not numeric_columns or len(numeric_columns[0]) == 0:
+    first_column = np.asarray(column_data[0], dtype=np.float64)
+    if len(first_column) == 0:
         print("WARNING: Skipping {} because the data is empty.".format(tree_name))
         return None
 
-    n_rows = len(numeric_columns[0])
-    if any(len(column) != n_rows for column in numeric_columns):
-        print("WARNING: Skipping {} due to mismatched column lengths.".format(tree_name))
-        return None
+    n_rows = len(first_column)
+    structured_dtype = [(header, np.float64) for header in headers]
+    structured_array = np.empty(n_rows, dtype=structured_dtype)
+    structured_array[headers[0]] = first_column
+    Misc.progressBar(0, len(headers)-1, bar_length=25)
+    sys.stdout.flush()
 
-    return np.core.records.fromarrays(numeric_columns, names=headers)
+    for i, (header, column) in enumerate(zip(headers[1:], column_data[1:]), start=1):
+        numeric_column = np.asarray(column, dtype=np.float64)
+        if len(numeric_column) != n_rows:
+            print("WARNING: Skipping {} due to mismatched column lengths.".format(tree_name))
+            return None
+        structured_array[header] = numeric_column
+        Misc.progressBar(i, len(headers)-1, bar_length=25)
+        sys.stdout.flush()
+
+    return structured_array
 
 
 def _coerce_cut_indices(index_values, n_rows):
