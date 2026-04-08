@@ -608,21 +608,19 @@ build_replay_input_file() {
     printf '%s/%s\n' "${replay_input_dir}" "${replay_basename}"
 }
 
-cache_path_to_mss_path() {
+cache_path_to_jcache_request_path() {
     local cache_path="$1"
-    local suffix=""
     case "${cache_path}" in
         /cache/*)
-            suffix="${cache_path#/cache/}"
+            printf '%s\n' "${cache_path}"
             ;;
         /lustre*/expphy/cache/*)
-            suffix="${cache_path#*/expphy/cache/}"
+            printf '%s\n' "${cache_path#*/expphy}"
             ;;
         *)
             return 1
             ;;
     esac
-    printf '/mss/%s\n' "${suffix}"
 }
 
 print_applycuts_path_diagnostics() {
@@ -645,7 +643,7 @@ print_applycuts_path_diagnostics() {
 
 ensure_cache_backed_replay_input_ready() {
     local replay_input_real="$1"
-    local replay_input_mss
+    local replay_input_cache_request
 
     case "${replay_input_real}" in
         /cache/*|/lustre*/expphy/cache/*)
@@ -653,27 +651,27 @@ ensure_cache_backed_replay_input_ready() {
                 echo "Cache-backed replay input is available at ${replay_input_real}"
                 return 0
             fi
-            if ! replay_input_mss="$(cache_path_to_mss_path "${replay_input_real}")"; then
-                echo "ERROR: replay input resolves into cache, but MSS path could not be derived from ${replay_input_real}"
+            if ! replay_input_cache_request="$(cache_path_to_jcache_request_path "${replay_input_real}")"; then
+                echo "ERROR: replay input resolves into cache, but a jcache request path could not be derived from ${replay_input_real}"
                 return 2
             fi
-            if [[ "${replay_input_mss}" != /mss/hallc/kaonlt/*/ROOTfiles/Analysis/*/*.root ]]; then
-                echo "ERROR: derived MSS recovery path looks invalid: ${replay_input_mss}"
+            if [[ "${replay_input_cache_request}" != /cache/hallc/kaonlt/*/ROOTfiles/Analysis/*/*.root ]]; then
+                echo "ERROR: derived jcache recovery path looks invalid: ${replay_input_cache_request}"
                 return 2
             fi
             if ! command -v jcache >/dev/null 2>&1; then
-                echo "ERROR: replay input resolves into cache, but jcache is not available to request ${replay_input_mss}"
+                echo "ERROR: replay input resolves into cache, but jcache is not available to request ${replay_input_cache_request}"
                 return 2
             fi
             echo "Replay input resolves into cache and is not currently available."
             echo "Resolved cache replay file : ${replay_input_real}"
-            printf 'Derived MSS recovery file  : <%s>\n' "${replay_input_mss}"
-            echo "Requesting recovery from tape with:"
-            printf '  jcache get <%s>\n' "${replay_input_mss}"
-            jcache get "${replay_input_mss}"
+            printf 'Derived jcache request path: <%s>\n' "${replay_input_cache_request}"
+            echo "Requesting recovery from cache/tape with:"
+            printf '  jcache get <%s>\n' "${replay_input_cache_request}"
+            jcache get "${replay_input_cache_request}"
             local jcache_rc=$?
             if [[ "${jcache_rc}" -ne 0 ]]; then
-                echo "ERROR: jcache get failed for ${replay_input_mss}"
+                echo "ERROR: jcache get failed for ${replay_input_cache_request}"
                 return "${jcache_rc}"
             fi
             echo "Replay cache recovery requested. Rerun applyCuts after staging completes."
