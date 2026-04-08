@@ -1,6 +1,10 @@
 #! /bin/bash
 
-JOB_LAUNCH_DIR="${SWIF_JOB_WORK_DIR:-${SWIF_JOB_STAGE_DIR:-$(pwd)}}"
+JOB_LAUNCH_DIR="${SWIF_JOB_WORK_DIR:-${SWIF_JOB_STAGE_DIR:-}}"
+RUNNING_UNDER_SWIF=0
+if [[ -n "${JOB_LAUNCH_DIR}" ]]; then
+    RUNNING_UNDER_SWIF=1
+fi
 
 # Runs a repo-local ltsep wrapper so batch jobs do not depend on upstream
 # getPathDict.py calling os.getlogin() on worker nodes.
@@ -560,12 +564,93 @@ else
 fi
 
 cd "${LTANAPATH}/src/setup"
+ROOT_INPUT_DIR="$(normalize_ltsep_dir "${ROOTPATH}")"
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
+PATH_DIAGNOSTICS_DONE=0
+
+resolve_real_path() {
+    local input_path="$1"
+    local resolved_path=""
+    if resolved_path="$(readlink -f -- "${input_path}" 2>/dev/null)" && [[ -n "${resolved_path}" ]]; then
+        printf '%s\n' "${resolved_path}"
+    else
+        printf '%s\n' "${input_path}"
+    fi
+}
+
+cache_path_to_mss_path() {
+    local cache_path="$1"
+    local suffix=""
+    case "${cache_path}" in
+        /cache/hallc/kaonlt/*)
+            suffix="${cache_path#/cache/hallc/kaonlt/}"
+            ;;
+        /lustre*/expphy/cache/hallc/kaonlt/*)
+            suffix="${cache_path#*/expphy/cache/hallc/kaonlt/}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+    printf '/mss/hallc/kaonlt/%s\n' "${suffix}"
+}
+
+print_applycuts_path_diagnostics() {
+    local replay_input_file="$1"
+    echo "Replay input dir  : ${ROOT_INPUT_DIR}"
+    echo "Replay input real : $(resolve_real_path "${ROOT_INPUT_DIR}")"
+    echo "Replay input file : ${replay_input_file}"
+    echo "Replay file real  : $(resolve_real_path "${replay_input_file}")"
+    echo "Skim output dir   : ${SKIM_OUTPUT_DIR}"
+    echo "Skim output real  : $(resolve_real_path "${SKIM_OUTPUT_DIR}")"
+}
+
+ensure_cache_backed_replay_input_ready() {
+    local replay_input_file="$1"
+    local replay_input_real
+    local replay_input_mss
+
+    replay_input_real="$(resolve_real_path "${replay_input_file}")"
+    case "${replay_input_real}" in
+        /cache/*|/lustre*/expphy/cache/*)
+            if [[ -e "${replay_input_real}" && -s "${replay_input_real}" ]]; then
+                echo "Cache-backed replay input is available at ${replay_input_real}"
+                return 0
+            fi
+            if ! replay_input_mss="$(cache_path_to_mss_path "${replay_input_real}")"; then
+                echo "ERROR: replay input resolves into cache, but MSS path could not be derived from ${replay_input_real}"
+                return 2
+            fi
+            if ! command -v jcache >/dev/null 2>&1; then
+                echo "ERROR: replay input resolves into cache, but jcache is not available to request ${replay_input_mss}"
+                return 2
+            fi
+            echo "Replay input resolves into cache and is not currently available."
+            echo "Requesting recovery from tape:"
+            echo "  jcache get ${replay_input_mss}"
+            jcache get "${replay_input_mss}"
+            local jcache_rc=$?
+            if [[ "${jcache_rc}" -ne 0 ]]; then
+                echo "ERROR: jcache get failed for ${replay_input_mss}"
+                return "${jcache_rc}"
+            fi
+            echo "Replay cache recovery requested. Rerun applyCuts after staging completes."
+            return 2
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
 
 stage_swif_output_copy() {
     local source_file="$1"
     local staged_file="${JOB_LAUNCH_DIR}/$(basename "${source_file}")"
+
+    if [[ "${RUNNING_UNDER_SWIF}" -ne 1 ]]; then
+        return 0
+    fi
 
     if [[ ! -f "${source_file}" ]]; then
         echo "ERROR: expected skim output not found at ${source_file}"
@@ -586,13 +671,25 @@ stage_swif_output_copy() {
 run_applycuts_particle() {
     local phi_label="$1"
     local particle="$2"
+    local replay_input_file="${ROOT_INPUT_DIR}/${ANATYPE}_coin_replay_production_${RUNNUM}_-1.root"
     local out_f_file="${SKIM_OUTPUT_DIR}/${particle}_${RUNNUM}_-1_Raw_Data.root"
     local log_file="${LTANAPATH}/log/${phi_label}_${particle}_${RUNNUM}_${KIN}.log"
+
+    if [[ "${PATH_DIAGNOSTICS_DONE}" -ne 1 ]]; then
+        print_applycuts_path_diagnostics "${replay_input_file}"
+        PATH_DIAGNOSTICS_DONE=1
+    fi
 
     if [ -e "$out_f_file" ]; then
         echo "$out_f_file already exists. Skipping analysis for ${particle}."
         stage_swif_output_copy "$out_f_file"
         return $?
+    fi
+
+    ensure_cache_backed_replay_input_ready "${replay_input_file}"
+    local cache_ready_rc=$?
+    if [[ "${cache_ready_rc}" -ne 0 ]]; then
+        return "${cache_ready_rc}"
     fi
 
     rm -f "$log_file"
