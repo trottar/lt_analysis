@@ -578,46 +578,26 @@ resolve_real_path() {
     fi
 }
 
-resolve_replay_input_file() {
-    local replay_basename="${ANATYPE}_coin_replay_production_${RUNNUM}_-1.root"
+build_replay_input_dir() {
     local analysis_leaf="${ANATYPE}LT"
-    local -a candidates=(
-        "${ROOTPATH}/Analysis/${analysis_leaf}/${replay_basename}"
-        "${ROOTPATH}/${analysis_leaf}/${replay_basename}"
-        "${ROOTPATH}/${replay_basename}"
-    )
+    local base_path="$1"
 
-    if [[ "${ROOTPATH}" == *"/Analysis/${analysis_leaf}" ]]; then
-        candidates=(
-            "${ROOTPATH}/${replay_basename}"
-            "${ROOTPATH%/Analysis/${analysis_leaf}}/Analysis/${analysis_leaf}/${replay_basename}"
-            "${ROOTPATH%/Analysis/${analysis_leaf}}/${analysis_leaf}/${replay_basename}"
-        )
-    elif [[ "${ROOTPATH}" == *"/Analysis" ]]; then
-        candidates=(
-            "${ROOTPATH}/${analysis_leaf}/${replay_basename}"
-            "${ROOTPATH%/Analysis}/Analysis/${analysis_leaf}/${replay_basename}"
-            "${ROOTPATH%/Analysis}/${analysis_leaf}/${replay_basename}"
-        )
+    if [[ "${base_path}" == *"/Analysis/${analysis_leaf}" ]]; then
+        printf '%s\n' "${base_path}"
+    elif [[ "${base_path}" == *"/Analysis" ]]; then
+        printf '%s/%s\n' "${base_path}" "${analysis_leaf}"
+    elif [[ "${base_path}" == *"None"* ]]; then
+        printf '%s\n' "${base_path/None/Analysis/${analysis_leaf}}"
+    else
+        printf '%s/Analysis/%s\n' "${base_path}" "${analysis_leaf}"
     fi
+}
 
-    if [[ "${ROOTPATH}" == *"None"* ]]; then
-        candidates+=(
-            "${ROOTPATH/None/Analysis/${analysis_leaf}}/${replay_basename}"
-            "${ROOTPATH/None/${analysis_leaf}}/${replay_basename}"
-        )
-    fi
-
-    local candidate
-    for candidate in "${candidates[@]}"; do
-        if [[ -e "${candidate}" ]]; then
-            printf '%s\n' "${candidate}"
-            return 0
-        fi
-    done
-
-    printf '%s\n' "${candidates[0]}"
-    return 1
+build_replay_input_file() {
+    local replay_basename="${ANATYPE}_coin_replay_production_${RUNNUM}_-1.root"
+    local replay_input_dir
+    replay_input_dir="$(build_replay_input_dir "$1")"
+    printf '%s/%s\n' "${replay_input_dir}" "${replay_basename}"
 }
 
 cache_path_to_mss_path() {
@@ -639,24 +619,26 @@ cache_path_to_mss_path() {
 
 print_applycuts_path_diagnostics() {
     local replay_input_file="$1"
+    local replay_input_real="$2"
     local replay_input_dir
+    local replay_input_real_dir
     replay_input_dir="$(dirname "${replay_input_file}")"
+    replay_input_real_dir="$(dirname "${replay_input_real}")"
     echo "Replay ROOTPATH   : ${ROOTPATH}"
+    echo "Replay root real  : $(resolve_real_path "${ROOTPATH}")"
     echo "Replay input dir  : ${replay_input_dir}"
-    echo "Replay input real : $(resolve_real_path "${replay_input_dir}")"
+    echo "Replay input real : ${replay_input_real_dir}"
     echo "Replay input file : ${replay_input_file}"
-    echo "Replay file real  : $(resolve_real_path "${replay_input_file}")"
+    echo "Replay file real  : ${replay_input_real}"
     echo "Skim base path    : ${SKIMPATH}"
     echo "Skim output dir   : ${SKIM_OUTPUT_DIR}"
     echo "Skim output real  : $(resolve_real_path "${SKIM_OUTPUT_DIR}")"
 }
 
 ensure_cache_backed_replay_input_ready() {
-    local replay_input_file="$1"
-    local replay_input_real
+    local replay_input_real="$1"
     local replay_input_mss
 
-    replay_input_real="$(resolve_real_path "${replay_input_file}")"
     case "${replay_input_real}" in
         /cache/*|/lustre*/expphy/cache/*)
             if [[ -e "${replay_input_real}" && -s "${replay_input_real}" ]]; then
@@ -717,12 +699,14 @@ run_applycuts_particle() {
     local phi_label="$1"
     local particle="$2"
     local replay_input_file
-    replay_input_file="$(resolve_replay_input_file)"
+    local replay_input_real
+    replay_input_file="$(build_replay_input_file "${ROOTPATH}")"
+    replay_input_real="$(build_replay_input_file "$(resolve_real_path "${ROOTPATH}")")"
     local out_f_file="${SKIM_OUTPUT_DIR}/${particle}_${RUNNUM}_-1_Raw_Data.root"
     local log_file="${LTANAPATH}/log/${phi_label}_${particle}_${RUNNUM}_${KIN}.log"
 
     if [[ "${PATH_DIAGNOSTICS_DONE}" -ne 1 ]]; then
-        print_applycuts_path_diagnostics "${replay_input_file}"
+        print_applycuts_path_diagnostics "${replay_input_file}" "${replay_input_real}"
         PATH_DIAGNOSTICS_DONE=1
     fi
 
@@ -732,7 +716,7 @@ run_applycuts_particle() {
         return $?
     fi
 
-    ensure_cache_backed_replay_input_ready "${replay_input_file}"
+    ensure_cache_backed_replay_input_ready "${replay_input_real}"
     local cache_ready_rc=$?
     if [[ "${cache_ready_rc}" -ne 0 ]]; then
         return "${cache_ready_rc}"
