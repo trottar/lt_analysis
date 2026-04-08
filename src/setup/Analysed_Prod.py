@@ -160,10 +160,12 @@ def _apply_named_cuts(column_data, cut_names):
             if np.array_equal(reference_column[fast_cut_indices], reference_cut):
                 cut_results[cut_name] = [column[fast_cut_indices] for column in numeric_columns]
                 Misc.progressBar(i, len(cut_names)-1, bar_length=25)
+                sys.stdout.flush()
                 continue
 
         cut_results[cut_name] = [c.add_cut(column, cut_name) for column in numeric_columns]
         Misc.progressBar(i, len(cut_names)-1, bar_length=25)
+        sys.stdout.flush()
 
     return cut_results
 
@@ -300,6 +302,8 @@ def main():
     if ParticleType == "proton":
         COIN_Data = coin_proton()        
 
+    print("\nCuts complete for {}. Starting ROOT output...".format(ParticleType), flush=True)
+
     # This is just the list of branches we use from the initial root file for each dict
     # I don't like re-defining this here as it's very prone to errors if you included (or removed something) earlier but didn't modify it here
     # Should base the branches to include based on some list and just repeat the list here (or call it again directly below)
@@ -317,7 +321,7 @@ def main():
     
     out_f_file = "%s/%s_%s_%s_Raw_Data.root" % (SKIM_OUTPATH, ParticleType, runNum, MaxEvent)
         
-    print("\n\nSaving data to new root files...")
+    print("\n\nSaving data to new root files...", flush=True)
     output_index = 0
     for i in range (0, len(data_keys)):
         if(term_search in data_keys[i]):
@@ -333,17 +337,19 @@ def main():
         #elif (i != 0):
         #    pd.DataFrame(data.get(data_keys[i]), columns = DFHeader, index = None).to_root(out_f_file, key ="%s" % data_keys[i], mode ='a')
         
-        print("\n[{}/{}] Preparing {}...".format(output_index, len(output_keys), data_keys[i]))
+        print("\n[{}/{}] Preparing {}...".format(output_index, len(output_keys), data_keys[i]), flush=True)
         structured_array = _build_structured_array_from_columns(data.get(data_keys[i]), DFHeader, data_keys[i])
         if structured_array is None:
             Misc.progressBar(output_index-1, len(output_keys)-1, bar_length=25)
+            sys.stdout.flush()
             continue
 
         # Save the structured array to ROOT file
-        print("[{}/{}] Writing {} to {}...".format(output_index, len(output_keys), data_keys[i], out_f_file))
+        print("[{}/{}] Writing {} to {}...".format(output_index, len(output_keys), data_keys[i], out_f_file), flush=True)
         rnp.array2root(structured_array, out_f_file, mode='recreate' if i == 0 else 'update', treename=data_keys[i])
         
         Misc.progressBar(output_index-1, len(output_keys)-1, bar_length=25)
+        sys.stdout.flush()
 
 if __name__ == '__main__':
     main()
