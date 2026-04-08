@@ -612,17 +612,17 @@ cache_path_to_mss_path() {
     local cache_path="$1"
     local suffix=""
     case "${cache_path}" in
-        /cache/hallc/kaonlt/*)
-            suffix="${cache_path#/cache/hallc/kaonlt/}"
+        /cache/*)
+            suffix="${cache_path#/cache/}"
             ;;
-        /lustre*/expphy/cache/hallc/kaonlt/*)
-            suffix="${cache_path#*/expphy/cache/hallc/kaonlt/}"
+        /lustre*/expphy/cache/*)
+            suffix="${cache_path#*/expphy/cache/}"
             ;;
         *)
             return 1
             ;;
     esac
-    printf '/mss/hallc/kaonlt/%s\n' "${suffix}"
+    printf '/mss/%s\n' "${suffix}"
 }
 
 print_applycuts_path_diagnostics() {
@@ -657,7 +657,7 @@ ensure_cache_backed_replay_input_ready() {
                 echo "ERROR: replay input resolves into cache, but MSS path could not be derived from ${replay_input_real}"
                 return 2
             fi
-            if [[ "${replay_input_mss}" != /mss/hallc/kaonlt/* ]]; then
+            if [[ "${replay_input_mss}" != /mss/hallc/kaonlt/*/ROOTfiles/Analysis/*/*.root ]]; then
                 echo "ERROR: derived MSS recovery path looks invalid: ${replay_input_mss}"
                 return 2
             fi
@@ -667,9 +667,9 @@ ensure_cache_backed_replay_input_ready() {
             fi
             echo "Replay input resolves into cache and is not currently available."
             echo "Resolved cache replay file : ${replay_input_real}"
-            echo "Derived MSS recovery file  : ${replay_input_mss}"
+            printf 'Derived MSS recovery file  : <%s>\n' "${replay_input_mss}"
             echo "Requesting recovery from tape with:"
-            echo "  jcache get ${replay_input_mss}"
+            printf '  jcache get <%s>\n' "${replay_input_mss}"
             jcache get "${replay_input_mss}"
             local jcache_rc=$?
             if [[ "${jcache_rc}" -ne 0 ]]; then
