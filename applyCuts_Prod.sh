@@ -608,29 +608,6 @@ build_replay_input_file() {
     printf '%s/%s\n' "${replay_input_dir}" "${replay_basename}"
 }
 
-build_rootfiles_link_path() {
-    local base_path="${1%/}"
-    local analysis_leaf="${ANATYPE}LT"
-
-    case "${base_path}" in
-        */Analysis/"${analysis_leaf}")
-            printf '%s\n' "${base_path%/Analysis/${analysis_leaf}}"
-            ;;
-        */Analysis)
-            printf '%s\n' "${base_path%/Analysis}"
-            ;;
-        */ROOTfiles)
-            printf '%s\n' "${base_path}"
-            ;;
-        */None)
-            printf '%s/ROOTfiles\n' "${base_path%/None}"
-            ;;
-        *)
-            printf '%s\n' "${base_path}"
-            ;;
-    esac
-}
-
 cache_path_to_jcache_request_path() {
     local cache_path="$1"
     case "${cache_path}" in
@@ -644,21 +621,6 @@ cache_path_to_jcache_request_path() {
             return 1
             ;;
     esac
-}
-
-build_replay_input_cache_request_file() {
-    local replay_input_real="$1"
-    local replay_basename="${ANATYPE}_coin_replay_production_${RUNNUM}_-1.root"
-    local rootfiles_link_path
-    local rootfiles_cache_target
-
-    rootfiles_link_path="$(build_rootfiles_link_path "${ROOTPATH}")"
-    if rootfiles_cache_target="$(readlink -- "${rootfiles_link_path}" 2>/dev/null)" && [[ "${rootfiles_cache_target}" == /cache/* ]]; then
-        printf '%s/Analysis/%s/%s\n' "${rootfiles_cache_target}" "${ANATYPE}LT" "${replay_basename}"
-        return 0
-    fi
-
-    cache_path_to_jcache_request_path "${replay_input_real}"
 }
 
 print_applycuts_path_diagnostics() {
@@ -689,7 +651,7 @@ ensure_cache_backed_replay_input_ready() {
                 echo "Cache-backed replay input is available at ${replay_input_real}"
                 return 0
             fi
-            if ! replay_input_cache_request="$(build_replay_input_cache_request_file "${replay_input_real}")"; then
+            if ! replay_input_cache_request="$(cache_path_to_jcache_request_path "${replay_input_real}")"; then
                 echo "ERROR: replay input resolves into cache, but a jcache request path could not be derived from ${replay_input_real}"
                 return 2
             fi
@@ -749,9 +711,13 @@ run_applycuts_particle() {
     local phi_label="$1"
     local particle="$2"
     local replay_input_file
+    local replay_input_dir
+    local replay_input_real_dir
     local replay_input_real
     replay_input_file="$(build_replay_input_file "${ROOTPATH}")"
-    replay_input_real="$(build_replay_input_file "$(resolve_real_path "${ROOTPATH}")")"
+    replay_input_dir="$(dirname "${replay_input_file}")"
+    replay_input_real_dir="$(resolve_real_path "${replay_input_dir}")"
+    replay_input_real="${replay_input_real_dir}/$(basename "${replay_input_file}")"
     local out_f_file="${SKIM_OUTPUT_DIR}/${particle}_${RUNNUM}_-1_Raw_Data.root"
     local log_file="${LTANAPATH}/log/${phi_label}_${particle}_${RUNNUM}_${KIN}.log"
 
