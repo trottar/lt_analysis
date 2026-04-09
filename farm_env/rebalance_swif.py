@@ -35,6 +35,7 @@ class ProblemJob:
     problem: str
     details: str
     categories: frozenset[str]
+    num_attempts: int = 0
     ram_bytes: int = 0
     disk_bytes: int = 0
     time_secs: int = 0
@@ -58,6 +59,17 @@ def run_command(cmd: Sequence[str], capture: bool = False) -> subprocess.Complet
     return subprocess.run(list(cmd), text=True, capture_output=capture, check=False)
 
 
+def compute_targets(args: argparse.Namespace, problem: ProblemJob) -> Dict[str, int]:
+    targets: Dict[str, int] = {}
+    if "memory" in problem.categories and problem.ram_bytes > 0:
+        targets["ram"] = int(math.ceil(problem.ram_bytes * args.ram_mult))
+    if "time" in problem.categories and problem.time_secs > 0:
+        targets["time"] = int(math.ceil(problem.time_secs * args.time_mult))
+    if "disk" in problem.categories and problem.disk_bytes > 0:
+        targets["disk"] = int(math.ceil(problem.disk_bytes * args.disk_mult))
+    return targets
+
+
 
 def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
     cmd = [swif2_bin, "status", workflow, "-jobs", "-display", "json"]
@@ -79,6 +91,7 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
             continue
         problem = str(job.get("job_attempt_problem", ""))
         details = str(job.get("job_attempt_problem_details", ""))
+        num_attempts = int(job.get("num_attempts") or 0)
         ram_bytes = int(job.get("site_job_ram_bytes") or 0)
         disk_bytes = int(job.get("site_job_disk_bytes") or 0)
         time_secs = int(job.get("site_job_time_secs") or 0)
@@ -105,6 +118,7 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
                     problem=problem,
                     details=details,
                     categories=frozenset(categories),
+                    num_attempts=num_attempts,
                     ram_bytes=ram_bytes,
                     disk_bytes=disk_bytes,
                     time_secs=time_secs,
@@ -117,14 +131,15 @@ def load_problem_jobs(swif2_bin: str, workflow: str) -> List[ProblemJob]:
 def build_modify_commands(args: argparse.Namespace, problems: Sequence[ProblemJob]) -> List[List[str]]:
     grouped: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
     for problem in problems:
-        if "memory" in problem.categories and problem.ram_bytes > 0:
-            new_ram = str(int(math.ceil(problem.ram_bytes * args.ram_mult)))
+        targets = compute_targets(args, problem)
+        if "ram" in targets:
+            new_ram = str(targets["ram"])
             grouped["memory"][new_ram].append(problem.job_name)
-        if "time" in problem.categories and problem.time_secs > 0:
-            new_time = str(int(math.ceil(problem.time_secs * args.time_mult)))
+        if "time" in targets:
+            new_time = str(targets["time"])
             grouped["time"][new_time].append(problem.job_name)
-        if "disk" in problem.categories and problem.disk_bytes > 0:
-            new_disk = str(int(math.ceil(problem.disk_bytes * args.disk_mult)))
+        if "disk" in targets:
+            new_disk = str(targets["disk"])
             grouped["disk"][new_disk].append(problem.job_name)
 
     commands: List[List[str]] = []
@@ -182,8 +197,17 @@ def main() -> int:
     print("Detected resource-related problem jobs")
     print("-" * 80)
     for problem in problems:
+        targets = compute_targets(args, problem)
         print(f"* {problem.job_name}: categories={','.join(sorted(problem.categories))}")
         print(f"    problem: {problem.problem}")
+        if problem.num_attempts:
+            print(f"    attempts: {problem.num_attempts}")
+        if "ram" in targets:
+            print(f"    ram: {problem.ram_bytes} -> {targets['ram']}")
+        if "time" in targets:
+            print(f"    time: {problem.time_secs} -> {targets['time']}")
+        if "disk" in targets:
+            print(f"    disk: {problem.disk_bytes} -> {targets['disk']}")
         if problem.details:
             print(f"    details: {problem.details}")
     print()
