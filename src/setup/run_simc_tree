@@ -1,10 +1,15 @@
 #! /bin/bash
 
-# Runs script in the ltsep python package that grabs current path enviroment
-if [[ ${HOSTNAME} = *"cdaq"* ]]; then
-    PATHFILE_INFO=`python3 /home/cdaq/pionLT-2021/hallc_replay_lt/UTIL_PION/bin/python/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
-elif [[ ${HOSTNAME} = *"farm"* ]]; then
-    PATHFILE_INFO=`python3 $replay_lt_env/lib/python3.9/site-packages/ltsep/scripts/getPathDict.py $PWD` # The output of this python script is just a comma separated string
+# Runs a repo-local ltsep wrapper so SIMC jobs do not depend on upstream
+# getPathDict.py field ordering or os.getlogin() behavior on farm nodes.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
+PATHFILE_INFO="$(python3 "${LTSEP_FIELDS_SCRIPT}" "${REPO_ROOT}")"
+path_rc=$?
+if [[ "${path_rc}" -ne 0 || -z "${PATHFILE_INFO}" ]]; then
+    echo "ERROR: failed to resolve ltsep paths via ${LTSEP_FIELDS_SCRIPT}" >&2
+    exit 1
 fi
 
 # Split the string we get to individual variables, easier for printing and use later
@@ -16,33 +21,45 @@ UTILPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f5`
 PACKAGEPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f6`
 OUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f7`
 ROOTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f8`
-REPORTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f9`
-CUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f10`
-PARAMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f11`
-SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f12`
-ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
-USER=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
-HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
-SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
-LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+SKIMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f9`
+REPORTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f10`
+CUTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f11`
+PARAMPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f12`
+SCRIPTPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f13`
+ANATYPE=`echo ${PATHFILE_INFO} | cut -d ','  -f14`
+USER=`echo ${PATHFILE_INFO} | cut -d ','  -f15`
+HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
+SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
+LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
-cd $SIMCPATH
-source /apps/root/6.22.06/setroot_CUE.bash
+mkdir -p "${LTANAPATH}/log"
+
+cd "$SIMCPATH" || exit 1
+if [[ -f /site/12gev_phys/softenv.sh ]]; then
+    source /site/12gev_phys/softenv.sh 2.3
+fi
+if [[ -f /apps/root/6.22.06/setroot_CUE.bash ]]; then
+    source /apps/root/6.22.06/setroot_CUE.bash
+elif [[ -f /apps/root/6.18.04/setroot_CUE.bash ]]; then
+    source /apps/root/6.18.04/setroot_CUE.bash
+else
+    echo "WARNING: no setroot_CUE.bash found under /apps/root; continuing with current ROOT environment" >&2
+fi
 make clean
 make
 ./simc << endofinput 2> "${LTANAPATH}/log/$1.log"
 $1
 endofinput
-cd ${SIMCPATH}/util/root_tree
+cd "${SIMCPATH}/util/root_tree" || exit 1
 make clean
 make
 ./make_root_tree << endofinput
 $1
 endofinput
-cd ${SIMCPATH}
-mv worksim/$1.root OUTPUTS
+cd "$SIMCPATH" || exit 1
+mv "worksim/$1.root" OUTPUTS
 
 REACTION=$2
 echo "Reaction selected: $2" 
-cd recon_hcana/    
+cd "${SIMCPATH}/recon_hcana" || exit 1
 root -q -l "recon_hcana.C(\"$1\", \"$REACTION\" )"
