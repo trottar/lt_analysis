@@ -50,6 +50,7 @@ normalize_ltsep_dir() {
 
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
+mkdir -p "${OUTPATH}"
 
 # Flag definitions (flags: h, c, i, p, a)
 while getopts 'hci:pa' flag; do
@@ -553,18 +554,18 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#dummy_right_tmp[@]} -ne 0 ]; then
-	    if [ -f "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDUMMYFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Right_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		echo
-		echo "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
-		rm -f "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDUMMYFilename}.root"
+		echo "${OUTPATH}/Right_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
+		rm -f "${OUTPATH}/Right_${ParticleType}_${OutDUMMYFilename}.root"
 	    fi
 	    echo
 	    echo "Combining right ${ParticleType} dummy..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "_-1_Raw_Data" "${TreeNames}" "Right_${ParticleType}_${OutDUMMYFilename}" "${dummy_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Right_${ParticleType}_${OutDUMMYFilename}.err"
+	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "${OUTPATH}/" "_-1_Raw_Data" "${TreeNames}" "Right_${ParticleType}_${OutDUMMYFilename}" "${dummy_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Right_${ParticleType}_${OutDUMMYFilename}.err"
 	    echo
-	    if [ -f "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDUMMYFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Right_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		for i in "${dummy_right_tmp[@]}"
 		do       
 		    if [ -f "${SKIM_OUTPUT_DIR}/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
@@ -580,18 +581,18 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#data_right_tmp[@]} -ne 0 ]; then
-	    if [ -f "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDATAFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Right_${ParticleType}_${OutDATAFilename}.root" ]; then
 		echo
-		echo "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
-		rm -f "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDATAFilename}.root"
+		echo "${OUTPATH}/Right_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
+		rm -f "${OUTPATH}/Right_${ParticleType}_${OutDATAFilename}.root"
 	    fi
 	    echo
 	    echo "Combining right ${ParticleType} data..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "_-1_Raw_Data" "${TreeNames}" "Right_${ParticleType}_${OutDATAFilename}" "${data_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Right_${ParticleType}_${OutDATAFilename}.err"
+	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "${OUTPATH}/" "_-1_Raw_Data" "${TreeNames}" "Right_${ParticleType}_${OutDATAFilename}" "${data_right_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Right_${ParticleType}_${OutDATAFilename}.err"
 	    echo
-	    if [ -f "${SKIM_OUTPUT_DIR}/Right_${ParticleType}_${OutDATAFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Right_${ParticleType}_${OutDATAFilename}.root" ]; then
 		for i in "${data_right_tmp[@]}"
 		do       
 		    if [ -f "${SKIM_OUTPUT_DIR}/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
@@ -607,18 +608,18 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#dummy_left_tmp[@]} -ne 0 ]; then
-	    if [ -f "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDUMMYFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Left_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		echo
-		echo "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
-		rm -f "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDUMMYFilename}.root"
+		echo "${OUTPATH}/Left_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
+		rm -f "${OUTPATH}/Left_${ParticleType}_${OutDUMMYFilename}.root"
 	    fi
 	    echo
 	    echo "Combining left ${ParticleType} dummy..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "_-1_Raw_Data" "${TreeNames}" "Left_${ParticleType}_${OutDUMMYFilename}" "${dummy_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Left_${ParticleType}_${OutDUMMYFilename}.err"
+	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "${OUTPATH}/" "_-1_Raw_Data" "${TreeNames}" "Left_${ParticleType}_${OutDUMMYFilename}" "${dummy_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Left_${ParticleType}_${OutDUMMYFilename}.err"
 	    echo
-	    if [ -f "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDUMMYFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Left_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		for i in "${dummy_left_tmp[@]}"
 		do       
 		    if [ -f "${SKIM_OUTPUT_DIR}/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
@@ -634,18 +635,18 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#data_left_tmp[@]} -ne 0 ]; then
-	    if [ -f "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDATAFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Left_${ParticleType}_${OutDATAFilename}.root" ]; then
 		echo
-		echo "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
-		rm -f "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDATAFilename}.root"
+		echo "${OUTPATH}/Left_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
+		rm -f "${OUTPATH}/Left_${ParticleType}_${OutDATAFilename}.root"
 	    fi
 	    echo
 	    echo "Combining left ${ParticleType} data..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "_-1_Raw_Data" "${TreeNames}" "Left_${ParticleType}_${OutDATAFilename}" "${data_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Left_${ParticleType}_${OutDATAFilename}.err"
+	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "${OUTPATH}/" "_-1_Raw_Data" "${TreeNames}" "Left_${ParticleType}_${OutDATAFilename}" "${data_left_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Left_${ParticleType}_${OutDATAFilename}.err"
 	    echo
-	    if [ -f "${SKIM_OUTPUT_DIR}/Left_${ParticleType}_${OutDATAFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Left_${ParticleType}_${OutDATAFilename}.root" ]; then
 		for i in "${data_left_tmp[@]}"
 		do       
 		    if [ -f "${SKIM_OUTPUT_DIR}/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
@@ -661,18 +662,18 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#dummy_center_tmp[@]} -ne 0 ]; then
-	    if [ -f "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDUMMYFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Center_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		echo
-		echo "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
-		rm -f "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDUMMYFilename}.root"
+		echo "${OUTPATH}/Center_${ParticleType}_${OutDUMMYFilename}.root exists already, deleting..."
+		rm -f "${OUTPATH}/Center_${ParticleType}_${OutDUMMYFilename}.root"
 	    fi
 	    echo
 	    echo "Combining center ${ParticleType} dummy..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "_-1_Raw_Data" "${TreeNames}" "Center_${ParticleType}_${OutDUMMYFilename}" "${dummy_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Center_${ParticleType}_${OutDUMMYFilename}.err"
+	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "${OUTPATH}/" "_-1_Raw_Data" "${TreeNames}" "Center_${ParticleType}_${OutDUMMYFilename}" "${dummy_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Center_${ParticleType}_${OutDUMMYFilename}.err"
 	    echo
-	    if [ -f "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDUMMYFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Center_${ParticleType}_${OutDUMMYFilename}.root" ]; then
 		for i in "${dummy_center_tmp[@]}"
 		do       
 		    if [ -f "${SKIM_OUTPUT_DIR}/${ParticleType}_${i}_-1_Raw_Data.root" ]; then
@@ -688,18 +689,18 @@ do
 
 	# Checks that array isn't empty
 	if [ ${#data_center_tmp[@]} -ne 0 ]; then
-	    if [ -f "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDATAFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Center_${ParticleType}_${OutDATAFilename}.root" ]; then
 		echo
-		echo "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
-		rm -f "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDATAFilename}.root"
+		echo "${OUTPATH}/Center_${ParticleType}_${OutDATAFilename}.root exists already, deleting..."
+		rm -f "${OUTPATH}/Center_${ParticleType}_${OutDATAFilename}.root"
 	    fi
 	    echo
 	    echo "Combining center ${ParticleType} data..."
 	    echo
 	    cd "${LTANAPATH}/src/setup"
-	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "_-1_Raw_Data" "${TreeNames}" "Center_${ParticleType}_${OutDATAFilename}" "${data_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Center_${ParticleType}_${OutDATAFilename}.err"
+	    python3 mergeRootFiles.py "${SKIM_OUTPUT_DIR}/" "${OUTPATH}/" "_-1_Raw_Data" "${TreeNames}" "Center_${ParticleType}_${OutDATAFilename}" "${data_center_tmp[*]}" "${ParticleType}" "${LTANAPATH}/log/Center_${ParticleType}_${OutDATAFilename}.err"
 	    echo
-	    if [ -f "${SKIM_OUTPUT_DIR}/Center_${ParticleType}_${OutDATAFilename}.root" ]; then
+	    if [ -f "${OUTPATH}/Center_${ParticleType}_${OutDATAFilename}.root" ]; then
 		for i in "${data_center_tmp[@]}"
 		do       
 		    if [ -f "${SKIM_OUTPUT_DIR}/${ParticleType}_${i}_-1_Raw_Data.root" ]; then

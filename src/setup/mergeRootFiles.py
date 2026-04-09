@@ -11,16 +11,18 @@
 #
 # Copyright (c) trottar
 #
-import sys, os
+import sys, os, subprocess
+from pathlib import Path
 import ROOT
 
-root_path = sys.argv[1]
-inp_file_name = sys.argv[2]
-inp_tree_names = sys.argv[3]
-output_file_name = sys.argv[4]
-string_run_nums = sys.argv[5]
-particle = sys.argv[6]
-err_fout = sys.argv[7]
+input_root_path = Path(sys.argv[1]).expanduser()
+output_root_path = Path(sys.argv[2]).expanduser()
+inp_file_name = sys.argv[3]
+inp_tree_names = sys.argv[4]
+output_file_name = sys.argv[5]
+string_run_nums = sys.argv[6]
+particle = sys.argv[7]
+err_fout = sys.argv[8]
 
 ###############################################################################################################################################
 '''
@@ -47,14 +49,82 @@ def log_bad_runs(inp_root_file, err_fout, warning):
     with open(err_fout, 'a') as f:
         f.write(warning+'\n')
 
-out_root_file = root_path + output_file_name + ".root"
+def resolve_absolute_path(path_obj):
+    return path_obj.resolve(strict=False)
+
+
+def is_cache_path(path_obj):
+    path_text = str(path_obj)
+    return (
+        path_text.startswith("/cache/")
+        or path_text.startswith("/lustre/expphy/cache/")
+        or "/cache/" in path_text
+    )
+
+
+def cache_path_to_mss(path_obj):
+    path_text = str(path_obj)
+    if path_text.startswith("/cache/hallc/kaonlt"):
+        return Path("/mss/hallc/kaonlt" + path_text[len("/cache/hallc/kaonlt"):])
+    if path_text.startswith("/lustre/expphy/cache/hallc/kaonlt"):
+        return Path("/mss/hallc/kaonlt" + path_text[len("/lustre/expphy/cache/hallc/kaonlt"):])
+    if path_text.startswith("/cache/"):
+        return Path("/mss" + path_text[len("/cache"):])
+    if path_text.startswith("/lustre/expphy/cache/"):
+        return Path("/mss" + path_text[len("/lustre/expphy/cache"):])
+    return path_obj
+
+
+def run_jcache_in_batches(mss_files, batch_size=50):
+    unique_files = []
+    seen = set()
+    for mss_file in mss_files:
+        mss_text = str(mss_file)
+        if mss_text not in seen:
+            unique_files.append(mss_text)
+            seen.add(mss_text)
+
+    if not unique_files:
+        return
+
+    total_batches = (len(unique_files) + batch_size - 1) // batch_size
+    print("\nCache-backed skim source detected; requesting jcache staging for combine inputs...")
+    for batch_index in range(total_batches):
+        start = batch_index * batch_size
+        batch = unique_files[start:start + batch_size]
+        command = ["jcache", "get"] + batch
+        print("  Batch {}/{}: {}".format(batch_index + 1, total_batches, " ".join(command)))
+        try:
+            subprocess.run(command, check=True)
+        except FileNotFoundError:
+            print("ERROR: jcache command not found. Cannot stage cache-backed skim inputs.")
+            sys.exit(1)
+        except subprocess.CalledProcessError as exc:
+            print("ERROR: jcache staging failed for combine inputs (exit code {}).".format(exc.returncode))
+            sys.exit(exc.returncode if exc.returncode != 0 else 1)
+
+
+input_root_abs = resolve_absolute_path(input_root_path)
+output_root_abs = resolve_absolute_path(output_root_path)
+print("\nCombining ROOT files from: {}".format(input_root_abs))
+print("Writing merged ROOT file to: {}".format(output_root_abs))
+
+arr_run_nums = [int(x) for x in string_run_nums.split()]
+input_root_files = [
+    input_root_path / (particle + "_" + str(run_num) + inp_file_name + ".root")
+    for run_num in arr_run_nums
+]
+
+if is_cache_path(input_root_abs):
+    run_jcache_in_batches([cache_path_to_mss(path_obj) for path_obj in input_root_files])
+
+os.makedirs(output_root_path, exist_ok=True)
+out_root_file = os.path.join(output_root_path, output_file_name + ".root")
 
 outfile = ROOT.TFile(out_root_file, "RECREATE")
 if not outfile.IsOpen():
     print("ERROR: Output file {} cannot be opened. Exiting the function.".format(outfile.GetName()))
     sys.exit(1)
-
-arr_run_nums = [int(x) for x in string_run_nums.split()]
 
 for tree in inp_tree_names.split():
 
@@ -66,7 +136,7 @@ for tree in inp_tree_names.split():
             Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         else:
             Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
-        inp_root_file = root_path + particle + "_" + str(n) + inp_file_name + ".root"
+        inp_root_file = os.path.join(input_root_path, particle + "_" + str(n) + inp_file_name + ".root")
         if not os.path.isfile(inp_root_file):
             warning = "WARNING: File {} not found. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)
@@ -109,4 +179,3 @@ outfile.Close()
 # Remove superfluous statements in error file
 for n in arr_run_nums:
     process_lines(str(n), err_fout)
-
