@@ -59,14 +59,16 @@ def absolute_path_has_cache(path_obj):
 
 def cache_path_to_mss(path_obj):
     path_text = str(path_obj)
-    if path_text.startswith("/cache/hallc/kaonlt"):
-        return Path("/mss/hallc/kaonlt" + path_text[len("/cache/hallc/kaonlt"):])
-    if path_text.startswith("/lustre/expphy/cache/hallc/kaonlt"):
-        return Path("/mss/hallc/kaonlt" + path_text[len("/lustre/expphy/cache/hallc/kaonlt"):])
-    if path_text.startswith("/cache/"):
-        return Path("/mss" + path_text[len("/cache"):])
-    if path_text.startswith("/lustre/expphy/cache/"):
-        return Path("/mss" + path_text[len("/lustre/expphy/cache"):])
+    kaonlt_cache_index = path_text.find("/cache/hallc/kaonlt")
+    if kaonlt_cache_index != -1:
+        suffix = path_text[kaonlt_cache_index + len("/cache/hallc/kaonlt"):]
+        return Path("/mss/hallc/kaonlt" + suffix)
+
+    generic_cache_index = path_text.find("/cache/")
+    if generic_cache_index != -1:
+        suffix = path_text[generic_cache_index + len("/cache"):]
+        return Path("/mss" + suffix)
+
     return None
 
 
