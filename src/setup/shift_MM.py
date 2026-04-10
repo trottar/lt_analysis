@@ -7,6 +7,7 @@
 # ================================================================
 #
 
+import math
 import os
 import sys
 from array import array
@@ -194,6 +195,76 @@ def fit_tree_peak(
         "fit_max": fit_max,
         "fit_center": fit_center,
     }
+
+
+def clone_hist_detached(hist, clone_name):
+    cloned_hist = hist.Clone(clone_name)
+    if hasattr(cloned_hist, "SetDirectory"):
+        cloned_hist.SetDirectory(0)
+    return cloned_hist
+
+
+def fit_hist_peak(
+    hist,
+    particle_type,
+    hist_xmin=FIT_HIST_XMIN,
+    hist_xmax=FIT_HIST_XMAX,
+):
+    hist_clone = clone_hist_detached(
+        hist,
+        f"{hist.GetName()}_fit_{abs(hash((hist.GetName(), hist_xmin, hist_xmax))) & 0xFFFFFFFF}",
+    )
+    search_min = hist_xmin
+    search_max = hist_xmax
+    peak_bin, _ = find_peak_bin(hist_clone, search_min, search_max)
+    fit_center = hist_clone.GetBinCenter(peak_bin)
+    fit_min, fit_max = determine_fit_window(hist_clone, peak_bin, search_min, search_max)
+    mean, mean_err, fit_func = fit_gaussian(hist_clone, fit_min, fit_max)
+    fit_func.SetLineColor(kRed)
+    return {
+        "hist": hist_clone,
+        "amplitude": fit_func.GetParameter(0),
+        "mean": mean,
+        "mean_err": mean_err,
+        "sigma": fit_func.GetParameter(2),
+        "fit_func": fit_func,
+        "fit_min": fit_min,
+        "fit_max": fit_max,
+        "fit_center": fit_center,
+    }
+
+
+def build_shifted_hist_from_hist(hist, shift, hist_name=None, hist_title=None):
+    shifted_hist = clone_hist_detached(
+        hist,
+        hist_name or f"{hist.GetName()}_shifted_{abs(hash((hist.GetName(), shift))) & 0xFFFFFFFF}",
+    )
+    shifted_hist.Reset("ICES")
+    if hist_title is not None:
+        shifted_hist.SetTitle(hist_title)
+
+    x_axis = shifted_hist.GetXaxis()
+    x_min = x_axis.GetXmin()
+    x_max = x_axis.GetXmax()
+
+    for bin_idx in range(1, hist.GetNbinsX() + 1):
+        content = hist.GetBinContent(bin_idx)
+        error = hist.GetBinError(bin_idx)
+        if content == 0.0 and error == 0.0:
+            continue
+
+        shifted_x = hist.GetBinCenter(bin_idx) + shift
+        if shifted_x < x_min or shifted_x >= x_max:
+            continue
+
+        target_bin = x_axis.FindBin(shifted_x)
+        shifted_hist.SetBinContent(target_bin, shifted_hist.GetBinContent(target_bin) + content)
+        combined_error = math.sqrt(
+            shifted_hist.GetBinError(target_bin) ** 2 + error ** 2
+        )
+        shifted_hist.SetBinError(target_bin, combined_error)
+
+    return shifted_hist
 
 
 def build_derived_tree(tree, branch_name, value_getter):
@@ -562,6 +633,201 @@ def write_t_shift_plots(
     canvas.Print(f"{output_pdf}]")
     canvas.Close()
     gStyle.SetOptStat(old_opt_stat)
+
+
+def write_t_shift_plots_from_hists(
+    particle_type,
+    simc_hist,
+    data_hist,
+    t_shift,
+    output_pdf,
+    plot_xmin,
+    plot_xmax,
+):
+    old_opt_stat = gStyle.GetOptStat()
+    gStyle.SetOptStat(0)
+
+    canvas_name = f"canvas_t_shift_hist_{abs(hash(output_pdf)) & 0xFFFFFFFF}"
+    canvas = TCanvas(canvas_name, "t Shift", 900, 700)
+    canvas.Print(f"{output_pdf}[")
+
+    simc_draw = clone_hist_detached(simc_hist, f"{simc_hist.GetName()}_plot")
+    simc_draw.SetTitle(f"SIMC -t ({particle_type})")
+    simc_draw.SetLineColor(kRed)
+    simc_draw.SetLineWidth(2)
+    simc_draw.GetXaxis().SetRangeUser(plot_xmin, plot_xmax)
+    simc_draw.Draw("hist")
+    make_text_box(
+        [
+            "Convention: -t",
+            f"Range = [{plot_xmin:.4f}, {plot_xmax:.4f}]",
+        ]
+    ).Draw("same")
+    canvas.Print(output_pdf)
+
+    data_draw = clone_hist_detached(data_hist, f"{data_hist.GetName()}_plot")
+    data_draw.SetTitle(f"Data -t ({particle_type})")
+    data_draw.SetLineColor(kBlack)
+    data_draw.SetLineWidth(2)
+    data_draw.GetXaxis().SetRangeUser(plot_xmin, plot_xmax)
+    data_draw.Draw("hist")
+    make_text_box(
+        [
+            "Convention: -t",
+            f"Applied t_shift = {t_shift:+.6f}",
+        ]
+    ).Draw("same")
+    canvas.Print(output_pdf)
+
+    shifted_hist = build_shifted_hist_from_hist(
+        data_hist,
+        t_shift,
+        hist_name=f"{data_hist.GetName()}_t_shifted",
+        hist_title="t_shift",
+    )
+
+    data_overlay = clone_hist_detached(data_draw, f"{data_draw.GetName()}_overlay")
+    shifted_overlay = clone_hist_detached(shifted_hist, f"{shifted_hist.GetName()}_overlay")
+    simc_overlay = clone_hist_detached(simc_draw, f"{simc_draw.GetName()}_overlay")
+
+    normalize_hist(data_overlay)
+    normalize_hist(shifted_overlay)
+    normalize_hist(simc_overlay)
+
+    data_overlay.SetTitle(f"-t Raw / Shifted / SIMC ({particle_type})")
+    data_overlay.SetLineColor(kBlack)
+    shifted_overlay.SetLineColor(kBlue)
+    simc_overlay.SetLineColor(kRed)
+    data_overlay.SetLineWidth(2)
+    shifted_overlay.SetLineWidth(2)
+    simc_overlay.SetLineWidth(2)
+
+    ymax = max(
+        data_overlay.GetMaximum(),
+        shifted_overlay.GetMaximum(),
+        simc_overlay.GetMaximum(),
+    ) * 1.15
+    data_overlay.SetMaximum(ymax)
+    data_overlay.GetYaxis().SetTitle("Normalized counts")
+    data_overlay.Draw("hist")
+    shifted_overlay.Draw("hist same")
+    simc_overlay.Draw("hist same")
+
+    legend = TLegend(0.58, 0.55, 0.89, 0.68)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(data_overlay, "Data -t", "l")
+    legend.AddEntry(shifted_overlay, "Data t_shift", "l")
+    legend.AddEntry(simc_overlay, "SIMC -t", "l")
+    legend.Draw("same")
+
+    make_text_box(
+        [
+            "Convention: -t",
+            f"Applied t_shift = {t_shift:+.6f}",
+        ]
+    ).Draw("same")
+    canvas.Print(output_pdf)
+
+    canvas.Print(f"{output_pdf}]")
+    canvas.Close()
+    gStyle.SetOptStat(old_opt_stat)
+
+
+def compute_mm_shift_details_from_hists(
+    particle_type,
+    simc_hist,
+    data_hist,
+    plot_xmin=None,
+    plot_xmax=None,
+):
+    ROOT.gROOT.SetBatch(True)
+
+    peak_name = get_peak_name(particle_type)
+
+    if plot_xmin is None:
+        plot_xmin = FIT_HIST_XMIN
+    if plot_xmax is None:
+        plot_xmax = FIT_HIST_XMAX
+
+    simc_fit = fit_hist_peak(
+        simc_hist,
+        particle_type,
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
+    )
+    data_fit = fit_hist_peak(
+        data_hist,
+        particle_type,
+        hist_xmin=plot_xmin,
+        hist_xmax=plot_xmax,
+    )
+    shift = simc_fit["mean"] - data_fit["mean"]
+
+    return {
+        "peak_name": peak_name,
+        "simc_fit": simc_fit,
+        "data_fit": data_fit,
+        "shift": shift,
+    }
+
+
+def compute_mm_shift_summary_from_hists(
+    particle_type,
+    simc_hist,
+    data_hist,
+    plot_xmin=None,
+    plot_xmax=None,
+):
+    details = compute_mm_shift_details_from_hists(
+        particle_type,
+        simc_hist,
+        data_hist,
+        plot_xmin=plot_xmin,
+        plot_xmax=plot_xmax,
+    )
+    simc_fit = details["simc_fit"]
+    data_fit = details["data_fit"]
+
+    return {
+        "simc_peak": simc_fit["mean"],
+        "simc_peak_err": simc_fit["mean_err"],
+        "data_peak": data_fit["mean"],
+        "data_peak_err": data_fit["mean_err"],
+        "simc_sigma": simc_fit["sigma"],
+        "data_sigma": data_fit["sigma"],
+        "simc_fit_min": simc_fit["fit_min"],
+        "simc_fit_max": simc_fit["fit_max"],
+        "data_fit_min": data_fit["fit_min"],
+        "data_fit_max": data_fit["fit_max"],
+        "shift": details["shift"],
+    }
+
+
+def plot_mm_shift_from_hist_details(
+    particle_type,
+    details,
+    output_pdf,
+    plot_xmin=FIT_HIST_XMIN,
+    plot_xmax=FIT_HIST_XMAX,
+):
+    shifted_hist = build_shifted_hist_from_hist(
+        details["data_fit"]["hist"],
+        details["shift"],
+        hist_name=f"{details['data_fit']['hist'].GetName()}_shifted_overlay",
+        hist_title="MM_shift",
+    )
+    write_shift_plots(
+        particle_type,
+        details["simc_fit"],
+        details["data_fit"],
+        shifted_hist,
+        details["shift"],
+        output_pdf,
+        plot_xmin=plot_xmin,
+        plot_xmax=plot_xmax,
+    )
+    return output_pdf
 
 
 def compute_mm_shift_details(

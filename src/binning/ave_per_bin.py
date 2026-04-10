@@ -209,8 +209,8 @@ def _subtract_ave_mm_background_for_tbin(
 def _process_ave_data_tree(
     tree,
     hist_group,
-    has_mm_shift,
-    has_t_shift,
+    shifted_mm_getter,
+    shifted_t_getter,
     t_bins,
     particle_type,
     hole_contains,
@@ -237,8 +237,8 @@ def _process_ave_data_tree(
         if not (allcuts or nommcuts):
             continue
 
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
-        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+        adj_MM = shifted_mm_getter(evt)
+        adj_t = shifted_t_getter(evt)
         t_index = find_bin_index(adj_t, t_bins)
         if t_index is None:
             continue
@@ -323,8 +323,9 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import evaluate_data_event, set_val
+    from apply_cuts import evaluate_data_event, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     set_val(inpDict) # Set global variables for optimization
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
 
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
@@ -465,14 +466,6 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             subDict["H_MM_nosub_SUB_DUMMY_RAND_{}".format(j)]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}".format(j),"MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)
             
     hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
-    has_mm_shift_data = bool(TBRANCH_DATA.GetBranch("MM_shift"))
-    has_mm_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("MM_shift"))
-    has_mm_shift_rand = bool(TBRANCH_RAND.GetBranch("MM_shift"))
-    has_mm_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("MM_shift"))
-    has_t_shift_data = bool(TBRANCH_DATA.GetBranch("t_shift"))
-    has_t_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("t_shift"))
-    has_t_shift_rand = bool(TBRANCH_RAND.GetBranch("t_shift"))
-    has_t_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("t_shift"))
 
     print("\nBinning data...")
     if event_cache is not None:
@@ -483,8 +476,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         mm_offset_from_tree = _process_ave_data_tree(
             TBRANCH_DATA,
             data_hists,
-            has_mm_shift_data,
-            has_t_shift_data,
+            get_shifted_mm,
+            get_shifted_t,
             t_bins,
             ParticleType,
             hole_contains,
@@ -504,8 +497,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         _process_ave_data_tree(
             TBRANCH_DUMMY,
             dummy_hists,
-            has_mm_shift_dummy,
-            has_t_shift_dummy,
+            get_shifted_mm,
+            get_shifted_t,
             t_bins,
             ParticleType,
             hole_contains,
@@ -522,8 +515,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         _process_ave_data_tree(
             TBRANCH_RAND,
             rand_hists,
-            has_mm_shift_rand,
-            has_t_shift_rand,
+            get_shifted_mm,
+            get_shifted_t,
             t_bins,
             ParticleType,
             hole_contains,
@@ -540,8 +533,8 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         _process_ave_data_tree(
             TBRANCH_DUMMY_RAND,
             dummy_rand_hists,
-            has_mm_shift_dummy_rand,
-            has_t_shift_dummy_rand,
+            get_shifted_mm,
+            get_shifted_t,
             t_bins,
             ParticleType,
             hole_contains,

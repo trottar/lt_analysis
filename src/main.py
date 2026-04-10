@@ -257,211 +257,8 @@ def print_timing_summary():
 
 atexit.register(print_timing_summary)
 
-sys.path.append("setup")
-from shift_MM import (
-    add_derived_branches_to_file,
-    add_shift_branch_to_file,
-    compute_mm_shift_details,
-    get_data_tree_names,
-    make_t_plot_filename,
-    plot_mm_shift_from_details,
-    write_t_shift_plots,
-)
-
-
-def get_shift_theta_and_beam(phiset):
-    config = {
-        "Right": {
-            "run_nums": [run for run in runNumRight.split(" ") if run],
-            "ptheta_vals": pThetaValRight,
-            "beam_vals": EbeamValRight,
-            "sign": -1.0,
-        },
-        "Left": {
-            "run_nums": [run for run in runNumLeft.split(" ") if run],
-            "ptheta_vals": pThetaValLeft,
-            "beam_vals": EbeamValLeft,
-            "sign": 1.0,
-        },
-        "Center": {
-            "run_nums": [run for run in runNumCenter.split(" ") if run],
-            "ptheta_vals": pThetaValCenter,
-            "beam_vals": EbeamValCenter,
-            "sign": 0.0,
-        },
-    }
-
-    setting = config[phiset]
-    run_nums = setting["run_nums"]
-    ptheta_vals = setting["ptheta_vals"]
-    beam_vals = setting["beam_vals"]
-    max_len = min(len(run_nums), len(ptheta_vals), len(pThetaValCenter), len(beam_vals))
-    if max_len == 0:
-        raise RuntimeError(f"No valid theta/beam entries found for {phiset} shift calculation.")
-
-    chosen_index = 0
-    log_suffix = OutFilename.replace("FullAnalysis_", "")
-    for idx, run in enumerate(run_nums[:max_len]):
-        pid_log = f"{LTANAPATH}/log/{phiset}_{ParticleType}_{run}_{log_suffix}.log"
-        if os.path.exists(pid_log):
-            chosen_index = idx
-            break
-
-    beam_energy_gev = float(beam_vals[chosen_index])
-
-    '''
-    if phiset == "Center":
-        theta_cm_deg = 0.0
-    else:
-        theta_delta = abs(float(pThetaValCenter[chosen_index]) - float(ptheta_vals[chosen_index]))
-        theta_cm_deg = setting["sign"] * theta_delta
-    '''
-
-    theta_cm_deg = float(ptheta_vals[chosen_index])
-
-    return theta_cm_deg, beam_energy_gev
-
-
-def run_shift_script(simc_root, data_root, theta_cm_deg, beam_energy_gev):
-    
-    print("\nRunning shift script for theta_cm = {:.3f} deg and beam energy = {:.3f} GeV".format(theta_cm_deg, beam_energy_gev))
-
-    command = [
-        "bash",
-        f"{LTANAPATH}/run_shift.sh",
-        LTANAPATH,
-        ParticleType,
-        simc_root,
-        data_root,
-        Q2,
-        W,
-        f"{theta_cm_deg:.6f}",
-        f"{beam_energy_gev:.6f}",
-        f"{mm_min:.6f}",
-        f"{mm_max:.6f}",
-    ]
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.stderr:
-        print(result.stderr.rstrip())
-    if result.returncode != 0:
-        raise RuntimeError(
-            "run_shift.sh failed with exit code {}.\nstdout:\n{}\nstderr:\n{}".format(
-                result.returncode,
-                result.stdout,
-                result.stderr,
-            )
-        )
-
-    stdout_lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    if not stdout_lines:
-        raise RuntimeError("run_shift.sh returned no output.")
-
-    return json.loads(stdout_lines[-1])
-
-
-mm_shift_summary = {}
-t_shift_summary = {}
-tree_names = get_data_tree_names(ParticleType)
-stage_start = perf_counter()
-for phiset in phisetlist:
-    setting_start = perf_counter()
-    rootFileData = f"{OUTPATH}/{phiset}_{ParticleType}_{InDATAFilename}.root"
-    if not os.path.exists(rootFileData):
-        print(f"Skipping MM shift for {phiset}: data file {rootFileData} not found.")
-        record_stage_time("MM/t shift {}".format(phiset), setting_start)
-        continue
-
-    rootFileSimc = f"{OUTPATH}/Prod_Coin_Q{Q2}W{W}{phiset.lower()}_{EPSSET}e.root"
-    if not os.path.exists(rootFileSimc):
-        print(f"ERROR: No SIMC file found for MM shift: {rootFileSimc}")
-        sys.exit(2)
-
-    rootFileDummy = f"{OUTPATH}/{phiset}_{ParticleType}_{InDUMMYFilename}.root"
-    theta_cm_deg, beam_energy_gev = get_shift_theta_and_beam(phiset)
-    shift_values = run_shift_script(
-        rootFileSimc,
-        rootFileData,
-        theta_cm_deg,
-        beam_energy_gev,
-    )
-    mm_shift = float(shift_values["shift"])
-
-    mm_details = compute_mm_shift_details(
-        ParticleType,
-        rootFileSimc,
-        rootFileData,
-        plot_xmin=mm_min,
-        plot_xmax=mm_max,
-    )
-    mm_plot_filename = plot_mm_shift_from_details(
-        ParticleType,
-        rootFileData,
-        mm_details,
-        plot_xmin=mm_min,
-        plot_xmax=mm_max,
-    )
-
-    mm_shift_summary[phiset] = {
-        "simc_peak": float(shift_values["simc_peak"]),
-        "simc_peak_err": float(shift_values["simc_peak_err"]),
-        "data_peak": float(shift_values["data_peak"]),
-        "data_peak_err": float(shift_values["data_peak_err"]),
-        "shift": mm_shift,
-        "theta_cm_deg": theta_cm_deg,
-        "beam_energy_gev": beam_energy_gev,
-        "plot_filename": mm_plot_filename,
-    }
-    output_file_lst.append(mm_plot_filename)
-
-    if shift_values.get("t_shift") is not None:
-        t_shift = float(shift_values["t_shift"])
-        print(f"Applying shift {mm_shift:+.6f} to MM in {rootFileData}")
-        if os.path.exists(rootFileDummy):
-            print(f"Applying shift {mm_shift:+.6f} to MM in {rootFileDummy}")
-        print(f"Applying t shift = {t_shift:+.6f} in -t convention")
-        shift_branch_specs = [
-            ("MM_shift", lambda evt, shift=mm_shift: getattr(evt, "MM") + shift, "Applying"),
-            ("t_shift", lambda evt, shift=t_shift: -getattr(evt, "MandelT") + shift, "Applying"),
-        ]
-        add_derived_branches_to_file(
-            rootFileData,
-            tree_names,
-            shift_branch_specs,
-        )
-        if os.path.exists(rootFileDummy):
-            add_derived_branches_to_file(
-                rootFileDummy,
-                tree_names,
-                shift_branch_specs,
-            )
-        t_plot_filename = make_t_plot_filename(rootFileData)
-        write_t_shift_plots(
-            ParticleType,
-            rootFileSimc,
-            rootFileData,
-            t_shift,
-            t_plot_filename,
-            plot_xmin=tmin,
-            plot_xmax=tmax,
-        )
-        t_shift_summary[phiset] = {
-            "shift": t_shift,
-            "theta_cm_deg": theta_cm_deg,
-            "beam_energy_gev": beam_energy_gev,
-            "phi_deg": float(shift_values.get("phi_deg", 0.0)),
-            "plot_filename": t_plot_filename,
-        }
-        output_file_lst.append(t_plot_filename)
-    else:
-        add_shift_branch_to_file(rootFileData, tree_names, "MM", mm_shift)
-        if os.path.exists(rootFileDummy):
-            add_shift_branch_to_file(rootFileDummy, tree_names, "MM", mm_shift)
-
-    record_stage_time("MM/t shift {}".format(phiset), setting_start)
-
-inpDict["mm_shift_summary"] = mm_shift_summary
-inpDict["t_shift_summary"] = t_shift_summary
-record_stage_time("MM/t shift setup total", stage_start)
+inpDict["mm_shift_summary"] = {}
+inpDict["t_shift_summary"] = {}
 
 # Removes this file to reset iteration count (see below for more details)
 f_path = "{}/{}_Q{}W{}_iter.dat".format(LTANAPATH,ParticleType,Q2,W)
@@ -622,51 +419,10 @@ if Q2 == "5p5" and W == "3p02":
 # DATA
 sys.path.append("cuts")
 from rand_sub import rand_sub
-
-# Call histogram function above to define dictonaries for right, left, center settings
-# Put these all into an array so that if we are missing a setting it is easier to remove
-# Plus it makes the code below less repetitive
-histlist = []
-stage_start = perf_counter()
-for phiset in phisetlist:
-    setting_start = perf_counter()
-    histlist.append(rand_sub(phiset,inpDict))
-    record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
-record_stage_time("Step 3 rand_sub total", stage_start)
-    
-print("\n\n")
-
-settingList = []
-for i,hist in enumerate(histlist):
-    if len(hist.keys()) <= 1: # If hist is empty (length of one for phi setting check)
-        print("No {} setting found...".format(hist["phi_setting"]))
-        phisetlist.remove(hist["phi_setting"])
-        histlist.remove(hist)
-    else:
-        settingList.append(hist["phi_setting"])
-
-if DEBUG:
-    # Show plot pdf for each setting
-    for hist in histlist:        
-        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-for hist in histlist:
-    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
-
-# Add root file with cut data and dummy
-for d in ["Dummy", "Data"]:
-    for phiset in phisetlist:
-        output_file_lst.append(f"{OUTPATH}/{phiset}_{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e.root")
+from shift_prep import shift_prep
 
 sys.path.append("normalize")
 from get_eff_charge import find_events
-
-# Upate hist dictionary with effective charge
-stage_start = perf_counter()
-for hist in histlist:
-    setting_start = perf_counter()
-    hist.update(find_events(hist, inpDict))
-    record_stage_time("Step 3 find_events {}".format(hist["phi_setting"]), setting_start)
-record_stage_time("Step 3 find_events total", stage_start)
 
 # ***Moved from main.py location below because needed for weight iteration***
 # Save fortran scripts that contain iteration functional form of parameterization
@@ -686,44 +442,127 @@ initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2
 
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
+from compare_simc import compare_simc
 
-# Upate hist dictionary with effective charge and simc histograms
+setting_seed_by_phi = {}
+prepared_seed_by_phi = {}
+
 stage_start = perf_counter()
-for hist in histlist:
+for phiset in phisetlist:
     setting_start = perf_counter()
+    seed_hist = {"phi_setting": phiset}
+    seed_hist.update(find_events(seed_hist, inpDict))
+    if len(seed_hist.keys()) <= 1:
+        print("Skipping {} setting during Step 3 seed setup...".format(phiset))
+        record_stage_time("Step 3 seed setup {}".format(phiset), setting_start)
+        continue
 
-    # Names don't match so need to do some string rearrangement
-    InSIMCFilename_original = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"  
-    #InSIMCFilename_original = f"Q{Q2}_W{W}_{hist['phi_setting'].lower()}_{EPSSET}e/Prod_Coin_Q{Q2}_W{W}_{hist['phi_setting'].lower()}_{EPSSET}e.root"  # Kin
-    InSIMCFilename = f"{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
-    original_rootFileSimc = OUTPATH+"/"+InSIMCFilename_original
-    rootFileSimc = OUTPATH+"/"+InSIMCFilename
-    hist["InSIMCFilename"] = InSIMCFilename
+    setting_seed_by_phi[phiset] = seed_hist
+    record_stage_time("Step 3 seed setup {}".format(phiset), setting_start)
+record_stage_time("Step 3 seed setup total", stage_start)
 
-    # Copy to new iteration so and then edit the weight
+stage_start = perf_counter()
+for phiset in list(setting_seed_by_phi.keys()):
+    setting_start = perf_counter()
+    seed_hist = setting_seed_by_phi[phiset]
+
+    InSIMCFilename_original = f"Prod_Coin_Q{Q2}W{W}{phiset.lower()}_{EPSSET}e.root"
+    InSIMCFilename = f"{phiset}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
+    original_rootFileSimc = OUTPATH + "/" + InSIMCFilename_original
+    rootFileSimc = OUTPATH + "/" + InSIMCFilename
+    seed_hist["InSIMCFilename"] = InSIMCFilename
+
     print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
     shutil.copy(original_rootFileSimc, rootFileSimc)
 
     print("\nCopying {} to {}".format(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist")))
     shutil.copy(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist"))
-    
-    # Back up to new iteration file list for output
+
     for f in [original_rootFileSimc, original_rootFileSimc.replace(".root", ".hist"), rootFileSimc, rootFileSimc.replace(".root", ".hist")]:
         output_file_lst.append(f)
 
-    # Make sure old simc root file exists
     if os.path.exists(rootFileSimc):
-        # Function to calculation new weight and apply it to simc root file 
-        iter_weight(initial_param_file, rootFileSimc, inpDict, hist["phi_setting"])
+        iter_weight(initial_param_file, rootFileSimc, inpDict, phiset)
     else:
         print("ERROR: Issue with simc root file {}".format(rootFileSimc))
         sys.exit(2)
-    record_stage_time("Step 3 iter_weight {}".format(hist["phi_setting"]), setting_start)
+
+    record_stage_time("Step 3 iter_weight {}".format(phiset), setting_start)
 record_stage_time("Step 3 iter_weight total", stage_start)
 
-# SIMC
-sys.path.append("simc_ana")    
-from compare_simc import compare_simc
+stage_start = perf_counter()
+mm_shift_summary = {}
+t_shift_summary = {}
+for phiset in list(setting_seed_by_phi.keys()):
+    setting_start = perf_counter()
+    prep_result = shift_prep(phiset, setting_seed_by_phi[phiset], inpDict)
+    if prep_result.get("mm_shift") is None:
+        print("Skipping {} setting during shift_prep...".format(phiset))
+        record_stage_time("Step 3 shift_prep {}".format(phiset), setting_start)
+        continue
+
+    mm_shift_summary[phiset] = prep_result["mm_shift"]
+    if prep_result.get("t_shift") and prep_result["t_shift"].get("shift") is not None:
+        t_shift_summary[phiset] = prep_result["t_shift"]
+    prepared_seed_by_phi[phiset] = setting_seed_by_phi[phiset]
+
+    for artifact_key in ("json_filename", "root_filename", "mm_plot_filename", "t_plot_filename"):
+        artifact = prep_result.get("artifacts", {}).get(artifact_key)
+        if artifact:
+            output_file_lst.append(artifact)
+
+    record_stage_time("Step 3 shift_prep {}".format(phiset), setting_start)
+record_stage_time("Step 3 shift_prep total", stage_start)
+
+inpDict["mm_shift_summary"] = mm_shift_summary
+inpDict["t_shift_summary"] = t_shift_summary
+inpDict["shift_mode"] = "shifted"
+
+# Call histogram function above to define dictonaries for right, left, center settings
+# Put these all into an array so that if we are missing a setting it is easier to remove
+# Plus it makes the code below less repetitive
+histlist = []
+stage_start = perf_counter()
+for phiset in phisetlist:
+    setting_start = perf_counter()
+    if phiset not in prepared_seed_by_phi:
+        print("Skipping {} setting during shifted rand_sub...".format(phiset))
+        record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
+        continue
+    hist = rand_sub(phiset, inpDict, shift_mode="shifted")
+    if len(hist.keys()) <= 1:
+        print("No {} setting found...".format(phiset))
+        record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
+        continue
+    histlist.append(hist)
+    record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
+record_stage_time("Step 3 rand_sub total", stage_start)
+    
+print("\n\n")
+
+settingList = []
+for hist in histlist:
+    settingList.append(hist["phi_setting"])
+phisetlist = settingList
+
+if DEBUG:
+    # Show plot pdf for each setting
+    for hist in histlist:        
+        show_pdf_with_evince(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+for hist in histlist:
+    output_file_lst.append(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(hist["phi_setting"],ParticleType)))
+
+# Add root file with cut data and dummy
+for d in ["Dummy", "Data"]:
+    for phiset in phisetlist:
+        output_file_lst.append(f"{OUTPATH}/{phiset}_{ParticleType}_Analysed_{d}_Q{Q2}W{W}_{EPSSET}e.root")
+
+stage_start = perf_counter()
+for hist in histlist:
+    setting_start = perf_counter()
+    hist.update(prepared_seed_by_phi[hist["phi_setting"]])
+    record_stage_time("Step 3 metadata merge {}".format(hist["phi_setting"]), setting_start)
+record_stage_time("Step 3 metadata merge total", stage_start)
 
 # Upate hist dictionary with effective charge and simc histograms
 stage_start = perf_counter()

@@ -27,6 +27,7 @@ W = ""
 Q2 = ""
 EPSSET = ""
 POL = ""
+ParticleType = ""
 tmin = ""
 tmax = ""
 cut_poly = []
@@ -36,9 +37,13 @@ cut_poly_xmax = None
 cut_poly_ymin = None
 cut_poly_ymax = None
 c0_value = 0.0
+ACTIVE_PHI_SETTING = ""
+SHIFT_MODE = "raw"
+MM_SHIFT_SUMMARY = {}
+T_SHIFT_SUMMARY = {}
 #TMIN_RESOLUTION_THRESHOLD = 0.0
 #TMIN_RESOLUTION_THRESHOLD = -1e-3 # 1 MeV^2, adjust as needed based on resolution studies
-TMIN_RESOLUTION_THRESHOLD = -1.0 # 1 GeV^2, adjust as needed based on resolution studies
+TMIN_RESOLUTION_THRESHOLD = 1e-5
 
 
 def _sort_ccw_points(points):
@@ -68,6 +73,51 @@ def _point_in_convex_poly(x, y, poly, eps=1e-12):
     return True
 
 # Then, set global variables which is called with arguments
+def set_shift_context(phi_setting=None, shift_mode=None, mm_shift_summary=None, t_shift_summary=None):
+
+    global ACTIVE_PHI_SETTING, SHIFT_MODE, MM_SHIFT_SUMMARY, T_SHIFT_SUMMARY
+
+    if phi_setting is not None:
+        ACTIVE_PHI_SETTING = phi_setting
+    if shift_mode is not None:
+        SHIFT_MODE = shift_mode
+    if mm_shift_summary is not None:
+        MM_SHIFT_SUMMARY = mm_shift_summary
+    if t_shift_summary is not None:
+        T_SHIFT_SUMMARY = t_shift_summary
+
+
+def get_shift_mode():
+    return SHIFT_MODE
+
+
+def _get_active_shift(summary_dict):
+    if SHIFT_MODE != "shifted":
+        return 0.0
+    if not ACTIVE_PHI_SETTING:
+        return 0.0
+
+    shift_info = summary_dict.get(ACTIVE_PHI_SETTING, {})
+    try:
+        return float(shift_info.get("shift", 0.0))
+    except (TypeError, ValueError, AttributeError):
+        return 0.0
+
+
+def get_active_mm_shift():
+    return _get_active_shift(MM_SHIFT_SUMMARY)
+
+
+def get_active_t_shift():
+    return _get_active_shift(T_SHIFT_SUMMARY)
+
+
+def get_effective_mm_offset(mm_offset=0.0):
+    if SHIFT_MODE == "shifted":
+        return 0.0
+    return mm_offset
+
+
 def set_val(inpDict):
     
     global W, Q2, EPSSET, POL, ParticleType
@@ -142,6 +192,13 @@ def set_val(inpDict):
         c0_value = c0_dict["Q{}W{}_{}e".format(Q2, W, EPSSET)]
     except KeyError:
         c0_value = 0.0
+
+    set_shift_context(
+        phi_setting=inpDict.get("phi_setting"),
+        shift_mode=inpDict.get("shift_mode"),
+        mm_shift_summary=inpDict.get("mm_shift_summary"),
+        t_shift_summary=inpDict.get("t_shift_summary"),
+    )
             
     ##############
     ##############        
@@ -187,10 +244,7 @@ def _passes_tmin_resolution(minus_t, w, q2):
 
 
 def get_shifted_mm(evt, mm_offset=0.0):
-    try:
-        return evt.MM_shift
-    except AttributeError:
-        return evt.MM + mm_offset
+    return evt.MM + get_effective_mm_offset(mm_offset) + get_active_mm_shift()
 
 
 def _compute_data_cut_state(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -203,8 +257,7 @@ def _compute_data_cut_state(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
     t_in_range = _in_window(adj_t, tmin, tmax)
     tmin_resolved = _passes_tmin_resolution(adj_t, evt.W, evt.Q2)
     mm_in_range = _in_window(adj_mm, mm_min, mm_max)
-    #return base_cuts and t_in_range and tmin_resolved and mm_in_range, base_cuts and t_in_range and tmin_resolved, adj_hsdelta
-    return base_cuts and t_in_range and mm_in_range, base_cuts and t_in_range, adj_hsdelta
+    return base_cuts and t_in_range and tmin_resolved and mm_in_range, base_cuts and t_in_range and tmin_resolved, adj_hsdelta
 
 
 def evaluate_data_event(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -221,13 +274,8 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
 
 ###############################################################################################################################################
 
-# Prefer the stored shifted branch when available; otherwise fall back to the
-# legacy convention of deriving -t from MandelT on the fly.
 def get_shifted_t(evt):
-    try:
-        return evt.t_shift
-    except AttributeError:
-        return -evt.MandelT
+    return -evt.MandelT + get_active_t_shift()
 
 # Subtraction cuts
 def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -257,7 +305,6 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     t_in_range = _in_window(minus_t, tmin, tmax)
     tmin_resolved = _passes_tmin_resolution(minus_t, evt.W, evt.Q2)
     mm_in_range = _in_window(adj_missmass, mm_min, mm_max)
-    #ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved and mm_in_range
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and mm_in_range
+    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved and mm_in_range
 
     return ALLCUTS

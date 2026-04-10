@@ -61,7 +61,7 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 ROOT.gStyle.SetOptStat(0)
 ################################################################################################################################################
 
-def compare_simc(hist, inpDict):
+def compare_simc(hist, inpDict, emit_plots=True):
 
     phi_setting = hist["phi_setting"]
 
@@ -345,6 +345,9 @@ def compare_simc(hist, inpDict):
     if histDict["NumEvts_MM_SIMC"] == 0.0:
         print(f"\n\nERROR: Empty results for {phi_setting} setting. Try adjusting functional forms of input model file...")
         sys.exit(2)
+
+    if not emit_plots:
+        return histDict
           
     ################################################################################################################################################
 

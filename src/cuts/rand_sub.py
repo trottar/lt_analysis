@@ -60,6 +60,7 @@ from mm_background_subtraction import (
     clone_reset_hist,
     mm_background_weight_from_value,
 )
+from apply_cuts import get_shift_mode, get_shifted_mm, get_shifted_t, set_shift_context
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -220,8 +221,6 @@ def _create_rand_sub_bg_templates(target_hists):
 
 def _process_rand_sub_background_tree(
     tree,
-    has_mm_shift,
-    has_t_shift,
     tmin,
     tmax,
     template_hists,
@@ -247,8 +246,8 @@ def _process_rand_sub_background_tree(
         if not allcuts:
             continue
 
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
-        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+        adj_MM = get_shifted_mm(evt)
+        adj_t = get_shifted_t(evt)
 
         event_weight = source_coeff * mm_background_weight_from_value(
             adj_MM,
@@ -264,7 +263,6 @@ def _process_rand_sub_background_tree(
 
 def _process_subtracted_particle_background_tree(
     tree,
-    has_mm_shift,
     mm_offset_data,
     template_hists,
     particle_type,
@@ -278,8 +276,10 @@ def _process_subtracted_particle_background_tree(
     source_coeff,
     residual_weights=None,
 ):
+    mm_offset_correction = 0.0 if get_shift_mode() == "shifted" else mm_offset_data
+
     for evt in tree:
-        base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_data)
+        base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_correction)
 
         if particle_type == "kaon":
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
@@ -291,10 +291,7 @@ def _process_subtracted_particle_background_tree(
         if not allcuts:
             continue
 
-        try:
-            adj_MM = evt.MM_shift if has_mm_shift else evt.MM + mm_offset_data
-        except AttributeError:
-            adj_MM = evt.MM + mm_offset_data
+        adj_MM = get_shifted_mm(evt, mm_offset=mm_offset_correction)
         adj_t = shifted_t_getter(evt)
 
         event_weight = source_coeff * mm_background_weight_from_value(
@@ -312,8 +309,6 @@ def _process_rand_sub_tree(
     tree,
     print_label,
     timer_label,
-    has_mm_shift,
-    has_t_shift,
     tmin,
     tmax,
     nomm_fills,
@@ -355,8 +350,8 @@ def _process_rand_sub_tree(
         if not (noholecuts or nommcuts or allcuts):
             continue
 
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM
-        adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+        adj_MM = get_shifted_mm(evt)
+        adj_t = get_shifted_t(evt)
 
         if noholecuts and nohole_xy_fill is not None:
             nohole_xy_fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -378,7 +373,7 @@ def _process_rand_sub_tree(
     _print_rand_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
     return mm_offset_value
 
-def rand_sub(phi_setting, inpDict):    
+def rand_sub(phi_setting, inpDict, shift_mode="shifted", emit_plots=True):
     total_start = perf_counter()
     setup_start = perf_counter()
 
@@ -434,8 +429,19 @@ def rand_sub(phi_setting, inpDict):
 
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, evaluate_data_event, get_shifted_t, set_val
+    from apply_cuts import (
+        apply_data_cuts,
+        apply_data_sub_cuts,
+        evaluate_data_cut_bools,
+        evaluate_data_event,
+        get_shift_mode,
+        get_shifted_mm,
+        get_shifted_t,
+        set_shift_context,
+        set_val,
+    )
     set_val(inpDict) # Set global variables for optimization
+    set_shift_context(phi_setting=phi_setting, shift_mode=shift_mode)
     
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
@@ -1155,14 +1161,6 @@ def rand_sub(phi_setting, inpDict):
     # Fill histograms for various trees called above
 
     hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
-    has_mm_shift_data = bool(TBRANCH_DATA.GetBranch("MM_shift"))
-    has_mm_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("MM_shift"))
-    has_mm_shift_rand = bool(TBRANCH_RAND.GetBranch("MM_shift"))
-    has_mm_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("MM_shift"))
-    has_t_shift_data = bool(TBRANCH_DATA.GetBranch("t_shift"))
-    has_t_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("t_shift"))
-    has_t_shift_rand = bool(TBRANCH_RAND.GetBranch("t_shift"))
-    has_t_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("t_shift"))
 
     if ParticleType == "kaon":
         data_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill
@@ -1244,8 +1242,6 @@ def rand_sub(phi_setting, inpDict):
         TBRANCH_DATA,
         "\nGrabbing {} {} data...".format(phi_setting, ParticleType),
         "rand_sub data loop {}".format(phi_setting),
-        has_mm_shift_data,
-        has_t_shift_data,
         tmin,
         tmax,
         data_nomm_fills,
@@ -1340,8 +1336,6 @@ def rand_sub(phi_setting, inpDict):
         TBRANCH_DUMMY,
         "\nGrabbing {} {} dummy...".format(phi_setting, ParticleType),
         "rand_sub dummy loop {}".format(phi_setting),
-        has_mm_shift_dummy,
-        has_t_shift_dummy,
         tmin,
         tmax,
         dummy_nomm_fills,
@@ -1437,8 +1431,6 @@ def rand_sub(phi_setting, inpDict):
         TBRANCH_RAND,
         "\nGrabbing {} {} random data...".format(phi_setting, ParticleType),
         "rand_sub random loop {}".format(phi_setting),
-        has_mm_shift_rand,
-        has_t_shift_rand,
         tmin,
         tmax,
         rand_nomm_fills,
@@ -1532,8 +1524,6 @@ def rand_sub(phi_setting, inpDict):
         TBRANCH_DUMMY_RAND,
         "\nGrabbing {} {} dummy random data...".format(phi_setting, ParticleType),
         "rand_sub dummy random loop {}".format(phi_setting),
-        has_mm_shift_dummy_rand,
-        has_t_shift_dummy_rand,
         tmin,
         tmax,
         dummy_rand_nomm_fills,
@@ -2213,10 +2203,6 @@ def rand_sub(phi_setting, inpDict):
         TBRANCH_SUB_RAND = sub_root_data.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
         TBRANCH_SUB_DUMMY = sub_root_dummy.Get("Cut_{}_Events_prompt_noRF".format(SubtractedParticle.capitalize()))
         TBRANCH_SUB_DUMMY_RAND = sub_root_dummy.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
-        has_mm_shift_sub_data = bool(TBRANCH_SUB_DATA.GetBranch("MM_shift"))
-        has_mm_shift_sub_rand = bool(TBRANCH_SUB_RAND.GetBranch("MM_shift"))
-        has_mm_shift_sub_dummy = bool(TBRANCH_SUB_DUMMY.GetBranch("MM_shift"))
-        has_mm_shift_sub_dummy_rand = bool(TBRANCH_SUB_DUMMY_RAND.GetBranch("MM_shift"))
 
     # Fit background and subtract
     # --------------------------------------------------------------
@@ -2243,8 +2229,6 @@ def rand_sub(phi_setting, inpDict):
 
         _process_rand_sub_background_tree(
             TBRANCH_DATA,
-            has_mm_shift_data,
-            has_t_shift_data,
             tmin,
             tmax,
             bg_templates1,
@@ -2259,8 +2243,6 @@ def rand_sub(phi_setting, inpDict):
         )
         _process_rand_sub_background_tree(
             TBRANCH_RAND,
-            has_mm_shift_rand,
-            has_t_shift_rand,
             tmin,
             tmax,
             bg_templates1,
@@ -2275,8 +2257,6 @@ def rand_sub(phi_setting, inpDict):
         )
         _process_rand_sub_background_tree(
             TBRANCH_DUMMY,
-            has_mm_shift_dummy,
-            has_t_shift_dummy,
             tmin,
             tmax,
             bg_templates1,
@@ -2291,8 +2271,6 @@ def rand_sub(phi_setting, inpDict):
         )
         _process_rand_sub_background_tree(
             TBRANCH_DUMMY_RAND,
-            has_mm_shift_dummy_rand,
-            has_t_shift_dummy_rand,
             tmin,
             tmax,
             bg_templates1,
@@ -2309,7 +2287,6 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon" and scale_factor != 0.0:
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_DATA,
-                has_mm_shift_sub_data,
                 MM_offset_DATA,
                 bg_templates1,
                 ParticleType,
@@ -2324,7 +2301,6 @@ def rand_sub(phi_setting, inpDict):
             )
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_RAND,
-                has_mm_shift_sub_rand,
                 MM_offset_DATA,
                 bg_templates1,
                 ParticleType,
@@ -2339,7 +2315,6 @@ def rand_sub(phi_setting, inpDict):
             )
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_DUMMY,
-                has_mm_shift_sub_dummy,
                 MM_offset_DATA,
                 bg_templates1,
                 ParticleType,
@@ -2354,7 +2329,6 @@ def rand_sub(phi_setting, inpDict):
             )
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_DUMMY_RAND,
-                has_mm_shift_sub_dummy_rand,
                 MM_offset_DATA,
                 bg_templates1,
                 ParticleType,
@@ -2400,8 +2374,6 @@ def rand_sub(phi_setting, inpDict):
 
         _process_rand_sub_background_tree(
             TBRANCH_DATA,
-            has_mm_shift_data,
-            has_t_shift_data,
             tmin,
             tmax,
             bg_templates2,
@@ -2417,8 +2389,6 @@ def rand_sub(phi_setting, inpDict):
         )
         _process_rand_sub_background_tree(
             TBRANCH_RAND,
-            has_mm_shift_rand,
-            has_t_shift_rand,
             tmin,
             tmax,
             bg_templates2,
@@ -2434,8 +2404,6 @@ def rand_sub(phi_setting, inpDict):
         )
         _process_rand_sub_background_tree(
             TBRANCH_DUMMY,
-            has_mm_shift_dummy,
-            has_t_shift_dummy,
             tmin,
             tmax,
             bg_templates2,
@@ -2451,8 +2419,6 @@ def rand_sub(phi_setting, inpDict):
         )
         _process_rand_sub_background_tree(
             TBRANCH_DUMMY_RAND,
-            has_mm_shift_dummy_rand,
-            has_t_shift_dummy_rand,
             tmin,
             tmax,
             bg_templates2,
@@ -2470,7 +2436,6 @@ def rand_sub(phi_setting, inpDict):
         if ParticleType == "kaon" and scale_factor != 0.0:
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_DATA,
-                has_mm_shift_sub_data,
                 MM_offset_DATA,
                 bg_templates2,
                 ParticleType,
@@ -2486,7 +2451,6 @@ def rand_sub(phi_setting, inpDict):
             )
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_RAND,
-                has_mm_shift_sub_rand,
                 MM_offset_DATA,
                 bg_templates2,
                 ParticleType,
@@ -2502,7 +2466,6 @@ def rand_sub(phi_setting, inpDict):
             )
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_DUMMY,
-                has_mm_shift_sub_dummy,
                 MM_offset_DATA,
                 bg_templates2,
                 ParticleType,
@@ -2518,7 +2481,6 @@ def rand_sub(phi_setting, inpDict):
             )
             _process_subtracted_particle_background_tree(
                 TBRANCH_SUB_DUMMY_RAND,
-                has_mm_shift_sub_dummy_rand,
                 MM_offset_DATA,
                 bg_templates2,
                 ParticleType,
@@ -2652,6 +2614,10 @@ def rand_sub(phi_setting, inpDict):
     histDict["NumEvts_MM_DUMMY"] = H_MM_DUMMY.Integral()
     histDict["NumEvts_MM_DATA"] = H_MM_DATA.Integral()
     _print_rand_timer("rand_sub histDict pack {}".format(phi_setting), perf_counter() - stage_start)
+
+    if not emit_plots:
+        _print_rand_timer("rand_sub total {}".format(phi_setting), perf_counter() - total_start)
+        return histDict
     
     ###
     # CT plots

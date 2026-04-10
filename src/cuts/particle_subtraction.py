@@ -180,13 +180,14 @@ def _process_particle_subtraction_tree(
     tree,
     print_label,
     timer_label,
-    has_mm_shift,
-    has_t_shift,
     mm_offset_data,
     fills,
     particle_type,
     hole_contains,
     evaluate_event,
+    shifted_mm_getter,
+    shifted_t_getter,
+    effective_mm_offset_getter,
     mm_min,
     mm_max,
     progress_bar,
@@ -200,6 +201,7 @@ def _process_particle_subtraction_tree(
     nohole_x_mm_fill = fills["nohole_x_mm"]
     nohole_y_mm_fill = fills["nohole_y_mm"]
     nomm_fill = fills["nomm"]
+    mm_offset_correction = effective_mm_offset_getter(mm_offset_data)
 
     for i, evt in enumerate(tree):
         progress_start = perf_counter()
@@ -207,20 +209,20 @@ def _process_particle_subtraction_tree(
         progress_time += perf_counter() - progress_start
 
         if particle_type == "kaon":
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_data)
+            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_correction)
             hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
             pid_pass = evt.P_hgcer_npeSum > 2.0
             allcuts = base_all_cuts and not hole_rejected and pid_pass
             noholecuts = base_sub_cuts
             nommcuts = base_sub_cuts and not hole_rejected and pid_pass
         else:
-            allcuts, nommcuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_data)
+            allcuts, nommcuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_correction)
             noholecuts = False
 
         if not (noholecuts or nommcuts or allcuts):
             continue
 
-        adj_MM = evt.MM_shift if has_mm_shift else evt.MM + mm_offset_data
+        adj_MM = shifted_mm_getter(evt, mm_offset=mm_offset_data)
 
         if noholecuts and nohole_xy_fill is not None:
             nohole_xy_fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -231,7 +233,7 @@ def _process_particle_subtraction_tree(
             nomm_fill(adj_MM)
 
         if allcuts:
-            adj_t = evt.t_shift if has_t_shift else -evt.MandelT
+            adj_t = shifted_t_getter(evt)
             _fill_particle_subtraction_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills)
 
     loop_elapsed = perf_counter() - loop_start
@@ -271,8 +273,9 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, evaluate_data_event, get_shifted_t, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, evaluate_data_event, get_effective_mm_offset, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     set_val(inpDict) # Set global variables for optimization
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
     
     ################################################################################################################################################
     # Define data root file trees of interest
@@ -589,14 +592,6 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     _print_sub_timer("particle_subtraction setup {}".format(phi_setting), perf_counter() - setup_start)
 
     hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
-    has_mm_shift_data = bool(TBRANCH_DATA.GetBranch("MM_shift"))
-    has_mm_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("MM_shift"))
-    has_mm_shift_rand = bool(TBRANCH_RAND.GetBranch("MM_shift"))
-    has_mm_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("MM_shift"))
-    has_t_shift_data = bool(TBRANCH_DATA.GetBranch("t_shift"))
-    has_t_shift_dummy = bool(TBRANCH_DUMMY.GetBranch("t_shift"))
-    has_t_shift_rand = bool(TBRANCH_RAND.GetBranch("t_shift"))
-    has_t_shift_dummy_rand = bool(TBRANCH_DUMMY_RAND.GetBranch("t_shift"))
 
     if ParticleType == "kaon":
         data_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill
@@ -669,13 +664,14 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
         TBRANCH_DATA,
         "\nGrabbing {} {} subtraction data...".format(phi_setting, SubtractedParticle),
         "particle_subtraction data loop {}".format(phi_setting),
-        has_mm_shift_data,
-        has_t_shift_data,
         MM_offset_DATA,
         data_fills,
         ParticleType,
         hole_contains,
         evaluate_data_event,
+        get_shifted_mm,
+        get_shifted_t,
+        get_effective_mm_offset,
         mm_min,
         mm_max,
         Misc.progressBar,
@@ -755,13 +751,14 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
         TBRANCH_DUMMY,
         "\nGrabbing {} {} subtraction dummy...".format(phi_setting, SubtractedParticle),
         "particle_subtraction dummy loop {}".format(phi_setting),
-        has_mm_shift_dummy,
-        has_t_shift_dummy,
         MM_offset_DATA,
         dummy_fills,
         ParticleType,
         hole_contains,
         evaluate_data_event,
+        get_shifted_mm,
+        get_shifted_t,
+        get_effective_mm_offset,
         mm_min,
         mm_max,
         Misc.progressBar,
@@ -841,13 +838,14 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
         TBRANCH_RAND,
         "\nGrabbing {} {} subtraction random...".format(phi_setting, SubtractedParticle),
         "particle_subtraction random loop {}".format(phi_setting),
-        has_mm_shift_rand,
-        has_t_shift_rand,
         MM_offset_DATA,
         rand_fills,
         ParticleType,
         hole_contains,
         evaluate_data_event,
+        get_shifted_mm,
+        get_shifted_t,
+        get_effective_mm_offset,
         mm_min,
         mm_max,
         Misc.progressBar,
@@ -927,13 +925,14 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
         TBRANCH_DUMMY_RAND,
         "\nGrabbing {} {} subtraction dummy random...".format(phi_setting, SubtractedParticle),
         "particle_subtraction dummy random loop {}".format(phi_setting),
-        has_mm_shift_dummy_rand,
-        has_t_shift_dummy_rand,
         MM_offset_DATA,
         dummy_rand_fills,
         ParticleType,
         hole_contains,
         evaluate_data_event,
+        get_shifted_mm,
+        get_shifted_t,
+        get_effective_mm_offset,
         mm_min,
         mm_max,
         Misc.progressBar,
@@ -1360,8 +1359,10 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_effective_mm_offset, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     set_val(inpDict) # Set global variables for optimization
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
+    mm_offset_for_cuts = get_effective_mm_offset(MM_offset_DATA)
     
     ################################################################################################################################################
     # Define data root file trees of interest
@@ -1475,11 +1476,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + MM_offset_DATA
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         
         ##############
@@ -1487,11 +1484,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -1522,11 +1519,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         
         ##############
@@ -1534,11 +1527,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -1569,11 +1562,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         
         ##############
@@ -1581,11 +1570,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -1616,11 +1605,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         
         ##############
@@ -1628,11 +1613,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
         ##############
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -1737,10 +1722,12 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     
     ################################################################################################################################################
     # Import function to define cut bools
-    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_shifted_t, set_val
+    from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_effective_mm_offset, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     sys.path.append("binning")
     from theta_cm import calculate_theta_cm_deg, calculate_tmin
     set_val(inpDict) # Set global variables for optimization
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
+    mm_offset_for_cuts = get_effective_mm_offset(MM_offset_DATA)
     
     ################################################################################################################################################
     # Define data root file trees of interest
@@ -1865,11 +1852,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + MM_offset_DATA
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
@@ -1883,11 +1866,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -1938,11 +1921,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
@@ -1956,11 +1935,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -2011,11 +1990,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
@@ -2029,11 +2004,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
@@ -2084,11 +2059,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
         adj_hsdelta = evt.hsdelta + c0_dict["Q{}W{}_{}e".format(Q2,W,EPSSET)]*evt.hsxpfp
 
-        # Check if variable shift branch exists
-        try:
-            adj_MM = evt.MM_shift
-        except AttributeError:
-            adj_MM = evt.MM + MM_offset_DATA
+        adj_MM = get_shifted_mm(evt, mm_offset=MM_offset_DATA)
         adj_t = get_shifted_t(evt)
         theta_cm_deg = calculate_theta_cm_deg(ParticleType, POL, evt.W, evt.Q2, adj_t)
         minus_tmin = calculate_tmin(ParticleType, POL, evt.W, evt.Q2)
@@ -2103,11 +2074,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
         phi_shift = (evt.ph_q)        
         
         if ParticleType == "kaon":
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts) and not hgcer_cutg.IsInside(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) and evt.P_hgcer_npeSum > 2.0
         else:
-            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
-            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=MM_offset_DATA)
+            ALLCUTS = apply_data_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
+            NOMMCUTS = apply_data_sub_cuts(evt, mm_min, mm_max, mm_offset=mm_offset_for_cuts)
 
         if(NOMMCUTS):
             for j in range(len(t_bins)-1):
