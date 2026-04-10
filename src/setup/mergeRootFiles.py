@@ -120,6 +120,9 @@ absolute_input_root_files = [
 if absolute_path_has_cache(input_root_abs):
     mss_stage_files = []
     for path_obj in absolute_input_root_files:
+        if path_obj.exists():
+            print("Cache file already present, skipping jcache: {}".format(path_obj))
+            continue
         mss_path = cache_path_to_mss(path_obj)
         if mss_path is None:
             print("WARNING: Could not map cache-backed input to MSS for jcache staging: {}".format(path_obj))
