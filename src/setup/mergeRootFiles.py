@@ -53,13 +53,8 @@ def resolve_absolute_path(path_obj):
     return path_obj.resolve(strict=False)
 
 
-def is_cache_path(path_obj):
-    path_text = str(path_obj)
-    return (
-        path_text.startswith("/cache/")
-        or path_text.startswith("/lustre/expphy/cache/")
-        or "/cache/" in path_text
-    )
+def absolute_path_has_cache(path_obj):
+    return "cache" in str(path_obj).lower()
 
 
 def cache_path_to_mss(path_obj):
@@ -72,7 +67,7 @@ def cache_path_to_mss(path_obj):
         return Path("/mss" + path_text[len("/cache"):])
     if path_text.startswith("/lustre/expphy/cache/"):
         return Path("/mss" + path_text[len("/lustre/expphy/cache"):])
-    return path_obj
+    return None
 
 
 def run_jcache_in_batches(mss_files, batch_size=50):
@@ -106,7 +101,8 @@ def run_jcache_in_batches(mss_files, batch_size=50):
 
 input_root_abs = resolve_absolute_path(input_root_path)
 output_root_abs = resolve_absolute_path(output_root_path)
-print("\nCombining ROOT files from: {}".format(input_root_abs))
+print("\nCombining ROOT files from: {}".format(input_root_path))
+print("Absolute skim source path: {}".format(input_root_abs))
 print("Writing merged ROOT file to: {}".format(output_root_abs))
 
 arr_run_nums = [int(x) for x in string_run_nums.split()]
@@ -114,9 +110,20 @@ input_root_files = [
     input_root_path / (particle + "_" + str(run_num) + inp_file_name + ".root")
     for run_num in arr_run_nums
 ]
+absolute_input_root_files = [
+    input_root_abs / (particle + "_" + str(run_num) + inp_file_name + ".root")
+    for run_num in arr_run_nums
+]
 
-if is_cache_path(input_root_abs):
-    run_jcache_in_batches([cache_path_to_mss(path_obj) for path_obj in input_root_files])
+if absolute_path_has_cache(input_root_abs):
+    mss_stage_files = []
+    for path_obj in absolute_input_root_files:
+        mss_path = cache_path_to_mss(path_obj)
+        if mss_path is None:
+            print("WARNING: Could not map cache-backed input to MSS for jcache staging: {}".format(path_obj))
+            continue
+        mss_stage_files.append(mss_path)
+    run_jcache_in_batches(mss_stage_files)
 
 os.makedirs(output_root_path, exist_ok=True)
 out_root_file = os.path.join(output_root_path, output_file_name + ".root")
