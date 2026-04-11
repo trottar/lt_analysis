@@ -400,6 +400,15 @@ inpDict["mm_shift_summary"] = mm_shift_summary
 inpDict["t_shift_summary"] = t_shift_summary
 inpDict["shift_mode"] = "raw"
 record_stage_time("MM/t shift setup total", stage_start)
+
+if DEBUG:
+    for phiset in phisetlist:
+        mm_plot = mm_shift_summary.get(phiset, {}).get("plot_filename")
+        if mm_plot:
+            show_pdf_with_evince(mm_plot)
+        t_plot = t_shift_summary.get(phiset, {}).get("plot_filename")
+        if t_plot:
+            show_pdf_with_evince(t_plot)
         
 ##############################
 # Step 3 of the lt_analysis: # DONE

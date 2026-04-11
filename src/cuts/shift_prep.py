@@ -41,6 +41,8 @@ from shift_MM import (
     build_shifted_hist_from_hist,
     compute_mm_shift_details_from_hists,
     get_hist_nbins,
+    make_plot_filename,
+    make_t_plot_filename,
     plot_mm_shift_from_hist_details,
     write_t_shift_plots_from_hists,
 )
@@ -348,8 +350,8 @@ def shift_prep(phi_setting, inpDict):
 
     theta_cm_deg, beam_energy_gev = get_shift_theta_and_beam(phi_setting, inpDict)
     output_base = _get_output_base(phi_setting, particle_type, inpDict)
-    mm_plot_filename = output_base + "_MM_Shift.pdf"
-    t_plot_filename = output_base + "_T_Shift.pdf"
+    mm_plot_filename = make_plot_filename(data_filename)
+    t_plot_filename = make_t_plot_filename(data_filename)
     output_root = output_base + ".root"
     output_json = output_base + ".json"
 
@@ -377,6 +379,22 @@ def shift_prep(phi_setting, inpDict):
         "beam_energy_gev": beam_energy_gev,
         "plot_filename": mm_plot_filename,
     }
+
+    print(
+        "SIMC peak ({}) = {:.6f} +/- {:.6f}".format(
+            simc_filename,
+            mm_shift_entry["simc_peak"],
+            mm_shift_entry["simc_peak_err"],
+        )
+    )
+    print(
+        "Data peak ({}) = {:.6f} +/- {:.6f}".format(
+            data_filename,
+            mm_shift_entry["data_peak"],
+            mm_shift_entry["data_peak_err"],
+        )
+    )
+    print("Applying MM shift = {:+.6f}".format(mm_shift))
 
     t_shift_entry = {}
     shifted_t_hist = None
@@ -413,6 +431,7 @@ def shift_prep(phi_setting, inpDict):
             "phi_deg": float(t_summary.get("phi_deg", 0.0)),
             "plot_filename": t_plot_filename,
         }
+        print("Applying t shift = {:+.6f} in -t convention".format(t_shift))
 
     shifted_mm_hist = build_shifted_hist_from_hist(
         data_mm_hist,
