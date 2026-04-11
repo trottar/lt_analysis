@@ -279,7 +279,15 @@ with open(prev_iter_json, 'r') as f:
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
 
+# Carry forward newer shift metadata safely when reading older cached iterations.
+inpDict.setdefault("mm_shift_summary", {})
+inpDict.setdefault("t_shift_summary", {})
+inpDict.setdefault("shift_mode", "raw")
+
 # Add closest and formatted dates to inpDict (used in plot comparison)
+inpDict["OutFilename"] = OutFilename
+inpDict["NumtBins"] = int(NumtBins)
+inpDict["NumPhiBins"] = int(NumPhiBins)
 inpDict["closest_date"] = closest_date
 inpDict["formatted_date"] = formatted_date
 inpDict["iter_num"] = iter_num
