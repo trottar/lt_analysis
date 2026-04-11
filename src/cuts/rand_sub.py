@@ -2209,7 +2209,6 @@ def rand_sub(phi_setting, inpDict, shift_mode="shifted", emit_plots=True):
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
     inpDict["bg_stat_scale1"] = 0.50
-    stage_start = perf_counter()
     residual_bg_weights1 = None
 
     if  inpDict["bg_stat_scale1"] > 0.0:
@@ -2501,8 +2500,6 @@ def rand_sub(phi_setting, inpDict, shift_mode="shifted", emit_plots=True):
         H_MM_fit2sub_DATA.Add(background_fit2[1], -1)
         H_MM_DATA.Add(background_fit2[0], -1)
         H_MM_full_DATA.Add(background_fit2[1], -1)
-    _print_rand_timer("rand_sub background fits {}".format(phi_setting), perf_counter() - stage_start)
-
     stage_start = perf_counter()
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
