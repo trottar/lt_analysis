@@ -440,6 +440,14 @@ def _parse_bool(value, default=False):
     return default
 
 
+def _is_shiftprep_artifact(path):
+    return "shiftprep" in os.path.basename(str(path)).lower()
+
+
+def _is_valid_event_tree(tree):
+    return bool(tree) and hasattr(tree, "InheritsFrom") and tree.InheritsFrom("TTree")
+
+
 HARDCODED_DIAMOND_AB_PARAMS = {
     "a1": -0.22478443202783813,
     "b1": 3.6863942419482063,
@@ -525,10 +533,12 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     if(phi_setting == '0'): phi_setting = ""
     print("\n\nKinematics: ",FilenameOverride,"\nPhi Setting: ",phi_setting)
     for file in glob.glob(OUTPATH+'/*'+phi_setting+'*'+ParticleType+'*'+FilenameOverride+'*.root'):
-	# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
+		# Searches through OUTPUT recursively for files matching the wild card format, taking the shortest one
         # Shortest file assumed to be full analyisis as it will not have "part" or "week" or "dummy" labels
         #print(file)
         if "simc" in file.lower():
+            continue
+        if _is_shiftprep_artifact(file):
             continue
         if "high" in file:
             if (len(file) < lenh):
@@ -571,6 +581,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
                     if "simc" in f.lower():
                         continue
+                    if _is_shiftprep_artifact(f):
+                        continue
                     fl = f.lower()
                     if eps_tag in fl:
                         if len(f) < best_len:
@@ -584,6 +596,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
                 if "simc" in f.lower():
                     continue                
+                if _is_shiftprep_artifact(f):
+                    continue
                 fl = f.lower()
                 if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
                     if len(f) < cand_len:
@@ -603,7 +617,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     pass
                 return None
             tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
-            if not tree:
+            if not _is_valid_event_tree(tree):
                 infile.Close()
                 return None
             ROOT.gROOT.cd()
@@ -772,10 +786,17 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 	# Read stuff from the main event tree
         infile = open_root_file(rootName, "READ")
 
-	# Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
+        # Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
         Cut_Events_all_noRF_tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
+        if not _is_valid_event_tree(Cut_Events_all_noRF_tree):
+            infile.Close()
+            raise TypeError(
+                "Expected TTree 'Cut_{}_Events_prompt_noRF' in {}, but found a non-tree object. "
+                "This usually means a diagnostic ROOT file was selected instead of an analysed event file."
+                .format(ParticleType.capitalize(), rootName)
+            )
 
-	##############################################################################################################################################
+        ##############################################################################################################################################
         countB = 0
         countA = 0
         badfit = True
@@ -1083,6 +1104,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             for f in glob.glob(OUTPATH + '/*' + tok + '*' + ParticleType + '*' + FilenameOverride + '*.root'):
                 if "simc" in f.lower():
                     continue                
+                if _is_shiftprep_artifact(f):
+                    continue
                 fl = f.lower()
                 if eps_tag in fl:
                     if len(f) < best_len:
@@ -1106,7 +1129,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             return None
 
         tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
-        if not tree:
+        if not _is_valid_event_tree(tree):
             print("!!!!! ERROR !!!!!\n Missing tree in file: {}\n!!!!! ERROR !!!!!".format(root_path))
             infile.Close()
             return None
@@ -1237,6 +1260,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         for f in glob.glob(OUTPATH + '/*' + ParticleType + '*' + FilenameOverride + '*.root'):
             if "simc" in f.lower():
                 continue            
+            if _is_shiftprep_artifact(f):
+                continue
             fl = f.lower()
             if (eps_tag in fl) and ("left" not in fl) and ("right" not in fl):
                 if len(f) < cand_len:
