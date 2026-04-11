@@ -17,6 +17,7 @@ import uproot as up
 import numpy as np
 import root_numpy as rnp
 import ROOT
+import copy
 from ROOT import TF1
 import sys, os, math
 
@@ -537,6 +538,11 @@ BG_MODELS = {
         },    
     },    
 }
+
+# Reuse the tuned Q4p4W2p74 background models for nearby settings until
+# dedicated side-band definitions are introduced for these kinematics.
+BG_MODELS["Q2p1W2p95"] = copy.deepcopy(BG_MODELS["Q4p4W2p74"])
+BG_MODELS["Q3p0W3p14"] = copy.deepcopy(BG_MODELS["Q4p4W2p74"])
 
 ################################################################################################################################################
 
@@ -1082,4 +1088,3 @@ def bg_fit(
         N_bg_norm_err *= abs(scaling)
 
     return fit_hist_inrange, fit_vis, bg_par, f_sig, N_bg_norm_err
-
