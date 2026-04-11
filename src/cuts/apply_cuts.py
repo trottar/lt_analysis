@@ -244,7 +244,10 @@ def _passes_tmin_resolution(minus_t, w, q2):
 
 
 def get_shifted_mm(evt, mm_offset=0.0):
-    return evt.MM + get_effective_mm_offset(mm_offset) + get_active_mm_shift()
+    try:
+        return evt.MM_shift
+    except AttributeError:
+        return evt.MM + get_effective_mm_offset(mm_offset) + get_active_mm_shift()
 
 
 def _compute_data_cut_state(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -275,7 +278,10 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
 ###############################################################################################################################################
 
 def get_shifted_t(evt):
-    return -evt.MandelT + get_active_t_shift()
+    try:
+        return evt.t_shift
+    except AttributeError:
+        return -evt.MandelT + get_active_t_shift()
 
 # Subtraction cuts
 def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -283,7 +289,7 @@ def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
 
 ################################################################################################################################################
 
-def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
+def _compute_simc_cut_state(evt, mm_min=0.7, mm_max=1.5):
 
     ##############
     # HARD CODED #
@@ -305,6 +311,13 @@ def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
     t_in_range = _in_window(minus_t, tmin, tmax)
     tmin_resolved = _passes_tmin_resolution(minus_t, evt.W, evt.Q2)
     mm_in_range = _in_window(adj_missmass, mm_min, mm_max)
-    ALLCUTS = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved and mm_in_range
+    base_cuts = HMS_Acceptance and SHMS_Acceptance and Diamond and t_in_range and tmin_resolved
+    return base_cuts and mm_in_range, base_cuts
 
-    return ALLCUTS
+
+def apply_simc_cuts(evt, mm_min=0.7, mm_max=1.5):
+    return _compute_simc_cut_state(evt, mm_min, mm_max)[0]
+
+
+def apply_simc_sub_cuts(evt, mm_min=0.7, mm_max=1.5):
+    return _compute_simc_cut_state(evt, mm_min, mm_max)[1]

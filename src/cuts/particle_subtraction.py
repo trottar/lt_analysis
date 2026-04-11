@@ -275,7 +275,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, apply_data_sub_cuts, evaluate_data_cut_bools, evaluate_data_event, get_effective_mm_offset, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     set_val(inpDict) # Set global variables for optimization
-    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "raw"))
     
     ################################################################################################################################################
     # Define data root file trees of interest
@@ -1361,7 +1361,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     # Import function to define cut bools
     from apply_cuts import apply_data_cuts, apply_data_sub_cuts, get_effective_mm_offset, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     set_val(inpDict) # Set global variables for optimization
-    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "raw"))
     mm_offset_for_cuts = get_effective_mm_offset(MM_offset_DATA)
     
     ################################################################################################################################################
@@ -1726,7 +1726,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     sys.path.append("binning")
     from theta_cm import calculate_theta_cm_deg, calculate_tmin
     set_val(inpDict) # Set global variables for optimization
-    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "raw"))
     mm_offset_for_cuts = get_effective_mm_offset(MM_offset_DATA)
     
     ################################################################################################################################################

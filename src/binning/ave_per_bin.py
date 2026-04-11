@@ -325,7 +325,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     # Import function to define cut bools
     from apply_cuts import evaluate_data_event, get_shifted_mm, get_shifted_t, set_shift_context, set_val
     set_val(inpDict) # Set global variables for optimization
-    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "shifted"))
+    set_shift_context(phi_setting=phi_setting, shift_mode=inpDict.get("shift_mode", "raw"))
 
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19

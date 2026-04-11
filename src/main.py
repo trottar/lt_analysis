@@ -369,6 +369,37 @@ if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_{}_diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))
+
+stage_start = perf_counter()
+mm_shift_summary = {}
+t_shift_summary = {}
+
+sys.path.append("cuts")
+from shift_prep import shift_prep
+
+for phiset in phisetlist:
+    setting_start = perf_counter()
+    prep_result = shift_prep(phiset, inpDict)
+    if prep_result.get("mm_shift") is None:
+        print("Skipping {} setting during shift_prep...".format(phiset))
+        record_stage_time("MM/t shift {}".format(phiset), setting_start)
+        continue
+
+    mm_shift_summary[phiset] = prep_result["mm_shift"]
+    if prep_result.get("t_shift") and prep_result["t_shift"].get("shift") is not None:
+        t_shift_summary[phiset] = prep_result["t_shift"]
+
+    for artifact_key in ("json_filename", "root_filename", "mm_plot_filename", "t_plot_filename"):
+        artifact = prep_result.get("artifacts", {}).get(artifact_key)
+        if artifact:
+            output_file_lst.append(artifact)
+
+    record_stage_time("MM/t shift {}".format(phiset), setting_start)
+
+inpDict["mm_shift_summary"] = mm_shift_summary
+inpDict["t_shift_summary"] = t_shift_summary
+inpDict["shift_mode"] = "raw"
+record_stage_time("MM/t shift setup total", stage_start)
         
 ##############################
 # Step 3 of the lt_analysis: # DONE
@@ -419,7 +450,6 @@ if Q2 == "5p5" and W == "3p02":
 # DATA
 sys.path.append("cuts")
 from rand_sub import rand_sub
-from shift_prep import shift_prep
 
 sys.path.append("normalize")
 from get_eff_charge import find_events
@@ -444,80 +474,6 @@ sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc import compare_simc
 
-setting_seed_by_phi = {}
-prepared_seed_by_phi = {}
-
-stage_start = perf_counter()
-for phiset in phisetlist:
-    setting_start = perf_counter()
-    seed_hist = {"phi_setting": phiset}
-    seed_hist.update(find_events(seed_hist, inpDict))
-    if len(seed_hist.keys()) <= 1:
-        print("Skipping {} setting during Step 3 seed setup...".format(phiset))
-        record_stage_time("Step 3 seed setup {}".format(phiset), setting_start)
-        continue
-
-    setting_seed_by_phi[phiset] = seed_hist
-    record_stage_time("Step 3 seed setup {}".format(phiset), setting_start)
-record_stage_time("Step 3 seed setup total", stage_start)
-
-stage_start = perf_counter()
-for phiset in list(setting_seed_by_phi.keys()):
-    setting_start = perf_counter()
-    seed_hist = setting_seed_by_phi[phiset]
-
-    InSIMCFilename_original = f"Prod_Coin_Q{Q2}W{W}{phiset.lower()}_{EPSSET}e.root"
-    InSIMCFilename = f"{phiset}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
-    original_rootFileSimc = OUTPATH + "/" + InSIMCFilename_original
-    rootFileSimc = OUTPATH + "/" + InSIMCFilename
-    seed_hist["InSIMCFilename"] = InSIMCFilename
-
-    print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
-    shutil.copy(original_rootFileSimc, rootFileSimc)
-
-    print("\nCopying {} to {}".format(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist")))
-    shutil.copy(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist"))
-
-    for f in [original_rootFileSimc, original_rootFileSimc.replace(".root", ".hist"), rootFileSimc, rootFileSimc.replace(".root", ".hist")]:
-        output_file_lst.append(f)
-
-    if os.path.exists(rootFileSimc):
-        iter_weight(initial_param_file, rootFileSimc, inpDict, phiset)
-    else:
-        print("ERROR: Issue with simc root file {}".format(rootFileSimc))
-        sys.exit(2)
-
-    record_stage_time("Step 3 iter_weight {}".format(phiset), setting_start)
-record_stage_time("Step 3 iter_weight total", stage_start)
-
-stage_start = perf_counter()
-mm_shift_summary = {}
-t_shift_summary = {}
-for phiset in list(setting_seed_by_phi.keys()):
-    setting_start = perf_counter()
-    prep_result = shift_prep(phiset, setting_seed_by_phi[phiset], inpDict)
-    if prep_result.get("mm_shift") is None:
-        print("Skipping {} setting during shift_prep...".format(phiset))
-        record_stage_time("Step 3 shift_prep {}".format(phiset), setting_start)
-        continue
-
-    mm_shift_summary[phiset] = prep_result["mm_shift"]
-    if prep_result.get("t_shift") and prep_result["t_shift"].get("shift") is not None:
-        t_shift_summary[phiset] = prep_result["t_shift"]
-    prepared_seed_by_phi[phiset] = setting_seed_by_phi[phiset]
-
-    for artifact_key in ("json_filename", "root_filename", "mm_plot_filename", "t_plot_filename"):
-        artifact = prep_result.get("artifacts", {}).get(artifact_key)
-        if artifact:
-            output_file_lst.append(artifact)
-
-    record_stage_time("Step 3 shift_prep {}".format(phiset), setting_start)
-record_stage_time("Step 3 shift_prep total", stage_start)
-
-inpDict["mm_shift_summary"] = mm_shift_summary
-inpDict["t_shift_summary"] = t_shift_summary
-inpDict["shift_mode"] = "shifted"
-
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
@@ -525,11 +481,7 @@ histlist = []
 stage_start = perf_counter()
 for phiset in phisetlist:
     setting_start = perf_counter()
-    if phiset not in prepared_seed_by_phi:
-        print("Skipping {} setting during shifted rand_sub...".format(phiset))
-        record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
-        continue
-    hist = rand_sub(phiset, inpDict, shift_mode="shifted")
+    hist = rand_sub(phiset, inpDict, shift_mode="raw")
     if len(hist.keys()) <= 1:
         print("No {} setting found...".format(phiset))
         record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
@@ -560,9 +512,37 @@ for d in ["Dummy", "Data"]:
 stage_start = perf_counter()
 for hist in histlist:
     setting_start = perf_counter()
-    hist.update(prepared_seed_by_phi[hist["phi_setting"]])
-    record_stage_time("Step 3 metadata merge {}".format(hist["phi_setting"]), setting_start)
-record_stage_time("Step 3 metadata merge total", stage_start)
+    hist.update(find_events(hist, inpDict))
+    record_stage_time("Step 3 find_events {}".format(hist["phi_setting"]), setting_start)
+record_stage_time("Step 3 find_events total", stage_start)
+
+stage_start = perf_counter()
+for hist in histlist:
+    setting_start = perf_counter()
+
+    InSIMCFilename_original = f"Prod_Coin_Q{Q2}W{W}{hist['phi_setting'].lower()}_{EPSSET}e.root"
+    InSIMCFilename = f"{hist['phi_setting']}_{ParticleType}_Simc_Q{Q2}W{W}_{EPSSET}e.root"
+    original_rootFileSimc = OUTPATH+"/"+InSIMCFilename_original
+    rootFileSimc = OUTPATH+"/"+InSIMCFilename
+    hist["InSIMCFilename"] = InSIMCFilename
+
+    print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
+    shutil.copy(original_rootFileSimc, rootFileSimc)
+
+    print("\nCopying {} to {}".format(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist")))
+    shutil.copy(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist"))
+
+    for f in [original_rootFileSimc, original_rootFileSimc.replace(".root", ".hist"), rootFileSimc, rootFileSimc.replace(".root", ".hist")]:
+        output_file_lst.append(f)
+
+    if os.path.exists(rootFileSimc):
+        iter_weight(initial_param_file, rootFileSimc, inpDict, hist["phi_setting"])
+    else:
+        print("ERROR: Issue with simc root file {}".format(rootFileSimc))
+        sys.exit(2)
+
+    record_stage_time("Step 3 iter_weight {}".format(hist["phi_setting"]), setting_start)
+record_stage_time("Step 3 iter_weight total", stage_start)
 
 # Upate hist dictionary with effective charge and simc histograms
 stage_start = perf_counter()

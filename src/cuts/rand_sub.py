@@ -373,7 +373,7 @@ def _process_rand_sub_tree(
     _print_rand_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
     return mm_offset_value
 
-def rand_sub(phi_setting, inpDict, shift_mode="shifted", emit_plots=True):
+def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     total_start = perf_counter()
     setup_start = perf_counter()
 
