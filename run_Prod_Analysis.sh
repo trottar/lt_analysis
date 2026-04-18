@@ -789,10 +789,10 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     #TMIN=0.160
     #TMAX=0.360
     #
-    NumtBins=4
-    NumPhiBins=15
-    TMIN=0.170
-    TMAX=0.360
+    NumtBins=3
+    NumPhiBins=11
+    TMIN=0.180
+    TMAX=0.400
 elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     # Q2=4p4, W=2p74
     #NumtBins=6
@@ -815,9 +815,9 @@ elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
     #TMAX=0.850
     ##TMAX=0.750
 	# Kin
-	NumtBins=4
+	#NumtBins=4
     #NumPhiBins=12
-	#NumtBins=3
+	NumtBins=3
     NumPhiBins=9
     TMIN=0.400
 	TMAX=0.900	
