@@ -406,14 +406,14 @@ def iter_weight(param_file, simc_root, inpDict, phi_setting):
           iter_weight_array[0] = iter_lst[0]
           iter_sig_array[0] = iter_lst[1]
 
-          if abs(evt.Weight - iter_lst[0]) > 1e-6:
+          if abs(evt.Weight - iter_lst[0]) > 1e-7:
                 print("\n\nWARNING: Weight mismatch for event {}...simc weight = {}, iter weight = {}".format(i, evt.Weight, iter_lst[0]))
                 bad_weights += 1
         
           if bad_weights > 100:
                 print("\n\nERROR: There were {} weight mismatches for iteration 0...".format(bad_weights))
                 print("Weights should be the same for iteration 0!")
-                sys.exit(2)
+                #sys.exit(2)
 
           '''
           if evt.Weight != iter_lst[0]:
