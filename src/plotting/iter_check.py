@@ -86,7 +86,6 @@ def plot_iteration(histlist, phisetlist, inpDict):
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
     
     ################################################################################################################################################    
 
@@ -102,6 +101,9 @@ def plot_iteration(histlist, phisetlist, inpDict):
         histlist_copy.append(hist_copy)
     
     for hist in histlist_copy:
+
+        if ParticleType == "kaon":
+            hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, hist["phi_setting"])
 
         TBRANCH_SIMC  = hist["InFile_SIMC"].Get("h10")
 
