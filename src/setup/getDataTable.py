@@ -147,6 +147,8 @@ def get_efficiencies(runNum,efficiency_table,foutcsv):
                 "SHMS_Prot_ALL_TRACK_EFF" : eff_data["SHMS_Prot_ALL_TRACK_EFF"].iloc[0],
                 # Boiling Correction
                 "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
+                # Coin blocking correction
+                "coinblock_corr" : eff_data["coinblock_corr"].iloc[0],
             }
             # Define dictionary of efficiency uncertainty values
             efficiency_errDict ={
@@ -172,6 +174,8 @@ def get_efficiencies(runNum,efficiency_table,foutcsv):
                 "SHMS_Prot_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Prot_ALL_TRACK_EFF_ERROR"].iloc[0],
                 # Boiling Correction
                 "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
+                # Coin blocking correction
+                "coinblock_stat_unct" : eff_data["coinblock_stat_unct"].iloc[0],
             }
 
         else:
@@ -199,6 +203,8 @@ def get_efficiencies(runNum,efficiency_table,foutcsv):
                 "SHMS_Pion_ALL_TRACK_EFF" : eff_data["SHMS_Pion_ALL_TRACK_EFF"].iloc[0],
                 # Boiling Correction
                 "BOIL_Eff" : eff_data["BOIL_Eff"].iloc[0],
+                # Coin blocking correction
+                "coinblock_corr" : eff_data["coinblock_corr"].iloc[0],
             }
 
             # Define dictionary of efficiency uncertainty values
@@ -227,6 +233,8 @@ def get_efficiencies(runNum,efficiency_table,foutcsv):
                 "SHMS_Pion_ALL_TRACK_EFF_ERROR" : eff_data["SHMS_Pion_ALL_TRACK_EFF_ERROR"].iloc[0],
                 # Boiling Correction
                 "BOIL_Eff_ERROR" : eff_data["BOIL_Eff_ERROR"].iloc[0],
+                # Coin blocking correction
+                "coinblock_stat_unct" : eff_data["coinblock_stat_unct"].iloc[0],
             }        
     else:
         print("Error: DataFrame 'eff_data' is empty for {}.".format(runNum))

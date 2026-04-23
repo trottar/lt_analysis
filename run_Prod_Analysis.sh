@@ -136,7 +136,8 @@ fi
 #EffData="coin_production_Prod_efficiency_data_2023_01_01.csv"
 #EffData="coin_production_Prod_efficiency_data_2023_12_18.csv"
 #EffData="coin_production_Prod_efficiency_data_2024_01_11.csv"
-EffData="coin_production_Prod_efficiency_data_2024_01_14.csv"
+#EffData="coin_production_Prod_efficiency_data_2024_01_14.csv"
+EffData="coin_production_coin_efficiency_data_2026_04_23.csv"
 #EffData="coin_production_Prod_efficiency_data_2024_09_17.csv" # Q2=0.38, pion
 ##############
 ##############
