@@ -444,12 +444,6 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     set_shift_context(phi_setting=phi_setting, shift_mode=shift_mode)
     
     ################################################################################################################################################
-    # Define HGCer hole cut for KaonLT 2018-19
-    if ParticleType == "kaon":
-        from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
-    
-    ################################################################################################################################################
     # Define data root file trees of interest
 
     rootFileData = f"{OUTPATH}/{phi_setting}_{ParticleType}_{InDATAFilename}.root"
@@ -471,6 +465,14 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     if not os.path.isfile(rootFileDummy):
         print("\n\nERROR: No dummy file found called {}\n\n".format(rootFileDummy))
         return histDict
+
+    ################################################################################################################################################
+    # Define HGCer hole cut for KaonLT 2018-19
+    if ParticleType == "kaon":
+        from hgcer_hole import apply_HGCer_hole_cut
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
+
+    ################################################################################################################################################
 
     InFile_DUMMY = open_root_file(rootFileDummy)
 
