@@ -447,7 +447,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
     
     ################################################################################################################################################
     # Define data root file trees of interest

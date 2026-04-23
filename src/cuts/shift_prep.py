@@ -118,7 +118,7 @@ def _build_cut_data_hists(phi_setting, particle_type, data_filename, inpDict, mm
     hole_contains = None
     if particle_type == "kaon":
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(inpDict["Q2"], inpDict["W"], inpDict["EPSSET"])
+        hgcer_cutg = apply_HGCer_hole_cut(inpDict["Q2"], inpDict["W"], inpDict["EPSSET"], phi_setting)
         hole_contains = hgcer_cutg.IsInside
 
     tree_name = "Cut_{}_Events_prompt_noRF".format(particle_type.capitalize())

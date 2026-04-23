@@ -532,7 +532,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
     
     ################################################################################################################################################
     
@@ -1620,7 +1620,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
         
     ################################################################################################################################################
         

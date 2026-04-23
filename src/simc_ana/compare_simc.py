@@ -122,7 +122,7 @@ def compare_simc(hist, inpDict, emit_plots=True):
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
     
     ################################################################################################################################################
     # Define simc root file trees of interest

@@ -332,7 +332,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     if ParticleType == "kaon":
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
     
     ################################################################################################################################################
         
@@ -1131,7 +1131,7 @@ def ave_per_bin_data(histlist, inpDict):
 
 ##################################################################################################################################################
 
-def process_hist_simc(tree_simc, t_bins, inpDict, iteration, event_cache=None):
+def process_hist_simc(tree_simc, t_bins, phi_setting, inpDict, iteration, event_cache=None):
 
     processed_dict = {}
 
@@ -1163,7 +1163,7 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration, event_cache=None):
     # Define HGCer hole cut for KaonLT 2018-19
     if ParticleType == "kaon":
         from hgcer_hole import apply_HGCer_hole_cut
-        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET)
+        hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
     
     ################################################################################################################################################
         
@@ -1214,9 +1214,9 @@ def process_hist_simc(tree_simc, t_bins, inpDict, iteration, event_cache=None):
         
     return processed_dict                    
         
-def bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration, event_cache=None):
+def bin_simc(kinematic_types, tree_simc, t_bins, phi_setting, inpDict, iteration, event_cache=None):
 
-    processed_dict = process_hist_simc(tree_simc, t_bins, inpDict, iteration, event_cache=event_cache)
+    processed_dict = process_hist_simc(tree_simc, t_bins, phi_setting, inpDict, iteration, event_cache=event_cache)
     
     binned_dict = {}
     
@@ -1291,7 +1291,7 @@ def calculate_ave_simc(kinematic_types, hist, t_bins, phi_bins, inpDict, iterati
     
     # Initialize lists for binned_t_data, binned_hist_data
     event_cache = hist.get("_yield_simc_event_cache")
-    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, inpDict, iteration, event_cache=event_cache)
+    binned_dict = bin_simc(kinematic_types, tree_simc, t_bins, hist["phi_setting"], inpDict, iteration, event_cache=event_cache)
     
     kin_hist_simc = binned_dict[kin_type]["kin_hist_simc"]
     
