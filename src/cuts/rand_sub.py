@@ -2210,7 +2210,10 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale1"] = 0.50
+    inpDict["bg_stat_scale1"] = 0.0 if (
+        math.isclose(float(str(Q2).replace("p", ".")), 3.0) and
+        math.isclose(float(str(W).replace("p", ".")), 3.14)
+    ) else 0.50
     residual_bg_weights1 = None
 
     if  inpDict["bg_stat_scale1"] > 0.0:

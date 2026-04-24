@@ -705,7 +705,10 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale1"] = 0.50        
+        inpDict["bg_stat_scale1"] = 0.0 if (
+            math.isclose(float(str(Q2).replace("p", ".")), 3.0) and
+            math.isclose(float(str(W).replace("p", ".")), 3.14)
+        ) else 0.50        
         residual_bg_weights1 = None
         
         if inpDict["bg_stat_scale1"] > 0.0:
