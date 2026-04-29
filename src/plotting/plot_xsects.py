@@ -53,6 +53,14 @@ def print_plot_timer(stage_name, start_time):
     return elapsed
 
 
+def fit_parameter_count(func):
+    return max(func.__code__.co_argcount - 1, 0)
+
+
+def flatten_axes(axes):
+    return np.atleast_1d(axes).ravel()
+
+
 plot_xsects_start = perf_counter()
 
 ParticleType = sys.argv[1]
@@ -872,6 +880,7 @@ with PdfPages(outputpdf) as pdf:
     stage_start = perf_counter()
     # Create a figure and axis objects
     fig, axes = plt.subplots(NumtBins, 1, figsize=(12, 8), sharex=True)
+    axes = flatten_axes(axes)
 
     # Define markers and colors
     markers = ['x', 'o', '*', 'D'] # 'x'->x, 'o'->circle, '*'->star, 'D'->diamond
@@ -1006,30 +1015,35 @@ with PdfPages(outputpdf) as pdf:
                 markerfacecolor='none', capsize=2
             )
 
-            if len(R) >= 3:   # need at least 3 points to fit A,B,C
-                # do the weighted fit
-                popt, pcov = curve_fit(
-                    R_model, φ, R,
-                    sigma=dR, absolute_sigma=True,
-                    p0=[1.0, 0.1, 0.1]
-                )
-                A, B, C = popt
-                coeffs[df_key]['t'].append(t_bin_centers[k])
-                coeffs[df_key]['A'].append(A)
-                coeffs[df_key]['B'].append(B)
-                coeffs[df_key]['C'].append(C)                
-                # smooth curve for plotting
-                φ_smooth = np.linspace(-180, 180, 361)
-                R_smooth = R_model(φ_smooth, A, B, C)
+            if len(R) >= fit_parameter_count(R_model):
+                try:
+                    popt, pcov = curve_fit(
+                        R_model, φ, R,
+                        sigma=dR, absolute_sigma=True,
+                        p0=[1.0, 0.1, 0.1]
+                    )
+                except (RuntimeError, TypeError, ValueError):
+                    popt = None
 
-                # plot the fit curve
-                fit_label = f"Fit {epsilon_label}: A={A:.3f}, B={B:.3f}, C={C:.3f}"
-                ax.plot(
-                    φ_smooth, R_smooth,
-                    linestyle='-',
-                    color=colors[i],
-                    label=fit_label
-                )
+                if popt is not None:
+                    A, B, C = popt
+                    coeffs[df_key]['t'].append(t_bin_centers[k])
+                    coeffs[df_key]['A'].append(A)
+                    coeffs[df_key]['B'].append(B)
+                    coeffs[df_key]['C'].append(C)
+
+                    # smooth curve for plotting
+                    φ_smooth = np.linspace(-180, 180, 361)
+                    R_smooth = R_model(φ_smooth, A, B, C)
+
+                    # plot the fit curve
+                    fit_label = f"Fit {epsilon_label}: A={A:.3f}, B={B:.3f}, C={C:.3f}"
+                    ax.plot(
+                        φ_smooth, R_smooth,
+                        linestyle='-',
+                        color=colors[i],
+                        label=fit_label
+                    )
 
         # rest of your formatting
         ax.axhline(1.0, color='gray', linestyle='--')
@@ -1089,16 +1103,41 @@ with PdfPages(outputpdf) as pdf:
                     facecolors='none', edgecolors=base_color,
                     label='data')
 
-            if len(t_arr) >= 2:             # need ≥2 points to fit in t
-                for name, (func, style, alpha) in fit_styles.items():
-                    try:
-                        p, _ = curve_fit(func, t_arr, y_arr, maxfev=6000)
-                        ax.plot(t_dense, func(t_dense, *p),
-                                linestyle=style, linewidth=2,
-                                color=base_color, alpha=alpha,
-                                label=f'{name}: {p[0]:.3g}, {p[1]:.3g}')
-                    except RuntimeError:
-                        pass    # silently ignore failed model
+            fits_drawn = 0
+            min_required_points = min(fit_parameter_count(func) for func, _, _ in fit_styles.values())
+
+            for name, (func, style, alpha) in fit_styles.items():
+                required_points = fit_parameter_count(func)
+                if len(t_arr) < required_points:
+                    continue
+
+                try:
+                    p, _ = curve_fit(func, t_arr, y_arr, maxfev=6000)
+                except (RuntimeError, TypeError, ValueError):
+                    continue
+
+                fit_label = '{}: {}'.format(
+                    name,
+                    ', '.join('{:.3g}'.format(val) for val in p)
+                )
+                ax.plot(
+                    t_dense, func(t_dense, *p),
+                    linestyle=style, linewidth=2,
+                    color=base_color, alpha=alpha,
+                    label=fit_label
+                )
+                fits_drawn += 1
+
+            if fits_drawn == 0 and len(t_arr) < min_required_points:
+                ax.text(
+                    0.02, 0.95,
+                    'Need >= {} t bins for coefficient fits; found {}'.format(
+                        min_required_points, len(t_arr)
+                    ),
+                    transform=ax.transAxes,
+                    fontsize=9,
+                    verticalalignment='top'
+                )
 
             ax.set_ylabel(comp, fontsize=15)
             ax.grid(True, linestyle='--', linewidth=0.6, alpha=0.7)
@@ -1221,6 +1260,10 @@ with PdfPages(outputpdf) as pdf:
                 Wval, Q2val = data
                 return fit_function(Wval, Q2val, a, b, c, d)
 
+            if len(ratios) < fit_parameter_count(fit_func):
+                x_len = x_increment+len(x_values)
+                continue
+
             try:
                 popt, pcov = curve_fit(fit_func, (df['W'][mask][non_zero_mask], df['Q2'][mask][non_zero_mask]), ratios, sigma=errors, absolute_sigma=True)
                 
@@ -1230,8 +1273,9 @@ with PdfPages(outputpdf) as pdf:
 
                 # Plot fitted function
                 ax.plot(range(x_increment, x_increment+len(ratios)), fitted_values, epsilon_fit_color, label=f'a = {a_fit:.4f}\nb = {b_fit:.4f}\nc = {c_fit:.4f}\nd = {d_fit:.4f}')
-            except (TypeError, ValueError) as e:
+            except (RuntimeError, TypeError, ValueError) as e:
                 print("Fit not found!")
+                x_len = x_increment+len(x_values)
                 continue
 
             x_len = x_increment+len(x_values)
