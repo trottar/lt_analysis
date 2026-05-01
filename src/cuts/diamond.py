@@ -50,6 +50,7 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import open_root_file, apply_bin_threshold
+from prompt_trees import get_prompt_tree_name
 from apply_cuts import evaluate_data_acceptance, get_acceptance_c0_value
 
 ################################################################################################################################################
@@ -632,7 +633,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 except Exception:
                     pass
                 return None
-            tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
+            tree_name = get_prompt_tree_name(ParticleType, eps_tag)
+            tree = infile.Get(tree_name)
             if not _is_valid_event_tree(tree):
                 infile.Close()
                 return None
@@ -811,13 +813,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         infile = open_root_file(rootName, "READ")
 
         # Assumes 2021 trees do not have Prompt MM cut, as some do not right now. *** NEED TO BE REPLAYED AGAIN WITH THIS BRANCH ***
-        Cut_Events_all_noRF_tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
+        prompt_tree_name = get_prompt_tree_name(ParticleType, eps_tag)
+        Cut_Events_all_noRF_tree = infile.Get(prompt_tree_name)
         if not _is_valid_event_tree(Cut_Events_all_noRF_tree):
             infile.Close()
             raise TypeError(
-                "Expected TTree 'Cut_{}_Events_prompt_noRF' in {}, but found a non-tree object. "
+                "Expected TTree '{}' in {}, but found a non-tree object. "
                 "This usually means a diagnostic ROOT file was selected instead of an analysed event file."
-                .format(ParticleType.capitalize(), rootName)
+                .format(prompt_tree_name, rootName)
             )
 
         ##############################################################################################################################################
@@ -1143,7 +1146,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         best_len = len(f)
         return best
 
-    def _build_q2w_hist_for_file(root_path, hname):
+    def _build_q2w_hist_for_file(root_path, hname, eps_tag):
         # Build a Q2vsW TH2D in memory (SetDirectory(0)) so it survives infile.Close().
         if root_path is None:
             return None
@@ -1158,7 +1161,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 pass
             return None
 
-        tree = infile.Get("Cut_{}_Events_prompt_noRF".format(ParticleType.capitalize()))
+        tree_name = get_prompt_tree_name(ParticleType, eps_tag)
+        tree = infile.Get(tree_name)
         if not _is_valid_event_tree(tree):
             print("!!!!! ERROR !!!!!\n Missing tree in file: {}\n!!!!! ERROR !!!!!".format(root_path))
             infile.Close()
@@ -1169,7 +1173,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         h.SetDirectory(0)
 
         for ev in tree:
-            h.Fill(ev.Q2, ev.W)
+            if _passes_source_acceptance(ev, eps_tag):
+                h.Fill(ev.Q2, ev.W)
 
         apply_bin_threshold(h, event_threshold_overlay)
         infile.Close()
@@ -1237,7 +1242,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         h = _build_q2w_hist_for_file(
             root_path,
-            "Q2vsW_{}_{}_{}_overlay_fit".format(eps_label.lower(), phi_label, FilenameOverride)
+            "Q2vsW_{}_{}_{}_overlay_fit".format(eps_label.lower(), phi_label, FilenameOverride),
+            eps_label.lower(),
         )
         if not h:
             print("WARNING: Could not build hist for {} epsilon, phi = {}".format(eps_label, phi_label))

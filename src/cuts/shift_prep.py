@@ -29,11 +29,15 @@ OUTPATH = lt.OUTPATH
 
 SETUP_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "setup"))
 SIMC_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "simc_ana"))
+UTILITY_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "utility"))
 if SETUP_PATH not in sys.path:
     sys.path.append(SETUP_PATH)
 if SIMC_PATH not in sys.path:
     sys.path.append(SIMC_PATH)
+if UTILITY_PATH not in sys.path:
+    sys.path.append(UTILITY_PATH)
 
+from prompt_trees import get_prompt_tree_name
 from calc_shift_values import run_t_shift_program
 from shift_MM import (
     add_derived_branches_to_file,
@@ -121,7 +125,7 @@ def _build_cut_data_hists(phi_setting, particle_type, data_filename, inpDict, mm
         hgcer_cutg = apply_HGCer_hole_cut(inpDict["Q2"], inpDict["W"], inpDict["EPSSET"], phi_setting)
         hole_contains = hgcer_cutg.IsInside
 
-    tree_name = "Cut_{}_Events_prompt_noRF".format(particle_type.capitalize())
+    tree_name = get_prompt_tree_name(particle_type, inpDict["EPSSET"])
     root_file, tree = _open_tree(data_filename, tree_name)
 
     mm_hist = _make_hist("H_MM_DATA_shiftprep", "Shift-prep data MM", mm_min, mm_max)
@@ -170,8 +174,8 @@ def _build_cut_simc_hists(phi_setting, simc_filename, inpDict, mm_min, mm_max, t
     return mm_hist, t_hist
 
 
-def _apply_shift_branches(particle_type, data_filename, dummy_filename, mm_shift, t_shift=None):
-    tree_names = ["Cut_{}_Events_prompt_noRF".format(particle_type.capitalize())]
+def _apply_shift_branches(particle_type, epsset, data_filename, dummy_filename, mm_shift, t_shift=None):
+    tree_names = [get_prompt_tree_name(particle_type, epsset)]
 
     if t_shift is not None:
         shift_branch_specs = [
@@ -442,6 +446,7 @@ def shift_prep(phi_setting, inpDict):
 
     _apply_shift_branches(
         particle_type,
+        inpDict["EPSSET"],
         data_filename,
         dummy_filename,
         mm_shift,

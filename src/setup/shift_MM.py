@@ -15,6 +15,12 @@ from array import array
 import ROOT
 from ROOT import TCanvas, TFile, TH1F, TLegend, TLine, TTree, gStyle, kBlack, kBlue, kGreen, kRed
 
+UTILITY_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "utility"))
+if UTILITY_PATH not in sys.path:
+    sys.path.append(UTILITY_PATH)
+
+from prompt_trees import get_prompt_tree_name
+
 
 HIST_NBINS = 200
 FIT_HIST_XMIN = 0.7
@@ -523,11 +529,12 @@ def write_t_shift_plots(
     output_pdf,
     plot_xmin,
     plot_xmax,
+    epsset=None,
 ):
     old_opt_stat = gStyle.GetOptStat()
     gStyle.SetOptStat(0)
 
-    reference_tree = f"Cut_{particle_type.capitalize()}_Events_prompt_noRF"
+    reference_tree = get_prompt_tree_name(particle_type, epsset)
     canvas_name = f"canvas_t_shift_{abs(hash(output_pdf)) & 0xFFFFFFFF}"
     canvas = TCanvas(canvas_name, "t Shift", 900, 700)
     canvas.Print(f"{output_pdf}[")
@@ -836,10 +843,11 @@ def compute_mm_shift_details(
     data_filename,
     plot_xmin=None,
     plot_xmax=None,
+    epsset=None,
 ):
     ROOT.gROOT.SetBatch(True)
 
-    reference_tree = f"Cut_{particle_type.capitalize()}_Events_prompt_noRF"
+    reference_tree = get_prompt_tree_name(particle_type, epsset)
     peak_name = get_peak_name(particle_type)
 
     if plot_xmin is None:
@@ -879,6 +887,7 @@ def compute_mm_shift_summary(
     data_filename,
     plot_xmin=None,
     plot_xmax=None,
+    epsset=None,
 ):
     details = compute_mm_shift_details(
         particle_type,
@@ -886,6 +895,7 @@ def compute_mm_shift_summary(
         data_filename,
         plot_xmin=plot_xmin,
         plot_xmax=plot_xmax,
+        epsset=epsset,
     )
     simc_fit = details["simc_fit"]
     data_fit = details["data_fit"]
@@ -912,10 +922,11 @@ def plot_mm_shift_from_details(
     output_pdf=None,
     plot_xmin=FIT_HIST_XMIN,
     plot_xmax=FIT_HIST_XMAX,
+    epsset=None,
 ):
     shifted_hist = build_histogram(
         data_filename,
-        f"Cut_{particle_type.capitalize()}_Events_prompt_noRF",
+        get_prompt_tree_name(particle_type, epsset),
         "MM",
         f"hist_shifted_{abs(hash((data_filename, plot_xmin, plot_xmax))) & 0xFFFFFFFF}",
         "MM_shift",
@@ -944,6 +955,7 @@ def shift_experimental_files_to_simc_peak(
     dummy_filename=None,
     plot_xmin=None,
     plot_xmax=None,
+    epsset=None,
 ):
     details = compute_mm_shift_details(
         particle_type,
@@ -951,6 +963,7 @@ def shift_experimental_files_to_simc_peak(
         data_filename,
         plot_xmin=plot_xmin,
         plot_xmax=plot_xmax,
+        epsset=epsset,
     )
     simc_fit = details["simc_fit"]
     data_fit = details["data_fit"]
@@ -978,6 +991,7 @@ def shift_experimental_files_to_simc_peak(
         output_pdf=make_plot_filename(data_filename),
         plot_xmin=plot_xmin,
         plot_xmax=plot_xmax,
+        epsset=epsset,
     )
 
     return {
