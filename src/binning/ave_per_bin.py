@@ -56,7 +56,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist
+from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -668,7 +668,11 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                     subDict[f"H_MM_nosub_SUB_DATA_{j}"],
                     pi_mm_min, pi_mm_max
                 )
-                scale_factor = (kaon_amp / pion_background_amp)
+                scale_factor = compute_positive_scale_factor(
+                    kaon_amp,
+                    pion_background_amp,
+                    "pion subtraction (t-bin {})".format(j),
+                )
                 ##############
                 ##############                
             except ZeroDivisionError:

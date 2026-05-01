@@ -53,7 +53,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range
+from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -1719,7 +1719,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     H_epsilon_DATA.Add(H_epsilon_RAND,-1)
     H_MM_DATA.Add(H_MM_RAND,-1)
     H_MM_full_DATA.Add(H_MM_full_RAND,-1)
-    H_MM_dummy_DATA.Add(H_MM_RAND,-1)
+    H_MM_dummy_DATA.Add(H_MM_dummy_RAND,-1)
     H_MM_fit2sub_DATA.Add(H_MM_fit2sub_RAND,-1)
     H_MM_fit1sub_DATA.Add(H_MM_fit1sub_RAND,-1)
     H_MM_pisub_DATA.Add(H_MM_pisub_RAND,-1)
@@ -2016,7 +2016,11 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
                 subDict["H_MM_nosub_SUB_DATA"],
                 pi_mm_min, pi_mm_max
             )
-            scale_factor = (kaon_amp / pion_background_amp)
+            scale_factor = compute_positive_scale_factor(
+                kaon_amp,
+                pion_background_amp,
+                "pion subtraction ({})".format(phi_setting),
+            )
             ##############
             ##############
             ##############

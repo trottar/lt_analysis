@@ -57,7 +57,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist
+from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -924,7 +924,11 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
                         pi_mm_min, pi_mm_max                    
                     )
-                    scale_factor = (kaon_amp / pion_background_amp)
+                    scale_factor = compute_positive_scale_factor(
+                        kaon_amp,
+                        pion_background_amp,
+                        "pion subtraction (t-bin {}, phi-bin {})".format(j, k),
+                    )
 
                     # Check that pion background is not over subtracting within kaon MM range
                     kaon_range_check = integrate_hist_range(
