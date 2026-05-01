@@ -118,6 +118,84 @@ def get_effective_mm_offset(mm_offset=0.0):
     return mm_offset
 
 
+def _format_setting_token(value):
+    return str(value).strip().replace(".", "p")
+
+
+def _format_epsset_key(epsset):
+    eps_key = str(epsset).strip().lower()
+    if not eps_key:
+        return ""
+    if not eps_key.endswith("e"):
+        eps_key = "{}e".format(eps_key)
+    return eps_key
+
+
+def _build_c0_dict(particle_type):
+
+    c0_map = {}
+
+    # Adjusted HMS delta to fix hsxfp correlation
+    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
+    # Note: these momenta are from Dave's slides and may not reflect what is used here
+    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
+    c0_list = [-1.0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
+
+    if particle_type == "kaon":
+        for c0, p in zip(c0_list, h_momentum_list):
+            if p == 0.889:
+                c0_map["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
+            elif p == 0.968:
+                c0_map["Q0p5W2p40_lowe"] = c0
+                c0_map["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
+                c0_map["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
+            elif p == 2.185:
+                c0_map["Q0p5W2p40_highe"] = c0 # Proper value 2.066
+                c0_map["Q3p0W2p32_lowe"] = c0
+            elif p == 2.328:
+                c0_map["Q4p4W2p74_lowe"] = c0
+            elif p == 3.266:
+                c0_map["Q5p5W3p02_highe"] = c0
+            elif p == 4.2:
+                c0_map["Q3p0W3p14_highe"] = c0 # Proper value 4.204
+            elif p == 4.712:
+                c0_map["Q4p4W2p74_highe"] = c0
+            elif p == 5.292:
+                c0_map["Q2p1W2p95_highe"] = c0
+            elif p == 6.59:
+                c0_map["Q3p0W2p32_highe"] = c0
+    else:
+        c0_map["Q0p4W2p20_lowe"] = 0.0
+        c0_map["Q0p4W2p20_highe"] = 0.0
+
+    return c0_map
+
+
+def get_acceptance_c0_value(q2, w, epsset, particle_type):
+    setting_key = "Q{}W{}_{}".format(
+        _format_setting_token(q2),
+        _format_setting_token(w),
+        _format_epsset_key(epsset),
+    )
+    return _build_c0_dict(particle_type).get(setting_key, 0.0)
+
+
+def evaluate_data_acceptance(evt, c0=0.0):
+    adj_hsdelta = evt.hsdelta + c0 * evt.hsxpfp
+
+    if evt.P_hod_goodstarttime != 1 or evt.P_dc_InsideDipoleExit != 1:
+        return False, adj_hsdelta
+    if evt.ssdelta < -10.0 or evt.ssdelta > 20.0 or evt.ssxptar < -0.06 or evt.ssxptar > 0.06 or evt.ssyptar < -0.04 or evt.ssyptar > 0.04:
+        return False, adj_hsdelta
+
+    if evt.H_hod_goodstarttime != 1 or evt.H_dc_InsideDipoleExit != 1:
+        return False, adj_hsdelta
+    if adj_hsdelta < -8.0 or adj_hsdelta > 8.0 or evt.hsxptar < -0.08 or evt.hsxptar > 0.08 or evt.hsyptar < -0.045 or evt.hsyptar > 0.045:
+        return False, adj_hsdelta
+
+    return True, adj_hsdelta
+
+
 def set_val(inpDict):
     
     global W, Q2, EPSSET, POL, ParticleType
@@ -155,43 +233,8 @@ def set_val(inpDict):
 
     global c0_dict
     
-    # Adjusted HMS delta to fix hsxfp correlation
-    # See Dave Gaskell's slides for more info: https://redmine.jlab.org/attachments/2316
-    # Note: these momenta are from Dave's slides and may not reflect what is used here
-    h_momentum_list = [0.889, 0.968, 2.185, 2.328, 3.266, 4.2, 4.712, 5.292, 6.59]
-    c0_list = [-1.0, -2.0, -2.0, -2.0, -3.0, -5.0, -6.0, -6.0, -3.0]
-
-    if ParticleType == "kaon":
-        for c0, p in zip(c0_list, h_momentum_list):
-            if p == 0.889:
-                c0_dict["Q2p1W2p95_lowe"] = c0 # Proper value 0.888
-            elif p == 0.968:
-                c0_dict["Q0p5W2p40_lowe"] = c0
-                c0_dict["Q3p0W3p14_lowe"] = c0 # Proper value 1.821
-                c0_dict["Q5p5W3p02_lowe"] = c0 # Proper value 0.962
-            elif p == 2.185:
-                c0_dict["Q0p5W2p40_highe"] = c0 # Proper value 2.066
-                c0_dict["Q3p0W2p32_lowe"] = c0
-            elif p == 2.328:
-                c0_dict["Q4p4W2p74_lowe"] = c0
-            elif p == 3.266:
-                c0_dict["Q5p5W3p02_highe"] = c0            
-            elif p == 4.2:
-                c0_dict["Q3p0W3p14_highe"] = c0 # Proper value 4.204
-            elif p == 4.712:
-                c0_dict["Q4p4W2p74_highe"] = c0            
-            elif p == 5.292:
-                c0_dict["Q2p1W2p95_highe"] = c0
-            elif p == 6.59:
-                c0_dict["Q3p0W2p32_highe"] = c0
-    else:
-        c0_dict["Q0p4W2p20_lowe"] = 0.0
-        c0_dict["Q0p4W2p20_highe"] = 0.0
-
-    try:
-        c0_value = c0_dict["Q{}W{}_{}e".format(Q2, W, EPSSET)]
-    except KeyError:
-        c0_value = 0.0
+    c0_dict = _build_c0_dict(ParticleType)
+    c0_value = get_acceptance_c0_value(Q2, W, EPSSET, ParticleType)
 
     set_shift_context(
         phi_setting=inpDict.get("phi_setting"),
@@ -207,26 +250,8 @@ def set_val(inpDict):
 ###############################################################################################################################################
 
 def _compute_base_data_cut_state(evt):
-
-    ##############
-    # HARD CODED #
-    ##############
-
-    adj_hsdelta = evt.hsdelta + c0_value * evt.hsxpfp
-
-    ##############
-    ##############        
-    ##############
-
-    #CUTs Definations 
-    if evt.P_hod_goodstarttime != 1 or evt.P_dc_InsideDipoleExit != 1:
-        return False, adj_hsdelta
-    if evt.ssdelta < -10.0 or evt.ssdelta > 20.0 or evt.ssxptar < -0.06 or evt.ssxptar > 0.06 or evt.ssyptar < -0.04 or evt.ssyptar > 0.04:
-        return False, adj_hsdelta
-
-    if evt.H_hod_goodstarttime != 1 or evt.H_dc_InsideDipoleExit != 1:
-        return False, adj_hsdelta
-    if adj_hsdelta < -8.0 or adj_hsdelta > 8.0 or evt.hsxptar < -0.08 or evt.hsxptar > 0.08 or evt.hsyptar < -0.045 or evt.hsyptar > 0.045:
+    passes_acceptance, adj_hsdelta = evaluate_data_acceptance(evt, c0_value)
+    if not passes_acceptance:
         return False, adj_hsdelta
 
     return _point_in_convex_poly(evt.Q2, evt.W, cut_poly), adj_hsdelta
