@@ -54,7 +54,7 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range
-from prompt_trees import get_prompt_tree_name
+from prompt_trees import get_prompt_tree_name, get_subtraction_prompt_tree_name
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -2204,7 +2204,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     if ParticleType == "kaon":
         sub_root_data = open_root_file(f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root")
         sub_root_dummy = open_root_file(f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root")
-        sub_prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
+        sub_prompt_tree_name = get_subtraction_prompt_tree_name(SubtractedParticle, EPSSET)
         TBRANCH_SUB_DATA = sub_root_data.Get(sub_prompt_tree_name)
         TBRANCH_SUB_RAND = sub_root_data.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
         TBRANCH_SUB_DUMMY = sub_root_dummy.Get(sub_prompt_tree_name)
