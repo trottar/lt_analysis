@@ -14,3 +14,8 @@ def use_prompt_rf_tree(epsset):
 def get_prompt_tree_name(particle_type, epsset):
     rf_suffix = "RF" if use_prompt_rf_tree(epsset) else "noRF"
     return "Cut_{}_Events_prompt_{}".format(particle_type.capitalize(), rf_suffix)
+
+
+def get_rand_tree_name(particle_type, epsset):
+    rf_suffix = "RF" if use_prompt_rf_tree(epsset) else "noRF"
+    return "Cut_{}_Events_rand_{}".format(particle_type.capitalize(), rf_suffix)

@@ -57,7 +57,7 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist
-from prompt_trees import get_prompt_tree_name
+from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -338,12 +338,13 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
     ################################################################################################################################################
         
     prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET)
+    rand_tree_name = get_rand_tree_name(ParticleType, EPSSET)
 
     TBRANCH_DATA  = tree_data.Get(prompt_tree_name)
-    TBRANCH_RAND  = tree_data.Get("Cut_{}_Events_rand_noRF".format(ParticleType.capitalize()))
+    TBRANCH_RAND  = tree_data.Get(rand_tree_name)
     
     TBRANCH_DUMMY  = tree_dummy.Get(prompt_tree_name)
-    TBRANCH_DUMMY_RAND  = tree_dummy.Get("Cut_{}_Events_rand_noRF".format(ParticleType.capitalize()))
+    TBRANCH_DUMMY_RAND  = tree_dummy.Get(rand_tree_name)
 
     hist_bin_dict = {}
     n_t = len(t_bins) - 1

@@ -47,7 +47,7 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import open_root_file
-from prompt_trees import get_prompt_tree_name
+from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 
 ################################################################################################################################################
 
@@ -289,10 +289,11 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     InFile_DATA = open_root_file(rootFileData)
 
     prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
+    rand_tree_name = get_rand_tree_name(SubtractedParticle, EPSSET)
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+    TBRANCH_RAND  = InFile_DATA.Get(rand_tree_name)
 
     ################################################################################################################################################
     # Define dummy root file trees of interest
@@ -306,7 +307,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get(prompt_tree_name)
     
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get(rand_tree_name)
 
     ################################################################################################################################################
     
@@ -1378,10 +1379,11 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
     InFile_DATA = open_root_file(rootFileData)
 
     prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
+    rand_tree_name = get_rand_tree_name(SubtractedParticle, EPSSET)
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+    TBRANCH_RAND  = InFile_DATA.Get(rand_tree_name)
 
     ################################################################################################################################################
     # Defin of interest
@@ -1395,7 +1397,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get(prompt_tree_name)
     
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get(rand_tree_name)
 
     ################################################################################################################################################
 
@@ -1745,10 +1747,11 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
     InFile_DATA = open_root_file(rootFileData)
 
     prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
+    rand_tree_name = get_rand_tree_name(SubtractedParticle, EPSSET)
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
-    TBRANCH_RAND  = InFile_DATA.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+    TBRANCH_RAND  = InFile_DATA.Get(rand_tree_name)
 
     ################################################################################################################################################
     # Define dummy root file trees of interest
@@ -1762,7 +1765,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
     TBRANCH_DUMMY  = InFile_DUMMY.Get(prompt_tree_name)
     
-    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get("Cut_{}_Events_rand_noRF".format(SubtractedParticle.capitalize()))
+    TBRANCH_DUMMY_RAND  = InFile_DUMMY.Get(rand_tree_name)
 
     ################################################################################################################################################
 
