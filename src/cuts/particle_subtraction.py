@@ -47,7 +47,7 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import open_root_file
-from prompt_trees import get_subtraction_prompt_tree_name
+from prompt_trees import get_prompt_tree_name
 
 ################################################################################################################################################
 
@@ -288,7 +288,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
 
     InFile_DATA = open_root_file(rootFileData)
 
-    prompt_tree_name = get_subtraction_prompt_tree_name(SubtractedParticle, EPSSET)
+    prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
@@ -1377,7 +1377,7 @@ def particle_subtraction_ave(t_bins, subDict, inpDict, SubtractedParticle, hgcer
 
     InFile_DATA = open_root_file(rootFileData)
 
-    prompt_tree_name = get_subtraction_prompt_tree_name(SubtractedParticle, EPSSET)
+    prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
@@ -1744,7 +1744,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
 
     InFile_DATA = open_root_file(rootFileData)
 
-    prompt_tree_name = get_subtraction_prompt_tree_name(SubtractedParticle, EPSSET)
+    prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
