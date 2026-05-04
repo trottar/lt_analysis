@@ -1085,17 +1085,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale"] = 0.50
+            inpDict["bg_stat_scale"] = 0.5
             # ----------------------------------------------------------------
 
-            if inpDict.get("bg_stat_scale2", 0.5) > 0.0:
+            if inpDict.get("bg_stat_scale2", 0.25) > 0.0:
                 # Fit background and subtract
                 fitDict["background_fit2_{}_{}".format(j, k)] = bg_fit(
                     phi_setting,
                     inpDict,
                     hist_bin_dict[f"H_MM_fit1sub_DATA_{j}_{k}"],   # wide / no-MM-cut
                     hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis 
-                    scaling=inpDict.get("bg_stat_scale2", 0.5),
+                    scaling=inpDict.get("bg_stat_scale2", 0.25),
                     model_key=f"cheb2_{phi_setting}_{EPSSET}e",
                     fit_name="Fit 2"
                 )
