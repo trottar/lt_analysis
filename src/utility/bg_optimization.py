@@ -57,6 +57,33 @@ def _candidate_sort_key(result):
     )
 
 
+def _is_better_result(candidate, incumbent):
+    if candidate is None:
+        return False
+    if incumbent is None:
+        return True
+    if not candidate.get("valid"):
+        return False
+    if not incumbent.get("valid"):
+        return True
+    return _candidate_sort_key(candidate) < _candidate_sort_key(incumbent)
+
+
+def _result_summary(result):
+    if not result:
+        return "none"
+    metrics = result.get("metrics", {})
+    return (
+        "BG_STAT_SCALE2={:.3f} fail={} mean_dev={} rms={} kin={}".format(
+            float(result.get("bg_scale", BG_STAT_SCALE2)),
+            int(metrics.get("ratio_fail_count", 10**9)),
+            _format_metric_value(metrics.get("ratio_mean_dev", float("inf"))),
+            _format_metric_value(metrics.get("ratio_rms", float("inf"))),
+            _format_metric_value(metrics.get("kinematic_score", float("inf"))),
+        )
+    )
+
+
 def _copy_static_hist_context(base_hist, candidate_hist):
     candidate_hist.update({key: val for key, val in base_hist.items() if key not in candidate_hist})
     return candidate_hist
@@ -215,6 +242,7 @@ def _log_scale_result(stage_name, epsset, phi_setting, result):
 def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc_yield_dict, simc_support, stage_name, bg_scales):
     results = []
     total = len(bg_scales)
+    running_best = None
     for idx, bg_scale in enumerate(bg_scales, start=1):
         _log(
             "{} scan {} {}: testing BG_STAT_SCALE2={:.3f} ({}/{})".format(
@@ -237,6 +265,39 @@ def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc
             simc_support,
         )
         _log_scale_result(stage_name, inpDict["EPSSET"], phi_setting, result)
+        if _is_better_result(result, running_best):
+            running_best = result
+            _log(
+                "{} leader update {} {} after {}/{}: {}".format(
+                    stage_name,
+                    inpDict["EPSSET"],
+                    phi_setting,
+                    idx,
+                    total,
+                    _result_summary(running_best),
+                )
+            )
+        elif running_best is not None:
+            _log(
+                "{} leader unchanged {} {} after {}/{}: {}".format(
+                    stage_name,
+                    inpDict["EPSSET"],
+                    phi_setting,
+                    idx,
+                    total,
+                    _result_summary(running_best),
+                )
+            )
+        else:
+            _log(
+                "{} leader pending {} {} after {}/{}: no valid BG_STAT_SCALE2 yet".format(
+                    stage_name,
+                    inpDict["EPSSET"],
+                    phi_setting,
+                    idx,
+                    total,
+                )
+            )
         results.append(result)
     return results
 
