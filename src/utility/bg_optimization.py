@@ -5,6 +5,7 @@ import math
 import os
 import subprocess
 import sys
+import csv
 
 import numpy as np
 
@@ -641,6 +642,165 @@ def _build_summary_report(inpDict, mode, proposal, phi_results):
     return "\n".join(lines)
 
 
+def _metric_columns(metrics):
+    metric_dict = metrics or {}
+    return {
+        "ratio_fail_count": metric_dict.get("ratio_fail_count"),
+        "ratio_mean_dev": metric_dict.get("ratio_mean_dev"),
+        "ratio_rms": metric_dict.get("ratio_rms"),
+        "kinematic_score": metric_dict.get("kinematic_score"),
+        "valid_ratio_bins": metric_dict.get("valid_ratio_bins"),
+        "kinematic_points": metric_dict.get("kinematic_points"),
+    }
+
+
+def _base_csv_row(inpDict, summary, row_kind, proposal=None, phi_setting="", stage="", bg_scale=None, valid=None):
+    proposal = proposal or {}
+    row = {
+        "mode": summary.get("mode", ""),
+        "epsset": inpDict.get("EPSSET", ""),
+        "particle": inpDict.get("ParticleType", ""),
+        "q2": inpDict.get("Q2", ""),
+        "w": inpDict.get("W", ""),
+        "outfilename": inpDict.get("OutFilename", ""),
+        "row_kind": row_kind,
+        "stage": stage,
+        "phi_setting": phi_setting,
+        "bg_stat_scale2": bg_scale,
+        "valid": valid,
+        "fallback": summary.get("fallback", False),
+        "requested_num_t_bins": proposal.get("requested_num_t_bins"),
+        "requested_num_phi_bins": proposal.get("requested_num_phi_bins"),
+        "actual_num_t_bins": proposal.get("actual_num_t_bins"),
+        "actual_num_phi_bins": proposal.get("actual_num_phi_bins"),
+    }
+    return row
+
+
+def _proposal_matches(selected_proposal, candidate_proposal):
+    if selected_proposal is candidate_proposal:
+        return True
+    if not selected_proposal or not candidate_proposal:
+        return False
+    try:
+        return (
+            np.array_equal(
+                np.asarray(selected_proposal.get("t_bins", []), dtype=float),
+                np.asarray(candidate_proposal.get("t_bins", []), dtype=float),
+            )
+            and np.array_equal(
+                np.asarray(selected_proposal.get("phi_bins", []), dtype=float),
+                np.asarray(candidate_proposal.get("phi_bins", []), dtype=float),
+            )
+        )
+    except Exception:
+        return False
+
+
+def _append_scale_rows(rows, inpDict, summary, proposal, phi_result, results, stage_name):
+    selected_scale = phi_result.get("bg_scale")
+    for result in results or []:
+        row = _base_csv_row(
+            inpDict,
+            summary,
+            row_kind="scale_candidate",
+            proposal=proposal,
+            phi_setting=result.get("phi_setting", phi_result.get("phi_setting", "")),
+            stage=stage_name,
+            bg_scale=result.get("bg_scale"),
+            valid=result.get("valid"),
+        )
+        row.update(_metric_columns(result.get("metrics")))
+        row["selected_for_stage"] = (
+            result.get("valid")
+            and selected_scale is not None
+            and math.isclose(float(result.get("bg_scale", float("nan"))), float(selected_scale), rel_tol=0.0, abs_tol=1.0e-9)
+        )
+        row["test_model_chi2"] = result.get("test_model_chi2")
+        rows.append(row)
+
+
+def build_optimization_csv_rows(summary, inpDict):
+    rows = []
+    mode = summary.get("mode")
+
+    if mode == "low":
+        for candidate in summary.get("candidate_results", []):
+            proposal = candidate.get("proposal", {})
+            candidate_row = _base_csv_row(
+                inpDict,
+                summary,
+                row_kind="bin_candidate",
+                proposal=proposal,
+                stage="aggregate",
+                valid=candidate.get("valid"),
+            )
+            candidate_row.update(_metric_columns(candidate.get("metrics")))
+            candidate_row["selected_bin_candidate"] = bool(
+                not summary.get("fallback")
+                and _proposal_matches(summary.get("proposal"), proposal)
+            )
+            candidate_row["error"] = candidate.get("error")
+            rows.append(candidate_row)
+
+            for phi_result in candidate.get("phi_results", []):
+                _append_scale_rows(rows, inpDict, summary, proposal, phi_result, phi_result.get("coarse_results", []), "coarse")
+                _append_scale_rows(rows, inpDict, summary, proposal, phi_result, phi_result.get("results", []), "refined")
+
+                selected_row = _base_csv_row(
+                    inpDict,
+                    summary,
+                    row_kind="phi_selection",
+                    proposal=proposal,
+                    phi_setting=phi_result.get("phi_setting", ""),
+                    stage="selected",
+                    bg_scale=phi_result.get("bg_scale"),
+                    valid=phi_result.get("valid"),
+                )
+                selected_row.update(_metric_columns(phi_result.get("metrics")))
+                selected_row["selected_for_stage"] = bool(
+                    not summary.get("fallback")
+                    and _proposal_matches(summary.get("proposal"), proposal)
+                )
+                selected_row["test_model_chi2"] = phi_result.get("test_model_chi2")
+                rows.append(selected_row)
+
+    elif mode == "high":
+        proposal = summary.get("proposal", {})
+        aggregate_row = _base_csv_row(
+            inpDict,
+            summary,
+            row_kind="bin_candidate",
+            proposal=proposal,
+            stage="aggregate",
+            valid=not summary.get("fallback", False),
+        )
+        aggregate_row.update(_metric_columns(summary.get("metrics")))
+        aggregate_row["selected_bin_candidate"] = True
+        rows.append(aggregate_row)
+
+        for phi_result in summary.get("candidate_results", []):
+            _append_scale_rows(rows, inpDict, summary, proposal, phi_result, phi_result.get("coarse_results", []), "coarse")
+            _append_scale_rows(rows, inpDict, summary, proposal, phi_result, phi_result.get("results", []), "refined")
+
+            selected_row = _base_csv_row(
+                inpDict,
+                summary,
+                row_kind="phi_selection",
+                proposal=proposal,
+                phi_setting=phi_result.get("phi_setting", ""),
+                stage="selected",
+                bg_scale=phi_result.get("bg_scale"),
+                valid=phi_result.get("valid"),
+            )
+            selected_row.update(_metric_columns(phi_result.get("metrics")))
+            selected_row["selected_for_stage"] = True
+            selected_row["test_model_chi2"] = phi_result.get("test_model_chi2")
+            rows.append(selected_row)
+
+    return rows
+
+
 def _rerun_final_rand_sub(histlist, inpDict, selected_bg_scales):
     sys.path.append("cuts")
     from rand_sub import rand_sub
@@ -833,3 +993,41 @@ def write_optimization_summary(summary, summary_path):
     with open(summary_path, "w") as handle:
         json.dump(serializable, handle, indent=2)
     return summary_path
+
+
+def write_optimization_csv(summary, inpDict, csv_path):
+    rows = build_optimization_csv_rows(summary, inpDict)
+    fieldnames = [
+        "mode",
+        "epsset",
+        "particle",
+        "q2",
+        "w",
+        "outfilename",
+        "row_kind",
+        "stage",
+        "phi_setting",
+        "bg_stat_scale2",
+        "valid",
+        "fallback",
+        "requested_num_t_bins",
+        "requested_num_phi_bins",
+        "actual_num_t_bins",
+        "actual_num_phi_bins",
+        "selected_bin_candidate",
+        "selected_for_stage",
+        "ratio_fail_count",
+        "ratio_mean_dev",
+        "ratio_rms",
+        "kinematic_score",
+        "valid_ratio_bins",
+        "kinematic_points",
+        "test_model_chi2",
+        "error",
+    ]
+    with open(csv_path, "w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: row.get(key) for key in fieldnames})
+    return csv_path

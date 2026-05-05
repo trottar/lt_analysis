@@ -593,6 +593,7 @@ sys.path.append("utility")
 from bg_optimization import (
     optimize_high_epsilon_configuration,
     optimize_low_epsilon_configuration,
+    write_optimization_csv,
     write_optimization_summary,
 )
 
@@ -603,8 +604,11 @@ stage_start = perf_counter()
 if EPSSET == "low":
     histlist, bg_opt_summary = optimize_low_epsilon_configuration(histlist, inpDict)
     bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.json".format(ParticleType, OutFilename, EPSSET)
+    bg_opt_csv_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.csv".format(ParticleType, OutFilename, EPSSET)
     write_optimization_summary(bg_opt_summary, bg_opt_path)
+    write_optimization_csv(bg_opt_summary, inpDict, bg_opt_csv_path)
     output_file_lst.append(bg_opt_path)
+    output_file_lst.append(bg_opt_csv_path)
 
 try:
     output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
@@ -645,8 +649,11 @@ for hist in histlist:
 if EPSSET == "high":
     histlist, bg_opt_summary = optimize_high_epsilon_configuration(histlist, inpDict)
     bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.json".format(ParticleType, OutFilename, EPSSET)
+    bg_opt_csv_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.csv".format(ParticleType, OutFilename, EPSSET)
     write_optimization_summary(bg_opt_summary, bg_opt_path)
+    write_optimization_csv(bg_opt_summary, inpDict, bg_opt_csv_path)
     output_file_lst.append(bg_opt_path)
+    output_file_lst.append(bg_opt_csv_path)
     for hist in histlist:
         hist["t_bins"] = t_bins
         hist["phi_bins"] = phi_bins
@@ -1029,6 +1036,11 @@ for f in output_file_lst:
             f_new = f.replace(OUTPATH,new_dir+"/json")
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)                
+        if ".csv" in f:
+            create_dir(new_dir+"/csv")
+            f_new = f.replace(OUTPATH,new_dir+"/csv")
+            print("\nCopying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
         if ".root" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
