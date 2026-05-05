@@ -27,8 +27,10 @@ T_BIN_ADJUST_MAX_ITERATIONS = 50000
 T_BIN_EDGE_BIAS = 2.0
 
 # Joint optimizer search space.
-NUM_T_BIN_SEARCH_OFFSETS = (-2, -1, 0, 1, 2)
-NUM_PHI_BIN_SEARCH_OFFSETS = (-2, -1, 0, 1, 2)
+# The bash-script bin counts are assumed to be close, so only scan local
+# neighbors within +/- 1 bin for the shared bin-count optimization.
+NUM_T_BIN_SEARCH_OFFSETS = (-1, 0, 1)
+NUM_PHI_BIN_SEARCH_OFFSETS = (-1, 0, 1)
 
 BG_STAT_SCALE2_COARSE_MIN = 0.0
 BG_STAT_SCALE2_COARSE_MAX = 1.0
