@@ -25,6 +25,8 @@ from utility import flatten_hist
 from background_config import (
     MIN_PHI_BINS,
     MIN_T_BINS,
+    PHI_BIN_MAX_DEG,
+    PHI_BIN_MIN_DEG,
     PHI_BIN_MIN_EVENTS,
     T_BIN_ADJUST_MAX_ITERATIONS,
     T_BIN_ADJUST_TOLERANCE,
@@ -96,7 +98,7 @@ def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False):
         print("\nFinding phi bins...")
 
     num_phi_bins = max(MIN_PHI_BINS, int(requested_num_phi_bins))
-    bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
+    bin_edges = _build_uniform_phi_bins(num_phi_bins)
 
     while True:
         counts, bins = np.histogram(phi_values, bin_edges)
@@ -111,9 +113,15 @@ def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False):
                     num_phi_bins, PHI_BIN_MIN_EVENTS
                 )
             )
-        bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
+        bin_edges = _build_uniform_phi_bins(num_phi_bins)
 
     if not quiet:
+        print(
+            "Using fixed equal-width phi bins from {:.1f} to {:.1f} degrees".format(
+                float(PHI_BIN_MIN_DEG),
+                float(PHI_BIN_MAX_DEG),
+            )
+        )
         for i, val in enumerate(counts):
             print(
                 "Bin {} from {:.1f} to {:.1f} has {} events".format(
@@ -123,6 +131,10 @@ def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False):
         print("phi_bins = ", bins)
 
     return bins, counts
+
+
+def _build_uniform_phi_bins(num_phi_bins):
+    return np.linspace(float(PHI_BIN_MIN_DEG), float(PHI_BIN_MAX_DEG), int(num_phi_bins) + 1)
 
 
 def _calculate_edge_scaling(index, total_bins, edge_bias):
