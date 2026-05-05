@@ -24,6 +24,10 @@ sys.path.append("binning")
 from find_bins import apply_bin_proposal, propose_bins, write_bin_interval_files
 
 
+def _log(message):
+    print("[BG OPT] {}".format(message))
+
+
 def _safe_float(value, default=float("inf")):
     try:
         val = float(value)
@@ -45,6 +49,13 @@ def _candidate_sort_key(result):
 
 def _copy_static_hist_context(base_hist, candidate_hist):
     candidate_hist.update({key: val for key, val in base_hist.items() if key not in candidate_hist})
+    return candidate_hist
+
+
+def _prepare_candidate_hist(base_hist, t_bins, phi_bins):
+    candidate_hist = dict(base_hist)
+    candidate_hist["t_bins"] = np.array(t_bins, dtype=float)
+    candidate_hist["phi_bins"] = np.array(phi_bins, dtype=float)
     return candidate_hist
 
 
@@ -160,7 +171,7 @@ def _build_candidate_metrics(phi_setting, ratio_dict, hist):
     return metrics
 
 
-def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins):
+def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support):
     candidate_inp = dict(inpDict)
     candidate_inp["NumtBins"] = len(t_bins) - 1
     candidate_inp["NumPhiBins"] = len(phi_bins) - 1
@@ -170,28 +181,16 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, p
         get_bg_scale_setting_key(candidate_inp["EPSSET"], phi_setting): float(bg_scale)
     }
 
-    sys.path.append("cuts")
-    from rand_sub import rand_sub
     sys.path.append("binning")
-    from calculate_yield import find_yield_data, find_yield_simc
+    from calculate_yield import find_yield_data
     from calculate_ratio import find_ratio
 
-    candidate_hist = rand_sub(phi_setting, candidate_inp, shift_mode="raw", emit_plots=False)
-    if len(candidate_hist.keys()) <= 1:
-        return {
-            "phi_setting": phi_setting,
-            "bg_scale": float(bg_scale),
-            "valid": False,
-            "error": "missing-setting",
-        }
-
-    candidate_hist = _copy_static_hist_context(base_hist, candidate_hist)
-    candidate_hist["t_bins"] = np.array(t_bins, dtype=float)
-    candidate_hist["phi_bins"] = np.array(phi_bins, dtype=float)
+    candidate_hist = _prepare_candidate_hist(base_hist, t_bins, phi_bins)
+    candidate_hist["_xsect_support_simc"] = simc_support
 
     yield_dict = {}
     yield_dict.update(find_yield_data([candidate_hist], candidate_inp))
-    yield_dict.update(find_yield_simc([candidate_hist], candidate_inp))
+    yield_dict.update(simc_yield_dict)
 
     ratio_dict = {}
     ratio_dict.update(find_ratio([candidate_hist], candidate_inp, yield_dict))
@@ -208,6 +207,21 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, p
         "metrics": metrics,
         "hist": candidate_hist,
     }
+
+
+def _build_simc_reference(base_hist, inpDict, t_bins, phi_bins):
+    candidate_inp = dict(inpDict)
+    candidate_inp["NumtBins"] = len(t_bins) - 1
+    candidate_inp["NumPhiBins"] = len(phi_bins) - 1
+    candidate_inp["yield_emit_plots"] = False
+
+    sys.path.append("binning")
+    from calculate_yield import find_yield_simc
+
+    simc_hist = _prepare_candidate_hist(base_hist, t_bins, phi_bins)
+    simc_yield_dict = {}
+    simc_yield_dict.update(find_yield_simc([simc_hist], candidate_inp))
+    return simc_yield_dict, simc_hist.get("_xsect_support_simc")
 
 
 def _parse_test_model_chi2(param_path):
@@ -313,6 +327,7 @@ def _finalize_phi_results(results, inpDict):
         top_key = _candidate_sort_key(finalists[0])
         tied = [result for result in finalists if _candidate_sort_key(result) == top_key]
         if len(tied) > 1:
+            _log("Running test_model.sh tie-break for {} {}".format(inpDict["EPSSET"], results[0]["phi_setting"]))
             tiebreak_chi2 = _run_test_model_tiebreak(inpDict)
             if tiebreak_chi2 is not None:
                 tied[0]["test_model_chi2"] = tiebreak_chi2
@@ -325,21 +340,54 @@ def _finalize_phi_results(results, inpDict):
 
 def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
     phi_setting = base_hist["phi_setting"]
+    _log(
+        "Scanning {} {} with NumtBins={} NumPhiBins={}".format(
+            inpDict["EPSSET"],
+            phi_setting,
+            len(t_bins) - 1,
+            len(phi_bins) - 1,
+        )
+    )
+    simc_yield_dict, simc_support = _build_simc_reference(base_hist, inpDict, t_bins, phi_bins)
     coarse_results = [
-        _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins)
+        _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support)
         for bg_scale in get_bg_scale_coarse_candidates()
     ]
 
     best_coarse = _finalize_phi_results(coarse_results, inpDict)
     if not best_coarse.get("valid"):
+        _log("No valid coarse BG scale found for {} {}".format(inpDict["EPSSET"], phi_setting))
         return best_coarse
 
+    _log(
+        "Best coarse {} {} BG_STAT_SCALE2={:.3f} fail={} mean_dev={:.4f} rms={:.4f}".format(
+            inpDict["EPSSET"],
+            phi_setting,
+            float(best_coarse["bg_scale"]),
+            int(best_coarse["metrics"]["ratio_fail_count"]),
+            float(best_coarse["metrics"]["ratio_mean_dev"]),
+            float(best_coarse["metrics"]["ratio_rms"]),
+        )
+    )
+
     refined_results = [
-        _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins)
+        _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support)
         for bg_scale in get_bg_scale_refined_candidates(best_coarse["bg_scale"])
     ]
     best_refined = _finalize_phi_results(refined_results, inpDict)
     best_refined["coarse_results"] = coarse_results
+    if best_refined.get("valid"):
+        _log(
+            "Selected {} {} BG_STAT_SCALE2={:.3f} fail={} mean_dev={:.4f} rms={:.4f} kin={:.4f}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                float(best_refined["bg_scale"]),
+                int(best_refined["metrics"]["ratio_fail_count"]),
+                float(best_refined["metrics"]["ratio_mean_dev"]),
+                float(best_refined["metrics"]["ratio_rms"]),
+                float(best_refined["metrics"]["kinematic_score"]),
+            )
+        )
     return best_refined
 
 
@@ -424,7 +472,25 @@ def _build_summary_report(inpDict, mode, proposal, phi_results):
     return "\n".join(lines)
 
 
+def _rerun_final_rand_sub(histlist, inpDict, selected_bg_scales):
+    sys.path.append("cuts")
+    from rand_sub import rand_sub
+
+    final_inp = dict(inpDict)
+    final_inp["bg_stat_scale2_by_setting"] = dict(selected_bg_scales)
+
+    refreshed_histlist = []
+    for base_hist in histlist:
+        phi_setting = base_hist["phi_setting"]
+        scale = float(selected_bg_scales.get(get_bg_scale_setting_key(inpDict["EPSSET"], phi_setting), BG_STAT_SCALE2))
+        _log("Final rand_sub rerun for {} {} with BG_STAT_SCALE2={:.3f}".format(inpDict["EPSSET"], phi_setting, scale))
+        refreshed_hist = rand_sub(phi_setting, final_inp, shift_mode="raw", emit_plots=True)
+        refreshed_histlist.append(_copy_static_hist_context(base_hist, refreshed_hist))
+    return refreshed_histlist
+
+
 def optimize_low_epsilon_configuration(histlist, inpDict):
+    _log("Starting low-e optimization prepass")
     requested_t_bins = int(inpDict["NumtBins"])
     requested_phi_bins = int(inpDict["NumPhiBins"])
     candidate_results = []
@@ -432,6 +498,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     for candidate_t_bins, candidate_phi_bins in build_bin_count_candidates(
         requested_t_bins, requested_phi_bins
     ):
+        _log("Trying shared bin candidate NumtBins={} NumPhiBins={}".format(candidate_t_bins, candidate_phi_bins))
         try:
             proposal = propose_bins(
                 histlist,
@@ -456,6 +523,16 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
             for base_hist in histlist
         ]
         aggregate_metrics = _aggregate_bin_candidate_result(phi_results)
+        _log(
+            "Candidate NumtBins={} NumPhiBins={} -> fail={} mean_dev={:.4f} rms={:.4f} kin={:.4f}".format(
+                proposal["actual_num_t_bins"],
+                proposal["actual_num_phi_bins"],
+                int(aggregate_metrics["ratio_fail_count"]),
+                float(aggregate_metrics["ratio_mean_dev"]),
+                float(aggregate_metrics["ratio_rms"]),
+                float(aggregate_metrics["kinematic_score"]),
+            )
+        )
         candidate_results.append(
             {
                 "valid": math.isfinite(float(aggregate_metrics["ratio_mean_dev"])),
@@ -477,6 +554,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
             for hist in histlist
         }
         inpDict["bg_stat_scale2_by_setting"] = fallback_map
+        _log("Falling back to configured binning/scales for low epsilon")
         summary = {
             "mode": "low",
             "fallback": True,
@@ -502,6 +580,12 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
         )
     )
     best_candidate = valid_candidates[0]
+    _log(
+        "Selected shared low-e bins NumtBins={} NumPhiBins={}".format(
+            best_candidate["proposal"]["actual_num_t_bins"],
+            best_candidate["proposal"]["actual_num_phi_bins"],
+        )
+    )
     apply_bin_proposal(inpDict, best_candidate["proposal"])
     write_bin_interval_files(inpDict, best_candidate["proposal"]["t_bins"], best_candidate["proposal"]["phi_bins"])
 
@@ -510,7 +594,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     for result in best_candidate["phi_results"]:
         key = get_bg_scale_setting_key(inpDict["EPSSET"], result["phi_setting"])
         selected_bg_scales[key] = float(result["bg_scale"])
-        selected_histlist.append(result["hist"])
+    selected_histlist = _rerun_final_rand_sub(histlist, inpDict, selected_bg_scales)
 
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scales
     summary = {
@@ -532,6 +616,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
 
 
 def optimize_high_epsilon_configuration(histlist, inpDict):
+    _log("Starting high-e optimization prepass")
     proposal = {
         "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
         "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
@@ -542,18 +627,11 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
         for base_hist in histlist
     ]
 
-    selected_histlist = []
     selected_bg_scales = {}
-    for base_hist, result in zip(histlist, phi_results):
+    for result in phi_results:
         key = get_bg_scale_setting_key(inpDict["EPSSET"], result["phi_setting"])
         selected_bg_scales[key] = float(result.get("bg_scale", resolve_bg_stat_scale2(inpDict, result["phi_setting"])))
-        if "hist" in result:
-            selected_histlist.append(result["hist"])
-        else:
-            selected_histlist.append(base_hist)
-
-    if not selected_histlist:
-        selected_histlist = histlist
+    selected_histlist = _rerun_final_rand_sub(histlist, inpDict, selected_bg_scales)
 
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scales
     summary = {
