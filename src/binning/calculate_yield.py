@@ -1693,9 +1693,6 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
-    if not emit_plots:
-        return processed_dict, support_hist_dict, _freeze_ave_simc_event_cache(ave_simc_event_cache)
-
     total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove t-phi bin edges and NumEvts_bin_MM_SIMC_unweighted
 
     # Loop through bins in t_simc and identify events in specified bins
@@ -1731,6 +1728,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                       for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
+
+            if not emit_plots:
+                continue
 
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)

@@ -28,6 +28,16 @@ def _log(message):
     print("[BG OPT] {}".format(message))
 
 
+def _format_metric_value(value, precision=4):
+    try:
+        val = float(value)
+    except Exception:
+        return "nan"
+    if not math.isfinite(val):
+        return "inf"
+    return "{:.{prec}f}".format(val, prec=precision)
+
+
 def _safe_float(value, default=float("inf")):
     try:
         val = float(value)
@@ -169,6 +179,66 @@ def _build_candidate_metrics(phi_setting, ratio_dict, hist):
     metrics.update(_build_ratio_metrics(ratio_dict, phi_setting))
     metrics.update(_build_kinematic_metrics(hist))
     return metrics
+
+
+def _log_scale_result(stage_name, epsset, phi_setting, result):
+    if not result.get("valid"):
+        _log(
+            "{} result {} {} BG_STAT_SCALE2={:.3f} -> invalid (valid_ratio_bins={} kin_points={})".format(
+                stage_name,
+                epsset,
+                phi_setting,
+                float(result.get("bg_scale", BG_STAT_SCALE2)),
+                int(result.get("metrics", {}).get("valid_ratio_bins", 0)),
+                int(result.get("metrics", {}).get("kinematic_points", 0)),
+            )
+        )
+        return
+
+    metrics = result["metrics"]
+    _log(
+        "{} result {} {} BG_STAT_SCALE2={:.3f} -> fail={} mean_dev={} rms={} kin={} bins={} kin_pts={}".format(
+            stage_name,
+            epsset,
+            phi_setting,
+            float(result["bg_scale"]),
+            int(metrics["ratio_fail_count"]),
+            _format_metric_value(metrics["ratio_mean_dev"]),
+            _format_metric_value(metrics["ratio_rms"]),
+            _format_metric_value(metrics["kinematic_score"]),
+            int(metrics["valid_ratio_bins"]),
+            int(metrics["kinematic_points"]),
+        )
+    )
+
+
+def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc_yield_dict, simc_support, stage_name, bg_scales):
+    results = []
+    total = len(bg_scales)
+    for idx, bg_scale in enumerate(bg_scales, start=1):
+        _log(
+            "{} scan {} {}: testing BG_STAT_SCALE2={:.3f} ({}/{})".format(
+                stage_name,
+                inpDict["EPSSET"],
+                phi_setting,
+                float(bg_scale),
+                idx,
+                total,
+            )
+        )
+        result = _evaluate_phi_candidate(
+            base_hist,
+            inpDict,
+            phi_setting,
+            bg_scale,
+            t_bins,
+            phi_bins,
+            simc_yield_dict,
+            simc_support,
+        )
+        _log_scale_result(stage_name, inpDict["EPSSET"], phi_setting, result)
+        results.append(result)
+    return results
 
 
 def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support):
@@ -327,7 +397,13 @@ def _finalize_phi_results(results, inpDict):
         top_key = _candidate_sort_key(finalists[0])
         tied = [result for result in finalists if _candidate_sort_key(result) == top_key]
         if len(tied) > 1:
-            _log("Running test_model.sh tie-break for {} {}".format(inpDict["EPSSET"], results[0]["phi_setting"]))
+            _log(
+                "Running test_model.sh tie-break for {} {} among BG_STAT_SCALE2={}".format(
+                    inpDict["EPSSET"],
+                    results[0]["phi_setting"],
+                    ", ".join("{:.3f}".format(float(result["bg_scale"])) for result in tied),
+                )
+            )
             tiebreak_chi2 = _run_test_model_tiebreak(inpDict)
             if tiebreak_chi2 is not None:
                 tied[0]["test_model_chi2"] = tiebreak_chi2
@@ -349,10 +425,25 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         )
     )
     simc_yield_dict, simc_support = _build_simc_reference(base_hist, inpDict, t_bins, phi_bins)
-    coarse_results = [
-        _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support)
-        for bg_scale in get_bg_scale_coarse_candidates()
-    ]
+    coarse_candidates = list(get_bg_scale_coarse_candidates())
+    _log(
+        "Coarse BG_STAT_SCALE2 grid for {} {}: {}".format(
+            inpDict["EPSSET"],
+            phi_setting,
+            ", ".join("{:.3f}".format(float(scale)) for scale in coarse_candidates),
+        )
+    )
+    coarse_results = _evaluate_scale_grid(
+        base_hist,
+        inpDict,
+        phi_setting,
+        t_bins,
+        phi_bins,
+        simc_yield_dict,
+        simc_support,
+        "Coarse",
+        coarse_candidates,
+    )
 
     best_coarse = _finalize_phi_results(coarse_results, inpDict)
     if not best_coarse.get("valid"):
@@ -370,10 +461,25 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         )
     )
 
-    refined_results = [
-        _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support)
-        for bg_scale in get_bg_scale_refined_candidates(best_coarse["bg_scale"])
-    ]
+    refined_candidates = list(get_bg_scale_refined_candidates(best_coarse["bg_scale"]))
+    _log(
+        "Refined BG_STAT_SCALE2 grid for {} {}: {}".format(
+            inpDict["EPSSET"],
+            phi_setting,
+            ", ".join("{:.3f}".format(float(scale)) for scale in refined_candidates),
+        )
+    )
+    refined_results = _evaluate_scale_grid(
+        base_hist,
+        inpDict,
+        phi_setting,
+        t_bins,
+        phi_bins,
+        simc_yield_dict,
+        simc_support,
+        "Refined",
+        refined_candidates,
+    )
     best_refined = _finalize_phi_results(refined_results, inpDict)
     best_refined["coarse_results"] = coarse_results
     if best_refined.get("valid"):
@@ -594,6 +700,12 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     for result in best_candidate["phi_results"]:
         key = get_bg_scale_setting_key(inpDict["EPSSET"], result["phi_setting"])
         selected_bg_scales[key] = float(result["bg_scale"])
+        _log(
+            "Selected low-e scale for {}: BG_STAT_SCALE2={:.3f}".format(
+                result["phi_setting"],
+                float(result["bg_scale"]),
+            )
+        )
     selected_histlist = _rerun_final_rand_sub(histlist, inpDict, selected_bg_scales)
 
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scales
@@ -631,6 +743,12 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     for result in phi_results:
         key = get_bg_scale_setting_key(inpDict["EPSSET"], result["phi_setting"])
         selected_bg_scales[key] = float(result.get("bg_scale", resolve_bg_stat_scale2(inpDict, result["phi_setting"])))
+        _log(
+            "Selected high-e scale for {}: BG_STAT_SCALE2={:.3f}".format(
+                result["phi_setting"],
+                float(selected_bg_scales[key]),
+            )
+        )
     selected_histlist = _rerun_final_rand_sub(histlist, inpDict, selected_bg_scales)
 
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scales
