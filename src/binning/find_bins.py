@@ -3,465 +3,310 @@
 #
 # Description:
 # ================================================================
-# Time-stamp: "2025-05-22 10:48:36 trottar"
+# Time-stamp: "2026-05-05 00:00:00 codex"
 # ================================================================
 #
-# Author:  Richard L. Trotta III <trotta@cua.edu>
-#
-# Copyright (c) trottar
-#
 
-##################################################################################################################################################
+import math
+import os
+import sys
 
-# Import relevant packages
-import uproot as up
 import numpy as np
-import root_numpy as rnp
-import ROOT
-import scipy
-import scipy.integrate as integrate
-from scipy.integrate import quad
-import matplotlib.pyplot as plt
-from collections import defaultdict
-import sys, math, os, subprocess
-from array import array
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH2F, TPad, TStyle, gStyle, gPad, TGaxis, TLine, TMath, TPaveText, TArc, TGraphPolar, TLatex, TH2Poly
-from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
-from functools import reduce
 
-################################################################################################################################################
-'''
-ltsep package import and pathing definitions
-'''
-
-# Import package for cuts
-from ltsep import Root
-# Import package for progress bar
 from ltsep import Misc
+from ltsep import Root
 
-lt=Root(os.path.realpath(__file__),"Plot_LTSep")
+lt = Root(os.path.realpath(__file__), "Plot_LTSep")
 
-# Add this to all files for more dynamic pathing
-USER=lt.USER # Grab user info for file finding
-HOST=lt.HOST
-REPLAYPATH=lt.REPLAYPATH
-UTILPATH=lt.UTILPATH
-LTANAPATH=lt.LTANAPATH
-ANATYPE=lt.ANATYPE
-OUTPATH=lt.OUTPATH
-
-##################################################################################################################################################
-# Importing utility functions
+LTANAPATH = lt.LTANAPATH
 
 sys.path.append("utility")
 from utility import flatten_hist
+from background_config import (
+    MIN_PHI_BINS,
+    MIN_T_BINS,
+    PHI_BIN_MIN_EVENTS,
+    T_BIN_ADJUST_MAX_ITERATIONS,
+    T_BIN_ADJUST_TOLERANCE,
+    T_BIN_EDGE_BIAS,
+    T_BIN_MIN_EVENTS,
+)
 
-################################################################################################################################################
 
-def find_bins(histlist, inpDict):
-
-    ################################################################################################################################################
-    
-    Q2 = inpDict["Q2"]
-    W = inpDict["W"]
-
-    ParticleType = inpDict["ParticleType"]
-
-    tmin = inpDict["tmin"]
-    tmax = inpDict["tmax"]
-        
-    ################################################################################################################################################
-    # Define root file trees of interest
-
-    # Initialize NumPy arrays
-    H_t_Right = np.array([])
-    H_t_Left = np.array([])
-    H_t_Center = np.array([])
-
-    H_phi_Right = np.array([])
-    H_phi_Left = np.array([])
-    H_phi_Center = np.array([])
-
-    # Create an empty list to store copied histograms
+def _clone_histlist(histlist):
     histlist_copy = []
-
-    # Check if the value of the dictionary is a TObject that can use .Clone()
     for hist in histlist:
         hist_copy = {}
         for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
-                # Clone the TObject if it has the 'Clone' method
+            if hasattr(val, "Clone") and callable(getattr(val, "Clone")):
                 hist_copy[key] = val.Clone()
             else:
-                # Otherwise, just copy the value
                 hist_copy[key] = val
-        # Append the copied histogram dictionary to the new list
         histlist_copy.append(hist_copy)
-    
-    for i,hist in enumerate(histlist_copy):
+    return histlist_copy
 
-        # Unscale data to get raw number of events
-        hist["H_t_DATA"].Scale(1.0 / inpDict["normfac_data"])
-        hist["H_ph_q_DATA"].Scale(1.0 / inpDict["normfac_data"])
-        
-        t = flatten_hist(hist["H_t_DATA"])
-        phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
-        
-        if hist["phi_setting"] == 'Right':
-            H_t_Right = np.append(H_t_Right, t)
-            H_phi_Right = np.append(H_phi_Right, phi_deg)
 
-        elif hist["phi_setting"] == 'Left':
-            H_t_Left = np.append(H_t_Left, t)
-            H_phi_Left = np.append(H_phi_Left, phi_deg)
+def _collect_bin_samples(histlist, inpDict):
+    tmin = float(inpDict["tmin"])
+    tmax = float(inpDict["tmax"])
 
-        elif hist["phi_setting"] == 'Center':
-            H_t_Center = np.append(H_t_Center, t)
-            H_phi_Center = np.append(H_phi_Center, phi_deg)
+    h_t_right = np.array([])
+    h_t_left = np.array([])
+    h_t_center = np.array([])
+    h_phi_right = np.array([])
+    h_phi_left = np.array([])
+    h_phi_center = np.array([])
 
-    ################################################################################################################################################
+    for hist in _clone_histlist(histlist):
+        normfac_data = hist.get("normfac_data", inpDict["normfac_data"])
+        hist["H_t_DATA"].Scale(1.0 / normfac_data)
+        hist["H_ph_q_DATA"].Scale(1.0 / normfac_data)
 
-    # Concatenate the H_t arrays for Right, Left, and Center
-    H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
+        t_values = flatten_hist(hist["H_t_DATA"])
+        phi_deg = [(phi * (180.0 / math.pi)) for phi in flatten_hist(hist["H_ph_q_DATA"])]
 
-    # Apply proper boundaries for t
-    # Find indices of min and max values
-    min_index = np.argmin(H_t_BinTest)
-    max_index = np.argmax(H_t_BinTest)
-    # Replace min and max values with tmin and tmax
-    H_t_BinTest[min_index] = tmin
-    H_t_BinTest[max_index] = tmax
-    
-    # Concatenate the H_phi arrays for Right, Left, and Center
-    H_phi_BinTest = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
-    
-    def find_phibins(H_phi_BinTest):
+        if hist["phi_setting"] == "Right":
+            h_t_right = np.append(h_t_right, t_values)
+            h_phi_right = np.append(h_phi_right, phi_deg)
+        elif hist["phi_setting"] == "Left":
+            h_t_left = np.append(h_t_left, t_values)
+            h_phi_left = np.append(h_phi_left, phi_deg)
+        elif hist["phi_setting"] == "Center":
+            h_t_center = np.append(h_t_center, t_values)
+            h_phi_center = np.append(h_phi_center, phi_deg)
 
+    h_t_combined = np.concatenate((h_t_right, h_t_left, h_t_center))
+    if h_t_combined.size == 0:
+        raise ValueError("No t-distribution data available for bin finding.")
+
+    min_index = np.argmin(h_t_combined)
+    max_index = np.argmax(h_t_combined)
+    h_t_combined[min_index] = tmin
+    h_t_combined[max_index] = tmax
+
+    h_phi_combined = np.concatenate((h_phi_right, h_phi_left, h_phi_center))
+    if h_phi_combined.size == 0:
+        raise ValueError("No phi-distribution data available for bin finding.")
+
+    return h_t_combined, h_phi_combined
+
+
+def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False):
+    if not quiet:
         print("\nFinding phi bins...")
-        bin_edges = np.linspace(-180.0, 180.0, inpDict["NumPhiBins"]+1)
-        n, bins = np.histogram(H_phi_BinTest, bin_edges)
 
-        ##############
-        # HARD CODED #
-        ##############
-        # Set minimum threhold number of events per bin
-        # Aim for >100 events
-        bad_bins_threshold = 10
-        #bad_bins_threshold = 25
-        #bad_bins_threshold = 50
-        #bad_bins_threshold = 75
-        #bad_bins_threshold = 100 #Q2=3.0/W=2.32, Q2=4.4/W=2.74
-        ##############
-        ##############
-        ##############
+    num_phi_bins = max(MIN_PHI_BINS, int(requested_num_phi_bins))
+    bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
 
-        num_phi_bins = inpDict["NumPhiBins"]
+    while True:
+        counts, bins = np.histogram(phi_values, bin_edges)
+        bad_bins = np.where(counts < PHI_BIN_MIN_EVENTS)[0]
+        if len(bad_bins) == 0:
+            break
+
+        num_phi_bins -= 1
+        if num_phi_bins < MIN_PHI_BINS:
+            raise ValueError(
+                "Only {} phi-bins achieve a minimum of {} events.".format(
+                    num_phi_bins, PHI_BIN_MIN_EVENTS
+                )
+            )
         bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
 
-        while True:
-            n, bins = np.histogram(H_phi_BinTest, bin_edges)
-
-            # Check for bad bins
-            bad_bins = np.where(n < bad_bins_threshold)[0]
-
-            # If no bad bins, we are done
-            if len(bad_bins) == 0:
-                break
-
-            # Adjust the number of bins by reducing it
-            num_phi_bins -= 1
-            if num_phi_bins <= 4:  # Ensure there are at least 4 bins
-                print("ERROR: Only {} phi-bins achieve a minimum of {} events!\nTry decreasing the minimum number of events per bin.".format(num_phi_bins, bad_bins_threshold))
-                sys.exit(2)
-
-            bin_edges = np.linspace(-180.0, 180.0, num_phi_bins + 1)
-
-        # Redefine number of phi-bins
-        if num_phi_bins != inpDict["NumPhiBins"]:
-            
-            print("Number of phi-bins changed from {} to: {} (threshold = {})".format(inpDict["NumPhiBins"], num_phi_bins, bad_bins_threshold))
-            inpDict["NumPhiBins"] = num_phi_bins
-            n, bins = np.histogram(H_phi_BinTest, bin_edges)
-        
-        for i,val in enumerate(n):
-            print("Bin {} from {:.1f} to {:.1f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
-        
-        bin_centers = (bins[:-1] + bins[1:]) / 2
-
+    if not quiet:
+        for i, val in enumerate(counts):
+            print(
+                "Bin {} from {:.1f} to {:.1f} has {} events".format(
+                    i + 1, bins[i], bins[i + 1], val
+                )
+            )
         print("phi_bins = ", bins)
-        
-        return bins
 
-    def find_tbins(H_t_BinTest):
+    return bins, counts
 
-        ##############
-        # HARD CODED #
-        ##############
-        # Set minimum threhold number of events per bin
-        # Aim for >1000 events
-        #bad_bins_threshold = 200 # Q2=5.5, W=3.02 
-        bad_bins_threshold = 500
-        #bad_bins_threshold = 1000
-        #bad_bins_threshold = 2500
-        '''
-        if Q2 == "4p4" and W == "2p74":
-            bad_bins_threshold = 2500 # Q2=4.4, W=2.74
-        elif Q2 == "5p5" and W == "3p02":
-            bad_bins_threshold = 200 # Q2=5.5, W=3.02        
-        else:
-            bad_bins_threshold = 1500
-        '''
-        ##############
-        ##############
-        ##############
-        
-        def adjust_bins(x, nbin, tolerance=1e-3, max_iterations=10, edge_bias=2.0):
-            """
-            Adaptive binning function with edge-biased bin movement.
 
-            Parameters:
-            - x: Input data array
-            - nbin: Initial number of bins
-            - tolerance: Tolerance for bin edge adjustments
-            - max_iterations: Maximum iterations for bin edge adjustment
-            - edge_bias: Controls the non-linear scaling of bin edge movements
-                         Higher values make edge bins move more aggressively
-                         Default is 2.0, meaning quadratic scaling
+def _calculate_edge_scaling(index, total_bins, edge_bias):
+    normalized_index = index / (total_bins - 1)
+    return (1 - abs(2 * normalized_index - 1)) ** edge_bias
 
-            Returns:
-            - Adjusted bin edges array
-            """
-            # Account for bin range
-            nbin += 1
-            npt = len(x)  # Total number of data points
-            n_per_bin = npt // nbin  # Calculate the number of events per bin
-            tmin, tmax = np.min(x), np.max(x)  # Min and max of input data
 
-            # Initialize bin edges 
-            bin_edges = np.linspace(tmin, tmax, num=nbin)
+def _adjust_t_bins(values, requested_num_t_bins, quiet=False):
+    nbin = max(MIN_T_BINS, int(requested_num_t_bins)) + 1
+    tmin = np.min(values)
+    tmax = np.max(values)
+    bin_edges = np.linspace(tmin, tmax, num=nbin)
+    counts, _ = np.histogram(values, bins=bin_edges)
 
-            # Calculate the number of events in each bin
-            counts, _ = np.histogram(x, bins=bin_edges)
+    iteration = 0
+    while np.any(counts < T_BIN_MIN_EVENTS) and iteration < T_BIN_ADJUST_MAX_ITERATIONS:
+        new_bin_edges = bin_edges.copy()
+        for i in range(1, len(bin_edges) - 1):
+            edge_scaling = _calculate_edge_scaling(i, len(bin_edges), T_BIN_EDGE_BIAS)
+            if counts[i - 1] < T_BIN_MIN_EVENTS:
+                new_bin_edges[i] += T_BIN_ADJUST_TOLERANCE * edge_scaling
+            elif counts[i] < T_BIN_MIN_EVENTS:
+                new_bin_edges[i] -= T_BIN_ADJUST_TOLERANCE * edge_scaling
 
-            def calculate_edge_scaling(index, total_bins):
-                """
-                Calculate a non-linear scaling factor for bin edge movement.
-                Bins closer to the edges move more aggressively.
+        bin_edges = new_bin_edges
+        counts, _ = np.histogram(values, bins=bin_edges)
+        iteration += 1
 
-                Parameters:
-                - index: Current bin edge index
-                - total_bins: Total number of bins
-                - edge_bias: Controls the non-linear scaling
+        if not quiet:
+            Misc.progressBar(iteration, T_BIN_ADJUST_MAX_ITERATIONS - 1, bar_length=25)
 
-                Returns:
-                - Scaling factor for bin edge movement
-                """
-                # Normalize index to range [0, 1]
-                normalized_index = index / (total_bins - 1)
+    if np.any(counts < T_BIN_MIN_EVENTS) and not quiet:
+        print(
+            "WARNING: Could not achieve minimum {} events in all bins after {} iterations.".format(
+                T_BIN_MIN_EVENTS, T_BIN_ADJUST_MAX_ITERATIONS
+            )
+        )
 
-                # Use non-linear scaling - quadratic or higher order based on edge_bias
-                # Closer to edges (0 or 1), scaling is more aggressive
-                scaling = (1 - abs(2 * normalized_index - 1)) ** edge_bias
+    return bin_edges, counts
 
-                return scaling
 
-            iteration = 0
-            while np.any(counts < bad_bins_threshold) and iteration < max_iterations:
-                # Create a copy of bin edges to modify
-                new_bin_edges = bin_edges.copy()
-
-                # Adjust bin edges
-                for i in range(1, len(bin_edges) - 1):
-                    # Calculate scaling factor for this bin edge
-                    edge_scaling = calculate_edge_scaling(i, len(bin_edges))
-
-                    if counts[i - 1] < bad_bins_threshold:
-                        # Increase bin edge with scaled movement
-                        new_bin_edges[i] += tolerance * edge_scaling
-                    elif counts[i] < bad_bins_threshold:
-                        # Decrease bin edge with scaled movement
-                        new_bin_edges[i] -= tolerance * edge_scaling
-
-                # Update bin edges
-                bin_edges = new_bin_edges
-
-                # Recalculate counts
-                counts, _ = np.histogram(x, bins=bin_edges)
-
-                iteration += 1
-
-                Misc.progressBar(iteration, max_iterations-1, bar_length=25)
-                
-                # Progress tracking (optional)
-                #print(f"Iteration {iteration}: Bin counts = {counts}")
-
-            # Handle case where minimum events cannot be achieved
-            if np.any(counts < bad_bins_threshold):
-                print(f"WARNING: Could not achieve minimum {bad_bins_threshold} events in all bins after {max_iterations} iterations.")
-                print("Returned bin edges may not meet the event count requirement.")
-
-            return bin_edges
-        
+def _find_t_bins(t_values, requested_num_t_bins, quiet=False):
+    if not quiet:
         print("\nFinding t bins...")
-        # Histogram takes the array data set and the bins as input
-        # The bins are determined by an iterative algorithm (see function above)
-        #print("H_t_BinTest: ", H_t_BinTest, type(H_t_BinTest))
-        try:
-            bin_edges = adjust_bins(H_t_BinTest, inpDict["NumtBins"], max_iterations=50000, edge_bias=2.0)
-            n, bins = np.histogram(H_t_BinTest, bin_edges)
-        except ValueError:
-            print("ERROR: Unavoidable empty bins. Tighten t-range or adjust number of t-bins...")
-            sys.exit(2)
 
-        # Check there are good t-bins
-        if np.size(n) == 0:
-            print("\n\nt-binning Failed: no valid bins avaliable!\nIncrease initial number of t-bins or change t-range...")
-            sys.exit(2)
+    try:
+        bin_edges = _adjust_t_bins(t_values, requested_num_t_bins, quiet=quiet)
+        bins, counts = bin_edges
+        counts, bins = np.histogram(t_values, bins)
+    except ValueError:
+        raise ValueError("Unavoidable empty bins. Tighten t-range or adjust number of t-bins.")
 
-        # Redefine number of t-bins
-        if len(n) != inpDict["NumtBins"]:
-            print("Number of t-bins changed from {} to: {} (threhold = {})".format(inpDict["NumtBins"], len(n), bad_bins_threshold))
-            inpDict["NumtBins"] = len(n)
-            if len(n) <= 1:
-                print("ERROR: Only {} t-bin achieved a minimum of {} events!\nTry decreasing minimum number of events per bin.".format(len(n), bad_bins_threshold))
-                sys.exit(2)
+    if np.size(counts) == 0:
+        raise ValueError("t-binning failed: no valid bins available.")
 
-        for i,val in enumerate(n):
-            print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
+    actual_num_t_bins = len(counts)
+    if actual_num_t_bins < MIN_T_BINS:
+        raise ValueError(
+            "Only {} t-bin achieved a minimum of {} events.".format(
+                actual_num_t_bins, T_BIN_MIN_EVENTS
+            )
+        )
 
-        bin_centers = (bins[:-1] + bins[1:]) / 2
-        
+    if not quiet:
+        for i, val in enumerate(counts):
+            print(
+                "Bin {} from {:.3f} to {:.3f} has {} events".format(
+                    i + 1, bins[i], bins[i + 1], val
+                )
+            )
         print("t_bins = ", bins)
-        
-        return bins
 
-    new_phi_bin = find_phibins(H_phi_BinTest)
-    new_t_bin = find_tbins(H_t_BinTest)
-    
-    # Write phibin_interval for lt_analysis scripts
-    lines = []
-    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
-        file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
-        # Loop over phi-bin edges
-        for i,phi in enumerate(new_phi_bin):
-            lines.append("\t{}".format(float(phi)))
-        file.writelines(lines)
+    return bins, counts
 
-    # Write t_bin_interval for lt_analysis scripts
-    lines = []
-    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, inpDict["Q2"].replace("p",""), inpDict["W"].replace("p","")), "w") as file:
-        file.write("{}\t{}\t{}\t{}\n".format(inpDict["Q2"].replace("p","."),inpDict["W"].replace("p","."),inpDict["NumtBins"],inpDict["NumPhiBins"]))
-        # Loop over t-bin edges
-        for i,t in enumerate(new_t_bin):
-            lines.append("\t{:.2f}".format(float(t)))
-        file.writelines(lines)
-            
+
+def propose_bins(histlist, inpDict, num_t_bins=None, num_phi_bins=None, quiet=False):
+    requested_t_bins = int(inpDict["NumtBins"] if num_t_bins is None else num_t_bins)
+    requested_phi_bins = int(inpDict["NumPhiBins"] if num_phi_bins is None else num_phi_bins)
+
+    t_values, phi_values = _collect_bin_samples(histlist, inpDict)
+    phi_bins, phi_counts = _find_phi_bins(phi_values, requested_phi_bins, quiet=quiet)
+    t_bins, t_counts = _find_t_bins(t_values, requested_t_bins, quiet=quiet)
+
+    return {
+        "t_bins": np.array(t_bins, dtype=float),
+        "phi_bins": np.array(phi_bins, dtype=float),
+        "requested_num_t_bins": requested_t_bins,
+        "requested_num_phi_bins": requested_phi_bins,
+        "actual_num_t_bins": len(t_bins) - 1,
+        "actual_num_phi_bins": len(phi_bins) - 1,
+        "t_counts": np.array(t_counts, dtype=int),
+        "phi_counts": np.array(phi_counts, dtype=int),
+    }
+
+
+def apply_bin_proposal(inpDict, proposal):
+    inpDict["NumtBins"] = int(proposal["actual_num_t_bins"])
+    inpDict["NumPhiBins"] = int(proposal["actual_num_phi_bins"])
+    inpDict["t_bins"] = np.array(proposal["t_bins"], dtype=float)
+    inpDict["phi_bins"] = np.array(proposal["phi_bins"], dtype=float)
+    return inpDict
+
+
+def write_bin_interval_files(inpDict, t_bins, phi_bins):
+    particle_type = inpDict["ParticleType"]
+    q2_token = inpDict["Q2"].replace("p", "")
+    w_token = inpDict["W"].replace("p", "")
+
+    phi_path = "{}/src/{}/phi_bin_interval_Q{}W{}".format(
+        LTANAPATH, particle_type, q2_token, w_token
+    )
+    t_path = "{}/src/{}/t_bin_interval_Q{}W{}".format(
+        LTANAPATH, particle_type, q2_token, w_token
+    )
+
+    phi_lines = ["\t{}".format(float(phi)) for phi in phi_bins]
+    with open(phi_path, "w") as file:
+        file.write(
+            "{}\t{}\t{}\t{}\n".format(
+                inpDict["Q2"].replace("p", "."),
+                inpDict["W"].replace("p", "."),
+                len(t_bins) - 1,
+                len(phi_bins) - 1,
+            )
+        )
+        file.writelines(phi_lines)
+
+    t_lines = ["\t{:.2f}".format(float(t_val)) for t_val in t_bins]
+    with open(t_path, "w") as file:
+        file.write(
+            "{}\t{}\t{}\t{}\n".format(
+                inpDict["Q2"].replace("p", "."),
+                inpDict["W"].replace("p", "."),
+                len(t_bins) - 1,
+                len(phi_bins) - 1,
+            )
+        )
+        file.writelines(t_lines)
+
+    return {"phi_path": phi_path, "t_path": t_path}
+
+
+def find_bins(histlist, inpDict):
+    proposal = propose_bins(histlist, inpDict, quiet=False)
+    apply_bin_proposal(inpDict, proposal)
+    write_bin_interval_files(inpDict, proposal["t_bins"], proposal["phi_bins"])
+    return proposal
+
+
 def check_bins(histlist, inpDict):
+    t_values, phi_values = _collect_bin_samples(histlist, inpDict)
+    t_bins = histlist[0]["t_bins"]
+    phi_bins = histlist[0]["phi_bins"]
 
-    ################################################################################################################################################
-    
-    ParticleType = inpDict["ParticleType"]
+    print("\nFinding phi bins...")
+    phi_counts, phi_edges = np.histogram(phi_values, phi_bins)
+    if len(phi_bins) - 1 != inpDict["NumPhiBins"]:
+        print(
+            "Number of phi-bins changed from {} to: {}".format(
+                inpDict["NumPhiBins"], len(phi_counts)
+            )
+        )
+        inpDict["NumPhiBins"] = len(phi_counts)
+    for i, val in enumerate(phi_counts):
+        print(
+            "Bin {} from {:.1f} to {:.1f} has {} events".format(
+                i + 1, phi_edges[i], phi_edges[i + 1], val
+            )
+        )
+    print("phi_bins = ", phi_edges)
 
-    tmin = inpDict["tmin"]
-    tmax = inpDict["tmax"]
-
-    # Create an empty list to store copied histograms
-    histlist_copy = []
-
-    # Check if the value of the dictionary is a TObject that can use .Clone()
-    for hist in histlist:
-        hist_copy = {}
-        for key, val in hist.items():
-            if hasattr(val, 'Clone') and callable(getattr(val, 'Clone')):
-                # Clone the TObject if it has the 'Clone' method
-                hist_copy[key] = val.Clone()
-            else:
-                # Otherwise, just copy the value
-                hist_copy[key] = val
-        # Append the copied histogram dictionary to the new list
-        histlist_copy.append(hist_copy)
-
-    t_bins = histlist_copy[0]["t_bins"]
-    phi_bins = histlist_copy[0]["phi_bins"]
-
-    ################################################################################################################################################
-    # Define root file trees of interest
-
-    # Initialize NumPy arrays
-    H_t_Right = np.array([])
-    H_t_Left = np.array([])
-    H_t_Center = np.array([])
-
-    H_phi_Right = np.array([])
-    H_phi_Left = np.array([])
-    H_phi_Center = np.array([])
-    
-    for i,hist in enumerate(histlist_copy):
-
-        # Unscale data to get raw number of events
-        hist["H_t_DATA"].Scale(1.0 / inpDict["normfac_data"])
-        hist["H_ph_q_DATA"].Scale(1.0 / inpDict["normfac_data"])
-        
-        t = flatten_hist(hist["H_t_DATA"])
-        phi_deg = [(phi)*(180 / math.pi) for phi in flatten_hist(hist["H_ph_q_DATA"])]
-        
-        if hist["phi_setting"] == 'Right':
-            H_t_Right = np.append(H_t_Right, t)
-            H_phi_Right = np.append(H_phi_Right, phi_deg)
-
-        elif hist["phi_setting"] == 'Left':
-            H_t_Left = np.append(H_t_Left, t)
-            H_phi_Left = np.append(H_phi_Left, phi_deg)
-
-        elif hist["phi_setting"] == 'Center':
-            H_t_Center = np.append(H_t_Center, t)
-            H_phi_Center = np.append(H_phi_Center, phi_deg)
-
-    ################################################################################################################################################
-
-    # Concatenate the H_t arrays for Right, Left, and Center
-    H_t_BinTest = np.concatenate((H_t_Right, H_t_Left, H_t_Center))
-
-    # Apply proper boundaries for t
-    # Find indices of min and max values
-    min_index = np.argmin(H_t_BinTest)
-    max_index = np.argmax(H_t_BinTest)
-    # Replace min and max values with tmin and tmax
-    H_t_BinTest[min_index] = tmin
-    H_t_BinTest[max_index] = tmax
-
-    # Concatenate the H_phi arrays for Right, Left, and Center
-    H_phi_BinTest = np.concatenate((H_phi_Right, H_phi_Left, H_phi_Center))
-    
-    def find_phibins(H_phi_BinTest):
-
-        print("\nFinding phi bins...")
-        n, bins = np.histogram(H_phi_BinTest, phi_bins)
-
-        # Redefine number of t-bins
-        if len(phi_bins) != inpDict["NumPhiBins"]:
-            print("Number of phi-bins changed from {} to: {}".format(inpDict["NumPhiBins"], len(n)))
-            inpDict["NumPhiBins"] = len(n)
-
-        for i,val in enumerate(n):
-            print("Bin {} from {:.1f} to {:.1f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
-        
-        print("phi_bins = ", bins)
-        
-    def find_tbins(H_t_BinTest):
-        
-        print("\nFinding t bins...")
-        n, bins = np.histogram(H_t_BinTest, t_bins)
-
-        # Redefine number of t-bins
-        if len(t_bins) != inpDict["NumtBins"]:
-            print("Number of t-bins changed from {} to: {}".format(inpDict["NumtBins"], len(n)))
-            inpDict["NumtBins"] = len(n)
-        
-        for i,val in enumerate(n):
-            print("Bin {} from {:.3f} to {:.3f} has {} events".format(i+1, bins[i], bins[i+1], n[i]))
-        
-        print("t_bins = ", bins)
-
-    new_phi_bin = find_phibins(H_phi_BinTest)
-    new_t_bin = find_tbins(H_t_BinTest)
+    print("\nFinding t bins...")
+    t_counts, t_edges = np.histogram(t_values, t_bins)
+    if len(t_bins) - 1 != inpDict["NumtBins"]:
+        print(
+            "Number of t-bins changed from {} to: {}".format(
+                inpDict["NumtBins"], len(t_counts)
+            )
+        )
+        inpDict["NumtBins"] = len(t_counts)
+    for i, val in enumerate(t_counts):
+        print(
+            "Bin {} from {:.3f} to {:.3f} has {} events".format(
+                i + 1, t_edges[i], t_edges[i + 1], val
+            )
+        )
+    print("t_bins = ", t_edges)

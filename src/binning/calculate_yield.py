@@ -59,7 +59,7 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import BG_STAT_SCALE2
+from background_config import resolve_bg_stat_scale2
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -493,6 +493,7 @@ def _process_yield_simc_tree(
 
 
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
+    emit_plots = inpDict.get("yield_emit_plots", True)
 
     processed_dict = {}
     support_hist_dict = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
@@ -1086,7 +1087,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale2"] = BG_STAT_SCALE2
+            inpDict["bg_stat_scale2"] = resolve_bg_stat_scale2(inpDict, phi_setting)
             # ----------------------------------------------------------------
 
             if inpDict["bg_stat_scale2"] > 0.0:
@@ -1177,6 +1178,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             support_hist_dict["theta_cm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)])
             support_hist_dict["mm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
             support_hist_dict["t_vs_tmin"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)])
+
+    if not emit_plots:
+        return processed_dict, support_hist_dict, _freeze_ave_event_cache(ave_event_cache), sub_event_cache
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
@@ -1590,6 +1594,7 @@ def find_yield_data(histlist, inpDict):
 ##################################################################################################################################################
 
 def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
+    emit_plots = inpDict.get("yield_emit_plots", True)
 
     processed_dict = {}
     support_hist_dict = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
@@ -1688,6 +1693,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
 
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
+    if not emit_plots:
+        return processed_dict, support_hist_dict, _freeze_ave_simc_event_cache(ave_simc_event_cache)
+
     total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove t-phi bin edges and NumEvts_bin_MM_SIMC_unweighted
 
     # Loop through bins in t_simc and identify events in specified bins

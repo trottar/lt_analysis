@@ -55,7 +55,7 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import BG_STAT_SCALE2
+from background_config import resolve_bg_stat_scale2
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -2367,7 +2367,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale2"] = BG_STAT_SCALE2
+    inpDict["bg_stat_scale2"] = resolve_bg_stat_scale2(inpDict, phi_setting)
 
     if inpDict["bg_stat_scale2"] > 0.0:
         background_fit2 = bg_fit(phi_setting,

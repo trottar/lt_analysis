@@ -184,6 +184,9 @@ ANATYPE=lt.ANATYPE
 OUTPATH=lt.OUTPATH
 CACHEPATH=lt.CACHEPATH
 
+inpDict["LTANAPATH"] = LTANAPATH
+inpDict["OUTPATH"] = OUTPATH
+
 TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
 
 foutroot = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
@@ -585,14 +588,23 @@ for hist in histlist:
 
 print("\n\n")
 sys.path.append("binning")
-from find_bins import find_bins, check_bins
+from find_bins import check_bins
+sys.path.append("utility")
+from bg_optimization import (
+    optimize_high_epsilon_configuration,
+    optimize_low_epsilon_configuration,
+    write_optimization_summary,
+)
 
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 	
 stage_start = perf_counter()
 if EPSSET == "low":
-    bin_vals = find_bins(histlist, inpDict)
+    histlist, bg_opt_summary = optimize_low_epsilon_configuration(histlist, inpDict)
+    bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.json".format(ParticleType, OutFilename, EPSSET)
+    write_optimization_summary(bg_opt_summary, bg_opt_path)
+    output_file_lst.append(bg_opt_path)
 
 try:
     output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
@@ -631,7 +643,15 @@ for hist in histlist:
     hist["phi_bins"] = phi_bins
 
 if EPSSET == "high":
-    check_bins(histlist, inpDict)
+    histlist, bg_opt_summary = optimize_high_epsilon_configuration(histlist, inpDict)
+    bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.json".format(ParticleType, OutFilename, EPSSET)
+    write_optimization_summary(bg_opt_summary, bg_opt_path)
+    output_file_lst.append(bg_opt_path)
+    for hist in histlist:
+        hist["t_bins"] = t_bins
+        hist["phi_bins"] = phi_bins
+
+check_bins(histlist, inpDict)
 
 record_stage_time("Step 4 bin finding/check total", stage_start)
 
@@ -855,6 +875,9 @@ cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_dat
 with open(old_param_file, 'r') as file:
     for line in file:
         cut_summary_lst += line
+
+if inpDict.get("bg_optimization_report"):
+    cut_summary_lst += "\n\n{}".format(inpDict["bg_optimization_report"])
         
 print("\n\n")
 print("="*25)

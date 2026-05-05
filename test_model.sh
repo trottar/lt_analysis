@@ -36,41 +36,22 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
+if [[ "$#" -ne 0 && "$#" -ne 9 ]]; then
+    echo "Usage: $0 [Q2 W TMIN TMAX ParticleType POL OutFilename formatted_date DEBUG]" >&2
+    exit 1
+fi
+
 # Define global variables for lt_analysis scripts
-Q2="4p4"
-W="2p74"
-TMIN=0.400
-TMAX=0.750
-# Combined KaonLT 4p4+3p0 (2p74+2p32)
-#Q2="4p3"
-#W="2p70"
-#TMIN=0.400
-#TMAX=0.750
-ParticleType="kaon"
-#
-#Q2="1p6"
-#W="2p22"
-#TMIN=0.001
-#TMAX=0.300
-#
-#Q2="2p4"
-#W="2p22"
-#TMIN=0.100
-#TMAX=0.600
-# Combined Fpi-2
-#Q2="2p0"
-#W="2p22"
-#TMIN=0.001
-#TMAX=0.600
-#ParticleType="pion"
-
-POL="+1" # Positive polarity
-
-DEBUG="False" # Flag for no plot splash
-#DEBUG="True" # Flag for plot splash
+Q2="${1:-4p4}"
+W="${2:-2p74}"
+TMIN="${3:-0.400}"
+TMAX="${4:-0.750}"
+ParticleType="${5:-kaon}"
+POL="${6:-+1}"
+DEBUG="${9:-False}"
 
 KIN="Q${Q2}W${W}"
-OutFilename="Testing_${KIN}"
+OutFilename="${7:-Testing_${KIN}}"
 # - `date` is a command that prints or sets the system date and time.
 # - `+%H` extracts the hour in 24-hour format.
 # - `+%M` extracts the minute.
@@ -78,7 +59,7 @@ OutFilename="Testing_${KIN}"
 # - `+%Y` extracts the year.
 # - `+%B` extracts the full month name.
 # - `%d` extracts the day of the month.
-formatted_date=$(date +%Y%B%d_H%HM%MS%S) 
+formatted_date="${8:-$(date +%Y%B%d_H%HM%MS%S)}"
 
 echo
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
