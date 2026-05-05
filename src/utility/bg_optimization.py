@@ -240,7 +240,7 @@ def _log_scale_result(stage_name, epsset, phi_setting, result):
     )
 
 
-def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc_yield_dict, simc_support, stage_name, bg_scales):
+def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc_yield_dict, simc_support, data_base_cache, stage_name, bg_scales):
     results = []
     total = len(bg_scales)
     running_best = None
@@ -264,6 +264,7 @@ def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc
             phi_bins,
             simc_yield_dict,
             simc_support,
+            data_base_cache,
         )
         _log_scale_result(stage_name, inpDict["EPSSET"], phi_setting, result)
         if _is_better_result(result, running_best):
@@ -303,12 +304,13 @@ def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc
     return results
 
 
-def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support):
+def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, phi_bins, simc_yield_dict, simc_support, data_base_cache):
     candidate_inp = dict(inpDict)
     candidate_inp["NumtBins"] = len(t_bins) - 1
     candidate_inp["NumPhiBins"] = len(phi_bins) - 1
     candidate_inp["yield_emit_plots"] = False
     candidate_inp["suppress_bg_opt_warnings"] = True
+    candidate_inp["bg_opt_use_data_cache"] = True
     candidate_inp["bg_stat_scale2"] = float(bg_scale)
     candidate_inp["bg_stat_scale2_by_setting"] = {
         get_bg_scale_setting_key(candidate_inp["EPSSET"], phi_setting): float(bg_scale)
@@ -320,6 +322,7 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, p
 
     candidate_hist = _prepare_candidate_hist(base_hist, t_bins, phi_bins)
     candidate_hist["_xsect_support_simc"] = simc_support
+    candidate_hist["_bg_opt_data_base_cache"] = data_base_cache
 
     yield_dict = {}
     yield_dict.update(find_yield_data([candidate_hist], candidate_inp))
@@ -488,7 +491,11 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
             len(phi_bins) - 1,
         )
     )
+    sys.path.append("binning")
+    from calculate_yield import prepare_bg_opt_data_base_cache
+
     simc_yield_dict, simc_support = _build_simc_reference(base_hist, inpDict, t_bins, phi_bins)
+    data_base_cache = prepare_bg_opt_data_base_cache(base_hist, inpDict, t_bins, phi_bins)
     coarse_candidates = list(get_bg_scale_coarse_candidates())
     _log(
         "Coarse BG_STAT_SCALE2 grid for {} {}: {}".format(
@@ -505,6 +512,7 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         phi_bins,
         simc_yield_dict,
         simc_support,
+        data_base_cache,
         "Coarse",
         coarse_candidates,
     )
@@ -541,6 +549,7 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         phi_bins,
         simc_yield_dict,
         simc_support,
+        data_base_cache,
         "Refined",
         refined_candidates,
     )

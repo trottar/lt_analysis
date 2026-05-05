@@ -59,7 +59,7 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import resolve_bg_stat_scale2
+from background_config import get_bg_scale_setting_key, resolve_bg_stat_scale2
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -84,6 +84,31 @@ def _clone_hist_for_plot(hist):
     if hasattr(cloned_hist, "SetDirectory"):
         cloned_hist.SetDirectory(0)
     return cloned_hist
+
+
+def _clone_processed_entry(entry):
+    cloned = {}
+    for key, val in entry.items():
+        if is_hist(val):
+            cloned[key] = _clone_hist_for_plot(val)
+        else:
+            cloned[key] = val
+    return cloned
+
+
+def _clone_processed_dict(processed_dict):
+    return {
+        key: _clone_processed_entry(entry)
+        for key, entry in processed_dict.items()
+    }
+
+
+def _make_bg_opt_bin_cache_key(t_bins, phi_bins, shift_mode):
+    return (
+        tuple(round(float(val), 8) for val in np.asarray(t_bins, dtype=float)),
+        tuple(round(float(val), 8) for val in np.asarray(phi_bins, dtype=float)),
+        str(shift_mode),
+    )
 
 
 def _fill_t_vs_tmin_hist(hist, particle_type, pol, w, q2, minus_t, weight=None):
@@ -1190,7 +1215,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1): 
             
-            processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = {
+            processed_entry = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_MM_DUMMY_NORM" : dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
@@ -1201,6 +1226,18 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 "bg_fit1_frac_err" : bg_fit1_frac_err[j][k],        
                 "bg_fit2_frac_err" : bg_fit2_frac_err[j][k],
             }
+            if not emit_plots:
+                processed_entry.update({
+                    "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)],
+                    "H_W_DATA" : hist_bin_dict["H_W_DATA_{}_{}".format(j, k)],
+                    "H_Q2_vs_W_DATA" : hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)],
+                    "H_theta_cm_DATA" : hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)],
+                    "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
+                    "H_MM_pisub_DATA" : hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
+                    "H_MM_nosub_DATA" : hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+                    "H_t_vs_tmin_DATA" : hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)],
+                })
+            processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = processed_entry
 
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
@@ -1348,9 +1385,151 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             
     return processed_dict, support_hist_dict, _freeze_ave_event_cache(ave_event_cache), sub_event_cache
 
-def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
 
-    processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
+    cache_key = _make_bg_opt_bin_cache_key(t_bins, phi_bins, inpDict.get("shift_mode", "raw"))
+    cache_store = hist.setdefault("_bg_opt_data_base_cache_store", {})
+    if cache_key in cache_store:
+        return cache_store[cache_key]
+
+    base_inp = dict(inpDict)
+    base_inp["yield_emit_plots"] = False
+    base_inp["suppress_bg_opt_warnings"] = True
+    base_inp["bg_stat_scale2"] = 0.0
+    base_inp["bg_stat_scale2_by_setting"] = {
+        get_bg_scale_setting_key(base_inp["EPSSET"], hist["phi_setting"]): 0.0
+    }
+
+    processed_dict, _, ave_event_cache, sub_event_cache = process_hist_data(
+        hist["InFile_DATA"],
+        hist["InFile_DUMMY"],
+        hist["normfac_data"],
+        hist["normfac_dummy"],
+        t_bins,
+        phi_bins,
+        hist["nWindows"],
+        hist["phi_setting"],
+        base_inp,
+    )
+
+    base_cache = {
+        "processed_dict": _clone_processed_dict(processed_dict),
+        "ave_event_cache": ave_event_cache,
+        "sub_event_cache": sub_event_cache,
+    }
+    cache_store[cache_key] = base_cache
+    return base_cache
+
+
+def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_setting, normfac_data, normfac_dummy, nWindows, inpDict):
+    processed_dict = _clone_processed_dict(data_base_cache["processed_dict"])
+    ave_event_cache = data_base_cache["ave_event_cache"]
+    sub_event_cache = data_base_cache["sub_event_cache"]
+    support_hist_dict = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
+
+    ParticleType = inpDict["ParticleType"]
+    EPSSET = inpDict["EPSSET"]
+    POL = inpDict["POL"]
+    mm_min = float(inpDict["mm_min"])
+    mm_max = float(inpDict["mm_max"])
+    event_threshold = 1
+
+    from background_fit import bg_fit
+
+    bg_scale2 = resolve_bg_stat_scale2(inpDict, phi_setting)
+    for j in range(len(t_bins) - 1):
+        for k in range(len(phi_bins) - 1):
+            entry = processed_dict["t_bin{}phi_bin{}".format(j + 1, k + 1)]
+
+            if bg_scale2 > 0.0:
+                hist_bin_dict = {
+                    "H_Q2_DATA_{}_{}".format(j, k): entry["H_Q2_DATA"],
+                    "H_W_DATA_{}_{}".format(j, k): entry["H_W_DATA"],
+                    "H_Q2_vs_W_DATA_{}_{}".format(j, k): entry["H_Q2_vs_W_DATA"],
+                    "H_theta_cm_DATA_{}_{}".format(j, k): entry["H_theta_cm_DATA"],
+                    "H_MM_DATA_{}_{}".format(j, k): entry["H_MM_DATA"],
+                    "H_t_DATA_{}_{}".format(j, k): entry["H_t_DATA"],
+                    "H_t_vs_tmin_DATA_{}_{}".format(j, k): entry["H_t_vs_tmin_DATA"],
+                }
+
+                fit_result = bg_fit(
+                    phi_setting,
+                    inpDict,
+                    entry["H_MM_fit1sub_DATA"],
+                    entry["H_MM_DATA"],
+                    scaling=bg_scale2,
+                    model_key=f"cheb2_{phi_setting}_{EPSSET}e",
+                    fit_name="Fit 2",
+                )
+
+                mm_stage2_input = _clone_hist_for_plot(entry["H_MM_DATA"])
+                _subtract_yield_mm_background_for_bin(
+                    hist_bin_dict,
+                    j,
+                    k,
+                    mm_stage2_input,
+                    fit_result[0],
+                    ave_event_cache,
+                    sub_event_cache,
+                    normfac_data,
+                    normfac_dummy,
+                    nWindows,
+                    entry["scale_factor"],
+                    ParticleType,
+                    POL,
+                    residual_weights=None,
+                )
+                entry["H_MM_DATA"].Add(fit_result[0], -1)
+
+                try:
+                    dN_bg_norm = float(fit_result[4])
+                    hmm = entry["H_MM_DATA"]
+                    ax = hmm.GetXaxis()
+                    ib_lo = max(1, ax.FindBin(mm_min))
+                    ib_hi = min(ax.GetNbins(), ax.FindBin(mm_max))
+                    N_sig_norm = float(hmm.Integral(ib_lo, ib_hi))
+                    if N_sig_norm < 0.0:
+                        N_sig_norm = 0.0
+                    if N_sig_norm > 0.0:
+                        if (not math.isfinite(dN_bg_norm)) or (dN_bg_norm < 0.0):
+                            entry["bg_fit2_frac_err"] = 1.0
+                        else:
+                            entry["bg_fit2_frac_err"] = abs(dN_bg_norm) / N_sig_norm
+                    else:
+                        entry["bg_fit2_frac_err"] = 0.0
+                except Exception:
+                    entry["bg_fit2_frac_err"] = 1.0
+
+                prune_hist(entry["H_MM_fit1sub_DATA"], event_threshold)
+                prune_hist(entry["H_MM_pisub_DATA"], event_threshold)
+                prune_hist(entry["H_MM_nosub_DATA"], event_threshold)
+                prune_hist(entry["H_MM_DATA"], event_threshold)
+                prune_hist(entry["H_t_DATA"], event_threshold)
+
+            support_hist_dict["Q2"][j][k] = _clone_hist_for_plot(entry["H_Q2_DATA"])
+            support_hist_dict["W"][j][k] = _clone_hist_for_plot(entry["H_W_DATA"])
+            support_hist_dict["q2_w"][j][k] = _clone_hist_for_plot(entry["H_Q2_vs_W_DATA"])
+            support_hist_dict["theta_cm"][j][k] = _clone_hist_for_plot(entry["H_theta_cm_DATA"])
+            support_hist_dict["mm"][j][k] = _clone_hist_for_plot(entry["H_MM_DATA"])
+            support_hist_dict["t_vs_tmin"][j][k] = _clone_hist_for_plot(entry["H_t_vs_tmin_DATA"])
+
+    return processed_dict, support_hist_dict, ave_event_cache, sub_event_cache
+
+def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, data_base_cache=None):
+
+    if data_base_cache is None:
+        processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    else:
+        processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = _process_hist_data_from_base_cache(
+            data_base_cache,
+            t_bins,
+            phi_bins,
+            phi_setting,
+            normfac_data,
+            normfac_dummy,
+            nWindows,
+            inpDict,
+        )
     
     binned_dict = {}
 
@@ -1453,9 +1632,25 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     dummy_charge_err = inpDict["dummy_charge_err_{}".format(hist["phi_setting"].lower())]
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
+
+    data_base_cache = None
+    if inpDict.get("bg_opt_use_data_cache"):
+        data_base_cache = hist.get("_bg_opt_data_base_cache")
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
-    binned_dict, ave_event_cache, sub_event_cache = bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+    binned_dict, ave_event_cache, sub_event_cache = bin_data(
+        kin_type,
+        tree_data,
+        tree_dummy,
+        normfac_data,
+        normfac_dummy,
+        t_bins,
+        phi_bins,
+        nWindows,
+        phi_setting,
+        inpDict,
+        data_base_cache=data_base_cache,
+    )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
     hist["_xsect_support_data"] = binned_dict[kin_type]["support_hist_dict"]
