@@ -246,6 +246,7 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale, t_bins, p
     candidate_inp["NumtBins"] = len(t_bins) - 1
     candidate_inp["NumPhiBins"] = len(phi_bins) - 1
     candidate_inp["yield_emit_plots"] = False
+    candidate_inp["suppress_bg_opt_warnings"] = True
     candidate_inp["bg_stat_scale2"] = float(bg_scale)
     candidate_inp["bg_stat_scale2_by_setting"] = {
         get_bg_scale_setting_key(candidate_inp["EPSSET"], phi_setting): float(bg_scale)
@@ -284,6 +285,7 @@ def _build_simc_reference(base_hist, inpDict, t_bins, phi_bins):
     candidate_inp["NumtBins"] = len(t_bins) - 1
     candidate_inp["NumPhiBins"] = len(phi_bins) - 1
     candidate_inp["yield_emit_plots"] = False
+    candidate_inp["suppress_bg_opt_warnings"] = True
 
     sys.path.append("binning")
     from calculate_yield import find_yield_simc

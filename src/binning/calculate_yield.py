@@ -494,6 +494,7 @@ def _process_yield_simc_tree(
 
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
     emit_plots = inpDict.get("yield_emit_plots", True)
+    suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
 
     processed_dict = {}
     support_hist_dict = _init_hist_group_matrices(("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t_vs_tmin"), len(t_bins) - 1, len(phi_bins) - 1)
@@ -930,6 +931,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         kaon_amp,
                         pion_background_amp,
                         "pion subtraction (t-bin {}, phi-bin {})".format(j, k),
+                        quiet=suppress_scale_warnings,
                     )
 
                     # Check that pion background is not over subtracting within kaon MM range
@@ -944,7 +946,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     )
 
                     if pion_range_check > kaon_range_check:
-                        print("\n\nWARNING: Pion background larger than kaon peak in t-bin {}, phi-bin {}. Setting scaling factor to zero....".format(j, k))
+                        if not suppress_scale_warnings:
+                            print("\n\nWARNING: Pion background larger than kaon peak in t-bin {}, phi-bin {}. Setting scaling factor to zero....".format(j, k))
                         scale_factor = 0.0
 
                     ##############
@@ -1179,9 +1182,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             support_hist_dict["mm"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
             support_hist_dict["t_vs_tmin"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)])
 
-    if not emit_plots:
-        return processed_dict, support_hist_dict, _freeze_ave_event_cache(ave_event_cache), sub_event_cache
-
     # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
     total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)]))-1 # '-1' to remove t-phi bin edges
@@ -1205,6 +1205,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             # Sort dictionary keys alphabetically
             processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)] = {key : processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)][key] \
                                                                   for key in sorted(processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)].keys())}
+
+            if not emit_plots:
+                continue
             
             # Include Stat box
             ROOT.gStyle.SetOptStat(1)

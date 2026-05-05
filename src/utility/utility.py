@@ -1303,34 +1303,37 @@ def integrate_hist_range(hist: ROOT.TH1F, x_min: float, x_max: float) -> float:
 
 ##################################################################################################################################################
 
-def compute_positive_scale_factor(signal_amp: float, background_amp: float, context: str = "background subtraction") -> float:
+def compute_positive_scale_factor(signal_amp: float, background_amp: float, context: str = "background subtraction", quiet: bool = False) -> float:
     """
     Returns a positive background scale factor or zero when the
     normalization amplitudes would produce an unphysical sign flip.
     """
     if not (math.isfinite(signal_amp) and math.isfinite(background_amp)):
-        print(
-            "\n\nWARNING: Invalid {} amplitudes "
-            "(signal={:.3e}, background={:.3e}). Setting scaling factor to zero....".format(
-                context, signal_amp, background_amp
+        if not quiet:
+            print(
+                "\n\nWARNING: Invalid {} amplitudes "
+                "(signal={:.3e}, background={:.3e}). Setting scaling factor to zero....".format(
+                    context, signal_amp, background_amp
+                )
             )
-        )
         return 0.0
 
     if signal_amp <= 0.0:
-        print(
-            "\n\nWARNING: Non-positive {} signal amplitude "
-            "({:.3e}). Setting scaling factor to zero....".format(context, signal_amp)
-        )
+        if not quiet:
+            print(
+                "\n\nWARNING: Non-positive {} signal amplitude "
+                "({:.3e}). Setting scaling factor to zero....".format(context, signal_amp)
+            )
         return 0.0
 
     if background_amp <= 0.0:
-        print(
-            "\n\nWARNING: Non-positive {} background amplitude "
-            "(signal={:.3e}, background={:.3e}). Setting scaling factor to zero....".format(
-                context, signal_amp, background_amp
+        if not quiet:
+            print(
+                "\n\nWARNING: Non-positive {} background amplitude "
+                "(signal={:.3e}, background={:.3e}). Setting scaling factor to zero....".format(
+                    context, signal_amp, background_amp
+                )
             )
-        )
         return 0.0
 
     return signal_amp / background_amp
