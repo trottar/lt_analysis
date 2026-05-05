@@ -59,6 +59,7 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
+from background_config import BG_STAT_SCALE2
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -1085,17 +1086,17 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale"] = 0.5
+            inpDict["bg_stat_scale2"] = BG_STAT_SCALE2
             # ----------------------------------------------------------------
 
-            if inpDict.get("bg_stat_scale2", 0.25) > 0.0:
+            if inpDict["bg_stat_scale2"] > 0.0:
                 # Fit background and subtract
                 fitDict["background_fit2_{}_{}".format(j, k)] = bg_fit(
                     phi_setting,
                     inpDict,
                     hist_bin_dict[f"H_MM_fit1sub_DATA_{j}_{k}"],   # wide / no-MM-cut
                     hist_bin_dict[f"H_MM_DATA_{j}_{k}"],          # cut-window axis 
-                    scaling=inpDict.get("bg_stat_scale2", 0.25),
+                    scaling=inpDict["bg_stat_scale2"],
                     model_key=f"cheb2_{phi_setting}_{EPSSET}e",
                     fit_name="Fit 2"
                 )
@@ -1281,7 +1282,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         mm_fit1sub_plot.SetFillStyle(3001)  # Set fill style to dots
                         mm_fit1sub_plot.SetFillColor(kBlack)  # Set fill color to black
                         mm_fit1sub_plot.Draw("hist same")
-                        if inpDict.get("bg_stat_scale2", 0.5) > 0.0:
+                        if inpDict["bg_stat_scale2"] > 0.0:
                             fit_plot = _clone_hist_for_plot(fitDict["background_fit2_{}_{}".format(j, k)][1])
                             fit_plot.SetLineColor(3)
                             fit_plot.Draw("same")
@@ -1428,7 +1429,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
     }
     if inpDict["bg_stat_scale1"] > 0.0:                 
         binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
-    if inpDict.get("bg_stat_scale2", 0.5) > 0.0:
+    if inpDict["bg_stat_scale2"] > 0.0:
         binned_dict[kin_type]["bg_fit2_frac_err"] = arr_bg_fit2_frac_err 
     binned_dict[kin_type]["support_hist_dict"] = support_hist_dict
 
