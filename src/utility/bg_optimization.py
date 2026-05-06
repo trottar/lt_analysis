@@ -476,7 +476,9 @@ def _finalize_phi_results(results, inpDict):
                 tied[0]["test_model_chi2"] = tiebreak_chi2
                 finalists = tied
 
-    best_result = valid_results[0]
+    best_result = dict(valid_results[0])
+    if "metrics" in best_result and isinstance(best_result["metrics"], dict):
+        best_result["metrics"] = dict(best_result["metrics"])
     best_result["results"] = results
     return best_result
 
@@ -611,18 +613,33 @@ def _aggregate_bin_candidate_result(phi_results):
     return metrics
 
 
-def _serialize_result(result):
+def _serialize_result(result, seen=None):
+    if seen is None:
+        seen = set()
+
+    result_id = id(result)
+    if isinstance(result, (dict, list, tuple)) and result_id in seen:
+        return "<cycle>"
+
     if isinstance(result, dict):
+        seen.add(result_id)
         serializable = {}
         for key, val in result.items():
             if key == "hist":
                 continue
-            serializable[key] = _serialize_result(val)
+            serializable[key] = _serialize_result(val, seen)
+        seen.discard(result_id)
         return serializable
     if isinstance(result, list):
-        return [_serialize_result(entry) for entry in result]
+        seen.add(result_id)
+        serializable = [_serialize_result(entry, seen) for entry in result]
+        seen.discard(result_id)
+        return serializable
     if isinstance(result, tuple):
-        return [_serialize_result(entry) for entry in result]
+        seen.add(result_id)
+        serializable = [_serialize_result(entry, seen) for entry in result]
+        seen.discard(result_id)
+        return serializable
     if isinstance(result, np.ndarray):
         return result.tolist()
     if isinstance(result, np.generic):
