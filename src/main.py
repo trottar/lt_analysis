@@ -609,7 +609,11 @@ if EPSSET == "low":
     output_file_lst.append(bg_opt_path)
     output_file_lst.append(bg_opt_csv_path)
     try:
-        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path)
+        bg_opt_pdf_path = os.path.splitext(bg_opt_csv_path)[0] + ".pdf"
+        print("[BG OPT] Writing diagnostics PDF {}".format(bg_opt_pdf_path))
+        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path, bg_opt_pdf_path)
+        if not os.path.exists(bg_opt_pdf_path):
+            raise FileNotFoundError("Expected diagnostics PDF was not created: {}".format(bg_opt_pdf_path))
         if DEBUG:
             show_pdf_with_evince(bg_opt_pdf_path)
         output_file_lst.append(bg_opt_pdf_path)
@@ -661,7 +665,11 @@ if EPSSET == "high":
     output_file_lst.append(bg_opt_path)
     output_file_lst.append(bg_opt_csv_path)
     try:
-        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path)
+        bg_opt_pdf_path = os.path.splitext(bg_opt_csv_path)[0] + ".pdf"
+        print("[BG OPT] Writing diagnostics PDF {}".format(bg_opt_pdf_path))
+        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path, bg_opt_pdf_path)
+        if not os.path.exists(bg_opt_pdf_path):
+            raise FileNotFoundError("Expected diagnostics PDF was not created: {}".format(bg_opt_pdf_path))
         if DEBUG:
             show_pdf_with_evince(bg_opt_pdf_path)
         output_file_lst.append(bg_opt_pdf_path)
@@ -1036,6 +1044,27 @@ for f in os.listdir(OUTPATH):
         support_npz = os.path.join(OUTPATH, f)
         if support_npz not in output_file_lst:
             output_file_lst.append(support_npz)
+
+for f in list(output_file_lst):
+    if OUTPATH not in f or not f.endswith(".csv") or "_bg_opt_" not in os.path.basename(f):
+        continue
+
+    bg_opt_pdf_path = os.path.splitext(f)[0] + ".pdf"
+    if bg_opt_pdf_path not in output_file_lst:
+        output_file_lst.append(bg_opt_pdf_path)
+
+    if not os.path.exists(f):
+        print("\nWARNING: BG optimization CSV not found, skipping diagnostics PDF regeneration: {}".format(f))
+        continue
+
+    if os.path.exists(bg_opt_pdf_path):
+        continue
+
+    try:
+        print("\n[BG OPT] Regenerating missing diagnostics PDF {} from {}".format(bg_opt_pdf_path, f))
+        plot_bg_optimization_diagnostics(f, bg_opt_pdf_path)
+    except Exception as exc:
+        print("\nWARNING: Failed to regenerate BG optimization diagnostics PDF {}: {}".format(bg_opt_pdf_path, exc))
 
 for f in output_file_lst:
     if OUTPATH in f:
