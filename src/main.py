@@ -196,9 +196,6 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
 
-# Append csv of efficiencies
-output_file_lst.append(OUTPATH + "/" + f"table_{ParticleType}_{kinematics}" + ".csv")
-
 phisetlist = ["Center", "Left", "Right"]
 #phisetlist = ["Center"]
 
@@ -1026,6 +1023,9 @@ for f in os.listdir(OUTPATH):
 
 for f in output_file_lst:
     if OUTPATH in f:
+        if not os.path.exists(f):
+            print("\nWARNING: Output artifact not found, skipping copy: {}".format(f))
+            continue
         if ".pdf" in f:
             create_dir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
@@ -1057,6 +1057,10 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
+        src_path = LTANAPATH+"/src/"+f
+        if not os.path.exists(src_path):
+            print("\nWARNING: Source artifact not found, skipping copy: {}".format(src_path))
+            continue
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
         if len(f_arr) > 1:
@@ -1064,16 +1068,20 @@ for f in output_file_lst:
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-                    shutil.copy(LTANAPATH+"/src/"+f, f_new)
+                    print("\nCopying {} to {}".format(src_path,f_new))
+                    shutil.copy(src_path, f_new)
         else:
             f_new = new_dir+"/"+f_tmp
-            print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-            shutil.copy(LTANAPATH+"/src/"+f, f_new)
+            print("\nCopying {} to {}".format(src_path,f_new))
+            shutil.copy(src_path, f_new)
     else:
+        src_path = LTANAPATH+"/src/"+f
+        if not os.path.exists(src_path):
+            print("\nWARNING: Source artifact not found, skipping copy: {}".format(src_path))
+            continue
         f_new = new_dir
-        print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
-        shutil.copy(LTANAPATH+"/src/"+f, f_new)
+        print("\nCopying {} to {}".format(src_path,f_new))
+        shutil.copy(src_path, f_new)
     
 # Need summary for both high and low eps.
 # All others should be saved once both are complete

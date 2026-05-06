@@ -111,9 +111,6 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
 
-# Append csv of efficiencies
-output_file_lst.append(OUTPATH + "/" + f"table_{ParticleType}_{kinematics}" + ".csv")
-
 ################################################################################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
