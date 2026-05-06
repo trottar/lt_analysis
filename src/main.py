@@ -593,6 +593,8 @@ from bg_optimization import (
     write_optimization_csv,
     write_optimization_summary,
 )
+sys.path.append("plotting")
+from bg_opt_diagnostics import plot_bg_optimization_diagnostics
 
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
@@ -606,6 +608,13 @@ if EPSSET == "low":
     write_optimization_csv(bg_opt_summary, inpDict, bg_opt_csv_path)
     output_file_lst.append(bg_opt_path)
     output_file_lst.append(bg_opt_csv_path)
+    try:
+        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path)
+        if DEBUG:
+            show_pdf_with_evince(bg_opt_pdf_path)
+        output_file_lst.append(bg_opt_pdf_path)
+    except Exception as exc:
+        print("WARNING: Failed to generate BG optimization diagnostics PDF {}: {}".format(bg_opt_csv_path, exc))
 
 try:
     output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
@@ -651,6 +660,13 @@ if EPSSET == "high":
     write_optimization_csv(bg_opt_summary, inpDict, bg_opt_csv_path)
     output_file_lst.append(bg_opt_path)
     output_file_lst.append(bg_opt_csv_path)
+    try:
+        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path)
+        if DEBUG:
+            show_pdf_with_evince(bg_opt_pdf_path)
+        output_file_lst.append(bg_opt_pdf_path)
+    except Exception as exc:
+        print("WARNING: Failed to generate BG optimization diagnostics PDF {}: {}".format(bg_opt_csv_path, exc))
     for hist in histlist:
         hist["t_bins"] = t_bins
         hist["phi_bins"] = phi_bins
