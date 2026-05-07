@@ -82,6 +82,7 @@ def _load_bg_opt_csv(csv_path):
         "kinematic_score",
         "valid_ratio_bins",
         "kinematic_points",
+        "selection_score",
         "test_model_chi2",
     ]
     df = _to_numeric_columns(df, numeric_columns)
@@ -94,7 +95,9 @@ def _load_bg_opt_csv(csv_path):
         & (df["stage"].isin(["coarse", "refined"]))
     ].copy()
 
-    if not aggregate.empty:
+    if not aggregate.empty and "selection_score" in aggregate.columns and aggregate["selection_score"].notna().any():
+        aggregate["composite_objective"] = aggregate["selection_score"]
+    elif not aggregate.empty:
         aggregate["composite_objective"] = (
             _minmax_lower(aggregate["ratio_fail_count"])
             + _minmax_lower(aggregate["ratio_rms"])
@@ -230,11 +233,13 @@ def _add_top_candidates_page(pdf, aggregate, selected_bin):
         ["composite_objective", "ratio_fail_count", "ratio_rms", "ratio_mean_dev", "kinematic_score"]
     ).head(12)
 
+    score_label = "selection score" if "selection_score" in aggregate.columns and aggregate["selection_score"].notna().any() else "composite objective"
+
     lines = [
-        "Top aggregate bin candidates by composite objective",
+        "Top aggregate bin candidates by {}".format(score_label),
         "",
-        "rank  sel  bins        fail   mean_dev   rms      kin      valid   objective",
-        "-" * 84,
+        "rank  sel  bins        fail   mean_dev   rms      kin      valid   score",
+        "-" * 80,
     ]
     for rank, (_, row) in enumerate(top.iterrows(), start=1):
         marker = "*"
@@ -244,17 +249,17 @@ def _add_top_candidates_page(pdf, aggregate, selected_bin):
                 and int(row["requested_num_phi_bins"]) == selected_bin[1]
             ) else " "
         lines.append(
-            "{:>4}   {}   {:<10} {:>4}   {:>8}   {:>7}  {:>7}  {:>5}   {:>8}".format(
-                rank,
-                marker,
-                row["bin_label"],
+                "{:>4}   {}   {:<10} {:>4}   {:>8}   {:>7}  {:>7}  {:>5}   {:>8}".format(
+                    rank,
+                    marker,
+                    row["bin_label"],
                 int(row["ratio_fail_count"]),
                 _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                 _format_metric(row["ratio_rms"], "{:.4f}"),
                 _format_metric(row["kinematic_score"], "{:.4f}"),
                 int(row["valid_ratio_bins"]),
-                _format_metric(row["composite_objective"], "{:.4f}"),
-            )
+                    _format_metric(row["composite_objective"], "{:.4f}"),
+                )
         )
 
     _add_text_page(pdf, "Aggregate Candidate Ranking", lines)
@@ -510,6 +515,7 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
         return ["No optimizer data found in {}".format(csv_path.name)]
 
     mode = str(df["mode"].dropna().iloc[0]) if "mode" in df and not df["mode"].dropna().empty else "unknown"
+    selection_mode = str(df["selection_mode"].dropna().iloc[0]) if "selection_mode" in df and not df["selection_mode"].dropna().empty else "unknown"
     epsset = str(df["epsset"].dropna().iloc[0]) if "epsset" in df and not df["epsset"].dropna().empty else "unknown"
     particle = str(df["particle"].dropna().iloc[0]) if "particle" in df and not df["particle"].dropna().empty else "unknown"
     q2 = str(df["q2"].dropna().iloc[0]) if "q2" in df and not df["q2"].dropna().empty else "unknown"
@@ -521,6 +527,7 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
         "",
         "particle:   {}".format(particle),
         "mode:       {}".format(mode),
+        "selection:  {}".format(selection_mode),
         "epsset:     {}".format(epsset),
         "Q2 / W:     {} / {}".format(q2, w),
         "outfile:    {}".format(outfilename),
@@ -543,19 +550,20 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
             "  aggregate rms:        {}".format(_format_metric(selected_row["ratio_rms"], "{:.4f}")),
             "  aggregate kin score:  {}".format(_format_metric(selected_row["kinematic_score"], "{:.4f}")),
             "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
-            "  composite objective:  {}".format(_format_metric(selected_row.get("composite_objective", float("nan")), "{:.4f}")),
+            "  selection score:      {}".format(_format_metric(selected_row.get("composite_objective", float("nan")), "{:.4f}")),
             "",
             "Selected BG_STAT_SCALE2 by phi:",
         ])
         for _, row in selected_phi_rows.sort_values("phi_setting").iterrows():
             lines.append(
-                "  {:<8} scale={} fail={} mean_dev={} rms={} kin={}".format(
+                "  {:<8} scale={} fail={} mean_dev={} rms={} kin={} score={}".format(
                     row["phi_setting"],
                     _format_metric(row["bg_stat_scale2"], "{:.3f}"),
                     int(row["ratio_fail_count"]),
                     _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                     _format_metric(row["ratio_rms"], "{:.4f}"),
                     _format_metric(row["kinematic_score"], "{:.4f}"),
+                    _format_metric(row.get("selection_score", float("nan")), "{:.4f}"),
                 )
             )
 
@@ -591,13 +599,17 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None):
 
         _add_top_candidates_page(pdf, aggregate, selected_bin)
 
+        composite_title = "Aggregate bin scan: weighted selection score"
+        if "selection_score" not in aggregate.columns or not aggregate["selection_score"].notna().any():
+            composite_title = "Aggregate bin scan: composite objective"
+
         heatmap_specs = [
             ("ratio_fail_count", "Aggregate bin scan: ratio fail count", "{:.0f}", "viridis_r"),
             ("ratio_mean_dev", "Aggregate bin scan: mean ratio deviation", "{:.3f}", "viridis_r"),
             ("ratio_rms", "Aggregate bin scan: ratio RMS", "{:.3f}", "viridis_r"),
             ("kinematic_score", "Aggregate bin scan: kinematic score", "{:.3f}", "viridis_r"),
             ("valid_ratio_bins", "Aggregate bin scan: valid ratio bins", "{:.0f}", "viridis"),
-            ("composite_objective", "Aggregate bin scan: composite objective", "{:.3f}", "viridis_r"),
+            ("composite_objective", composite_title, "{:.3f}", "viridis_r"),
         ]
         for metric, title, fmt, cmap in heatmap_specs:
             _add_heatmap_page(

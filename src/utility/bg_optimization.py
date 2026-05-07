@@ -10,6 +10,8 @@ import csv
 import numpy as np
 
 from background_config import (
+    BG_OPT_METRIC_WEIGHTS,
+    BG_OPT_SELECTION_MODE,
     BG_STAT_SCALE2,
     BG_STAT_SCALE2_FINALIST_COUNT,
     KINEMATIC_SCORE_VARS,
@@ -49,6 +51,78 @@ def _safe_float(value, default=float("inf")):
     return default
 
 
+def _get_selection_mode():
+    mode = str(BG_OPT_SELECTION_MODE).strip().lower()
+    if mode in {"weighted", "lexicographic"}:
+        return mode
+    return "lexicographic"
+
+
+def _normalize_metric_values(values, higher_is_better=False):
+    numeric = np.asarray([_safe_float(value, default=float("nan")) for value in values], dtype=float)
+    finite_mask = np.isfinite(numeric)
+    normalized = np.zeros(len(numeric), dtype=float)
+    if not finite_mask.any():
+        return normalized
+
+    finite_vals = numeric[finite_mask]
+    lo = float(np.min(finite_vals))
+    hi = float(np.max(finite_vals))
+    if math.isclose(lo, hi, rel_tol=0.0, abs_tol=1.0e-12):
+        return normalized
+
+    if higher_is_better:
+        normalized[finite_mask] = (hi - numeric[finite_mask]) / (hi - lo)
+    else:
+        normalized[finite_mask] = (numeric[finite_mask] - lo) / (hi - lo)
+    return normalized
+
+
+def _annotate_selection_scores(results):
+    mode = _get_selection_mode()
+    for result in results:
+        result["selection_mode"] = mode
+        result["selection_score"] = None
+
+    if mode != "weighted":
+        return
+
+    valid_results = [result for result in results if result.get("valid")]
+    if not valid_results:
+        return
+
+    metric_series = {
+        "ratio_fail_count": _normalize_metric_values(
+            [result.get("metrics", {}).get("ratio_fail_count") for result in valid_results],
+            higher_is_better=False,
+        ),
+        "ratio_mean_dev": _normalize_metric_values(
+            [result.get("metrics", {}).get("ratio_mean_dev") for result in valid_results],
+            higher_is_better=False,
+        ),
+        "ratio_rms": _normalize_metric_values(
+            [result.get("metrics", {}).get("ratio_rms") for result in valid_results],
+            higher_is_better=False,
+        ),
+        "kinematic_score": _normalize_metric_values(
+            [result.get("metrics", {}).get("kinematic_score") for result in valid_results],
+            higher_is_better=False,
+        ),
+        "valid_ratio_bins": _normalize_metric_values(
+            [result.get("metrics", {}).get("valid_ratio_bins") for result in valid_results],
+            higher_is_better=True,
+        ),
+    }
+
+    for idx, result in enumerate(valid_results):
+        score = 0.0
+        for metric_name, weight in BG_OPT_METRIC_WEIGHTS.items():
+            if metric_name not in metric_series:
+                continue
+            score += float(weight) * float(metric_series[metric_name][idx])
+        result["selection_score"] = float(score)
+
+
 def _candidate_sort_key(result):
     return (
         int(result["metrics"]["ratio_fail_count"]),
@@ -56,6 +130,20 @@ def _candidate_sort_key(result):
         float(result["metrics"]["ratio_rms"]),
         float(result["metrics"]["kinematic_score"]),
     )
+
+
+def _candidate_order_key(result):
+    metrics = result.get("metrics", {})
+    if _get_selection_mode() == "weighted":
+        return (
+            _safe_float(result.get("selection_score"), default=float("inf")),
+            int(metrics.get("ratio_fail_count", 10**9)),
+            _safe_float(metrics.get("ratio_mean_dev"), default=float("inf")),
+            _safe_float(metrics.get("ratio_rms"), default=float("inf")),
+            _safe_float(metrics.get("kinematic_score"), default=float("inf")),
+            -int(metrics.get("valid_ratio_bins", 0)),
+        )
+    return _candidate_sort_key(result)
 
 
 def _is_better_result(candidate, incumbent):
@@ -67,15 +155,20 @@ def _is_better_result(candidate, incumbent):
         return False
     if not incumbent.get("valid"):
         return True
-    return _candidate_sort_key(candidate) < _candidate_sort_key(incumbent)
+    return _candidate_order_key(candidate) < _candidate_order_key(incumbent)
 
 
 def _result_summary(result):
     if not result:
         return "none"
     metrics = result.get("metrics", {})
+    score = result.get("selection_score")
+    score_str = ""
+    if score is not None and math.isfinite(_safe_float(score, default=float("inf"))):
+        score_str = "score={} ".format(_format_metric_value(score))
     return (
-        "BG_STAT_SCALE2={:.3f} fail={} mean_dev={} rms={} kin={}".format(
+        "{}BG_STAT_SCALE2={:.3f} fail={} mean_dev={} rms={} kin={}".format(
+            score_str,
             float(result.get("bg_scale", BG_STAT_SCALE2)),
             int(metrics.get("ratio_fail_count", 10**9)),
             _format_metric_value(metrics.get("ratio_mean_dev", float("inf"))),
@@ -224,8 +317,11 @@ def _log_scale_result(stage_name, epsset, phi_setting, result):
         return
 
     metrics = result["metrics"]
+    score_str = ""
+    if result.get("selection_score") is not None:
+        score_str = " score={}".format(_format_metric_value(result.get("selection_score")))
     _log(
-        "{} result {} {} BG_STAT_SCALE2={:.3f} -> fail={} mean_dev={} rms={} kin={} bins={} kin_pts={}".format(
+        "{} result {} {} BG_STAT_SCALE2={:.3f} -> fail={} mean_dev={} rms={} kin={} bins={} kin_pts={}{}".format(
             stage_name,
             epsset,
             phi_setting,
@@ -236,6 +332,7 @@ def _log_scale_result(stage_name, epsset, phi_setting, result):
             _format_metric_value(metrics["kinematic_score"]),
             int(metrics["valid_ratio_bins"]),
             int(metrics["kinematic_points"]),
+            score_str,
         )
     )
 
@@ -266,19 +363,36 @@ def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc
             simc_support,
             data_base_cache,
         )
+        results.append(result)
+        _annotate_selection_scores(results)
         _log_scale_result(stage_name, inpDict["EPSSET"], phi_setting, result)
-        if _is_better_result(result, running_best):
-            running_best = result
-            _log(
-                "{} leader update {} {} after {}/{}: {}".format(
-                    stage_name,
-                    inpDict["EPSSET"],
-                    phi_setting,
-                    idx,
-                    total,
-                    _result_summary(running_best),
+        previous_best = running_best
+        valid_results = [candidate for candidate in results if candidate.get("valid")]
+        if valid_results:
+            valid_results.sort(key=_candidate_order_key)
+            running_best = valid_results[0]
+            if previous_best is None or running_best is not previous_best:
+                _log(
+                    "{} leader update {} {} after {}/{}: {}".format(
+                        stage_name,
+                        inpDict["EPSSET"],
+                        phi_setting,
+                        idx,
+                        total,
+                        _result_summary(running_best),
+                    )
                 )
-            )
+            else:
+                _log(
+                    "{} leader unchanged {} {} after {}/{}: {}".format(
+                        stage_name,
+                        inpDict["EPSSET"],
+                        phi_setting,
+                        idx,
+                        total,
+                        _result_summary(running_best),
+                    )
+                )
         elif running_best is not None:
             _log(
                 "{} leader unchanged {} {} after {}/{}: {}".format(
@@ -300,7 +414,6 @@ def _evaluate_scale_grid(base_hist, inpDict, phi_setting, t_bins, phi_bins, simc
                     total,
                 )
             )
-        results.append(result)
     return results
 
 
@@ -440,6 +553,7 @@ def _run_test_model_tiebreak(inpDict):
 
 
 def _finalize_phi_results(results, inpDict):
+    _annotate_selection_scores(results)
     valid_results = [result for result in results if result.get("valid")]
     if not valid_results:
         return {
@@ -458,11 +572,11 @@ def _finalize_phi_results(results, inpDict):
             "results": results,
         }
 
-    valid_results.sort(key=_candidate_sort_key)
+    valid_results.sort(key=_candidate_order_key)
     finalists = valid_results[: max(1, BG_STAT_SCALE2_FINALIST_COUNT)]
     if len(finalists) > 1:
-        top_key = _candidate_sort_key(finalists[0])
-        tied = [result for result in finalists if _candidate_sort_key(result) == top_key]
+        top_key = _candidate_order_key(finalists[0])
+        tied = [result for result in finalists if _candidate_order_key(result) == top_key]
         if len(tied) > 1:
             _log(
                 "Running test_model.sh tie-break for {} {} among BG_STAT_SCALE2={}".format(
@@ -650,6 +764,7 @@ def _serialize_result(result, seen=None):
 def _build_summary_report(inpDict, mode, proposal, phi_results):
     lines = [
         "BG/Tuning Summary ({})".format(mode),
+        "Selection mode: {}".format(_get_selection_mode()),
         "Shared bins: NumtBins={} NumPhiBins={}".format(
             len(proposal["t_bins"]) - 1,
             len(proposal["phi_bins"]) - 1,
@@ -659,10 +774,11 @@ def _build_summary_report(inpDict, mode, proposal, phi_results):
         scale = result.get("bg_scale", BG_STAT_SCALE2)
         status = "fallback" if result.get("fallback") else "selected"
         lines.append(
-            "{} {}: BG_STAT_SCALE2={:.3f}".format(
+            "{} {}: BG_STAT_SCALE2={:.3f} score={}".format(
                 result.get("phi_setting", "unknown"),
                 status,
                 float(scale),
+                _format_metric_value(result.get("selection_score")),
             )
         )
     return "\n".join(lines)
@@ -684,6 +800,7 @@ def _base_csv_row(inpDict, summary, row_kind, proposal=None, phi_setting="", sta
     proposal = proposal or {}
     row = {
         "mode": summary.get("mode", ""),
+        "selection_mode": summary.get("selection_mode", _get_selection_mode()),
         "epsset": inpDict.get("EPSSET", ""),
         "particle": inpDict.get("ParticleType", ""),
         "q2": inpDict.get("Q2", ""),
@@ -737,6 +854,7 @@ def _append_scale_rows(rows, inpDict, summary, proposal, phi_result, results, st
             valid=result.get("valid"),
         )
         row.update(_metric_columns(result.get("metrics")))
+        row["selection_score"] = result.get("selection_score")
         row["selected_for_stage"] = (
             result.get("valid")
             and selected_scale is not None
@@ -762,6 +880,7 @@ def build_optimization_csv_rows(summary, inpDict):
                 valid=candidate.get("valid"),
             )
             candidate_row.update(_metric_columns(candidate.get("metrics")))
+            candidate_row["selection_score"] = candidate.get("selection_score")
             candidate_row["selected_bin_candidate"] = bool(
                 not summary.get("fallback")
                 and _proposal_matches(summary.get("proposal"), proposal)
@@ -784,6 +903,7 @@ def build_optimization_csv_rows(summary, inpDict):
                     valid=phi_result.get("valid"),
                 )
                 selected_row.update(_metric_columns(phi_result.get("metrics")))
+                selected_row["selection_score"] = phi_result.get("selection_score")
                 selected_row["selected_for_stage"] = bool(
                     not summary.get("fallback")
                     and _proposal_matches(summary.get("proposal"), proposal)
@@ -802,6 +922,7 @@ def build_optimization_csv_rows(summary, inpDict):
             valid=not summary.get("fallback", False),
         )
         aggregate_row.update(_metric_columns(summary.get("metrics")))
+        aggregate_row["selection_score"] = summary.get("selection_score")
         aggregate_row["selected_bin_candidate"] = True
         rows.append(aggregate_row)
 
@@ -820,6 +941,7 @@ def build_optimization_csv_rows(summary, inpDict):
                 valid=phi_result.get("valid"),
             )
             selected_row.update(_metric_columns(phi_result.get("metrics")))
+            selected_row["selection_score"] = phi_result.get("selection_score")
             selected_row["selected_for_stage"] = True
             selected_row["test_model_chi2"] = phi_result.get("test_model_chi2")
             rows.append(selected_row)
@@ -912,6 +1034,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
         _log("Falling back to configured binning/scales for low epsilon")
         summary = {
             "mode": "low",
+            "selection_mode": _get_selection_mode(),
             "fallback": True,
             "proposal": fallback_proposal,
             "candidate_results": candidate_results,
@@ -926,19 +1049,14 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
         )
         return histlist, summary
 
-    valid_candidates.sort(
-        key=lambda result: (
-            int(result["metrics"]["ratio_fail_count"]),
-            float(result["metrics"]["ratio_mean_dev"]),
-            float(result["metrics"]["ratio_rms"]),
-            float(result["metrics"]["kinematic_score"]),
-        )
-    )
+    _annotate_selection_scores(candidate_results)
+    valid_candidates.sort(key=_candidate_order_key)
     best_candidate = valid_candidates[0]
     _log(
-        "Selected shared low-e bins NumtBins={} NumPhiBins={}".format(
+        "Selected shared low-e bins NumtBins={} NumPhiBins={} score={}".format(
             best_candidate["proposal"]["actual_num_t_bins"],
             best_candidate["proposal"]["actual_num_phi_bins"],
+            _format_metric_value(best_candidate.get("selection_score")),
         )
     )
     apply_bin_proposal(inpDict, best_candidate["proposal"])
@@ -960,11 +1078,13 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scales
     summary = {
         "mode": "low",
+        "selection_mode": _get_selection_mode(),
         "fallback": False,
         "proposal": best_candidate["proposal"],
         "selected_bg_scales": selected_bg_scales,
         "metrics": best_candidate["metrics"],
         "candidate_results": candidate_results,
+        "selection_score": best_candidate.get("selection_score"),
     }
     inpDict["bg_optimization_summary"] = _serialize_result(summary)
     inpDict["bg_optimization_report"] = _build_summary_report(
@@ -1003,11 +1123,13 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scales
     summary = {
         "mode": "high",
+        "selection_mode": _get_selection_mode(),
         "fallback": False,
         "proposal": proposal,
         "selected_bg_scales": selected_bg_scales,
         "metrics": _aggregate_bin_candidate_result(phi_results),
         "candidate_results": phi_results,
+        "selection_score": None,
     }
     inpDict["bg_optimization_summary"] = _serialize_result(summary)
     inpDict["bg_optimization_report"] = _build_summary_report(inpDict, "high", proposal, phi_results)
@@ -1025,6 +1147,7 @@ def write_optimization_csv(summary, inpDict, csv_path):
     rows = build_optimization_csv_rows(summary, inpDict)
     fieldnames = [
         "mode",
+        "selection_mode",
         "epsset",
         "particle",
         "q2",
@@ -1048,6 +1171,7 @@ def write_optimization_csv(summary, inpDict, csv_path):
         "kinematic_score",
         "valid_ratio_bins",
         "kinematic_points",
+        "selection_score",
         "test_model_chi2",
         "error",
     ]

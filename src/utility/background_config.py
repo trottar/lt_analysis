@@ -12,6 +12,21 @@ from __future__ import annotations
 
 BG_STAT_SCALE2 = 0.5
 
+# Candidate selection strategy for the Step-4 optimizer.
+# "weighted" ranks candidates by a config-controlled weighted score.
+# "lexicographic" preserves the older strict fail->mean_dev->rms->kin order.
+BG_OPT_SELECTION_MODE = "weighted"
+
+# Relative weights for the weighted selection mode. Lower is better for the
+# first four metrics; higher is better for valid_ratio_bins.
+BG_OPT_METRIC_WEIGHTS = {
+    "ratio_fail_count": 0.35,
+    "ratio_mean_dev": 0.25,
+    "ratio_rms": 0.20,
+    "kinematic_score": 0.15,
+    "valid_ratio_bins": 0.05,
+}
+
 # Sigma cut used when ranking data/SIMC ratio agreement.
 RATIO_SIGMA_THRESHOLD = 3.0
 
