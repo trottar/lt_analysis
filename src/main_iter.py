@@ -110,6 +110,7 @@ foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
+output_file_lst.append("utility/background_config.py")
 
 ################################################################################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen

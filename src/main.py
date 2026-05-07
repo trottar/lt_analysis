@@ -195,6 +195,7 @@ foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
+output_file_lst.append("utility/background_config.py")
 
 phisetlist = ["Center", "Left", "Right"]
 #phisetlist = ["Center"]
