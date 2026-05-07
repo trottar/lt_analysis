@@ -1102,6 +1102,12 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
         "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
         "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
     }
+    _log(
+        "Using low-e shared bins for high-e: NumtBins={} NumPhiBins={}".format(
+            len(proposal["t_bins"]) - 1,
+            len(proposal["phi_bins"]) - 1,
+        )
+    )
 
     phi_results = [
         _optimize_phi_scale(base_hist, inpDict, proposal["t_bins"], proposal["phi_bins"])
