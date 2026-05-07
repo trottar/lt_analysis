@@ -924,6 +924,9 @@ def is_good_background_shape(
     pos_tol=0.0,                 # require f_max > pos_tol
     concavity_rel_tol=0.02,       # max deviation from a straight line, as a fraction of scale
     concavity_abs_tol=None,       # if set, overrides rel tol (same units as y)
+    reject_interior_minimum=True, # reject convex-up / "flipped" fits with an interior valley
+    interior_min_rel_tol=0.05,    # how far below the lower edge the interior may dip
+    interior_min_abs_tol=None,    # if set, overrides rel tol (same units as y)
     n_samples=64,
 ):
     """
@@ -934,6 +937,8 @@ def is_good_background_shape(
       - f_max > pos_tol
       - f_min >= -neg_tol
       - not "too concave": close to the secant (endpoint-to-endpoint line)
+      - no flipped / convex-up valley: the interior may not dip materially
+        below both endpoint values
     """
     if not (x_max > x_min):
         return False
@@ -962,6 +967,18 @@ def is_good_background_shape(
         y0, y1 = ys[0], ys[-1]
         span = x_max - x_min
         max_dev = 0.0
+        shape_scale = max(abs(f_max), abs(f_min), abs(y0), abs(y1), abs(y1 - y0), 1e-12)
+
+        if reject_interior_minimum and len(ys) > 2:
+            interior_min = min(ys[1:-1])
+            edge_floor = min(y0, y1)
+            if interior_min_abs_tol is not None:
+                min_tol = interior_min_abs_tol
+            else:
+                min_tol = interior_min_rel_tol * shape_scale
+            if interior_min < edge_floor - min_tol:
+                return False
+
         for x, y in zip(xs, ys):
             t = (x - x_min) / span
             y_lin = y0 + t * (y1 - y0)
