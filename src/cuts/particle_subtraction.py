@@ -76,6 +76,10 @@ def _init_sub_event_cache():
         "Q2": [],
         "W": [],
         "epsilon": [],
+        "ssxptar": [],
+        "ssyptar": [],
+        "hsxptar": [],
+        "hsyptar": [],
         "allcuts": [],
         "nommcuts": [],
         "t_index": [],
@@ -87,7 +91,7 @@ def _init_sub_event_cache():
     }
 
 
-def _append_sub_event(cache_section, adj_t, adj_MM, q2, w, epsilon, allcuts, nommcuts, t_index=-1, phi_index=-1):
+def _append_sub_event(cache_section, adj_t, adj_MM, q2, w, epsilon, ssxptar, ssyptar, hsxptar, hsyptar, allcuts, nommcuts, t_index=-1, phi_index=-1):
     if not (allcuts or nommcuts):
         return
 
@@ -96,6 +100,10 @@ def _append_sub_event(cache_section, adj_t, adj_MM, q2, w, epsilon, allcuts, nom
     cache_section["Q2"].append(q2)
     cache_section["W"].append(w)
     cache_section["epsilon"].append(epsilon)
+    cache_section["ssxptar"].append(ssxptar)
+    cache_section["ssyptar"].append(ssyptar)
+    cache_section["hsxptar"].append(hsxptar)
+    cache_section["hsyptar"].append(hsyptar)
     cache_section["allcuts"].append(bool(allcuts))
     cache_section["nommcuts"].append(bool(nommcuts))
     cache_section["t_index"].append(int(t_index))
@@ -111,6 +119,10 @@ def _freeze_sub_event_cache(event_cache):
             "Q2": np.asarray(cache_section["Q2"], dtype=np.float64),
             "W": np.asarray(cache_section["W"], dtype=np.float64),
             "epsilon": np.asarray(cache_section["epsilon"], dtype=np.float64),
+            "ssxptar": np.asarray(cache_section["ssxptar"], dtype=np.float64),
+            "ssyptar": np.asarray(cache_section["ssyptar"], dtype=np.float64),
+            "hsxptar": np.asarray(cache_section["hsxptar"], dtype=np.float64),
+            "hsyptar": np.asarray(cache_section["hsyptar"], dtype=np.float64),
             "allcuts": np.asarray(cache_section["allcuts"], dtype=bool),
             "nommcuts": np.asarray(cache_section["nommcuts"], dtype=bool),
             "t_index": np.asarray(cache_section["t_index"], dtype=np.int32),
@@ -1781,6 +1793,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)] = subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)]
             hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)] = subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)]
             hist_dict["H_t_DATA_{}_{}".format(j, k)] = subDict["H_t_SUB_DATA_{}_{}".format(j, k)]
+            hist_dict["H_hsxptar_DATA_{}_{}".format(j, k)] = subDict["H_hsxptar_SUB_DATA_{}_{}".format(j, k)]
+            hist_dict["H_hsyptar_DATA_{}_{}".format(j, k)] = subDict["H_hsyptar_SUB_DATA_{}_{}".format(j, k)]
+            hist_dict["H_ssxptar_DATA_{}_{}".format(j, k)] = subDict["H_ssxptar_SUB_DATA_{}_{}".format(j, k)]
+            hist_dict["H_ssyptar_DATA_{}_{}".format(j, k)] = subDict["H_ssyptar_SUB_DATA_{}_{}".format(j, k)]
             hist_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)] = subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)]
             hist_dict["H_MM_DATA_{}_{}".format(j, k)] = subDict["H_MM_SUB_DATA_{}_{}".format(j, k)]
             hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)]            
@@ -1790,6 +1806,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)] = subDict["H_Q2_vs_W_SUB_DUMMY_{}_{}".format(j, k)]
             hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)] = subDict["H_theta_cm_SUB_DUMMY_{}_{}".format(j, k)]
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)] = subDict["H_t_SUB_DUMMY_{}_{}".format(j, k)]
+            hist_dict["H_hsxptar_DUMMY_{}_{}".format(j, k)] = subDict["H_hsxptar_SUB_DUMMY_{}_{}".format(j, k)]
+            hist_dict["H_hsyptar_DUMMY_{}_{}".format(j, k)] = subDict["H_hsyptar_SUB_DUMMY_{}_{}".format(j, k)]
+            hist_dict["H_ssxptar_DUMMY_{}_{}".format(j, k)] = subDict["H_ssxptar_SUB_DUMMY_{}_{}".format(j, k)]
+            hist_dict["H_ssyptar_DUMMY_{}_{}".format(j, k)] = subDict["H_ssyptar_SUB_DUMMY_{}_{}".format(j, k)]
             hist_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)] = subDict["H_t_vs_tmin_SUB_DUMMY_{}_{}".format(j, k)]
             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)] = subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)]
             hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_DUMMY_{}_{}".format(j, k)]            
@@ -1799,6 +1819,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)] = subDict["H_Q2_vs_W_SUB_RAND_{}_{}".format(j, k)]
             hist_dict["H_theta_cm_RAND_{}_{}".format(j, k)] = subDict["H_theta_cm_SUB_RAND_{}_{}".format(j, k)]
             hist_dict["H_t_RAND_{}_{}".format(j, k)] = subDict["H_t_SUB_RAND_{}_{}".format(j, k)]
+            hist_dict["H_hsxptar_RAND_{}_{}".format(j, k)] = subDict["H_hsxptar_SUB_RAND_{}_{}".format(j, k)]
+            hist_dict["H_hsyptar_RAND_{}_{}".format(j, k)] = subDict["H_hsyptar_SUB_RAND_{}_{}".format(j, k)]
+            hist_dict["H_ssxptar_RAND_{}_{}".format(j, k)] = subDict["H_ssxptar_SUB_RAND_{}_{}".format(j, k)]
+            hist_dict["H_ssyptar_RAND_{}_{}".format(j, k)] = subDict["H_ssyptar_SUB_RAND_{}_{}".format(j, k)]
             hist_dict["H_t_vs_tmin_RAND_{}_{}".format(j, k)] = subDict["H_t_vs_tmin_SUB_RAND_{}_{}".format(j, k)]
             hist_dict["H_MM_RAND_{}_{}".format(j, k)] = subDict["H_MM_SUB_RAND_{}_{}".format(j, k)]
             hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_RAND_{}_{}".format(j, k)]            
@@ -1808,6 +1832,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_Q2_vs_W_SUB_DUMMY_RAND_{}_{}".format(j, k)]
             hist_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_theta_cm_SUB_DUMMY_RAND_{}_{}".format(j, k)]
             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_t_SUB_DUMMY_RAND_{}_{}".format(j, k)]
+            hist_dict["H_hsxptar_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_hsxptar_SUB_DUMMY_RAND_{}_{}".format(j, k)]
+            hist_dict["H_hsyptar_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_hsyptar_SUB_DUMMY_RAND_{}_{}".format(j, k)]
+            hist_dict["H_ssxptar_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_ssxptar_SUB_DUMMY_RAND_{}_{}".format(j, k)]
+            hist_dict["H_ssyptar_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_ssyptar_SUB_DUMMY_RAND_{}_{}".format(j, k)]
             hist_dict["H_t_vs_tmin_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_t_vs_tmin_SUB_DUMMY_RAND_{}_{}".format(j, k)]
             hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_MM_SUB_DUMMY_RAND_{}_{}".format(j, k)]
             hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)] = subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]            
@@ -1901,6 +1929,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
+                                evt.ssxptar,
+                                evt.ssyptar,
+                                evt.hsxptar,
+                                evt.hsyptar,
                                 True,
                                 NOMMCUTS,
                                 t_index=j,
@@ -1912,6 +1944,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             if math.isfinite(theta_cm_deg):
                                 hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_DATA_{}_{}".format(j, k)].Fill(adj_t)
+                            hist_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Fill(evt.hsxptar)
+                            hist_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Fill(evt.hsyptar)
+                            hist_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Fill(evt.ssxptar)
+                            hist_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Fill(evt.ssyptar)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
                             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Fill(adj_MM)
@@ -1970,6 +2006,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
+                                evt.ssxptar,
+                                evt.ssyptar,
+                                evt.hsxptar,
+                                evt.hsyptar,
                                 True,
                                 NOMMCUTS,
                                 t_index=j,
@@ -1981,6 +2021,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             if math.isfinite(theta_cm_deg):
                                 hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Fill(adj_t)
+                            hist_dict["H_hsxptar_DUMMY_{}_{}".format(j, k)].Fill(evt.hsxptar)
+                            hist_dict["H_hsyptar_DUMMY_{}_{}".format(j, k)].Fill(evt.hsyptar)
+                            hist_dict["H_ssxptar_DUMMY_{}_{}".format(j, k)].Fill(evt.ssxptar)
+                            hist_dict["H_ssyptar_DUMMY_{}_{}".format(j, k)].Fill(evt.ssyptar)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
                             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Fill(adj_MM)
@@ -2039,6 +2083,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
+                                evt.ssxptar,
+                                evt.ssyptar,
+                                evt.hsxptar,
+                                evt.hsyptar,
                                 True,
                                 NOMMCUTS,
                                 t_index=j,
@@ -2050,6 +2098,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             if math.isfinite(theta_cm_deg):
                                 hist_dict["H_theta_cm_RAND_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_RAND_{}_{}".format(j, k)].Fill(adj_t)
+                            hist_dict["H_hsxptar_RAND_{}_{}".format(j, k)].Fill(evt.hsxptar)
+                            hist_dict["H_hsyptar_RAND_{}_{}".format(j, k)].Fill(evt.hsyptar)
+                            hist_dict["H_ssxptar_RAND_{}_{}".format(j, k)].Fill(evt.ssxptar)
+                            hist_dict["H_ssyptar_RAND_{}_{}".format(j, k)].Fill(evt.ssyptar)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_RAND_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
                             hist_dict["H_MM_RAND_{}_{}".format(j, k)].Fill(adj_MM)
@@ -2109,6 +2161,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
+                                evt.ssxptar,
+                                evt.ssyptar,
+                                evt.hsxptar,
+                                evt.hsyptar,
                                 True,
                                 NOMMCUTS,
                                 t_index=j,
@@ -2120,6 +2176,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                             if math.isfinite(theta_cm_deg):
                                 hist_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)].Fill(theta_cm_deg)
                             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_t)
+                            hist_dict["H_hsxptar_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.hsxptar)
+                            hist_dict["H_hsyptar_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.hsyptar)
+                            hist_dict["H_ssxptar_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.ssxptar)
+                            hist_dict["H_ssyptar_DUMMY_RAND_{}_{}".format(j, k)].Fill(evt.ssyptar)
                             if math.isfinite(minus_tmin):
                                 hist_dict["H_t_vs_tmin_DUMMY_RAND_{}_{}".format(j, k)].Fill(minus_tmin, adj_t)
                             hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Fill(adj_MM)
@@ -2133,6 +2193,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_theta_cm_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_t_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_hsxptar_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_hsyptar_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_ssxptar_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_ssyptar_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_t_vs_tmin_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)].Scale(1/nWindows)            
@@ -2143,6 +2207,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_hsxptar_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_hsyptar_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_ssxptar_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
+            hist_dict["H_ssyptar_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_t_vs_tmin_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)].Scale(1/nWindows)            
@@ -2154,6 +2222,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(hist_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(hist_dict["H_theta_cm_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_hsxptar_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_hsyptar_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_ssxptar_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_ssyptar_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_vs_tmin_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_RAND_{}_{}".format(j, k)],-1)            
@@ -2165,6 +2237,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_hsxptar_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_hsxptar_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_hsyptar_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_hsyptar_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_ssxptar_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_ssxptar_DUMMY_RAND_{}_{}".format(j, k)],-1)
+            hist_dict["H_ssyptar_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_ssyptar_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_t_vs_tmin_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)],-1)    
@@ -2176,6 +2252,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
             hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+            hist_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+            hist_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+            hist_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
+            hist_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
             hist_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
             hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Scale(norm_factor_data)
@@ -2187,6 +2267,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
             hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
             hist_dict["H_t_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+            hist_dict["H_hsxptar_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+            hist_dict["H_hsyptar_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+            hist_dict["H_ssxptar_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
+            hist_dict["H_ssyptar_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
             hist_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
             hist_dict["H_MM_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
             hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)].Scale(norm_factor_dummy)
@@ -2198,6 +2282,10 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
             hist_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(hist_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(hist_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_t_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_DUMMY_{}_{}".format(j, k)],-1)
+            hist_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_hsxptar_DUMMY_{}_{}".format(j, k)],-1)
+            hist_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_hsyptar_DUMMY_{}_{}".format(j, k)],-1)
+            hist_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_ssxptar_DUMMY_{}_{}".format(j, k)],-1)
+            hist_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Add(hist_dict["H_ssyptar_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(hist_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_DUMMY_{}_{}".format(j, k)],-1)
             hist_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Add(hist_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)],-1)

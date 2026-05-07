@@ -20,10 +20,10 @@ BG_OPT_SELECTION_MODE = "weighted"
 # Relative weights for the weighted selection mode. Lower is better for the
 # first four metrics; higher is better for valid_ratio_bins.
 BG_OPT_METRIC_WEIGHTS = {
-    "ratio_fail_count": 0.35,
-    "ratio_mean_dev": 0.25,
-    "ratio_rms": 0.20,
-    "kinematic_score": 0.15,
+    "kinematic_score": 0.5,    
+    "ratio_fail_count": 0.25,
+    "ratio_mean_dev": 0.10,
+    "ratio_rms": 0.10,
     "valid_ratio_bins": 0.05,
 }
 
@@ -61,7 +61,7 @@ BG_OPT_MM_PLOT_MAX = 1.5
 BG_OPT_MM_PLOT_NBINS = 100
 
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
-KINEMATIC_SCORE_VARS = ("Q2", "W", "theta_cm", "mm")
+KINEMATIC_SCORE_VARS = ("Q2", "W", "t", "mm", "xptar", "yptar")
 
 
 def _round_scale(value):
