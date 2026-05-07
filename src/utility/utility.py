@@ -514,7 +514,18 @@ def is_hist(obj):
 
 # Function to check if an object is of a ROOT type
 def is_root_obj(obj):
-    return isinstance(obj, (ROOT.TH1D, ROOT.TH2D, ROOT.TGraphErrors, ROOT.TGraphPolar, ROOT.TFile, ROOT.TMultiGraph))
+    return isinstance(
+        obj,
+        (
+            ROOT.TH1D,
+            ROOT.TH2D,
+            ROOT.TGraphErrors,
+            ROOT.TGraphPolar,
+            ROOT.TFile,
+            ROOT.TMultiGraph,
+            ROOT.TF1,
+        ),
+    )
 
 ################################################################################################################################################
 
