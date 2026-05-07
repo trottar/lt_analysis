@@ -611,7 +611,12 @@ if EPSSET == "low":
     try:
         bg_opt_pdf_path = os.path.splitext(bg_opt_csv_path)[0] + ".pdf"
         print("[BG OPT] Writing diagnostics PDF {}".format(bg_opt_pdf_path))
-        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path, bg_opt_pdf_path)
+        bg_opt_pdf_path = plot_bg_optimization_diagnostics(
+            bg_opt_csv_path,
+            bg_opt_pdf_path,
+            histlist=histlist,
+            inpDict=inpDict,
+        )
         if not os.path.exists(bg_opt_pdf_path):
             raise FileNotFoundError("Expected diagnostics PDF was not created: {}".format(bg_opt_pdf_path))
         if DEBUG:
@@ -667,7 +672,12 @@ if EPSSET == "high":
     try:
         bg_opt_pdf_path = os.path.splitext(bg_opt_csv_path)[0] + ".pdf"
         print("[BG OPT] Writing diagnostics PDF {}".format(bg_opt_pdf_path))
-        bg_opt_pdf_path = plot_bg_optimization_diagnostics(bg_opt_csv_path, bg_opt_pdf_path)
+        bg_opt_pdf_path = plot_bg_optimization_diagnostics(
+            bg_opt_csv_path,
+            bg_opt_pdf_path,
+            histlist=histlist,
+            inpDict=inpDict,
+        )
         if not os.path.exists(bg_opt_pdf_path):
             raise FileNotFoundError("Expected diagnostics PDF was not created: {}".format(bg_opt_pdf_path))
         if DEBUG:

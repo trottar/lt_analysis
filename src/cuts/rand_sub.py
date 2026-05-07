@@ -55,7 +55,12 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import resolve_bg_stat_scale2
+from background_config import (
+    BG_OPT_MM_PLOT_MAX,
+    BG_OPT_MM_PLOT_MIN,
+    BG_OPT_MM_PLOT_NBINS,
+    resolve_bg_stat_scale2,
+)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -416,6 +421,9 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     efficiency_table = inpDict["efficiency_table"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+    mm_plot_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
+    mm_plot_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
+    mm_plot_nbins = int(inpDict.get("bg_opt_mm_plot_nbins", BG_OPT_MM_PLOT_NBINS))
 
     ################################################################################################################################################
 
@@ -661,13 +669,13 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     H_t_DATA       = TH1D("H_t_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DATA  = TH1D("H_epsilon_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DATA  = TH1D("H_MM_DATA",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_rand_dummy_DATA  = TH1D("H_MM_rand_dummy_DATA",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_dummy_DATA  = TH1D("H_MM_dummy_DATA",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_full_DATA  = TH1D("H_MM_full_DATA",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_fit2sub_DATA  = TH1D("H_MM_fit2sub_DATA",f"MM_fit2sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_fit1sub_DATA  = TH1D("H_MM_fit1sub_DATA",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_pisub_DATA  = TH1D("H_MM_pisub_DATA",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_nosub_DATA  = TH1D("H_MM_nosub_DATA",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
+    H_MM_rand_dummy_DATA  = TH1D("H_MM_rand_dummy_DATA",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_dummy_DATA  = TH1D("H_MM_dummy_DATA",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_full_DATA  = TH1D("H_MM_full_DATA",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit2sub_DATA  = TH1D("H_MM_fit2sub_DATA",f"MM_fit2sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit1sub_DATA  = TH1D("H_MM_fit1sub_DATA",f"MM_fit1sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_pisub_DATA  = TH1D("H_MM_pisub_DATA",f"MM_pisub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_nosub_DATA  = TH1D("H_MM_nosub_DATA",f"MM_nosub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
     H_th_DATA  = TH1D("H_th_DATA","X' tar", 100, -0.1, 0.1)
     H_ph_DATA  = TH1D("H_ph_DATA","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DATA  = TH1D("H_ph_q_DATA","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -706,11 +714,11 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     H_t_DUMMY       = TH1D("H_t_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])  
     H_epsilon_DUMMY  = TH1D("H_epsilon_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY  = TH1D("H_MM_DUMMY",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_full_DUMMY  = TH1D("H_MM_full_DUMMY",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_fit2sub_DUMMY  = TH1D("H_MM_fit2sub_DUMMY",f"MM_fit2sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_fit1sub_DUMMY  = TH1D("H_MM_fit1sub_DUMMY",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_pisub_DUMMY  = TH1D("H_MM_pisub_DUMMY",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_nosub_DUMMY  = TH1D("H_MM_nosub_DUMMY",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
+    H_MM_full_DUMMY  = TH1D("H_MM_full_DUMMY",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit2sub_DUMMY  = TH1D("H_MM_fit2sub_DUMMY",f"MM_fit2sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit1sub_DUMMY  = TH1D("H_MM_fit1sub_DUMMY",f"MM_fit1sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_pisub_DUMMY  = TH1D("H_MM_pisub_DUMMY",f"MM_pisub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_nosub_DUMMY  = TH1D("H_MM_nosub_DUMMY",f"MM_nosub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
     H_th_DUMMY  = TH1D("H_th_DUMMY","X' tar", 100, -0.1, 0.1)
     H_ph_DUMMY  = TH1D("H_ph_DUMMY","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DUMMY  = TH1D("H_ph_q_DUMMY","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -744,13 +752,13 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     H_t_RAND       = TH1D("H_t_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_RAND  = TH1D("H_epsilon_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_RAND  = TH1D("H_MM_RAND",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_rand_dummy_RAND  = TH1D("H_MM_rand_dummy_RAND",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_dummy_RAND  = TH1D("H_MM_dummy_RAND",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_full_RAND  = TH1D("H_MM_full_RAND",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)    
-    H_MM_fit2sub_RAND  = TH1D("H_MM_fit2sub_RAND",f"MM_fit2sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_fit1sub_RAND  = TH1D("H_MM_fit1sub_RAND",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_pisub_RAND  = TH1D("H_MM_pisub_RAND",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_nosub_RAND  = TH1D("H_MM_nosub_RAND",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
+    H_MM_rand_dummy_RAND  = TH1D("H_MM_rand_dummy_RAND",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_dummy_RAND  = TH1D("H_MM_dummy_RAND",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_full_RAND  = TH1D("H_MM_full_RAND",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit2sub_RAND  = TH1D("H_MM_fit2sub_RAND",f"MM_fit2sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit1sub_RAND  = TH1D("H_MM_fit1sub_RAND",f"MM_fit1sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_pisub_RAND  = TH1D("H_MM_pisub_RAND",f"MM_pisub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_nosub_RAND  = TH1D("H_MM_nosub_RAND",f"MM_nosub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
     H_th_RAND  = TH1D("H_th_RAND","X' tar", 100, -0.1, 0.1)
     H_ph_RAND  = TH1D("H_ph_RAND","Y' tar", 100, -0.1, 0.1)
     H_ph_q_RAND  = TH1D("H_ph_q_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -784,11 +792,11 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     H_t_DUMMY_RAND       = TH1D("H_t_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_DUMMY_RAND  = TH1D("H_epsilon_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_DUMMY_RAND  = TH1D("H_MM_DUMMY_RAND",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
-    H_MM_full_DUMMY_RAND  = TH1D("H_MM_full_DUMMY_RAND",f"MM_{ParticleType[0].upper()}", 100, 0.7, 1.5)    
-    H_MM_fit2sub_DUMMY_RAND  = TH1D("H_MM_fit2sub_DUMMY_RAND",f"MM_fit2sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_fit1sub_DUMMY_RAND  = TH1D("H_MM_fit1sub_DUMMY_RAND",f"MM_fit1sub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_pisub_DUMMY_RAND  = TH1D("H_MM_pisub_DUMMY_RAND",f"MM_pisub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
-    H_MM_nosub_DUMMY_RAND  = TH1D("H_MM_nosub_DUMMY_RAND",f"MM_nosub_{ParticleType[0].upper()}", 100, 0.7, 1.5)
+    H_MM_full_DUMMY_RAND  = TH1D("H_MM_full_DUMMY_RAND",f"MM_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit2sub_DUMMY_RAND  = TH1D("H_MM_fit2sub_DUMMY_RAND",f"MM_fit2sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_fit1sub_DUMMY_RAND  = TH1D("H_MM_fit1sub_DUMMY_RAND",f"MM_fit1sub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_pisub_DUMMY_RAND  = TH1D("H_MM_pisub_DUMMY_RAND",f"MM_pisub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+    H_MM_nosub_DUMMY_RAND  = TH1D("H_MM_nosub_DUMMY_RAND",f"MM_nosub_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
     H_th_DUMMY_RAND  = TH1D("H_th_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
     H_ph_DUMMY_RAND  = TH1D("H_ph_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
     H_ph_q_DUMMY_RAND  = TH1D("H_ph_q_DUMMY_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -936,8 +944,8 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         subDict["H_t_SUB_DATA"]       = TH1D("H_t_SUB_DATA","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DATA"]  = TH1D("H_epsilon_SUB_DATA","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_DATA"]  = TH1D("H_MM_SUB_DATA",f"MM_{SubtractedParticle}", 100, inpDict["mm_min"], inpDict["mm_max"])
-        subDict["H_MM_full_SUB_DATA"]  = TH1D("H_MM_full_SUB_DATA",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)        
-        subDict["H_MM_nosub_SUB_DATA"]  = TH1D("H_MM_nosub_SUB_DATA",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_full_SUB_DATA"]  = TH1D("H_MM_full_SUB_DATA",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+        subDict["H_MM_nosub_SUB_DATA"]  = TH1D("H_MM_nosub_SUB_DATA",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
         subDict["H_th_SUB_DATA"]  = TH1D("H_th_SUB_DATA","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DATA"]  = TH1D("H_ph_SUB_DATA","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DATA"]  = TH1D("H_ph_q_SUB_DATA","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -976,8 +984,8 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         subDict["H_t_SUB_RAND"]       = TH1D("H_t_SUB_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_RAND"]  = TH1D("H_epsilon_SUB_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_RAND"]  = TH1D("H_MM_SUB_RAND",f"MM_{SubtractedParticle}", 100, inpDict["mm_min"], inpDict["mm_max"])
-        subDict["H_MM_full_SUB_RAND"]  = TH1D("H_MM_full_SUB_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)        
-        subDict["H_MM_nosub_SUB_RAND"]  = TH1D("H_MM_nosub_SUB_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_full_SUB_RAND"]  = TH1D("H_MM_full_SUB_RAND",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+        subDict["H_MM_nosub_SUB_RAND"]  = TH1D("H_MM_nosub_SUB_RAND",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
         subDict["H_th_SUB_RAND"]  = TH1D("H_th_SUB_RAND","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_RAND"]  = TH1D("H_ph_SUB_RAND","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_RAND"]  = TH1D("H_ph_q_SUB_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -1016,8 +1024,8 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         subDict["H_t_SUB_DUMMY"]       = TH1D("H_t_SUB_DUMMY","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DUMMY"]  = TH1D("H_epsilon_SUB_DUMMY","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_DUMMY"]  = TH1D("H_MM_SUB_DUMMY",f"MM_{SubtractedParticle}", 100, inpDict["mm_min"], inpDict["mm_max"])
-        subDict["H_MM_full_SUB_DUMMY"]  = TH1D("H_MM_full_SUB_DUMMY",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
-        subDict["H_MM_nosub_SUB_DUMMY"]  = TH1D("H_MM_nosub_SUB_DUMMY",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_full_SUB_DUMMY"]  = TH1D("H_MM_full_SUB_DUMMY",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+        subDict["H_MM_nosub_SUB_DUMMY"]  = TH1D("H_MM_nosub_SUB_DUMMY",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
         subDict["H_th_SUB_DUMMY"]  = TH1D("H_th_SUB_DUMMY","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DUMMY"]  = TH1D("H_ph_SUB_DUMMY","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DUMMY"]  = TH1D("H_ph_q_SUB_DUMMY","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -1056,8 +1064,8 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         subDict["H_t_SUB_DUMMY_RAND"]       = TH1D("H_t_SUB_DUMMY_RAND","-t", 100, inpDict["tmin"], inpDict["tmax"])
         subDict["H_epsilon_SUB_DUMMY_RAND"]  = TH1D("H_epsilon_SUB_DUMMY_RAND","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
         subDict["H_MM_SUB_DUMMY_RAND"]  = TH1D("H_MM_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", 100, inpDict["mm_min"], inpDict["mm_max"])
-        subDict["H_MM_full_SUB_DUMMY_RAND"]  = TH1D("H_MM_full_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)        
-        subDict["H_MM_nosub_SUB_DUMMY_RAND"]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", 100, 0.7, 1.5)
+        subDict["H_MM_full_SUB_DUMMY_RAND"]  = TH1D("H_MM_full_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
+        subDict["H_MM_nosub_SUB_DUMMY_RAND"]  = TH1D("H_MM_nosub_SUB_DUMMY_RAND",f"MM_{SubtractedParticle}", mm_plot_nbins, mm_plot_min, mm_plot_max)
         subDict["H_th_SUB_DUMMY_RAND"]  = TH1D("H_th_SUB_DUMMY_RAND","X' tar", 100, -0.1, 0.1)
         subDict["H_ph_SUB_DUMMY_RAND"]  = TH1D("H_ph_SUB_DUMMY_RAND","Y' tar", 100, -0.1, 0.1)
         subDict["H_ph_q_SUB_DUMMY_RAND"]  = TH1D("H_ph_q_SUB_DUMMY_RAND","Phi Detected (ph_xq)", 100, -math.pi, math.pi)
@@ -2223,6 +2231,8 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     # --------------------------------------------------------------
     inpDict["bg_stat_scale1"] = 0.0
     residual_bg_weights1 = None
+    background_fit1 = None
+    background_fit2 = None
 
     if  inpDict["bg_stat_scale1"] > 0.0:
         background_fit1 = bg_fit(phi_setting,
@@ -2588,6 +2598,8 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     histDict["H_MM_fit1sub_DATA"] =     H_MM_fit1sub_DATA
     histDict["H_MM_pisub_DATA"] =     H_MM_pisub_DATA
     histDict["H_MM_nosub_DATA"] =     H_MM_nosub_DATA
+    histDict["BG_FIT1_VIS_DATA"] = background_fit1[1] if background_fit1 is not None else None
+    histDict["BG_FIT2_VIS_DATA"] = background_fit2[1] if background_fit2 is not None else None
     histDict["H_th_DATA"] =     H_th_DATA
     histDict["H_ph_DATA"] =     H_ph_DATA
     histDict["H_ph_q_DATA"] =     H_ph_q_DATA

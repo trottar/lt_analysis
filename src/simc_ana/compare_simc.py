@@ -53,6 +53,7 @@ OUTPATH=lt.OUTPATH
 
 sys.path.append("utility")
 from utility import open_root_file, create_polar_plot, remove_bad_bins
+from background_config import BG_OPT_MM_PLOT_MAX, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_NBINS
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -98,6 +99,9 @@ def compare_simc(hist, inpDict, emit_plots=True):
     efficiency_table = inpDict["efficiency_table"]
     EPSSET = inpDict["EPSSET"]
     ParticleType = inpDict["ParticleType"]
+    mm_plot_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
+    mm_plot_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
+    mm_plot_nbins = int(inpDict.get("bg_opt_mm_plot_nbins", BG_OPT_MM_PLOT_NBINS))
 
     InSIMCFilename = hist["InSIMCFilename"]
     
@@ -114,7 +118,7 @@ def compare_simc(hist, inpDict, emit_plots=True):
     ################################################################################################################################################
     # Import function to define cut bools
     sys.path.append("cuts")
-    from apply_cuts import apply_simc_cuts, set_val
+    from apply_cuts import apply_simc_cuts, apply_simc_sub_cuts, set_val
     set_val(inpDict) # Set global variables for optimization
     
     ################################################################################################################################################
@@ -161,6 +165,7 @@ def compare_simc(hist, inpDict, emit_plots=True):
     H_t_SIMC       = TH1D("H_t_SIMC","-t", 100, inpDict["tmin"], inpDict["tmax"])
     H_epsilon_SIMC  = TH1D("H_epsilon_SIMC","epsilon", 100, inpDict["Epsmin"], inpDict["Epsmax"])
     H_MM_SIMC  = TH1D("H_MM_SIMC",f"MM_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
+    H_MM_full_SIMC  = TH1D("H_MM_full_SIMC",f"MM_full_{ParticleType[0].upper()}", mm_plot_nbins, mm_plot_min, mm_plot_max)
     H_MM_unweighted_SIMC  = TH1D("H_MM_unweighted_SIMC","MM_unweighted_{ParticleType[0].upper()}", 100, inpDict["mm_min"], inpDict["mm_max"])
     MM_vs_t_SIMC = TH2D("MM_vs_t_SIMC", "Missing Mass vs t; MM; t", 100, inpDict["mm_min"], inpDict["mm_max"], 100, inpDict["tmin"], inpDict["tmax"])
     H_th_SIMC  = TH1D("H_th_SIMC","X' tar", 100, -0.1, 0.1)
@@ -204,19 +209,24 @@ def compare_simc(hist, inpDict, emit_plots=True):
       
       adj_t = -evt.t
       base_cuts = apply_simc_cuts(evt, mm_min, mm_max)
+      base_sub_cuts = apply_simc_sub_cuts(evt, mm_min, mm_max)
 
       if ParticleType == "kaon":
           
           ALLCUTS = base_cuts and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
-          NOHOLECUTS = base_cuts
+          NOMMCUTS = base_sub_cuts and not hgcer_cutg.IsInside(evt.phgcer_x_det, evt.phgcer_y_det)
           
-          if(NOHOLECUTS):
+          if(base_sub_cuts):
               # HGCer hole comparison            
               P_hgcer_nohole_xAtCer_vs_yAtCer_SIMC.Fill(evt.phgcer_x_det,evt.phgcer_y_det)
           
       else:
 
           ALLCUTS = base_cuts
+          NOMMCUTS = base_sub_cuts
+
+      if(NOMMCUTS):
+          H_MM_full_SIMC.Fill(adj_missmass, evt.iter_weight)
           
       #Fill SIMC events
       if(ALLCUTS):
@@ -286,6 +296,7 @@ def compare_simc(hist, inpDict, emit_plots=True):
     H_t_SIMC.Scale(normfac_simc)
     H_epsilon_SIMC.Scale(normfac_simc)
     H_MM_SIMC.Scale(normfac_simc)
+    H_MM_full_SIMC.Scale(normfac_simc)
     H_MM_unweighted_SIMC.Scale(normfac_simc)
     MM_vs_t_SIMC.Scale(normfac_simc)
     H_th_SIMC.Scale(normfac_simc)
@@ -325,6 +336,7 @@ def compare_simc(hist, inpDict, emit_plots=True):
     histDict["H_t_SIMC"] =     H_t_SIMC
     histDict["H_epsilon_SIMC"] =     H_epsilon_SIMC
     histDict["H_MM_SIMC"] =     H_MM_SIMC
+    histDict["H_MM_full_SIMC"] =     H_MM_full_SIMC
     histDict["MM_vs_t_SIMC"] =     MM_vs_t_SIMC
     histDict["H_th_SIMC"] =     H_th_SIMC
     histDict["H_ph_SIMC"] =     H_ph_SIMC

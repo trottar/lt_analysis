@@ -54,6 +54,12 @@ BG_STAT_SCALE2_REFINE_WINDOW = 0.1
 BG_STAT_SCALE2_REFINE_STEP = 0.025
 BG_STAT_SCALE2_FINALIST_COUNT = 2
 
+# Full-spectrum MM diagnostic plot controls used by the Step-4 optimizer PDF.
+# These are check-plot only and do not change the MM cut window used elsewhere.
+BG_OPT_MM_PLOT_MIN = 0.7
+BG_OPT_MM_PLOT_MAX = 1.5
+BG_OPT_MM_PLOT_NBINS = 100
+
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
 KINEMATIC_SCORE_VARS = ("Q2", "W", "theta_cm", "mm")
 
