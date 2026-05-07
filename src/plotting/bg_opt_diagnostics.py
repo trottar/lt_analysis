@@ -5,6 +5,7 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.patches import Rectangle
@@ -263,9 +264,16 @@ def _draw_heatmap(ax, frame, metric, title, selected_bin=None, fmt="{:.2f}", cma
             value = pivot.values[i, j]
             if pd.isna(value):
                 label = "nan"
+                text_color = "black"
+                stroke_color = "white"
             else:
                 label = fmt.format(value)
-            ax.text(j, i, label, ha="center", va="center", fontsize=8)
+                rgba = im.cmap(im.norm(value))
+                luminance = 0.2126 * rgba[0] + 0.7152 * rgba[1] + 0.0722 * rgba[2]
+                text_color = "white" if luminance < 0.45 else "black"
+                stroke_color = "black" if text_color == "white" else "white"
+            text = ax.text(j, i, label, ha="center", va="center", fontsize=8, color=text_color)
+            text.set_path_effects([pe.withStroke(linewidth=1.5, foreground=stroke_color, alpha=0.9)])
 
     if selected_bin is not None:
         selected_t, selected_phi = selected_bin
@@ -389,10 +397,10 @@ def _add_phi_heatmap_page(pdf, phi_setting, phi_rows, selected_bin):
     fig, axes = plt.subplots(2, 2, figsize=(10.0, 8.0))
     axes = np.atleast_1d(axes).ravel()
     metrics = [
-        ("bg_stat_scale2", "Selected BG_STAT_SCALE2", "{:.3f}", "magma"),
-        ("ratio_fail_count", "Ratio fail count", "{:.0f}", "viridis_r"),
-        ("ratio_rms", "Ratio RMS", "{:.3f}", "viridis_r"),
-        ("kinematic_score", "Kinematic score", "{:.3f}", "viridis_r"),
+        ("bg_stat_scale2", "Selected BG_STAT_SCALE2", "{:.3f}", "cividis"),
+        ("ratio_fail_count", "Ratio fail count", "{:.0f}", "cividis_r"),
+        ("ratio_rms", "Ratio RMS", "{:.3f}", "cividis_r"),
+        ("kinematic_score", "Kinematic score", "{:.3f}", "cividis_r"),
     ]
 
     colorbars = []
@@ -860,12 +868,12 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 composite_title = "Aggregate bin scan: composite objective"
 
             heatmap_specs = [
-                ("ratio_fail_count", "Aggregate bin scan: ratio fail count", "{:.0f}", "viridis_r"),
-                ("ratio_mean_dev", "Aggregate bin scan: mean ratio deviation", "{:.3f}", "viridis_r"),
-                ("ratio_rms", "Aggregate bin scan: ratio RMS", "{:.3f}", "viridis_r"),
-                ("kinematic_score", "Aggregate bin scan: kinematic score", "{:.3f}", "viridis_r"),
+                ("ratio_fail_count", "Aggregate bin scan: ratio fail count", "{:.0f}", "cividis_r"),
+                ("ratio_mean_dev", "Aggregate bin scan: mean ratio deviation", "{:.3f}", "cividis_r"),
+                ("ratio_rms", "Aggregate bin scan: ratio RMS", "{:.3f}", "cividis_r"),
+                ("kinematic_score", "Aggregate bin scan: kinematic score", "{:.3f}", "cividis_r"),
                 ("valid_ratio_bins", "Aggregate bin scan: valid ratio bins", "{:.0f}", "viridis"),
-                ("composite_objective", composite_title, "{:.3f}", "viridis_r"),
+                ("composite_objective", composite_title, "{:.3f}", "cividis_r"),
             ]
             for metric, title, fmt, cmap in heatmap_specs:
                 _add_heatmap_page(
