@@ -295,8 +295,8 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {                
-                        "left":  (1.09, 1.11), #Q4p4W2p74
-                        "right": (1.30, 1.40), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.30, 1.35), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                
                         #"left":  (1.05, 1.10),
@@ -309,8 +309,8 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        "left":  (1.09, 1.11), #Q4p4W2p74
-                        "right": (1.30, 1.40), #Q4p4W2p74              
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.30, 1.35), #Q4p4W2p74              
                         #"left":  (1.06, 1.11),
                         #"right": (1.14, 1.20),
                         #"left":  (1.05, 1.10),
@@ -323,8 +323,8 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        "left":  (1.09, 1.11), #Q4p4W2p74
-                        "right": (1.30, 1.40), #Q4p4W2p74                 
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.30, 1.35), #Q4p4W2p74                 
                         #"left":  (1.09, 1.11),
                         #"right": (1.18, 1.23),
                         #"left":  (1.05, 1.10),
@@ -337,8 +337,8 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        "left":  (1.09, 1.11), #Q4p4W2p74
-                        "right": (1.30, 1.40), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.30, 1.35), #Q4p4W2p74
                         #"left":  (1.09, 1.11),
                         #"right": (1.18, 1.20),                
                         #"left":  (1.05, 1.10),
@@ -351,8 +351,8 @@ BG_MODELS = {
                     "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
                     "n_par":      3,
                     "sidebands": {
-                        "left":  (1.09, 1.11), #Q4p4W2p74
-                        "right": (1.30, 1.40), #Q4p4W2p74 
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.30, 1.35), #Q4p4W2p74 
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),                 
                         #"left":  (1.05, 1.10),
