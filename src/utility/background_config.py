@@ -10,7 +10,7 @@ fallback BG scale, binning thresholds, and optimizer search behavior.
 from __future__ import annotations
 
 
-BG_STAT_SCALE1 = 0.0
+BG_STAT_SCALE1 = 0.5
 BG_STAT_SCALE2 = 0.5
 
 # Candidate selection strategy for the Step-4 optimizer.
