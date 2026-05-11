@@ -72,6 +72,7 @@ def _load_bg_opt_csv(csv_path):
         df["{}_bool".format(column)] = df[column].map(_to_bool)
 
     numeric_columns = [
+        "bg_stat_scale1",
         "bg_stat_scale2",
         "requested_num_t_bins",
         "requested_num_phi_bins",
@@ -87,6 +88,8 @@ def _load_bg_opt_csv(csv_path):
         "test_model_chi2",
     ]
     df = _to_numeric_columns(df, numeric_columns)
+    if "scale_axis" not in df.columns:
+        df["scale_axis"] = "bg_stat_scale2"
 
     if "requested_num_t_bins" in df.columns and "actual_num_t_bins" in df.columns:
         df["requested_num_t_bins"] = df["requested_num_t_bins"].fillna(df["actual_num_t_bins"])
@@ -394,11 +397,13 @@ def _add_phi_heatmap_page(pdf, phi_setting, phi_rows, selected_bin):
     if phi_rows.empty:
         return
 
-    fig, axes = plt.subplots(2, 2, figsize=(10.0, 8.0))
+    fig, axes = plt.subplots(2, 3, figsize=(12.5, 8.2))
     axes = np.atleast_1d(axes).ravel()
     metrics = [
+        ("bg_stat_scale1", "Selected BG_STAT_SCALE1", "{:.3f}", "cividis"),
         ("bg_stat_scale2", "Selected BG_STAT_SCALE2", "{:.3f}", "cividis"),
         ("ratio_fail_count", "Ratio fail count", "{:.0f}", "cividis_r"),
+        ("ratio_mean_dev", "Mean ratio deviation", "{:.3f}", "cividis_r"),
         ("ratio_rms", "Ratio RMS", "{:.3f}", "cividis_r"),
         ("kinematic_score", "Kinematic score", "{:.3f}", "cividis_r"),
     ]
@@ -426,13 +431,20 @@ def _add_phi_heatmap_page(pdf, phi_setting, phi_rows, selected_bin):
     plt.close(fig)
 
 
-def _plot_metric_lines(ax, frame, metric, title, selected_bin=None, selected_scale=None):
+def _scale_axis_metadata(scale_axis):
+    if str(scale_axis).strip().lower() == "bg_stat_scale1":
+        return "bg_stat_scale1", "BG_STAT_SCALE1"
+    return "bg_stat_scale2", "BG_STAT_SCALE2"
+
+
+def _plot_metric_lines(ax, frame, metric, title, scale_axis, selected_scale=None):
     if frame.empty:
         ax.axis("off")
         ax.text(0.5, 0.5, "No data", ha="center", va="center", transform=ax.transAxes)
         ax.set_title(title)
         return
 
+    scale_column, scale_label = _scale_axis_metadata(scale_axis)
     stage_styles = {
         "coarse": {"linestyle": "--", "alpha": 0.8},
         "refined": {"linestyle": "-", "alpha": 0.95},
@@ -441,9 +453,9 @@ def _plot_metric_lines(ax, frame, metric, title, selected_bin=None, selected_sca
 
     for stage, group in frame.groupby("stage"):
         style = stage_styles.get(stage, {"linestyle": "-", "alpha": 0.9})
-        group = group.sort_values("bg_stat_scale2")
+        group = group.sort_values(scale_column)
         ax.plot(
-            group["bg_stat_scale2"],
+            group[scale_column],
             group[metric],
             marker="o",
             linewidth=2.0,
@@ -455,7 +467,7 @@ def _plot_metric_lines(ax, frame, metric, title, selected_bin=None, selected_sca
         chosen = group[group["selected_for_stage_bool"]]
         if not chosen.empty:
             ax.scatter(
-                chosen["bg_stat_scale2"],
+                chosen[scale_column],
                 chosen[metric],
                 s=80,
                 marker="*",
@@ -466,14 +478,14 @@ def _plot_metric_lines(ax, frame, metric, title, selected_bin=None, selected_sca
     if selected_scale is not None and math.isfinite(float(selected_scale)):
         ax.axvline(float(selected_scale), color="red", linewidth=1.5, alpha=0.7)
 
-    ax.set_xlabel("BG_STAT_SCALE2")
+    ax.set_xlabel(scale_label)
     ax.set_ylabel(metric)
     ax.set_title(title)
     ax.grid(alpha=0.25)
     ax.legend()
 
 
-def _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, selected_scale):
+def _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, scale_axis, selected_scale):
     if selected_bin is None:
         return
 
@@ -482,25 +494,27 @@ def _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, sel
         (scale_rows["phi_setting"] == phi_setting)
         & (scale_rows["requested_num_t_bins"] == selected_t)
         & (scale_rows["requested_num_phi_bins"] == selected_phi)
+        & (scale_rows["scale_axis"] == scale_axis)
     ].copy()
     if frame.empty:
         return
 
-    frame = frame.drop_duplicates(["stage", "bg_stat_scale2", "ratio_fail_count", "ratio_mean_dev", "ratio_rms", "kinematic_score"])
+    scale_column, scale_label = _scale_axis_metadata(scale_axis)
+    frame = frame.drop_duplicates(["stage", scale_column, "ratio_fail_count", "ratio_mean_dev", "ratio_rms", "kinematic_score"])
     fig, axes = plt.subplots(2, 2, figsize=(10.0, 8.0))
     axes = np.atleast_1d(axes).ravel()
     metrics = [
-        ("ratio_fail_count", "Failure count vs BG_STAT_SCALE2"),
-        ("ratio_mean_dev", "Mean ratio deviation vs BG_STAT_SCALE2"),
-        ("ratio_rms", "Ratio RMS vs BG_STAT_SCALE2"),
-        ("kinematic_score", "Kinematic score vs BG_STAT_SCALE2"),
+        ("ratio_fail_count", "Failure count vs {}".format(scale_label)),
+        ("ratio_mean_dev", "Mean ratio deviation vs {}".format(scale_label)),
+        ("ratio_rms", "Ratio RMS vs {}".format(scale_label)),
+        ("kinematic_score", "Kinematic score vs {}".format(scale_label)),
     ]
 
     for ax, (metric, title) in zip(axes, metrics):
-        _plot_metric_lines(ax, frame, metric, title, selected_bin=selected_bin, selected_scale=selected_scale)
+        _plot_metric_lines(ax, frame, metric, title, scale_axis=scale_axis, selected_scale=selected_scale)
 
     fig.suptitle(
-        "Selected-binning scale scan: {} ({})".format(phi_setting, frame["bin_label"].iloc[0]),
+        "Selected-binning scale scan: {} ({}, {})".format(phi_setting, frame["bin_label"].iloc[0], scale_label),
         fontsize=15,
     )
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.97])
@@ -508,16 +522,17 @@ def _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, sel
     plt.close(fig)
 
 
-def _plot_full_phase_space_metric(ax, frame, metric, title, selected_bin):
+def _plot_full_phase_space_metric(ax, frame, metric, title, selected_bin, scale_axis):
     if frame.empty:
         ax.axis("off")
         ax.text(0.5, 0.5, "No data", ha="center", va="center", transform=ax.transAxes)
         ax.set_title(title)
         return
 
-    frame = frame.sort_values(["requested_num_t_bins", "requested_num_phi_bins", "bg_stat_scale2"])
+    scale_column, scale_label = _scale_axis_metadata(scale_axis)
+    frame = frame.sort_values(["requested_num_t_bins", "requested_num_phi_bins", scale_column])
     for bin_label, group in frame.groupby("bin_label"):
-        group = group.sort_values("bg_stat_scale2")
+        group = group.sort_values(scale_column)
         try:
             group_t = int(group["requested_num_t_bins"].iloc[0])
             group_phi = int(group["requested_num_phi_bins"].iloc[0])
@@ -526,7 +541,7 @@ def _plot_full_phase_space_metric(ax, frame, metric, title, selected_bin):
 
         is_selected = selected_bin is not None and group_t == selected_bin[0] and group_phi == selected_bin[1]
         ax.plot(
-            group["bg_stat_scale2"],
+            group[scale_column],
             group[metric],
             marker="o",
             linewidth=2.4 if is_selected else 1.1,
@@ -537,7 +552,7 @@ def _plot_full_phase_space_metric(ax, frame, metric, title, selected_bin):
         chosen = group[group["selected_for_stage_bool"]]
         if not chosen.empty:
             ax.scatter(
-                chosen["bg_stat_scale2"],
+                chosen[scale_column],
                 chosen[metric],
                 s=70,
                 marker="*",
@@ -545,20 +560,22 @@ def _plot_full_phase_space_metric(ax, frame, metric, title, selected_bin):
                 zorder=5,
             )
 
-    ax.set_xlabel("BG_STAT_SCALE2")
+    ax.set_xlabel(scale_label)
     ax.set_ylabel(metric)
     ax.set_title(title)
     ax.grid(alpha=0.25)
 
 
-def _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, selected_bin):
+def _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, selected_bin):
     frame = scale_rows[
         (scale_rows["phi_setting"] == phi_setting)
         & (scale_rows["stage"] == stage)
+        & (scale_rows["scale_axis"] == scale_axis)
     ].copy()
     if frame.empty:
         return
 
+    _, scale_label = _scale_axis_metadata(scale_axis)
     fig, axes = plt.subplots(2, 2, figsize=(11.0, 8.5))
     axes = np.atleast_1d(axes).ravel()
     metrics = [
@@ -572,8 +589,9 @@ def _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, selected_bin
             ax,
             frame,
             metric,
-            "{} {}: {}".format(phi_setting, stage.capitalize(), title),
+            "{} {} {}: {}".format(phi_setting, stage.capitalize(), scale_label, title),
             selected_bin,
+            scale_axis,
         )
 
     handles, labels = axes[0].get_legend_handles_labels()
@@ -581,7 +599,7 @@ def _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, selected_bin
         fig.legend(handles, labels, loc="upper center", ncol=min(3, len(labels)), fontsize=8, frameon=False)
 
     fig.suptitle(
-        "Full phase-space scale evolution: {} ({})".format(phi_setting, stage.capitalize()),
+        "Full phase-space scale evolution: {} ({} {})".format(phi_setting, stage.capitalize(), scale_label),
         fontsize=15,
     )
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.93])
@@ -631,12 +649,13 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
             "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
             "  selection score:      {}".format(_format_metric(selected_row.get("composite_objective", float("nan")), "{:.4f}")),
             "",
-            "Selected BG_STAT_SCALE2 by phi:",
+            "Selected BG_STAT_SCALE1 / BG_STAT_SCALE2 by phi:",
         ])
         for _, row in selected_phi_rows.sort_values("phi_setting").iterrows():
             lines.append(
-                "  {:<8} scale={} fail={} mean_dev={} rms={} kin={} score={}".format(
+                "  {:<8} scale1={} scale2={} fail={} mean_dev={} rms={} kin={} score={}".format(
                     row["phi_setting"],
+                    _format_metric(row["bg_stat_scale1"], "{:.3f}"),
                     _format_metric(row["bg_stat_scale2"], "{:.3f}"),
                     int(row["ratio_fail_count"]),
                     _format_metric(row["ratio_mean_dev"], "{:.4f}"),
@@ -671,13 +690,14 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
             "  aggregate kin score:  {}".format(_format_metric(selected_row["kinematic_score"], "{:.4f}")),
             "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
             "",
-            "Per-phi selected BG_STAT_SCALE2:",
+            "Per-phi selected BG_STAT_SCALE1 / BG_STAT_SCALE2:",
         ])
 
     for _, row in selected_phi_rows.sort_values("phi_setting").iterrows():
         lines.append(
-            "  {:<8} scale={} fail={} mean_dev={} rms={} kin={} score={}".format(
+            "  {:<8} scale1={} scale2={} fail={} mean_dev={} rms={} kin={} score={}".format(
                 row["phi_setting"],
+                _format_metric(row["bg_stat_scale1"], "{:.3f}"),
                 _format_metric(row["bg_stat_scale2"], "{:.3f}"),
                 int(row["ratio_fail_count"]),
                 _format_metric(row["ratio_mean_dev"], "{:.4f}"),
@@ -690,7 +710,7 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
     _add_text_page(pdf, "High-E Fixed-Binning Summary", lines)
 
 
-def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale, logy=False):
+def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1, selected_scale2, logy=False):
     if hist_entry is None or inpDict is None:
         return False
 
@@ -791,7 +811,8 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale, 
     ax.legend(loc="best", fontsize=8)
 
     info_lines = [
-        "BG_STAT_SCALE2 = {}".format(_format_metric(selected_scale, "{:.3f}")),
+        "BG_STAT_SCALE1 = {}".format(_format_metric(selected_scale1, "{:.3f}")),
+        "BG_STAT_SCALE2 = {}".format(_format_metric(selected_scale2, "{:.3f}")),
         "window norm scale(simc->data) = {}".format(_format_metric(simc_scale, "{:.3f}")),
         scale_note,
         "check plot only; no analysis normalization changed",
@@ -893,15 +914,19 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
             if mode != "high":
                 _add_phi_heatmap_page(pdf, phi_setting, phi_rows.copy(), selected_bin)
 
-            selected_scale = float("nan")
+            selected_scale1 = float("nan")
+            selected_scale2 = float("nan")
             chosen = selected_phi_rows[selected_phi_rows["phi_setting"] == phi_setting]
             if not chosen.empty:
-                selected_scale = float(chosen.iloc[0]["bg_stat_scale2"])
+                selected_scale1 = float(chosen.iloc[0]["bg_stat_scale1"])
+                selected_scale2 = float(chosen.iloc[0]["bg_stat_scale2"])
 
-            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, selected_scale)
+            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale1", selected_scale1)
+            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale2", selected_scale2)
             if mode != "high":
-                for stage in ("coarse", "refined"):
-                    _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, selected_bin)
+                for scale_axis in ("bg_stat_scale1", "bg_stat_scale2"):
+                    for stage in ("coarse", "refined"):
+                        _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, selected_bin)
 
             hist_entry = _find_hist_entry(histlist, phi_setting)
             mm_overlay_added = _add_mm_overlay_page(
@@ -909,7 +934,8 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 hist_entry,
                 inpDict,
                 phi_setting,
-                selected_scale,
+                selected_scale1,
+                selected_scale2,
                 logy=False,
             ) or mm_overlay_added
             mm_overlay_added = _add_mm_overlay_page(
@@ -917,7 +943,8 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 hist_entry,
                 inpDict,
                 phi_setting,
-                selected_scale,
+                selected_scale1,
+                selected_scale2,
                 logy=True,
             ) or mm_overlay_added
 

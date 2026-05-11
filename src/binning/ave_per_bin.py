@@ -58,7 +58,7 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import resolve_bg_stat_scale2
+from background_config import resolve_bg_stat_scale1, resolve_bg_stat_scale2
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -714,7 +714,7 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Fit background and subtract
         # ---- Statistic‑scale for this (t,φ) bin ----------------
-        inpDict["bg_stat_scale1"] = 0.0
+        inpDict["bg_stat_scale1"] = resolve_bg_stat_scale1(inpDict, phi_setting)
         residual_bg_weights1 = None
         
         if inpDict["bg_stat_scale1"] > 0.0:

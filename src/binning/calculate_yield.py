@@ -59,7 +59,11 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import get_bg_scale_setting_key, resolve_bg_stat_scale2
+from background_config import (
+    get_bg_scale_setting_key,
+    resolve_bg_stat_scale1,
+    resolve_bg_stat_scale2,
+)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -1171,7 +1175,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
-            inpDict["bg_stat_scale1"] = 0.0
+            inpDict["bg_stat_scale1"] = resolve_bg_stat_scale1(inpDict, phi_setting)
             # ----------------------------------------------------------------
             residual_bg_weights1 = None
 
@@ -1555,6 +1559,10 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
     base_inp = dict(inpDict)
     base_inp["yield_emit_plots"] = False
     base_inp["suppress_bg_opt_warnings"] = True
+    base_inp["bg_stat_scale1"] = 0.0
+    base_inp["bg_stat_scale1_by_setting"] = {
+        get_bg_scale_setting_key(base_inp["EPSSET"], hist["phi_setting"]): 0.0
+    }
     base_inp["bg_stat_scale2"] = 0.0
     base_inp["bg_stat_scale2_by_setting"] = {
         get_bg_scale_setting_key(base_inp["EPSSET"], hist["phi_setting"]): 0.0
@@ -1600,12 +1608,13 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
 
     from background_fit import bg_fit
 
+    bg_scale1 = resolve_bg_stat_scale1(inpDict, phi_setting)
     bg_scale2 = resolve_bg_stat_scale2(inpDict, phi_setting)
     for j in range(len(t_bins) - 1):
         for k in range(len(phi_bins) - 1):
             entry = processed_dict["t_bin{}phi_bin{}".format(j + 1, k + 1)]
-
-            if bg_scale2 > 0.0:
+            residual_bg_weights1 = None
+            if bg_scale1 > 0.0 or bg_scale2 > 0.0:
                 hist_bin_dict = {
                     "H_Q2_DATA_{}_{}".format(j, k): entry["H_Q2_DATA"],
                     "H_W_DATA_{}_{}".format(j, k): entry["H_W_DATA"],
@@ -1620,7 +1629,60 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     "H_t_vs_tmin_DATA_{}_{}".format(j, k): entry["H_t_vs_tmin_DATA"],
                 }
 
-                fit_result = bg_fit(
+            if bg_scale1 > 0.0:
+                fit_result1 = bg_fit(
+                    phi_setting,
+                    inpDict,
+                    entry["H_MM_pisub_DATA"],
+                    entry["H_MM_DATA"],
+                    scaling=bg_scale1,
+                    model_key=f"fixquad_{phi_setting}_{EPSSET}e",
+                    fit_name="Fit 1",
+                )
+
+                mm_stage1_input = _clone_hist_for_plot(entry["H_MM_DATA"])
+                bg_weights1 = _subtract_yield_mm_background_for_bin(
+                    hist_bin_dict,
+                    j,
+                    k,
+                    mm_stage1_input,
+                    fit_result1[0],
+                    ave_event_cache,
+                    sub_event_cache,
+                    normfac_data,
+                    normfac_dummy,
+                    nWindows,
+                    entry["scale_factor"],
+                    ParticleType,
+                    POL,
+                )
+                residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
+                entry["H_MM_fit1sub_DATA"].Add(fit_result1[1], -1)
+                entry["H_MM_DATA"].Add(fit_result1[0], -1)
+
+                try:
+                    dN_bg_norm = float(fit_result1[4])
+                    hmm = entry["H_MM_DATA"]
+                    ax = hmm.GetXaxis()
+                    ib_lo = max(1, ax.FindBin(mm_min))
+                    ib_hi = min(ax.GetNbins(), ax.FindBin(mm_max))
+                    N_sig_norm = float(hmm.Integral(ib_lo, ib_hi))
+                    if N_sig_norm < 0.0:
+                        N_sig_norm = 0.0
+                    if N_sig_norm > 0.0:
+                        if (not math.isfinite(dN_bg_norm)) or (dN_bg_norm < 0.0):
+                            entry["bg_fit1_frac_err"] = 1.0
+                        else:
+                            entry["bg_fit1_frac_err"] = abs(dN_bg_norm) / N_sig_norm
+                    else:
+                        entry["bg_fit1_frac_err"] = 0.0
+                except Exception:
+                    entry["bg_fit1_frac_err"] = 1.0
+            else:
+                entry["bg_fit1_frac_err"] = 0.0
+
+            if bg_scale2 > 0.0:
+                fit_result2 = bg_fit(
                     phi_setting,
                     inpDict,
                     entry["H_MM_fit1sub_DATA"],
@@ -1636,7 +1698,7 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     j,
                     k,
                     mm_stage2_input,
-                    fit_result[0],
+                    fit_result2[0],
                     ave_event_cache,
                     sub_event_cache,
                     normfac_data,
@@ -1645,12 +1707,12 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     entry["scale_factor"],
                     ParticleType,
                     POL,
-                    residual_weights=None,
+                    residual_weights=residual_bg_weights1,
                 )
-                entry["H_MM_DATA"].Add(fit_result[0], -1)
+                entry["H_MM_DATA"].Add(fit_result2[0], -1)
 
                 try:
-                    dN_bg_norm = float(fit_result[4])
+                    dN_bg_norm = float(fit_result2[4])
                     hmm = entry["H_MM_DATA"]
                     ax = hmm.GetXaxis()
                     ib_lo = max(1, ax.FindBin(mm_min))
@@ -1667,7 +1729,10 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                         entry["bg_fit2_frac_err"] = 0.0
                 except Exception:
                     entry["bg_fit2_frac_err"] = 1.0
+            else:
+                entry["bg_fit2_frac_err"] = 0.0
 
+            if bg_scale1 > 0.0 or bg_scale2 > 0.0:
                 prune_hist(entry["H_MM_fit1sub_DATA"], event_threshold)
                 prune_hist(entry["H_MM_pisub_DATA"], event_threshold)
                 prune_hist(entry["H_MM_nosub_DATA"], event_threshold)

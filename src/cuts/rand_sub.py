@@ -59,6 +59,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     BG_OPT_MM_PLOT_NBINS,
+    resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
 from mm_background_subtraction import (
@@ -2229,7 +2230,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     # --------------------------------------------------------------
     # Stat‑scale: events that survive ALL subtractions & MM‑cuts
     # --------------------------------------------------------------
-    inpDict["bg_stat_scale1"] = 0.0
+    inpDict["bg_stat_scale1"] = resolve_bg_stat_scale1(inpDict, phi_setting)
     residual_bg_weights1 = None
     background_fit1 = None
     background_fit2 = None
