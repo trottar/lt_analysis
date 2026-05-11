@@ -186,22 +186,21 @@ def _window_integral(hist, x_min, x_max):
     return float(hist.Integral(axis.FindBin(float(x_min)), axis.FindBin(float(x_max))))
 
 
-def _sample_function(func, x_min, x_max, n_points=600):
+def _sample_function(func, x_min=None, x_max=None, n_points=600):
     if func is None or not hasattr(func, "Eval"):
         return None, None
-    xs = np.linspace(float(x_min), float(x_max), int(n_points))
-    ys = np.array([float(func.Eval(float(x_val))) for x_val in xs], dtype=float)
-    return xs, ys
-
-
-def _sum_function_curves(functions, x_min, x_max, n_points=600):
-    active_functions = [func for func in functions if func is not None and hasattr(func, "Eval")]
-    if not active_functions:
+    if x_min is None:
+        x_min = float(func.GetXmin()) if hasattr(func, "GetXmin") else None
+    if x_max is None:
+        x_max = float(func.GetXmax()) if hasattr(func, "GetXmax") else None
+    if x_min is None or x_max is None:
         return None, None
-    xs = np.linspace(float(x_min), float(x_max), int(n_points))
-    ys = np.zeros_like(xs)
-    for func in active_functions:
-        ys += np.array([float(func.Eval(float(x_val))) for x_val in xs], dtype=float)
+    x_min = float(x_min)
+    x_max = float(x_max)
+    if not math.isfinite(x_min) or not math.isfinite(x_max) or x_max <= x_min:
+        return None, None
+    xs = np.linspace(x_min, x_max, int(n_points))
+    ys = np.array([float(func.Eval(float(x_val))) for x_val in xs], dtype=float)
     return xs, ys
 
 
@@ -762,7 +761,11 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         label="SIMC (scaled in MM window)",
     )
 
-    x_fit1, y_fit1 = _sample_function(fit1_func, x_min, x_max)
+    x_fit1, y_fit1 = _sample_function(
+        fit1_func,
+        x_min=max(x_min, float(fit1_func.GetXmin())) if fit1_func is not None and hasattr(fit1_func, "GetXmin") else x_min,
+        x_max=min(x_max, float(fit1_func.GetXmax())) if fit1_func is not None and hasattr(fit1_func, "GetXmax") else x_max,
+    )
     if x_fit1 is not None:
         ax.plot(
             x_fit1,
@@ -773,7 +776,11 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
             label="empirical fit 1",
         )
 
-    x_fit2, y_fit2 = _sample_function(fit2_func, x_min, x_max)
+    x_fit2, y_fit2 = _sample_function(
+        fit2_func,
+        x_min=max(x_min, float(fit2_func.GetXmin())) if fit2_func is not None and hasattr(fit2_func, "GetXmin") else x_min,
+        x_max=min(x_max, float(fit2_func.GetXmax())) if fit2_func is not None and hasattr(fit2_func, "GetXmax") else x_max,
+    )
     if x_fit2 is not None:
         ax.plot(
             x_fit2,
@@ -782,16 +789,6 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
             linewidth=1.8,
             linestyle="-.",
             label="empirical fit 2",
-        )
-
-    x_total, y_total = _sum_function_curves((fit1_func, fit2_func), x_min, x_max)
-    if x_total is not None:
-        ax.plot(
-            x_total,
-            _for_log(y_total) if logy else y_total,
-            color="#9467bd",
-            linewidth=2.2,
-            label="empirical fit total",
         )
 
     ax.axvline(mm_min, color="#1f77b4", linestyle=":", linewidth=1.5)
