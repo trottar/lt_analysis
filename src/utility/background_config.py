@@ -242,76 +242,76 @@ BG_MODELS = {
             "Fit 1" : {
                 # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "fixquad_Center_lowe": {
-                    "cheb2_Center_highe": {
-                    "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
-                    "n_par":      3,
+                    # quadratic, forced to be 0 at x = 1.12
+                    "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
+                    "n_par":      2,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),
-                        "left":  (1.12, 1.15),
-                        "right": (1.22, 1.25),
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21),
                     }
                 },
 
                 # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "fixquad_Left_lowe": {
-                "cheb2_Center_highe": {
-                    "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
-                    "n_par":      3,
+                    # quadratic, forced to be 0 at x = 1.12
+                    "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
+                    "n_par":      2,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),
-                        "left":  (1.12, 1.15),
-                        "right": (1.22, 1.25),
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21),
                     }
                 },
 
                 # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "fixquad_Center_highe": {
-                "cheb2_Center_highe": {
-                    "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
-                    "n_par":      3,
+                    # quadratic, forced to be 0 at x = 1.12
+                    "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
+                    "n_par":      2,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),
-                        "left":  (1.12, 1.15),
-                        "right": (1.22, 1.25),
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21),
                     }
                 },
 
                 # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "fixquad_Left_highe": {
-                "cheb2_Center_highe": {
-                    "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
-                    "n_par":      3,
+                    # quadratic, forced to be 0 at x = 1.12
+                    "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
+                    "n_par":      2,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),
-                        "left":  (1.12, 1.15),
-                        "right": (1.22, 1.25),
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21),
                     }
                 },
 
                     # --- ** GOOD ** 2nd-order Chebyshev ---------------------------
                 "fixquad_Right_highe": {
-                "cheb2_Center_highe": {
-                    "func_expr": "cheb2", # 2nd-order Chebyshev polynomial
-                    "n_par":      3,
+                    # quadratic, forced to be 0 at x = 1.12
+                    "func_expr": "[0]*(x-1.12) + [1]*(x-1.12)*(x-1.12)",
+                    "n_par":      2,
                     "sidebands": {
-                        #"left":  (1.08, 1.10), #Q4p4W2p74
-                        #"right": (1.20, 1.25), #Q4p4W2p74
+                        "left":  (1.08, 1.10), #Q4p4W2p74
+                        "right": (1.20, 1.25), #Q4p4W2p74
                         #"left":  (1.06, 1.10),
                         #"right": (1.18, 1.21),
-                        "left":  (1.12, 1.15),
-                        "right": (1.22, 1.25),
+                        #"left":  (1.12, 1.15),
+                        #"right": (1.16, 1.21),
                     }
                 },
             },
