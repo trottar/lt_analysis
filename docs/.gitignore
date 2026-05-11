@@ -1,1 +1,5 @@
+*.pdf
+*.tar
+*.tar.gz
+pdf_text/
 !.gitignore
