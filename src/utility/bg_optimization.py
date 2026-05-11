@@ -136,11 +136,30 @@ def _candidate_sort_key(result):
     )
 
 
+def _result_bin_count_key(result):
+    proposal = result.get("proposal", {}) if isinstance(result, dict) else {}
+    actual_t = proposal.get("actual_num_t_bins", result.get("actual_num_t_bins", result.get("requested_num_t_bins", 0)))
+    actual_phi = proposal.get("actual_num_phi_bins", result.get("actual_num_phi_bins", result.get("requested_num_phi_bins", 0)))
+    try:
+        actual_t = int(actual_t)
+    except Exception:
+        actual_t = 0
+    try:
+        actual_phi = int(actual_phi)
+    except Exception:
+        actual_phi = 0
+    return actual_t * actual_phi, actual_t, actual_phi
+
+
 def _candidate_order_key(result):
     metrics = result.get("metrics", {})
+    total_bins, actual_t, actual_phi = _result_bin_count_key(result)
     if _get_selection_mode() == "weighted":
         return (
             _safe_float(result.get("selection_score"), default=float("inf")),
+            -int(total_bins),
+            -int(actual_t),
+            -int(actual_phi),
             int(metrics.get("ratio_fail_count", 10**9)),
             _safe_float(metrics.get("ratio_mean_dev"), default=float("inf")),
             _safe_float(metrics.get("ratio_rms"), default=float("inf")),

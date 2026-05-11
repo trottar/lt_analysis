@@ -129,13 +129,9 @@ def _select_aggregate_row(aggregate):
 
     selected = aggregate[aggregate["selected_bin_candidate_bool"]]
     if not selected.empty:
-        return selected.sort_values(
-            ["ratio_fail_count", "ratio_mean_dev", "ratio_rms", "kinematic_score"]
-        ).iloc[0]
+        return _sort_aggregate_candidates(selected).iloc[0]
 
-    return aggregate.sort_values(
-        ["composite_objective", "ratio_fail_count", "ratio_rms", "ratio_mean_dev", "kinematic_score"]
-    ).iloc[0]
+    return _sort_aggregate_candidates(aggregate).iloc[0]
 
 
 def _selected_bin_tuple(selected_row):
@@ -148,6 +144,36 @@ def _selected_bin_tuple(selected_row):
         )
     except Exception:
         return None
+
+
+def _bin_count_sort_columns(frame):
+    work = frame.copy()
+    if "requested_num_t_bins" not in work.columns:
+        work["requested_num_t_bins"] = 0
+    if "requested_num_phi_bins" not in work.columns:
+        work["requested_num_phi_bins"] = 0
+    work["_total_bins"] = (
+        pd.to_numeric(work["requested_num_t_bins"], errors="coerce").fillna(0.0)
+        * pd.to_numeric(work["requested_num_phi_bins"], errors="coerce").fillna(0.0)
+    )
+    return work
+
+
+def _sort_aggregate_candidates(frame):
+    work = _bin_count_sort_columns(frame)
+    return work.sort_values(
+        [
+            "composite_objective",
+            "_total_bins",
+            "requested_num_t_bins",
+            "requested_num_phi_bins",
+            "ratio_fail_count",
+            "ratio_rms",
+            "ratio_mean_dev",
+            "kinematic_score",
+        ],
+        ascending=[True, False, False, False, True, True, True, True],
+    )
 
 
 def _find_hist_entry(histlist, phi_setting):
@@ -310,9 +336,7 @@ def _add_top_candidates_page(pdf, aggregate, selected_bin):
     if aggregate.empty:
         return
 
-    top = aggregate.sort_values(
-        ["composite_objective", "ratio_fail_count", "ratio_rms", "ratio_mean_dev", "kinematic_score"]
-    ).head(12)
+    top = _sort_aggregate_candidates(aggregate).head(12)
 
     score_label = "selection score" if "selection_score" in aggregate.columns and aggregate["selection_score"].notna().any() else "composite objective"
 
