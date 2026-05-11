@@ -738,9 +738,12 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         return False
 
     data_hist = hist_entry.get("H_MM_pisub_DATA")
+    fit2_input_hist = hist_entry.get("H_MM_fit1sub_DATA")
     simc_hist = hist_entry.get("H_MM_full_SIMC")
     if data_hist is None or simc_hist is None:
         return False
+    if fit2_input_hist is None:
+        fit2_input_hist = data_hist
 
     fit1_func = hist_entry.get("BG_FIT1_VIS_DATA")
     fit2_func = hist_entry.get("BG_FIT2_VIS_DATA")
@@ -761,6 +764,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         scale_note = "SIMC scaled to data inside MM cut window"
 
     x_data, y_data = _hist_to_arrays(data_hist)
+    x_fit2_input, y_fit2_input = _hist_to_arrays(fit2_input_hist)
     x_simc, y_simc = _hist_to_arrays(simc_hist, scale=simc_scale)
     x_min, x_max = _hist_bounds(data_hist)
     if x_data is None or x_simc is None or x_min is None or x_max is None:
@@ -773,8 +777,18 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         where="mid",
         color="black",
         linewidth=1.8,
-        label="data (rand/dummy/pi sub, pre empirical fit)",
+        label="data input to fit1 (rand/dummy/pi sub)",
     )
+    if x_fit2_input is not None and fit2_func is not None:
+        ax.step(
+            x_fit2_input,
+            _for_log(y_fit2_input) if logy else y_fit2_input,
+            where="mid",
+            color="0.45",
+            linewidth=1.5,
+            alpha=0.95,
+            label="data input to fit2 (after fit1 subtraction)",
+        )
     ax.step(
         x_simc,
         _for_log(y_simc) if logy else y_simc,
@@ -797,7 +811,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
             color="#1f77b4",
             linewidth=1.8,
             linestyle="--",
-            label="empirical fit 1",
+            label="empirical fit 1 on fit1 input",
         )
 
     x_fit2, y_fit2 = _sample_function(
@@ -812,7 +826,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
             color="#2ca02c",
             linewidth=1.8,
             linestyle="-.",
-            label="empirical fit 2",
+            label="empirical fit 2 on fit2 input",
         )
 
     ax.axvline(mm_min, color="#1f77b4", linestyle=":", linewidth=1.5)
@@ -836,6 +850,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         "BG_STAT_SCALE2 = {}".format(_format_metric(selected_scale2, "{:.3f}")),
         "window norm scale(simc->data) = {}".format(_format_metric(simc_scale, "{:.3f}")),
         scale_note,
+        "Fit 1 uses black spectrum; Fit 2 uses gray spectrum",
         "check plot only; no analysis normalization changed",
     ]
     ax.text(
