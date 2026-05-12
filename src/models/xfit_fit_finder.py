@@ -46,7 +46,7 @@ def compute_iteration_ic(red_chi2, num_events, num_params):
         return 0.0, 0.0
     return calculate_information_criteria(num_events, num_params, red_chi2 * ndf)
 
-def build_signal_graph(nsep, sig_name, selection_expr="", wfactor_values=None):
+def build_signal_graph(nsep, sig_name, selection_expr="", wfactor_scale=None):
     draw_expr = f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e"
     nsep.Draw(draw_expr, selection_expr, "goff")
     n_points = nsep.GetSelectedRows()
@@ -55,11 +55,13 @@ def build_signal_graph(nsep, sig_name, selection_expr="", wfactor_values=None):
         x_val = nsep.GetV2()[i_point]
         y_val = nsep.GetV1()[i_point]
         y_err = nsep.GetV3()[i_point]
-        if wfactor_values is not None and i_point < len(wfactor_values):
-            wfactor = wfactor_values[i_point]
-            if math.isfinite(wfactor) and abs(wfactor) > 1.0e-15:
-                y_val /= wfactor
-                y_err /= abs(wfactor)
+        if (
+            wfactor_scale is not None
+            and math.isfinite(wfactor_scale)
+            and abs(wfactor_scale) > 1.0e-15
+        ):
+            y_val /= wfactor_scale
+            y_err /= abs(wfactor_scale)
         graph.SetPoint(i_point, x_val, y_val)
         graph.SetPointError(i_point, 0, y_err)
     return graph, n_points
@@ -513,7 +515,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 graphs_sig_ic_bic.append(graph_sig_bic)
 
                 g_sig, fit_num_events = build_signal_graph(
-                    nsep, sig_name, wfactor_values=g_vec
+                    nsep, sig_name, wfactor_scale=g_vec[b]
                 )
                 if fit_num_events == 0:
                     print(f"WARNING: No data points selected for Sig {sig_name}. Skipping.")
@@ -1304,7 +1306,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                       f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
                 g_sig, fit_num_events = build_signal_graph(
-                    nsep, sig_name, wfactor_values=g_vec
+                    nsep, sig_name, wfactor_scale=g_vec[b]
                 )
                 if fit_num_events == 0:
                     print(f"WARNING: No data points selected for Sig {sig_name}. Skipping.")
