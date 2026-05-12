@@ -51,6 +51,10 @@ def build_signal_graph(nsep, sig_name, selection_expr="", wfactor_scale=None):
     nsep.Draw(draw_expr, selection_expr, "goff")
     n_points = nsep.GetSelectedRows()
     graph = TGraphErrors()
+    # x_sep stores separated cross sections in the same units used by lt_2D_fit:
+    # weighted by W, converted to nb, and divided by 2pi. The xfit sig_* model
+    # functions are the raw structure functions, so undo that mapping here.
+    model_unit_scale = (2.0 * PI) / 1.0e3
     for i_point in range(n_points):
         x_val = nsep.GetV2()[i_point]
         y_val = nsep.GetV1()[i_point]
@@ -60,8 +64,8 @@ def build_signal_graph(nsep, sig_name, selection_expr="", wfactor_scale=None):
             and math.isfinite(wfactor_scale)
             and abs(wfactor_scale) > 1.0e-15
         ):
-            y_val /= wfactor_scale
-            y_err /= abs(wfactor_scale)
+            y_val = (y_val * model_unit_scale) / wfactor_scale
+            y_err = (y_err * model_unit_scale) / abs(wfactor_scale)
         graph.SetPoint(i_point, x_val, y_val)
         graph.SetPointError(i_point, 0, y_err)
     return graph, n_points
@@ -1006,11 +1010,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (W-factor Removed)")
+                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (Model Units)")
                 graphs_sig_fit[it].Draw("A*")
                 graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
                 graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^{2}]")
+                graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [#mu b/GeV^{{2}}]")
                 graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
                 graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
                 graphs_sig_fit[it].GetYaxis().CenterTitle()
@@ -1338,11 +1342,11 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     par_chi2_vec[4*it + j] = best_overall_chi2
 
                 c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (W-factor Removed)")
+                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (Model Units)")
                 graphs_sig_fit[it].Draw("A*")
                 graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
                 graphs_sig_fit[it].GetXaxis().CenterTitle()
-                graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [nb/GeV^{2}]")
+                graphs_sig_fit[it].GetYaxis().SetTitle(f"#left(#frac{{#it{{d#sigma}}}}{{#it{{dt}}}}#right)_{{{sig_name}}} [#mu b/GeV^{{2}}]")
                 graphs_sig_fit[it].GetYaxis().SetTitleOffset(1.5)
                 graphs_sig_fit[it].GetYaxis().SetTitleSize(0.035)
                 graphs_sig_fit[it].GetYaxis().CenterTitle()
