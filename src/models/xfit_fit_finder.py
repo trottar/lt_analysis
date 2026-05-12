@@ -46,7 +46,7 @@ def compute_iteration_ic(red_chi2, num_events, num_params):
         return 0.0, 0.0
     return calculate_information_criteria(num_events, num_params, red_chi2 * ndf)
 
-def build_signal_graph(nsep, sig_name, selection_expr=""):
+def build_signal_graph(nsep, sig_name, selection_expr="", wfactor_values=None):
     draw_expr = f"sig{sig_name.lower()}:t:sig{sig_name.lower()}_e"
     nsep.Draw(draw_expr, selection_expr, "goff")
     n_points = nsep.GetSelectedRows()
@@ -55,6 +55,11 @@ def build_signal_graph(nsep, sig_name, selection_expr=""):
         x_val = nsep.GetV2()[i_point]
         y_val = nsep.GetV1()[i_point]
         y_err = nsep.GetV3()[i_point]
+        if wfactor_values is not None and i_point < len(wfactor_values):
+            wfactor = wfactor_values[i_point]
+            if math.isfinite(wfactor) and abs(wfactor) > 1.0e-15:
+                y_val /= wfactor
+                y_err /= abs(wfactor)
         graph.SetPoint(i_point, x_val, y_val)
         graph.SetPointError(i_point, 0, y_err)
     return graph, n_points
@@ -507,7 +512,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 graphs_sig_ic_aic.append(graph_sig_aic)
                 graphs_sig_ic_bic.append(graph_sig_bic)
 
-                g_sig, fit_num_events = build_signal_graph(nsep, sig_name)
+                g_sig, fit_num_events = build_signal_graph(
+                    nsep, sig_name, wfactor_values=g_vec
+                )
                 if fit_num_events == 0:
                     print(f"WARNING: No data points selected for Sig {sig_name}. Skipping.")
                     continue
@@ -1000,7 +1007,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
 
                 # Plot the final model fit
                 c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (W-factor Removed)")
                 graphs_sig_fit[it].Draw("A*")
                 graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
                 graphs_sig_fit[it].GetXaxis().CenterTitle()
@@ -1296,7 +1303,9 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                 print(f"Determining best fit for bin: t={t_vec[b]:.3f}, Q2={q2_vec[b]:.3f}, "
                       f"W={w_vec[b]:.3f}, theta={th_vec[b]:.3f}")
 
-                g_sig, fit_num_events = build_signal_graph(nsep, sig_name)
+                g_sig, fit_num_events = build_signal_graph(
+                    nsep, sig_name, wfactor_values=g_vec
+                )
                 if fit_num_events == 0:
                     print(f"WARNING: No data points selected for Sig {sig_name}. Skipping.")
                     continue
@@ -1330,7 +1339,7 @@ def parameterize(inpDict, par_vec, par_err_vec, par_chi2_vec, fixed_params, outp
                     par_chi2_vec[4*it + j] = best_overall_chi2
 
                 c2.cd(it+1).SetLeftMargin(0.12)
-                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit")
+                graphs_sig_fit[it].SetTitle(f"Sigma {sig_name} Model Fit (W-factor Removed)")
                 graphs_sig_fit[it].Draw("A*")
                 graphs_sig_fit[it].GetXaxis().SetTitle("#it{-t} [GeV^{2}]")
                 graphs_sig_fit[it].GetXaxis().CenterTitle()
