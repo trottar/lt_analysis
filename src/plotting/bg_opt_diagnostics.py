@@ -54,6 +54,13 @@ def _safe_int(value, default=0):
     return int(numeric)
 
 
+def _safe_tick_label(value):
+    coerced = _safe_int(value, None)
+    if coerced is None:
+        return str(value)
+    return str(coerced)
+
+
 def _minmax_lower(series):
     series = pd.to_numeric(series, errors="coerce")
     valid = series.dropna()
@@ -290,9 +297,9 @@ def _draw_heatmap(ax, frame, metric, title, selected_bin=None, fmt="{:.2f}", cma
     values = np.ma.masked_invalid(pivot.values.astype(float))
     im = ax.imshow(values, aspect="auto", cmap=cmap)
     ax.set_xticks(np.arange(len(pivot.columns)))
-    ax.set_xticklabels([str(int(val)) for val in pivot.columns])
+    ax.set_xticklabels([_safe_tick_label(val) for val in pivot.columns])
     ax.set_yticks(np.arange(len(pivot.index)))
-    ax.set_yticklabels([str(int(val)) for val in pivot.index])
+    ax.set_yticklabels([_safe_tick_label(val) for val in pivot.index])
     ax.set_xlabel("Requested phi bins")
     ax.set_ylabel("Requested t bins")
     ax.set_title(title)
@@ -897,6 +904,19 @@ def _add_mm_overlay_unavailable_page(pdf):
     )
 
 
+def _add_section_error_page(pdf, section_title, exc):
+    _add_text_page(
+        pdf,
+        "{} Error".format(section_title),
+        [
+            "The optimizer diagnostics encountered an exception while building this section.",
+            "",
+            "section: {}".format(section_title),
+            "error:   {}".format(exc),
+        ],
+    )
+
+
 def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inpDict=None):
     csv_path = Path(csv_path)
     if pdf_path is None:
@@ -926,9 +946,15 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
         )
 
         if mode == "high":
-            _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows)
+            try:
+                _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows)
+            except Exception as exc:
+                _add_section_error_page(pdf, "High-E Fixed-Binning Summary", exc)
         else:
-            _add_top_candidates_page(pdf, aggregate, selected_bin)
+            try:
+                _add_top_candidates_page(pdf, aggregate, selected_bin)
+            except Exception as exc:
+                _add_section_error_page(pdf, "Aggregate Candidate Ranking", exc)
 
             composite_title = "Aggregate bin scan: weighted selection score"
             if "selection_score" not in aggregate.columns or not aggregate["selection_score"].notna().any():
@@ -943,22 +969,31 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 ("composite_objective", composite_title, "{:.3f}", "cividis_r"),
             ]
             for metric, title, fmt, cmap in heatmap_specs:
-                _add_heatmap_page(
-                    pdf,
-                    aggregate,
-                    metric=metric,
-                    title=title,
-                    selected_bin=selected_bin,
-                    fmt=fmt,
-                    cmap=cmap,
-                )
+                try:
+                    _add_heatmap_page(
+                        pdf,
+                        aggregate,
+                        metric=metric,
+                        title=title,
+                        selected_bin=selected_bin,
+                        fmt=fmt,
+                        cmap=cmap,
+                    )
+                except Exception as exc:
+                    _add_section_error_page(pdf, title, exc)
 
-            _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin)
+            try:
+                _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin)
+            except Exception as exc:
+                _add_section_error_page(pdf, "Aggregate Tradeoff", exc)
 
         mm_overlay_added = False
         for phi_setting, phi_rows in phi_selected.groupby("phi_setting"):
             if mode != "high":
-                _add_phi_heatmap_page(pdf, phi_setting, phi_rows.copy(), selected_bin)
+                try:
+                    _add_phi_heatmap_page(pdf, phi_setting, phi_rows.copy(), selected_bin)
+                except Exception as exc:
+                    _add_section_error_page(pdf, "{} Per-Phi Heatmaps".format(phi_setting), exc)
 
             selected_scale1 = float("nan")
             selected_scale2 = float("nan")
@@ -967,32 +1002,47 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 selected_scale1 = float(chosen.iloc[0]["bg_stat_scale1"])
                 selected_scale2 = float(chosen.iloc[0]["bg_stat_scale2"])
 
-            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale1", selected_scale1)
-            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale2", selected_scale2)
+            try:
+                _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale1", selected_scale1)
+            except Exception as exc:
+                _add_section_error_page(pdf, "{} BG_STAT_SCALE1 Scan".format(phi_setting), exc)
+            try:
+                _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale2", selected_scale2)
+            except Exception as exc:
+                _add_section_error_page(pdf, "{} BG_STAT_SCALE2 Scan".format(phi_setting), exc)
             if mode != "high":
                 for scale_axis in ("bg_stat_scale1", "bg_stat_scale2"):
                     for stage in ("coarse", "refined"):
-                        _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, selected_bin)
+                        try:
+                            _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, selected_bin)
+                        except Exception as exc:
+                            _add_section_error_page(pdf, "{} {} {}".format(phi_setting, stage.capitalize(), scale_axis.upper()), exc)
 
             hist_entry = _find_hist_entry(histlist, phi_setting)
-            mm_overlay_added = _add_mm_overlay_page(
-                pdf,
-                hist_entry,
-                inpDict,
-                phi_setting,
-                selected_scale1,
-                selected_scale2,
-                logy=False,
-            ) or mm_overlay_added
-            mm_overlay_added = _add_mm_overlay_page(
-                pdf,
-                hist_entry,
-                inpDict,
-                phi_setting,
-                selected_scale1,
-                selected_scale2,
-                logy=True,
-            ) or mm_overlay_added
+            try:
+                mm_overlay_added = _add_mm_overlay_page(
+                    pdf,
+                    hist_entry,
+                    inpDict,
+                    phi_setting,
+                    selected_scale1,
+                    selected_scale2,
+                    logy=False,
+                ) or mm_overlay_added
+            except Exception as exc:
+                _add_section_error_page(pdf, "{} MM Diagnostic (linear)".format(phi_setting), exc)
+            try:
+                mm_overlay_added = _add_mm_overlay_page(
+                    pdf,
+                    hist_entry,
+                    inpDict,
+                    phi_setting,
+                    selected_scale1,
+                    selected_scale2,
+                    logy=True,
+                ) or mm_overlay_added
+            except Exception as exc:
+                _add_section_error_page(pdf, "{} MM Diagnostic (log)".format(phi_setting), exc)
 
         if histlist is None or inpDict is None:
             _add_mm_overlay_unavailable_page(pdf)
