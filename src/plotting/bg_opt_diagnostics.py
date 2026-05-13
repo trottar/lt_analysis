@@ -39,26 +39,9 @@ def _to_numeric_columns(df, columns):
 
 def _format_bin_label(row):
     try:
-        return "{}t x {}phi".format(_safe_int(row["requested_num_t_bins"], 0), _safe_int(row["requested_num_phi_bins"], 0))
+        return "{}t x {}phi".format(int(row["requested_num_t_bins"]), int(row["requested_num_phi_bins"]))
     except Exception:
         return "unknown"
-
-
-def _safe_int(value, default=0):
-    try:
-        numeric = float(value)
-    except Exception:
-        return default
-    if not math.isfinite(numeric):
-        return default
-    return int(numeric)
-
-
-def _safe_tick_label(value):
-    coerced = _safe_int(value, None)
-    if coerced is None:
-        return str(value)
-    return str(coerced)
 
 
 def _minmax_lower(series):
@@ -156,8 +139,8 @@ def _selected_bin_tuple(selected_row):
         return None
     try:
         return (
-            _safe_int(selected_row["requested_num_t_bins"], None),
-            _safe_int(selected_row["requested_num_phi_bins"], None),
+            int(selected_row["requested_num_t_bins"]),
+            int(selected_row["requested_num_phi_bins"]),
         )
     except Exception:
         return None
@@ -297,9 +280,9 @@ def _draw_heatmap(ax, frame, metric, title, selected_bin=None, fmt="{:.2f}", cma
     values = np.ma.masked_invalid(pivot.values.astype(float))
     im = ax.imshow(values, aspect="auto", cmap=cmap)
     ax.set_xticks(np.arange(len(pivot.columns)))
-    ax.set_xticklabels([_safe_tick_label(val) for val in pivot.columns])
+    ax.set_xticklabels([str(int(val)) for val in pivot.columns])
     ax.set_yticks(np.arange(len(pivot.index)))
-    ax.set_yticklabels([_safe_tick_label(val) for val in pivot.index])
+    ax.set_yticklabels([str(int(val)) for val in pivot.index])
     ax.set_xlabel("Requested phi bins")
     ax.set_ylabel("Requested t bins")
     ax.set_title(title)
@@ -367,19 +350,19 @@ def _add_top_candidates_page(pdf, aggregate, selected_bin):
         marker = "*"
         if selected_bin is not None:
             marker = "*" if (
-                _safe_int(row["requested_num_t_bins"], None) == selected_bin[0]
-                and _safe_int(row["requested_num_phi_bins"], None) == selected_bin[1]
+                int(row["requested_num_t_bins"]) == selected_bin[0]
+                and int(row["requested_num_phi_bins"]) == selected_bin[1]
             ) else " "
         lines.append(
                 "{:>4}   {}   {:<10} {:>4}   {:>8}   {:>7}  {:>7}  {:>5}   {:>8}".format(
                     rank,
                     marker,
                     row["bin_label"],
-                _safe_int(row["ratio_fail_count"], -1),
+                int(row["ratio_fail_count"]),
                 _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                 _format_metric(row["ratio_rms"], "{:.4f}"),
                 _format_metric(row["kinematic_score"], "{:.4f}"),
-                _safe_int(row["valid_ratio_bins"], -1),
+                int(row["valid_ratio_bins"]),
                     _format_metric(row["composite_objective"], "{:.4f}"),
                 )
         )
@@ -403,8 +386,8 @@ def _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin):
 
     for _, row in aggregate.iterrows():
         is_selected = selected_bin is not None and (
-            _safe_int(row["requested_num_t_bins"], None) == selected_bin[0]
-            and _safe_int(row["requested_num_phi_bins"], None) == selected_bin[1]
+            int(row["requested_num_t_bins"]) == selected_bin[0]
+            and int(row["requested_num_phi_bins"]) == selected_bin[1]
         )
         ax.annotate(
             row["bin_label"],
@@ -679,14 +662,14 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
         lines.extend([
             "Selected shared binning:",
             "  requested bins: {}t x {}phi".format(
-                _safe_int(selected_row["requested_num_t_bins"], 0),
-                _safe_int(selected_row["requested_num_phi_bins"], 0),
+                int(selected_row["requested_num_t_bins"]),
+                int(selected_row["requested_num_phi_bins"]),
             ),
-            "  aggregate fail count: {}".format(_safe_int(selected_row["ratio_fail_count"], -1)),
+            "  aggregate fail count: {}".format(int(selected_row["ratio_fail_count"])),
             "  aggregate mean_dev:   {}".format(_format_metric(selected_row["ratio_mean_dev"], "{:.4f}")),
             "  aggregate rms:        {}".format(_format_metric(selected_row["ratio_rms"], "{:.4f}")),
             "  aggregate kin score:  {}".format(_format_metric(selected_row["kinematic_score"], "{:.4f}")),
-            "  valid ratio bins:     {}".format(_safe_int(selected_row["valid_ratio_bins"], -1)),
+            "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
             "  selection score:      {}".format(_format_metric(selected_row.get("composite_objective", float("nan")), "{:.4f}")),
             "",
             "Selected BG_STAT_SCALE1 / BG_STAT_SCALE2 by phi:",
@@ -697,7 +680,7 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
                     row["phi_setting"],
                     _format_metric(row["bg_stat_scale1"], "{:.3f}"),
                     _format_metric(row["bg_stat_scale2"], "{:.3f}"),
-                    _safe_int(row["ratio_fail_count"], -1),
+                    int(row["ratio_fail_count"]),
                     _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                     _format_metric(row["ratio_rms"], "{:.4f}"),
                     _format_metric(row["kinematic_score"], "{:.4f}"),
@@ -721,14 +704,14 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
         lines.extend([
             "Fixed shared binning:",
             "  requested bins: {}t x {}phi".format(
-                _safe_int(selected_row["requested_num_t_bins"], 0),
-                _safe_int(selected_row["requested_num_phi_bins"], 0),
+                int(selected_row["requested_num_t_bins"]),
+                int(selected_row["requested_num_phi_bins"]),
             ),
-            "  aggregate fail count: {}".format(_safe_int(selected_row["ratio_fail_count"], -1)),
+            "  aggregate fail count: {}".format(int(selected_row["ratio_fail_count"])),
             "  aggregate mean_dev:   {}".format(_format_metric(selected_row["ratio_mean_dev"], "{:.4f}")),
             "  aggregate rms:        {}".format(_format_metric(selected_row["ratio_rms"], "{:.4f}")),
             "  aggregate kin score:  {}".format(_format_metric(selected_row["kinematic_score"], "{:.4f}")),
-            "  valid ratio bins:     {}".format(_safe_int(selected_row["valid_ratio_bins"], -1)),
+            "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
             "",
             "Per-phi selected BG_STAT_SCALE1 / BG_STAT_SCALE2:",
         ])
@@ -739,7 +722,7 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
                 row["phi_setting"],
                 _format_metric(row["bg_stat_scale1"], "{:.3f}"),
                 _format_metric(row["bg_stat_scale2"], "{:.3f}"),
-                _safe_int(row["ratio_fail_count"], -1),
+                int(row["ratio_fail_count"]),
                 _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                 _format_metric(row["ratio_rms"], "{:.4f}"),
                 _format_metric(row["kinematic_score"], "{:.4f}"),
@@ -904,19 +887,6 @@ def _add_mm_overlay_unavailable_page(pdf):
     )
 
 
-def _add_section_error_page(pdf, section_title, exc):
-    _add_text_page(
-        pdf,
-        "{} Error".format(section_title),
-        [
-            "The optimizer diagnostics encountered an exception while building this section.",
-            "",
-            "section: {}".format(section_title),
-            "error:   {}".format(exc),
-        ],
-    )
-
-
 def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inpDict=None):
     csv_path = Path(csv_path)
     if pdf_path is None:
@@ -946,15 +916,9 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
         )
 
         if mode == "high":
-            try:
-                _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows)
-            except Exception as exc:
-                _add_section_error_page(pdf, "High-E Fixed-Binning Summary", exc)
+            _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows)
         else:
-            try:
-                _add_top_candidates_page(pdf, aggregate, selected_bin)
-            except Exception as exc:
-                _add_section_error_page(pdf, "Aggregate Candidate Ranking", exc)
+            _add_top_candidates_page(pdf, aggregate, selected_bin)
 
             composite_title = "Aggregate bin scan: weighted selection score"
             if "selection_score" not in aggregate.columns or not aggregate["selection_score"].notna().any():
@@ -969,31 +933,22 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 ("composite_objective", composite_title, "{:.3f}", "cividis_r"),
             ]
             for metric, title, fmt, cmap in heatmap_specs:
-                try:
-                    _add_heatmap_page(
-                        pdf,
-                        aggregate,
-                        metric=metric,
-                        title=title,
-                        selected_bin=selected_bin,
-                        fmt=fmt,
-                        cmap=cmap,
-                    )
-                except Exception as exc:
-                    _add_section_error_page(pdf, title, exc)
+                _add_heatmap_page(
+                    pdf,
+                    aggregate,
+                    metric=metric,
+                    title=title,
+                    selected_bin=selected_bin,
+                    fmt=fmt,
+                    cmap=cmap,
+                )
 
-            try:
-                _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin)
-            except Exception as exc:
-                _add_section_error_page(pdf, "Aggregate Tradeoff", exc)
+            _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin)
 
         mm_overlay_added = False
         for phi_setting, phi_rows in phi_selected.groupby("phi_setting"):
             if mode != "high":
-                try:
-                    _add_phi_heatmap_page(pdf, phi_setting, phi_rows.copy(), selected_bin)
-                except Exception as exc:
-                    _add_section_error_page(pdf, "{} Per-Phi Heatmaps".format(phi_setting), exc)
+                _add_phi_heatmap_page(pdf, phi_setting, phi_rows.copy(), selected_bin)
 
             selected_scale1 = float("nan")
             selected_scale2 = float("nan")
@@ -1002,47 +957,32 @@ def plot_bg_optimization_diagnostics(csv_path, pdf_path=None, histlist=None, inp
                 selected_scale1 = float(chosen.iloc[0]["bg_stat_scale1"])
                 selected_scale2 = float(chosen.iloc[0]["bg_stat_scale2"])
 
-            try:
-                _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale1", selected_scale1)
-            except Exception as exc:
-                _add_section_error_page(pdf, "{} BG_STAT_SCALE1 Scan".format(phi_setting), exc)
-            try:
-                _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale2", selected_scale2)
-            except Exception as exc:
-                _add_section_error_page(pdf, "{} BG_STAT_SCALE2 Scan".format(phi_setting), exc)
+            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale1", selected_scale1)
+            _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, "bg_stat_scale2", selected_scale2)
             if mode != "high":
                 for scale_axis in ("bg_stat_scale1", "bg_stat_scale2"):
                     for stage in ("coarse", "refined"):
-                        try:
-                            _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, selected_bin)
-                        except Exception as exc:
-                            _add_section_error_page(pdf, "{} {} {}".format(phi_setting, stage.capitalize(), scale_axis.upper()), exc)
+                        _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, selected_bin)
 
             hist_entry = _find_hist_entry(histlist, phi_setting)
-            try:
-                mm_overlay_added = _add_mm_overlay_page(
-                    pdf,
-                    hist_entry,
-                    inpDict,
-                    phi_setting,
-                    selected_scale1,
-                    selected_scale2,
-                    logy=False,
-                ) or mm_overlay_added
-            except Exception as exc:
-                _add_section_error_page(pdf, "{} MM Diagnostic (linear)".format(phi_setting), exc)
-            try:
-                mm_overlay_added = _add_mm_overlay_page(
-                    pdf,
-                    hist_entry,
-                    inpDict,
-                    phi_setting,
-                    selected_scale1,
-                    selected_scale2,
-                    logy=True,
-                ) or mm_overlay_added
-            except Exception as exc:
-                _add_section_error_page(pdf, "{} MM Diagnostic (log)".format(phi_setting), exc)
+            mm_overlay_added = _add_mm_overlay_page(
+                pdf,
+                hist_entry,
+                inpDict,
+                phi_setting,
+                selected_scale1,
+                selected_scale2,
+                logy=False,
+            ) or mm_overlay_added
+            mm_overlay_added = _add_mm_overlay_page(
+                pdf,
+                hist_entry,
+                inpDict,
+                phi_setting,
+                selected_scale1,
+                selected_scale2,
+                logy=True,
+            ) or mm_overlay_added
 
         if histlist is None or inpDict is None:
             _add_mm_overlay_unavailable_page(pdf)

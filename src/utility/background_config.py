@@ -22,9 +22,9 @@ BG_OPT_SELECTION_MODE = "weighted"
 # first four metrics; higher is better for valid_ratio_bins.
 BG_OPT_METRIC_WEIGHTS = {
     "kinematic_score": 0.5,
-    "ratio_fail_count": 0.25,
-    "ratio_mean_dev": 0.10,
-    "ratio_rms": 0.10,
+    "ratio_rms": 0.25,
+    "ratio_mean_dev": 0.15,
+    "ratio_fail_count": 0.05,
     "valid_ratio_bins": 0.05,
 }
 
