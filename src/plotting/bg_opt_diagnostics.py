@@ -39,9 +39,19 @@ def _to_numeric_columns(df, columns):
 
 def _format_bin_label(row):
     try:
-        return "{}t x {}phi".format(int(row["requested_num_t_bins"]), int(row["requested_num_phi_bins"]))
+        return "{}t x {}phi".format(_safe_int(row["requested_num_t_bins"], 0), _safe_int(row["requested_num_phi_bins"], 0))
     except Exception:
         return "unknown"
+
+
+def _safe_int(value, default=0):
+    try:
+        numeric = float(value)
+    except Exception:
+        return default
+    if not math.isfinite(numeric):
+        return default
+    return int(numeric)
 
 
 def _minmax_lower(series):
@@ -139,8 +149,8 @@ def _selected_bin_tuple(selected_row):
         return None
     try:
         return (
-            int(selected_row["requested_num_t_bins"]),
-            int(selected_row["requested_num_phi_bins"]),
+            _safe_int(selected_row["requested_num_t_bins"], None),
+            _safe_int(selected_row["requested_num_phi_bins"], None),
         )
     except Exception:
         return None
@@ -350,19 +360,19 @@ def _add_top_candidates_page(pdf, aggregate, selected_bin):
         marker = "*"
         if selected_bin is not None:
             marker = "*" if (
-                int(row["requested_num_t_bins"]) == selected_bin[0]
-                and int(row["requested_num_phi_bins"]) == selected_bin[1]
+                _safe_int(row["requested_num_t_bins"], None) == selected_bin[0]
+                and _safe_int(row["requested_num_phi_bins"], None) == selected_bin[1]
             ) else " "
         lines.append(
                 "{:>4}   {}   {:<10} {:>4}   {:>8}   {:>7}  {:>7}  {:>5}   {:>8}".format(
                     rank,
                     marker,
                     row["bin_label"],
-                int(row["ratio_fail_count"]),
+                _safe_int(row["ratio_fail_count"], -1),
                 _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                 _format_metric(row["ratio_rms"], "{:.4f}"),
                 _format_metric(row["kinematic_score"], "{:.4f}"),
-                int(row["valid_ratio_bins"]),
+                _safe_int(row["valid_ratio_bins"], -1),
                     _format_metric(row["composite_objective"], "{:.4f}"),
                 )
         )
@@ -386,8 +396,8 @@ def _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin):
 
     for _, row in aggregate.iterrows():
         is_selected = selected_bin is not None and (
-            int(row["requested_num_t_bins"]) == selected_bin[0]
-            and int(row["requested_num_phi_bins"]) == selected_bin[1]
+            _safe_int(row["requested_num_t_bins"], None) == selected_bin[0]
+            and _safe_int(row["requested_num_phi_bins"], None) == selected_bin[1]
         )
         ax.annotate(
             row["bin_label"],
@@ -662,14 +672,14 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
         lines.extend([
             "Selected shared binning:",
             "  requested bins: {}t x {}phi".format(
-                int(selected_row["requested_num_t_bins"]),
-                int(selected_row["requested_num_phi_bins"]),
+                _safe_int(selected_row["requested_num_t_bins"], 0),
+                _safe_int(selected_row["requested_num_phi_bins"], 0),
             ),
-            "  aggregate fail count: {}".format(int(selected_row["ratio_fail_count"])),
+            "  aggregate fail count: {}".format(_safe_int(selected_row["ratio_fail_count"], -1)),
             "  aggregate mean_dev:   {}".format(_format_metric(selected_row["ratio_mean_dev"], "{:.4f}")),
             "  aggregate rms:        {}".format(_format_metric(selected_row["ratio_rms"], "{:.4f}")),
             "  aggregate kin score:  {}".format(_format_metric(selected_row["kinematic_score"], "{:.4f}")),
-            "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
+            "  valid ratio bins:     {}".format(_safe_int(selected_row["valid_ratio_bins"], -1)),
             "  selection score:      {}".format(_format_metric(selected_row.get("composite_objective", float("nan")), "{:.4f}")),
             "",
             "Selected BG_STAT_SCALE1 / BG_STAT_SCALE2 by phi:",
@@ -680,7 +690,7 @@ def _build_cover_lines(csv_path, df, aggregate, phi_selected, selected_row, sele
                     row["phi_setting"],
                     _format_metric(row["bg_stat_scale1"], "{:.3f}"),
                     _format_metric(row["bg_stat_scale2"], "{:.3f}"),
-                    int(row["ratio_fail_count"]),
+                    _safe_int(row["ratio_fail_count"], -1),
                     _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                     _format_metric(row["ratio_rms"], "{:.4f}"),
                     _format_metric(row["kinematic_score"], "{:.4f}"),
@@ -704,14 +714,14 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
         lines.extend([
             "Fixed shared binning:",
             "  requested bins: {}t x {}phi".format(
-                int(selected_row["requested_num_t_bins"]),
-                int(selected_row["requested_num_phi_bins"]),
+                _safe_int(selected_row["requested_num_t_bins"], 0),
+                _safe_int(selected_row["requested_num_phi_bins"], 0),
             ),
-            "  aggregate fail count: {}".format(int(selected_row["ratio_fail_count"])),
+            "  aggregate fail count: {}".format(_safe_int(selected_row["ratio_fail_count"], -1)),
             "  aggregate mean_dev:   {}".format(_format_metric(selected_row["ratio_mean_dev"], "{:.4f}")),
             "  aggregate rms:        {}".format(_format_metric(selected_row["ratio_rms"], "{:.4f}")),
             "  aggregate kin score:  {}".format(_format_metric(selected_row["kinematic_score"], "{:.4f}")),
-            "  valid ratio bins:     {}".format(int(selected_row["valid_ratio_bins"])),
+            "  valid ratio bins:     {}".format(_safe_int(selected_row["valid_ratio_bins"], -1)),
             "",
             "Per-phi selected BG_STAT_SCALE1 / BG_STAT_SCALE2:",
         ])
@@ -722,7 +732,7 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
                 row["phi_setting"],
                 _format_metric(row["bg_stat_scale1"], "{:.3f}"),
                 _format_metric(row["bg_stat_scale2"], "{:.3f}"),
-                int(row["ratio_fail_count"]),
+                _safe_int(row["ratio_fail_count"], -1),
                 _format_metric(row["ratio_mean_dev"], "{:.4f}"),
                 _format_metric(row["ratio_rms"], "{:.4f}"),
                 _format_metric(row["kinematic_score"], "{:.4f}"),
