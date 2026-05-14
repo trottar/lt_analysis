@@ -310,6 +310,50 @@ def diamond_fit(Q2vsW_hist, Q2Val, fitrange=10, threshold=0.0, use_legacy=False,
         print(f"diamond_fit: new procedure failed ({e}); falling back to legacy.")
         return diamond_fit_legacy(Q2vsW_hist, Q2Val, fitrange)
 
+
+def _estimate_diamond_fitrange(Q2vsW_hist):
+    """Estimate the fit window from the occupied Q2 span of the histogram."""
+
+    histo, _, _ = _th2_to_numpy(Q2vsW_hist)
+    occupied_x = np.where(np.any(histo > 0, axis=1))[0]
+    if len(occupied_x) < 2:
+        return 10
+
+    fitrange = int((occupied_x[-1] - occupied_x[0]) / 100.0)
+    return fitrange if fitrange > 1 else 10
+
+
+def _fit_diamond_polygon(Q2vsW_hist, Q2Val, threshold=0.0, prefer_auto_control=False):
+    """
+    Fit a histogram into diamond lines/polygon using one consistent strategy.
+
+    We prefer the legacy-style Q2-centered control window because that is what
+    the active per-setting low-epsilon cut path has historically used. The
+    auto-control path remains as a fallback for unusual sparse histograms.
+    """
+
+    fitrange = _estimate_diamond_fitrange(Q2vsW_hist)
+    fit_modes = [prefer_auto_control] if prefer_auto_control else [False, True]
+    errors = []
+
+    for auto_control in fit_modes:
+        try:
+            fit_results = diamond_fit(
+                Q2vsW_hist,
+                Q2Val,
+                fitrange=fitrange,
+                threshold=threshold,
+                auto_control=auto_control,
+            )
+            poly = _poly_from_diamond_fits(fit_results)
+            if poly is None:
+                raise ValueError("fit lines did not form a valid polygon")
+            return fit_results, _sort_ccw_points(poly), fitrange, auto_control
+        except Exception as exc:
+            errors.append("auto_control={}: {}".format(auto_control, exc))
+
+    raise ValueError("; ".join(errors) if errors else "diamond fit failed")
+
 ###################################################################################################
 # Convex polygon helpers (used for "common overlap" cuts)
 
@@ -440,6 +484,20 @@ def _parse_bool(value, default=False):
     if v in ("0", "false", "f", "no", "n", "off", ""):
         return False
     return default
+
+
+def _poly_from_input_dict(inpDict):
+    if not isinstance(inpDict, dict):
+        return None
+    if inpDict.get("cut_mode") != "poly":
+        return None
+    points = inpDict.get("poly_points", [])
+    if len(points) < 3:
+        return None
+    try:
+        return _sort_ccw_points([(float(p[0]), float(p[1])) for p in points])
+    except Exception:
+        return None
 
 
 def _is_shiftprep_artifact(path):
@@ -694,18 +752,21 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 if not htmp:
                     continue
                 try:
-                    fits_tmp = diamond_fit(htmp, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
-                    poly_tmp = _poly_from_diamond_fits(fits_tmp)
-                    if poly_tmp:
-                        poly_tmp = _sort_ccw_points(poly_tmp)
-                        polys.append(poly_tmp)
-                        common_poly_sources.append((eps_lbl, phi_lbl, src_file))
-                        overlay_diamond_entries.append({
-                            "epsilon": eps_lbl,
-                            "phi": phi_lbl,
-                            "file": src_file,
-                            "poly": poly_tmp,
-                        })
+                    _, poly_tmp, fitrange_tmp, auto_control_tmp = _fit_diamond_polygon(
+                        htmp,
+                        Q2Val,
+                        threshold=0.0,
+                    )
+                    polys.append(poly_tmp)
+                    common_poly_sources.append((eps_lbl, phi_lbl, src_file))
+                    overlay_diamond_entries.append({
+                        "epsilon": eps_lbl,
+                        "phi": phi_lbl,
+                        "file": src_file,
+                        "poly": poly_tmp,
+                        "fitrange": fitrange_tmp,
+                        "auto_control": auto_control_tmp,
+                    })
                 except Exception as e:
                     print("WARNING: common-cut: failed {}-{} fit ({})".format(eps_lbl, phi_lbl, e))
 
@@ -765,10 +826,20 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     Q2vsW_milo_cut = TH2D("Q2vsW_mid_lowcut","Mid Epsilon Q2 vs W Dist for Prompt Events (Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
     Q2vsW_himi_cut = TH2D("Q2vsW_high_midcut", "High Epsilon Q2 vs W Dist for Prompt Events (Mid-Diamond and t Cut); Q2; W", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
 
+    input_cut_poly = _poly_from_input_dict(inpDict)
+    cut_poly_source = None
+
     if hardcoded_cut_poly is not None:
         cut_poly = _sort_ccw_points(hardcoded_cut_poly)
+        cut_poly_source = "hardcoded"
+    elif common_poly is not None:
+        cut_poly = _sort_ccw_points(common_poly)
+        cut_poly_source = "common"
+    elif input_cut_poly is not None:
+        cut_poly = input_cut_poly
+        cut_poly_source = "input"
     else:
-        cut_poly = _sort_ccw_points(common_poly) if common_poly is not None else None
+        cut_poly = None
 
     def _passes_active_cut(event, eps_tag):
         if not _passes_source_acceptance(event, eps_tag):
@@ -874,19 +945,21 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             apply_bin_threshold(Q2vsW_lo_cut, event_threshold)
                 
         # Does assume nbins bins for Q2 and W, centered at kinematic values
-        minQ = Q2_cut.FindFirstBinAbove(0)
-        maxQ = Q2_cut.FindLastBinAbove(0)
-        fitrange = int((maxQ-minQ)/100)
-        print("fitrange: ",fitrange)
         if (k == 0):  # Low epsilon
             # Build low-epsilon polygon fallback if common overlap polygon is unavailable.
             if hardcoded_fit_results is not None:
                 fit_results = hardcoded_fit_results
+                low_fit_poly = _poly_from_diamond_fits(fit_results)
             else:
-                fit_results = diamond_fit(Q2vsW_lowe_cut, Q2Val, fitrange)
-            low_fit_poly = _poly_from_diamond_fits(fit_results)
+                fit_results, low_fit_poly, fitrange, auto_control_used = _fit_diamond_polygon(
+                    Q2vsW_lowe_cut,
+                    Q2Val,
+                    threshold=0.0,
+                )
+                print("fitrange: {} (auto_control={})".format(fitrange, auto_control_used))
             if (cut_poly is None) and (low_fit_poly is not None) and (phi_setting != "Center"):
                 cut_poly = _sort_ccw_points(low_fit_poly)
+                cut_poly_source = "low_fallback"
 
             for event in Cut_Events_all_noRF_tree:
                 if _passes_active_cut(event, eps_tag):
@@ -1250,7 +1323,19 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             return
 
         try:
-            fits = diamond_fit(h, Q2Val, fitrange=10, threshold=0.0, auto_control=True)
+            fits, _, fitrange, auto_control_used = _fit_diamond_polygon(
+                h,
+                Q2Val,
+                threshold=0.0,
+            )
+            print(
+                "Overlay fit {} epsilon, {}: fitrange={} auto_control={}".format(
+                    eps_label,
+                    phi_label,
+                    fitrange,
+                    auto_control_used,
+                )
+            )
         except Exception as e:
             print("WARNING: diamond_fit failed for {} epsilon, phi = {} ({})".format(eps_label, phi_label, e))
             return
@@ -1330,7 +1415,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             gcut.SetLineWidth(5)
             gcut.SetLineStyle(1)
             gcut.Draw("L SAME")
-            if common_poly is not None:
+            if cut_poly_source in ("common", "input"):
                 leg.AddEntry(gcut, "Common Cut (overlap)", "l")
             else:
                 leg.AddEntry(gcut, "Applied Cut Polygon", "l")
