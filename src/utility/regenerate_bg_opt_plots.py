@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -88,6 +89,99 @@ def _describe_input_behavior(raw_input):
     return "{} -> glob expansion".format(raw_input)
 
 
+def _infer_run_dir_for_csv(csv_path):
+    csv_path = Path(csv_path).expanduser()
+    if csv_path.parent.name.lower() == "csv":
+        return csv_path.parent.parent
+    return csv_path.parent
+
+
+def _infer_analysis_stem(csv_path):
+    stem = Path(csv_path).stem
+    for suffix in ("_bg_opt_low", "_bg_opt_high"):
+        if stem.endswith(suffix):
+            return stem[: -len(suffix)]
+    return stem
+
+
+def _artifact_paths_for_csv(csv_path):
+    run_dir = _infer_run_dir_for_csv(csv_path)
+    analysis_stem = _infer_analysis_stem(csv_path)
+    return {
+        "run_dir": run_dir,
+        "analysis_stem": analysis_stem,
+        "root": run_dir / "root" / "{}.root".format(analysis_stem),
+        "json": run_dir / "json" / "{}.json".format(analysis_stem),
+    }
+
+
+def _clone_histogram(obj):
+    if obj is None:
+        return None
+    cloned = obj.Clone()
+    if hasattr(cloned, "SetDirectory"):
+        try:
+            cloned.SetDirectory(0)
+        except Exception:
+            pass
+    return cloned
+
+
+def _load_histogram(root_file, directory_name, histogram_name):
+    current_dir = root_file.GetDirectory(directory_name)
+    if not current_dir:
+        return None
+    hist = current_dir.Get(histogram_name)
+    return _clone_histogram(hist)
+
+
+def _load_archived_context(csv_path):
+    artifacts = _artifact_paths_for_csv(csv_path)
+    json_path = artifacts["json"]
+    root_path = artifacts["root"]
+    if not json_path.exists() or not root_path.exists():
+        return None, None, artifacts
+
+    try:
+        with open(json_path, "r") as handle:
+            payload = json.load(handle)
+    except Exception as exc:
+        print("WARNING: Failed to load archived JSON {}: {}".format(json_path, exc))
+        return None, None, artifacts
+
+    inpDict = payload.get("inpDict")
+    histlist = payload.get("histlist", [])
+    if not isinstance(histlist, list) or inpDict is None:
+        return None, None, artifacts
+
+    try:
+        import ROOT
+    except Exception as exc:
+        print("WARNING: ROOT import failed while loading archived context for {}: {}".format(csv_path, exc))
+        return None, None, artifacts
+
+    root_file = ROOT.TFile.Open(str(root_path), "READ")
+    if not root_file or root_file.IsZombie():
+        print("WARNING: Failed to open archived ROOT file {}".format(root_path))
+        return None, None, artifacts
+
+    try:
+        enriched_histlist = []
+        for entry in histlist:
+            hist_entry = dict(entry)
+            phi_setting = str(hist_entry.get("phi_setting", "")).strip()
+            if phi_setting:
+                hist_entry["H_MM_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_DATA")
+                hist_entry["H_MM_pisub_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_pisub_DATA")
+                hist_entry["H_MM_fit1sub_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_fit1sub_DATA")
+                hist_entry["H_MM_full_SIMC"] = _load_histogram(root_file, "{}/simc".format(phi_setting), "H_MM_full_SIMC")
+            enriched_histlist.append(hist_entry)
+    finally:
+        root_file.Close()
+
+    return enriched_histlist, inpDict, artifacts
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Regenerate BG optimization diagnostics PDFs from saved *_bg_opt_*.csv files."
@@ -139,13 +233,18 @@ def main(argv=None):
     print("Found {} BG optimization CSV file(s).".format(len(csv_paths)))
     for raw_input in args.inputs:
         print("  {}".format(_describe_input_behavior(raw_input)))
-    print("Note: CSV-only regeneration rebuilds the diagnostics pages, but MM overlay pages require live ROOT histograms and will show as unavailable.")
+    print("The utility will use archived json/root files when present so MM pages can be rebuilt from saved histograms.")
 
     failures = []
     for csv_path in csv_paths:
         pdf_path = _build_output_path(csv_path, output_dir=args.output_dir, suffix=args.suffix)
         try:
-            created = plot_bg_optimization_diagnostics(csv_path, pdf_path=pdf_path)
+            histlist, inpDict, artifacts = _load_archived_context(csv_path)
+            if histlist is not None and inpDict is not None:
+                print("Using archived context: {} and {}".format(artifacts["json"], artifacts["root"]))
+            else:
+                print("Archived context unavailable for {}; MM pages may be omitted.".format(csv_path))
+            created = plot_bg_optimization_diagnostics(csv_path, pdf_path=pdf_path, histlist=histlist, inpDict=inpDict)
             print("Wrote {}".format(created))
         except Exception as exc:
             failures.append((csv_path, exc))
