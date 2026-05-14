@@ -1,11 +1,14 @@
 #! /usr/bin/python
 
 import math
+import logging
 from pathlib import Path
 import sys
 
 import matplotlib
 matplotlib.use("Agg")
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
