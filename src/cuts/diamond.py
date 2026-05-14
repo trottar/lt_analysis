@@ -366,6 +366,68 @@ def _sort_ccw_points(points):
     pts = sorted(pts, key=lambda p: math.atan2(p[1] - cy, p[0] - cx))
     return pts
 
+
+def _cross(o, a, b):
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+
+def _convex_hull(points):
+    pts = sorted({(float(p[0]), float(p[1])) for p in points})
+    if len(pts) < 3:
+        return pts
+
+    lower = []
+    for p in pts:
+        while len(lower) >= 2 and _cross(lower[-2], lower[-1], p) <= 0.0:
+            lower.pop()
+        lower.append(p)
+
+    upper = []
+    for p in reversed(pts):
+        while len(upper) >= 2 and _cross(upper[-2], upper[-1], p) <= 0.0:
+            upper.pop()
+        upper.append(p)
+
+    hull = lower[:-1] + upper[:-1]
+    if len(hull) < 3:
+        return None
+    return _sort_ccw_points(hull)
+
+
+def _support_poly_from_histogram(th2, threshold=0.0):
+    """
+    Build a conservative convex support polygon from occupied histogram bins.
+
+    Using bin corners rather than fitted edge lines makes the overlay match the
+    thresholded COLZ distributions: if a bin is populated after thresholding,
+    its rectangle is included in the support polygon.
+    """
+
+    if th2 is None:
+        return None
+
+    pts = []
+    xaxis = th2.GetXaxis()
+    yaxis = th2.GetYaxis()
+    for ix in range(1, th2.GetNbinsX() + 1):
+        xlo = float(xaxis.GetBinLowEdge(ix))
+        xhi = float(xaxis.GetBinUpEdge(ix))
+        for iy in range(1, th2.GetNbinsY() + 1):
+            if th2.GetBinContent(ix, iy) <= threshold:
+                continue
+            ylo = float(yaxis.GetBinLowEdge(iy))
+            yhi = float(yaxis.GetBinUpEdge(iy))
+            pts.extend([
+                (xlo, ylo),
+                (xlo, yhi),
+                (xhi, ylo),
+                (xhi, yhi),
+            ])
+
+    if len(pts) < 3:
+        return None
+    return _convex_hull(pts)
+
 def _dedup_points(points, tol=1e-6):
     out = []
     for p in points:
@@ -783,11 +845,15 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 if not htmp:
                     continue
                 try:
-                    _, poly_tmp, fitrange_tmp, auto_control_tmp = _fit_diamond_polygon(
-                        htmp,
-                        Q2Val,
-                        threshold=0.0,
-                    )
+                    poly_tmp = _support_poly_from_histogram(htmp, threshold=0.0)
+                    fitrange_tmp = None
+                    auto_control_tmp = None
+                    if poly_tmp is None:
+                        _, poly_tmp, fitrange_tmp, auto_control_tmp = _fit_diamond_polygon(
+                            htmp,
+                            Q2Val,
+                            threshold=0.0,
+                        )
                     polys.append(poly_tmp)
                     common_poly_sources.append((eps_lbl, phi_lbl, src_file))
                     overlay_diamond_entries.append({
@@ -982,12 +1048,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 fit_results = hardcoded_fit_results
                 low_fit_poly = _poly_from_diamond_fits(fit_results)
             else:
-                fit_results, low_fit_poly, fitrange, auto_control_used = _fit_diamond_polygon(
-                    Q2vsW_lowe_cut,
-                    Q2Val,
-                    threshold=0.0,
-                )
-                print("fitrange: {} (auto_control={})".format(fitrange, auto_control_used))
+                low_fit_poly = _support_poly_from_histogram(Q2vsW_lowe_cut, threshold=0.0)
+                if low_fit_poly is None:
+                    fit_results, low_fit_poly, fitrange, auto_control_used = _fit_diamond_polygon(
+                        Q2vsW_lowe_cut,
+                        Q2Val,
+                        threshold=0.0,
+                    )
+                    print("fitrange: {} (auto_control={})".format(fitrange, auto_control_used))
             if (cut_poly is None) and (low_fit_poly is not None) and (phi_setting != "Center"):
                 cut_poly = _sort_ccw_points(low_fit_poly)
                 cut_poly_source = "low_fallback"
@@ -1365,14 +1433,25 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             print("WARNING: Could not build hist for {} epsilon, phi = {}".format(eps_label, phi_label))
             return
 
+        poly = _support_poly_from_histogram(h, threshold=0.0)
+        if poly is not None:
+            _draw_poly_outline(
+                poly,
+                eps_label,
+                phi_label,
+                color,
+                "gDiamond_{}_{}_{}".format(eps_label.lower(), phi_label, FilenameOverride),
+            )
+            return
+
         try:
-            fits, _, fitrange, auto_control_used = _fit_diamond_polygon(
+            fits, poly, fitrange, auto_control_used = _fit_diamond_polygon(
                 h,
                 Q2Val,
                 threshold=0.0,
             )
             print(
-                "Overlay fit {} epsilon, {}: fitrange={} auto_control={}".format(
+                "Overlay fit fallback {} epsilon, {}: fitrange={} auto_control={}".format(
                     eps_label,
                     phi_label,
                     fitrange,
