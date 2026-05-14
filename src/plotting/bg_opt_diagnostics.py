@@ -2,6 +2,7 @@
 
 import math
 from pathlib import Path
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -219,6 +220,18 @@ def _hist_to_arrays(hist, scale=1.0):
     centers = np.array([float(axis.GetBinCenter(ib)) for ib in range(1, nbins + 1)], dtype=float)
     values = np.array([float(hist.GetBinContent(ib)) for ib in range(1, nbins + 1)], dtype=float)
     return centers, values * float(scale)
+
+
+def _clone_hist_for_refit(hist, name):
+    if hist is None or not hasattr(hist, "Clone"):
+        return None
+    cloned = hist.Clone(name)
+    if hasattr(cloned, "SetDirectory"):
+        try:
+            cloned.SetDirectory(0)
+        except Exception:
+            pass
+    return cloned
 
 
 def _hist_bounds(hist):
@@ -764,20 +777,79 @@ def _add_high_fixed_binning_page(pdf, selected_row, selected_phi_rows):
     _add_text_page(pdf, "High-E Fixed-Binning Summary", lines)
 
 
+def _reconstruct_bg_fit_functions(hist_entry, inpDict, phi_setting, selected_scale1, selected_scale2):
+    fit1_func = hist_entry.get("BG_FIT1_VIS_DATA")
+    fit2_func = hist_entry.get("BG_FIT2_VIS_DATA")
+    if (fit1_func is not None or selected_scale1 <= 0.0) and (fit2_func is not None or selected_scale2 <= 0.0):
+        return fit1_func, fit2_func
+
+    data_hist = hist_entry.get("H_MM_pisub_DATA")
+    data_hist_cut = hist_entry.get("H_MM_DATA") or data_hist
+    fit2_input_hist = hist_entry.get("H_MM_fit1sub_DATA") or data_hist
+    if data_hist is None:
+        return fit1_func, fit2_func
+
+    try:
+        repo_root = Path(__file__).resolve().parents[2]
+        cuts_dir = repo_root / "src" / "cuts"
+        if str(cuts_dir) not in sys.path:
+            sys.path.append(str(cuts_dir))
+        from background_fit import bg_fit
+
+        epsset = str(inpDict.get("EPSSET", "")).strip().lower()
+        eps_suffix = epsset if epsset.endswith("e") else "{}e".format(epsset)
+
+        if fit1_func is None and selected_scale1 > 0.0:
+            fit1_result = bg_fit(
+                phi_setting,
+                inpDict,
+                _clone_hist_for_refit(data_hist, "H_MM_pisub_DATA_0_0"),
+                _clone_hist_for_refit(data_hist_cut, "H_MM_DATA_0_0"),
+                scaling=float(selected_scale1),
+                model_key="fixquad_{}_{}".format(phi_setting, eps_suffix),
+                fit_name="Fit 1",
+            )
+            fit1_func = fit1_result[1]
+
+        if fit2_func is None and selected_scale2 > 0.0:
+            fit2_result = bg_fit(
+                phi_setting,
+                inpDict,
+                _clone_hist_for_refit(fit2_input_hist, "H_MM_fit1sub_DATA_0_0"),
+                _clone_hist_for_refit(data_hist_cut, "H_MM_DATA_0_0"),
+                scaling=float(selected_scale2),
+                model_key="cheb2_{}_{}".format(phi_setting, eps_suffix),
+                fit_name="Fit 2",
+            )
+            fit2_func = fit2_result[1]
+    except Exception:
+        pass
+
+    return fit1_func, fit2_func
+
+
 def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1, selected_scale2, logy=False):
     if hist_entry is None or inpDict is None:
         return False
 
     data_hist = hist_entry.get("H_MM_pisub_DATA")
+    data_hist_cut = hist_entry.get("H_MM_DATA")
     fit2_input_hist = hist_entry.get("H_MM_fit1sub_DATA")
     simc_hist = hist_entry.get("H_MM_full_SIMC")
     if data_hist is None or simc_hist is None:
         return False
+    if data_hist_cut is None:
+        data_hist_cut = data_hist
     if fit2_input_hist is None:
         fit2_input_hist = data_hist
 
-    fit1_func = hist_entry.get("BG_FIT1_VIS_DATA")
-    fit2_func = hist_entry.get("BG_FIT2_VIS_DATA")
+    fit1_func, fit2_func = _reconstruct_bg_fit_functions(
+        hist_entry,
+        inpDict,
+        phi_setting,
+        selected_scale1,
+        selected_scale2,
+    )
     mm_min = float(inpDict["mm_min"])
     mm_max = float(inpDict["mm_max"])
 
