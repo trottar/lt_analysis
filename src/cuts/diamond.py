@@ -500,6 +500,32 @@ def _poly_from_input_dict(inpDict):
         return None
 
 
+def _overlay_entries_from_input_dict(inpDict):
+    if not isinstance(inpDict, dict):
+        return []
+
+    entries = inpDict.get("diamond_overlay_entries", [])
+    parsed = []
+    for entry in entries:
+        try:
+            poly = _sort_ccw_points(
+                [(float(p[0]), float(p[1])) for p in entry.get("poly_points", [])]
+            )
+        except Exception:
+            continue
+        if len(poly) < 3:
+            continue
+        parsed.append({
+            "epsilon": str(entry.get("epsilon", "")),
+            "phi": str(entry.get("phi", "")),
+            "file": str(entry.get("file", "")),
+            "poly": poly,
+            "fitrange": entry.get("fitrange"),
+            "auto_control": entry.get("auto_control"),
+        })
+    return parsed
+
+
 def _is_shiftprep_artifact(path):
     return "shiftprep" in os.path.basename(str(path)).lower()
 
@@ -619,13 +645,18 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         print("!!!!! ERROR !!!!!\n No valid file found! \n!!!!! ERROR !!!!!")
         sys.exit(1)
 
+    print("Selected source files for {}:".format(phi_setting if phi_setting else "All"))
+    print("  high = {}".format(highe_input if highe_input else "None"))
+    print("  mid  = {}".format(mide_input if mide_input else "None"))
+    print("  low  = {}".format(lowe_input if lowe_input else "None"))
+
     ##############################################################################################################################################
     # Common-cut polygon:
     # Intersect all available epsilon/phi diamond polygons so the chosen cut is
     # guaranteed to lie inside the full set of setting diamonds.
     common_poly = None
     common_poly_sources = []
-    overlay_diamond_entries = []
+    overlay_diamond_entries = _overlay_entries_from_input_dict(inpDict)
 
     # Use the same hard-coded threshold rule as the main hist thresholding.
     if Q2Val == 3.0 and WVal == 3.14:
@@ -1013,6 +1044,18 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             paramDict["poly_sources"] = [
                 {"epsilon": eps, "phi": phi, "file": fpath} for (eps, phi, fpath) in common_poly_sources
             ]
+        if overlay_diamond_entries:
+            paramDict["diamond_overlay_entries"] = [
+                {
+                    "epsilon": entry["epsilon"],
+                    "phi": entry["phi"],
+                    "file": entry["file"],
+                    "poly_points": [[float(p[0]), float(p[1])] for p in _sort_ccw_points(entry["poly"])],
+                    "fitrange": entry.get("fitrange"),
+                    "auto_control": entry.get("auto_control"),
+                }
+                for entry in overlay_diamond_entries
+            ]
 
     else:
 
@@ -1391,6 +1434,12 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         return cand
 
     if overlay_diamond_entries:
+        print(
+            "Using {} stored/common diamond overlay entries for {} setting".format(
+                len(overlay_diamond_entries),
+                phi_setting,
+            )
+        )
         for entry in overlay_diamond_entries:
             _draw_poly_outline(
                 entry["poly"],
