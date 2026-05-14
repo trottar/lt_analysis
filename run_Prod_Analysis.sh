@@ -817,7 +817,8 @@ elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
 	# Kin
 	#NumtBins=4
     #NumPhiBins=12
-	NumtBins=3
+	#NumtBins=3
+	NumtBins=4
     NumPhiBins=9
     TMIN=0.400
 	TMAX=0.900	
