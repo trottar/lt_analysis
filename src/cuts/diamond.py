@@ -1535,18 +1535,21 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     eps_file = _find_center_fallback_overlay(eps_tag)
                 _draw_diamond_outline(eps_file, eps_label, phi_label, color_map[(eps_label, phi_label)])
 
-    # Draw the applied cut polygon as a thick black outline.
+    # Draw the applied cut polygon as a shaded overlap region with a crisp outline.
     if cut_poly is not None:
         gcut = _tgraph_from_poly(cut_poly, "gCommonCut_{}".format(FilenameOverride))
         if gcut:
+            gcut.SetFillStyle(1001)
+            gcut.SetFillColorAlpha(ROOT.kGray + 1, 0.22)
             gcut.SetLineColor(ROOT.kBlack)
             gcut.SetLineWidth(5)
             gcut.SetLineStyle(1)
+            gcut.Draw("F SAME")
             gcut.Draw("L SAME")
             if cut_poly_source in ("common", "input"):
-                leg.AddEntry(gcut, "Common Cut (overlap)", "l")
+                leg.AddEntry(gcut, "Common Cut (overlap)", "lf")
             else:
-                leg.AddEntry(gcut, "Applied Cut Polygon", "l")
+                leg.AddEntry(gcut, "Applied Cut Polygon", "lf")
             overlay_keepalive.append(gcut)
 
     leg.Draw()
