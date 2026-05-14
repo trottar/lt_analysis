@@ -44,6 +44,27 @@ def _format_bin_label(row):
         return "unknown"
 
 
+def _is_finite_number(value):
+    try:
+        return math.isfinite(float(value))
+    except Exception:
+        return False
+
+
+def _finite_bin_mask(frame):
+    if frame is None or frame.empty:
+        return pd.Series(dtype=bool)
+    t_vals = pd.to_numeric(frame.get("requested_num_t_bins"), errors="coerce")
+    phi_vals = pd.to_numeric(frame.get("requested_num_phi_bins"), errors="coerce")
+    return t_vals.notna() & phi_vals.notna()
+
+
+def _drop_invalid_bin_rows(frame):
+    if frame is None or frame.empty:
+        return frame
+    return frame[_finite_bin_mask(frame)].copy()
+
+
 def _minmax_lower(series):
     series = pd.to_numeric(series, errors="coerce")
     valid = series.dropna()
@@ -106,6 +127,10 @@ def _load_bg_opt_csv(csv_path):
         (df["row_kind"] == "scale_candidate")
         & (df["stage"].isin(["coarse", "refined"]))
     ].copy()
+
+    aggregate = _drop_invalid_bin_rows(aggregate)
+    phi_selected = _drop_invalid_bin_rows(phi_selected)
+    scale = _drop_invalid_bin_rows(scale)
 
     if not aggregate.empty and "selection_score" in aggregate.columns and aggregate["selection_score"].notna().any():
         aggregate["composite_objective"] = aggregate["selection_score"]
@@ -264,6 +289,7 @@ def _add_text_page(pdf, title, lines):
 
 
 def _draw_heatmap(ax, frame, metric, title, selected_bin=None, fmt="{:.2f}", cmap="viridis"):
+    frame = _drop_invalid_bin_rows(frame)
     pivot = frame.pivot_table(
         index="requested_num_t_bins",
         columns="requested_num_phi_bins",
@@ -333,6 +359,7 @@ def _add_heatmap_page(pdf, aggregate, metric, title, selected_bin=None, fmt="{:.
 
 
 def _add_top_candidates_page(pdf, aggregate, selected_bin):
+    aggregate = _drop_invalid_bin_rows(aggregate)
     if aggregate.empty:
         return
 
@@ -371,6 +398,7 @@ def _add_top_candidates_page(pdf, aggregate, selected_bin):
 
 
 def _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin):
+    aggregate = _drop_invalid_bin_rows(aggregate)
     if aggregate.empty:
         return
 
@@ -417,6 +445,7 @@ def _add_aggregate_tradeoff_page(pdf, aggregate, selected_bin):
 
 
 def _add_phi_heatmap_page(pdf, phi_setting, phi_rows, selected_bin):
+    phi_rows = _drop_invalid_bin_rows(phi_rows)
     if phi_rows.empty:
         return
 
@@ -512,6 +541,7 @@ def _add_selected_bin_scale_page(pdf, scale_rows, phi_setting, selected_bin, sca
     if selected_bin is None:
         return
 
+    scale_rows = _drop_invalid_bin_rows(scale_rows)
     selected_t, selected_phi = selected_bin
     frame = scale_rows[
         (scale_rows["phi_setting"] == phi_setting)
@@ -595,6 +625,7 @@ def _add_full_phase_space_page(pdf, scale_rows, phi_setting, stage, scale_axis, 
         & (scale_rows["stage"] == stage)
         & (scale_rows["scale_axis"] == scale_axis)
     ].copy()
+    frame = _drop_invalid_bin_rows(frame)
     if frame.empty:
         return
 
