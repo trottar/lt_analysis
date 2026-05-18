@@ -47,7 +47,15 @@ OUTPATH=lt.OUTPATH
 # Shared background-model catalogue
 
 sys.path.append("utility")
-from background_config import BG_MODELS
+from background_config import (
+    BG_FIT_CONCAVITY_REL_TOL,
+    BG_FIT_INTERIOR_MIN_REL_TOL,
+    BG_FIT_MAX_NONPOSITIVE_FRACTION,
+    BG_FIT_MAX_NONPOSITIVE_SPAN,
+    BG_FIT_NEG_TOL,
+    BG_FIT_SHAPE_SAMPLES,
+    BG_MODELS,
+)
 
 
 def get_fit_histogram_padded(fit_func,
@@ -105,13 +113,16 @@ def is_good_background_shape(
     x_min,
     x_max,
     *,
-    neg_tol=1e-4,
+    neg_tol=1e-8,
     pos_tol=0.0,                 # require f_max > pos_tol
     concavity_rel_tol=0.02,       # max deviation from a straight line, as a fraction of scale
     concavity_abs_tol=None,       # if set, overrides rel tol (same units as y)
     reject_interior_minimum=True, # reject convex-up / "flipped" fits with an interior valley
     interior_min_rel_tol=0.05,    # how far below the lower edge the interior may dip
     interior_min_abs_tol=None,    # if set, overrides rel tol (same units as y)
+    max_nonpositive_fraction=0.05,
+    max_nonpositive_span=0.006,
+    nonpositive_tol=0.0,
     n_samples=64,
 ):
     """
@@ -121,6 +132,7 @@ def is_good_background_shape(
       - finite min/max on [x_min, x_max]
       - f_max > pos_tol
       - f_min >= -neg_tol
+      - no broad non-positive interval across the fitted BG window
       - not "too concave": close to the secant (endpoint-to-endpoint line)
       - no flipped / convex-up valley: the interior may not dip materially
         below both endpoint values
@@ -148,6 +160,28 @@ def is_good_background_shape(
             if not math.isfinite(y):
                 return False
             ys.append(y)
+
+        if max_nonpositive_fraction is not None or max_nonpositive_span is not None:
+            nonpositive_mask = [y <= nonpositive_tol for y in ys]
+            nonpositive_count = sum(nonpositive_mask)
+            if max_nonpositive_fraction is not None and len(nonpositive_mask) > 0:
+                if (float(nonpositive_count) / float(len(nonpositive_mask))) > float(max_nonpositive_fraction):
+                    return False
+
+            if max_nonpositive_span is not None and nonpositive_count > 0:
+                longest_span = 0.0
+                current_start = None
+                for idx, is_nonpositive in enumerate(nonpositive_mask):
+                    if is_nonpositive and current_start is None:
+                        current_start = xs[idx]
+                    elif (not is_nonpositive) and current_start is not None:
+                        span_end = xs[idx - 1]
+                        longest_span = max(longest_span, span_end - current_start)
+                        current_start = None
+                if current_start is not None:
+                    longest_span = max(longest_span, xs[-1] - current_start)
+                if longest_span > float(max_nonpositive_span):
+                    return False
 
         y0, y1 = ys[0], ys[-1]
         span = x_max - x_min
@@ -397,10 +431,15 @@ def bg_fit(
     #      and refit, until the function is above -neg_tol or the window
     #      collapses.
     #
-    neg_tol     = inpDict.get("bg_neg_tol", 1e-4)      # how negative we tolerate
+    neg_tol     = inpDict.get("bg_neg_tol", BG_FIT_NEG_TOL)      # how negative we tolerate
     max_refit   = inpDict.get("bg_max_refit", 2000)   # max refits per histogram
     shrink_frac = inpDict.get("bg_shrink_frac", 0.05)  # fraction of width to move per step
     min_width   = inpDict.get("bg_min_sig_width", 1e-10)  # minimum BG window width
+    shape_samples = int(inpDict.get("bg_shape_samples", BG_FIT_SHAPE_SAMPLES))
+    concavity_rel_tol = inpDict.get("bg_concavity_rel_tol", BG_FIT_CONCAVITY_REL_TOL)
+    interior_min_rel_tol = inpDict.get("bg_interior_min_rel_tol", BG_FIT_INTERIOR_MIN_REL_TOL)
+    max_nonpositive_fraction = inpDict.get("bg_max_nonpositive_fraction", BG_FIT_MAX_NONPOSITIVE_FRACTION)
+    max_nonpositive_span = inpDict.get("bg_max_nonpositive_span", BG_FIT_MAX_NONPOSITIVE_SPAN)
 
     # Background SHAPE window = BG_MODELS bounds (this is what you care about)
     bg_lo = sb_left[0]
@@ -424,7 +463,17 @@ def bg_fit(
             fit_res = None
 
         # Check the shape INSIDE THE BG_MODELS BOUNDS [bg_lo, bg_hi]
-        if is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
+        if is_good_background_shape(
+            fit_func,
+            bg_lo,
+            bg_hi,
+            neg_tol=neg_tol,
+            concavity_rel_tol=concavity_rel_tol,
+            interior_min_rel_tol=interior_min_rel_tol,
+            max_nonpositive_fraction=max_nonpositive_fraction,
+            max_nonpositive_span=max_nonpositive_span,
+            n_samples=shape_samples,
+        ):
             if irefit > 0:
                 if DEBUG:
                     print(
@@ -485,7 +534,17 @@ def bg_fit(
             bg_lo, bg_hi = new_lo, new_hi
 
     # After the loop, if we still have no acceptable fit, fall back to zero BG
-    if fit_func is None or not is_good_background_shape(fit_func, bg_lo, bg_hi, neg_tol=neg_tol):
+    if fit_func is None or not is_good_background_shape(
+        fit_func,
+        bg_lo,
+        bg_hi,
+        neg_tol=neg_tol,
+        concavity_rel_tol=concavity_rel_tol,
+        interior_min_rel_tol=interior_min_rel_tol,
+        max_nonpositive_fraction=max_nonpositive_fraction,
+        max_nonpositive_span=max_nonpositive_span,
+        n_samples=shape_samples,
+    ):
         # For debug, look at the shape on the ORIGINAL BG window if possible
         if fit_func is not None:
             f_min = float(fit_func.GetMinimum(orig_bg_lo, orig_bg_hi))

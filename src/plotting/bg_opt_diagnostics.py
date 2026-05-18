@@ -5,6 +5,12 @@ import logging
 from pathlib import Path
 import sys
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+UTILITY_DIR = REPO_ROOT / "src" / "utility"
+if str(UTILITY_DIR) not in sys.path:
+    sys.path.append(str(UTILITY_DIR))
+from background_config import BG_OPT_MM_SIMC_SCALE_MODE
+
 import matplotlib
 matplotlib.use("Agg")
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
@@ -793,8 +799,7 @@ def _reconstruct_bg_fit_functions(hist_entry, inpDict, phi_setting, selected_sca
         return fit1_func, fit2_func
 
     try:
-        repo_root = Path(__file__).resolve().parents[2]
-        cuts_dir = repo_root / "src" / "cuts"
+        cuts_dir = REPO_ROOT / "src" / "cuts"
         if str(cuts_dir) not in sys.path:
             sys.path.append(str(cuts_dir))
         from background_fit import bg_fit
@@ -859,15 +864,22 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
     data_window = _window_integral(data_hist, mm_min, mm_max)
     simc_window = _window_integral(simc_hist, mm_min, mm_max)
     simc_scale = 1.0
-    scale_note = "SIMC left unscaled (window normalization unavailable)"
-    if (
-        math.isfinite(data_window)
-        and math.isfinite(simc_window)
-        and data_window > 0.0
-        and simc_window > 0.0
-    ):
-        simc_scale = data_window / simc_window
-        scale_note = "SIMC scaled to data inside MM cut window"
+    scale_mode = str(BG_OPT_MM_SIMC_SCALE_MODE).strip().lower()
+    scale_note = "SIMC kept at proper archived normalization"
+    if scale_mode == "window":
+        scale_note = "SIMC left unscaled (window normalization unavailable)"
+        if (
+            math.isfinite(data_window)
+            and math.isfinite(simc_window)
+            and data_window > 0.0
+            and simc_window > 0.0
+        ):
+            simc_scale = data_window / simc_window
+            scale_note = "SIMC scaled to data inside MM cut window"
+    elif scale_mode != "proper":
+        scale_note = "SIMC normalization mode '{}' not recognized; using proper archived normalization".format(
+            BG_OPT_MM_SIMC_SCALE_MODE
+        )
 
     x_data, y_data = _hist_to_arrays(data_hist)
     x_fit2_input, y_fit2_input = _hist_to_arrays(fit2_input_hist)

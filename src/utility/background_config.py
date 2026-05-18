@@ -13,6 +13,16 @@ from __future__ import annotations
 BG_STAT_SCALE1 = 0.5
 BG_STAT_SCALE2 = 0.5
 
+# Background-fit shape guards. These are used to reject pathological
+# empirical-fit curves before they can be subtracted or chosen by the
+# optimizer.
+BG_FIT_NEG_TOL = 1e-8
+BG_FIT_SHAPE_SAMPLES = 128
+BG_FIT_CONCAVITY_REL_TOL = 0.02
+BG_FIT_INTERIOR_MIN_REL_TOL = 0.05
+BG_FIT_MAX_NONPOSITIVE_FRACTION = 0.05
+BG_FIT_MAX_NONPOSITIVE_SPAN = 0.006
+
 # Candidate selection strategy for the Step-4 optimizer.
 # "weighted" ranks candidates by a config-controlled weighted score.
 # "lexicographic" preserves the older strict fail->mean_dev->rms->kin order.
@@ -66,6 +76,7 @@ BG_STAT_SCALE2_FINALIST_COUNT = 2
 BG_OPT_MM_PLOT_MIN = 0.7
 BG_OPT_MM_PLOT_MAX = 1.5
 BG_OPT_MM_PLOT_NBINS = 100
+BG_OPT_MM_SIMC_SCALE_MODE = "window"
 
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
 KINEMATIC_SCORE_VARS = ("Q2", "W", "t", "mm", "xptar", "yptar")
