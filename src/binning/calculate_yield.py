@@ -147,6 +147,7 @@ def _init_ave_event_cache():
     cache_template = {
         "adj_t": [],
         "adj_MM": [],
+        "theta_cm_deg": [],
         "Q2": [],
         "W": [],
         "epsilon": [],
@@ -171,6 +172,7 @@ def _append_ave_event(
     cache_section,
     adj_t,
     adj_MM,
+    theta_cm_deg,
     q2,
     w,
     epsilon,
@@ -190,6 +192,7 @@ def _append_ave_event(
 
     cache_section["adj_t"].append(adj_t)
     cache_section["adj_MM"].append(adj_MM)
+    cache_section["theta_cm_deg"].append(theta_cm_deg)
     cache_section["Q2"].append(q2)
     cache_section["W"].append(w)
     cache_section["epsilon"].append(epsilon)
@@ -208,9 +211,10 @@ def _append_ave_event(
 def _freeze_ave_event_cache(event_cache):
     frozen_cache = {}
     for cache_key, cache_section in event_cache.items():
-        frozen_cache[cache_key] = {
+        frozen_section = {
             "adj_t": np.asarray(cache_section["adj_t"], dtype=np.float64),
             "adj_MM": np.asarray(cache_section["adj_MM"], dtype=np.float64),
+            "theta_cm_deg": np.asarray(cache_section["theta_cm_deg"], dtype=np.float64),
             "Q2": np.asarray(cache_section["Q2"], dtype=np.float64),
             "W": np.asarray(cache_section["W"], dtype=np.float64),
             "epsilon": np.asarray(cache_section["epsilon"], dtype=np.float64),
@@ -225,7 +229,27 @@ def _freeze_ave_event_cache(event_cache):
             "phi_index": np.asarray(cache_section["phi_index"], dtype=np.int32),
             "phi_shift_deg": np.asarray(cache_section["phi_shift_deg"], dtype=np.float64),
         }
+        frozen_section["allcut_bin_index"] = _build_allcut_bin_index(frozen_section)
+        frozen_cache[cache_key] = frozen_section
     return frozen_cache
+
+
+def _build_allcut_bin_index(cache_section):
+    bin_index = {}
+    for idx in np.flatnonzero(cache_section["allcuts"]):
+        t_bin = int(cache_section["t_index"][idx])
+        phi_bin = int(cache_section["phi_index"][idx])
+        if t_bin < 0 or phi_bin < 0:
+            continue
+        bin_index.setdefault((t_bin, phi_bin), []).append(int(idx))
+    return {
+        key: np.asarray(indices, dtype=np.int32)
+        for key, indices in bin_index.items()
+    }
+
+
+def _noop_progress_bar(*args, **kwargs):
+    return None
 
 
 def _init_ave_simc_event_cache():
@@ -298,12 +322,17 @@ def _fill_yield_background_templates_for_bin(
         if cache_section is None or coeff == 0.0:
             continue
 
-        for idx, adj_mm in enumerate(cache_section["adj_MM"]):
+        bin_indices = cache_section.get("allcut_bin_index", {}).get((t_index, phi_index))
+        if bin_indices is None:
+            bin_indices = range(len(cache_section["adj_MM"]))
+
+        for idx in bin_indices:
             if not cache_section["allcuts"][idx]:
                 continue
             if int(cache_section["t_index"][idx]) != t_index or int(cache_section["phi_index"][idx]) != phi_index:
                 continue
 
+            adj_mm = cache_section["adj_MM"][idx]
             event_weight = coeff * mm_background_weight_from_value(
                 adj_mm,
                 mm_reference_hist,
@@ -320,6 +349,7 @@ def _fill_yield_background_templates_for_bin(
             ssyptar = cache_section["ssyptar"][idx]
             hsxptar = cache_section["hsxptar"][idx]
             hsyptar = cache_section["hsyptar"][idx]
+            theta_cm_deg = cache_section["theta_cm_deg"][idx]
 
             template_hists["t"].Fill(adj_t, event_weight)
             template_hists["Q2"].Fill(q2, event_weight)
@@ -335,7 +365,6 @@ def _fill_yield_background_templates_for_bin(
                 weight=event_weight,
             )
 
-            theta_cm_deg = calculate_theta_cm_deg(particle_type, pol, w, q2, adj_t)
             if math.isfinite(theta_cm_deg):
                 template_hists["theta_cm"].Fill(theta_cm_deg, event_weight)
             template_hists["ssxptar"].Fill(ssxptar, event_weight)
@@ -456,6 +485,7 @@ def _process_yield_data_tree(
                 cache_section,
                 adj_t,
                 adj_MM,
+                theta_cm_deg,
                 evt.Q2,
                 evt.W,
                 evt.epsilon,
@@ -584,6 +614,7 @@ def _process_yield_simc_tree(
 def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
     emit_plots = inpDict.get("yield_emit_plots", True)
     suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
+    progress_bar = Misc.progressBar if bool(inpDict.get("yield_show_progress", True)) else _noop_progress_bar
 
     processed_dict = {}
     support_hist_dict = _init_hist_group_matrices(
@@ -862,7 +893,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         evaluate_data_event,
         mm_min,
         mm_max,
-        Misc.progressBar,
+        progress_bar,
         update_mm_offset=True,
     )
 
@@ -881,7 +912,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         evaluate_data_event,
         mm_min,
         mm_max,
-        Misc.progressBar,
+        progress_bar,
     )
 
     print("\nBinning rand...")
@@ -899,7 +930,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         evaluate_data_event,
         mm_min,
         mm_max,
-        Misc.progressBar,
+        progress_bar,
     )
 
     print("\nBinning dummy_rand...")
@@ -917,7 +948,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         evaluate_data_event,
         mm_min,
         mm_max,
-        Misc.progressBar,
+        progress_bar,
     )
 
     # Pion subtraction by scaling pion background to peak size
@@ -1558,6 +1589,7 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
 
     base_inp = dict(inpDict)
     base_inp["yield_emit_plots"] = False
+    base_inp["yield_show_progress"] = False
     base_inp["suppress_bg_opt_warnings"] = True
     base_inp["bg_stat_scale1"] = 0.0
     base_inp["bg_stat_scale1_by_setting"] = {
@@ -2033,6 +2065,7 @@ def find_yield_data(histlist, inpDict):
 
 def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):
     emit_plots = inpDict.get("yield_emit_plots", True)
+    progress_bar = Misc.progressBar if bool(inpDict.get("yield_show_progress", True)) else _noop_progress_bar
 
     processed_dict = {}
     support_hist_dict = _init_hist_group_matrices(
@@ -2138,7 +2171,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         mm_max,
         t_bins,
         phi_bins,
-        Misc.progressBar,
+        progress_bar,
     )
 
     # Checks for first plots and calls +'(' to Print
