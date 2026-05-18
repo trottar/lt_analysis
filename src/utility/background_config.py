@@ -76,7 +76,9 @@ BG_STAT_SCALE2_FINALIST_COUNT = 2
 BG_OPT_MM_PLOT_MIN = 0.7
 BG_OPT_MM_PLOT_MAX = 1.5
 BG_OPT_MM_PLOT_NBINS = 100
-BG_OPT_MM_SIMC_SCALE_MODE = "window"
+# window: SIMC scaled to data inside MM cut window
+# proper: SIMC kept at proper archived normalization
+BG_OPT_MM_SIMC_SCALE_MODE = "proper"
 
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
 KINEMATIC_SCORE_VARS = ("Q2", "W", "t", "mm", "xptar", "yptar")
