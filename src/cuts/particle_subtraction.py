@@ -73,6 +73,7 @@ def _init_sub_event_cache():
     cache_template = {
         "adj_t": [],
         "adj_MM": [],
+        "theta_cm_deg": [],
         "Q2": [],
         "W": [],
         "epsilon": [],
@@ -91,12 +92,30 @@ def _init_sub_event_cache():
     }
 
 
-def _append_sub_event(cache_section, adj_t, adj_MM, q2, w, epsilon, ssxptar, ssyptar, hsxptar, hsyptar, allcuts, nommcuts, t_index=-1, phi_index=-1):
+def _build_sub_allcut_bin_index(cache_section):
+    if len(cache_section["allcuts"]) == 0:
+        return {}
+
+    index_map = {}
+    allcut_indices = np.flatnonzero(cache_section["allcuts"])
+    for idx in allcut_indices:
+        key = (int(cache_section["t_index"][idx]), int(cache_section["phi_index"][idx]))
+        if key not in index_map:
+            index_map[key] = []
+        index_map[key].append(int(idx))
+    return {
+        key: np.asarray(indices, dtype=np.int32)
+        for key, indices in index_map.items()
+    }
+
+
+def _append_sub_event(cache_section, adj_t, adj_MM, theta_cm_deg, q2, w, epsilon, ssxptar, ssyptar, hsxptar, hsyptar, allcuts, nommcuts, t_index=-1, phi_index=-1):
     if not (allcuts or nommcuts):
         return
 
     cache_section["adj_t"].append(adj_t)
     cache_section["adj_MM"].append(adj_MM)
+    cache_section["theta_cm_deg"].append(theta_cm_deg)
     cache_section["Q2"].append(q2)
     cache_section["W"].append(w)
     cache_section["epsilon"].append(epsilon)
@@ -116,6 +135,7 @@ def _freeze_sub_event_cache(event_cache):
         frozen_cache[cache_key] = {
             "adj_t": np.asarray(cache_section["adj_t"], dtype=np.float64),
             "adj_MM": np.asarray(cache_section["adj_MM"], dtype=np.float64),
+            "theta_cm_deg": np.asarray(cache_section["theta_cm_deg"], dtype=np.float64),
             "Q2": np.asarray(cache_section["Q2"], dtype=np.float64),
             "W": np.asarray(cache_section["W"], dtype=np.float64),
             "epsilon": np.asarray(cache_section["epsilon"], dtype=np.float64),
@@ -128,6 +148,7 @@ def _freeze_sub_event_cache(event_cache):
             "t_index": np.asarray(cache_section["t_index"], dtype=np.int32),
             "phi_index": np.asarray(cache_section["phi_index"], dtype=np.int32),
         }
+        frozen_cache[cache_key]["allcut_bin_index"] = _build_sub_allcut_bin_index(frozen_cache[cache_key])
     return frozen_cache
 
 
@@ -1926,6 +1947,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 sub_event_cache["prompt"],
                                 adj_t,
                                 adj_MM,
+                                theta_cm_deg,
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
@@ -2003,6 +2025,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 sub_event_cache["dummy"],
                                 adj_t,
                                 adj_MM,
+                                theta_cm_deg,
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
@@ -2080,6 +2103,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 sub_event_cache["rand"],
                                 adj_t,
                                 adj_MM,
+                                theta_cm_deg,
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,
@@ -2158,6 +2182,7 @@ def particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedPar
                                 sub_event_cache["dummy_rand"],
                                 adj_t,
                                 adj_MM,
+                                theta_cm_deg,
                                 evt.Q2,
                                 evt.W,
                                 evt.epsilon,

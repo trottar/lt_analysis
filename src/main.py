@@ -602,14 +602,21 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 	
 stage_start = perf_counter()
 if EPSSET == "low":
+    low_opt_start = perf_counter()
     histlist, bg_opt_summary = optimize_low_epsilon_configuration(histlist, inpDict)
+    record_stage_time("Step 4 low-e BG optimization", low_opt_start)
+
+    low_bg_artifact_start = perf_counter()
     bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.json".format(ParticleType, OutFilename, EPSSET)
     bg_opt_csv_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.csv".format(ParticleType, OutFilename, EPSSET)
     write_optimization_summary(bg_opt_summary, bg_opt_path)
     write_optimization_csv(bg_opt_summary, inpDict, bg_opt_csv_path)
     output_file_lst.append(bg_opt_path)
     output_file_lst.append(bg_opt_csv_path)
+    record_stage_time("Step 4 low-e BG summary export", low_bg_artifact_start)
+
     try:
+        low_bg_pdf_start = perf_counter()
         bg_opt_pdf_path = os.path.splitext(bg_opt_csv_path)[0] + ".pdf"
         print("[BG OPT] Writing diagnostics PDF {}".format(bg_opt_pdf_path))
         bg_opt_pdf_path = plot_bg_optimization_diagnostics(
@@ -623,6 +630,7 @@ if EPSSET == "low":
         if DEBUG:
             show_pdf_with_evince(bg_opt_pdf_path)
         output_file_lst.append(bg_opt_pdf_path)
+        record_stage_time("Step 4 low-e BG diagnostics PDF", low_bg_pdf_start)
     except Exception as exc:
         print("WARNING: Failed to generate BG optimization diagnostics PDF {}: {}".format(bg_opt_csv_path, exc))
 
@@ -663,14 +671,21 @@ for hist in histlist:
     hist["phi_bins"] = phi_bins
 
 if EPSSET == "high":
+    high_opt_start = perf_counter()
     histlist, bg_opt_summary = optimize_high_epsilon_configuration(histlist, inpDict)
+    record_stage_time("Step 4 high-e BG optimization", high_opt_start)
+
+    high_bg_artifact_start = perf_counter()
     bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.json".format(ParticleType, OutFilename, EPSSET)
     bg_opt_csv_path = OUTPATH + "/" + "{}_{}_bg_opt_{}.csv".format(ParticleType, OutFilename, EPSSET)
     write_optimization_summary(bg_opt_summary, bg_opt_path)
     write_optimization_csv(bg_opt_summary, inpDict, bg_opt_csv_path)
     output_file_lst.append(bg_opt_path)
     output_file_lst.append(bg_opt_csv_path)
+    record_stage_time("Step 4 high-e BG summary export", high_bg_artifact_start)
+
     try:
+        high_bg_pdf_start = perf_counter()
         bg_opt_pdf_path = os.path.splitext(bg_opt_csv_path)[0] + ".pdf"
         print("[BG OPT] Writing diagnostics PDF {}".format(bg_opt_pdf_path))
         bg_opt_pdf_path = plot_bg_optimization_diagnostics(
@@ -684,13 +699,16 @@ if EPSSET == "high":
         if DEBUG:
             show_pdf_with_evince(bg_opt_pdf_path)
         output_file_lst.append(bg_opt_pdf_path)
+        record_stage_time("Step 4 high-e BG diagnostics PDF", high_bg_pdf_start)
     except Exception as exc:
         print("WARNING: Failed to generate BG optimization diagnostics PDF {}: {}".format(bg_opt_csv_path, exc))
     for hist in histlist:
         hist["t_bins"] = t_bins
         hist["phi_bins"] = phi_bins
 
+bin_check_start = perf_counter()
 check_bins(histlist, inpDict)
+record_stage_time("Step 4 bin checker", bin_check_start)
 
 record_stage_time("Step 4 bin finding/check total", stage_start)
 

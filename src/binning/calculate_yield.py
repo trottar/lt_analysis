@@ -349,7 +349,11 @@ def _fill_yield_background_templates_for_bin(
             ssyptar = cache_section["ssyptar"][idx]
             hsxptar = cache_section["hsxptar"][idx]
             hsyptar = cache_section["hsyptar"][idx]
-            theta_cm_deg = cache_section["theta_cm_deg"][idx]
+            theta_cm_vals = cache_section.get("theta_cm_deg")
+            if theta_cm_vals is None:
+                theta_cm_deg = calculate_theta_cm_deg(particle_type, pol, w, q2, adj_t)
+            else:
+                theta_cm_deg = theta_cm_vals[idx]
 
             template_hists["t"].Fill(adj_t, event_weight)
             template_hists["Q2"].Fill(q2, event_weight)
