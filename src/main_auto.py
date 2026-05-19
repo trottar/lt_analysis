@@ -37,6 +37,18 @@ import shutil
 
 sys.path.append("utility")
 from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email, request_yn_response, run_bash_script
+from frozen_manifest import (
+    find_frozen_manifest_path,
+    get_analysis_artifact_paths,
+    get_correction_ledger_paths,
+    load_frozen_manifest,
+    validate_iteration_inputs_against_manifest,
+)
+from write_final_analysis_summary import (
+    build_final_analysis_summary,
+    collect_xsect_payload,
+    write_final_analysis_summary,
+)
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -110,6 +122,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
 output_file_lst.append("utility/background_config.py")
+analysis_artifact_paths = get_analysis_artifact_paths(OUTPATH, ParticleType, Q2, W)
 
 ################################################################################################################################################    
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
@@ -165,6 +178,19 @@ for support_dir in [os.path.join(prev_iter_dir, "root"), prev_iter_dir]:
             shutil.copy(support_path, OUTPATH)
             copied_support_files.add(f)
 
+for artifact_subdir in ["json", "csv"]:
+    src_dir = os.path.join(prev_iter_dir, artifact_subdir)
+    if not os.path.isdir(src_dir):
+        continue
+    for f in os.listdir(src_dir):
+        src_path = os.path.join(src_dir, f)
+        if os.path.isfile(src_path):
+            print("\nCopying {} to {}".format(src_path, OUTPATH))
+            shutil.copy(src_path, OUTPATH)
+            copied_path = os.path.join(OUTPATH, f)
+            if copied_path not in output_file_lst:
+                output_file_lst.append(copied_path)
+
 if EPSSET == "low":
     # Copy all files from previous iteration to OUTPATH to assure consistency
     # List all files in the source directory
@@ -213,6 +239,28 @@ if EPSSET == "low":
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
+manifest_path_prev = find_frozen_manifest_path(prev_iter_dir, ParticleType, Q2, W)
+manifest_payload_prev = load_frozen_manifest(manifest_path_prev)
+correction_ledger_paths_prev = [
+    os.path.join(prev_iter_dir, "json", filename)
+    for filename in os.listdir(os.path.join(prev_iter_dir, "json"))
+    if filename.endswith("_correction_ledger.json")
+]
+if not correction_ledger_paths_prev:
+    raise FileNotFoundError(
+        "No correction ledger JSON files were found in {}".format(
+            os.path.join(prev_iter_dir, "json")
+        )
+    )
+support_npz_paths_prev = []
+for support_dir in [os.path.join(prev_iter_dir, "root"), prev_iter_dir]:
+    if not os.path.isdir(support_dir):
+        continue
+    for filename in os.listdir(support_dir):
+        if filename.startswith(support_prefix) and filename.endswith(".npz"):
+            support_npz_paths_prev.append(os.path.join(support_dir, filename))
+if not support_npz_paths_prev:
+    raise FileNotFoundError("No xsect-support NPZ files were found in {}".format(prev_iter_dir))
 
 # Redefine dictionaries from old iteration information, see main.py
 with open(prev_iter_json, 'r') as f:
@@ -372,6 +420,22 @@ except IOError:
 for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
+
+validate_iteration_inputs_against_manifest(
+    manifest_payload_prev,
+    inpDict,
+    t_bins,
+    phi_bins,
+    LTANAPATH,
+    required_paths=[
+        manifest_path_prev,
+        prev_iter_root,
+        prev_iter_json,
+        *correction_ledger_paths_prev,
+        *support_npz_paths_prev,
+    ],
+)
+output_file_lst.append(os.path.join(OUTPATH, os.path.basename(manifest_path_prev)))
 
 check_bins(histlist, inpDict)
 
@@ -733,6 +797,7 @@ if EPSSET == "high":
         show_pdf_with_evince(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))        
     output_file_lst.append(OUTPATH+"/{}_xsects_Q{}W{}.pdf".format(ParticleType, Q2, W))
     output_file_lst.append(OUTPATH+"/{}_lt_fit_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    output_file_lst.append(f"{OUTPATH}/{ANATYPE}LT_Q{Q2.replace('.','p')}W{W.replace('.','p')}.csv")
     output_file_lst.append('models/lt_2D_fit.py')
     
     # Save sep and unsep values from current iteration
@@ -757,6 +822,48 @@ if EPSSET == "high":
     x_fit_in_t(ParticleType, pol_str, formatted_date, Q2, W, inpDict, output_file_lst, skip_optimization=True)
     if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_lt_fit_in_t_Q{}W{}.pdf".format(ParticleType, Q2, W))
+    low_outfilename = manifest_payload_prev.get("zeroth_iteration_inputs", {}).get("low", {}).get("inp_dict", {}).get("OutFilename")
+    high_outfilename = manifest_payload_prev.get("zeroth_iteration_inputs", {}).get("high", {}).get("inp_dict", {}).get("OutFilename")
+    if low_outfilename and high_outfilename:
+        low_ledger_path = get_correction_ledger_paths(OUTPATH, ParticleType, low_outfilename)["json"]
+        high_ledger_path = get_correction_ledger_paths(OUTPATH, ParticleType, high_outfilename)["json"]
+        low_ledger_payload = json.load(open(low_ledger_path, "r"))
+        high_ledger_payload = json.load(open(high_ledger_path, "r"))
+        epsilon_compare_payload = None
+        if os.path.exists(analysis_artifact_paths["epsilon_compare_json"]):
+            with open(analysis_artifact_paths["epsilon_compare_json"], "r") as handle:
+                epsilon_compare_payload = json.load(handle)
+        systematics_payload = None
+        if os.path.exists(analysis_artifact_paths["systematics_json"]):
+            with open(analysis_artifact_paths["systematics_json"], "r") as handle:
+                systematics_payload = json.load(handle)
+        nonklambda_payload = None
+        if os.path.exists(analysis_artifact_paths["nonklambda_json"]):
+            with open(analysis_artifact_paths["nonklambda_json"], "r") as handle:
+                nonklambda_payload = json.load(handle)
+        inpDict["convergence_status"] = "iteration_update"
+        final_summary_payload = build_final_analysis_summary(
+            manifest_payload_prev,
+            low_ledger_payload,
+            high_ledger_payload,
+            epsilon_compare_payload=epsilon_compare_payload,
+            systematics_payload=systematics_payload,
+            nonklambda_payload=nonklambda_payload,
+            xsect_payload=collect_xsect_payload(OUTPATH, LTANAPATH, ParticleType, Q2, W, ANATYPE, POL),
+            current_inp_dict=inpDict,
+            manifest_path=os.path.join(OUTPATH, os.path.basename(manifest_path_prev)),
+        )
+        final_summary_paths = write_final_analysis_summary(
+            final_summary_payload,
+            OUTPATH,
+            ParticleType,
+            Q2,
+            W,
+            active_profile=manifest_payload_prev.get("active_profile"),
+        )
+        for artifact in final_summary_paths:
+            if artifact not in output_file_lst:
+                output_file_lst.append(artifact)
     
 ##############################
 # Step 8 of the lt_analysis: #
@@ -781,6 +888,9 @@ if EPSSET == "high":
 
 for f in output_file_lst:
     if OUTPATH in f:
+        if not os.path.exists(f):
+            print("\nWARNING: Output artifact not found, skipping copy: {}".format(f))
+            continue
         if ".pdf" in f:
             create_dir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
@@ -790,7 +900,12 @@ for f in output_file_lst:
             create_dir(new_dir+"/json")
             f_new = f.replace(OUTPATH,new_dir+"/json")
             print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)                
+            shutil.copy(f, f_new)
+        if ".csv" in f:
+            create_dir(new_dir+"/csv")
+            f_new = f.replace(OUTPATH,new_dir+"/csv")
+            print("\nCopying {} to {}".format(f,f_new))
+            shutil.copy(f, f_new)
         if ".root" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
@@ -807,6 +922,9 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(f,f_new))
             shutil.copy(f, f_new)
     elif "{}/".format(ParticleType) in f:
+        if not os.path.exists(LTANAPATH+"/src/"+f):
+            print("\nWARNING: Source artifact not found, skipping copy: {}".format(LTANAPATH+"/src/"+f))
+            continue
         f_arr = f.split("/")
         f_tmp = f_arr.pop()
         if len(f_arr) > 1:
@@ -821,6 +939,9 @@ for f in output_file_lst:
             print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
             shutil.copy(LTANAPATH+"/src/"+f, f_new)
     else:
+        if not os.path.exists(LTANAPATH+"/src/"+f):
+            print("\nWARNING: Source artifact not found, skipping copy: {}".format(LTANAPATH+"/src/"+f))
+            continue
         f_new = new_dir
         print("\nCopying {} to {}".format(LTANAPATH+"/src/"+f,f_new))
         shutil.copy(LTANAPATH+"/src/"+f, f_new)

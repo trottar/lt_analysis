@@ -59,11 +59,14 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     BG_OPT_MM_PLOT_NBINS,
+    BG_OVERSUB_WARN_FRACTION,
+    BG_OVERSUB_WARN_MAX_RATIO,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
 from mm_background_subtraction import (
     build_mm_background_weights,
+    build_mm_background_weights_with_diagnostics,
     build_mm_residual_weights,
     clone_reset_hist,
     mm_background_weight_from_value,
@@ -93,6 +96,23 @@ def _print_rand_timer(label, elapsed, total_events=None):
         print("[TIMER] {}: {} ({:.3f} ms/event)".format(label, _format_elapsed(elapsed), per_event_ms))
     else:
         print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
+
+
+def _warn_if_oversub_diagnostics(label, diagnostics):
+    if not diagnostics:
+        return
+    fraction = float(diagnostics.get("affected_lambda_fraction", 0.0) or 0.0)
+    max_ratio = float(diagnostics.get("max_unclamped_ratio", 0.0) or 0.0)
+    if fraction > float(BG_OVERSUB_WARN_FRACTION) or max_ratio > float(BG_OVERSUB_WARN_MAX_RATIO):
+        print(
+            "WARNING: {} oversubtraction diagnostics exceeded thresholds "
+            "(fraction={:.4f}, max_ratio={:.4f}, bins={})".format(
+                label,
+                fraction,
+                max_ratio,
+                int(diagnostics.get("oversub_bin_count", 0) or 0),
+            )
+        )
 
 
 def _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
@@ -2248,7 +2268,14 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         mm_stage1_input = clone_reset_hist(H_MM_DATA, "_stage1_input")
         mm_stage1_input.Add(H_MM_DATA)
         bg_templates1 = _create_rand_sub_bg_templates(data_bg_targets)
-        bg_weights1 = build_mm_background_weights(mm_stage1_input, background_fit1[0])
+        bg_weights1, bg_diag1 = build_mm_background_weights_with_diagnostics(
+            mm_stage1_input,
+            background_fit1[0],
+        )
+        _warn_if_oversub_diagnostics(
+            "{} {} Fit 1".format(inpDict.get("EPSSET", ""), phi_setting),
+            bg_diag1,
+        )
 
         _process_rand_sub_background_tree(
             TBRANCH_DATA,
@@ -2393,7 +2420,14 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         mm_stage2_input = clone_reset_hist(H_MM_DATA, "_stage2_input")
         mm_stage2_input.Add(H_MM_DATA)
         bg_templates2 = _create_rand_sub_bg_templates(data_bg_targets)
-        bg_weights2 = build_mm_background_weights(mm_stage2_input, background_fit2[0])
+        bg_weights2, bg_diag2 = build_mm_background_weights_with_diagnostics(
+            mm_stage2_input,
+            background_fit2[0],
+        )
+        _warn_if_oversub_diagnostics(
+            "{} {} Fit 2".format(inpDict.get("EPSSET", ""), phi_setting),
+            bg_diag2,
+        )
 
         _process_rand_sub_background_tree(
             TBRANCH_DATA,
@@ -2601,6 +2635,10 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
     histDict["H_MM_nosub_DATA"] =     H_MM_nosub_DATA
     histDict["BG_FIT1_VIS_DATA"] = background_fit1[1] if background_fit1 is not None else None
     histDict["BG_FIT2_VIS_DATA"] = background_fit2[1] if background_fit2 is not None else None
+    histDict["bg_oversub_diagnostics"] = {
+        "fit1": bg_diag1 if "bg_diag1" in locals() else None,
+        "fit2": bg_diag2 if "bg_diag2" in locals() else None,
+    }
     histDict["H_th_DATA"] =     H_th_DATA
     histDict["H_ph_DATA"] =     H_ph_DATA
     histDict["H_ph_q_DATA"] =     H_ph_q_DATA

@@ -2427,7 +2427,7 @@ elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
 	    fi	    
 	done
     done
-else:
+else
 	echo
 	echo "ERROR: Invalid combination of flags!"
 	echo "       Please use either -i or -a flag."

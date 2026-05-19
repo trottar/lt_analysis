@@ -9,22 +9,28 @@ import csv
 
 import numpy as np
 
+from frozen_manifest import load_zeroth_iteration_input_bundle
 from background_config import (
-    BG_OPT_METRIC_WEIGHTS,
-    BG_OPT_SELECTION_MODE,
     BG_STAT_SCALE1,
     BG_STAT_SCALE2,
     BG_STAT_SCALE2_FINALIST_COUNT,
     KINEMATIC_SCORE_VARS,
     RATIO_SIGMA_THRESHOLD,
     build_bin_count_candidates,
+    get_active_bg_profile,
+    get_active_metric_weights,
+    get_active_selection_mode,
     get_bg_scale1_coarse_candidates,
     get_bg_scale1_refined_candidates,
     get_bg_scale_coarse_candidates,
     get_bg_scale_refined_candidates,
     get_bg_scale_setting_key,
+    get_forced_bg_scale1,
+    get_forced_bg_scale2,
+    get_resolved_bg_profile_settings,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
+    use_common_epsilon_scales,
 )
 
 sys.path.append("binning")
@@ -56,10 +62,7 @@ def _safe_float(value, default=float("inf")):
 
 
 def _get_selection_mode():
-    mode = str(BG_OPT_SELECTION_MODE).strip().lower()
-    if mode in {"weighted", "lexicographic"}:
-        return mode
-    return "lexicographic"
+    return get_active_selection_mode()
 
 
 def _normalize_metric_values(values, higher_is_better=False):
@@ -120,7 +123,7 @@ def _annotate_selection_scores(results):
 
     for idx, result in enumerate(valid_results):
         score = 0.0
-        for metric_name, weight in BG_OPT_METRIC_WEIGHTS.items():
+        for metric_name, weight in get_active_metric_weights().items():
             if metric_name not in metric_series:
                 continue
             score += float(weight) * float(metric_series[metric_name][idx])
@@ -200,6 +203,17 @@ def _result_summary(result):
             _format_metric_value(metrics.get("kinematic_score", float("inf"))),
         )
     )
+
+
+def _get_profile_metadata():
+    resolved = get_resolved_bg_profile_settings()
+    return {
+        "active_profile": resolved.get("name"),
+        "resolved_profile": resolved,
+        "forced_bg_scale1": get_forced_bg_scale1(),
+        "forced_bg_scale2": get_forced_bg_scale2(),
+        "use_common_epsilon_scales": use_common_epsilon_scales(),
+    }
 
 
 def _copy_static_hist_context(base_hist, candidate_hist):
@@ -466,6 +480,37 @@ def _evaluate_scale_grid(
     return results
 
 
+def _evaluate_fixed_result(
+    base_hist,
+    inpDict,
+    phi_setting,
+    t_bins,
+    phi_bins,
+    simc_yield_dict,
+    simc_support,
+    data_base_cache,
+    bg_scale1,
+    bg_scale2,
+    stage_name,
+):
+    result = _evaluate_phi_candidate(
+        base_hist,
+        inpDict,
+        phi_setting,
+        float(bg_scale1),
+        float(bg_scale2),
+        t_bins,
+        phi_bins,
+        simc_yield_dict,
+        simc_support,
+        data_base_cache,
+    )
+    result["selection_mode"] = _get_selection_mode()
+    result["scan_skipped"] = True
+    result["scan_skip_reason"] = stage_name
+    return result
+
+
 def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale1, bg_scale2, t_bins, phi_bins, simc_yield_dict, simc_support, data_base_cache):
     candidate_inp = dict(inpDict)
     candidate_inp["NumtBins"] = len(t_bins) - 1
@@ -677,15 +722,58 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
     data_base_cache = prepare_bg_opt_data_base_cache(base_hist, inpDict, t_bins, phi_bins)
     initial_scale1 = resolve_bg_stat_scale1(inpDict, phi_setting)
     initial_scale2 = resolve_bg_stat_scale2(inpDict, phi_setting)
+    forced_scale1 = get_forced_bg_scale1()
+    forced_scale2 = get_forced_bg_scale2()
+    scan_skipped = {
+        "bg_stat_scale1": forced_scale1 is not None,
+        "bg_stat_scale2": forced_scale2 is not None,
+    }
 
-    coarse_candidates1 = list(get_bg_scale1_coarse_candidates())
-    _log(
-        "Coarse BG_STAT_SCALE1 grid for {} {}: {}".format(
-            inpDict["EPSSET"],
+    if forced_scale1 is not None and forced_scale2 is not None:
+        fixed_result = _evaluate_fixed_result(
+            base_hist,
+            inpDict,
             phi_setting,
-            ", ".join("{:.3f}".format(float(scale)) for scale in coarse_candidates1),
+            t_bins,
+            phi_bins,
+            simc_yield_dict,
+            simc_support,
+            data_base_cache,
+            forced_scale1,
+            forced_scale2,
+            "profile_forced_both_scales",
         )
-    )
+        fixed_result["coarse_fit1_best"] = fixed_result
+        fixed_result["coarse_fit1_results"] = [fixed_result]
+        fixed_result["coarse_fit2_best"] = fixed_result
+        fixed_result["coarse_fit2_results"] = [fixed_result]
+        fixed_result["refined_fit1_best"] = fixed_result
+        fixed_result["refined_fit1_results"] = [fixed_result]
+        fixed_result["refined_fit2_best"] = fixed_result
+        fixed_result["refined_fit2_results"] = [fixed_result]
+        fixed_result["forced_bg_scale1"] = forced_scale1
+        fixed_result["forced_bg_scale2"] = forced_scale2
+        fixed_result["scan_skipped"] = scan_skipped
+        return fixed_result
+
+    if forced_scale1 is not None:
+        coarse_candidates1 = [float(forced_scale1)]
+        _log(
+            "Skipping BG_STAT_SCALE1 scan for {} {} due to active profile; fixed at {:.3f}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                float(forced_scale1),
+            )
+        )
+    else:
+        coarse_candidates1 = list(get_bg_scale1_coarse_candidates())
+        _log(
+            "Coarse BG_STAT_SCALE1 grid for {} {}: {}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                ", ".join("{:.3f}".format(float(scale)) for scale in coarse_candidates1),
+            )
+        )
     coarse_fit1_results = _evaluate_scale_grid(
         base_hist,
         inpDict,
@@ -698,13 +786,16 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         "Coarse",
         "bg_stat_scale1",
         coarse_candidates1,
-        initial_scale1,
-        initial_scale2,
+        forced_scale1 if forced_scale1 is not None else initial_scale1,
+        forced_scale2 if forced_scale2 is not None else initial_scale2,
     )
 
     best_coarse_fit1 = _finalize_phi_results(coarse_fit1_results, inpDict)
     if not best_coarse_fit1.get("valid"):
         _log("No valid coarse BG_STAT_SCALE1 found for {} {}".format(inpDict["EPSSET"], phi_setting))
+        best_coarse_fit1["forced_bg_scale1"] = forced_scale1
+        best_coarse_fit1["forced_bg_scale2"] = forced_scale2
+        best_coarse_fit1["scan_skipped"] = scan_skipped
         return best_coarse_fit1
 
     _log(
@@ -719,14 +810,24 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         )
     )
 
-    coarse_candidates2 = list(get_bg_scale_coarse_candidates())
-    _log(
-        "Coarse BG_STAT_SCALE2 grid for {} {}: {}".format(
-            inpDict["EPSSET"],
-            phi_setting,
-            ", ".join("{:.3f}".format(float(scale)) for scale in coarse_candidates2),
+    if forced_scale2 is not None:
+        coarse_candidates2 = [float(forced_scale2)]
+        _log(
+            "Skipping BG_STAT_SCALE2 scan for {} {} due to active profile; fixed at {:.3f}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                float(forced_scale2),
+            )
         )
-    )
+    else:
+        coarse_candidates2 = list(get_bg_scale_coarse_candidates())
+        _log(
+            "Coarse BG_STAT_SCALE2 grid for {} {}: {}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                ", ".join("{:.3f}".format(float(scale)) for scale in coarse_candidates2),
+            )
+        )
     coarse_fit2_results = _evaluate_scale_grid(
         base_hist,
         inpDict,
@@ -740,7 +841,7 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         "bg_stat_scale2",
         coarse_candidates2,
         best_coarse_fit1["bg_scale1"],
-        initial_scale2,
+        forced_scale2 if forced_scale2 is not None else initial_scale2,
     )
 
     best_coarse_fit2 = _finalize_phi_results(coarse_fit2_results, inpDict)
@@ -759,57 +860,65 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
         )
     )
 
-    refined_candidates1 = list(get_bg_scale1_refined_candidates(best_coarse_fit1["bg_scale1"]))
-    _log(
-        "Refined BG_STAT_SCALE1 grid for {} {}: {}".format(
-            inpDict["EPSSET"],
-            phi_setting,
-            ", ".join("{:.3f}".format(float(scale)) for scale in refined_candidates1),
+    if forced_scale1 is not None:
+        refined_fit1_results = list(coarse_fit1_results)
+        best_refined_fit1 = dict(best_coarse_fit1)
+    else:
+        refined_candidates1 = list(get_bg_scale1_refined_candidates(best_coarse_fit1["bg_scale1"]))
+        _log(
+            "Refined BG_STAT_SCALE1 grid for {} {}: {}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                ", ".join("{:.3f}".format(float(scale)) for scale in refined_candidates1),
+            )
         )
-    )
-    refined_fit1_results = _evaluate_scale_grid(
-        base_hist,
-        inpDict,
-        phi_setting,
-        t_bins,
-        phi_bins,
-        simc_yield_dict,
-        simc_support,
-        data_base_cache,
-        "Refined",
-        "bg_stat_scale1",
-        refined_candidates1,
-        best_coarse_fit1["bg_scale1"],
-        best_coarse_fit2["bg_scale2"],
-    )
-    best_refined_fit1 = _finalize_phi_results(refined_fit1_results, inpDict)
-    if not best_refined_fit1.get("valid"):
-        best_refined_fit1 = best_coarse_fit2
+        refined_fit1_results = _evaluate_scale_grid(
+            base_hist,
+            inpDict,
+            phi_setting,
+            t_bins,
+            phi_bins,
+            simc_yield_dict,
+            simc_support,
+            data_base_cache,
+            "Refined",
+            "bg_stat_scale1",
+            refined_candidates1,
+            best_coarse_fit1["bg_scale1"],
+            best_coarse_fit2["bg_scale2"],
+        )
+        best_refined_fit1 = _finalize_phi_results(refined_fit1_results, inpDict)
+        if not best_refined_fit1.get("valid"):
+            best_refined_fit1 = best_coarse_fit2
 
-    refined_candidates2 = list(get_bg_scale_refined_candidates(best_coarse_fit2["bg_scale2"]))
-    _log(
-        "Refined BG_STAT_SCALE2 grid for {} {}: {}".format(
-            inpDict["EPSSET"],
-            phi_setting,
-            ", ".join("{:.3f}".format(float(scale)) for scale in refined_candidates2),
+    if forced_scale2 is not None:
+        refined_fit2_results = list(coarse_fit2_results)
+        best_refined_fit2 = dict(best_coarse_fit2)
+    else:
+        refined_candidates2 = list(get_bg_scale_refined_candidates(best_coarse_fit2["bg_scale2"]))
+        _log(
+            "Refined BG_STAT_SCALE2 grid for {} {}: {}".format(
+                inpDict["EPSSET"],
+                phi_setting,
+                ", ".join("{:.3f}".format(float(scale)) for scale in refined_candidates2),
+            )
         )
-    )
-    refined_fit2_results = _evaluate_scale_grid(
-        base_hist,
-        inpDict,
-        phi_setting,
-        t_bins,
-        phi_bins,
-        simc_yield_dict,
-        simc_support,
-        data_base_cache,
-        "Refined",
-        "bg_stat_scale2",
-        refined_candidates2,
-        best_refined_fit1["bg_scale1"],
-        best_coarse_fit2["bg_scale2"],
-    )
-    best_refined_fit2 = _finalize_phi_results(refined_fit2_results, inpDict)
+        refined_fit2_results = _evaluate_scale_grid(
+            base_hist,
+            inpDict,
+            phi_setting,
+            t_bins,
+            phi_bins,
+            simc_yield_dict,
+            simc_support,
+            data_base_cache,
+            "Refined",
+            "bg_stat_scale2",
+            refined_candidates2,
+            best_refined_fit1["bg_scale1"],
+            best_coarse_fit2["bg_scale2"],
+        )
+        best_refined_fit2 = _finalize_phi_results(refined_fit2_results, inpDict)
 
     selected_result = None
     for candidate in (best_refined_fit2, best_refined_fit1, best_coarse_fit2, best_coarse_fit1):
@@ -829,6 +938,9 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
     selected_result["refined_fit1_results"] = refined_fit1_results
     selected_result["refined_fit2_best"] = best_refined_fit2
     selected_result["refined_fit2_results"] = refined_fit2_results
+    selected_result["forced_bg_scale1"] = forced_scale1
+    selected_result["forced_bg_scale2"] = forced_scale2
+    selected_result["scan_skipped"] = scan_skipped
 
     if selected_result.get("valid"):
         _log(
@@ -922,9 +1034,12 @@ def _serialize_result(result, seen=None):
 
 
 def _build_summary_report(inpDict, mode, proposal, phi_results):
+    profile_meta = _get_profile_metadata()
     lines = [
         "BG/Tuning Summary ({})".format(mode),
+        "Active profile: {}".format(profile_meta["active_profile"]),
         "Selection mode: {}".format(_get_selection_mode()),
+        "Use common epsilon scales: {}".format(profile_meta["use_common_epsilon_scales"]),
         "Shared bins: NumtBins={} NumPhiBins={}".format(
             len(proposal["t_bins"]) - 1,
             len(proposal["phi_bins"]) - 1,
@@ -971,6 +1086,7 @@ def _base_csv_row(
     proposal = proposal or {}
     row = {
         "mode": summary.get("mode", ""),
+        "active_profile": summary.get("active_profile"),
         "selection_mode": summary.get("selection_mode", _get_selection_mode()),
         "epsset": inpDict.get("EPSSET", ""),
         "particle": inpDict.get("ParticleType", ""),
@@ -985,6 +1101,10 @@ def _base_csv_row(
         "bg_stat_scale2": bg_scale2,
         "valid": valid,
         "fallback": summary.get("fallback", False),
+        "forced_bg_scale1": summary.get("forced_bg_scale1"),
+        "forced_bg_scale2": summary.get("forced_bg_scale2"),
+        "use_common_epsilon_scales": summary.get("use_common_epsilon_scales"),
+        "resolved_profile_json": json.dumps(summary.get("resolved_profile", {}), sort_keys=True),
         "requested_num_t_bins": proposal.get("requested_num_t_bins"),
         "requested_num_phi_bins": proposal.get("requested_num_phi_bins"),
         "actual_num_t_bins": proposal.get("actual_num_t_bins"),
@@ -1164,8 +1284,73 @@ def _rerun_final_rand_sub(histlist, inpDict, selected_bg_scale1s, selected_bg_sc
     return refreshed_histlist
 
 
+def _load_common_scale_maps_from_low(inpDict, histlist):
+    bundle = load_zeroth_iteration_input_bundle(
+        inpDict["OUTPATH"],
+        inpDict["ParticleType"],
+        inpDict["Q2"],
+        inpDict["W"],
+        active_profile=inpDict.get("bg_active_profile"),
+    ) or {}
+    low_outfilename = bundle.get("low", {}).get("inp_dict", {}).get("OutFilename")
+    if not low_outfilename:
+        low_outfilename = str(inpDict.get("OutFilename", "")).replace("highe", "lowe")
+    low_summary_path = os.path.join(
+        inpDict["OUTPATH"],
+        "{}_{}_bg_opt_low.json".format(inpDict["ParticleType"], low_outfilename),
+    )
+    if not os.path.exists(low_summary_path):
+        raise FileNotFoundError(
+            "Common-epsilon profile requires the low-epsilon BG summary, but it was not found: {}".format(
+                low_summary_path
+            )
+        )
+    with open(low_summary_path, "r") as handle:
+        low_summary = json.load(handle)
+    selected_bg_scale1s = deepcopy(low_summary.get("selected_bg_scale1s", {}))
+    selected_bg_scale2s = deepcopy(low_summary.get("selected_bg_scale2s", {}))
+    phi_results = []
+    proposal = {
+        "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
+        "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
+    }
+    for base_hist in histlist:
+        phi_setting = base_hist["phi_setting"]
+        key = get_bg_scale_setting_key(inpDict["EPSSET"], phi_setting)
+        low_key = get_bg_scale_setting_key("low", phi_setting)
+        common_scale1 = float(selected_bg_scale1s.get(low_key, selected_bg_scale1s.get(key, BG_STAT_SCALE1)))
+        common_scale2 = float(selected_bg_scale2s.get(low_key, selected_bg_scale2s.get(key, BG_STAT_SCALE2)))
+        selected_bg_scale1s[key] = common_scale1
+        selected_bg_scale2s[key] = common_scale2
+        simc_yield_dict, simc_support = _build_simc_reference(base_hist, inpDict, proposal["t_bins"], proposal["phi_bins"])
+        sys.path.append("binning")
+        from calculate_yield import prepare_bg_opt_data_base_cache
+
+        data_base_cache = prepare_bg_opt_data_base_cache(base_hist, inpDict, proposal["t_bins"], proposal["phi_bins"])
+        result = _evaluate_fixed_result(
+            base_hist,
+            inpDict,
+            phi_setting,
+            proposal["t_bins"],
+            proposal["phi_bins"],
+            simc_yield_dict,
+            simc_support,
+            data_base_cache,
+            common_scale1,
+            common_scale2,
+            "common_epsilon_low_freeze",
+        )
+        result["common_scale_source"] = "low_epsilon_freeze"
+        phi_results.append(result)
+    return selected_bg_scale1s, selected_bg_scale2s, phi_results
+
+
 def optimize_low_epsilon_configuration(histlist, inpDict):
     _log("Starting low-e optimization prepass")
+    profile_meta = _get_profile_metadata()
+    inpDict["bg_active_profile"] = profile_meta["active_profile"]
+    inpDict["bg_resolved_profile"] = profile_meta["resolved_profile"]
+    inpDict["bg_use_common_epsilon_scales"] = profile_meta["use_common_epsilon_scales"]
     requested_t_bins = int(inpDict["NumtBins"])
     requested_phi_bins = int(inpDict["NumPhiBins"])
     candidate_results = []
@@ -1238,6 +1423,11 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
         summary = {
             "mode": "low",
             "selection_mode": _get_selection_mode(),
+            "active_profile": profile_meta["active_profile"],
+            "resolved_profile": profile_meta["resolved_profile"],
+            "forced_bg_scale1": profile_meta["forced_bg_scale1"],
+            "forced_bg_scale2": profile_meta["forced_bg_scale2"],
+            "use_common_epsilon_scales": profile_meta["use_common_epsilon_scales"],
             "fallback": True,
             "proposal": fallback_proposal,
             "selected_bg_scale1s": fallback_map1,
@@ -1296,6 +1486,11 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     summary = {
         "mode": "low",
         "selection_mode": _get_selection_mode(),
+        "active_profile": profile_meta["active_profile"],
+        "resolved_profile": profile_meta["resolved_profile"],
+        "forced_bg_scale1": profile_meta["forced_bg_scale1"],
+        "forced_bg_scale2": profile_meta["forced_bg_scale2"],
+        "use_common_epsilon_scales": profile_meta["use_common_epsilon_scales"],
         "fallback": False,
         "proposal": best_candidate["proposal"],
         "selected_bg_scale1s": selected_bg_scale1s,
@@ -1317,6 +1512,10 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
 
 def optimize_high_epsilon_configuration(histlist, inpDict):
     _log("Starting high-e optimization prepass")
+    profile_meta = _get_profile_metadata()
+    inpDict["bg_active_profile"] = profile_meta["active_profile"]
+    inpDict["bg_resolved_profile"] = profile_meta["resolved_profile"]
+    inpDict["bg_use_common_epsilon_scales"] = profile_meta["use_common_epsilon_scales"]
     proposal = {
         "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
         "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
@@ -1332,24 +1531,28 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
         )
     )
 
-    phi_results = [
-        _optimize_phi_scale(base_hist, inpDict, proposal["t_bins"], proposal["phi_bins"])
-        for base_hist in histlist
-    ]
+    if use_common_epsilon_scales():
+        _log("Active profile requests common epsilon scales; reusing the frozen low-e scale map")
+        selected_bg_scale1s, selected_bg_scale2s, phi_results = _load_common_scale_maps_from_low(inpDict, histlist)
+    else:
+        phi_results = [
+            _optimize_phi_scale(base_hist, inpDict, proposal["t_bins"], proposal["phi_bins"])
+            for base_hist in histlist
+        ]
 
-    selected_bg_scale1s = {}
-    selected_bg_scale2s = {}
-    for result in phi_results:
-        key = get_bg_scale_setting_key(inpDict["EPSSET"], result["phi_setting"])
-        selected_bg_scale1s[key] = float(result.get("bg_scale1", resolve_bg_stat_scale1(inpDict, result["phi_setting"])))
-        selected_bg_scale2s[key] = float(result.get("bg_scale2", resolve_bg_stat_scale2(inpDict, result["phi_setting"])))
-        _log(
-            "Selected high-e scales for {}: BG_STAT_SCALE1={:.3f} BG_STAT_SCALE2={:.3f}".format(
-                result["phi_setting"],
-                float(selected_bg_scale1s[key]),
-                float(selected_bg_scale2s[key]),
+        selected_bg_scale1s = {}
+        selected_bg_scale2s = {}
+        for result in phi_results:
+            key = get_bg_scale_setting_key(inpDict["EPSSET"], result["phi_setting"])
+            selected_bg_scale1s[key] = float(result.get("bg_scale1", resolve_bg_stat_scale1(inpDict, result["phi_setting"])))
+            selected_bg_scale2s[key] = float(result.get("bg_scale2", resolve_bg_stat_scale2(inpDict, result["phi_setting"])))
+            _log(
+                "Selected high-e scales for {}: BG_STAT_SCALE1={:.3f} BG_STAT_SCALE2={:.3f}".format(
+                    result["phi_setting"],
+                    float(selected_bg_scale1s[key]),
+                    float(selected_bg_scale2s[key]),
+                )
             )
-        )
     selected_histlist = _rerun_final_rand_sub(histlist, inpDict, selected_bg_scale1s, selected_bg_scale2s)
 
     inpDict["bg_stat_scale1_by_setting"] = selected_bg_scale1s
@@ -1357,6 +1560,11 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     summary = {
         "mode": "high",
         "selection_mode": _get_selection_mode(),
+        "active_profile": profile_meta["active_profile"],
+        "resolved_profile": profile_meta["resolved_profile"],
+        "forced_bg_scale1": profile_meta["forced_bg_scale1"],
+        "forced_bg_scale2": profile_meta["forced_bg_scale2"],
+        "use_common_epsilon_scales": profile_meta["use_common_epsilon_scales"],
         "fallback": False,
         "proposal": proposal,
         "selected_bg_scale1s": selected_bg_scale1s,
@@ -1366,6 +1574,8 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
         "candidate_results": phi_results,
         "selection_score": None,
     }
+    if use_common_epsilon_scales():
+        summary["common_scale_source"] = "low_epsilon_freeze"
     inpDict["bg_optimization_summary"] = _serialize_result(summary)
     inpDict["bg_optimization_report"] = _build_summary_report(inpDict, "high", proposal, phi_results)
     return selected_histlist, summary
@@ -1382,6 +1592,7 @@ def write_optimization_csv(summary, inpDict, csv_path):
     rows = build_optimization_csv_rows(summary, inpDict)
     fieldnames = [
         "mode",
+        "active_profile",
         "selection_mode",
         "epsset",
         "particle",
@@ -1396,6 +1607,10 @@ def write_optimization_csv(summary, inpDict, csv_path):
         "bg_stat_scale2",
         "valid",
         "fallback",
+        "forced_bg_scale1",
+        "forced_bg_scale2",
+        "use_common_epsilon_scales",
+        "resolved_profile_json",
         "requested_num_t_bins",
         "requested_num_phi_bins",
         "actual_num_t_bins",

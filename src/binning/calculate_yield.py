@@ -60,12 +60,15 @@ sys.path.append("utility")
 from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
+    BG_OVERSUB_WARN_FRACTION,
+    BG_OVERSUB_WARN_MAX_RATIO,
     get_bg_scale_setting_key,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
 from mm_background_subtraction import (
     build_mm_background_weights,
+    build_mm_background_weights_with_diagnostics,
     build_mm_residual_weights,
     clone_reset_hist,
     mm_background_weight_from_value,
@@ -113,6 +116,46 @@ def _make_bg_opt_bin_cache_key(t_bins, phi_bins, shift_mode):
         tuple(round(float(val), 8) for val in np.asarray(phi_bins, dtype=float)),
         str(shift_mode),
     )
+
+
+def _warn_if_oversub_diagnostics(label, diagnostics):
+    if not diagnostics:
+        return
+    fraction = float(diagnostics.get("affected_lambda_fraction", 0.0) or 0.0)
+    max_ratio = float(diagnostics.get("max_unclamped_ratio", 0.0) or 0.0)
+    if fraction > float(BG_OVERSUB_WARN_FRACTION) or max_ratio > float(BG_OVERSUB_WARN_MAX_RATIO):
+        print(
+            "WARNING: {} oversubtraction diagnostics exceeded thresholds "
+            "(fraction={:.4f}, max_ratio={:.4f}, bins={})".format(
+                label,
+                fraction,
+                max_ratio,
+                int(diagnostics.get("oversub_bin_count", 0) or 0),
+            )
+        )
+
+
+def _extract_stage_window_yields(entry, mm_min, mm_max):
+    stage_map = {
+        "raw_prompt": "H_MM_RAW_PROMPT_DATA",
+        "after_random_subtraction": "H_MM_AFTER_RANDOM_DATA",
+        "after_dummy_subtraction": "H_MM_nosub_DATA",
+        "after_pion_subtraction": "H_MM_pisub_DATA",
+        "after_empirical_fit1": "H_MM_fit1sub_DATA",
+        "after_empirical_fit2": "H_MM_DATA",
+        "final_lambda_window": "H_MM_DATA",
+    }
+    yields = {}
+    for stage_name, hist_key in stage_map.items():
+        hist = entry.get(hist_key)
+        if hist is None:
+            yields[stage_name] = None
+            continue
+        try:
+            yields[stage_name] = float(integrate_hist_range(hist, mm_min, mm_max))
+        except Exception:
+            yields[stage_name] = None
+    return yields
 
 
 def _fill_t_vs_tmin_hist(hist, particle_type, pol, w, q2, minus_t, weight=None):
@@ -393,7 +436,10 @@ def _subtract_yield_mm_background_for_bin(
     pol,
     residual_weights=None,
 ):
-    mm_background_weights = build_mm_background_weights(mm_reference_hist, background_hist)
+    mm_background_weights, diagnostics = build_mm_background_weights_with_diagnostics(
+        mm_reference_hist,
+        background_hist,
+    )
     template_hists = {
         "t": clone_reset_hist(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)], "_bg_template"),
         "Q2": clone_reset_hist(hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)], "_bg_template"),
@@ -430,7 +476,7 @@ def _subtract_yield_mm_background_for_bin(
     hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Add(template_hists["hsyptar"], -1)
     hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(template_hists["t_vs_tmin"], -1)
 
-    return mm_background_weights
+    return mm_background_weights, diagnostics
 
 
 def _init_hist_group_matrices(names, n_t, n_phi):
@@ -967,6 +1013,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     n_t = len(t_bins) - 1
     n_phi = len(phi_bins) - 1
     arr_scale_factor = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]
+    stage_snapshot_dict = {}
 
     # Per-(t,phi) fractional uncertainty from the background fits (background_fit1/2)
     bg_fit1_frac_err = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]    
@@ -975,6 +1022,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1):
+            stage_snapshot_dict["H_MM_RAW_PROMPT_DATA_{}_{}".format(j, k)] = _clone_hist_for_plot(
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]
+            )
                             
             hist_bin_dict["H_Q2_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
             hist_bin_dict["H_W_RAND_{}_{}".format(j, k)].Scale(1/nWindows)
@@ -1045,6 +1095,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Scale(normfac_data)
+            stage_snapshot_dict["H_MM_RAW_PROMPT_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Scale(normfac_data)
             hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Scale(normfac_data)
@@ -1070,6 +1121,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)] = hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Clone(
                 "H_MM_DUMMY_NORM_{}_{}".format(j, k)
+            )
+            stage_snapshot_dict["H_MM_AFTER_RANDOM_DATA_{}_{}".format(j, k)] = _clone_hist_for_plot(
+                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]
             )
             
             # Dummy subtraction            
@@ -1413,6 +1467,8 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             processed_entry = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 "H_MM_DUMMY_NORM" : dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)],
+                "H_MM_RAW_PROMPT_DATA" : stage_snapshot_dict["H_MM_RAW_PROMPT_DATA_{}_{}".format(j, k)],
+                "H_MM_AFTER_RANDOM_DATA" : stage_snapshot_dict["H_MM_AFTER_RANDOM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
@@ -1421,21 +1477,25 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 "bg_fit1_frac_err" : bg_fit1_frac_err[j][k],        
                 "bg_fit2_frac_err" : bg_fit2_frac_err[j][k],
             }
-            if not emit_plots:
-                processed_entry.update({
-                    "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)],
-                    "H_W_DATA" : hist_bin_dict["H_W_DATA_{}_{}".format(j, k)],
-                    "H_Q2_vs_W_DATA" : hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)],
-                    "H_theta_cm_DATA" : hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)],
-                    "H_hsxptar_DATA" : hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)],
-                    "H_hsyptar_DATA" : hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)],
-                    "H_ssxptar_DATA" : hist_bin_dict["H_ssxptar_DATA_{}_{}".format(j, k)],
-                    "H_ssyptar_DATA" : hist_bin_dict["H_ssyptar_DATA_{}_{}".format(j, k)],
-                    "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
-                    "H_MM_pisub_DATA" : hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
-                    "H_MM_nosub_DATA" : hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
-                    "H_t_vs_tmin_DATA" : hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)],
-                })
+            processed_entry.update({
+                "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)],
+                "H_W_DATA" : hist_bin_dict["H_W_DATA_{}_{}".format(j, k)],
+                "H_Q2_vs_W_DATA" : hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)],
+                "H_theta_cm_DATA" : hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)],
+                "H_hsxptar_DATA" : hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)],
+                "H_hsyptar_DATA" : hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)],
+                "H_ssxptar_DATA" : hist_bin_dict["H_ssxptar_DATA_{}_{}".format(j, k)],
+                "H_ssyptar_DATA" : hist_bin_dict["H_ssyptar_DATA_{}_{}".format(j, k)],
+                "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)],
+                "H_MM_pisub_DATA" : hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
+                "H_MM_nosub_DATA" : hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+                "H_t_vs_tmin_DATA" : hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)],
+            })
+            processed_entry["stage_window_yields"] = _extract_stage_window_yields(
+                processed_entry,
+                float(inpDict["mm_min"]),
+                float(inpDict["mm_max"]),
+            )
             processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)] = processed_entry
 
             # Sort dictionary keys alphabetically
@@ -1650,6 +1710,7 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
         for k in range(len(phi_bins) - 1):
             entry = processed_dict["t_bin{}phi_bin{}".format(j + 1, k + 1)]
             residual_bg_weights1 = None
+            entry.setdefault("oversub_diagnostics", {})
             if bg_scale1 > 0.0 or bg_scale2 > 0.0:
                 hist_bin_dict = {
                     "H_Q2_DATA_{}_{}".format(j, k): entry["H_Q2_DATA"],
@@ -1677,7 +1738,7 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 )
 
                 mm_stage1_input = _clone_hist_for_plot(entry["H_MM_DATA"])
-                bg_weights1 = _subtract_yield_mm_background_for_bin(
+                bg_weights1, fit1_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
                     k,
@@ -1691,6 +1752,16 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     entry["scale_factor"],
                     ParticleType,
                     POL,
+                )
+                entry["oversub_diagnostics"]["fit1"] = fit1_diagnostics
+                _warn_if_oversub_diagnostics(
+                    "{} {} t-bin {} phi-bin {} Fit 1".format(
+                        inpDict.get("EPSSET", ""),
+                        phi_setting,
+                        j + 1,
+                        k + 1,
+                    ),
+                    fit1_diagnostics,
                 )
                 residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
                 entry["H_MM_fit1sub_DATA"].Add(fit_result1[1], -1)
@@ -1729,7 +1800,7 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 )
 
                 mm_stage2_input = _clone_hist_for_plot(entry["H_MM_DATA"])
-                _subtract_yield_mm_background_for_bin(
+                _, fit2_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
                     k,
@@ -1744,6 +1815,16 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     ParticleType,
                     POL,
                     residual_weights=residual_bg_weights1,
+                )
+                entry["oversub_diagnostics"]["fit2"] = fit2_diagnostics
+                _warn_if_oversub_diagnostics(
+                    "{} {} t-bin {} phi-bin {} Fit 2".format(
+                        inpDict.get("EPSSET", ""),
+                        phi_setting,
+                        j + 1,
+                        k + 1,
+                    ),
+                    fit2_diagnostics,
                 )
                 entry["H_MM_DATA"].Add(fit_result2[0], -1)
 
@@ -1774,6 +1855,8 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 prune_hist(entry["H_MM_nosub_DATA"], event_threshold)
                 prune_hist(entry["H_MM_DATA"], event_threshold)
                 prune_hist(entry["H_t_DATA"], event_threshold)
+
+            entry["stage_window_yields"] = _extract_stage_window_yields(entry, mm_min, mm_max)
 
             support_hist_dict["Q2"][j][k] = _clone_hist_for_plot(entry["H_Q2_DATA"])
             support_hist_dict["W"][j][k] = _clone_hist_for_plot(entry["H_W_DATA"])
@@ -1881,6 +1964,7 @@ def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bin
             binned_hist_sub.append(tmp_binned_hist_sub[0])
 
     binned_dict[kin_type] = {
+        "processed_dict": processed_dict,
         "binned_t_data" : binned_t_data,
         "binned_hist_data" : binned_hist_data,
         "binned_hist_sub" : binned_hist_sub,
@@ -1929,6 +2013,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
+    hist["_yield_data_processed_dict"] = binned_dict[kin_type]["processed_dict"]
     hist["_xsect_support_data"] = binned_dict[kin_type]["support_hist_dict"]
 
     binned_t_data = binned_dict[kin_type]["binned_t_data"]

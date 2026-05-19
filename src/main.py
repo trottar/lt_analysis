@@ -39,6 +39,22 @@ from time import perf_counter
 
 sys.path.append("utility")
 from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email, request_yn_response, run_bash_script
+from background_config import get_active_bg_profile_name
+from correction_ledger import build_correction_ledger, write_correction_ledger
+from epsilon_correction_compare import load_ledgers_and_compare, validate_epsilon_compare
+from frozen_manifest import (
+    build_frozen_manifest_payload,
+    get_analysis_artifact_paths,
+    get_correction_ledger_paths,
+    load_zeroth_iteration_input_bundle,
+    write_frozen_manifest,
+    write_zeroth_iteration_input_bundle,
+)
+from write_final_analysis_summary import (
+    build_final_analysis_summary,
+    collect_xsect_payload,
+    write_final_analysis_summary,
+)
 
 ##################################################################################################################################################
 # Check the number of arguments provided to the script
@@ -186,6 +202,26 @@ CACHEPATH=lt.CACHEPATH
 
 inpDict["LTANAPATH"] = LTANAPATH
 inpDict["OUTPATH"] = OUTPATH
+write_zeroth_iteration_input_bundle(
+    OUTPATH,
+    ParticleType,
+    Q2,
+    W,
+    EPSSET,
+    sys.argv,
+    inpDict,
+    active_profile=inpDict.get("bg_active_profile"),
+)
+analysis_artifact_paths = get_analysis_artifact_paths(
+    OUTPATH,
+    ParticleType,
+    Q2,
+    W,
+    active_profile=inpDict.get("bg_active_profile"),
+)
+output_file_lst.append(analysis_artifact_paths["input_bundle"])
+if analysis_artifact_paths["input_bundle_profile"] != analysis_artifact_paths["input_bundle"]:
+    output_file_lst.append(analysis_artifact_paths["input_bundle_profile"])
 
 TEMP_CACHEPATH=f"{OUTPATH}/cache_transfer"
 
@@ -196,6 +232,7 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 
 output_file_lst = []
 output_file_lst.append("utility/background_config.py")
+inpDict["bg_active_profile"] = get_active_bg_profile_name()
 
 phisetlist = ["Center", "Left", "Right"]
 #phisetlist = ["Center"]
@@ -786,6 +823,30 @@ yieldDict.update(find_yield_simc(histlist, inpDict))
 record_stage_time("Step 6 simc yields", stage_start)
 
 stage_start = perf_counter()
+correction_ledger_payload = build_correction_ledger(
+    histlist,
+    inpDict,
+    bg_summary=inpDict.get("bg_optimization_summary"),
+)
+correction_ledger_paths = write_correction_ledger(
+    correction_ledger_payload,
+    OUTPATH,
+    ParticleType,
+    OutFilename,
+    active_profile=inpDict.get("bg_active_profile"),
+)
+for artifact in correction_ledger_paths:
+    if artifact not in output_file_lst:
+        output_file_lst.append(artifact)
+inpDict["correction_ledger_path"] = get_correction_ledger_paths(
+    OUTPATH,
+    ParticleType,
+    OutFilename,
+    active_profile=inpDict.get("bg_active_profile"),
+)["json"]
+record_stage_time("Step 6 correction ledger export", stage_start)
+
+stage_start = perf_counter()
 write_xsect_support(histlist, inpDict, output_file_lst)
 record_stage_time("Step 6 xsect support", stage_start)
 #sys.exit(2)
@@ -1018,6 +1079,121 @@ if EPSSET == "high":
     aver_hi_file = '{}/averages/aver.{}_Q{}W{}_{:.0f}.dat'.format(ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""), float(HIEPS)*100)
     output_file_lst.append(aver_hi_file)    
     record_stage_time("Step 7 xsect separation", stage_start)
+
+    stage_start = perf_counter()
+    zeroth_bundle = load_zeroth_iteration_input_bundle(
+        OUTPATH,
+        ParticleType,
+        Q2,
+        W,
+        active_profile=inpDict.get("bg_active_profile"),
+    ) or {}
+    low_bundle_entry = zeroth_bundle.get("low", {})
+    high_bundle_entry = zeroth_bundle.get("high", {})
+    low_outfilename = low_bundle_entry.get("inp_dict", {}).get("OutFilename")
+    if not low_outfilename:
+        raise RuntimeError("Low-epsilon entry was not found in the 0th-iteration input bundle")
+
+    low_ledger_path = get_correction_ledger_paths(
+        OUTPATH,
+        ParticleType,
+        low_outfilename,
+        active_profile=inpDict.get("bg_active_profile"),
+    )["json"]
+    high_ledger_path = get_correction_ledger_paths(
+        OUTPATH,
+        ParticleType,
+        OutFilename,
+        active_profile=inpDict.get("bg_active_profile"),
+    )["json"]
+    low_bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_low.json".format(ParticleType, low_outfilename)
+    high_bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_high.json".format(ParticleType, OutFilename)
+
+    with open(low_ledger_path, "r") as handle:
+        low_ledger_payload = json.load(handle)
+    with open(high_ledger_path, "r") as handle:
+        high_ledger_payload = json.load(handle)
+    with open(low_bg_opt_path, "r") as handle:
+        low_bg_summary = json.load(handle)
+    with open(high_bg_opt_path, "r") as handle:
+        high_bg_summary = json.load(handle)
+
+    manifest_payload = build_frozen_manifest_payload(
+        ParticleType,
+        Q2,
+        W,
+        LOEPS,
+        HIEPS,
+        histlist,
+        low_bg_summary,
+        high_bg_summary,
+        low_bundle_entry,
+        high_bundle_entry,
+        inpDict,
+        LTANAPATH,
+    )
+    manifest_paths = write_frozen_manifest(
+        OUTPATH,
+        ParticleType,
+        Q2,
+        W,
+        manifest_payload,
+        active_profile=inpDict.get("bg_active_profile"),
+    )
+    for artifact in manifest_paths:
+        if artifact not in output_file_lst:
+            output_file_lst.append(artifact)
+
+    epsilon_compare_payload = load_ledgers_and_compare(
+        low_ledger_path,
+        high_ledger_path,
+        outpath=OUTPATH,
+        particle_type=ParticleType,
+        q2=Q2,
+        w=W,
+        active_profile=inpDict.get("bg_active_profile"),
+    )
+    validate_epsilon_compare(epsilon_compare_payload)
+    for artifact in (
+        analysis_artifact_paths["epsilon_compare_json"],
+        analysis_artifact_paths["epsilon_compare_csv"],
+    ):
+        if artifact not in output_file_lst:
+            output_file_lst.append(artifact)
+
+    systematics_payload = None
+    if os.path.exists(analysis_artifact_paths["systematics_json"]):
+        with open(analysis_artifact_paths["systematics_json"], "r") as handle:
+            systematics_payload = json.load(handle)
+    nonklambda_payload = None
+    if os.path.exists(analysis_artifact_paths["nonklambda_json"]):
+        with open(analysis_artifact_paths["nonklambda_json"], "r") as handle:
+            nonklambda_payload = json.load(handle)
+
+    inpDict["convergence_status"] = "0th_iteration_complete"
+    final_summary_payload = build_final_analysis_summary(
+        manifest_payload,
+        low_ledger_payload,
+        high_ledger_payload,
+        epsilon_compare_payload=epsilon_compare_payload,
+        systematics_payload=systematics_payload,
+        nonklambda_payload=nonklambda_payload,
+        xsect_payload=collect_xsect_payload(OUTPATH, LTANAPATH, ParticleType, Q2, W, ANATYPE, POL),
+        current_inp_dict=inpDict,
+        manifest_path=manifest_paths[0],
+    )
+    final_summary_paths = write_final_analysis_summary(
+        final_summary_payload,
+        OUTPATH,
+        ParticleType,
+        Q2,
+        W,
+        active_profile=inpDict.get("bg_active_profile"),
+    )
+    for artifact in final_summary_paths:
+        if artifact not in output_file_lst:
+            output_file_lst.append(artifact)
+    record_stage_time("Step 7 frozen-manifest/final-summary export", stage_start)
     
 ##############################
 # Step 8 of the lt_analysis: #

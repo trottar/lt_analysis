@@ -9,6 +9,10 @@ fallback BG scale, binning thresholds, and optimizer search behavior.
 
 from __future__ import annotations
 
+import json
+import os
+from copy import deepcopy
+
 
 BG_STAT_SCALE1 = 0.5
 BG_STAT_SCALE2 = 0.5
@@ -38,8 +42,60 @@ BG_OPT_METRIC_WEIGHTS = {
     "valid_ratio_bins": 0.05,
 }
 
+BG_OPT_ACTIVE_PROFILE = "nominal_weighted"
+
+BG_OPT_PROFILES = {
+    "nominal_weighted": {
+        "selection_mode": "weighted",
+        "metric_weights": deepcopy(BG_OPT_METRIC_WEIGHTS),
+    },
+    "ratio_first": {
+        "selection_mode": "lexicographic",
+    },
+    "kinematic_diagnostic_only": {
+        "selection_mode": "weighted",
+        "metric_weights": {
+            "kinematic_score": 0.00,
+            "ratio_rms": 0.40,
+            "ratio_mean_dev": 0.35,
+            "ratio_fail_count": 0.20,
+            "valid_ratio_bins": 0.05,
+        },
+    },
+    "no_empirical_residual": {
+        "force_bg_stat_scale1": 0.0,
+        "force_bg_stat_scale2": 0.0,
+    },
+    "fit1_only": {
+        "force_bg_stat_scale2": 0.0,
+    },
+    "fit2_only": {
+        "force_bg_stat_scale1": 0.0,
+    },
+    "common_epsilon_scales": {
+        "selection_mode": "lexicographic",
+        "use_common_epsilon_scales": True,
+    },
+}
+
+BG_SYSTEMATIC_PROFILES = [
+    "nominal_weighted",
+    "ratio_first",
+    "kinematic_diagnostic_only",
+    "no_empirical_residual",
+    "fit1_only",
+    "fit2_only",
+    "common_epsilon_scales",
+]
+
 # Sigma cut used when ranking data/SIMC ratio agreement.
 RATIO_SIGMA_THRESHOLD = 3.0
+
+ALLOW_CONFIG_DRIFT = False
+EMP_EPS_DIFF_WARN_THRESHOLD = 0.03
+EMP_EPS_DIFF_FAIL_THRESHOLD = None
+BG_OVERSUB_WARN_FRACTION = 0.02
+BG_OVERSUB_WARN_MAX_RATIO = 1.10
 
 # Shared bin-finding controls migrated from find_bins.py.
 PHI_BIN_MIN_EVENTS = 10
@@ -79,6 +135,8 @@ BG_OPT_MM_PLOT_NBINS = 100
 # window: SIMC scaled to data inside MM cut window
 # proper: SIMC kept at proper archived normalization
 BG_OPT_MM_SIMC_SCALE_MODE = "proper"
+
+_PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
 
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
 KINEMATIC_SCORE_VARS = ("Q2", "W", "t", "mm", "xptar", "yptar")
@@ -894,6 +952,132 @@ BG_MODELS = {
 }
 
 ################################################################################################################################################
+
+
+def _load_runtime_overrides():
+    override_path = os.environ.get(_PROFILE_OVERRIDE_ENV, "").strip()
+    if not override_path:
+        return {}
+    if not os.path.exists(override_path):
+        raise FileNotFoundError(
+            "Background-config override file from {} was not found: {}".format(
+                _PROFILE_OVERRIDE_ENV,
+                override_path,
+            )
+        )
+    with open(override_path, "r") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict):
+        raise ValueError(
+            "Background-config override file {} must contain a JSON object".format(
+                override_path
+            )
+        )
+    return payload
+
+
+_RUNTIME_BG_CONFIG_OVERRIDES = _load_runtime_overrides()
+for _override_key, _override_value in _RUNTIME_BG_CONFIG_OVERRIDES.items():
+    if isinstance(_override_key, str) and _override_key.isupper():
+        globals()[_override_key] = _override_value
+
+
+def get_available_bg_profile_names():
+    return sorted(BG_OPT_PROFILES.keys())
+
+
+def get_active_bg_profile_name():
+    return str(BG_OPT_ACTIVE_PROFILE).strip()
+
+
+def _normalize_selection_mode(value):
+    mode = str(value).strip().lower()
+    if mode not in {"weighted", "lexicographic"}:
+        raise ValueError(
+            "Invalid background selection mode '{}' in profile '{}'. "
+            "Allowed values are 'weighted' or 'lexicographic'.".format(
+                value,
+                get_active_bg_profile_name(),
+            )
+        )
+    return mode
+
+
+def _normalize_metric_weights(weights):
+    if weights is None:
+        return deepcopy(BG_OPT_METRIC_WEIGHTS)
+    if not isinstance(weights, dict):
+        raise ValueError(
+            "metric_weights for background profile '{}' must be a dictionary".format(
+                get_active_bg_profile_name()
+            )
+        )
+    normalized = deepcopy(BG_OPT_METRIC_WEIGHTS)
+    for key, value in weights.items():
+        normalized[str(key)] = float(value)
+    return normalized
+
+
+def get_active_bg_profile():
+    profile_name = get_active_bg_profile_name()
+    if profile_name not in BG_OPT_PROFILES:
+        raise ValueError(
+            "Invalid BG_OPT_ACTIVE_PROFILE '{}'. Allowed profiles: {}".format(
+                profile_name,
+                ", ".join(get_available_bg_profile_names()),
+            )
+        )
+    raw_profile = deepcopy(BG_OPT_PROFILES[profile_name])
+    resolved = {
+        "name": profile_name,
+        "selection_mode": _normalize_selection_mode(
+            raw_profile.get("selection_mode", BG_OPT_SELECTION_MODE)
+        ),
+        "metric_weights": _normalize_metric_weights(
+            raw_profile.get("metric_weights", BG_OPT_METRIC_WEIGHTS)
+        ),
+        "force_bg_stat_scale1": raw_profile.get("force_bg_stat_scale1"),
+        "force_bg_stat_scale2": raw_profile.get("force_bg_stat_scale2"),
+        "use_common_epsilon_scales": bool(
+            raw_profile.get("use_common_epsilon_scales", False)
+        ),
+        "constraints": deepcopy(raw_profile.get("constraints", {})),
+        "raw_profile": raw_profile,
+    }
+    return resolved
+
+
+def get_active_selection_mode():
+    return get_active_bg_profile()["selection_mode"]
+
+
+def get_active_metric_weights():
+    return deepcopy(get_active_bg_profile()["metric_weights"])
+
+
+def get_forced_bg_scale1():
+    value = get_active_bg_profile().get("force_bg_stat_scale1")
+    return None if value is None else float(value)
+
+
+def get_forced_bg_scale2():
+    value = get_active_bg_profile().get("force_bg_stat_scale2")
+    return None if value is None else float(value)
+
+
+def use_common_epsilon_scales():
+    return bool(get_active_bg_profile().get("use_common_epsilon_scales", False))
+
+
+def get_resolved_bg_profile_settings():
+    return deepcopy(get_active_bg_profile())
+
+
+def get_runtime_bg_config_overrides():
+    return deepcopy(_RUNTIME_BG_CONFIG_OVERRIDES)
+
+
+_ACTIVE_BG_PROFILE_VALIDATION = get_active_bg_profile()
 
 
 def _round_scale(value):
