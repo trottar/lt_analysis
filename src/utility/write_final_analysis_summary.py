@@ -68,6 +68,7 @@ def build_final_analysis_summary(
         "phi_bin_edges": manifest_payload.get("phi_bin_edges"),
         "active_profile": manifest_payload.get("active_profile"),
         "resolved_optimizer_settings": deepcopy(manifest_payload.get("resolved_optimizer_settings", {})),
+        "common_epsilon_scale_behavior": manifest_payload.get("common_epsilon_scale_behavior", "independent"),
         "fit1_scales": deepcopy(manifest_payload.get("selected_bg_scale1s", {})),
         "fit2_scales": deepcopy(manifest_payload.get("selected_bg_scale2s", {})),
         "low_epsilon_corrections": deepcopy((low_ledger_payload or {}).get("combined_totals", {})),
@@ -92,12 +93,15 @@ def _markdown_lines(summary):
         "| Particle | {} |".format(summary.get("particle_type", "")),
         "| Q2/W | Q{} W{} |".format(summary.get("q2", ""), summary.get("w", "")),
         "| Active profile | {} |".format(summary.get("active_profile", "")),
+        "| Common epsilon scale behavior | {} |".format(summary.get("common_epsilon_scale_behavior", "")),
         "| MM cut | {} |".format(summary.get("mm_cut_window", "")),
         "| t bins | {} |".format(summary.get("t_bin_edges", "")),
         "| phi bins | {} |".format(summary.get("phi_bin_edges", "")),
         "| Manifest hash | {} |".format(summary.get("manifest_hash", "")),
         "| Iteration count | {} |".format(summary.get("iteration_count", "")),
         "| Convergence status | {} |".format(summary.get("convergence_status", "")),
+        "| Low bin-level ledger | {} |".format(summary.get("low_epsilon_corrections", {}).get("all_settings_have_bin_level_ledger")),
+        "| High bin-level ledger | {} |".format(summary.get("high_epsilon_corrections", {}).get("all_settings_have_bin_level_ledger")),
         "",
         "## Empirical Corrections",
         "",
@@ -150,7 +154,13 @@ def _markdown_lines(summary):
 def write_final_analysis_summary(summary, outpath, particle_type, q2, w, active_profile=None):
     artifact_paths = get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=active_profile)
     written = []
-    written.extend(write_json_with_aliases(summary, artifact_paths["final_summary_json"]))
+    written.extend(
+        write_json_with_aliases(
+            summary,
+            artifact_paths["final_summary_json"],
+            artifact_paths["final_summary_json_profile"],
+        )
+    )
 
     csv_rows = [
         {
@@ -158,9 +168,12 @@ def write_final_analysis_summary(summary, outpath, particle_type, q2, w, active_
             "q2": summary.get("q2"),
             "w": summary.get("w"),
             "active_profile": summary.get("active_profile"),
+            "common_epsilon_scale_behavior": summary.get("common_epsilon_scale_behavior"),
             "manifest_hash": summary.get("manifest_hash"),
             "iteration_count": summary.get("iteration_count"),
             "convergence_status": summary.get("convergence_status"),
+            "low_bin_level_ledger_available": summary.get("low_epsilon_corrections", {}).get("all_settings_have_bin_level_ledger"),
+            "high_bin_level_ledger_available": summary.get("high_epsilon_corrections", {}).get("all_settings_have_bin_level_ledger"),
             "low_fit1_fractional_correction": summary.get("low_epsilon_corrections", {}).get("fit1_fractional_correction"),
             "low_fit2_fractional_correction": summary.get("low_epsilon_corrections", {}).get("fit2_fractional_correction"),
             "low_total_empirical_fraction": summary.get("low_epsilon_corrections", {}).get("total_empirical_fraction"),
@@ -177,10 +190,21 @@ def write_final_analysis_summary(summary, outpath, particle_type, q2, w, active_
         for row in csv_rows:
             writer.writerow(row)
     written.append(artifact_paths["final_summary_csv"])
+    if os.path.abspath(artifact_paths["final_summary_csv_profile"]) != os.path.abspath(artifact_paths["final_summary_csv"]):
+        with open(artifact_paths["final_summary_csv_profile"], "w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(csv_rows[0].keys()))
+            writer.writeheader()
+            for row in csv_rows:
+                writer.writerow(row)
+        written.append(artifact_paths["final_summary_csv_profile"])
 
     with open(artifact_paths["final_summary_md"], "w") as handle:
         handle.write(_markdown_lines(summary))
     written.append(artifact_paths["final_summary_md"])
+    if os.path.abspath(artifact_paths["final_summary_md_profile"]) != os.path.abspath(artifact_paths["final_summary_md"]):
+        with open(artifact_paths["final_summary_md_profile"], "w") as handle:
+            handle.write(_markdown_lines(summary))
+        written.append(artifact_paths["final_summary_md_profile"])
     return written
 
 

@@ -134,7 +134,7 @@ Implemented profiles:
 - `no_empirical_residual`
 - `fit1_only`
 - `fit2_only`
-- `common_epsilon_scales`
+- `high_uses_low_epsilon_scales`
 
 Systematic replay lists are configured through:
 

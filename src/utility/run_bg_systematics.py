@@ -104,7 +104,7 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
             _run_profile(high_entry["argv"], profile_name, repo_root, snapshot_path)
 
             artifact_paths = get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=profile_name)
-            final_summary = _load_json(artifact_paths["final_summary_json"])
+            final_summary = _load_json(artifact_paths["final_summary_json_profile"])
             row["selected_t_bins"] = final_summary.get("t_bin_edges")
             row["selected_phi_bins"] = final_summary.get("phi_bin_edges")
             row["selected_fit1_scales"] = final_summary.get("fit1_scales")
@@ -115,13 +115,13 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
                 particle_type,
                 bundle["low"]["inp_dict"]["OutFilename"],
                 active_profile=profile_name,
-            )["json"]
+            )["json_profile"]
             high_ledger_path = get_correction_ledger_paths(
                 outpath,
                 particle_type,
                 bundle["high"]["inp_dict"]["OutFilename"],
                 active_profile=profile_name,
-            )["json"]
+            )["json_profile"]
             low_ledger = _load_json(low_ledger_path)
             high_ledger = _load_json(high_ledger_path)
             row["lambda_yield"] = float(low_ledger["combined_totals"]["combined_stage_yields"]["final_lambda_window"]) + float(
@@ -140,12 +140,19 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
 
             for artifact in [
                 artifact_paths["manifest"],
+                artifact_paths["manifest_profile"],
                 artifact_paths["input_bundle"],
+                artifact_paths["input_bundle_profile"],
                 artifact_paths["epsilon_compare_json"],
+                artifact_paths["epsilon_compare_json_profile"],
                 artifact_paths["epsilon_compare_csv"],
+                artifact_paths["epsilon_compare_csv_profile"],
                 artifact_paths["final_summary_json"],
+                artifact_paths["final_summary_json_profile"],
                 artifact_paths["final_summary_csv"],
+                artifact_paths["final_summary_csv_profile"],
                 artifact_paths["final_summary_md"],
+                artifact_paths["final_summary_md_profile"],
                 low_ledger_path,
                 high_ledger_path,
             ]:

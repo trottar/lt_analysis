@@ -72,9 +72,9 @@ BG_OPT_PROFILES = {
     "fit2_only": {
         "force_bg_stat_scale1": 0.0,
     },
-    "common_epsilon_scales": {
+    "high_uses_low_epsilon_scales": {
         "selection_mode": "lexicographic",
-        "use_common_epsilon_scales": True,
+        "common_epsilon_scale_behavior": "reuse_low_epsilon_scales_for_high",
     },
 }
 
@@ -85,7 +85,7 @@ BG_SYSTEMATIC_PROFILES = [
     "no_empirical_residual",
     "fit1_only",
     "fit2_only",
-    "common_epsilon_scales",
+    "high_uses_low_epsilon_scales",
 ]
 
 # Sigma cut used when ranking data/SIMC ratio agreement.
@@ -1018,8 +1018,47 @@ def _normalize_metric_weights(weights):
     return normalized
 
 
+def _normalize_common_epsilon_scale_behavior(raw_profile, profile_name):
+    if profile_name == "common_epsilon_scales":
+        raise ValueError(
+            "Background profile 'common_epsilon_scales' was renamed to "
+            "'high_uses_low_epsilon_scales'. The current implementation reuses "
+            "the frozen low-epsilon scale map on the high-epsilon pass rather "
+            "than performing a true joint low/high optimization."
+        )
+
+    behavior = raw_profile.get("common_epsilon_scale_behavior")
+    if behavior is None:
+        if raw_profile.get("use_low_epsilon_scales_for_high"):
+            behavior = "reuse_low_epsilon_scales_for_high"
+        elif raw_profile.get("use_common_epsilon_scales"):
+            behavior = "reuse_low_epsilon_scales_for_high"
+        else:
+            behavior = "independent"
+
+    behavior = str(behavior).strip().lower()
+    allowed = {"independent", "reuse_low_epsilon_scales_for_high"}
+    if behavior not in allowed:
+        raise ValueError(
+            "Invalid common_epsilon_scale_behavior '{}' in profile '{}'. "
+            "Allowed values are {}.".format(
+                behavior,
+                profile_name,
+                ", ".join(sorted(allowed)),
+            )
+        )
+    return behavior
+
+
 def get_active_bg_profile():
     profile_name = get_active_bg_profile_name()
+    if profile_name == "common_epsilon_scales":
+        raise ValueError(
+            "Background profile 'common_epsilon_scales' was renamed to "
+            "'high_uses_low_epsilon_scales'. The current implementation reuses "
+            "the frozen low-epsilon scale map on the high-epsilon pass rather "
+            "than performing a true joint low/high optimization."
+        )
     if profile_name not in BG_OPT_PROFILES:
         raise ValueError(
             "Invalid BG_OPT_ACTIVE_PROFILE '{}'. Allowed profiles: {}".format(
@@ -1038,12 +1077,16 @@ def get_active_bg_profile():
         ),
         "force_bg_stat_scale1": raw_profile.get("force_bg_stat_scale1"),
         "force_bg_stat_scale2": raw_profile.get("force_bg_stat_scale2"),
-        "use_common_epsilon_scales": bool(
-            raw_profile.get("use_common_epsilon_scales", False)
+        "common_epsilon_scale_behavior": _normalize_common_epsilon_scale_behavior(
+            raw_profile,
+            profile_name,
         ),
         "constraints": deepcopy(raw_profile.get("constraints", {})),
         "raw_profile": raw_profile,
     }
+    resolved["use_common_epsilon_scales"] = bool(
+        resolved["common_epsilon_scale_behavior"] != "independent"
+    )
     return resolved
 
 
@@ -1067,6 +1110,10 @@ def get_forced_bg_scale2():
 
 def use_common_epsilon_scales():
     return bool(get_active_bg_profile().get("use_common_epsilon_scales", False))
+
+
+def get_common_epsilon_scale_behavior():
+    return str(get_active_bg_profile().get("common_epsilon_scale_behavior", "independent"))
 
 
 def get_resolved_bg_profile_settings():

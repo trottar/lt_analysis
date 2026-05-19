@@ -166,7 +166,17 @@ def _combine_stage_yields(bin_entries):
     return combined
 
 
+def _combine_setting_stage_yields(setting_entries):
+    combined = {stage_name: 0.0 for stage_name in STAGE_ORDER}
+    for setting_entry in setting_entries:
+        stage_yields = setting_entry.get("combined_stage_yields", {})
+        for stage_name in STAGE_ORDER:
+            combined[stage_name] += float(stage_yields.get(stage_name) or 0.0)
+    return combined
+
+
 def _summarize_setting(hist, processed_dict, mm_min, mm_max):
+    bin_level_available = bool(processed_dict)
     bin_entries = []
     for bin_key in sorted(processed_dict.keys()):
         bin_entries.append(_build_bin_entry(bin_key, processed_dict[bin_key]))
@@ -178,6 +188,7 @@ def _summarize_setting(hist, processed_dict, mm_min, mm_max):
     final_yield = float(combined_stage_yields.get("final_lambda_window") or 0.0)
     return {
         "phi_setting": hist.get("phi_setting"),
+        "bin_level_ledger_available": bool(bin_level_available),
         "overall_stage_yields": _top_level_stage_yields(hist, mm_min, mm_max),
         "combined_stage_yields": combined_stage_yields,
         "percent_change_by_stage": _percent_change_map(combined_stage_yields),
@@ -215,10 +226,15 @@ def build_correction_ledger(histlist, inp_dict, bg_summary=None):
     combined_bin_entries = []
     for setting_entry in setting_entries:
         combined_bin_entries.extend(setting_entry.get("t_phi_bins", []))
-    combined_stage_yields = _combine_stage_yields(combined_bin_entries)
+    combined_stage_yields = (
+        _combine_stage_yields(combined_bin_entries)
+        if combined_bin_entries
+        else _combine_setting_stage_yields(setting_entries)
+    )
     combined_empirical = _empirical_corrections(combined_stage_yields)
+    combined_unc_sources = combined_bin_entries or setting_entries
     combined_unc_abs = math.sqrt(
-        sum(float(entry.get("empirical_fit_uncertainty_abs", 0.0) or 0.0) ** 2 for entry in combined_bin_entries)
+        sum(float(entry.get("empirical_fit_uncertainty_abs", 0.0) or 0.0) ** 2 for entry in combined_unc_sources)
     )
     final_yield = float(combined_stage_yields.get("final_lambda_window") or 0.0)
 
@@ -235,6 +251,9 @@ def build_correction_ledger(histlist, inp_dict, bg_summary=None):
         "settings": setting_entries,
         "combined_totals": {
             "combined_stage_yields": combined_stage_yields,
+            "all_settings_have_bin_level_ledger": bool(
+                setting_entries and all(setting_entry.get("bin_level_ledger_available") for setting_entry in setting_entries)
+            ),
             "percent_change_by_stage": _percent_change_map(combined_stage_yields),
             "fit1_fractional_correction": combined_empirical["fit1_fractional_correction"],
             "fit2_fractional_correction": combined_empirical["fit2_fractional_correction"],
@@ -270,6 +289,7 @@ def _ledger_rows(payload):
         }
         row.update(setting_entry.get("combined_stage_yields", {}))
         row.update({
+            "bin_level_ledger_available": setting_entry.get("bin_level_ledger_available"),
             "fit1_fractional_correction": setting_entry.get("fit1_fractional_correction"),
             "fit2_fractional_correction": setting_entry.get("fit2_fractional_correction"),
             "total_empirical_fraction": setting_entry.get("total_empirical_fraction"),
@@ -317,6 +337,7 @@ def _ledger_rows(payload):
     }
     row.update(combined.get("combined_stage_yields", {}))
     row.update({
+        "all_settings_have_bin_level_ledger": combined.get("all_settings_have_bin_level_ledger"),
         "fit1_fractional_correction": combined.get("fit1_fractional_correction"),
         "fit2_fractional_correction": combined.get("fit2_fractional_correction"),
         "total_empirical_fraction": combined.get("total_empirical_fraction"),
@@ -346,6 +367,8 @@ def write_correction_ledger(payload, outpath, particle_type, outfilename, active
         "active_profile",
         "resolved_profile_json",
         *STAGE_ORDER,
+        "bin_level_ledger_available",
+        "all_settings_have_bin_level_ledger",
         "fit1_fractional_correction",
         "fit2_fractional_correction",
         "total_empirical_fraction",

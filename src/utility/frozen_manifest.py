@@ -85,9 +85,14 @@ def get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=No
         "input_bundle_profile": stem + "_0th_iteration_input_bundle{}.json".format(profile_suffix),
         "epsilon_compare_json": stem + "_epsilon_empirical_compare.json",
         "epsilon_compare_csv": stem + "_epsilon_empirical_compare.csv",
+        "epsilon_compare_json_profile": stem + "_epsilon_empirical_compare{}.json".format(profile_suffix),
+        "epsilon_compare_csv_profile": stem + "_epsilon_empirical_compare{}.csv".format(profile_suffix),
         "final_summary_json": stem + "_final_analysis_summary.json",
         "final_summary_csv": stem + "_final_analysis_summary.csv",
         "final_summary_md": stem + "_final_analysis_summary.md",
+        "final_summary_json_profile": stem + "_final_analysis_summary{}.json".format(profile_suffix),
+        "final_summary_csv_profile": stem + "_final_analysis_summary{}.csv".format(profile_suffix),
+        "final_summary_md_profile": stem + "_final_analysis_summary{}.md".format(profile_suffix),
         "systematics_json": stem + "_bg_systematics_summary.json",
         "systematics_csv": stem + "_bg_systematics_summary.csv",
         "nonklambda_json": stem + "_nonklambda_crosscheck.json",
@@ -166,7 +171,12 @@ def write_zeroth_iteration_input_bundle(
 
 def load_zeroth_iteration_input_bundle(outpath, particle_type, q2, w, active_profile=None):
     artifact_paths = get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=active_profile)
-    return _read_json_if_exists(artifact_paths["input_bundle"])
+    preferred_paths = [artifact_paths["input_bundle_profile"], artifact_paths["input_bundle"]]
+    for candidate in preferred_paths:
+        payload = _read_json_if_exists(candidate)
+        if payload is not None:
+            return payload
+    return None
 
 
 def _infer_fit_metadata(q2, w, phi_settings, eps_values):
@@ -256,6 +266,11 @@ def build_frozen_manifest_payload(
         "use_common_epsilon_scales": bool(
             current_inp_dict.get("bg_use_common_epsilon_scales")
             or resolved_profile.get("use_common_epsilon_scales", False)
+        ),
+        "common_epsilon_scale_behavior": (
+            current_inp_dict.get("bg_common_epsilon_scale_behavior")
+            or resolved_profile.get("common_epsilon_scale_behavior")
+            or "independent"
         ),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "git_commit_hash": get_git_commit_hash(repo_root),
@@ -374,10 +389,15 @@ def validate_iteration_inputs_against_manifest(
     for rel_path, manifest_entry in manifest_hashes.items():
         manifest_hash = None if not isinstance(manifest_entry, dict) else manifest_entry.get("sha256")
         current_hash = current_hashes.get(rel_path, {}).get("sha256")
-        if not manifest_hash or not current_hash or manifest_hash == current_hash:
+        if not manifest_hash:
             continue
-        warning = "Config/code hash drift detected for {}".format(rel_path)
-        if rel_path == "src/utility/background_config.py" and not ALLOW_CONFIG_DRIFT:
+        if manifest_hash == current_hash:
+            continue
+        warning = (
+            "Config/code hash drift detected for {} "
+            "(expected {}, got {})".format(rel_path, manifest_hash, current_hash or "missing")
+        )
+        if not ALLOW_CONFIG_DRIFT:
             raise ValueError(warning)
         print("WARNING: {}".format(warning))
         current_inp_dict["manifest_validation_warnings"].append(warning)

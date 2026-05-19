@@ -75,11 +75,14 @@ def build_epsilon_empirical_compare(low_ledger, high_ledger):
     mean_high = _safe_div(sum(row["f_emp_high"] for row in rows), len(rows)) if rows else 0.0
     rms_delta = math.sqrt(sum(delta * delta for delta in deltas) / len(deltas)) if deltas else 0.0
     max_abs_delta = max((abs(delta) for delta in deltas), default=0.0)
+    low_bin_level = bool(low_ledger.get("combined_totals", {}).get("all_settings_have_bin_level_ledger"))
+    high_bin_level = bool(high_ledger.get("combined_totals", {}).get("all_settings_have_bin_level_ledger"))
     return {
         "particle_type": low_ledger.get("particle_type"),
         "q2": low_ledger.get("q2"),
         "w": low_ledger.get("w"),
         "active_profile": high_ledger.get("active_profile") or low_ledger.get("active_profile"),
+        "bin_level_ledger_available": bool(low_bin_level and high_bin_level),
         "rows": rows,
         "mean_f_emp_low": float(mean_low),
         "mean_f_emp_high": float(mean_high),
@@ -95,7 +98,13 @@ def build_epsilon_empirical_compare(low_ledger, high_ledger):
 def write_epsilon_empirical_compare(payload, outpath, particle_type, q2, w, active_profile=None):
     paths = get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=active_profile)
     written = []
-    written.extend(write_json_with_aliases(payload, paths["epsilon_compare_json"]))
+    written.extend(
+        write_json_with_aliases(
+            payload,
+            paths["epsilon_compare_json"],
+            paths["epsilon_compare_json_profile"],
+        )
+    )
 
     fieldnames = [
         "phi_setting",
@@ -110,6 +119,13 @@ def write_epsilon_empirical_compare(payload, outpath, particle_type, q2, w, acti
         for row in payload.get("rows", []):
             writer.writerow({key: row.get(key) for key in fieldnames})
     written.append(paths["epsilon_compare_csv"])
+    if os.path.abspath(paths["epsilon_compare_csv_profile"]) != os.path.abspath(paths["epsilon_compare_csv"]):
+        with open(paths["epsilon_compare_csv_profile"], "w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in payload.get("rows", []):
+                writer.writerow({key: row.get(key) for key in fieldnames})
+        written.append(paths["epsilon_compare_csv_profile"])
     return written
 
 
@@ -123,6 +139,8 @@ def load_ledgers_and_compare(low_ledger_path, high_ledger_path, outpath=None, pa
 
 
 def validate_epsilon_compare(payload):
+    if not payload.get("bin_level_ledger_available", True):
+        print("WARNING: Epsilon empirical compare is running without complete bin-level correction-ledger coverage")
     if payload.get("failure_bins"):
         raise ValueError(
             "Empirical epsilon-difference threshold exceeded in {} bins".format(

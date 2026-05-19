@@ -241,6 +241,14 @@ prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
 manifest_path_prev = find_frozen_manifest_path(prev_iter_dir, ParticleType, Q2, W)
 manifest_payload_prev = load_frozen_manifest(manifest_path_prev)
+manifest_active_profile = manifest_payload_prev.get("active_profile")
+analysis_artifact_paths = get_analysis_artifact_paths(
+    OUTPATH,
+    ParticleType,
+    Q2,
+    W,
+    active_profile=manifest_active_profile,
+)
 correction_ledger_paths_prev = [
     os.path.join(prev_iter_dir, "json", filename)
     for filename in os.listdir(os.path.join(prev_iter_dir, "json"))
@@ -825,13 +833,23 @@ if EPSSET == "high":
     low_outfilename = manifest_payload_prev.get("zeroth_iteration_inputs", {}).get("low", {}).get("inp_dict", {}).get("OutFilename")
     high_outfilename = manifest_payload_prev.get("zeroth_iteration_inputs", {}).get("high", {}).get("inp_dict", {}).get("OutFilename")
     if low_outfilename and high_outfilename:
-        low_ledger_path = get_correction_ledger_paths(OUTPATH, ParticleType, low_outfilename)["json"]
-        high_ledger_path = get_correction_ledger_paths(OUTPATH, ParticleType, high_outfilename)["json"]
+        low_ledger_path = get_correction_ledger_paths(
+            OUTPATH,
+            ParticleType,
+            low_outfilename,
+            active_profile=manifest_active_profile,
+        )["json_profile"]
+        high_ledger_path = get_correction_ledger_paths(
+            OUTPATH,
+            ParticleType,
+            high_outfilename,
+            active_profile=manifest_active_profile,
+        )["json_profile"]
         low_ledger_payload = json.load(open(low_ledger_path, "r"))
         high_ledger_payload = json.load(open(high_ledger_path, "r"))
         epsilon_compare_payload = None
-        if os.path.exists(analysis_artifact_paths["epsilon_compare_json"]):
-            with open(analysis_artifact_paths["epsilon_compare_json"], "r") as handle:
+        if os.path.exists(analysis_artifact_paths["epsilon_compare_json_profile"]):
+            with open(analysis_artifact_paths["epsilon_compare_json_profile"], "r") as handle:
                 epsilon_compare_payload = json.load(handle)
         systematics_payload = None
         if os.path.exists(analysis_artifact_paths["systematics_json"]):

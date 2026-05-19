@@ -202,6 +202,9 @@ CACHEPATH=lt.CACHEPATH
 
 inpDict["LTANAPATH"] = LTANAPATH
 inpDict["OUTPATH"] = OUTPATH
+output_file_lst = []
+output_file_lst.append("utility/background_config.py")
+inpDict["bg_active_profile"] = get_active_bg_profile_name()
 write_zeroth_iteration_input_bundle(
     OUTPATH,
     ParticleType,
@@ -210,14 +213,14 @@ write_zeroth_iteration_input_bundle(
     EPSSET,
     sys.argv,
     inpDict,
-    active_profile=inpDict.get("bg_active_profile"),
+    active_profile=inpDict["bg_active_profile"],
 )
 analysis_artifact_paths = get_analysis_artifact_paths(
     OUTPATH,
     ParticleType,
     Q2,
     W,
-    active_profile=inpDict.get("bg_active_profile"),
+    active_profile=inpDict["bg_active_profile"],
 )
 output_file_lst.append(analysis_artifact_paths["input_bundle"])
 if analysis_artifact_paths["input_bundle_profile"] != analysis_artifact_paths["input_bundle"]:
@@ -229,10 +232,6 @@ foutroot = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".root"
 fouttxt  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".txt"
 foutjson  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".json"
 outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
-
-output_file_lst = []
-output_file_lst.append("utility/background_config.py")
-inpDict["bg_active_profile"] = get_active_bg_profile_name()
 
 phisetlist = ["Center", "Left", "Right"]
 #phisetlist = ["Center"]
@@ -1157,6 +1156,8 @@ if EPSSET == "high":
     for artifact in (
         analysis_artifact_paths["epsilon_compare_json"],
         analysis_artifact_paths["epsilon_compare_csv"],
+        analysis_artifact_paths["epsilon_compare_json_profile"],
+        analysis_artifact_paths["epsilon_compare_csv_profile"],
     ):
         if artifact not in output_file_lst:
             output_file_lst.append(artifact)

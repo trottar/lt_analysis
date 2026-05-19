@@ -25,6 +25,7 @@ from background_config import (
     get_bg_scale_coarse_candidates,
     get_bg_scale_refined_candidates,
     get_bg_scale_setting_key,
+    get_common_epsilon_scale_behavior,
     get_forced_bg_scale1,
     get_forced_bg_scale2,
     get_resolved_bg_profile_settings,
@@ -213,6 +214,7 @@ def _get_profile_metadata():
         "forced_bg_scale1": get_forced_bg_scale1(),
         "forced_bg_scale2": get_forced_bg_scale2(),
         "use_common_epsilon_scales": use_common_epsilon_scales(),
+        "common_epsilon_scale_behavior": get_common_epsilon_scale_behavior(),
     }
 
 
@@ -1040,6 +1042,7 @@ def _build_summary_report(inpDict, mode, proposal, phi_results):
         "Active profile: {}".format(profile_meta["active_profile"]),
         "Selection mode: {}".format(_get_selection_mode()),
         "Use common epsilon scales: {}".format(profile_meta["use_common_epsilon_scales"]),
+        "Common epsilon scale behavior: {}".format(profile_meta["common_epsilon_scale_behavior"]),
         "Shared bins: NumtBins={} NumPhiBins={}".format(
             len(proposal["t_bins"]) - 1,
             len(proposal["phi_bins"]) - 1,
@@ -1104,6 +1107,7 @@ def _base_csv_row(
         "forced_bg_scale1": summary.get("forced_bg_scale1"),
         "forced_bg_scale2": summary.get("forced_bg_scale2"),
         "use_common_epsilon_scales": summary.get("use_common_epsilon_scales"),
+        "common_epsilon_scale_behavior": summary.get("common_epsilon_scale_behavior"),
         "resolved_profile_json": json.dumps(summary.get("resolved_profile", {}), sort_keys=True),
         "requested_num_t_bins": proposal.get("requested_num_t_bins"),
         "requested_num_phi_bins": proposal.get("requested_num_phi_bins"),
@@ -1351,6 +1355,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     inpDict["bg_active_profile"] = profile_meta["active_profile"]
     inpDict["bg_resolved_profile"] = profile_meta["resolved_profile"]
     inpDict["bg_use_common_epsilon_scales"] = profile_meta["use_common_epsilon_scales"]
+    inpDict["bg_common_epsilon_scale_behavior"] = profile_meta["common_epsilon_scale_behavior"]
     requested_t_bins = int(inpDict["NumtBins"])
     requested_phi_bins = int(inpDict["NumPhiBins"])
     candidate_results = []
@@ -1428,6 +1433,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
             "forced_bg_scale1": profile_meta["forced_bg_scale1"],
             "forced_bg_scale2": profile_meta["forced_bg_scale2"],
             "use_common_epsilon_scales": profile_meta["use_common_epsilon_scales"],
+            "common_epsilon_scale_behavior": profile_meta["common_epsilon_scale_behavior"],
             "fallback": True,
             "proposal": fallback_proposal,
             "selected_bg_scale1s": fallback_map1,
@@ -1491,6 +1497,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
         "forced_bg_scale1": profile_meta["forced_bg_scale1"],
         "forced_bg_scale2": profile_meta["forced_bg_scale2"],
         "use_common_epsilon_scales": profile_meta["use_common_epsilon_scales"],
+        "common_epsilon_scale_behavior": profile_meta["common_epsilon_scale_behavior"],
         "fallback": False,
         "proposal": best_candidate["proposal"],
         "selected_bg_scale1s": selected_bg_scale1s,
@@ -1516,6 +1523,7 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     inpDict["bg_active_profile"] = profile_meta["active_profile"]
     inpDict["bg_resolved_profile"] = profile_meta["resolved_profile"]
     inpDict["bg_use_common_epsilon_scales"] = profile_meta["use_common_epsilon_scales"]
+    inpDict["bg_common_epsilon_scale_behavior"] = profile_meta["common_epsilon_scale_behavior"]
     proposal = {
         "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
         "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
@@ -1532,7 +1540,11 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     )
 
     if use_common_epsilon_scales():
-        _log("Active profile requests common epsilon scales; reusing the frozen low-e scale map")
+        _log(
+            "Active profile requests '{}' behavior; reusing the frozen low-e scale map on the high-e pass".format(
+                profile_meta["common_epsilon_scale_behavior"]
+            )
+        )
         selected_bg_scale1s, selected_bg_scale2s, phi_results = _load_common_scale_maps_from_low(inpDict, histlist)
     else:
         phi_results = [
@@ -1565,6 +1577,7 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
         "forced_bg_scale1": profile_meta["forced_bg_scale1"],
         "forced_bg_scale2": profile_meta["forced_bg_scale2"],
         "use_common_epsilon_scales": profile_meta["use_common_epsilon_scales"],
+        "common_epsilon_scale_behavior": profile_meta["common_epsilon_scale_behavior"],
         "fallback": False,
         "proposal": proposal,
         "selected_bg_scale1s": selected_bg_scale1s,
@@ -1610,6 +1623,7 @@ def write_optimization_csv(summary, inpDict, csv_path):
         "forced_bg_scale1",
         "forced_bg_scale2",
         "use_common_epsilon_scales",
+        "common_epsilon_scale_behavior",
         "resolved_profile_json",
         "requested_num_t_bins",
         "requested_num_phi_bins",
