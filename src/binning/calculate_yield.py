@@ -1032,6 +1032,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     # Per-(t,phi) fractional uncertainty from the background fits (background_fit1/2)
     bg_fit1_frac_err = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]    
     bg_fit2_frac_err = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]  
+    bg_oversub_diagnostics = [
+        [{"fit1": {}, "fit2": {}} for _ in range(n_phi)]
+        for _ in range(n_t)
+    ]
 
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -1295,7 +1299,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 )
 
                 mm_stage1_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
-                bg_weights1 = _subtract_yield_mm_background_for_bin(
+                bg_weights1, fit1_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
                     k,
@@ -1309,6 +1313,15 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     arr_scale_factor[j][k],
                     ParticleType,
                     POL,
+                )
+                bg_oversub_diagnostics[j][k]["fit1"] = fit1_diagnostics
+                _warn_if_oversub_diagnostics(
+                    inpDict,
+                    fit1_diagnostics,
+                    phi_setting,
+                    j,
+                    k,
+                    "Fit 1",
                 )
                 residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
                 hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit1_{}_{}".format(j, k)][1], -1)
@@ -1387,7 +1400,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 )
 
                 mm_stage2_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
-                _subtract_yield_mm_background_for_bin(
+                _, fit2_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
                     k,
@@ -1402,6 +1415,15 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                     ParticleType,
                     POL,
                     residual_weights=residual_bg_weights1,
+                )
+                bg_oversub_diagnostics[j][k]["fit2"] = fit2_diagnostics
+                _warn_if_oversub_diagnostics(
+                    inpDict,
+                    fit2_diagnostics,
+                    phi_setting,
+                    j,
+                    k,
+                    "Fit 2",
                 )
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(fitDict["background_fit2_{}_{}".format(j, k)][0], -1)            
 
@@ -1490,6 +1512,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 # Fractional background-fit error for this bin
                 "bg_fit1_frac_err" : bg_fit1_frac_err[j][k],        
                 "bg_fit2_frac_err" : bg_fit2_frac_err[j][k],
+                "oversub_diagnostics" : bg_oversub_diagnostics[j][k],
             }
             processed_entry.update({
                 "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)],
