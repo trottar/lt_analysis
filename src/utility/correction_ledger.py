@@ -356,7 +356,14 @@ def _ledger_rows(payload):
 def write_correction_ledger(payload, outpath, particle_type, outfilename, active_profile=None):
     paths = get_correction_ledger_paths(outpath, particle_type, outfilename, active_profile=active_profile)
     written = []
-    written.extend(write_json_with_aliases(payload, paths["json"], paths["json_profile"]))
+    written.extend(
+        write_json_with_aliases(
+            payload,
+            paths["json"],
+            paths["json_profile"],
+            active_profile=active_profile,
+        )
+    )
 
     rows = _ledger_rows(payload)
     fieldnames = [
@@ -380,17 +387,18 @@ def write_correction_ledger(payload, outpath, particle_type, outfilename, active
         "fit1_max_unclamped_ratio",
         "fit2_max_unclamped_ratio",
     ]
-    with open(paths["csv"], "w", newline="") as handle:
+    primary_csv_path = paths["csv_profile"]
+    with open(primary_csv_path, "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for row in rows:
             writer.writerow({key: row.get(key) for key in fieldnames})
-    written.append(paths["csv"])
-    if paths["csv_profile"] != paths["csv"]:
-        with open(paths["csv_profile"], "w", newline="") as handle:
+    written.append(primary_csv_path)
+    if active_profile in (None, "", "nominal_weighted") and os.path.abspath(paths["csv"]) != os.path.abspath(primary_csv_path):
+        with open(paths["csv"], "w", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=fieldnames)
             writer.writeheader()
             for row in rows:
                 writer.writerow({key: row.get(key) for key in fieldnames})
-        written.append(paths["csv_profile"])
+        written.append(paths["csv"])
     return written

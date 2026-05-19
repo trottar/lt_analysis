@@ -8,7 +8,11 @@ import json
 import os
 from copy import deepcopy
 
-from frozen_manifest import get_analysis_artifact_paths, write_json_with_aliases
+from frozen_manifest import (
+    get_analysis_artifact_paths,
+    write_json_with_aliases,
+    write_text_with_aliases,
+)
 
 
 def _read_json_if_exists(path):
@@ -159,6 +163,7 @@ def write_final_analysis_summary(summary, outpath, particle_type, q2, w, active_
             summary,
             artifact_paths["final_summary_json"],
             artifact_paths["final_summary_json_profile"],
+            active_profile=active_profile,
         )
     )
 
@@ -184,27 +189,29 @@ def write_final_analysis_summary(summary, outpath, particle_type, q2, w, active_
             "epsilon_compare_max_abs_delta_f_emp": summary.get("epsilon_empirical_compare", {}).get("max_abs_delta_f_emp"),
         }
     ]
-    with open(artifact_paths["final_summary_csv"], "w", newline="") as handle:
+    primary_csv_path = artifact_paths["final_summary_csv_profile"]
+    with open(primary_csv_path, "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(csv_rows[0].keys()))
         writer.writeheader()
         for row in csv_rows:
             writer.writerow(row)
-    written.append(artifact_paths["final_summary_csv"])
-    if os.path.abspath(artifact_paths["final_summary_csv_profile"]) != os.path.abspath(artifact_paths["final_summary_csv"]):
-        with open(artifact_paths["final_summary_csv_profile"], "w", newline="") as handle:
+    written.append(primary_csv_path)
+    if active_profile in (None, "", "nominal_weighted") and os.path.abspath(artifact_paths["final_summary_csv"]) != os.path.abspath(primary_csv_path):
+        with open(artifact_paths["final_summary_csv"], "w", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=list(csv_rows[0].keys()))
             writer.writeheader()
             for row in csv_rows:
                 writer.writerow(row)
-        written.append(artifact_paths["final_summary_csv_profile"])
+        written.append(artifact_paths["final_summary_csv"])
 
-    with open(artifact_paths["final_summary_md"], "w") as handle:
-        handle.write(_markdown_lines(summary))
-    written.append(artifact_paths["final_summary_md"])
-    if os.path.abspath(artifact_paths["final_summary_md_profile"]) != os.path.abspath(artifact_paths["final_summary_md"]):
-        with open(artifact_paths["final_summary_md_profile"], "w") as handle:
-            handle.write(_markdown_lines(summary))
-        written.append(artifact_paths["final_summary_md_profile"])
+    written.extend(
+        write_text_with_aliases(
+            _markdown_lines(summary),
+            artifact_paths["final_summary_md"],
+            artifact_paths["final_summary_md_profile"],
+            active_profile=active_profile,
+        )
+    )
     return written
 
 

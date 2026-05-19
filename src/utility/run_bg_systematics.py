@@ -11,7 +11,11 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 
-from background_config import BG_SYSTEMATIC_PROFILES
+from background_config import (
+    BG_OPT_PROFILES,
+    BG_SYSTEMATIC_PROFILES,
+    BG_SYSTEMATICS_USE_ISOLATED_WORKSPACE,
+)
 from frozen_manifest import (
     get_analysis_artifact_paths,
     get_correction_ledger_paths,
@@ -49,6 +53,15 @@ def _copy_if_exists(src, dst_dir):
     shutil.copy(src, os.path.join(dst_dir, os.path.basename(src)))
 
 
+def _resolve_script_path(argv_entry, repo_root):
+    if not argv_entry:
+        return None
+    candidate = str(argv_entry)
+    if os.path.isabs(candidate):
+        return candidate
+    return os.path.join(repo_root, candidate)
+
+
 def _run_profile(argv, profile_name, repo_root, snapshot_path):
     env = os.environ.copy()
     env["LT_BG_PROFILE_SNAPSHOT_JSON"] = snapshot_path
@@ -69,7 +82,90 @@ def _profile_output_dir(outpath, particle_type, q2, w, profile_name):
     )
 
 
+def validate_systematics_replay_bundle(bundle, repo_root, outpath, particle_type, q2, w):
+    if BG_SYSTEMATICS_USE_ISOLATED_WORKSPACE:
+        raise NotImplementedError(
+            "BG_SYSTEMATICS_USE_ISOLATED_WORKSPACE=True is not yet supported by run_bg_systematics.py"
+        )
+    if not os.path.isdir(outpath):
+        raise FileNotFoundError("Systematics OUTPATH does not exist: {}".format(outpath))
+    if not isinstance(bundle, dict):
+        raise ValueError("Systematics replay bundle must be a dictionary")
+
+    known_profiles = set(BG_OPT_PROFILES.keys())
+    requested_profiles = list(BG_SYSTEMATIC_PROFILES)
+    invalid_profiles = [profile for profile in requested_profiles if profile not in known_profiles]
+    if invalid_profiles:
+        raise ValueError(
+            "BG_SYSTEMATIC_PROFILES contains unknown profile(s): {}".format(
+                ", ".join(invalid_profiles)
+            )
+        )
+
+    bundle_active_profile = bundle.get("active_profile")
+    if bundle_active_profile not in (None, "", "nominal_weighted") and bundle_active_profile not in known_profiles:
+        raise ValueError(
+            "0th-iteration input bundle records unknown active_profile '{}'".format(
+                bundle_active_profile
+            )
+        )
+
+    warnings = []
+    entry_details = {}
+    for eps_name in ("low", "high"):
+        entry = bundle.get(eps_name)
+        if not isinstance(entry, dict):
+            raise ValueError("Systematics replay bundle is missing '{}' entry".format(eps_name))
+        argv = entry.get("argv")
+        inp_dict = entry.get("inp_dict")
+        if not isinstance(argv, list) or not argv:
+            raise ValueError("Systematics replay bundle '{}' entry must include a non-empty argv list".format(eps_name))
+        if not isinstance(inp_dict, dict):
+            raise ValueError("Systematics replay bundle '{}' entry must include inp_dict".format(eps_name))
+        if str(inp_dict.get("Q2")) != str(q2) or str(inp_dict.get("W")) != str(w):
+            raise ValueError(
+                "Systematics replay bundle '{}' Q2/W mismatch: expected Q{}W{}, got Q{}W{}".format(
+                    eps_name,
+                    q2,
+                    w,
+                    inp_dict.get("Q2"),
+                    inp_dict.get("W"),
+                )
+            )
+        if str(inp_dict.get("ParticleType")) != str(particle_type):
+            raise ValueError(
+                "Systematics replay bundle '{}' particle mismatch: expected {}, got {}".format(
+                    eps_name,
+                    particle_type,
+                    inp_dict.get("ParticleType"),
+                )
+            )
+        script_path = _resolve_script_path(argv[0], repo_root)
+        if not script_path or not os.path.exists(script_path):
+            raise FileNotFoundError(
+                "Systematics replay bundle '{}' script was not found: {}".format(
+                    eps_name,
+                    script_path or argv[0],
+                )
+            )
+        entry_details[eps_name] = {
+            "script_path": script_path,
+            "outfilename": inp_dict.get("OutFilename"),
+        }
+
+    return {
+        "passed": True,
+        "warnings": warnings,
+        "bundle_active_profile": bundle_active_profile or "nominal_weighted",
+        "requested_profiles": requested_profiles,
+        "replay_mode": "live_outpath",
+        "outpath": outpath,
+        "entries": entry_details,
+    }
+
+
 def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
+    preflight = validate_systematics_replay_bundle(bundle, repo_root, outpath, particle_type, q2, w)
     results = []
     nominal_row = None
     for profile_name in BG_SYSTEMATIC_PROFILES:
@@ -77,6 +173,8 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
         os.makedirs(profile_dir, exist_ok=True)
         snapshot_path = os.path.join(profile_dir, "bg_profile_snapshot.json")
         _write_json(snapshot_path, {"BG_OPT_ACTIVE_PROFILE": profile_name})
+        workspace_dir = os.path.join(profile_dir, "workspace")
+        os.makedirs(workspace_dir, exist_ok=True)
 
         row = {
             "profile_name": profile_name,
@@ -93,6 +191,10 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
             "percent_deviation_from_nominal": None,
             "pass_fail_status": "failed",
             "error_message": None,
+            "preflight_passed": bool(preflight.get("passed")),
+            "replay_mode": preflight.get("replay_mode"),
+            "workspace_path": workspace_dir,
+            "profile_snapshot_path": snapshot_path,
         }
         try:
             low_entry = bundle.get("low", {})
@@ -153,6 +255,12 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
                 artifact_paths["final_summary_csv_profile"],
                 artifact_paths["final_summary_md"],
                 artifact_paths["final_summary_md_profile"],
+                artifact_paths["nonklambda_json"],
+                artifact_paths["nonklambda_json_profile"],
+                artifact_paths["nonklambda_csv"],
+                artifact_paths["nonklambda_csv_profile"],
+                artifact_paths["nonklambda_pdf"],
+                artifact_paths["nonklambda_pdf_profile"],
                 low_ledger_path,
                 high_ledger_path,
             ]:
@@ -178,6 +286,7 @@ def run_bg_systematics(bundle, repo_root, outpath, particle_type, q2, w):
         "w": w,
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "nominal_profile": "nominal_weighted",
+        "preflight": preflight,
         "rows": results,
         "lambda_yield_rms": None,
         "lambda_yield_envelope": None,
@@ -207,6 +316,10 @@ def write_bg_systematics_summary(summary, outpath, particle_type, q2, w, active_
         "percent_deviation_from_nominal",
         "pass_fail_status",
         "error_message",
+        "preflight_passed",
+        "replay_mode",
+        "workspace_path",
+        "profile_snapshot_path",
     ]
     with open(paths["systematics_csv"], "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)

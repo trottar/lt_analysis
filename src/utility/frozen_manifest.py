@@ -98,6 +98,9 @@ def get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=No
         "nonklambda_json": stem + "_nonklambda_crosscheck.json",
         "nonklambda_csv": stem + "_nonklambda_crosscheck.csv",
         "nonklambda_pdf": stem + "_nonklambda_crosscheck.pdf",
+        "nonklambda_json_profile": stem + "_nonklambda_crosscheck{}.json".format(profile_suffix),
+        "nonklambda_csv_profile": stem + "_nonklambda_crosscheck{}.csv".format(profile_suffix),
+        "nonklambda_pdf_profile": stem + "_nonklambda_crosscheck{}.pdf".format(profile_suffix),
     }
 
 
@@ -122,7 +125,28 @@ def _read_json_if_exists(path):
         return json.load(handle)
 
 
-def write_json_with_aliases(payload, primary_path, alias_path=None):
+def should_write_generic_alias(active_profile):
+    return active_profile in (None, "", "nominal_weighted")
+
+
+def resolve_profile_output_paths(generic_path, profile_path=None, active_profile=None):
+    primary_path = profile_path or generic_path
+    alias_path = None
+    if (
+        generic_path
+        and should_write_generic_alias(active_profile)
+        and os.path.abspath(generic_path) != os.path.abspath(primary_path)
+    ):
+        alias_path = generic_path
+    return primary_path, alias_path
+
+
+def write_json_with_aliases(payload, generic_path, profile_path=None, active_profile=None):
+    primary_path, alias_path = resolve_profile_output_paths(
+        generic_path,
+        profile_path=profile_path,
+        active_profile=active_profile,
+    )
     serializable = _json_ready(payload)
     with open(primary_path, "w") as handle:
         json.dump(serializable, handle, indent=2, sort_keys=True)
@@ -130,6 +154,22 @@ def write_json_with_aliases(payload, primary_path, alias_path=None):
     if alias_path and os.path.abspath(alias_path) != os.path.abspath(primary_path):
         with open(alias_path, "w") as handle:
             json.dump(serializable, handle, indent=2, sort_keys=True)
+        written.append(alias_path)
+    return written
+
+
+def write_text_with_aliases(text, generic_path, profile_path=None, active_profile=None):
+    primary_path, alias_path = resolve_profile_output_paths(
+        generic_path,
+        profile_path=profile_path,
+        active_profile=active_profile,
+    )
+    with open(primary_path, "w") as handle:
+        handle.write(text)
+    written = [primary_path]
+    if alias_path and os.path.abspath(alias_path) != os.path.abspath(primary_path):
+        with open(alias_path, "w") as handle:
+            handle.write(text)
         written.append(alias_path)
     return written
 
@@ -150,12 +190,16 @@ def write_zeroth_iteration_input_bundle(
     active_profile=None,
 ):
     artifact_paths = get_analysis_artifact_paths(outpath, particle_type, q2, w, active_profile=active_profile)
-    bundle = _read_json_if_exists(artifact_paths["input_bundle"]) or {
+    bundle = (
+        _read_json_if_exists(artifact_paths["input_bundle_profile"])
+        or _read_json_if_exists(artifact_paths["input_bundle"])
+        or {
         "particle_type": particle_type,
         "q2": q2,
         "w": w,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
+    )
     bundle["active_profile"] = active_profile
     bundle[str(epsset).lower()] = {
         "argv": list(argv),
@@ -166,6 +210,7 @@ def write_zeroth_iteration_input_bundle(
         bundle,
         artifact_paths["input_bundle"],
         artifact_paths["input_bundle_profile"],
+        active_profile=active_profile,
     )
 
 
@@ -293,6 +338,7 @@ def write_frozen_manifest(outpath, particle_type, q2, w, payload, active_profile
         payload,
         artifact_paths["manifest"],
         artifact_paths["manifest_profile"],
+        active_profile=active_profile,
     )
 
 

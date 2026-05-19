@@ -118,19 +118,33 @@ def _make_bg_opt_bin_cache_key(t_bins, phi_bins, shift_mode):
     )
 
 
-def _warn_if_oversub_diagnostics(label, diagnostics):
-    if not diagnostics:
+def _warn_if_oversub_diagnostics(inpDict, diagnostics, phi_setting, t_bin_index, phi_bin_index, fit_stage):
+    if not diagnostics or bool(inpDict.get("suppress_bg_opt_warnings", False)):
         return
     fraction = float(diagnostics.get("affected_lambda_fraction", 0.0) or 0.0)
     max_ratio = float(diagnostics.get("max_unclamped_ratio", 0.0) or 0.0)
     if fraction > float(BG_OVERSUB_WARN_FRACTION) or max_ratio > float(BG_OVERSUB_WARN_MAX_RATIO):
+        affected_mm_range = diagnostics.get("affected_mm_range")
         print(
-            "WARNING: {} oversubtraction diagnostics exceeded thresholds "
-            "(fraction={:.4f}, max_ratio={:.4f}, bins={})".format(
-                label,
+            "WARNING: empirical MM background over-subtraction diagnostic exceeded threshold\n"
+            "  epsset = {}\n"
+            "  phi_setting = {}\n"
+            "  t_bin = {}\n"
+            "  phi_bin = {}\n"
+            "  fit_stage = {}\n"
+            "  affected_lambda_fraction = {:.4f}\n"
+            "  max_unclamped_ratio = {:.4f}\n"
+            "  oversub_bin_count = {}\n"
+            "  affected_mm_range = {}".format(
+                inpDict.get("EPSSET", ""),
+                phi_setting,
+                int(t_bin_index) + 1,
+                int(phi_bin_index) + 1,
+                fit_stage,
                 fraction,
                 max_ratio,
                 int(diagnostics.get("oversub_bin_count", 0) or 0),
+                affected_mm_range,
             )
         )
 
@@ -1755,13 +1769,12 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 )
                 entry["oversub_diagnostics"]["fit1"] = fit1_diagnostics
                 _warn_if_oversub_diagnostics(
-                    "{} {} t-bin {} phi-bin {} Fit 1".format(
-                        inpDict.get("EPSSET", ""),
-                        phi_setting,
-                        j + 1,
-                        k + 1,
-                    ),
+                    inpDict,
                     fit1_diagnostics,
+                    phi_setting,
+                    j,
+                    k,
+                    "Fit 1",
                 )
                 residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
                 entry["H_MM_fit1sub_DATA"].Add(fit_result1[1], -1)
@@ -1818,13 +1831,12 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 )
                 entry["oversub_diagnostics"]["fit2"] = fit2_diagnostics
                 _warn_if_oversub_diagnostics(
-                    "{} {} t-bin {} phi-bin {} Fit 2".format(
-                        inpDict.get("EPSSET", ""),
-                        phi_setting,
-                        j + 1,
-                        k + 1,
-                    ),
+                    inpDict,
                     fit2_diagnostics,
+                    phi_setting,
+                    j,
+                    k,
+                    "Fit 2",
                 )
                 entry["H_MM_DATA"].Add(fit_result2[0], -1)
 

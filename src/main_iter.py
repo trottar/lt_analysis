@@ -891,8 +891,11 @@ if EPSSET == "high":
             with open(analysis_artifact_paths["systematics_json"], "r") as handle:
                 systematics_payload = json.load(handle)
         nonklambda_payload = None
-        if os.path.exists(analysis_artifact_paths["nonklambda_json"]):
-            with open(analysis_artifact_paths["nonklambda_json"], "r") as handle:
+        nonklambda_path = analysis_artifact_paths["nonklambda_json_profile"]
+        if not os.path.exists(nonklambda_path):
+            nonklambda_path = analysis_artifact_paths["nonklambda_json"]
+        if os.path.exists(nonklambda_path):
+            with open(nonklambda_path, "r") as handle:
                 nonklambda_payload = json.load(handle)
         inpDict["convergence_status"] = "iteration_update"
         final_summary_payload = build_final_analysis_summary(

@@ -103,6 +103,7 @@ def write_epsilon_empirical_compare(payload, outpath, particle_type, q2, w, acti
             payload,
             paths["epsilon_compare_json"],
             paths["epsilon_compare_json_profile"],
+            active_profile=active_profile,
         )
     )
 
@@ -113,19 +114,20 @@ def write_epsilon_empirical_compare(payload, outpath, particle_type, q2, w, acti
         "f_emp_high",
         "delta_f_emp",
     ]
-    with open(paths["epsilon_compare_csv"], "w", newline="") as handle:
+    primary_csv_path = paths["epsilon_compare_csv_profile"]
+    with open(primary_csv_path, "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         for row in payload.get("rows", []):
             writer.writerow({key: row.get(key) for key in fieldnames})
-    written.append(paths["epsilon_compare_csv"])
-    if os.path.abspath(paths["epsilon_compare_csv_profile"]) != os.path.abspath(paths["epsilon_compare_csv"]):
-        with open(paths["epsilon_compare_csv_profile"], "w", newline="") as handle:
+    written.append(primary_csv_path)
+    if active_profile in (None, "", "nominal_weighted") and os.path.abspath(paths["epsilon_compare_csv"]) != os.path.abspath(primary_csv_path):
+        with open(paths["epsilon_compare_csv"], "w", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=fieldnames)
             writer.writeheader()
             for row in payload.get("rows", []):
                 writer.writerow({key: row.get(key) for key in fieldnames})
-        written.append(paths["epsilon_compare_csv_profile"])
+        written.append(paths["epsilon_compare_csv"])
     return written
 
 

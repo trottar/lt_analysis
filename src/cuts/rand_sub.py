@@ -98,19 +98,29 @@ def _print_rand_timer(label, elapsed, total_events=None):
         print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
 
 
-def _warn_if_oversub_diagnostics(label, diagnostics):
-    if not diagnostics:
+def _warn_if_oversub_diagnostics(inpDict, diagnostics, phi_setting, fit_stage):
+    if not diagnostics or bool(inpDict.get("suppress_bg_opt_warnings", False)):
         return
     fraction = float(diagnostics.get("affected_lambda_fraction", 0.0) or 0.0)
     max_ratio = float(diagnostics.get("max_unclamped_ratio", 0.0) or 0.0)
     if fraction > float(BG_OVERSUB_WARN_FRACTION) or max_ratio > float(BG_OVERSUB_WARN_MAX_RATIO):
+        affected_mm_range = diagnostics.get("affected_mm_range")
         print(
-            "WARNING: {} oversubtraction diagnostics exceeded thresholds "
-            "(fraction={:.4f}, max_ratio={:.4f}, bins={})".format(
-                label,
+            "WARNING: empirical MM background over-subtraction diagnostic exceeded threshold\n"
+            "  epsset = {}\n"
+            "  phi_setting = {}\n"
+            "  fit_stage = {}\n"
+            "  affected_lambda_fraction = {:.4f}\n"
+            "  max_unclamped_ratio = {:.4f}\n"
+            "  oversub_bin_count = {}\n"
+            "  affected_mm_range = {}".format(
+                inpDict.get("EPSSET", ""),
+                phi_setting,
+                fit_stage,
                 fraction,
                 max_ratio,
                 int(diagnostics.get("oversub_bin_count", 0) or 0),
+                affected_mm_range,
             )
         )
 
@@ -2273,8 +2283,10 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
             background_fit1[0],
         )
         _warn_if_oversub_diagnostics(
-            "{} {} Fit 1".format(inpDict.get("EPSSET", ""), phi_setting),
+            inpDict,
             bg_diag1,
+            phi_setting,
+            "Fit 1",
         )
 
         _process_rand_sub_background_tree(
@@ -2425,8 +2437,10 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
             background_fit2[0],
         )
         _warn_if_oversub_diagnostics(
-            "{} {} Fit 2".format(inpDict.get("EPSSET", ""), phi_setting),
+            inpDict,
             bg_diag2,
+            phi_setting,
+            "Fit 2",
         )
 
         _process_rand_sub_background_tree(
