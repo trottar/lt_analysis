@@ -21,6 +21,8 @@ python -m py_compile src/utility/mm_background_subtraction.py
 python -m py_compile src/utility/check_nominal_regression.py
 
 python - <<'PY'
+import contextlib
+import io
 import os
 import sys
 
@@ -41,6 +43,8 @@ print("analysis hardening pure-python imports OK")
 PY
 
 python - <<'PY'
+import contextlib
+import io
 import os
 import sys
 import tempfile
@@ -106,6 +110,8 @@ print("analysis hardening profile-aware writer smoke OK")
 PY
 
 python - <<'PY'
+import contextlib
+import io
 import os
 import sys
 
@@ -124,6 +130,7 @@ manifest = {
     "t_bin_edges": [0.0, 1.0],
     "phi_bin_edges": [0.0, 90.0],
     "key_file_hashes": {
+        "src/utility/background_config.py": {"sha256": "expected-background-config"},
         "src/main_auto.py": {"sha256": "expected-main-auto"},
         "src/main_iter.py": {"sha256": "expected-main-iter"},
     },
@@ -141,6 +148,7 @@ original_builder = frozen_manifest.build_key_file_hashes
 try:
     frozen_manifest.ALLOW_CONFIG_DRIFT = False
     frozen_manifest.build_key_file_hashes = lambda repo_root: {
+        "src/utility/background_config.py": {"sha256": "different-background-config"},
         "src/main_auto.py": {"sha256": "different-main-auto"},
         "src/main_iter.py": {"sha256": "different-main-iter"},
     }
@@ -156,28 +164,32 @@ try:
             warn_only_hash_paths=warn_only_hash_paths,
         )
     except ValueError as exc:
-        if "src/main_iter.py" not in str(exc):
+        if "src/utility/background_config.py" not in str(exc):
             raise
     else:
-        raise AssertionError("Expected current-driver hash mismatch to fail validation")
+        raise AssertionError("Expected background-config hash mismatch to fail validation")
 
     frozen_manifest.build_key_file_hashes = lambda repo_root: {
+        "src/utility/background_config.py": {"sha256": "expected-background-config"},
         "src/main_auto.py": {"sha256": "different-main-auto"},
-        "src/main_iter.py": {"sha256": "expected-main-iter"},
+        "src/main_iter.py": {"sha256": "different-main-iter"},
     }
     validated = dict(inp_dict)
-    frozen_manifest.validate_iteration_inputs_against_manifest(
-        manifest,
-        validated,
-        [0.0, 1.0],
-        [0.0, 90.0],
-        ".",
-        strict_hash_paths=strict_hash_paths,
-        warn_only_hash_paths=warn_only_hash_paths,
-    )
+    with contextlib.redirect_stdout(io.StringIO()):
+        frozen_manifest.validate_iteration_inputs_against_manifest(
+            manifest,
+            validated,
+            [0.0, 1.0],
+            [0.0, 90.0],
+            ".",
+            strict_hash_paths=strict_hash_paths,
+            warn_only_hash_paths=warn_only_hash_paths,
+        )
     warnings = validated.get("manifest_validation_warnings", [])
     if not any("src/main_auto.py" in warning for warning in warnings):
         raise AssertionError("Expected sibling-driver drift to warn, not fail")
+    if not any("src/main_iter.py" in warning for warning in warnings):
+        raise AssertionError("Expected current-driver code drift to warn, not fail")
 finally:
     frozen_manifest.ALLOW_CONFIG_DRIFT = original_allow
     frozen_manifest.build_key_file_hashes = original_builder

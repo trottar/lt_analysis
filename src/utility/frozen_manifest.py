@@ -28,17 +28,17 @@ KEY_FILE_HASH_TARGETS = [
 
 def get_iteration_manifest_hash_policy(current_script_relpath=None):
     """
-    Later iterations should fail on live config drift and the currently
-    executing driver script, but only warn on sibling/data-side code drift.
+    Later iterations should fail on live background-config drift and only warn
+    on code-file drift.
 
     The frozen manifest already captures the 0th-iteration products. Once those
     products are materialized and validated, a later SIMC-weight iteration
-    should not be blocked by unrelated drift in a different driver such as
-    ``src/main_auto.py`` during a ``main_iter.py`` run.
+    should not be blocked by bookkeeping or driver-code updates in
+    ``main_iter.py`` / ``main_auto.py``. Keep the signature so existing callers
+    do not need to change, but the only strict path is the shared analysis
+    config.
     """
     strict_hash_paths = {"src/utility/background_config.py"}
-    if current_script_relpath:
-        strict_hash_paths.add(current_script_relpath)
     warn_only_hash_paths = set(KEY_FILE_HASH_TARGETS) - strict_hash_paths
     return strict_hash_paths, warn_only_hash_paths
 
