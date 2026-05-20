@@ -191,3 +191,18 @@ For production review, inspect:
 - final analysis summary Markdown;
 - optional background-systematics summary;
 - optional non-KLambda cross-check outputs.
+
+## Offline Plot Regeneration
+
+For cached runs, regenerate the Step-4 optimizer PDF with:
+
+- `python src/utility/regenerate_bg_opt_plots.py <cached-run-dir>`
+
+Regenerate the newer workflow-stage diagnostic plots with:
+
+- `python src/utility/regenerate_workflow_diagnostic_plots.py <cached-run-dir>`
+
+The workflow diagnostic utility reads cached manifest/ledger/systematics/final-summary
+JSON files and writes a multi-page PDF into the run's `plots/` directory. It is
+profile-aware, so systematic replay directories can be plotted independently from
+the nominal run.

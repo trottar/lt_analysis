@@ -19,6 +19,7 @@ python -m py_compile src/utility/run_bg_systematics.py
 python -m py_compile src/utility/write_final_analysis_summary.py
 python -m py_compile src/utility/mm_background_subtraction.py
 python -m py_compile src/utility/check_nominal_regression.py
+python -m py_compile src/utility/regenerate_workflow_diagnostic_plots.py
 
 python - <<'PY'
 import contextlib
@@ -38,6 +39,7 @@ import run_bg_systematics
 import write_final_analysis_summary
 import mm_background_subtraction
 import check_nominal_regression
+import regenerate_workflow_diagnostic_plots
 
 print("analysis hardening pure-python imports OK")
 PY
@@ -114,12 +116,15 @@ import contextlib
 import io
 import os
 import sys
+import tempfile
+import json
 
 utility_path = os.path.join(os.getcwd(), "src", "utility")
 if utility_path not in sys.path:
     sys.path.append(utility_path)
 
 import frozen_manifest
+import regenerate_workflow_diagnostic_plots
 
 strict_hash_paths, warn_only_hash_paths = frozen_manifest.get_iteration_manifest_hash_policy("src/main_iter.py")
 
@@ -195,6 +200,222 @@ finally:
     frozen_manifest.build_key_file_hashes = original_builder
 
 print("analysis hardening manifest hash-policy smoke OK")
+
+with tempfile.TemporaryDirectory() as tmpdir:
+    plot_dir = os.path.join(tmpdir, "plots")
+    json_dir = os.path.join(tmpdir, "json")
+    os.makedirs(plot_dir, exist_ok=True)
+    os.makedirs(json_dir, exist_ok=True)
+
+    particle = "kaon"
+    q2 = "test"
+    w = "test"
+    active_profile = "fit1_only"
+    artifact_paths = frozen_manifest.get_analysis_artifact_paths(tmpdir, particle, q2, w, active_profile=active_profile)
+    ledger_low_paths = frozen_manifest.get_correction_ledger_paths(tmpdir, particle, "test_low", active_profile=active_profile)
+    ledger_high_paths = frozen_manifest.get_correction_ledger_paths(tmpdir, particle, "test_high", active_profile=active_profile)
+
+    manifest_payload = {
+        "particle_type": particle,
+        "q2": q2,
+        "w": w,
+        "active_profile": active_profile,
+        "epsilon_values": {"low": 0.1, "high": 0.2},
+        "mm_cut_window": [1.10, 1.15],
+        "t_bin_edges": [0.1, 0.2, 0.3],
+        "phi_bin_edges": [-180.0, -60.0, 60.0, 180.0],
+        "selected_bg_scale1s": {"low": {"low:Center": 0.4}, "high": {"high:Center": 0.5}},
+        "selected_bg_scale2s": {"low": {"low:Center": 0.2}, "high": {"high:Center": 0.3}},
+        "resolved_optimizer_settings": {"selection_mode": "weighted"},
+        "common_epsilon_scale_behavior": "independent",
+        "created_at": "2026-05-20T00:00:00Z",
+    }
+    bundle_payload = {
+        "particle_type": particle,
+        "q2": q2,
+        "w": w,
+        "active_profile": active_profile,
+        "low": {"argv": ["src/main.py"], "inp_dict": {"OutFilename": "test_low", "EPSSET": "low", "EPSVAL": 0.1, "NumtBins": 2, "NumPhiBins": 3, "ParticleType": particle, "POL": 1}},
+        "high": {"argv": ["src/main.py"], "inp_dict": {"OutFilename": "test_high", "EPSSET": "high", "EPSVAL": 0.2, "NumtBins": 2, "NumPhiBins": 3, "ParticleType": particle, "POL": 1}},
+    }
+
+    def build_ledger(epsset, fit1_total, fit2_total):
+        stage_yields = {
+            "raw_prompt": 100.0,
+            "after_random_subtraction": 90.0,
+            "after_dummy_subtraction": 82.0,
+            "after_pion_subtraction": 76.0,
+            "after_empirical_fit1": 76.0 - fit1_total,
+            "after_empirical_fit2": 76.0 - fit1_total - fit2_total,
+            "final_lambda_window": 76.0 - fit1_total - fit2_total,
+        }
+        return {
+            "particle_type": particle,
+            "epsset": epsset,
+            "q2": q2,
+            "w": w,
+            "outfilename": "test_{}".format(epsset),
+            "active_profile": active_profile,
+            "resolved_optimizer_settings": {"selection_mode": "weighted"},
+            "settings": [
+                {
+                    "phi_setting": "Center",
+                    "bin_level_ledger_available": True,
+                    "combined_stage_yields": dict(stage_yields),
+                    "fit1_fractional_correction": fit1_total / 76.0,
+                    "fit2_fractional_correction": fit2_total / (76.0 - fit1_total),
+                    "total_empirical_fraction": (fit1_total + fit2_total) / 76.0,
+                    "empirical_fit_uncertainty_frac": 0.02,
+                    "failed_fit_count": 0,
+                    "zero_background_fallback_count": 0,
+                    "oversub_diagnostics": {
+                        "fit1": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.0},
+                        "fit2": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.0},
+                    },
+                    "t_phi_bins": [
+                        {
+                            "bin_key": "t_bin1phi_bin1",
+                            "stage_yields": dict(stage_yields),
+                            "fit1_fractional_correction": fit1_total / 76.0,
+                            "fit2_fractional_correction": fit2_total / (76.0 - fit1_total),
+                            "total_empirical_fraction": (fit1_total + fit2_total) / 76.0,
+                            "empirical_fit_uncertainty_frac": 0.02,
+                            "fit1_failed": False,
+                            "fit2_failed": False,
+                            "fit1_zero_background_fallback": False,
+                            "fit2_zero_background_fallback": False,
+                            "oversub_diagnostics": {
+                                "fit1": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.0},
+                                "fit2": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.0},
+                            },
+                        },
+                        {
+                            "bin_key": "t_bin2phi_bin3",
+                            "stage_yields": {
+                                "raw_prompt": 50.0,
+                                "after_random_subtraction": 45.0,
+                                "after_dummy_subtraction": 41.0,
+                                "after_pion_subtraction": 38.0,
+                                "after_empirical_fit1": 36.5,
+                                "after_empirical_fit2": 35.5,
+                                "final_lambda_window": 35.5,
+                            },
+                            "fit1_fractional_correction": 1.5 / 38.0,
+                            "fit2_fractional_correction": 1.0 / 36.5,
+                            "total_empirical_fraction": 2.5 / 38.0,
+                            "empirical_fit_uncertainty_frac": 0.03,
+                            "fit1_failed": False,
+                            "fit2_failed": False,
+                            "fit1_zero_background_fallback": False,
+                            "fit2_zero_background_fallback": False,
+                            "oversub_diagnostics": {
+                                "fit1": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.01},
+                                "fit2": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.02},
+                            },
+                        },
+                    ],
+                }
+            ],
+            "combined_totals": {
+                "combined_stage_yields": dict(stage_yields),
+                "all_settings_have_bin_level_ledger": True,
+                "fit1_fractional_correction": fit1_total / 76.0,
+                "fit2_fractional_correction": fit2_total / (76.0 - fit1_total),
+                "total_empirical_fraction": (fit1_total + fit2_total) / 76.0,
+                "empirical_fit_uncertainty_frac": 0.02,
+                "failed_fit_count": 0,
+                "zero_background_fallback_count": 0,
+                "oversub_diagnostics": {
+                    "fit1": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.01},
+                    "fit2": {"oversub_bin_count": 0, "max_unclamped_ratio": 1.02},
+                },
+            },
+        }
+
+    low_ledger = build_ledger("low", 4.0, 2.0)
+    high_ledger = build_ledger("high", 5.0, 1.0)
+    epsilon_compare = {
+        "particle_type": particle,
+        "q2": q2,
+        "w": w,
+        "active_profile": active_profile,
+        "rows": [
+            {"phi_setting": "Center", "bin_key": "t_bin1phi_bin1", "f_emp_low": 0.08, "f_emp_high": 0.09, "delta_f_emp": 0.01},
+            {"phi_setting": "Center", "bin_key": "t_bin2phi_bin3", "f_emp_low": 0.07, "f_emp_high": 0.05, "delta_f_emp": -0.02},
+        ],
+        "mean_f_emp_low": 0.075,
+        "mean_f_emp_high": 0.07,
+        "rms_delta_f_emp": 0.0158,
+        "max_abs_delta_f_emp": 0.02,
+        "warning_threshold": 0.03,
+        "fail_threshold": None,
+    }
+    final_summary = {
+        "particle_type": particle,
+        "q2": q2,
+        "w": w,
+        "active_profile": active_profile,
+        "common_epsilon_scale_behavior": "independent",
+        "resolved_optimizer_settings": {"selection_mode": "weighted"},
+        "fit1_scales": manifest_payload["selected_bg_scale1s"],
+        "fit2_scales": manifest_payload["selected_bg_scale2s"],
+        "low_epsilon_corrections": low_ledger["combined_totals"],
+        "high_epsilon_corrections": high_ledger["combined_totals"],
+        "epsilon_empirical_compare": epsilon_compare,
+        "xsect_outputs": {
+            "separated_csv": [{"sigma_L": "0.11", "sigma_T": "0.22", "sigma_LT": "0.03", "sigma_TT": "0.04"}],
+            "unseparated_csv": [{"xsec": "0.33"}],
+        },
+        "manifest_hash": "synthetic",
+        "iteration_count": 2,
+        "convergence_status": "synthetic",
+    }
+    systematics_summary = {
+        "nominal_profile": "nominal_weighted",
+        "generated_at": "2026-05-20T00:00:00Z",
+        "rows": [
+            {"profile_name": "nominal_weighted", "lambda_yield": 100.0, "percent_deviation_from_nominal": 0.0, "pass_fail_status": "passed", "sigma_L": 0.1, "sigma_T": 0.2, "sigma_LT": 0.03, "sigma_TT": 0.04, "error_message": None},
+            {"profile_name": "fit1_only", "lambda_yield": 97.0, "percent_deviation_from_nominal": -3.0, "pass_fail_status": "passed", "sigma_L": 0.09, "sigma_T": 0.19, "sigma_LT": 0.025, "sigma_TT": 0.035, "error_message": None},
+        ],
+        "lambda_yield_rms": 2.121,
+        "lambda_yield_envelope": 3.0,
+        "preflight": {"passed": True},
+    }
+    nonklambda_summary = {
+        "comparison_mode": "preprocessed_prediction",
+        "active_profile": active_profile,
+        "prediction_count": 2,
+        "missing_empirical_bin_count": 0,
+        "max_abs_lambda_window_correction_difference": 0.02,
+        "warnings": [],
+        "rows": [
+            {"channel_name": "nonKL", "status": "ok", "lambda_window_correction_difference": 0.02},
+            {"channel_name": "nonKL", "status": "ok", "lambda_window_correction_difference": -0.01},
+        ],
+    }
+
+    for path, payload in [
+        (os.path.join(json_dir, os.path.basename(artifact_paths["manifest_profile"])), manifest_payload),
+        (os.path.join(json_dir, os.path.basename(artifact_paths["input_bundle_profile"])), bundle_payload),
+        (os.path.join(json_dir, os.path.basename(artifact_paths["epsilon_compare_json_profile"])), epsilon_compare),
+        (os.path.join(json_dir, os.path.basename(artifact_paths["final_summary_json_profile"])), final_summary),
+        (os.path.join(json_dir, os.path.basename(artifact_paths["systematics_json"])), systematics_summary),
+        (os.path.join(json_dir, os.path.basename(artifact_paths["nonklambda_json_profile"])), nonklambda_summary),
+        (os.path.join(json_dir, os.path.basename(ledger_low_paths["json_profile"])), low_ledger),
+        (os.path.join(json_dir, os.path.basename(ledger_high_paths["json_profile"])), high_ledger),
+    ]:
+        with open(path, "w") as handle:
+            json.dump(payload, handle, indent=2, sort_keys=True)
+
+    status = regenerate_workflow_diagnostic_plots.main([tmpdir, "--profile", active_profile])
+    if status != 0:
+        raise AssertionError("Expected workflow diagnostic plot regeneration smoke to succeed")
+
+    expected_pdf = os.path.join(plot_dir, "{}_Q{}W{}_workflow_diagnostics_{}.pdf".format(particle, q2, w, active_profile))
+    if not os.path.exists(expected_pdf):
+        raise AssertionError("Expected workflow diagnostic PDF was not created: {}".format(expected_pdf))
+
+print("analysis hardening workflow-plot smoke OK")
 PY
 
 python - <<'PY'
