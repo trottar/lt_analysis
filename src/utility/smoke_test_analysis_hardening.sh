@@ -108,6 +108,86 @@ PY
 python - <<'PY'
 import os
 import sys
+
+utility_path = os.path.join(os.getcwd(), "src", "utility")
+if utility_path not in sys.path:
+    sys.path.append(utility_path)
+
+import frozen_manifest
+
+strict_hash_paths, warn_only_hash_paths = frozen_manifest.get_iteration_manifest_hash_policy("src/main_iter.py")
+
+manifest = {
+    "q2": "test",
+    "w": "test",
+    "epsilon_values": {"low": "0.1"},
+    "t_bin_edges": [0.0, 1.0],
+    "phi_bin_edges": [0.0, 90.0],
+    "key_file_hashes": {
+        "src/main_auto.py": {"sha256": "expected-main-auto"},
+        "src/main_iter.py": {"sha256": "expected-main-iter"},
+    },
+}
+inp_dict = {
+    "Q2": "test",
+    "W": "test",
+    "EPSSET": "low",
+    "EPSVAL": "0.1",
+    "NumtBins": 1,
+    "NumPhiBins": 1,
+}
+original_allow = frozen_manifest.ALLOW_CONFIG_DRIFT
+original_builder = frozen_manifest.build_key_file_hashes
+try:
+    frozen_manifest.ALLOW_CONFIG_DRIFT = False
+    frozen_manifest.build_key_file_hashes = lambda repo_root: {
+        "src/main_auto.py": {"sha256": "different-main-auto"},
+        "src/main_iter.py": {"sha256": "different-main-iter"},
+    }
+
+    try:
+        frozen_manifest.validate_iteration_inputs_against_manifest(
+            manifest,
+            dict(inp_dict),
+            [0.0, 1.0],
+            [0.0, 90.0],
+            ".",
+            strict_hash_paths=strict_hash_paths,
+            warn_only_hash_paths=warn_only_hash_paths,
+        )
+    except ValueError as exc:
+        if "src/main_iter.py" not in str(exc):
+            raise
+    else:
+        raise AssertionError("Expected current-driver hash mismatch to fail validation")
+
+    frozen_manifest.build_key_file_hashes = lambda repo_root: {
+        "src/main_auto.py": {"sha256": "different-main-auto"},
+        "src/main_iter.py": {"sha256": "expected-main-iter"},
+    }
+    validated = dict(inp_dict)
+    frozen_manifest.validate_iteration_inputs_against_manifest(
+        manifest,
+        validated,
+        [0.0, 1.0],
+        [0.0, 90.0],
+        ".",
+        strict_hash_paths=strict_hash_paths,
+        warn_only_hash_paths=warn_only_hash_paths,
+    )
+    warnings = validated.get("manifest_validation_warnings", [])
+    if not any("src/main_auto.py" in warning for warning in warnings):
+        raise AssertionError("Expected sibling-driver drift to warn, not fail")
+finally:
+    frozen_manifest.ALLOW_CONFIG_DRIFT = original_allow
+    frozen_manifest.build_key_file_hashes = original_builder
+
+print("analysis hardening manifest hash-policy smoke OK")
+PY
+
+python - <<'PY'
+import os
+import sys
 import tempfile
 
 try:
