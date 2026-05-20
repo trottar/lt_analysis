@@ -439,6 +439,21 @@ for hist in histlist:
     hist["t_bins"] = t_bins
     hist["phi_bins"] = phi_bins
 
+frozen_num_t_bins = len(t_bins) - 1
+frozen_num_phi_bins = len(phi_bins) - 1
+if inpDict.get("NumtBins") != frozen_num_t_bins or inpDict.get("NumPhiBins") != frozen_num_phi_bins:
+    print(
+        "[ITER] Using frozen manifest bin counts: NumtBins={} NumPhiBins={} "
+        "(requested {} / {})".format(
+            frozen_num_t_bins,
+            frozen_num_phi_bins,
+            inpDict.get("NumtBins"),
+            inpDict.get("NumPhiBins"),
+        )
+    )
+inpDict["NumtBins"] = frozen_num_t_bins
+inpDict["NumPhiBins"] = frozen_num_phi_bins
+
 validate_iteration_inputs_against_manifest(
     manifest_payload_prev,
     inpDict,
