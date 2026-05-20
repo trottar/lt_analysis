@@ -43,6 +43,7 @@ from frozen_manifest import (
     find_frozen_manifest_path,
     get_analysis_artifact_paths,
     get_correction_ledger_paths,
+    get_iteration_manifest_hash_policy,
     load_frozen_manifest,
     validate_iteration_inputs_against_manifest,
 )
@@ -454,6 +455,7 @@ if inpDict.get("NumtBins") != frozen_num_t_bins or inpDict.get("NumPhiBins") != 
 inpDict["NumtBins"] = frozen_num_t_bins
 inpDict["NumPhiBins"] = frozen_num_phi_bins
 
+strict_hash_paths, warn_only_hash_paths = get_iteration_manifest_hash_policy("src/main_iter.py")
 validate_iteration_inputs_against_manifest(
     manifest_payload_prev,
     inpDict,
@@ -467,6 +469,8 @@ validate_iteration_inputs_against_manifest(
         *correction_ledger_paths_prev,
         *support_npz_paths_prev,
     ],
+    strict_hash_paths=strict_hash_paths,
+    warn_only_hash_paths=warn_only_hash_paths,
 )
 if manifest_path_prev not in output_file_lst:
     output_file_lst.append(os.path.join(OUTPATH, os.path.basename(manifest_path_prev)))

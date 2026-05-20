@@ -26,6 +26,23 @@ KEY_FILE_HASH_TARGETS = [
 ]
 
 
+def get_iteration_manifest_hash_policy(current_script_relpath=None):
+    """
+    Later iterations should fail on live config drift and the currently
+    executing driver script, but only warn on sibling/data-side code drift.
+
+    The frozen manifest already captures the 0th-iteration products. Once those
+    products are materialized and validated, a later SIMC-weight iteration
+    should not be blocked by unrelated drift in a different driver such as
+    ``src/main_auto.py`` during a ``main_iter.py`` run.
+    """
+    strict_hash_paths = {"src/utility/background_config.py"}
+    if current_script_relpath:
+        strict_hash_paths.add(current_script_relpath)
+    warn_only_hash_paths = set(KEY_FILE_HASH_TARGETS) - strict_hash_paths
+    return strict_hash_paths, warn_only_hash_paths
+
+
 def _json_ready(value):
     if isinstance(value, dict):
         return {str(key): _json_ready(val) for key, val in value.items()}
@@ -390,6 +407,8 @@ def validate_iteration_inputs_against_manifest(
     phi_bins,
     repo_root,
     required_paths=None,
+    strict_hash_paths=None,
+    warn_only_hash_paths=None,
 ):
     required_paths = required_paths or []
     for path in required_paths:
@@ -432,6 +451,10 @@ def validate_iteration_inputs_against_manifest(
     manifest_hashes = manifest.get("key_file_hashes", {})
     current_hashes = build_key_file_hashes(repo_root)
     current_inp_dict["manifest_validation_warnings"] = []
+    if strict_hash_paths is not None:
+        strict_hash_paths = set(strict_hash_paths)
+    if warn_only_hash_paths is not None:
+        warn_only_hash_paths = set(warn_only_hash_paths)
     for rel_path, manifest_entry in manifest_hashes.items():
         manifest_hash = None if not isinstance(manifest_entry, dict) else manifest_entry.get("sha256")
         current_hash = current_hashes.get(rel_path, {}).get("sha256")
@@ -443,7 +466,10 @@ def validate_iteration_inputs_against_manifest(
             "Config/code hash drift detected for {} "
             "(expected {}, got {})".format(rel_path, manifest_hash, current_hash or "missing")
         )
-        if not ALLOW_CONFIG_DRIFT:
+        should_fail = not ALLOW_CONFIG_DRIFT
+        if strict_hash_paths is not None:
+            should_fail = rel_path in strict_hash_paths and rel_path not in (warn_only_hash_paths or set())
+        if should_fail:
             raise ValueError(warning)
         print("WARNING: {}".format(warning))
         current_inp_dict["manifest_validation_warnings"].append(warning)
