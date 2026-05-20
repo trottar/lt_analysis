@@ -174,6 +174,7 @@ def _load_archived_context(csv_path):
                 hist_entry["H_MM_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_DATA")
                 hist_entry["H_MM_pisub_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_pisub_DATA")
                 hist_entry["H_MM_fit1sub_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_fit1sub_DATA")
+                hist_entry["H_MM_fit2sub_DATA"] = _load_histogram(root_file, "{}/data".format(phi_setting), "H_MM_fit2sub_DATA")
                 hist_entry["H_MM_full_SIMC"] = _load_histogram(root_file, "{}/simc".format(phi_setting), "H_MM_full_SIMC")
             enriched_histlist.append(hist_entry)
     finally:

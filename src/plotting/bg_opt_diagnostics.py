@@ -843,6 +843,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
     data_hist = hist_entry.get("H_MM_pisub_DATA")
     data_hist_cut = hist_entry.get("H_MM_DATA")
     fit2_input_hist = hist_entry.get("H_MM_fit1sub_DATA")
+    fit2_output_hist = hist_entry.get("H_MM_fit2sub_DATA")
     simc_hist = hist_entry.get("H_MM_full_SIMC")
     if data_hist is None or simc_hist is None:
         return False
@@ -883,6 +884,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
 
     x_data, y_data = _hist_to_arrays(data_hist)
     x_fit2_input, y_fit2_input = _hist_to_arrays(fit2_input_hist)
+    x_fit2_output, y_fit2_output = _hist_to_arrays(fit2_output_hist)
     x_simc, y_simc = _hist_to_arrays(simc_hist, scale=simc_scale)
     x_min, x_max = _hist_bounds(data_hist)
     if x_data is None or x_simc is None or x_min is None or x_max is None:
@@ -907,6 +909,16 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
             alpha=0.95,
             label="data input to fit2 (after fit1 subtraction)",
         )
+    if x_fit2_output is not None and selected_scale2 > 0.0:
+        ax.step(
+            x_fit2_output,
+            _for_log(y_fit2_output) if logy else y_fit2_output,
+            where="mid",
+            color="#9467bd",
+            linewidth=1.8,
+            alpha=0.95,
+            label="data after fit2 subtraction",
+        )
     ax.step(
         x_simc,
         _for_log(y_simc) if logy else y_simc,
@@ -914,7 +926,9 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         color="#d62728",
         linewidth=1.8,
         alpha=0.9,
-        label="SIMC (scaled in MM window)",
+        label="SIMC ({})".format(
+            "scaled in MM window" if scale_mode == "window" else "proper normalization"
+        ),
     )
 
     x_fit1, y_fit1 = _sample_function(
@@ -969,6 +983,7 @@ def _add_mm_overlay_page(pdf, hist_entry, inpDict, phi_setting, selected_scale1,
         "window norm scale(simc->data) = {}".format(_format_metric(simc_scale, "{:.3f}")),
         scale_note,
         "Fit 1 uses black spectrum; Fit 2 uses gray spectrum",
+        "Post-Fit-2 spectrum shown in purple",
         "check plot only; no analysis normalization changed",
     ]
     ax.text(
