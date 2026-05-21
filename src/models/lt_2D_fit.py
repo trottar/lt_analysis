@@ -77,8 +77,8 @@ else:
     mtar = 0.9395654133 # GeV/c^2, mass of the target (neutron)
 w_set = float(W.replace("p",".")) # W value
 
-DEFAULT_ROSENBLUTH_FIT_MODE = "cauchy"
-#DEFAULT_ROSENBLUTH_FIT_MODE = "traditional"
+#DEFAULT_ROSENBLUTH_FIT_MODE = "cauchy"
+DEFAULT_ROSENBLUTH_FIT_MODE = "traditional"
 ROSENBLUTH_MODE_ALIASES = {
     "cauchy": "cauchy",
     "hard": "cauchy",
@@ -715,7 +715,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(2, 0.0)   # ρLT
         fff2.FixParameter(3, 0.0)   # ρTT
         # — Apply limits for all parameters in stage 0 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(FIT_PARAM_KEYS):
             reset_limits_from_table(fff2, idx, name, stage=0)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -745,7 +745,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.ReleaseParameter(1)    # σL now floats
         # — Apply limits for all parameters in stage 1 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(FIT_PARAM_KEYS):
             reset_limits_from_table(fff2, idx, name, stage=1)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -768,7 +768,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(2)    # ρ_LT or σ_LT now floats
         fff2.ReleaseParameter(3)    # ρ_TT or σ_TT now floats
         # — Apply limits for all parameters in stage 2 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(FIT_PARAM_KEYS):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
@@ -789,7 +789,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.ReleaseParameter(0)    # σL now floats
         fff2.ReleaseParameter(1)    # σL now floats
         # — Apply limits for all parameters in stage 2 —
-        for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
+        for idx, name in enumerate(FIT_PARAM_KEYS):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
