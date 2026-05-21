@@ -77,6 +77,33 @@ else:
     mtar = 0.9395654133 # GeV/c^2, mass of the target (neutron)
 w_set = float(W.replace("p",".")) # W value
 
+#DEFAULT_ROSENBLUTH_FIT_MODE = "cauchy"
+DEFAULT_ROSENBLUTH_FIT_MODE = "traditional"
+ROSENBLUTH_MODE_ALIASES = {
+    "cauchy": "cauchy",
+    "hard": "cauchy",
+    "bounded": "cauchy",
+    "physical": "cauchy",
+    "traditional": "traditional",
+    "standard": "traditional",
+    "plain": "traditional",
+}
+
+rosenbluth_mode = os.environ.get("LT_ROSENBLUTH_MODE", DEFAULT_ROSENBLUTH_FIT_MODE)
+if len(sys.argv) >= 8 and str(sys.argv[7]).strip():
+    rosenbluth_mode = str(sys.argv[7]).strip()
+ROSENBLUTH_FIT_MODE = ROSENBLUTH_MODE_ALIASES.get(str(rosenbluth_mode).strip().lower())
+if ROSENBLUTH_FIT_MODE is None:
+    valid_modes = ", ".join(sorted(set(ROSENBLUTH_MODE_ALIASES.values())))
+    raise ValueError(
+        "Unrecognized Rosenbluth fit mode '{}'. Valid modes: {}".format(
+            rosenbluth_mode,
+            valid_modes,
+        )
+    )
+USE_CAUCHY_ROSENBLUTH = ROSENBLUTH_FIT_MODE == "cauchy"
+print("[LT FIT] Rosenbluth mode: {}".format(ROSENBLUTH_FIT_MODE))
+
 ###############################################################################################################################################
 # ---------------------------  DYNAMIC LIMITS  ---------------------------------
 #  PARAM_LIMITS encodes the *physical* boundaries that each cross-section term
@@ -99,14 +126,22 @@ w_set = float(W.replace("p",".")) # W value
 #        "sigL": [(0.001, 1e3), (0.001, 500), (0.001, 200)]
 #  to narrow σL after the first pass.
 # ------------------------------------------------------------------------------
-PARAM_LIMITS = {
-    "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
-    "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
-    #"rhoLT": [(-1.0, 1.0)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    #"rhoTT": [(-1.0, 1.0)]*3     # ρ_TT : σ_TT / σT
-    "rhoLT": [(-0.999, 0.999)]*3,    # ρ_LT : σ_LT / √(σT σL)
-    "rhoTT": [(-0.999, 0.999)]*3     # ρ_TT : σ_TT / σT
-}
+if USE_CAUCHY_ROSENBLUTH:
+    PARAM_LIMITS = {
+        "sigT" : [(0.001, 1e3)]*3,   # σ_T  : transverse
+        "sigL" : [(0.001, 1e3)]*3,   # σ_L  : longitudinal
+        "rhoLT": [(-0.999, 0.999)]*3,    # ρ_LT : σ_LT / √(σT σL)
+        "rhoTT": [(-0.999, 0.999)]*3     # ρ_TT : σ_TT / σT
+    }
+    FIT_PARAM_KEYS = ["sigT", "sigL", "rhoLT", "rhoTT"]
+else:
+    PARAM_LIMITS = {
+        "sigT" : [(0.001, 1e3)]*3,
+        "sigL" : [(0.001, 1e3)]*3,
+        "sigLT": [(-1e3, 1e3)]*3,
+        "sigTT": [(-1e3, 1e3)]*3,
+    }
+    FIT_PARAM_KEYS = ["sigT", "sigL", "sigLT", "sigTT"]
 # ------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------
@@ -273,9 +308,160 @@ def check_sigma_positive(fcn, graph,
 ###############################################################################################################################################
 
 # Import separated xsects models
-from lt_active import LT_sep_x_fun_wrapper, LT_sep_x_fun_unsep_wrapper
+from lt_active import (
+    LT_sep_x_fun_wrapper as LT_sep_x_fun_wrapper_cauchy,
+    LT_sep_x_fun_unsep_wrapper as LT_sep_x_fun_unsep_wrapper_cauchy,
+)
 
 ###############################################################################################################################################
+
+def LT_sep_x_fun_wrapper(inp_eps):
+    if USE_CAUCHY_ROSENBLUTH:
+        return LT_sep_x_fun_wrapper_cauchy(inp_eps)
+
+    def LT_sep_x_fun(x, par):
+        eps = inp_eps
+        xx = x[0]
+        xs = (
+            par[0]
+            + eps * par[1]
+            + ROOT.TMath.Sqrt(2 * eps * (1 + eps))
+            * par[2]
+            * ROOT.TMath.Cos(xx * PI / 180)
+            + eps
+            * par[3]
+            * ROOT.TMath.Cos(2 * xx * PI / 180)
+        )
+        return xs
+
+    return LT_sep_x_fun
+
+
+def LT_sep_x_fun_unsep_wrapper(inp_eps):
+    if USE_CAUCHY_ROSENBLUTH:
+        return LT_sep_x_fun_unsep_wrapper_cauchy(inp_eps)
+
+    def LT_sep_x_fun_unsep(x, par):
+        eps = inp_eps
+        xx = x[0]
+        xs = (
+            par[0]
+            + eps * par[1]
+            + ROOT.TMath.Sqrt(2 * eps * (1 + eps))
+            * par[2]
+            * ROOT.TMath.Cos(xx)
+            + eps
+            * par[3]
+            * ROOT.TMath.Cos(2 * xx)
+        )
+        return xs
+
+    return LT_sep_x_fun_unsep
+
+
+def build_2d_rosenbluth_tf2():
+    if USE_CAUCHY_ROSENBLUTH:
+        formula = (
+            f"("
+            f"[0]"
+            f"+ y*[1]"
+            f"+ sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"
+            f"+ y*cos(2*x*({PI}/180))*[3]*[0]"
+            f")"
+        )
+    else:
+        formula = (
+            f"("
+            f"[0]"
+            f"+ y*[1]"
+            f"+ sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]"
+            f"+ y*cos(2*x*({PI}/180))*[3]"
+            f")"
+        )
+    return TF2("fff2", formula, 0, 360, 0.0, 1.0)
+
+
+def enforce_positive_if_enabled(fcn, graph):
+    if not USE_CAUCHY_ROSENBLUTH:
+        return True
+    return check_sigma_positive(fcn, graph)
+
+
+def extract_physical_components(fit_func, covariance):
+    sig_t = fit_func.GetParameter(0)
+    sig_l = fit_func.GetParameter(1)
+    param_2 = fit_func.GetParameter(2)
+    param_3 = fit_func.GetParameter(3)
+
+    if USE_CAUCHY_ROSENBLUTH:
+        rho_lt = param_2
+        rho_tt = param_3
+        sig_lt = rho_lt * math.sqrt(max(sig_t * sig_l, 0.0))
+        sig_tt = rho_tt * sig_t
+
+        rho_lt_err = math.sqrt(max(covariance[2, 2], 0.0))
+        rho_tt_err = math.sqrt(max(covariance[3, 3], 0.0))
+
+        sqrt_sig_t_sig_l = math.sqrt(max(sig_t * sig_l, 0.0))
+        if sqrt_sig_t_sig_l > 0.0:
+            sig_lt_gradient = np.array([
+                0.5 * rho_lt * sig_l / sqrt_sig_t_sig_l,
+                0.5 * rho_lt * sig_t / sqrt_sig_t_sig_l,
+                sqrt_sig_t_sig_l,
+                0.0,
+            ], dtype=float)
+        else:
+            sig_lt_gradient = np.zeros(4, dtype=float)
+        sig_tt_gradient = np.array([rho_tt, 0.0, 0.0, sig_t], dtype=float)
+    else:
+        sig_lt = param_2
+        sig_tt = param_3
+
+        sig_lt_gradient = np.array([0.0, 0.0, 1.0, 0.0], dtype=float)
+        sig_tt_gradient = np.array([0.0, 0.0, 0.0, 1.0], dtype=float)
+
+        sqrt_sig_t_sig_l = math.sqrt(max(sig_t * sig_l, 0.0))
+        if sqrt_sig_t_sig_l > 0.0:
+            rho_lt = sig_lt / sqrt_sig_t_sig_l
+            rho_lt_gradient = np.array([
+                -0.5 * sig_lt * sig_l / (sqrt_sig_t_sig_l ** 3),
+                -0.5 * sig_lt * sig_t / (sqrt_sig_t_sig_l ** 3),
+                1.0 / sqrt_sig_t_sig_l,
+                0.0,
+            ], dtype=float)
+            rho_lt_err = math.sqrt(propagated_variance(covariance, rho_lt_gradient))
+        else:
+            rho_lt = float("nan")
+            rho_lt_err = float("nan")
+
+        if sig_t > 0.0:
+            rho_tt = sig_tt / sig_t
+            rho_tt_gradient = np.array([
+                -sig_tt / (sig_t ** 2),
+                0.0,
+                0.0,
+                1.0 / sig_t,
+            ], dtype=float)
+            rho_tt_err = math.sqrt(propagated_variance(covariance, rho_tt_gradient))
+        else:
+            rho_tt = float("nan")
+            rho_tt_err = float("nan")
+
+    sig_lt_err = math.sqrt(propagated_variance(covariance, sig_lt_gradient))
+    sig_tt_err = math.sqrt(propagated_variance(covariance, sig_tt_gradient))
+
+    return {
+        "sig_t": sig_t,
+        "sig_l": sig_l,
+        "sig_lt": sig_lt,
+        "sig_tt": sig_tt,
+        "rho_lt": rho_lt,
+        "rho_tt": rho_tt,
+        "sig_lt_err": sig_lt_err,
+        "sig_tt_err": sig_tt_err,
+        "rho_lt_err": rho_lt_err,
+        "rho_tt_err": rho_tt_err,
+    }
 
 def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
@@ -466,29 +652,17 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         g_plot_err.SetLineWidth(2)
 
         # ------------------------------------------------------------------
-        # Re-parameterised version enforcing |ρ| ≤ 1 
+        # 2D Rosenbluth fit
+        #   cauchy mode      : fit σT, σL, ρLT, ρTT with hard physical bounds
+        #   traditional mode : fit σT, σL, σLT, σTT directly
         # ------------------------------------------------------------------
-        # Re-parameterised LT/TT enforcing |ρ|≤1:
-        fff2 = TF2(
-            "fff2",
-            (
-                f"("
-                f"[0]"                                             # σ_T
-                f"+ y*[1]"                                        # ε·σ_L
-                f"+ sqrt(2*y*(1.+y))*cos(x*({PI}/180))*[2]*sqrt([0]*[1])"  # ρ_LT·√(σₜσₗ)
-                f"+ y*cos(2*x*({PI}/180))*[3]*[0]"               # ρ_TT·σₜ
-                f")"
-            ),
-            0, 360,
-            0.0, 1.0
-            #LOEPS-0.1, HIEPS+0.1
-        )         
+        fff2 = build_2d_rosenbluth_tf2()
 
         for k in range(4):
             fff2.ReleaseParameter(k)
 
         # ---------------------------------------------------------------
-        par_keys  = ["sigT", "sigL", "rhoLT", "rhoTT"]
+        par_keys  = list(FIT_PARAM_KEYS)
         current_i = 0
 
         for idx, key in enumerate(par_keys):
@@ -502,6 +676,8 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
             # --- give MINUIT a sensible first step ---------------------
             if key.startswith("rho"):
                 fff2.SetParError(idx, 0.02)            # ±0.02 for ρ’s
+            elif key in ("sigLT", "sigTT"):
+                fff2.SetParError(idx, 1.0)
             else:
                 step = 0.05 * (hi - lo) if hi > lo else 0.1
                 fff2.SetParError(idx, step)            # 5 % of range for σT, σL
@@ -516,15 +692,15 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParameters(
             SEED_SIGT,      # σ_T
             SEED_SIGL,      # σ_L
-            0.0,         # ρ_LT
-            0.0          # ρ_TT
+            0.0,            # ρ_LT or σ_LT
+            0.0             # ρ_TT or σ_TT
         )
         
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
-        fff2.SetParError(2, 1e-3)                        # ρ_LT step
-        fff2.SetParError(3, 1e-3)                        # ρ_TT step         
+        fff2.SetParError(2, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
+        fff2.SetParError(3, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
 
         sigL_change = TGraphErrors()
         sigT_change = TGraphErrors()
@@ -547,7 +723,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         fff2.SetParError(2, 1e-3)                        # ρ_LT step
         fff2.SetParError(3, 1e-3)                        # ρ_TT step          
         g_plot_err.Fit(fff2, FIT_OPTIONS)
-        check_sigma_positive(fff2, g_plot_err)
+        enforce_positive_if_enabled(fff2, g_plot_err)
 
         sigL_change.SetTitle("t = {:.3f}".format(t_list[i]))
         sigL_change.GetXaxis().SetTitle("Fit Step")
@@ -574,10 +750,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
-        fff2.SetParError(2, 1e-3)                        # ρ_LT step
-        fff2.SetParError(3, 1e-3)                        # ρ_TT step                   
+        fff2.SetParError(2, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
+        fff2.SetParError(3, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
         g_plot_err.Fit(fff2, FIT_OPTIONS)
-        check_sigma_positive(fff2, g_plot_err)
+        enforce_positive_if_enabled(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -586,21 +762,21 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         fit_step += 1    
 
-        # --- Fit 3: ρ_LT , ρ_TT --------------------------
+        # --- Fit 3: interference terms -------------------
         fff2.FixParameter(0, fff2.GetParameter(0))  # σT now fixed
         fff2.FixParameter(1, fff2.GetParameter(1))  # σL now fixed
-        fff2.ReleaseParameter(2)    # ρ_LT now floats
-        fff2.ReleaseParameter(3)    # ρ_TT now floats
+        fff2.ReleaseParameter(2)    # ρ_LT or σ_LT now floats
+        fff2.ReleaseParameter(3)    # ρ_TT or σ_TT now floats
         # — Apply limits for all parameters in stage 2 —
         for idx, name in enumerate(["sigT","sigL","rhoLT","rhoTT"]):
             reset_limits_from_table(fff2, idx, name, stage=2)
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
-        fff2.SetParError(2, 1e-3)                        # ρ_LT step
-        fff2.SetParError(3, 1e-3)                        # ρ_TT step                   
+        fff2.SetParError(2, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
+        fff2.SetParError(3, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
         g_plot_err.Fit(fff2, FIT_OPTIONS)
-        check_sigma_positive(fff2, g_plot_err)
+        enforce_positive_if_enabled(fff2, g_plot_err)
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
         sigL_change.SetPointError(sigL_change.GetN()-1, 0, fff2.GetParError(1))
@@ -618,10 +794,10 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         # — Give Minuit a finite “kick size” on each parameter —
         fff2.SetParError(0, max(1.0, 0.1 * SEED_SIGT))     # σ_T step ≃10% of its seed (but at least 1)
         fff2.SetParError(1, max(1e-3, 0.1 * abs(SEED_SIGL)))# σ_L step       
-        fff2.SetParError(2, 1e-3)                        # ρ_LT step
-        fff2.SetParError(3, 1e-3)                        # ρ_TT step                 
+        fff2.SetParError(2, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
+        fff2.SetParError(3, 1e-3 if USE_CAUCHY_ROSENBLUTH else 1.0)
         g_plot_err.Fit(fff2, FIT_OPTIONS)
-        check_sigma_positive(fff2, g_plot_err)
+        enforce_positive_if_enabled(fff2, g_plot_err)
         fit_res = unwrap_fit_result(g_plot_err.Fit(fff2, FIT_OPTIONS))
 
         sigL_change.SetPoint(sigL_change.GetN(), sigL_change.GetN()+1, fff2.GetParameter(1))
@@ -763,39 +939,25 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
 
         # ---------------------------------------------------------------
         # Central values -------------------------------------------------
-        sig_t   = fff2.GetParameter(0)
-        sig_l   = fff2.GetParameter(1)
-        rho_lt  = fff2.GetParameter(2)
-        rho_tt  = fff2.GetParameter(3)
         covariance, covariance_ok = get_fit_covariance(fff2, fit_res)
 
         if not covariance_ok:
             print("WARNING: accurate fit covariance unavailable; falling back to diagonal parameter errors.")
 
-        sig_lt  = rho_lt * math.sqrt(sig_t * sig_l)
-        sig_tt  = rho_tt * sig_t
+        components = extract_physical_components(fff2, covariance)
+        sig_t   = components["sig_t"]
+        sig_l   = components["sig_l"]
+        sig_lt  = components["sig_lt"]
+        sig_tt  = components["sig_tt"]
+        rho_lt  = components["rho_lt"]
+        rho_tt  = components["rho_tt"]
 
-        # One-sigma errors ----------------------------------------------
         sig_t_err   = math.sqrt(max(covariance[0, 0], 0.0))
         sig_l_err   = math.sqrt(max(covariance[1, 1], 0.0))
-        rho_lt_err  = math.sqrt(max(covariance[2, 2], 0.0))
-        rho_tt_err  = math.sqrt(max(covariance[3, 3], 0.0))
-
-        sqrt_sig_t_sig_l = math.sqrt(max(sig_t * sig_l, 0.0))
-        if sqrt_sig_t_sig_l > 0.0:
-            sig_lt_gradient = np.array([
-                0.5 * rho_lt * sig_l / sqrt_sig_t_sig_l,
-                0.5 * rho_lt * sig_t / sqrt_sig_t_sig_l,
-                sqrt_sig_t_sig_l,
-                0.0,
-            ], dtype=float)
-        else:
-            sig_lt_gradient = np.zeros(4, dtype=float)
-
-        sig_tt_gradient = np.array([rho_tt, 0.0, 0.0, sig_t], dtype=float)
-
-        sig_lt_err = math.sqrt(propagated_variance(covariance, sig_lt_gradient))
-        sig_tt_err = math.sqrt(propagated_variance(covariance, sig_tt_gradient))
+        rho_lt_err  = components["rho_lt_err"]
+        rho_tt_err  = components["rho_tt_err"]
+        sig_lt_err = components["sig_lt_err"]
+        sig_tt_err = components["sig_tt_err"]
 
         lo_cross_sec[i] = sig_t + (lo_eps * sig_l)
         hi_cross_sec[i] = sig_t + (hi_eps * sig_l)
@@ -805,6 +967,7 @@ def single_setting(q2_set, w_set, fn_lo, fn_hi):
         print(f"\n=== Bin {i+1} Summary ===")
         print(f"  t = {t_list[i]:.3f} GeV²   θ = {theta_list[i]:.1f}°   W = {w_list[i]:.3f} GeV   Q² = {q2_list[i]:.3f} GeV²")
         print(f"  ε_lo = {lo_eps_list[i]:.3f}   ε_hi = {hi_eps_list[i]:.3f}\n")
+        print(f"  Rosenbluth mode = {ROSENBLUTH_FIT_MODE}")
         print(f"  ρ_LT = {rho_lt:.3f} ± {rho_lt_err:.3f}")
         print(f"  ρ_TT = {rho_tt:.3f} ± {rho_tt_err:.3f}")
         print(f"  Reduced χ² = {red_chi2:.2f} (NDF = {ndf})")        
