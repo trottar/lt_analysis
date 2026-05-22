@@ -111,6 +111,125 @@ with tempfile.TemporaryDirectory() as tmpdir:
 print("analysis hardening profile-aware writer smoke OK")
 PY
 
+python - "$@" <<'PY'
+import os
+import sys
+
+utility_path = os.path.join(os.getcwd(), "src", "utility")
+if utility_path not in sys.path:
+    sys.path.append(utility_path)
+
+import frozen_manifest
+
+
+def _is_manifest_filename(name):
+    return name.endswith(".json") and "_frozen_manifest" in name
+
+
+def _discover_default_manifest_paths(repo_root):
+    analysis_root = os.path.join(repo_root, "OUTPUT", "Analysis")
+    manifests = []
+    if not os.path.isdir(analysis_root):
+        return manifests
+    for analysis_name in sorted(os.listdir(analysis_root)):
+        analysis_dir = os.path.join(analysis_root, analysis_name)
+        if not os.path.isdir(analysis_dir):
+            continue
+        for entry in sorted(os.listdir(analysis_dir)):
+            if _is_manifest_filename(entry):
+                manifests.append(os.path.join(analysis_dir, entry))
+    return manifests
+
+
+def _discover_manifest_paths(raw_paths):
+    manifests = []
+    for raw_path in raw_paths:
+        abs_path = os.path.abspath(raw_path)
+        if os.path.isfile(abs_path):
+            if not _is_manifest_filename(os.path.basename(abs_path)):
+                raise FileNotFoundError(
+                    "Path is not a frozen manifest JSON: {}".format(abs_path)
+                )
+            manifests.append(abs_path)
+            continue
+        if not os.path.isdir(abs_path):
+            raise FileNotFoundError("Manifest/cache path does not exist: {}".format(abs_path))
+
+        discovered = []
+        for candidate_root in (abs_path, os.path.join(abs_path, "json")):
+            if not os.path.isdir(candidate_root):
+                continue
+            for entry in sorted(os.listdir(candidate_root)):
+                if _is_manifest_filename(entry):
+                    discovered.append(os.path.join(candidate_root, entry))
+        if not discovered:
+            for walk_root, _, files in os.walk(abs_path):
+                for entry in sorted(files):
+                    if _is_manifest_filename(entry):
+                        discovered.append(os.path.join(walk_root, entry))
+        if not discovered:
+            raise FileNotFoundError(
+                "No frozen manifest JSON files found under {}".format(abs_path)
+            )
+        manifests.extend(discovered)
+
+    unique_manifests = []
+    seen = set()
+    for manifest_path in manifests:
+        normalized = os.path.abspath(manifest_path)
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        unique_manifests.append(normalized)
+    return unique_manifests
+
+
+repo_root = os.getcwd()
+requested_paths = sys.argv[1:]
+if requested_paths:
+    manifest_paths = _discover_manifest_paths(requested_paths)
+else:
+    manifest_paths = _discover_default_manifest_paths(repo_root)
+
+if not manifest_paths:
+    print(
+        "analysis hardening cache-manifest preflight skipped "
+        "(no staged top-level manifests found; pass a cache dir or manifest path to check a frozen run explicitly)"
+    )
+    raise SystemExit(0)
+
+strict_hash_paths, warn_only_hash_paths = frozen_manifest.get_iteration_manifest_hash_policy()
+validated = 0
+warning_count = 0
+for manifest_path in manifest_paths:
+    manifest = frozen_manifest.load_frozen_manifest(manifest_path)
+    result = frozen_manifest.validate_manifest_hashes_against_repo(
+        manifest,
+        repo_root,
+        strict_hash_paths=strict_hash_paths,
+        warn_only_hash_paths=warn_only_hash_paths,
+        allow_config_drift=frozen_manifest.ALLOW_CONFIG_DRIFT,
+        emit_warnings=False,
+    )
+    warnings = result.get("warnings", [])
+    warning_count += len(warnings)
+    validated += 1
+    if warnings:
+        print(
+            "analysis hardening cache-manifest preflight WARN: {} ({} warning-only drift item(s))".format(
+                manifest_path,
+                len(warnings),
+            )
+        )
+
+print(
+    "analysis hardening cache-manifest preflight OK ({} manifest(s), {} warning-only drift item(s))".format(
+        validated,
+        warning_count,
+    )
+)
+PY
+
 python - <<'PY'
 import contextlib
 import io

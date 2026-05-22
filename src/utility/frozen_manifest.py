@@ -400,6 +400,50 @@ def load_frozen_manifest(manifest_path):
         return json.load(handle)
 
 
+def validate_manifest_hashes_against_repo(
+    manifest,
+    repo_root,
+    strict_hash_paths=None,
+    warn_only_hash_paths=None,
+    allow_config_drift=None,
+    emit_warnings=True,
+):
+    manifest_hashes = manifest.get("key_file_hashes", {})
+    current_hashes = build_key_file_hashes(repo_root)
+    warnings = []
+    if strict_hash_paths is not None:
+        strict_hash_paths = set(strict_hash_paths)
+    if warn_only_hash_paths is not None:
+        warn_only_hash_paths = set(warn_only_hash_paths)
+    if allow_config_drift is None:
+        allow_config_drift = ALLOW_CONFIG_DRIFT
+
+    for rel_path, manifest_entry in manifest_hashes.items():
+        manifest_hash = None if not isinstance(manifest_entry, dict) else manifest_entry.get("sha256")
+        current_hash = current_hashes.get(rel_path, {}).get("sha256")
+        if not manifest_hash:
+            continue
+        if manifest_hash == current_hash:
+            continue
+        warning = (
+            "Config/code hash drift detected for {} "
+            "(expected {}, got {})".format(rel_path, manifest_hash, current_hash or "missing")
+        )
+        should_fail = not allow_config_drift
+        if strict_hash_paths is not None:
+            should_fail = rel_path in strict_hash_paths and rel_path not in (warn_only_hash_paths or set())
+        if should_fail:
+            raise ValueError(warning)
+        if emit_warnings:
+            print("WARNING: {}".format(warning))
+        warnings.append(warning)
+
+    return {
+        "manifest_hashes": current_hashes,
+        "warnings": warnings,
+    }
+
+
 def validate_iteration_inputs_against_manifest(
     manifest,
     current_inp_dict,
@@ -448,33 +492,18 @@ def validate_iteration_inputs_against_manifest(
     if int(current_inp_dict.get("NumPhiBins", len(phi_bins) - 1)) != len(phi_bins) - 1:
         raise ValueError("Requested NumPhiBins does not match frozen manifest bin count")
 
-    manifest_hashes = manifest.get("key_file_hashes", {})
-    current_hashes = build_key_file_hashes(repo_root)
     current_inp_dict["manifest_validation_warnings"] = []
-    if strict_hash_paths is not None:
-        strict_hash_paths = set(strict_hash_paths)
-    if warn_only_hash_paths is not None:
-        warn_only_hash_paths = set(warn_only_hash_paths)
-    for rel_path, manifest_entry in manifest_hashes.items():
-        manifest_hash = None if not isinstance(manifest_entry, dict) else manifest_entry.get("sha256")
-        current_hash = current_hashes.get(rel_path, {}).get("sha256")
-        if not manifest_hash:
-            continue
-        if manifest_hash == current_hash:
-            continue
-        warning = (
-            "Config/code hash drift detected for {} "
-            "(expected {}, got {})".format(rel_path, manifest_hash, current_hash or "missing")
-        )
-        should_fail = not ALLOW_CONFIG_DRIFT
-        if strict_hash_paths is not None:
-            should_fail = rel_path in strict_hash_paths and rel_path not in (warn_only_hash_paths or set())
-        if should_fail:
-            raise ValueError(warning)
-        print("WARNING: {}".format(warning))
-        current_inp_dict["manifest_validation_warnings"].append(warning)
+    hash_validation = validate_manifest_hashes_against_repo(
+        manifest,
+        repo_root,
+        strict_hash_paths=strict_hash_paths,
+        warn_only_hash_paths=warn_only_hash_paths,
+        allow_config_drift=ALLOW_CONFIG_DRIFT,
+        emit_warnings=True,
+    )
+    current_inp_dict["manifest_validation_warnings"] = list(hash_validation.get("warnings", []))
 
     return {
-        "manifest_hashes": current_hashes,
+        "manifest_hashes": hash_validation.get("manifest_hashes", {}),
         "warnings": list(current_inp_dict.get("manifest_validation_warnings", [])),
     }
