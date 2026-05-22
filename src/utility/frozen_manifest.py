@@ -400,6 +400,65 @@ def load_frozen_manifest(manifest_path):
         return json.load(handle)
 
 
+def _build_hash_drift_message(
+    rel_path,
+    manifest_hash,
+    current_hash,
+    manifest=None,
+    manifest_path=None,
+    allow_config_drift=None,
+):
+    manifest = manifest or {}
+    if allow_config_drift is None:
+        allow_config_drift = ALLOW_CONFIG_DRIFT
+
+    lines = [
+        "Frozen-manifest validation failed: config/code hash drift detected.",
+        "File: {}".format(rel_path),
+        "Expected SHA256: {}".format(manifest_hash),
+        "Current  SHA256: {}".format(current_hash or "missing"),
+    ]
+    if manifest_path:
+        lines.append("Frozen manifest: {}".format(manifest_path))
+    if manifest.get("particle_type") or manifest.get("q2") or manifest.get("w"):
+        lines.append(
+            "Frozen run: {} Q{}W{}".format(
+                manifest.get("particle_type", "unknown"),
+                manifest.get("q2", "unknown"),
+                manifest.get("w", "unknown"),
+            )
+        )
+    if manifest.get("active_profile"):
+        lines.append("Frozen profile: {}".format(manifest.get("active_profile")))
+    if manifest.get("created_at"):
+        lines.append("Frozen at: {}".format(manifest.get("created_at")))
+    lines.append("ALLOW_CONFIG_DRIFT = {}".format(bool(allow_config_drift)))
+
+    if rel_path == "src/utility/background_config.py":
+        lines.extend(
+            [
+                "",
+                "This cached iteration chain was frozen with a different background_config.py.",
+                "Later iterations stop here so they do not mix a new analysis config with old frozen data-side products.",
+                "",
+                "Next steps:",
+                "1. Restore src/utility/background_config.py to the version used by this frozen run.",
+                "2. Or rerun the 0th iteration to create a new frozen manifest/cache chain.",
+                "3. Or, for exploratory work only, set ALLOW_CONFIG_DRIFT = True.",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "This file differs from the version recorded in the frozen manifest.",
+                "If you intended to continue the old frozen chain, restore the matching file or rerun the 0th iteration.",
+            ]
+        )
+
+    return "\n".join(lines)
+
+
 def validate_manifest_hashes_against_repo(
     manifest,
     repo_root,
@@ -407,6 +466,7 @@ def validate_manifest_hashes_against_repo(
     warn_only_hash_paths=None,
     allow_config_drift=None,
     emit_warnings=True,
+    manifest_path=None,
 ):
     manifest_hashes = manifest.get("key_file_hashes", {})
     current_hashes = build_key_file_hashes(repo_root)
@@ -429,11 +489,19 @@ def validate_manifest_hashes_against_repo(
             "Config/code hash drift detected for {} "
             "(expected {}, got {})".format(rel_path, manifest_hash, current_hash or "missing")
         )
+        detailed_message = _build_hash_drift_message(
+            rel_path,
+            manifest_hash,
+            current_hash,
+            manifest=manifest,
+            manifest_path=manifest_path,
+            allow_config_drift=allow_config_drift,
+        )
         should_fail = not allow_config_drift
         if strict_hash_paths is not None:
             should_fail = rel_path in strict_hash_paths and rel_path not in (warn_only_hash_paths or set())
         if should_fail:
-            raise ValueError(warning)
+            raise ValueError(detailed_message)
         if emit_warnings:
             print("WARNING: {}".format(warning))
         warnings.append(warning)
@@ -450,6 +518,7 @@ def validate_iteration_inputs_against_manifest(
     t_bins,
     phi_bins,
     repo_root,
+    manifest_path=None,
     required_paths=None,
     strict_hash_paths=None,
     warn_only_hash_paths=None,
@@ -500,6 +569,7 @@ def validate_iteration_inputs_against_manifest(
         warn_only_hash_paths=warn_only_hash_paths,
         allow_config_drift=ALLOW_CONFIG_DRIFT,
         emit_warnings=True,
+        manifest_path=manifest_path,
     )
     current_inp_dict["manifest_validation_warnings"] = list(hash_validation.get("warnings", []))
 

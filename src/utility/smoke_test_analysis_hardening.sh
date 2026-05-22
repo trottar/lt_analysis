@@ -203,14 +203,22 @@ validated = 0
 warning_count = 0
 for manifest_path in manifest_paths:
     manifest = frozen_manifest.load_frozen_manifest(manifest_path)
-    result = frozen_manifest.validate_manifest_hashes_against_repo(
-        manifest,
-        repo_root,
-        strict_hash_paths=strict_hash_paths,
-        warn_only_hash_paths=warn_only_hash_paths,
-        allow_config_drift=frozen_manifest.ALLOW_CONFIG_DRIFT,
-        emit_warnings=False,
-    )
+    try:
+        result = frozen_manifest.validate_manifest_hashes_against_repo(
+            manifest,
+            repo_root,
+            strict_hash_paths=strict_hash_paths,
+            warn_only_hash_paths=warn_only_hash_paths,
+            allow_config_drift=frozen_manifest.ALLOW_CONFIG_DRIFT,
+            emit_warnings=False,
+            manifest_path=manifest_path,
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        print("analysis hardening cache-manifest preflight FAILED")
+        print("Manifest: {}".format(manifest_path))
+        print("")
+        print(exc)
+        raise SystemExit(2)
     warnings = result.get("warnings", [])
     warning_count += len(warnings)
     validated += 1

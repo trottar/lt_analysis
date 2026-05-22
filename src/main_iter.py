@@ -404,22 +404,34 @@ inpDict["NumtBins"] = frozen_num_t_bins
 inpDict["NumPhiBins"] = frozen_num_phi_bins
 
 strict_hash_paths, warn_only_hash_paths = get_iteration_manifest_hash_policy("src/main_iter.py")
-validate_iteration_inputs_against_manifest(
-    manifest_payload_prev,
-    inpDict,
-    t_bins,
-    phi_bins,
-    LTANAPATH,
-    required_paths=[
-        manifest_path_prev,
-        prev_iter_root,
-        prev_iter_json,
-        *correction_ledger_paths_prev,
-        *support_npz_paths_prev,
-    ],
-    strict_hash_paths=strict_hash_paths,
-    warn_only_hash_paths=warn_only_hash_paths,
-)
+try:
+    validate_iteration_inputs_against_manifest(
+        manifest_payload_prev,
+        inpDict,
+        t_bins,
+        phi_bins,
+        LTANAPATH,
+        manifest_path=manifest_path_prev,
+        required_paths=[
+            manifest_path_prev,
+            prev_iter_root,
+            prev_iter_json,
+            *correction_ledger_paths_prev,
+            *support_npz_paths_prev,
+        ],
+        strict_hash_paths=strict_hash_paths,
+        warn_only_hash_paths=warn_only_hash_paths,
+    )
+except (FileNotFoundError, ValueError) as exc:
+    print("\n" + "=" * 72)
+    print("FROZEN MANIFEST VALIDATION FAILED")
+    print("=" * 72)
+    print("Manifest: {}".format(manifest_path_prev))
+    print("Cached iteration directory: {}".format(prev_iter_dir))
+    print("")
+    print(exc)
+    print("=" * 72)
+    sys.exit(2)
 if manifest_path_prev not in output_file_lst:
     output_file_lst.append(os.path.join(OUTPATH, os.path.basename(manifest_path_prev)))
 record_stage_time("Iteration frozen-contract validation", validation_start)
