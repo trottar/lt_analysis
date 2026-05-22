@@ -45,6 +45,7 @@ from frozen_manifest import (
     get_correction_ledger_paths,
     get_iteration_manifest_hash_policy,
     load_frozen_manifest,
+    read_interval_file,
     validate_iteration_inputs_against_manifest,
 )
 from write_final_analysis_summary import (
@@ -355,6 +356,74 @@ shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/fu
 output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
 record_stage_time("Iteration previous-output setup", stage_start)
 
+validation_start = perf_counter()
+t_bin_interval_relpath = "{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+phi_bin_interval_relpath = "{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p",""))
+if t_bin_interval_relpath not in output_file_lst:
+    output_file_lst.append(t_bin_interval_relpath)
+if phi_bin_interval_relpath not in output_file_lst:
+    output_file_lst.append(phi_bin_interval_relpath)
+
+t_bin_interval_path = "{}/src/{}".format(LTANAPATH, t_bin_interval_relpath)
+phi_bin_interval_path = "{}/src/{}".format(LTANAPATH, phi_bin_interval_relpath)
+try:
+    t_bins = read_interval_file(t_bin_interval_path)
+except FileNotFoundError:
+    print("{} not found...".format(t_bin_interval_path))
+    sys.exit(2)
+except Exception as exc:
+    print("Error reading {}... {}".format(t_bin_interval_path, exc))
+    sys.exit(2)
+
+try:
+    phi_bins = read_interval_file(phi_bin_interval_path)
+except FileNotFoundError:
+    print("{} not found...".format(phi_bin_interval_path))
+    sys.exit(2)
+except Exception as exc:
+    print("Error reading {}... {}".format(phi_bin_interval_path, exc))
+    sys.exit(2)
+
+for hist in histlist:
+    hist["t_bins"] = t_bins
+    hist["phi_bins"] = phi_bins
+
+frozen_num_t_bins = len(t_bins) - 1
+frozen_num_phi_bins = len(phi_bins) - 1
+if inpDict.get("NumtBins") != frozen_num_t_bins or inpDict.get("NumPhiBins") != frozen_num_phi_bins:
+    print(
+        "[ITER] Using frozen manifest bin counts: NumtBins={} NumPhiBins={} "
+        "(requested {} / {})".format(
+            frozen_num_t_bins,
+            frozen_num_phi_bins,
+            inpDict.get("NumtBins"),
+            inpDict.get("NumPhiBins"),
+        )
+    )
+inpDict["NumtBins"] = frozen_num_t_bins
+inpDict["NumPhiBins"] = frozen_num_phi_bins
+
+strict_hash_paths, warn_only_hash_paths = get_iteration_manifest_hash_policy("src/main_iter.py")
+validate_iteration_inputs_against_manifest(
+    manifest_payload_prev,
+    inpDict,
+    t_bins,
+    phi_bins,
+    LTANAPATH,
+    required_paths=[
+        manifest_path_prev,
+        prev_iter_root,
+        prev_iter_json,
+        *correction_ledger_paths_prev,
+        *support_npz_paths_prev,
+    ],
+    strict_hash_paths=strict_hash_paths,
+    warn_only_hash_paths=warn_only_hash_paths,
+)
+if manifest_path_prev not in output_file_lst:
+    output_file_lst.append(os.path.join(OUTPATH, os.path.basename(manifest_path_prev)))
+record_stage_time("Iteration frozen-contract validation", validation_start)
+
 if EPSSET == "low":
     stage_start = perf_counter()
 #if EPSSET == "low":
@@ -404,77 +473,6 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
 stage_start = perf_counter()
-try:
-    output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
-    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
-        # Read all lines from the file into a list
-        all_lines = file.readlines()
-        # Check if the file has at least two lines
-        if len(all_lines) >= 2:
-            # Extract the second line and remove leading/trailing whitespace
-            t_bins = all_lines[1].split("\t")
-            del t_bins[0]
-            t_bins = np.array([float(element) for element in t_bins])
-except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
-except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
-
-try:
-    output_file_lst.append("{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
-    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
-        # Read all lines from the file into a list
-        all_lines = file.readlines()
-        # Check if the file has at least two lines
-        if len(all_lines) >= 2:
-            # Extract the second line and remove leading/trailing whitespace
-            phi_bins = all_lines[1].split("\t")
-            del phi_bins[0]
-            phi_bins = np.array([float(element) for element in phi_bins])
-except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
-except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
-
-for hist in histlist:
-    hist["t_bins"] = t_bins
-    hist["phi_bins"] = phi_bins
-
-frozen_num_t_bins = len(t_bins) - 1
-frozen_num_phi_bins = len(phi_bins) - 1
-if inpDict.get("NumtBins") != frozen_num_t_bins or inpDict.get("NumPhiBins") != frozen_num_phi_bins:
-    print(
-        "[ITER] Using frozen manifest bin counts: NumtBins={} NumPhiBins={} "
-        "(requested {} / {})".format(
-            frozen_num_t_bins,
-            frozen_num_phi_bins,
-            inpDict.get("NumtBins"),
-            inpDict.get("NumPhiBins"),
-        )
-    )
-inpDict["NumtBins"] = frozen_num_t_bins
-inpDict["NumPhiBins"] = frozen_num_phi_bins
-
-strict_hash_paths, warn_only_hash_paths = get_iteration_manifest_hash_policy("src/main_iter.py")
-validate_iteration_inputs_against_manifest(
-    manifest_payload_prev,
-    inpDict,
-    t_bins,
-    phi_bins,
-    LTANAPATH,
-    required_paths=[
-        manifest_path_prev,
-        prev_iter_root,
-        prev_iter_json,
-        *correction_ledger_paths_prev,
-        *support_npz_paths_prev,
-    ],
-    strict_hash_paths=strict_hash_paths,
-    warn_only_hash_paths=warn_only_hash_paths,
-)
-if manifest_path_prev not in output_file_lst:
-    output_file_lst.append(os.path.join(OUTPATH, os.path.basename(manifest_path_prev)))
-
 check_bins(histlist, inpDict)
 record_stage_time("Step 4 bin finding/check total", stage_start)
 

@@ -419,6 +419,23 @@ print("analysis hardening workflow-plot smoke OK")
 PY
 
 python - <<'PY'
+from pathlib import Path
+
+for rel_path in ("src/main_iter.py", "src/main_auto.py"):
+    text = Path(rel_path).read_text()
+    validate_index = text.find("validate_iteration_inputs_against_manifest(")
+    xfit_index = text.find("x_fit_in_t(")
+    if validate_index < 0 or xfit_index < 0:
+        raise AssertionError("Could not find validation/x_fit markers in {}".format(rel_path))
+    if validate_index > xfit_index:
+        raise AssertionError(
+            "Frozen-manifest validation occurs after x_fit_in_t in {}; fail-fast ordering regressed".format(rel_path)
+        )
+
+print("analysis hardening iteration-preflight ordering OK")
+PY
+
+python - <<'PY'
 import os
 import sys
 import tempfile
