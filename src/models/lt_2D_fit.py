@@ -77,8 +77,8 @@ else:
     mtar = 0.9395654133 # GeV/c^2, mass of the target (neutron)
 w_set = float(W.replace("p",".")) # W value
 
-DEFAULT_ROSENBLUTH_FIT_MODE = "cauchy"
-#DEFAULT_ROSENBLUTH_FIT_MODE = "traditional"
+#DEFAULT_ROSENBLUTH_FIT_MODE = "cauchy"
+DEFAULT_ROSENBLUTH_FIT_MODE = "traditional"
 ROSENBLUTH_MODE_ALIASES = {
     "cauchy": "cauchy",
     "hard": "cauchy",
