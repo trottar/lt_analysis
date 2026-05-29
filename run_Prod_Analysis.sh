@@ -748,7 +748,7 @@ elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     #NumtBins=3
     #NumPhiBins=9	
 	NumtBins=4
-    NumPhiBins=9
+    NumPhiBins=8
     TMIN=0.150
     TMAX=0.400
     #TMIN=0.100
