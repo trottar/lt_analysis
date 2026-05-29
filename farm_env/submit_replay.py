@@ -59,6 +59,8 @@ DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
 DEFAULT_RAW_CACHE_GLOB_TEMPLATE = "/cache/hallc/spring17/raw/coin_all_{run5}.dat"
 DEFAULT_RAW_MSS_TEMPLATE = "/mss/hallc/spring17/raw/coin_all_{run5}.dat"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
+DEFAULT_ZOMBIE_RERUN_PASS = "Pass4b_Apr_2026"
+DEFAULT_ZOMBIE_RERUN_SUBDIR = "rerun_zombies"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -98,10 +100,74 @@ class RunPlan:
     cache_file: Optional[Path]
     cache_ready: bool
     cache_reason: str
+    output_cache_ready: bool = True
+    output_cache_reason: str = "not_checked"
+    output_cache_file: Optional[Path] = None
+    output_cache_request_path: Optional[Path] = None
+    output_cache_request_command: Tuple[str, ...] = ()
+    replay_output_health: str = "not_checked"
+    replay_output_health_detail: str = ""
+    zombie_reroute: bool = False
+    original_replay_destination: Optional[Path] = None
+    original_report_destination: Optional[Path] = None
     replay_output_exists: bool = False
     report_output_exists: bool = False
     tarball_output_exists: bool = False
     cache_request_command: Tuple[str, ...] = ()
+
+
+def validate_root_file(path: Path) -> Tuple[str, str]:
+    if not path.exists():
+        return ("missing_cache_file", "file does not exist in cache")
+    try:
+        size_bytes = path.stat().st_size
+    except OSError as exc:
+        return ("cache_stat_error", str(exc))
+    if size_bytes <= 0:
+        return ("zero_size_file", "file exists but has zero size")
+
+    root_exc: Optional[Exception] = None
+    try:
+        import ROOT  # type: ignore
+
+        ROOT.gROOT.SetBatch(True)
+        previous_error_level = int(getattr(ROOT, "gErrorIgnoreLevel", 0))
+        try:
+            ROOT.gErrorIgnoreLevel = ROOT.kError
+            root_file = ROOT.TFile.Open(str(path), "READ")
+        finally:
+            ROOT.gErrorIgnoreLevel = previous_error_level
+        if not root_file:
+            return ("unreadable_root", "ROOT.TFile.Open returned null")
+        try:
+            if not root_file.IsOpen():
+                return ("unreadable_root", "ROOT opened a handle but file is not open")
+            if root_file.IsZombie():
+                return ("zombie_root_file", "ROOT marked file as zombie")
+            if root_file.TestBit(ROOT.TFile.kRecovered):
+                return ("recovered_root_file", "ROOT marked file as recovered")
+            keys = root_file.GetListOfKeys()
+            key_count = int(keys.GetSize()) if keys is not None else 0
+            if key_count <= 0:
+                return ("root_file_has_no_keys", f"ROOT opened file but found no keys; size={size_bytes}")
+            return ("healthy_root_file", f"ROOT opened successfully; keys={key_count}; size={size_bytes}")
+        finally:
+            root_file.Close()
+    except Exception as exc:  # pragma: no cover - depends on runtime env
+        root_exc = exc
+
+    try:
+        import uproot  # type: ignore
+
+        with uproot.open(path) as handle:
+            key_count = len(handle.keys())
+        if key_count <= 0:
+            return ("root_file_has_no_keys", f"uproot opened file but found no keys; size={size_bytes}")
+        return ("healthy_root_file", f"uproot opened successfully; keys={key_count}; size={size_bytes}")
+    except Exception as exc:  # pragma: no cover - depends on runtime env
+        if root_exc is not None:
+            return ("unreadable_root", f"ROOT failed: {root_exc}; uproot failed: {exc}")
+        return ("unreadable_root", f"uproot failed: {exc}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -216,6 +282,29 @@ def parse_args() -> argparse.Namespace:
         action="store_false",
         default=True,
         help="Do not request raw-file staging when the cache file is missing.",
+    )
+    parser.add_argument(
+        "--zombie-rerun-pass",
+        default=DEFAULT_ZOMBIE_RERUN_PASS,
+        help=(
+            "Pass directory to use when rerouting zombie replay outputs. "
+            f"Default: {DEFAULT_ZOMBIE_RERUN_PASS}"
+        ),
+    )
+    parser.add_argument(
+        "--zombie-rerun-subdir",
+        default=DEFAULT_ZOMBIE_RERUN_SUBDIR,
+        help=(
+            "Subdirectory inserted under the rerun pass for zombie replay outputs. "
+            f"Default: {DEFAULT_ZOMBIE_RERUN_SUBDIR}"
+        ),
+    )
+    parser.add_argument(
+        "--no-zombie-reroute",
+        dest="zombie_reroute",
+        action="store_false",
+        default=True,
+        help="Disable zombie replay output checking and rerouting.",
     )
     parser.add_argument(
         "--workflow-name",
@@ -349,6 +438,136 @@ def replay_report_tarball_mss_output_file(plan: RunPlan) -> Optional[Path]:
     if plan.report_destination is None or plan.report_tarball_basename is None:
         return None
     return plan.report_destination / plan.report_tarball_basename
+
+
+def original_replay_mss_output_file(plan: RunPlan) -> Optional[Path]:
+    if plan.original_replay_destination is None:
+        return None
+    return plan.original_replay_destination / replay_output_basename(plan.run)
+
+
+def original_replay_report_mss_output_file(plan: RunPlan) -> Optional[Path]:
+    if plan.original_report_destination is None:
+        return None
+    return plan.original_report_destination / replay_report_basename(plan.run)
+
+
+def original_replay_report_tarball_mss_output_file(plan: RunPlan) -> Optional[Path]:
+    if plan.original_report_destination is None or plan.report_tarball_basename is None:
+        return None
+    return plan.original_report_destination / plan.report_tarball_basename
+
+
+def derive_output_cache_request_path_from_mss(mss_path: Path) -> Optional[Path]:
+    mss_text = str(mss_path)
+    if mss_text.startswith("/mss/hallc/kaonlt/"):
+        suffix = mss_text[len("/mss/hallc/kaonlt/") :]
+        return Path("/cache/hallc/kaonlt") / suffix
+    if mss_text.startswith("/mss/"):
+        return Path("/cache") / mss_text[len("/mss/") :]
+    return None
+
+
+def resolve_existing_output_cache_file(cache_request_path: Optional[Path]) -> Optional[Path]:
+    if cache_request_path is None:
+        return None
+    candidates = [cache_request_path]
+    cache_text = str(cache_request_path)
+    if cache_text.startswith("/cache/"):
+        candidates.append(Path("/lustre/expphy") / cache_text.lstrip("/"))
+        candidates.append(Path("/lustre24/expphy") / cache_text.lstrip("/"))
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def build_output_cache_request_command(cache_request_path: Path) -> Tuple[str, ...]:
+    return ("jcache", "get", str(cache_request_path))
+
+
+def derive_zombie_rerun_destination(destination: Path, args: argparse.Namespace) -> Path:
+    parts = destination.parts
+    if len(parts) >= 6 and parts[0] == "/" and parts[1] == "mss" and parts[2] == "hallc" and parts[3] == "kaonlt":
+        tail = parts[5:]
+        return Path("/mss/hallc/kaonlt") / args.zombie_rerun_pass / args.zombie_rerun_subdir / Path(*tail)
+    raise ValueError(f"Cannot derive zombie rerun destination from MSS path: {destination}")
+
+
+def assess_existing_replay_output(
+    run: int,
+    replay_destination: Path,
+    report_destination: Optional[Path],
+    report_tarball_basename: Optional[str],
+    args: argparse.Namespace,
+) -> Dict[str, object]:
+    replay_target = replay_destination / replay_output_basename(run)
+    replay_output_exists = replay_target.exists()
+    report_output_exists = False
+    tarball_output_exists = False
+    if report_destination is not None:
+        report_target = report_destination / replay_report_basename(run)
+        report_output_exists = report_target.exists()
+        if report_tarball_basename is not None:
+            tarball_target = report_destination / report_tarball_basename
+            tarball_output_exists = tarball_target.exists()
+
+    assessment: Dict[str, object] = {
+        "replay_destination": replay_destination,
+        "report_destination": report_destination,
+        "replay_output_exists": replay_output_exists,
+        "report_output_exists": report_output_exists,
+        "tarball_output_exists": tarball_output_exists,
+        "output_cache_ready": True,
+        "output_cache_reason": "not_needed",
+        "output_cache_file": None,
+        "output_cache_request_path": None,
+        "output_cache_request_command": (),
+        "replay_output_health": "not_checked",
+        "replay_output_health_detail": "",
+        "zombie_reroute": False,
+        "original_replay_destination": None,
+        "original_report_destination": None,
+    }
+
+    if not replay_output_exists or not args.zombie_reroute:
+        return assessment
+
+    cache_request_path = derive_output_cache_request_path_from_mss(replay_target)
+    cache_file = resolve_existing_output_cache_file(cache_request_path)
+    assessment["output_cache_request_path"] = cache_request_path
+    assessment["output_cache_file"] = cache_file
+
+    if cache_file is None:
+        assessment["output_cache_ready"] = False
+        assessment["output_cache_reason"] = "missing_output_cache"
+        if args.request_missing_cache and cache_request_path is not None:
+            assessment["output_cache_request_command"] = build_output_cache_request_command(cache_request_path)
+        return assessment
+
+    health, detail = validate_root_file(cache_file)
+    assessment["replay_output_health"] = health
+    assessment["replay_output_health_detail"] = detail
+    assessment["output_cache_reason"] = "healthy_existing_output" if health == "healthy_root_file" else "zombie_existing_output"
+
+    if health == "healthy_root_file":
+        return assessment
+
+    rerun_replay_destination = derive_zombie_rerun_destination(replay_destination, args)
+    rerun_report_destination = (
+        derive_zombie_rerun_destination(report_destination, args)
+        if report_destination is not None
+        else None
+    )
+    assessment["zombie_reroute"] = True
+    assessment["original_replay_destination"] = replay_destination
+    assessment["original_report_destination"] = report_destination
+    assessment["replay_destination"] = rerun_replay_destination
+    assessment["report_destination"] = rerun_report_destination
+    assessment["replay_output_exists"] = False
+    assessment["report_output_exists"] = False
+    assessment["tarball_output_exists"] = False
+    return assessment
 
 
 def plan_has_missing_mss_output(plan: RunPlan) -> bool:
@@ -751,15 +970,18 @@ def build_run_plans(
             if archive_prefix_template
             else default_report_tarball_basename(run)
         )
-        replay_target = replay_destination / replay_output_basename(run)
-        replay_output_exists = replay_target.exists()
-        report_output_exists = False
-        tarball_output_exists = False
-        if report_destination is not None:
-            report_target = report_destination / replay_report_basename(run)
-            report_output_exists = report_target.exists()
-            tarball_target = report_destination / report_tarball_basename
-            tarball_output_exists = tarball_target.exists()
+        output_assessment = assess_existing_replay_output(
+            run,
+            replay_destination,
+            report_destination,
+            report_tarball_basename,
+            args,
+        )
+        job_name = safe_name(
+            f"{family_prefix}_run{run}_rerun_zombie"
+            if bool(output_assessment["zombie_reroute"])
+            else f"{family_prefix}_run{run}"
+        )
         plans.append(
             RunPlan(
                 run=run,
@@ -767,15 +989,25 @@ def build_run_plans(
                 variants=tuple(sorted(runs_to_variants[run])),
                 resources=resources,
                 representative_manifest=runs_to_manifest[run],
-                replay_destination=replay_destination,
-                report_destination=report_destination,
+                replay_destination=output_assessment["replay_destination"],
+                report_destination=output_assessment["report_destination"],
                 report_tarball_basename=report_tarball_basename,
                 cache_file=cache_file,
                 cache_ready=cache_ready,
                 cache_reason=cache_reason,
-                replay_output_exists=replay_output_exists,
-                report_output_exists=report_output_exists,
-                tarball_output_exists=tarball_output_exists,
+                output_cache_ready=bool(output_assessment["output_cache_ready"]),
+                output_cache_reason=str(output_assessment["output_cache_reason"]),
+                output_cache_file=output_assessment["output_cache_file"],
+                output_cache_request_path=output_assessment["output_cache_request_path"],
+                output_cache_request_command=tuple(output_assessment["output_cache_request_command"]),
+                replay_output_health=str(output_assessment["replay_output_health"]),
+                replay_output_health_detail=str(output_assessment["replay_output_health_detail"]),
+                zombie_reroute=bool(output_assessment["zombie_reroute"]),
+                original_replay_destination=output_assessment["original_replay_destination"],
+                original_report_destination=output_assessment["original_report_destination"],
+                replay_output_exists=bool(output_assessment["replay_output_exists"]),
+                report_output_exists=bool(output_assessment["report_output_exists"]),
+                tarball_output_exists=bool(output_assessment["tarball_output_exists"]),
                 cache_request_command=cache_request_command,
             )
         )
@@ -1078,6 +1310,18 @@ def print_summary(
             else:
                 print("         request : disabled")
             continue
+        if not plan.output_cache_ready:
+            print(
+                f"[WAIT {plan.output_cache_reason}] run={plan.run} job={plan.job_name} "
+                f"cache={plan.output_cache_request_path or plan.output_cache_file}"
+            )
+            if plan.replay_output_exists:
+                print(f"         existing_root_mss_output: {replay_mss_output_file(plan)}")
+            if plan.output_cache_request_command:
+                print("         request : " + " ".join(shlex.quote(x) for x in plan.output_cache_request_command))
+            else:
+                print("         request : disabled")
+            continue
         if not plan_has_missing_mss_output(plan):
             print(f"[SKIP existing_mss_output] run={plan.run} job={plan.job_name}")
             print(f"         existing_mss_output: {replay_mss_output_file(plan)}")
@@ -1085,9 +1329,15 @@ def print_summary(
                 print(f"         existing_mss_output: {replay_report_mss_output_file(plan)}")
             if plan.report_tarball_basename is not None and replay_report_tarball_mss_output_file(plan) is not None:
                 print(f"         existing_mss_output: {replay_report_tarball_mss_output_file(plan)}")
+            if plan.output_cache_file is not None:
+                print(f"         replay_output_cache: {plan.output_cache_file}")
+            if plan.replay_output_health != "not_checked":
+                print(f"         replay_output_health: {plan.replay_output_health} ({plan.replay_output_health_detail})")
             continue
         status_parts: List[str] = []
-        if plan.replay_output_exists:
+        if plan.zombie_reroute:
+            status_parts.append("zombie_reroute")
+        elif plan.replay_output_exists:
             status_parts.append("root_exists")
         if plan.report_output_exists:
             status_parts.append("report_exists")
@@ -1103,16 +1353,27 @@ def print_summary(
             f"heuristic={plan.resources.reason}"
         )
         print(f"         variants: {', '.join(plan.variants)}")
-        print(f"         replay_mss_destination: {plan.replay_destination}")
-        if plan.replay_output_exists:
-            print(f"         existing_root_mss_output: {replay_mss_output_file(plan)}")
+        if plan.zombie_reroute and original_replay_mss_output_file(plan) is not None:
+            print(f"         zombie_existing_root_mss_output: {original_replay_mss_output_file(plan)}")
+            if plan.output_cache_file is not None:
+                print(f"         replay_output_cache: {plan.output_cache_file}")
+            if plan.replay_output_health != "not_checked":
+                print(f"         replay_output_health: {plan.replay_output_health} ({plan.replay_output_health_detail})")
+            print(f"         reroute_replay_mss_destination: {plan.replay_destination}")
+            if plan.report_destination is not None and plan.original_report_destination is not None:
+                print(f"         reroute_report_mss_destination: {plan.report_destination}")
+        else:
+            print(f"         replay_mss_destination: {plan.replay_destination}")
+            if plan.replay_output_exists:
+                print(f"         existing_root_mss_output: {replay_mss_output_file(plan)}")
         if plan.report_destination is not None:
-            print(f"         report_mss_destination: {plan.report_destination}")
-            if plan.report_output_exists:
+            if not plan.zombie_reroute:
+                print(f"         report_mss_destination: {plan.report_destination}")
+            if plan.report_output_exists and not plan.zombie_reroute:
                 print(f"         existing_report_mss_output: {replay_report_mss_output_file(plan)}")
             if plan.report_tarball_basename is not None:
                 print(f"         report_tarball: {plan.report_tarball_basename}")
-                if plan.tarball_output_exists:
+                if plan.tarball_output_exists and not plan.zombie_reroute:
                     print(f"         existing_tarball_mss_output: {replay_report_tarball_mss_output_file(plan)}")
         cmd = build_add_job_command(
             args.swif2_bin,
@@ -1154,7 +1415,11 @@ def submit_jobs(
     replay_script = str(expand_path(args.replay_script))
     existing_names = set(existing_job_names)
     rc = 0
-    eligible_plans = [plan for plan in plans if plan.cache_ready and plan_has_missing_mss_output(plan)]
+    eligible_plans = [
+        plan
+        for plan in plans
+        if plan.cache_ready and plan.output_cache_ready and plan_has_missing_mss_output(plan)
+    ]
 
     missing_cache_plans = [plan for plan in plans if not plan.cache_ready]
     for plan in missing_cache_plans:
@@ -1174,9 +1439,27 @@ def submit_jobs(
             return rc
         print()
 
+    output_cache_wait_plans = [plan for plan in plans if plan.cache_ready and not plan.output_cache_ready]
+    for plan in output_cache_wait_plans:
+        if not plan.output_cache_request_command:
+            print(f"Replay output cache missing for run {plan.run}; no request command configured.")
+            continue
+        print(f"Requesting replay-output cache staging for run {plan.run}:")
+        print("  " + " ".join(shlex.quote(x) for x in plan.output_cache_request_command))
+        result = run_command(plan.output_cache_request_command, capture=True)
+        if result.stdout:
+            print(result.stdout.rstrip())
+        if result.stderr:
+            print(result.stderr.rstrip(), file=sys.stderr)
+        if result.returncode != 0:
+            rc = result.returncode
+            print(f"ERROR: replay output cache request failed for run {plan.run}", file=sys.stderr)
+            return rc
+        print()
+
     if not eligible_plans:
         print("No cache-ready replay jobs to submit yet.")
-        print("Missing raw files were requested for staging where configured.")
+        print("Missing raw or replay-output cache files were requested for staging where configured.")
         return rc
 
     created, create_cmd = ensure_workflow(args.swif2_bin, workflow, args.max_concurrent, submit=True)
@@ -1187,6 +1470,8 @@ def submit_jobs(
 
     for plan in plans:
         if not plan.cache_ready:
+            continue
+        if not plan.output_cache_ready:
             continue
         if not plan_has_missing_mss_output(plan):
             print(f"Skipping run {plan.run}; all requested MSS outputs already exist:")
