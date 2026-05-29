@@ -746,6 +746,7 @@ if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
 elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
     # Q2=2p1, W=2p95
     #NumtBins=3
+    #NumPhiBins=9	
 	NumtBins=4
     NumPhiBins=9
     TMIN=0.150
