@@ -567,6 +567,8 @@ cd "${LTANAPATH}/src/setup"
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 PATH_DIAGNOSTICS_DONE=0
+ZOMBIE_RERUN_PASS="Pass4b_Apr_2026"
+ZOMBIE_RERUN_SUBDIR="rerun_zombies"
 
 resolve_real_path() {
     local input_path="$1"
@@ -608,6 +610,70 @@ build_replay_input_file() {
     printf '%s/%s\n' "${replay_input_dir}" "${replay_basename}"
 }
 
+build_rerun_zombie_replay_input_file() {
+    local root_real="$1"
+    local root_cache_dir=""
+    local suffix_after_kaonlt=""
+    local suffix_after_pass=""
+    local rerun_root_base=""
+
+    if ! root_cache_dir="$(cache_path_to_jcache_request_path "${root_real}")"; then
+        return 1
+    fi
+    case "${root_cache_dir}" in
+        /cache/hallc/kaonlt/*)
+            suffix_after_kaonlt="${root_cache_dir#/cache/hallc/kaonlt/}"
+            suffix_after_pass="${suffix_after_kaonlt#*/}"
+            rerun_root_base="/cache/hallc/kaonlt/${ZOMBIE_RERUN_PASS}/${ZOMBIE_RERUN_SUBDIR}/${suffix_after_pass}"
+            build_replay_input_file "${rerun_root_base}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+select_replay_input_file() {
+    local root_base="$1"
+    local primary_file=""
+    local primary_real_dir=""
+    local primary_real=""
+    local rerun_file=""
+    local rerun_real_dir=""
+    local rerun_real=""
+
+    if [[ -n "${REPLAY_INPUT_OVERRIDE:-}" ]]; then
+        printf '%s\t%s\n' "${REPLAY_INPUT_OVERRIDE}" "${REPLAY_INPUT_OVERRIDE_SOURCE:-override}"
+        return 0
+    fi
+
+    primary_file="$(build_replay_input_file "${root_base}")"
+    primary_real_dir="$(resolve_real_path "$(dirname "${primary_file}")")"
+    primary_real="${primary_real_dir}/$(basename "${primary_file}")"
+    if [[ -e "${primary_real}" && -s "${primary_real}" ]]; then
+        printf '%s\t%s\n' "${primary_file}" "primary"
+        return 0
+    fi
+
+    rerun_file="$(build_rerun_zombie_replay_input_file "$(resolve_real_path "${root_base}")" 2>/dev/null || true)"
+    if [[ -n "${rerun_file}" ]]; then
+        rerun_real_dir="$(resolve_real_path "$(dirname "${rerun_file}")")"
+        rerun_real="${rerun_real_dir}/$(basename "${rerun_file}")"
+        if [[ -e "${rerun_real}" && -s "${rerun_real}" ]]; then
+            printf '%s\t%s\n' "${rerun_file}" "rerun_zombie"
+            return 0
+        fi
+        case "${rerun_real}" in
+            /cache/*|/lustre*/expphy/cache/*)
+                printf '%s\t%s\n' "${rerun_file}" "rerun_zombie"
+                return 0
+                ;;
+        esac
+    fi
+
+    printf '%s\t%s\n' "${primary_file}" "primary"
+}
+
 cache_path_to_jcache_request_path() {
     local cache_path="$1"
     case "${cache_path}" in
@@ -626,6 +692,7 @@ cache_path_to_jcache_request_path() {
 print_applycuts_path_diagnostics() {
     local replay_input_file="$1"
     local replay_input_real="$2"
+    local replay_input_source="$3"
     local replay_input_dir
     local replay_input_real_dir
     replay_input_dir="$(dirname "${replay_input_file}")"
@@ -636,6 +703,9 @@ print_applycuts_path_diagnostics() {
     echo "Replay input real : ${replay_input_real_dir}"
     echo "Replay input file : ${replay_input_file}"
     echo "Replay file real  : ${replay_input_real}"
+    if [[ "${replay_input_source}" != "primary" ]]; then
+        echo "Replay override   : ${replay_input_source}"
+    fi
     echo "Skim base path    : ${SKIMPATH}"
     echo "Skim output dir   : ${SKIM_OUTPUT_DIR}"
     echo "Skim output real  : $(resolve_real_path "${SKIM_OUTPUT_DIR}")"
@@ -711,10 +781,11 @@ run_applycuts_particle() {
     local phi_label="$1"
     local particle="$2"
     local replay_input_file
+    local replay_input_source
     local replay_input_dir
     local replay_input_real_dir
     local replay_input_real
-    replay_input_file="$(build_replay_input_file "${ROOTPATH}")"
+    IFS=$'\t' read -r replay_input_file replay_input_source < <(select_replay_input_file "${ROOTPATH}")
     replay_input_dir="$(dirname "${replay_input_file}")"
     replay_input_real_dir="$(resolve_real_path "${replay_input_dir}")"
     replay_input_real="${replay_input_real_dir}/$(basename "${replay_input_file}")"
@@ -722,7 +793,7 @@ run_applycuts_particle() {
     local log_file="${LTANAPATH}/log/${phi_label}_${particle}_${RUNNUM}_${KIN}.log"
 
     if [[ "${PATH_DIAGNOSTICS_DONE}" -ne 1 ]]; then
-        print_applycuts_path_diagnostics "${replay_input_file}" "${replay_input_real}"
+        print_applycuts_path_diagnostics "${replay_input_file}" "${replay_input_real}" "${replay_input_source}"
         PATH_DIAGNOSTICS_DONE=1
     fi
 

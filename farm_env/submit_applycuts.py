@@ -59,6 +59,8 @@ DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
+DEFAULT_ZOMBIE_RERUN_PASS = "Pass4b_Apr_2026"
+DEFAULT_ZOMBIE_RERUN_SUBDIR = "rerun_zombies"
 
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
@@ -90,6 +92,7 @@ class RunPlan:
     job_name: str
     replay_mss_file: Optional[Path]
     replay_cache_file: Optional[Path]
+    replay_source: str
     skim_destination: Path
     skim_kaon: Path
     skim_pion: Path
@@ -424,17 +427,33 @@ def render_template(template: str, run: int, extra: Optional[Dict[str, str]] = N
     return os.path.expandvars(template).format(**values)
 
 
-def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Optional[Path]:
+def derive_zombie_rerun_destination(destination: Path) -> Optional[Path]:
+    parts = destination.parts
+    if len(parts) >= 6 and parts[0] == "/" and parts[1] == "mss" and parts[2] == "hallc" and parts[3] == "kaonlt":
+        tail = parts[5:]
+        return Path("/mss/hallc/kaonlt") / DEFAULT_ZOMBIE_RERUN_PASS / DEFAULT_ZOMBIE_RERUN_SUBDIR / Path(*tail)
+    return None
+
+
+def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Tuple[Optional[Path], str]:
     exact_name = f"{anatype}_coin_replay_production_{run}_-1.root"
     glob_name = f"*coin_replay_production_{run}_-1.root"
     for destination in variant.replay_destinations:
+        zombie_destination = derive_zombie_rerun_destination(destination)
+        if zombie_destination is not None:
+            exact = zombie_destination / exact_name
+            if exact.exists():
+                return exact, "rerun_zombie"
+            matches = sorted(zombie_destination.glob(glob_name))
+            if matches:
+                return matches[0], "rerun_zombie"
         exact = destination / exact_name
         if exact.exists():
-            return exact
+            return exact, "primary"
         matches = sorted(destination.glob(glob_name))
         if matches:
-            return matches[0]
-    return None
+            return matches[0], "primary"
+    return None, "missing"
 
 
 def build_cache_request_command(args: argparse.Namespace, run: int, mss_file: Path, cache_file: Path) -> List[str]:
@@ -474,7 +493,7 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
     plans: List[RunPlan] = []
     for variant in variants:
         for run in runs_for_variant(variant):
-            replay_mss_file = find_replay_mss_file(variant, paths.anatype, run)
+            replay_mss_file, replay_source = find_replay_mss_file(variant, paths.anatype, run)
             replay_cache_file = (
                 paths.cache_path_from_mss(replay_mss_file) if replay_mss_file is not None else None
             )
@@ -496,6 +515,7 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                         job_name=job_name,
                         replay_mss_file=replay_mss_file,
                         replay_cache_file=replay_cache_file,
+                        replay_source=replay_source,
                         skim_destination=variant.skim_destination,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
@@ -515,6 +535,7 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                         job_name=job_name,
                         replay_mss_file=None,
                         replay_cache_file=None,
+                        replay_source=replay_source,
                         skim_destination=variant.skim_destination,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
@@ -538,6 +559,7 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                         job_name=job_name,
                         replay_mss_file=replay_mss_file,
                         replay_cache_file=replay_cache_file,
+                        replay_source=replay_source,
                         skim_destination=variant.skim_destination,
                         skim_kaon=skim_kaon,
                         skim_pion=skim_pion,
@@ -557,6 +579,7 @@ def build_run_plans(paths: LtsepPaths, variants: Sequence[JsonVariant], args: ar
                     job_name=job_name,
                     replay_mss_file=replay_mss_file,
                     replay_cache_file=replay_cache_file,
+                    replay_source=replay_source,
                     skim_destination=variant.skim_destination,
                     skim_kaon=skim_kaon,
                     skim_pion=skim_pion,
@@ -641,6 +664,15 @@ def build_add_job_command(
     family_prefix: str,
     args: argparse.Namespace,
 ) -> List[str]:
+    job_cmd: List[str] = [applycuts_script]
+    if plan.replay_source != "primary" and plan.replay_cache_file is not None:
+        job_cmd = [
+            "/usr/bin/env",
+            f"REPLAY_INPUT_OVERRIDE={plan.replay_cache_file}",
+            f"REPLAY_INPUT_OVERRIDE_SOURCE={plan.replay_source}",
+            applycuts_script,
+        ]
+
     cmd = [
         swif2_bin,
         "add-job",
@@ -690,10 +722,10 @@ def build_add_job_command(
         )
     cmd.extend(
         [
-            applycuts_script,
-            plan.variant.epsilon,
-            plan.variant.phi,
-            plan.variant.q2,
+        *job_cmd,
+        plan.variant.epsilon,
+        plan.variant.phi,
+        plan.variant.q2,
             plan.variant.w,
             plan.variant.target,
             str(plan.run),
@@ -840,6 +872,8 @@ def print_summary(
             print("         replay_mss   : missing")
         else:
             print(f"         replay_mss   : {plan.replay_mss_file}")
+        if plan.replay_source != "primary":
+            print(f"         replay_source: {plan.replay_source}")
         if plan.replay_cache_file is None:
             print("         replay_cache : missing")
         else:
