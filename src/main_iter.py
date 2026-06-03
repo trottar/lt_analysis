@@ -318,8 +318,9 @@ correction_ledger_paths_prev = [
     if filename.endswith("_correction_ledger.json")
 ]
 if not correction_ledger_paths_prev:
-    raise FileNotFoundError(
-        "No correction ledger JSON files were found in {}".format(
+    print(
+        "\nWARNING: No correction ledger JSON files were found in {}. "
+        "Continuing with legacy cached iteration artifacts.".format(
             os.path.join(prev_iter_dir, "json")
         )
     )
@@ -902,58 +903,71 @@ if EPSSET == "high":
     low_outfilename = manifest_payload_prev.get("zeroth_iteration_inputs", {}).get("low", {}).get("inp_dict", {}).get("OutFilename")
     high_outfilename = manifest_payload_prev.get("zeroth_iteration_inputs", {}).get("high", {}).get("inp_dict", {}).get("OutFilename")
     if low_outfilename and high_outfilename:
-        low_ledger_path = get_correction_ledger_paths(
+        low_ledger_paths = get_correction_ledger_paths(
             OUTPATH,
             ParticleType,
             low_outfilename,
             active_profile=manifest_active_profile,
-        )["json_profile"]
-        high_ledger_path = get_correction_ledger_paths(
+        )
+        high_ledger_paths = get_correction_ledger_paths(
             OUTPATH,
             ParticleType,
             high_outfilename,
             active_profile=manifest_active_profile,
-        )["json_profile"]
-        low_ledger_payload = json.load(open(low_ledger_path, "r"))
-        high_ledger_payload = json.load(open(high_ledger_path, "r"))
-        epsilon_compare_payload = None
-        if os.path.exists(analysis_artifact_paths["epsilon_compare_json_profile"]):
-            with open(analysis_artifact_paths["epsilon_compare_json_profile"], "r") as handle:
-                epsilon_compare_payload = json.load(handle)
-        systematics_payload = None
-        if os.path.exists(analysis_artifact_paths["systematics_json"]):
-            with open(analysis_artifact_paths["systematics_json"], "r") as handle:
-                systematics_payload = json.load(handle)
-        nonklambda_payload = None
-        nonklambda_path = analysis_artifact_paths["nonklambda_json_profile"]
-        if not os.path.exists(nonklambda_path):
-            nonklambda_path = analysis_artifact_paths["nonklambda_json"]
-        if os.path.exists(nonklambda_path):
-            with open(nonklambda_path, "r") as handle:
-                nonklambda_payload = json.load(handle)
-        inpDict["convergence_status"] = "iteration_update"
-        final_summary_payload = build_final_analysis_summary(
-            manifest_payload_prev,
-            low_ledger_payload,
-            high_ledger_payload,
-            epsilon_compare_payload=epsilon_compare_payload,
-            systematics_payload=systematics_payload,
-            nonklambda_payload=nonklambda_payload,
-            xsect_payload=collect_xsect_payload(OUTPATH, LTANAPATH, ParticleType, Q2, W, ANATYPE, POL),
-            current_inp_dict=inpDict,
-            manifest_path=os.path.join(OUTPATH, os.path.basename(manifest_path_prev)),
         )
-        final_summary_paths = write_final_analysis_summary(
-            final_summary_payload,
-            OUTPATH,
-            ParticleType,
-            Q2,
-            W,
-            active_profile=manifest_payload_prev.get("active_profile"),
-        )
-        for artifact in final_summary_paths:
-            if artifact not in output_file_lst:
-                output_file_lst.append(artifact)
+        low_ledger_path = low_ledger_paths["json_profile"]
+        if not os.path.exists(low_ledger_path):
+            low_ledger_path = low_ledger_paths["json"]
+        high_ledger_path = high_ledger_paths["json_profile"]
+        if not os.path.exists(high_ledger_path):
+            high_ledger_path = high_ledger_paths["json"]
+
+        if not os.path.exists(low_ledger_path) or not os.path.exists(high_ledger_path):
+            print(
+                "\nWARNING: Skipping final summary refresh because correction ledgers are missing "
+                "(low={}, high={})".format(low_ledger_path, high_ledger_path)
+            )
+        else:
+            low_ledger_payload = json.load(open(low_ledger_path, "r"))
+            high_ledger_payload = json.load(open(high_ledger_path, "r"))
+            epsilon_compare_payload = None
+            if os.path.exists(analysis_artifact_paths["epsilon_compare_json_profile"]):
+                with open(analysis_artifact_paths["epsilon_compare_json_profile"], "r") as handle:
+                    epsilon_compare_payload = json.load(handle)
+            systematics_payload = None
+            if os.path.exists(analysis_artifact_paths["systematics_json"]):
+                with open(analysis_artifact_paths["systematics_json"], "r") as handle:
+                    systematics_payload = json.load(handle)
+            nonklambda_payload = None
+            nonklambda_path = analysis_artifact_paths["nonklambda_json_profile"]
+            if not os.path.exists(nonklambda_path):
+                nonklambda_path = analysis_artifact_paths["nonklambda_json"]
+            if os.path.exists(nonklambda_path):
+                with open(nonklambda_path, "r") as handle:
+                    nonklambda_payload = json.load(handle)
+            inpDict["convergence_status"] = "iteration_update"
+            final_summary_payload = build_final_analysis_summary(
+                manifest_payload_prev,
+                low_ledger_payload,
+                high_ledger_payload,
+                epsilon_compare_payload=epsilon_compare_payload,
+                systematics_payload=systematics_payload,
+                nonklambda_payload=nonklambda_payload,
+                xsect_payload=collect_xsect_payload(OUTPATH, LTANAPATH, ParticleType, Q2, W, ANATYPE, POL),
+                current_inp_dict=inpDict,
+                manifest_path=os.path.join(OUTPATH, os.path.basename(manifest_path_prev)),
+            )
+            final_summary_paths = write_final_analysis_summary(
+                final_summary_payload,
+                OUTPATH,
+                ParticleType,
+                Q2,
+                W,
+                active_profile=manifest_payload_prev.get("active_profile"),
+            )
+            for artifact in final_summary_paths:
+                if artifact not in output_file_lst:
+                    output_file_lst.append(artifact)
     record_stage_time("Step 7 final summary refresh", stage_start)
     
 ##############################
