@@ -40,11 +40,10 @@ from time import perf_counter
 sys.path.append("utility")
 from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email, request_yn_response, run_bash_script
 from frozen_manifest import (
-    find_frozen_manifest_path,
     get_analysis_artifact_paths,
     get_correction_ledger_paths,
     get_iteration_manifest_hash_policy,
-    load_frozen_manifest,
+    load_or_reconstruct_frozen_manifest,
     read_interval_file,
     validate_iteration_inputs_against_manifest,
 )
@@ -297,8 +296,14 @@ if EPSSET == "low":
         
 prev_iter_root = foutroot.replace(OUTPATH,prev_iter_dir+"/root")
 prev_iter_json = foutjson.replace(OUTPATH,prev_iter_dir+"/json")
-manifest_path_prev = find_frozen_manifest_path(prev_iter_dir, ParticleType, Q2, W)
-manifest_payload_prev = load_frozen_manifest(manifest_path_prev)
+manifest_path_prev, manifest_payload_prev, manifest_reconstructed = load_or_reconstruct_frozen_manifest(
+    prev_iter_dir,
+    ParticleType,
+    Q2,
+    W,
+)
+if manifest_reconstructed:
+    print("[ITER] Using reconstructed frozen manifest from cached artifacts")
 manifest_active_profile = manifest_payload_prev.get("active_profile")
 analysis_artifact_paths = get_analysis_artifact_paths(
     OUTPATH,

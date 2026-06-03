@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import subprocess
+from glob import glob
 from copy import deepcopy
 from datetime import datetime, timezone
 
@@ -385,6 +386,21 @@ def find_frozen_manifest_path(base_dir, particle_type, q2, w):
     for candidate in candidates:
         if os.path.exists(candidate):
             return candidate
+    wildcard_candidates = []
+    for search_dir in (base_dir, os.path.join(base_dir, "json")):
+        wildcard_candidates.extend(
+            sorted(
+                glob(
+                    os.path.join(
+                        search_dir,
+                        "{}_Q{}W{}_frozen_manifest*.json".format(particle_type, q2, w),
+                    )
+                )
+            )
+        )
+    for candidate in wildcard_candidates:
+        if os.path.exists(candidate):
+            return candidate
     raise FileNotFoundError(
         "Frozen manifest not found in {} for {} Q{}W{}".format(
             base_dir,
@@ -398,6 +414,183 @@ def find_frozen_manifest_path(base_dir, particle_type, q2, w):
 def load_frozen_manifest(manifest_path):
     with open(manifest_path, "r") as handle:
         return json.load(handle)
+
+
+def _glob_first(patterns):
+    for pattern in patterns:
+        matches = sorted(glob(pattern))
+        for match in matches:
+            if os.path.exists(match):
+                return match
+    return None
+
+
+def _find_cached_analysis_json(base_dir, particle_type, q2, w, eps_suffix):
+    patterns = [
+        os.path.join(base_dir, "json", "{}_*Q{}W{}_{}.json".format(particle_type, q2, w, eps_suffix)),
+        os.path.join(base_dir, "{}_*Q{}W{}_{}.json".format(particle_type, q2, w, eps_suffix)),
+    ]
+    excluded_tokens = (
+        "_bg_opt_",
+        "_correction_ledger",
+        "_final_analysis_summary",
+        "_frozen_manifest",
+        "_0th_iteration_input_bundle",
+        "_epsilon_empirical_compare",
+        "_bg_systematics_summary",
+        "_nonklambda_crosscheck",
+    )
+    for pattern in patterns:
+        for candidate in sorted(glob(pattern)):
+            basename = os.path.basename(candidate)
+            if any(token in basename for token in excluded_tokens):
+                continue
+            if os.path.exists(candidate):
+                return candidate
+    return None
+
+
+def _infer_outfilename_from_json_path(json_path, particle_type):
+    basename = os.path.basename(json_path)
+    prefix = "{}_".format(particle_type)
+    if basename.startswith(prefix):
+        basename = basename[len(prefix):]
+    if basename.endswith(".json"):
+        basename = basename[:-5]
+    return basename
+
+
+def _read_interval_file_from_cache(base_dir, q2, w, prefix):
+    rel_name = "{}_bin_interval_Q{}W{}".format(prefix, q2.replace("p", ""), w.replace("p", ""))
+    candidates = [
+        os.path.join(base_dir, rel_name),
+        os.path.join(base_dir, "root", rel_name),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return read_interval_file(candidate)
+    return None
+
+
+def _load_cached_input_bundle(base_dir, particle_type, q2, w):
+    bundle_path = _glob_first(
+        [
+            os.path.join(base_dir, "json", "{}_Q{}W{}_0th_iteration_input_bundle*.json".format(particle_type, q2, w)),
+            os.path.join(base_dir, "{}_Q{}W{}_0th_iteration_input_bundle*.json".format(particle_type, q2, w)),
+        ]
+    )
+    return (_read_json_if_exists(bundle_path), bundle_path) if bundle_path else (None, None)
+
+
+def reconstruct_frozen_manifest_from_cache(base_dir, particle_type, q2, w):
+    low_json = _find_cached_analysis_json(base_dir, particle_type, q2, w, "lowe")
+    high_json = _find_cached_analysis_json(base_dir, particle_type, q2, w, "highe")
+    if not low_json and not high_json:
+        raise FileNotFoundError(
+            "Could not reconstruct frozen manifest: no cached analysis JSON files were found in {}".format(base_dir)
+        )
+
+    low_payload = _read_json_if_exists(low_json) if low_json else None
+    high_payload = _read_json_if_exists(high_json) if high_json else None
+    primary_payload = high_payload or low_payload
+    if primary_payload is None:
+        raise FileNotFoundError(
+            "Could not reconstruct frozen manifest: cached analysis JSON payloads were unreadable in {}".format(base_dir)
+        )
+
+    low_inp = (low_payload or {}).get("inpDict", {})
+    high_inp = (high_payload or {}).get("inpDict", {})
+    primary_inp = primary_payload.get("inpDict", {})
+    primary_histlist = primary_payload.get("histlist", [])
+
+    t_bins = None
+    phi_bins = None
+    if primary_histlist:
+        t_bins = primary_histlist[0].get("t_bins")
+        phi_bins = primary_histlist[0].get("phi_bins")
+    if t_bins is None:
+        t_bins = _read_interval_file_from_cache(base_dir, q2, w, "t")
+    if phi_bins is None:
+        phi_bins = _read_interval_file_from_cache(base_dir, q2, w, "phi")
+    if t_bins is None or phi_bins is None:
+        raise FileNotFoundError(
+            "Could not reconstruct frozen manifest: cached t/phi interval files were not found in {}".format(base_dir)
+        )
+
+    input_bundle, input_bundle_path = _load_cached_input_bundle(base_dir, particle_type, q2, w)
+    active_profile = (
+        (input_bundle or {}).get("active_profile")
+        or high_inp.get("bg_active_profile")
+        or low_inp.get("bg_active_profile")
+        or primary_inp.get("bg_active_profile")
+    )
+
+    synthesized_bundle = input_bundle or {
+        "particle_type": particle_type,
+        "q2": q2,
+        "w": w,
+        "active_profile": active_profile,
+    }
+    synthesized_bundle.setdefault(
+        "low",
+        {"inp_dict": {"OutFilename": _infer_outfilename_from_json_path(low_json, particle_type)}} if low_json else {},
+    )
+    synthesized_bundle.setdefault(
+        "high",
+        {"inp_dict": {"OutFilename": _infer_outfilename_from_json_path(high_json, particle_type)}} if high_json else {},
+    )
+    if low_json and "inp_dict" not in synthesized_bundle.get("low", {}):
+        synthesized_bundle["low"]["inp_dict"] = {"OutFilename": _infer_outfilename_from_json_path(low_json, particle_type)}
+    if high_json and "inp_dict" not in synthesized_bundle.get("high", {}):
+        synthesized_bundle["high"]["inp_dict"] = {"OutFilename": _infer_outfilename_from_json_path(high_json, particle_type)}
+
+    manifest_payload = {
+        "particle_type": particle_type,
+        "polarity": primary_inp.get("POL"),
+        "q2": q2,
+        "w": w,
+        "epsilon_values": {
+            "low": low_inp.get("EPSVAL", primary_inp.get("LOEPS")),
+            "high": high_inp.get("EPSVAL", primary_inp.get("HIEPS")),
+        },
+        "mm_cut_window": [
+            float(primary_inp.get("mm_min")) if primary_inp.get("mm_min") is not None else None,
+            float(primary_inp.get("mm_max")) if primary_inp.get("mm_max") is not None else None,
+        ],
+        "t_bin_edges": _json_ready(np.asarray(t_bins, dtype=float)),
+        "phi_bin_edges": _json_ready(np.asarray(phi_bins, dtype=float)),
+        "active_profile": active_profile,
+        "zeroth_iteration_inputs": synthesized_bundle,
+        "key_file_hashes": {},
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "reconstructed_from_cache": True,
+        "reconstructed_from": {
+            "base_dir": base_dir,
+            "low_json": low_json,
+            "high_json": high_json,
+            "input_bundle": input_bundle_path,
+        },
+    }
+    return manifest_payload
+
+
+def load_or_reconstruct_frozen_manifest(base_dir, particle_type, q2, w):
+    try:
+        manifest_path = find_frozen_manifest_path(base_dir, particle_type, q2, w)
+        return manifest_path, load_frozen_manifest(manifest_path), False
+    except FileNotFoundError:
+        manifest_payload = reconstruct_frozen_manifest_from_cache(base_dir, particle_type, q2, w)
+        manifest_dir = os.path.join(base_dir, "json")
+        if not os.path.isdir(manifest_dir):
+            os.makedirs(manifest_dir, exist_ok=True)
+        manifest_path = os.path.join(
+            manifest_dir,
+            "{}_Q{}W{}_frozen_manifest.json".format(particle_type, q2, w),
+        )
+        with open(manifest_path, "w") as handle:
+            json.dump(_json_ready(manifest_payload), handle, indent=2, sort_keys=True)
+        print("[FROZEN MANIFEST] Reconstructed missing manifest from cached artifacts: {}".format(manifest_path))
+        return manifest_path, manifest_payload, True
 
 
 def _build_hash_drift_message(
