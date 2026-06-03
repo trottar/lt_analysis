@@ -549,22 +549,38 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         return
 
     settings = [str(setting) for setting in support["settings"]]
+    settings = [
+        setting
+        for setting in settings
+        if "data_mm_{}_values".format(setting.lower()) in support
+        and "simc_mm_{}_values".format(setting.lower()) in support
+    ]
+    if not settings:
+        print("[XSECT SUPPORT][plot_xsects] No valid support settings found for {}".format(epsilon_label))
+        return
     aveline = file_df_dict["avek_file"]
     central_q2 = aveline["Q2"].to_numpy()
     central_w = aveline["W"].to_numpy()
     central_theta = aveline["theta_cm"].to_numpy()
 
     t_edges = support["t_bins"]
+    t_bin_centers_local = 0.5 * (t_edges[:-1] + t_edges[1:])
+    num_t_bins = len(t_bin_centers_local)
     mm_edges = support["mm_edges"]
     q2_edges = support["q2_edges"]
     w_edges = support["w_edges"]
     q2_w_x_edges = support.get("q2_w_x_edges")
     q2_w_y_edges = support.get("q2_w_y_edges")
     theta_edges = support["theta_cm_edges"]
-    theta_true_edges = support["theta_cm_true_edges"]
+    theta_true_edges = support.get("theta_cm_true_edges")
     phi_edges = support["phi_bins"]
     t_vs_tmin_x_edges = support["t_vs_tmin_x_edges"]
     t_vs_tmin_y_edges = support["t_vs_tmin_y_edges"]
+
+    def central_value(values, index):
+        if values is None or index >= len(values):
+            return float("nan")
+        return values[index]
 
     matrix_cache = {}
     hist_sum_cache = {}
@@ -577,39 +593,80 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     def cached_matrix(kind, variable, setting, field):
         cache_key = (kind, variable, setting, field)
         if cache_key not in matrix_cache:
-            matrix_cache[cache_key] = get_support_matrix(support, kind, variable, setting, field)
+            support_key = "{}_{}_{}_{}".format(kind, variable, setting.lower(), field)
+            matrix_cache[cache_key] = support.get(support_key)
         return matrix_cache[cache_key]
 
     def cached_hist_sum(kind, variable, setting, t_index):
         cache_key = (kind, variable, setting, t_index)
         if cache_key not in hist_sum_cache:
-            values = cached_matrix(kind, variable, setting, "values")[t_index]
-            errors = cached_matrix(kind, variable, setting, "errors")[t_index]
+            values_matrix = cached_matrix(kind, variable, setting, "values")
+            errors_matrix = cached_matrix(kind, variable, setting, "errors")
+            if values_matrix is None or errors_matrix is None or t_index >= len(values_matrix) or t_index >= len(errors_matrix):
+                hist_sum_cache[cache_key] = (None, None)
+                return hist_sum_cache[cache_key]
+            values = values_matrix[t_index]
+            errors = errors_matrix[t_index]
             hist_sum_cache[cache_key] = sum_hist_over_phi(values, errors)
         return hist_sum_cache[cache_key]
 
     def cached_combined_hist(kind, variable, t_index):
         cache_key = (kind, variable, t_index)
         if cache_key not in combined_hist_cache:
-            combined_hist_cache[cache_key] = combine_hist_over_settings(support, kind, variable, settings, t_index)
+            valid_values = []
+            valid_errors = []
+            for setting in settings:
+                values, errors = cached_hist_sum(kind, variable, setting, t_index)
+                if values is None or errors is None:
+                    continue
+                valid_values.append(values)
+                valid_errors.append(errors)
+            if not valid_values:
+                combined_hist_cache[cache_key] = (None, None)
+            else:
+                values_total = np.zeros_like(valid_values[0])
+                errors_sq_total = np.zeros_like(valid_errors[0])
+                for values, errors in zip(valid_values, valid_errors):
+                    values_total += values
+                    errors_sq_total += np.square(errors)
+                combined_hist_cache[cache_key] = (values_total, np.sqrt(errors_sq_total))
         return combined_hist_cache[cache_key]
 
     def cached_combined_map(kind, variable, t_index):
         cache_key = (kind, variable, t_index)
         if cache_key not in combined_map_cache:
-            combined_map_cache[cache_key] = combine_map_over_settings(support, kind, variable, settings, t_index)
+            values_total = None
+            for setting in settings:
+                values_matrix = cached_matrix(kind, variable, setting, "values")
+                if values_matrix is None or t_index >= len(values_matrix):
+                    continue
+                values = values_matrix[t_index]
+                if values_total is None:
+                    values_total = np.zeros_like(values)
+                values_total += values
+            combined_map_cache[cache_key] = values_total
         return combined_map_cache[cache_key]
 
     def cached_combined_2d_map(kind, variable, t_index):
         cache_key = (kind, variable, t_index)
         if cache_key not in combined_2d_map_cache:
-            combined_2d_map_cache[cache_key] = combine_2d_map_over_settings(support, kind, variable, settings, t_index)
+            values_total = None
+            for setting in settings:
+                values_matrix = cached_matrix(kind, variable, setting, "values")
+                if values_matrix is None or t_index >= len(values_matrix):
+                    continue
+                values = np.sum(values_matrix[t_index], axis=0)
+                if values_total is None:
+                    values_total = np.zeros_like(values)
+                values_total += values
+            combined_2d_map_cache[cache_key] = values_total
         return combined_2d_map_cache[cache_key]
 
     def cached_mm_vs_t_map(kind, setting):
         cache_key = (kind, setting)
         if cache_key not in mm_vs_t_cache:
-            mm_vs_t_cache[cache_key] = np.sum(cached_matrix(kind, "mm", setting, "values"), axis=1)
+            values_matrix = cached_matrix(kind, "mm", setting, "values")
+            mm_vs_t_cache[cache_key] = None if values_matrix is None else np.sum(values_matrix, axis=1)
         return mm_vs_t_cache[cache_key]
 
     def cached_q2_w_tmin_grid():
@@ -620,12 +677,15 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             q2_w_tmin_cache = build_q2_w_tmin_grid(q2_w_x_edges, q2_w_y_edges)
         return q2_w_tmin_cache
 
-    for k in range(NumtBins):
+    for k in range(num_t_bins):
         fig, axes = plt.subplots(len(settings), 1, figsize=(12, max(4, 3.5 * len(settings))), sharex=True)
         axes = np.atleast_1d(axes)
         for idx, setting in enumerate(settings):
             data_sum, data_err_sum = cached_hist_sum("data", "mm", setting, k)
             simc_sum, simc_err_sum = cached_hist_sum("simc", "mm", setting, k)
+            if data_sum is None or data_err_sum is None or simc_sum is None or simc_err_sum is None:
+                axes[idx].set_visible(False)
+                continue
             plot_hist_overlay(
                 axes[idx],
                 mm_edges,
@@ -633,16 +693,18 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 data_err_sum,
                 simc_sum,
                 simc_err_sum,
-                "{} {} MM, {} setting, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), setting, t_bin_centers[k]),
+                "{} {} MM, {} setting, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), setting, t_bin_centers_local[k]),
                 'MM',
             )
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
 
-    for k in range(NumtBins):
+    for k in range(num_t_bins):
         data_mm, data_mm_err = cached_combined_hist("data", "mm", k)
         simc_mm, simc_mm_err = cached_combined_hist("simc", "mm", k)
+        if data_mm is None or data_mm_err is None or simc_mm is None or simc_mm_err is None:
+            continue
         fig, ax = plt.subplots(figsize=(12, 8))
         plot_hist_overlay(
             ax,
@@ -651,7 +713,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             data_mm_err,
             simc_mm,
             simc_mm_err,
-            "{} {} MM, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), t_bin_centers[k]),
+            "{} {} MM, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), t_bin_centers_local[k]),
             'MM',
         )
         plt.tight_layout()
@@ -661,6 +723,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
     for setting in settings:
         data_map = cached_mm_vs_t_map("data", setting)
         simc_map = cached_mm_vs_t_map("simc", setting)
+        if data_map is None or simc_map is None:
+            continue
         fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
         plot_density_map(
             fig,
@@ -688,9 +752,11 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
 
     if q2_w_x_edges is not None and q2_w_y_edges is not None:
         q2_w_tmin_grid = cached_q2_w_tmin_grid()
-        for k in range(NumtBins):
+        for k in range(num_t_bins):
             data_map = cached_combined_2d_map("data", "q2_w", k)
             simc_map = cached_combined_2d_map("simc", "q2_w", k)
+            if data_map is None or simc_map is None:
+                continue
             fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
             plot_density_map(
                 fig,
@@ -698,7 +764,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 q2_w_x_edges,
                 q2_w_y_edges,
                 data_map,
-                "{} $Q^2$ vs W, all settings Data, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+                "{} $Q^2$ vs W, all settings Data, t={:.3f}".format(epsilon_label, t_bin_centers_local[k]),
                 '$Q^2$',
                 'W',
             )
@@ -708,14 +774,14 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 q2_w_x_edges,
                 q2_w_y_edges,
                 simc_map,
-                "{} $Q^2$ vs W, all settings SIMC, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+                "{} $Q^2$ vs W, all settings SIMC, t={:.3f}".format(epsilon_label, t_bin_centers_local[k]),
                 '$Q^2$',
                 'W',
             )
 
             if q2_w_tmin_grid is not None:
                 q2_grid, w_grid, tmin_grid = q2_w_tmin_grid
-                minus_t_guides = (t_edges[k], t_bin_centers[k], t_edges[k + 1])
+                minus_t_guides = (t_edges[k], t_bin_centers_local[k], t_edges[k + 1])
                 for ax in np.atleast_1d(axes):
                     overlay_q2_w_phase_space(
                         ax,
@@ -723,8 +789,8 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                         w_grid,
                         tmin_grid,
                         minus_t_guides,
-                        central_q2[k],
-                        central_w[k],
+                        central_value(central_q2, k),
+                        central_value(central_w, k),
                     )
 
             plt.tight_layout()
@@ -737,18 +803,21 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         ("theta_cm", theta_edges, central_theta, '$\\theta_{cm}$ (deg)'),
     )
     for variable, edges, central_values, xlabel in one_d_pages:
-        for k in range(NumtBins):
+        for k in range(num_t_bins):
             data_values, data_errors = cached_combined_hist("data", variable, k)
             simc_values, simc_errors = cached_combined_hist("simc", variable, k)
+            if data_values is None or data_errors is None or simc_values is None or simc_errors is None:
+                continue
             extra_simc_values = None
             extra_simc_label = None
             extra_simc_color = 'tab:blue'
             simc_label = 'SIMC'
             simc_color = 'tab:green'
-            if variable == "theta_cm":
+            if variable == "theta_cm" and theta_true_edges is not None:
                 extra_simc_values, _ = cached_combined_hist("simc", "theta_cm_true", k)
-                simc_label = 'SIMC Recon'
-                extra_simc_label = 'SIMC True'
+                if extra_simc_values is not None:
+                    simc_label = 'SIMC Recon'
+                    extra_simc_label = 'SIMC True'
             fig, ax = plt.subplots(figsize=(12, 8))
             plot_hist_overlay(
                 ax,
@@ -757,9 +826,9 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
                 data_errors,
                 simc_values,
                 simc_errors,
-                "{} {} {}, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), xlabel, t_bin_centers[k]),
+                "{} {} {}, all settings, t={:.3f}".format(epsilon_label, ParticleType.capitalize(), xlabel, t_bin_centers_local[k]),
                 xlabel,
-                central_line=central_values[k],
+                central_line=central_value(central_values, k),
                 simc_label=simc_label,
                 simc_color=simc_color,
                 extra_simc_values=extra_simc_values,
@@ -770,14 +839,20 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
 
-    for k in range(NumtBins):
+    for k in range(num_t_bins):
         fig, axes = plt.subplots(len(settings), 2, figsize=(14, max(4, 3.5 * len(settings))), sharex=True, sharey=True)
         axes = np.atleast_2d(axes)
         for idx, setting in enumerate(settings):
-            data_map = cached_matrix("data", "mm", setting, "values")[k]
-            simc_map = cached_matrix("simc", "mm", setting, "values")[k]
-            plot_phi_map(fig, axes[idx, 0], phi_edges, mm_edges, data_map, "{} {} MM vs $\\phi$, {} Data, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers[k]), 'MM')
-            plot_phi_map(fig, axes[idx, 1], phi_edges, mm_edges, simc_map, "{} {} MM vs $\\phi$, {} SIMC, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers[k]), 'MM')
+            data_values = cached_matrix("data", "mm", setting, "values")
+            simc_values = cached_matrix("simc", "mm", setting, "values")
+            if data_values is None or simc_values is None or k >= len(data_values) or k >= len(simc_values):
+                axes[idx, 0].set_visible(False)
+                axes[idx, 1].set_visible(False)
+                continue
+            data_map = data_values[k]
+            simc_map = simc_values[k]
+            plot_phi_map(fig, axes[idx, 0], phi_edges, mm_edges, data_map, "{} {} MM vs $\\phi$, {} Data, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers_local[k]), 'MM')
+            plot_phi_map(fig, axes[idx, 1], phi_edges, mm_edges, simc_map, "{} {} MM vs $\\phi$, {} SIMC, t={:.3f}".format(epsilon_label, setting, ParticleType.capitalize(), t_bin_centers_local[k]), 'MM')
         plt.tight_layout()
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
@@ -789,26 +864,35 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         ("theta_cm", theta_edges, '$\\theta_{cm}$ (deg)'),
     )
     for variable, edges, ylabel in two_d_pages:
-        for k in range(NumtBins):
+        for k in range(num_t_bins):
             data_map = cached_combined_map("data", variable, k)
             simc_map = cached_combined_map("simc", variable, k)
-            if variable == "theta_cm":
+            if data_map is None or simc_map is None:
+                continue
+            if variable == "theta_cm" and theta_true_edges is not None:
                 simc_true_map = cached_combined_map("simc", "theta_cm_true", k)
-                fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
-                plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
-                plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
-                plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                if simc_true_map is not None:
+                    fig, axes = plt.subplots(1, 3, figsize=(20, 6), sharex=True, sharey=True)
+                    plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
+                    plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC Recon, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
+                    plot_phi_map(fig, axes[2], phi_edges, theta_true_edges, simc_true_map, "{} {} vs $\\phi$, all settings SIMC True, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
+                else:
+                    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+                    plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
+                    plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
             else:
                 fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
-                plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
-                plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers[k]), ylabel)
+                plot_phi_map(fig, axes[0], phi_edges, edges, data_map, "{} {} vs $\\phi$, all settings Data, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
+                plot_phi_map(fig, axes[1], phi_edges, edges, simc_map, "{} {} vs $\\phi$, all settings SIMC, t={:.3f}".format(epsilon_label, ylabel, t_bin_centers_local[k]), ylabel)
             plt.tight_layout()
             pdf.savefig(fig, bbox_inches='tight')
             plt.close(fig)
 
-    for k in range(NumtBins):
+    for k in range(num_t_bins):
         data_map = cached_combined_2d_map("data", "t_vs_tmin", k)
         simc_map = cached_combined_2d_map("simc", "t_vs_tmin", k)
+        if data_map is None or simc_map is None:
+            continue
         fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
         plot_density_map(
             fig,
@@ -816,7 +900,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             t_vs_tmin_x_edges,
             t_vs_tmin_y_edges,
             data_map,
-            "{} -t vs -t_{{min}}, all settings Data, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+            "{} -t vs -t_{{min}}, all settings Data, t={:.3f}".format(epsilon_label, t_bin_centers_local[k]),
             '$-t_{min}$',
             '$-t$',
         )
@@ -826,7 +910,7 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
             t_vs_tmin_x_edges,
             t_vs_tmin_y_edges,
             simc_map,
-            "{} -t vs -t_{{min}}, all settings SIMC, t={:.3f}".format(epsilon_label, t_bin_centers[k]),
+            "{} -t vs -t_{{min}}, all settings SIMC, t={:.3f}".format(epsilon_label, t_bin_centers_local[k]),
             '$-t_{min}$',
             '$-t$',
         )
@@ -853,11 +937,18 @@ def append_xsect_support_pages(pdf, support, epsilon_label):
         ("theta_cm", central_theta, None, '$\\theta_{cm}$ (deg)'),
     )
     for _, values, errors, ylabel in central_pages:
+        values = np.asarray(values)
+        max_points = min(num_t_bins, len(values))
+        if max_points <= 0:
+            continue
+        values = values[:max_points]
+        x_values = t_bin_centers_local[:max_points]
+        plot_errors = None if errors is None else np.asarray(errors)[:max_points]
         fig, ax = plt.subplots(figsize=(12, 8))
-        if errors is None:
-            ax.plot(t_bin_centers, values, marker='o', color='tab:red')
+        if plot_errors is None:
+            ax.plot(x_values, values, marker='o', color='tab:red')
         else:
-            ax.errorbar(t_bin_centers, values, yerr=np.maximum(errors, 0.0), marker='o', linestyle='None', color='tab:red', markerfacecolor='none', capsize=2)
+            ax.errorbar(x_values, values, yerr=np.maximum(plot_errors, 0.0), marker='o', linestyle='None', color='tab:red', markerfacecolor='none', capsize=2)
         ax.set_title("{} central {} vs t".format(epsilon_label, ylabel), fontsize=18)
         ax.set_xlabel('-t', fontsize=14)
         ax.set_ylabel(ylabel, fontsize=14)
