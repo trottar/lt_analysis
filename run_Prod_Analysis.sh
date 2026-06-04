@@ -792,7 +792,7 @@ elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
     #TMIN=0.160
     #TMAX=0.360
     #
-    NumtBins=3
+    NumtBins=4
     NumPhiBins=10
     TMIN=0.180
     TMAX=0.600

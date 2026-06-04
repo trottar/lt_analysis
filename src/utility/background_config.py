@@ -42,8 +42,8 @@ BG_OPT_METRIC_WEIGHTS = {
     "valid_ratio_bins": 0.05,
 }
 
-#BG_OPT_ACTIVE_PROFILE = "nominal_weighted"
-BG_OPT_ACTIVE_PROFILE = "no_empirical_residual"
+BG_OPT_ACTIVE_PROFILE = "nominal_weighted"
+#BG_OPT_ACTIVE_PROFILE = "no_empirical_residual"
 
 BG_OPT_PROFILES = {
     "nominal_weighted": {
@@ -116,7 +116,7 @@ T_BIN_EDGE_BIAS = 2.0
 # The bash-script bin counts are assumed to be close, so only scan local
 # neighbors within +/- 1 bin for the shared bin-count optimization.
 NUM_T_BIN_SEARCH_OFFSETS = (-1, 0, 1)
-NUM_PHI_BIN_SEARCH_OFFSETS = (-1, 0, 1)
+NUM_PHI_BIN_SEARCH_OFFSETS = (-1, 0)
 
 BG_STAT_SCALE1_COARSE_MIN = 0.0
 BG_STAT_SCALE1_COARSE_MAX = 1.0
@@ -138,7 +138,8 @@ BG_OPT_MM_PLOT_MAX = 1.5
 BG_OPT_MM_PLOT_NBINS = 100
 # window: SIMC scaled to data inside MM cut window
 # proper: SIMC kept at proper archived normalization
-BG_OPT_MM_SIMC_SCALE_MODE = "proper"
+#BG_OPT_MM_SIMC_SCALE_MODE = "proper"
+BG_OPT_MM_SIMC_SCALE_MODE = "window"
 
 _PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
 
