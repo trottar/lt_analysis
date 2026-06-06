@@ -138,8 +138,8 @@ BG_OPT_MM_PLOT_MAX = 1.5
 BG_OPT_MM_PLOT_NBINS = 100
 # window: SIMC scaled to data inside MM cut window
 # proper: SIMC kept at proper archived normalization
-#BG_OPT_MM_SIMC_SCALE_MODE = "proper"
-BG_OPT_MM_SIMC_SCALE_MODE = "window"
+BG_OPT_MM_SIMC_SCALE_MODE = "proper"
+#BG_OPT_MM_SIMC_SCALE_MODE = "window"
 
 _PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
 
