@@ -12,7 +12,11 @@ from datetime import datetime, timezone
 
 import numpy as np
 
-from background_config import ALLOW_CONFIG_DRIFT, BG_MODELS
+from background_config import (
+    ALLOW_CONFIG_DRIFT,
+    BG_MODELS,
+    get_particle_subtraction_window_config,
+)
 
 
 KEY_FILE_HASH_TARGETS = [
@@ -311,6 +315,10 @@ def build_frozen_manifest_payload(
             float(current_inp_dict.get("mm_min")),
             float(current_inp_dict.get("mm_max")),
         ],
+        "particle_subtraction_windows": get_particle_subtraction_window_config(
+            particle_type,
+            "pion",
+        ),
         "t_bin_edges": t_bins,
         "phi_bin_edges": phi_bins,
         "background_models": _infer_fit_metadata(q2, w, phi_settings, eps_values),
@@ -557,6 +565,10 @@ def reconstruct_frozen_manifest_from_cache(base_dir, particle_type, q2, w):
             float(primary_inp.get("mm_min")) if primary_inp.get("mm_min") is not None else None,
             float(primary_inp.get("mm_max")) if primary_inp.get("mm_max") is not None else None,
         ],
+        "particle_subtraction_windows": get_particle_subtraction_window_config(
+            particle_type,
+            "pion",
+        ),
         "t_bin_edges": _json_ready(np.asarray(t_bins, dtype=float)),
         "phi_bin_edges": _json_ready(np.asarray(phi_bins, dtype=float)),
         "active_profile": active_profile,

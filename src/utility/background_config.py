@@ -141,6 +141,20 @@ BG_OPT_MM_PLOT_NBINS = 100
 BG_OPT_MM_SIMC_SCALE_MODE = "proper"
 #BG_OPT_MM_SIMC_SCALE_MODE = "window"
 
+# Separate normalization windows used when scaling the pion-selected
+# subtraction sample in kaon analyses.
+PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
+    "kaon": {
+        "pion": {
+            "apply_mm_offset_data": True,
+            "windows": {
+                "pi_n": (0.88, 0.94),
+                "pi_delta": (1.35, 1.45),
+            },
+        },
+    },
+}
+
 _PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
 
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
@@ -1113,6 +1127,35 @@ def resolve_bg_stat_scale2(inpDict, phi_setting=None):
     if "bg_stat_scale2" in inpDict:
         return float(inpDict["bg_stat_scale2"])
     return float(BG_STAT_SCALE2)
+
+
+def get_particle_subtraction_window_config(particle_type, subtracted_particle):
+    particle_key = str(particle_type or "").strip().lower()
+    subtracted_key = str(subtracted_particle or "").strip().lower()
+    particle_config = PARTICLE_SUBTRACTION_WINDOW_CONFIG.get(particle_key, {})
+    config = particle_config.get(subtracted_key)
+    return None if config is None else deepcopy(config)
+
+
+def resolve_particle_subtraction_windows(particle_type, subtracted_particle, mm_offset_data=0.0):
+    config = get_particle_subtraction_window_config(particle_type, subtracted_particle)
+    if not config:
+        return {}
+
+    offset = float(mm_offset_data) if bool(config.get("apply_mm_offset_data", False)) else 0.0
+    resolved = {}
+    for window_name, bounds in (config.get("windows") or {}).items():
+        if len(bounds) != 2:
+            raise ValueError(
+                "Particle subtraction window '{}' for {} -> {} must contain exactly two bounds".format(
+                    window_name,
+                    particle_type,
+                    subtracted_particle,
+                )
+            )
+        low_edge, high_edge = bounds
+        resolved[str(window_name)] = (float(low_edge) + offset, float(high_edge) + offset)
+    return resolved
 
 
 def build_bin_count_candidates(requested_t_bins, requested_phi_bins):

@@ -51,6 +51,12 @@ def _sha256_file(path):
     return digest.hexdigest()
 
 
+def _inline_json(value):
+    if value is None:
+        return ""
+    return json.dumps(value, sort_keys=True)
+
+
 def build_final_analysis_summary(
     manifest_payload,
     low_ledger_payload,
@@ -68,6 +74,7 @@ def build_final_analysis_summary(
         "q2": manifest_payload.get("q2"),
         "w": manifest_payload.get("w"),
         "mm_cut_window": manifest_payload.get("mm_cut_window"),
+        "particle_subtraction_windows": deepcopy(manifest_payload.get("particle_subtraction_windows")),
         "t_bin_edges": manifest_payload.get("t_bin_edges"),
         "phi_bin_edges": manifest_payload.get("phi_bin_edges"),
         "active_profile": manifest_payload.get("active_profile"),
@@ -99,6 +106,7 @@ def _markdown_lines(summary):
         "| Active profile | {} |".format(summary.get("active_profile", "")),
         "| Common epsilon scale behavior | {} |".format(summary.get("common_epsilon_scale_behavior", "")),
         "| MM cut | {} |".format(summary.get("mm_cut_window", "")),
+        "| Particle subtraction windows | {} |".format(_inline_json(summary.get("particle_subtraction_windows"))),
         "| t bins | {} |".format(summary.get("t_bin_edges", "")),
         "| phi bins | {} |".format(summary.get("phi_bin_edges", "")),
         "| Manifest hash | {} |".format(summary.get("manifest_hash", "")),
@@ -177,6 +185,7 @@ def write_final_analysis_summary(summary, outpath, particle_type, q2, w, active_
             "manifest_hash": summary.get("manifest_hash"),
             "iteration_count": summary.get("iteration_count"),
             "convergence_status": summary.get("convergence_status"),
+            "particle_subtraction_windows_json": _inline_json(summary.get("particle_subtraction_windows")),
             "low_bin_level_ledger_available": summary.get("low_epsilon_corrections", {}).get("all_settings_have_bin_level_ledger"),
             "high_bin_level_ledger_available": summary.get("high_epsilon_corrections", {}).get("all_settings_have_bin_level_ledger"),
             "low_fit1_fractional_correction": summary.get("low_epsilon_corrections", {}).get("fit1_fractional_correction"),

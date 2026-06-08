@@ -479,6 +479,7 @@ def _plot_heatmap(ax, matrix, title, colorbar_label, cmap="viridis", center_zero
 def _plot_manifest_pages(pdf, artifacts):
     manifest = artifacts["manifest"]
     profile_settings = manifest.get("resolved_optimizer_settings", {})
+    particle_subtraction_windows = manifest.get("particle_subtraction_windows") or {}
     lines = [
         "Manifest: {}".format(artifacts["manifest_path"]),
         "Particle: {}".format(manifest.get("particle_type")),
@@ -486,6 +487,8 @@ def _plot_manifest_pages(pdf, artifacts):
         "Active profile: {}".format(manifest.get("active_profile")),
         "Common epsilon scale behavior: {}".format(manifest.get("common_epsilon_scale_behavior", "independent")),
         "MM cut window: {}".format(manifest.get("mm_cut_window")),
+        "Particle subtraction windows:",
+        _short_profile_json(particle_subtraction_windows),
         "Low epsilon: {}".format((manifest.get("epsilon_values") or {}).get("low")),
         "High epsilon: {}".format((manifest.get("epsilon_values") or {}).get("high")),
         "Git commit: {}".format(manifest.get("git_commit_hash")),

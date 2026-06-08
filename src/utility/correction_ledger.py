@@ -10,6 +10,7 @@ from copy import deepcopy
 
 from utility import integrate_hist_range
 from frozen_manifest import get_correction_ledger_paths, write_json_with_aliases
+from background_config import get_particle_subtraction_window_config
 
 
 STAGE_ORDER = [
@@ -246,6 +247,10 @@ def build_correction_ledger(histlist, inp_dict, bg_summary=None):
         "w": inp_dict.get("W"),
         "outfilename": inp_dict.get("OutFilename"),
         "mm_cut_window": [mm_min, mm_max],
+        "particle_subtraction_windows": get_particle_subtraction_window_config(
+            inp_dict.get("ParticleType"),
+            "pion",
+        ),
         "active_profile": inp_dict.get("bg_active_profile"),
         "resolved_optimizer_settings": deepcopy(inp_dict.get("bg_resolved_profile", {})),
         "bg_optimization_summary": deepcopy(bg_summary or inp_dict.get("bg_optimization_summary", {})),

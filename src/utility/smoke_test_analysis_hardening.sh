@@ -45,6 +45,44 @@ print("analysis hardening pure-python imports OK")
 PY
 
 python - <<'PY'
+import math
+import os
+import sys
+
+utility_path = os.path.join(os.getcwd(), "src", "utility")
+if utility_path not in sys.path:
+    sys.path.append(utility_path)
+
+from background_config import (
+    get_particle_subtraction_window_config,
+    resolve_particle_subtraction_windows,
+)
+
+config = get_particle_subtraction_window_config("kaon", "pion")
+if config is None:
+    raise AssertionError("Expected kaon->pion subtraction-window config to exist")
+if tuple(config["windows"]["pi_n"]) != (0.88, 0.94):
+    raise AssertionError("Unexpected pi_n subtraction window: {}".format(config["windows"]["pi_n"]))
+if tuple(config["windows"]["pi_delta"]) != (1.35, 1.45):
+    raise AssertionError("Unexpected pi_delta subtraction window: {}".format(config["windows"]["pi_delta"]))
+
+resolved_nominal = resolve_particle_subtraction_windows("kaon", "pion", 0.0)
+resolved_shifted = resolve_particle_subtraction_windows("kaon", "pion", 0.02)
+for key, expected in {"pi_n": (0.88, 0.94), "pi_delta": (1.35, 1.45)}.items():
+    actual = resolved_nominal.get(key)
+    if actual is None or any(not math.isclose(actual[idx], expected[idx], rel_tol=0.0, abs_tol=1e-12) for idx in range(2)):
+        raise AssertionError("Unexpected nominal resolved window for {}: {}".format(key, actual))
+    shifted = resolved_shifted.get(key)
+    if shifted is None or any(
+        not math.isclose(shifted[idx], expected[idx] + 0.02, rel_tol=0.0, abs_tol=1e-12)
+        for idx in range(2)
+    ):
+        raise AssertionError("Unexpected shifted resolved window for {}: {}".format(key, shifted))
+
+print("analysis hardening subtraction-window resolver smoke OK")
+PY
+
+python - <<'PY'
 import contextlib
 import io
 import os
@@ -83,6 +121,10 @@ with tempfile.TemporaryDirectory() as tmpdir:
             "w": "test",
             "active_profile": "fit1_only",
             "common_epsilon_scale_behavior": "independent",
+            "particle_subtraction_windows": {
+                "apply_mm_offset_data": True,
+                "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
+            },
             "low_epsilon_corrections": {},
             "high_epsilon_corrections": {},
             "epsilon_empirical_compare": {},
@@ -349,6 +391,10 @@ with tempfile.TemporaryDirectory() as tmpdir:
         "active_profile": active_profile,
         "epsilon_values": {"low": 0.1, "high": 0.2},
         "mm_cut_window": [1.10, 1.15],
+        "particle_subtraction_windows": {
+            "apply_mm_offset_data": True,
+            "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
+        },
         "t_bin_edges": [0.1, 0.2, 0.3],
         "phi_bin_edges": [-180.0, -60.0, 60.0, 180.0],
         "selected_bg_scale1s": {"low": {"low:Center": 0.4}, "high": {"high:Center": 0.5}},
@@ -382,6 +428,10 @@ with tempfile.TemporaryDirectory() as tmpdir:
             "q2": q2,
             "w": w,
             "outfilename": "test_{}".format(epsset),
+            "particle_subtraction_windows": {
+                "apply_mm_offset_data": True,
+                "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
+            },
             "active_profile": active_profile,
             "resolved_optimizer_settings": {"selection_mode": "weighted"},
             "settings": [
@@ -483,6 +533,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
         "w": w,
         "active_profile": active_profile,
         "common_epsilon_scale_behavior": "independent",
+        "particle_subtraction_windows": manifest_payload["particle_subtraction_windows"],
         "resolved_optimizer_settings": {"selection_mode": "weighted"},
         "fit1_scales": manifest_payload["selected_bg_scale1s"],
         "fit2_scales": manifest_payload["selected_bg_scale2s"],
@@ -586,6 +637,10 @@ payload = {
     "w": "test",
     "outfilename": "test",
     "mm_cut_window": [1.0, 1.2],
+    "particle_subtraction_windows": {
+        "apply_mm_offset_data": True,
+        "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
+    },
     "active_profile": "fit1_only",
     "resolved_optimizer_settings": {},
     "settings": [],

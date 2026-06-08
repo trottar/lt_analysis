@@ -58,7 +58,11 @@ OUTPATH=lt.OUTPATH
 sys.path.append("utility")
 from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist, compute_positive_scale_factor
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
-from background_config import resolve_bg_stat_scale1, resolve_bg_stat_scale2
+from background_config import (
+    resolve_particle_subtraction_windows,
+    resolve_bg_stat_scale1,
+    resolve_bg_stat_scale2,
+)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_residual_weights,
@@ -652,30 +656,37 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
         if ParticleType == "kaon":
             
             try:
-                ##############
-                # HARD CODED #
-                ##############
-                pi_mm_min = 0.88 + MM_offset_DATA
-                pi_mm_max = 0.94 + MM_offset_DATA
-                ###pi_mm_min = 0.91 + MM_offset_DATA
-                ###pi_mm_max = 0.98 + MM_offset_DATA                
-                # Fit amplitudes: pion background (from raw DATA) and kaon (from SUB_DATA)
-                kaon_amp = integrate_hist_range(
-                    hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
-                    pi_mm_min, pi_mm_max
+                subtraction_windows = resolve_particle_subtraction_windows(
+                    ParticleType,
+                    SubtractedParticle,
+                    MM_offset_DATA,
                 )
+                if not subtraction_windows:
+                    raise ValueError(
+                        "No particle subtraction windows configured for {} -> {}".format(
+                            ParticleType,
+                            SubtractedParticle,
+                        )
+                    )
 
-                pion_background_amp = integrate_hist_range(
-                    subDict[f"H_MM_nosub_SUB_DATA_{j}"],
-                    pi_mm_min, pi_mm_max
-                )
+                kaon_amp = 0.0
+                pion_background_amp = 0.0
+                for window_min, window_max in subtraction_windows.values():
+                    kaon_amp += integrate_hist_range(
+                        hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
+                        window_min,
+                        window_max,
+                    )
+                    pion_background_amp += integrate_hist_range(
+                        subDict[f"H_MM_nosub_SUB_DATA_{j}"],
+                        window_min,
+                        window_max,
+                    )
                 scale_factor = compute_positive_scale_factor(
                     kaon_amp,
                     pion_background_amp,
                     "pion subtraction (t-bin {})".format(j),
                 )
-                ##############
-                ##############                
             except ZeroDivisionError:
                 scale_factor = 0.0
             '''

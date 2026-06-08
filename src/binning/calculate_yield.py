@@ -63,6 +63,7 @@ from background_config import (
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
     get_bg_scale_setting_key,
+    resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
@@ -1187,23 +1188,32 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
             if ParticleType == "kaon":
                 
                 try:
-                    ##############
-                    # HARD CODED #
-                    ##############
-                    pi_mm_min = 0.88 + MM_offset_DATA
-                    pi_mm_max = 0.94 + MM_offset_DATA
-                    ###pi_mm_min = 0.91 + MM_offset_DATA
-                    ###pi_mm_max = 0.98 + MM_offset_DATA
-                    # Fit amplitudes: pion background (from raw DATA) and kaon (from SUB_DATA)
-                    kaon_amp = integrate_hist_range(
-                        hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                        pi_mm_min, pi_mm_max             
+                    subtraction_windows = resolve_particle_subtraction_windows(
+                        ParticleType,
+                        SubtractedParticle,
+                        MM_offset_DATA,
                     )
+                    if not subtraction_windows:
+                        raise ValueError(
+                            "No particle subtraction windows configured for {} -> {}".format(
+                                ParticleType,
+                                SubtractedParticle,
+                            )
+                        )
 
-                    pion_background_amp = integrate_hist_range(
-                        subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                        pi_mm_min, pi_mm_max                    
-                    )
+                    kaon_amp = 0.0
+                    pion_background_amp = 0.0
+                    for window_min, window_max in subtraction_windows.values():
+                        kaon_amp += integrate_hist_range(
+                            hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                            window_min,
+                            window_max,
+                        )
+                        pion_background_amp += integrate_hist_range(
+                            subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                            window_min,
+                            window_max,
+                        )
                     scale_factor = compute_positive_scale_factor(
                         kaon_amp,
                         pion_background_amp,

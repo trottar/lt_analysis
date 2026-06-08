@@ -61,6 +61,7 @@ from background_config import (
     BG_OPT_MM_PLOT_NBINS,
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
+    resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
@@ -2039,31 +2040,37 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
         
         try:
-            ##############
-            # HARD CODED #
-            ##############
-            pi_mm_min = 0.88 + MM_offset_DATA
-            pi_mm_max = 0.94 + MM_offset_DATA 
-            ###pi_mm_min = 0.91 + MM_offset_DATA
-            ###pi_mm_max = 0.98 + MM_offset_DATA                       
-            # Scale pion to kaon data
-            kaon_amp = integrate_hist_range(
-                H_MM_nosub_DATA,
-                pi_mm_min, pi_mm_max
+            subtraction_windows = resolve_particle_subtraction_windows(
+                ParticleType,
+                SubtractedParticle,
+                MM_offset_DATA,
             )
+            if not subtraction_windows:
+                raise ValueError(
+                    "No particle subtraction windows configured for {} -> {}".format(
+                        ParticleType,
+                        SubtractedParticle,
+                    )
+                )
 
-            pion_background_amp = integrate_hist_range(
-                subDict["H_MM_nosub_SUB_DATA"],
-                pi_mm_min, pi_mm_max
-            )
+            kaon_amp = 0.0
+            pion_background_amp = 0.0
+            for window_min, window_max in subtraction_windows.values():
+                kaon_amp += integrate_hist_range(
+                    H_MM_nosub_DATA,
+                    window_min,
+                    window_max,
+                )
+                pion_background_amp += integrate_hist_range(
+                    subDict["H_MM_nosub_SUB_DATA"],
+                    window_min,
+                    window_max,
+                )
             scale_factor = compute_positive_scale_factor(
                 kaon_amp,
                 pion_background_amp,
                 "pion subtraction ({})".format(phi_setting),
             )
-            ##############
-            ##############
-            ##############
         except ZeroDivisionError:
             scale_factor = 0.0
         '''
