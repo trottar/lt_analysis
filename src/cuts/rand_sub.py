@@ -22,6 +22,7 @@ import scipy
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import sys, math, os, subprocess
+import traceback
 import array
 from time import perf_counter
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
@@ -97,6 +98,37 @@ def _print_rand_timer(label, elapsed, total_events=None):
         print("[TIMER] {}: {} ({:.3f} ms/event)".format(label, _format_elapsed(elapsed), per_event_ms))
     else:
         print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
+
+
+def _print_rand_debug(stage, **details):
+    print("[DEBUG rand_sub] {}".format(stage), flush=True)
+    for key, value in details.items():
+        print("  {} = {}".format(key, value), flush=True)
+
+
+def _safe_tree_entries(tree):
+    if tree is None:
+        return None
+    try:
+        return int(tree.GetEntries())
+    except Exception:
+        return "unavailable"
+
+
+def _debug_tree_status(label, tree):
+    tree_name = None
+    if tree is not None:
+        try:
+            tree_name = tree.GetName()
+        except Exception:
+            tree_name = "unavailable"
+    _print_rand_debug(
+        "tree status",
+        label=label,
+        exists=bool(tree is not None),
+        tree_name=tree_name,
+        entries=_safe_tree_entries(tree),
+    )
 
 
 def _warn_if_oversub_diagnostics(inpDict, diagnostics, phi_setting, fit_stage):
@@ -272,7 +304,11 @@ def _process_rand_sub_background_tree(
     mm_background_weights,
     source_coeff,
     residual_weights=None,
+    tree_label=None,
 ):
+    if tree is None:
+        raise RuntimeError("Background tree '{}' is None".format(tree_label or "unnamed"))
+
     for evt in tree:
         if particle_type == "kaon":
             base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
@@ -314,7 +350,11 @@ def _process_subtracted_particle_background_tree(
     mm_background_weights,
     source_coeff,
     residual_weights=None,
+    tree_label=None,
 ):
+    if tree is None:
+        raise RuntimeError("Subtracted-particle background tree '{}' is None".format(tree_label or "unnamed"))
+
     mm_offset_correction = 0.0 if get_shift_mode() == "shifted" else mm_offset_data
 
     for evt in tree:
@@ -2253,332 +2293,424 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         "p_aero": P_aero_npeSum_DATA,
     }
 
-    if ParticleType == "kaon":
-        sub_root_data = open_root_file(f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root")
-        sub_root_dummy = open_root_file(f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root")
-        sub_prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
-        sub_rand_tree_name = get_rand_tree_name(SubtractedParticle, EPSSET)
-        TBRANCH_SUB_DATA = sub_root_data.Get(sub_prompt_tree_name)
-        TBRANCH_SUB_RAND = sub_root_data.Get(sub_rand_tree_name)
-        TBRANCH_SUB_DUMMY = sub_root_dummy.Get(sub_prompt_tree_name)
-        TBRANCH_SUB_DUMMY_RAND = sub_root_dummy.Get(sub_rand_tree_name)
+    rand_debug_stage = "post-pion-subtraction"
+    bg_diag1 = None
+    bg_diag2 = None
+    TBRANCH_SUB_DATA = None
+    TBRANCH_SUB_RAND = None
+    TBRANCH_SUB_DUMMY = None
+    TBRANCH_SUB_DUMMY_RAND = None
 
-    # Fit background and subtract
-    # --------------------------------------------------------------
-    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
-    # --------------------------------------------------------------
-    inpDict["bg_stat_scale1"] = resolve_bg_stat_scale1(inpDict, phi_setting)
-    residual_bg_weights1 = None
-    background_fit1 = None
-    background_fit2 = None
+    try:
+        if ParticleType == "kaon":
+            rand_debug_stage = "open subtracted-particle ROOT files"
+            sub_data_path = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root"
+            sub_dummy_path = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root"
+            _print_rand_debug(
+                "opening subtraction ROOT files",
+                phi_setting=phi_setting,
+                epsset=EPSSET,
+                subtracted_particle=SubtractedParticle,
+                data_path=sub_data_path,
+                data_exists=os.path.exists(sub_data_path),
+                dummy_path=sub_dummy_path,
+                dummy_exists=os.path.exists(sub_dummy_path),
+            )
+            sub_root_data = open_root_file(sub_data_path)
+            sub_root_dummy = open_root_file(sub_dummy_path)
+            sub_prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
+            sub_rand_tree_name = get_rand_tree_name(SubtractedParticle, EPSSET)
+            TBRANCH_SUB_DATA = sub_root_data.Get(sub_prompt_tree_name)
+            TBRANCH_SUB_RAND = sub_root_data.Get(sub_rand_tree_name)
+            TBRANCH_SUB_DUMMY = sub_root_dummy.Get(sub_prompt_tree_name)
+            TBRANCH_SUB_DUMMY_RAND = sub_root_dummy.Get(sub_rand_tree_name)
+            _print_rand_debug(
+                "resolved subtraction tree names",
+                prompt_tree_name=sub_prompt_tree_name,
+                rand_tree_name=sub_rand_tree_name,
+            )
+            _debug_tree_status("sub_data_prompt", TBRANCH_SUB_DATA)
+            _debug_tree_status("sub_data_rand", TBRANCH_SUB_RAND)
+            _debug_tree_status("sub_dummy_prompt", TBRANCH_SUB_DUMMY)
+            _debug_tree_status("sub_dummy_rand", TBRANCH_SUB_DUMMY_RAND)
 
-    if  inpDict["bg_stat_scale1"] > 0.0:
-        background_fit1 = bg_fit(phi_setting,
-                                inpDict,
-                                H_MM_pisub_DATA,   # wide / no-cut
-                                H_MM_DATA,         # cut-window axis
-                                scaling=inpDict["bg_stat_scale1"],
-                                model_key=f"fixquad_{phi_setting}_{EPSSET}e",
-                                fit_name="Fit 1")
-        # background_fit1[0] : scaled function   (use for subtraction)
-        # background_fit1[1] : original function (use for drawing only)
-        mm_stage1_input = clone_reset_hist(H_MM_DATA, "_stage1_input")
-        mm_stage1_input.Add(H_MM_DATA)
-        bg_templates1 = _create_rand_sub_bg_templates(data_bg_targets)
-        bg_weights1, bg_diag1 = build_mm_background_weights_with_diagnostics(
-            mm_stage1_input,
-            background_fit1[0],
-        )
-        _warn_if_oversub_diagnostics(
-            inpDict,
-            bg_diag1,
-            phi_setting,
-            "Fit 1",
-        )
-
-        _process_rand_sub_background_tree(
-            TBRANCH_DATA,
-            tmin,
-            tmax,
-            bg_templates1,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage1_input,
-            bg_weights1,
-            norm_factor_data,
-        )
-        _process_rand_sub_background_tree(
-            TBRANCH_RAND,
-            tmin,
-            tmax,
-            bg_templates1,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage1_input,
-            bg_weights1,
-            -norm_factor_data / nWindows,
-        )
-        _process_rand_sub_background_tree(
-            TBRANCH_DUMMY,
-            tmin,
-            tmax,
-            bg_templates1,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage1_input,
-            bg_weights1,
-            -norm_factor_dummy,
-        )
-        _process_rand_sub_background_tree(
-            TBRANCH_DUMMY_RAND,
-            tmin,
-            tmax,
-            bg_templates1,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage1_input,
-            bg_weights1,
-            norm_factor_dummy / nWindows,
+        # Fit background and subtract
+        # --------------------------------------------------------------
+        # Stat-scale: events that survive ALL subtractions & MM-cuts
+        # --------------------------------------------------------------
+        rand_debug_stage = "resolve fit 1 scale"
+        inpDict["bg_stat_scale1"] = resolve_bg_stat_scale1(inpDict, phi_setting)
+        residual_bg_weights1 = None
+        background_fit1 = None
+        background_fit2 = None
+        _print_rand_debug(
+            "fit 1 scale resolved",
+            phi_setting=phi_setting,
+            epsset=EPSSET,
+            bg_stat_scale1=inpDict["bg_stat_scale1"],
+            scale_factor=scale_factor if "scale_factor" in locals() else None,
         )
 
-        if ParticleType == "kaon" and scale_factor != 0.0:
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_DATA,
-                MM_offset_DATA,
+        if inpDict["bg_stat_scale1"] > 0.0:
+            rand_debug_stage = "fit 1 function build"
+            background_fit1 = bg_fit(phi_setting,
+                                    inpDict,
+                                    H_MM_pisub_DATA,   # wide / no-cut
+                                    H_MM_DATA,         # cut-window axis
+                                    scaling=inpDict["bg_stat_scale1"],
+                                    model_key=f"fixquad_{phi_setting}_{EPSSET}e",
+                                    fit_name="Fit 1")
+            mm_stage1_input = clone_reset_hist(H_MM_DATA, "_stage1_input")
+            mm_stage1_input.Add(H_MM_DATA)
+            bg_templates1 = _create_rand_sub_bg_templates(data_bg_targets)
+            bg_weights1, bg_diag1 = build_mm_background_weights_with_diagnostics(
+                mm_stage1_input,
+                background_fit1[0],
+            )
+            _warn_if_oversub_diagnostics(
+                inpDict,
+                bg_diag1,
+                phi_setting,
+                "Fit 1",
+            )
+
+            rand_debug_stage = "fit 1 prompt data background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_DATA,
+                tmin,
+                tmax,
                 bg_templates1,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
                 bg_weights1,
-                -scale_factor * norm_factor_data,
+                norm_factor_data,
+                tree_label="prompt data fit1",
             )
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_RAND,
-                MM_offset_DATA,
+            rand_debug_stage = "fit 1 random data background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_RAND,
+                tmin,
+                tmax,
                 bg_templates1,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
                 bg_weights1,
-                scale_factor * norm_factor_data / nWindows,
+                -norm_factor_data / nWindows,
+                tree_label="random data fit1",
             )
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_DUMMY,
-                MM_offset_DATA,
+            rand_debug_stage = "fit 1 prompt dummy background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_DUMMY,
+                tmin,
+                tmax,
                 bg_templates1,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
                 bg_weights1,
-                scale_factor * norm_factor_dummy,
+                -norm_factor_dummy,
+                tree_label="prompt dummy fit1",
             )
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_DUMMY_RAND,
-                MM_offset_DATA,
+            rand_debug_stage = "fit 1 random dummy background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_DUMMY_RAND,
+                tmin,
+                tmax,
                 bg_templates1,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage1_input,
                 bg_weights1,
-                -scale_factor * norm_factor_dummy / nWindows,
+                norm_factor_dummy / nWindows,
+                tree_label="random dummy fit1",
             )
 
-        for key, hist in data_bg_targets.items():
-            hist.Add(bg_templates1[key], -1)
+            if ParticleType == "kaon" and scale_factor != 0.0:
+                rand_debug_stage = "fit 1 subtracted prompt data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DATA,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    -scale_factor * norm_factor_data,
+                    tree_label="subtracted prompt data fit1",
+                )
+                rand_debug_stage = "fit 1 subtracted random data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_RAND,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    scale_factor * norm_factor_data / nWindows,
+                    tree_label="subtracted random data fit1",
+                )
+                rand_debug_stage = "fit 1 subtracted prompt dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    scale_factor * norm_factor_dummy,
+                    tree_label="subtracted prompt dummy fit1",
+                )
+                rand_debug_stage = "fit 1 subtracted random dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY_RAND,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    -scale_factor * norm_factor_dummy / nWindows,
+                    tree_label="subtracted random dummy fit1",
+                )
 
-        residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
-        H_MM_fit2sub_DATA.Add(background_fit1[1], -1)
-        H_MM_fit1sub_DATA.Add(background_fit1[1], -1)
-        H_MM_DATA.Add(background_fit1[0], -1)
-        H_MM_full_DATA.Add(background_fit1[1], -1)        
+            rand_debug_stage = "fit 1 histogram subtraction"
+            for key, hist in data_bg_targets.items():
+                hist.Add(bg_templates1[key], -1)
 
-    # Fit background and subtract
-    # --------------------------------------------------------------
-    # Stat‑scale: events that survive ALL subtractions & MM‑cuts
-    # --------------------------------------------------------------
-    inpDict["bg_stat_scale2"] = resolve_bg_stat_scale2(inpDict, phi_setting)
+            residual_bg_weights1 = build_mm_residual_weights(bg_weights1)
+            H_MM_fit2sub_DATA.Add(background_fit1[1], -1)
+            H_MM_fit1sub_DATA.Add(background_fit1[1], -1)
+            H_MM_DATA.Add(background_fit1[0], -1)
+            H_MM_full_DATA.Add(background_fit1[1], -1)
 
-    if inpDict["bg_stat_scale2"] > 0.0:
-        background_fit2 = bg_fit(phi_setting,
-                                inpDict,
-                                H_MM_fit1sub_DATA,   # wide / no-cut
-                                H_MM_DATA,         # cut-window axis
-                                scaling=inpDict["bg_stat_scale2"],
-                                model_key=f"cheb2_{phi_setting}_{EPSSET}e",
-                                fit_name="Fit 2")
-        # background_fit2[0] : scaled function   (use for subtraction)
-        # background_fit2[1] : original function (use for drawing only)
-        mm_stage2_input = clone_reset_hist(H_MM_DATA, "_stage2_input")
-        mm_stage2_input.Add(H_MM_DATA)
-        bg_templates2 = _create_rand_sub_bg_templates(data_bg_targets)
-        bg_weights2, bg_diag2 = build_mm_background_weights_with_diagnostics(
-            mm_stage2_input,
-            background_fit2[0],
-        )
-        _warn_if_oversub_diagnostics(
-            inpDict,
-            bg_diag2,
-            phi_setting,
-            "Fit 2",
-        )
-
-        _process_rand_sub_background_tree(
-            TBRANCH_DATA,
-            tmin,
-            tmax,
-            bg_templates2,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage2_input,
-            bg_weights2,
-            norm_factor_data,
-            residual_weights=residual_bg_weights1,
-        )
-        _process_rand_sub_background_tree(
-            TBRANCH_RAND,
-            tmin,
-            tmax,
-            bg_templates2,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage2_input,
-            bg_weights2,
-            -norm_factor_data / nWindows,
-            residual_weights=residual_bg_weights1,
-        )
-        _process_rand_sub_background_tree(
-            TBRANCH_DUMMY,
-            tmin,
-            tmax,
-            bg_templates2,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage2_input,
-            bg_weights2,
-            -norm_factor_dummy,
-            residual_weights=residual_bg_weights1,
-        )
-        _process_rand_sub_background_tree(
-            TBRANCH_DUMMY_RAND,
-            tmin,
-            tmax,
-            bg_templates2,
-            ParticleType,
-            hole_contains,
-            evaluate_data_event,
-            mm_min,
-            mm_max,
-            mm_stage2_input,
-            bg_weights2,
-            norm_factor_dummy / nWindows,
-            residual_weights=residual_bg_weights1,
+        # Fit background and subtract
+        # --------------------------------------------------------------
+        # Stat-scale: events that survive ALL subtractions & MM-cuts
+        # --------------------------------------------------------------
+        rand_debug_stage = "resolve fit 2 scale"
+        inpDict["bg_stat_scale2"] = resolve_bg_stat_scale2(inpDict, phi_setting)
+        _print_rand_debug(
+            "fit 2 scale resolved",
+            phi_setting=phi_setting,
+            epsset=EPSSET,
+            bg_stat_scale2=inpDict["bg_stat_scale2"],
         )
 
-        if ParticleType == "kaon" and scale_factor != 0.0:
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_DATA,
-                MM_offset_DATA,
+        if inpDict["bg_stat_scale2"] > 0.0:
+            rand_debug_stage = "fit 2 function build"
+            background_fit2 = bg_fit(phi_setting,
+                                    inpDict,
+                                    H_MM_fit1sub_DATA,   # wide / no-cut
+                                    H_MM_DATA,         # cut-window axis
+                                    scaling=inpDict["bg_stat_scale2"],
+                                    model_key=f"cheb2_{phi_setting}_{EPSSET}e",
+                                    fit_name="Fit 2")
+            mm_stage2_input = clone_reset_hist(H_MM_DATA, "_stage2_input")
+            mm_stage2_input.Add(H_MM_DATA)
+            bg_templates2 = _create_rand_sub_bg_templates(data_bg_targets)
+            bg_weights2, bg_diag2 = build_mm_background_weights_with_diagnostics(
+                mm_stage2_input,
+                background_fit2[0],
+            )
+            _warn_if_oversub_diagnostics(
+                inpDict,
+                bg_diag2,
+                phi_setting,
+                "Fit 2",
+            )
+
+            rand_debug_stage = "fit 2 prompt data background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_DATA,
+                tmin,
+                tmax,
                 bg_templates2,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
                 bg_weights2,
-                -scale_factor * norm_factor_data,
+                norm_factor_data,
                 residual_weights=residual_bg_weights1,
+                tree_label="prompt data fit2",
             )
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_RAND,
-                MM_offset_DATA,
+            rand_debug_stage = "fit 2 random data background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_RAND,
+                tmin,
+                tmax,
                 bg_templates2,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
                 bg_weights2,
-                scale_factor * norm_factor_data / nWindows,
+                -norm_factor_data / nWindows,
                 residual_weights=residual_bg_weights1,
+                tree_label="random data fit2",
             )
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_DUMMY,
-                MM_offset_DATA,
+            rand_debug_stage = "fit 2 prompt dummy background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_DUMMY,
+                tmin,
+                tmax,
                 bg_templates2,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
                 bg_weights2,
-                scale_factor * norm_factor_dummy,
+                -norm_factor_dummy,
                 residual_weights=residual_bg_weights1,
+                tree_label="prompt dummy fit2",
             )
-            _process_subtracted_particle_background_tree(
-                TBRANCH_SUB_DUMMY_RAND,
-                MM_offset_DATA,
+            rand_debug_stage = "fit 2 random dummy background pass"
+            _process_rand_sub_background_tree(
+                TBRANCH_DUMMY_RAND,
+                tmin,
+                tmax,
                 bg_templates2,
                 ParticleType,
                 hole_contains,
                 evaluate_data_event,
-                get_shifted_t,
                 mm_min,
                 mm_max,
                 mm_stage2_input,
                 bg_weights2,
-                -scale_factor * norm_factor_dummy / nWindows,
+                norm_factor_dummy / nWindows,
                 residual_weights=residual_bg_weights1,
+                tree_label="random dummy fit2",
             )
 
-        for key, hist in data_bg_targets.items():
-            hist.Add(bg_templates2[key], -1)
+            if ParticleType == "kaon" and scale_factor != 0.0:
+                rand_debug_stage = "fit 2 subtracted prompt data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DATA,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    -scale_factor * norm_factor_data,
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted prompt data fit2",
+                )
+                rand_debug_stage = "fit 2 subtracted random data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_RAND,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    scale_factor * norm_factor_data / nWindows,
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted random data fit2",
+                )
+                rand_debug_stage = "fit 2 subtracted prompt dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    scale_factor * norm_factor_dummy,
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted prompt dummy fit2",
+                )
+                rand_debug_stage = "fit 2 subtracted random dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY_RAND,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    -scale_factor * norm_factor_dummy / nWindows,
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted random dummy fit2",
+                )
 
-        H_MM_fit2sub_DATA.Add(background_fit2[1], -1)
-        H_MM_DATA.Add(background_fit2[0], -1)
-        H_MM_full_DATA.Add(background_fit2[1], -1)
+            rand_debug_stage = "fit 2 histogram subtraction"
+            for key, hist in data_bg_targets.items():
+                hist.Add(bg_templates2[key], -1)
+
+            H_MM_fit2sub_DATA.Add(background_fit2[1], -1)
+            H_MM_DATA.Add(background_fit2[0], -1)
+            H_MM_full_DATA.Add(background_fit2[1], -1)
+    except Exception:
+        _print_rand_debug(
+            "failure after pion subtraction",
+            stage=rand_debug_stage,
+            phi_setting=phi_setting,
+            epsset=EPSSET,
+            particle_type=ParticleType,
+            bg_stat_scale1=inpDict.get("bg_stat_scale1"),
+            bg_stat_scale2=inpDict.get("bg_stat_scale2"),
+            scale_factor=scale_factor if "scale_factor" in locals() else None,
+        )
+        traceback.print_exc()
+        raise
+
     stage_start = perf_counter()
     histDict["InFile_DATA"] = InFile_DATA
     histDict["InFile_DUMMY"] = InFile_DUMMY
