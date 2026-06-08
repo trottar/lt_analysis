@@ -294,6 +294,21 @@ def print_timing_summary():
 
 atexit.register(print_timing_summary)
 
+
+def copy_with_context(src_path, dst_path, description):
+    try:
+        print("\nCopying {} to {}".format(src_path, dst_path))
+        shutil.copy(src_path, dst_path)
+    except Exception as exc:
+        raise RuntimeError(
+            "{} failed while copying '{}' -> '{}': {}".format(
+                description,
+                src_path,
+                dst_path,
+                exc,
+            )
+        ) from exc
+
 inpDict["mm_shift_summary"] = {}
 inpDict["t_shift_summary"] = {}
 
@@ -509,8 +524,11 @@ output_file_lst.append(py_param)
 # Needs to be done this way because of fortran compiler limitations
 py_param_active = 'models/param_active.py'
 # \nCopying content of used models to actively used files
-print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
-shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
+copy_with_context(
+    LTANAPATH+"/src/"+py_param,
+    LTANAPATH+"/src/"+py_param_active,
+    "Activating parameter model",
+)
 
 # ***Parameter file from last iteration!***
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
@@ -977,10 +995,18 @@ create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 record_stage_time("Step 6 create_lists", stage_start)
 
 # Copy initial parameterization to specific particle type directory
-shutil.copy('{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")), '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")))
+copy_with_context(
+    '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")),
+    '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")),
+    "Saving current parameterization",
+)
 
 # Copy input model to specific particle type directory
-shutil.copy('{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W), '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W))
+copy_with_context(
+    '{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W),
+    '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W),
+    "Saving input model",
+)
 
 # Save input model
 output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
@@ -1025,10 +1051,16 @@ if EPSSET == "high":
     py_param_active = 'models/param_active.py'
     fort_xmodel_active = 'models/xmodel_active.f'
     # \nCopying content of used models to actively used files
-    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active))
-    shutil.copy(LTANAPATH+"/src/"+fort_xmodel, LTANAPATH+"/src/"+fort_xmodel_active)
-    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active))    
-    shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
+    copy_with_context(
+        LTANAPATH+"/src/"+fort_xmodel,
+        LTANAPATH+"/src/"+fort_xmodel_active,
+        "Activating xmodel source",
+    )
+    copy_with_context(
+        LTANAPATH+"/src/"+py_param,
+        LTANAPATH+"/src/"+py_param_active,
+        "Activating parameter model",
+    )
 
     # Save python script that contain separated xsect models for lt script
     py_lt = 'models/lt_{}_{}.py'.format(ParticleType, pol_str)
@@ -1037,8 +1069,11 @@ if EPSSET == "high":
     # Needs to be done this way because of fortran compiler limitations
     py_lt_active = 'models/lt_active.py'
     # \nCopying content of used models to actively used files
-    print("\nCopying {} to {}".format(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active))
-    shutil.copy(LTANAPATH+"/src/"+py_lt, LTANAPATH+"/src/"+py_lt_active)
+    copy_with_context(
+        LTANAPATH+"/src/"+py_lt,
+        LTANAPATH+"/src/"+py_lt_active,
+        "Activating LT fit model",
+    )
     
     # run_xsect bash script calls average_kinematics.f to find error weighted average of data.
     # It then runs calc_xsect.f to find unseparated cross section as well as new set of parameters
@@ -1244,8 +1279,11 @@ if EPSSET == "high":
             file.write(formatted_date)
                 
     f_path_new = f_path.replace(LTANAPATH,new_dir).replace("iter","iter_0") # Zeroth iteration
-    print("\nCopying {} to {}".format(f_path,f_path_new))
-    shutil.copy(f_path,f_path_new)
+    copy_with_context(
+        f_path,
+        f_path_new,
+        "Archiving iteration stamp",
+    )
 
 support_prefix = f"{ParticleType}_xsect_support_Q{Q2}W{W}_"
 for f in os.listdir(OUTPATH):
@@ -1283,33 +1321,27 @@ for f in output_file_lst:
         if ".pdf" in f:
             create_dir(new_dir+"/plots")
             f_new = f.replace(OUTPATH,new_dir+"/plots")
-            print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)
+            copy_with_context(f, f_new, "Caching PDF artifact")
         if ".json" in f:
             create_dir(new_dir+"/json")
             f_new = f.replace(OUTPATH,new_dir+"/json")
-            print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)                
+            copy_with_context(f, f_new, "Caching JSON artifact")
         if ".csv" in f:
             create_dir(new_dir+"/csv")
             f_new = f.replace(OUTPATH,new_dir+"/csv")
-            print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)
+            copy_with_context(f, f_new, "Caching CSV artifact")
         if ".root" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)
+            copy_with_context(f, f_new, "Caching ROOT artifact")
         if ".hist" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)
+            copy_with_context(f, f_new, "Caching HIST artifact")
         if ".npz" in f:
             create_dir(new_dir+"/root")
             f_new = f.replace(OUTPATH,new_dir+"/root")
-            print("\nCopying {} to {}".format(f,f_new))
-            shutil.copy(f, f_new)
+            copy_with_context(f, f_new, "Caching NPZ artifact")
     elif "{}/".format(ParticleType) in f:
         src_path = LTANAPATH+"/src/"+f
         if not os.path.exists(src_path):
@@ -1322,20 +1354,17 @@ for f in output_file_lst:
                 if "{}".format(ParticleType) not in f_dir:
                     create_dir(new_dir+"/"+f_dir)
                     f_new = new_dir+"/"+f_dir+"/"+f_tmp    
-                    print("\nCopying {} to {}".format(src_path,f_new))
-                    shutil.copy(src_path, f_new)
+                    copy_with_context(src_path, f_new, "Caching source artifact")
         else:
             f_new = new_dir+"/"+f_tmp
-            print("\nCopying {} to {}".format(src_path,f_new))
-            shutil.copy(src_path, f_new)
+            copy_with_context(src_path, f_new, "Caching source artifact")
     else:
         src_path = LTANAPATH+"/src/"+f
         if not os.path.exists(src_path):
             print("\nWARNING: Source artifact not found, skipping copy: {}".format(src_path))
             continue
         f_new = new_dir
-        print("\nCopying {} to {}".format(src_path,f_new))
-        shutil.copy(src_path, f_new)
+        copy_with_context(src_path, f_new, "Caching source artifact")
     
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
