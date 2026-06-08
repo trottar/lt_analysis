@@ -556,32 +556,38 @@ def bg_fit(
         hist_name = hist.GetName()
         parts = hist_name.split("_")
 
+        warning_details = []
         try:
             tbin = int(parts[-2]) + 1
             phibin = int(parts[-1]) + 1
-            if DEBUG:
-                print(
-                    f"Bad fit for: {hist_name}  "
-                    f"(tbin={tbin}, phibin={phibin})  "
-                    f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-                )
+            warning_details.append(f"tbin={tbin}")
+            warning_details.append(f"phibin={phibin}")
         except ValueError:
             try:
                 tbin = int(parts[-1]) + 1
-                if DEBUG:
-                    print(
-                        f"Bad fit for: {hist_name}  "
-                        f"(tbin={tbin})  "
-                        f"f_min={f_min:.6g}  f_max={f_max:.6g}"
-                    )
+                warning_details.append(f"tbin={tbin}")
             except ValueError:
-                if DEBUG:
-                    print(
-                        "ERROR!"
-                        f" Bad fit for: {hist_name}  "
-                        "\nClosing script..."
-                    )
-                sys.exit(2)
+                warning_details.append("bin_id=unavailable")
+
+        print(
+            "WARNING: background fit failed shape validation; using zero-background fallback\n"
+            "  hist_name = {}\n"
+            "  fit_name = {}\n"
+            "  model_key = {}\n"
+            "  bg_window = [{:.6f}, {:.6f}]\n"
+            "  f_min = {:.6g}\n"
+            "  f_max = {:.6g}\n"
+            "  details = {}".format(
+                hist_name,
+                fit_name,
+                model_key,
+                orig_bg_lo,
+                orig_bg_hi,
+                f_min,
+                f_max,
+                ", ".join(warning_details),
+            )
+        )
 
         # Zero background over the full MM range
         fit_func_zero = TF1("fit_func_zero_bad", "0", mm_min, mm_max)
