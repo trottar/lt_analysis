@@ -24,6 +24,7 @@ from scipy.integrate import quad
 import matplotlib.pyplot as plt
 from collections import defaultdict
 import sys, math, os, subprocess
+import traceback
 from array import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
@@ -243,6 +244,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not sp
 analysis_start_time = perf_counter()
 stage_timings = []
 timing_summary_printed = False
+current_debug_stage = "startup"
 
 
 def format_elapsed(seconds):
@@ -293,6 +295,36 @@ def print_timing_summary():
 
 
 atexit.register(print_timing_summary)
+
+
+def debug_checkpoint(stage_name, **details):
+    global current_debug_stage
+    current_debug_stage = stage_name
+    print("\n[DEBUG] {}".format(stage_name))
+    for key, value in details.items():
+        print("  {} = {}".format(key, value))
+
+
+def debug_file_status(label, path):
+    exists = os.path.exists(path)
+    print("\n[DEBUG] {}: exists={} path={}".format(label, exists, path))
+    if exists and os.path.isfile(path):
+        try:
+            print("  size_bytes = {}".format(os.path.getsize(path)))
+        except OSError as exc:
+            print("  size_bytes = unavailable ({})".format(exc))
+
+
+def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    print("\n[FATAL] Unhandled exception while in stage: {}".format(current_debug_stage))
+    traceback.print_exception(exc_type, exc_value, exc_traceback)
+
+
+sys.excepthook = handle_uncaught_exception
 
 
 def copy_with_context(src_path, dst_path, description):
@@ -840,6 +872,12 @@ yieldDict.update(find_yield_simc(histlist, inpDict))
 record_stage_time("Step 6 simc yields", stage_start)
 
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 correction ledger export start",
+    epsset=EPSSET,
+    outfilename=OutFilename,
+    active_profile=inpDict.get("bg_active_profile"),
+)
 correction_ledger_payload = build_correction_ledger(
     histlist,
     inpDict,
@@ -861,9 +899,14 @@ inpDict["correction_ledger_path"] = get_correction_ledger_paths(
     OutFilename,
     active_profile=inpDict.get("bg_active_profile"),
 )["json"]
+debug_file_status("Correction ledger JSON", inpDict["correction_ledger_path"])
 record_stage_time("Step 6 correction ledger export", stage_start)
 
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 xsect support start",
+    hist_count=len(histlist),
+)
 write_xsect_support(histlist, inpDict, output_file_lst)
 record_stage_time("Step 6 xsect support", stage_start)
 #sys.exit(2)
@@ -873,6 +916,10 @@ from calculate_ratio import find_ratio
 
 ratioDict = {}
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 ratio calculation start",
+    yield_keys=len(yieldDict),
+)
 ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
 record_stage_time("Step 6 ratios", stage_start)
 
@@ -881,6 +928,10 @@ from ave_per_bin import ave_per_bin_data
 
 aveDict = {}
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 average calculation start",
+    hist_count=len(histlist),
+)
 aveDict.update(ave_per_bin_data(histlist, inpDict))
 record_stage_time("Step 6 averages", stage_start)
 
@@ -888,6 +939,10 @@ sys.path.append("plotting")
 from binned import plot_binned
 
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 plot_binned start",
+    phi_settings=",".join(hist["phi_setting"] for hist in histlist),
+)
 plot_binned(t_bins, phi_bins, histlist, phisetlist, inpDict, yieldDict, ratioDict, aveDict)
 record_stage_time("Step 6 plot_binned", stage_start)
 #notify_email(email_address="trotta@cua.edu")
@@ -969,6 +1024,11 @@ combineDict = {}
 combineDict.update({"inpDict" : inpDict})
 tmp_lst = []
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 JSON export start",
+    foutjson=foutjson,
+    hist_count=len(histlist),
+)
 for hist in histlist:
     print("\nSaving {} information to {}".format(hist["phi_setting"],foutjson))
     tmp_dict = {}
@@ -987,14 +1047,23 @@ combineDict.update({ "histlist" : tmp_lst})
 with open(foutjson, 'w') as f_json:
     json.dump(combineDict, f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
+debug_file_status("Combined analysis JSON", foutjson)
 record_stage_time("Step 6 JSON export", stage_start)
 
 from physics_lists import create_lists
 stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 create_lists start",
+    output_artifacts=len(output_file_lst),
+)
 create_lists(aveDict, yieldDict, histlist, inpDict, phisetlist, output_file_lst)
 record_stage_time("Step 6 create_lists", stage_start)
 
 # Copy initial parameterization to specific particle type directory
+debug_file_status(
+    "Source parameterization before copy",
+    '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")),
+)
 copy_with_context(
     '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2.replace("p",""), W.replace("p","")),
     '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p","")),
@@ -1002,6 +1071,10 @@ copy_with_context(
 )
 
 # Copy input model to specific particle type directory
+debug_file_status(
+    "Source input model before copy",
+    '{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W),
+)
 copy_with_context(
     '{}/src/models/Q{}W{}.model'.format(LTANAPATH, Q2, W),
     '{}/src/{}/functions/Q{}W{}.model'.format(LTANAPATH, ParticleType, Q2, W),
@@ -1015,6 +1088,7 @@ output_file_lst.append('{}/functions/Q{}W{}.model'.format(ParticleType, Q2, W))
 # ***These old parameters are needed for this iteration. See README for more info on procedure!***
 old_param_file = '{}/src/{}/parameters/par.{}_Q{}W{}.dat'.format(LTANAPATH, ParticleType, pol_str, Q2.replace("p",""), W.replace("p",""))
 cut_summary_lst += "\n\nUnsep Parameterization for {}...\n".format(formatted_date)
+debug_file_status("Old parameter file before summary read", old_param_file)
 with open(old_param_file, 'r') as file:
     for line in file:
         cut_summary_lst += line
@@ -1039,6 +1113,12 @@ inpDict["cut_summary_lst"] = cut_summary_lst
 
 if EPSSET == "high":
     stage_start = perf_counter()
+    debug_checkpoint(
+        "Step 7 high-epsilon separation start",
+        q2=Q2,
+        w=W,
+        particle=ParticleType,
+    )
     
     # Save fortran scripts that contain iteration functional form of parameterization
     py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
@@ -1233,6 +1313,12 @@ if EPSSET == "high":
         if artifact not in output_file_lst:
             output_file_lst.append(artifact)
     record_stage_time("Step 7 frozen-manifest/final-summary export", stage_start)
+else:
+    debug_checkpoint(
+        "Step 7 skipped for low epsilon",
+        epsset=EPSSET,
+        outfilename=OutFilename,
+    )
     
 ##############################
 # Step 8 of the lt_analysis: #
@@ -1245,6 +1331,13 @@ if EPSSET == "high":
 stage_start = perf_counter()
 new_dir = "{}/{}/Q{}W{}/{}".format(TEMP_CACHEPATH, ParticleType.lower(), Q2, W, formatted_date)
 create_dir(new_dir)
+debug_checkpoint(
+    "Step 8 cache/archive start",
+    epsset=EPSSET,
+    new_dir=new_dir,
+    outpath=OUTPATH,
+    output_artifact_count=len(output_file_lst),
+)
 
 if EPSSET == "high":
     
@@ -1368,8 +1461,14 @@ for f in output_file_lst:
     
 # Need summary for both high and low eps.
 # All others should be saved once both are complete
-with open(new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date), 'w') as file:
+summary_output_path = new_dir+'/{}_{}_summary_{}.txt'.format(ParticleType,OutFilename,formatted_date)
+debug_checkpoint(
+    "Step 8 summary write start",
+    summary_output_path=summary_output_path,
+)
+with open(summary_output_path, 'w') as file:
     file.write(inpDict["cut_summary_lst"])
+debug_file_status("Summary text output", summary_output_path)
 record_stage_time("Step 8 cache/archive copy", stage_start)
 print_timing_summary()
 
