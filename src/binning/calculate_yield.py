@@ -1201,14 +1201,6 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             SubtractedParticle,
                             MM_offset_DATA,
                         )
-                        if not subtraction_windows:
-                            raise ValueError(
-                                "No particle subtraction windows configured for {} -> {}".format(
-                                    ParticleType,
-                                    SubtractedParticle,
-                                )
-                            )
-
                         scale_components = compute_staged_particle_subtraction_scales(
                             hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
                             subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],

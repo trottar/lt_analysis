@@ -45,6 +45,7 @@ print("analysis hardening pure-python imports OK")
 PY
 
 python - <<'PY'
+import copy
 import math
 import os
 import sys
@@ -53,6 +54,7 @@ utility_path = os.path.join(os.getcwd(), "src", "utility")
 if utility_path not in sys.path:
     sys.path.append(utility_path)
 
+import background_config as bgcfg
 from background_config import (
     get_particle_subtraction_window_config,
     resolve_particle_subtraction_windows,
@@ -61,6 +63,8 @@ from background_config import (
 config = get_particle_subtraction_window_config("kaon", "pion")
 if config is None:
     raise AssertionError("Expected kaon->pion subtraction-window config to exist")
+if config.get("enabled_windows") != {"pi_n": True, "pi_delta": True}:
+    raise AssertionError("Unexpected subtraction-window enabled flags: {}".format(config.get("enabled_windows")))
 if tuple(config["windows"]["pi_n"]) != (0.88, 0.94):
     raise AssertionError("Unexpected pi_n subtraction window: {}".format(config["windows"]["pi_n"]))
 if tuple(config["windows"]["pi_delta"]) != (1.35, 1.45):
@@ -78,6 +82,21 @@ for key, expected in {"pi_n": (0.88, 0.94), "pi_delta": (1.35, 1.45)}.items():
         for idx in range(2)
     ):
         raise AssertionError("Unexpected shifted resolved window for {}: {}".format(key, shifted))
+
+orig_enabled = copy.deepcopy(bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG["kaon"]["pion"]["enabled_windows"])
+try:
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG["kaon"]["pion"]["enabled_windows"]["pi_delta"] = False
+    resolved_pi_n_only = resolve_particle_subtraction_windows("kaon", "pion", 0.0)
+    if set(resolved_pi_n_only.keys()) != {"pi_n"}:
+        raise AssertionError("Unexpected pi_n-only resolved windows: {}".format(resolved_pi_n_only))
+
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG["kaon"]["pion"]["enabled_windows"]["pi_delta"] = True
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG["kaon"]["pion"]["enabled_windows"]["pi_n"] = False
+    resolved_pi_delta_only = resolve_particle_subtraction_windows("kaon", "pion", 0.0)
+    if set(resolved_pi_delta_only.keys()) != {"pi_delta"}:
+        raise AssertionError("Unexpected pi_delta-only resolved windows: {}".format(resolved_pi_delta_only))
+finally:
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG["kaon"]["pion"]["enabled_windows"] = orig_enabled
 
 print("analysis hardening subtraction-window resolver smoke OK")
 PY
@@ -123,6 +142,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
             "common_epsilon_scale_behavior": "independent",
             "particle_subtraction_windows": {
                 "apply_mm_offset_data": True,
+                "enabled_windows": {"pi_n": True, "pi_delta": True},
                 "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
             },
             "low_epsilon_corrections": {},
@@ -393,6 +413,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
         "mm_cut_window": [1.10, 1.15],
         "particle_subtraction_windows": {
             "apply_mm_offset_data": True,
+            "enabled_windows": {"pi_n": True, "pi_delta": True},
             "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
         },
         "t_bin_edges": [0.1, 0.2, 0.3],
@@ -430,6 +451,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
             "outfilename": "test_{}".format(epsset),
             "particle_subtraction_windows": {
                 "apply_mm_offset_data": True,
+                "enabled_windows": {"pi_n": True, "pi_delta": True},
                 "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
             },
             "active_profile": active_profile,
@@ -639,6 +661,7 @@ payload = {
     "mm_cut_window": [1.0, 1.2],
     "particle_subtraction_windows": {
         "apply_mm_offset_data": True,
+        "enabled_windows": {"pi_n": True, "pi_delta": True},
         "windows": {"pi_n": [0.88, 0.94], "pi_delta": [1.35, 1.45]},
     },
     "active_profile": "fit1_only",

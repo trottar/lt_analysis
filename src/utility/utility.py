@@ -1368,44 +1368,65 @@ def compute_staged_particle_subtraction_scales(
 
     pi_n_window = subtraction_windows.get("pi_n")
     pi_delta_window = subtraction_windows.get("pi_delta")
-    if pi_n_window is None or pi_delta_window is None:
-        raise ValueError("Expected pi_n and pi_delta subtraction windows for staged particle subtraction")
-
-    data_pi_n_amp = integrate_hist_range(data_hist, pi_n_window[0], pi_n_window[1])
-    background_pi_n_amp = integrate_hist_range(background_hist, pi_n_window[0], pi_n_window[1])
-    pi_n_scale_factor = compute_positive_scale_factor(
-        data_pi_n_amp,
-        background_pi_n_amp,
-        "{} pi-n".format(context),
-        quiet=quiet,
-    )
-
-    data_pi_delta_amp = integrate_hist_range(data_hist, pi_delta_window[0], pi_delta_window[1])
-    background_pi_delta_amp = integrate_hist_range(background_hist, pi_delta_window[0], pi_delta_window[1])
-    residual_pi_delta_amp = data_pi_delta_amp - (pi_n_scale_factor * background_pi_delta_amp)
-    pi_delta_scale_factor = compute_positive_scale_factor(
-        residual_pi_delta_amp,
-        background_pi_delta_amp,
-        "{} pi-delta".format(context),
-        quiet=quiet,
-    )
-
-    return {
+    scale_components = {
         "pi_n": {
-            "window": tuple(pi_n_window),
-            "data_amp": data_pi_n_amp,
-            "background_amp": background_pi_n_amp,
-            "scale_factor": pi_n_scale_factor,
+            "enabled": pi_n_window is not None,
+            "window": tuple(pi_n_window) if pi_n_window is not None else None,
+            "data_amp": 0.0,
+            "background_amp": 0.0,
+            "scale_factor": 0.0,
         },
         "pi_delta": {
-            "window": tuple(pi_delta_window),
-            "data_amp": data_pi_delta_amp,
-            "background_amp": background_pi_delta_amp,
-            "residual_amp": residual_pi_delta_amp,
-            "scale_factor": pi_delta_scale_factor,
+            "enabled": pi_delta_window is not None,
+            "window": tuple(pi_delta_window) if pi_delta_window is not None else None,
+            "data_amp": 0.0,
+            "background_amp": 0.0,
+            "residual_amp": 0.0,
+            "scale_factor": 0.0,
         },
-        "total_scale_factor": pi_n_scale_factor + pi_delta_scale_factor,
+        "total_scale_factor": 0.0,
     }
+
+    pi_n_scale_factor = 0.0
+    if pi_n_window is not None:
+        data_pi_n_amp = integrate_hist_range(data_hist, pi_n_window[0], pi_n_window[1])
+        background_pi_n_amp = integrate_hist_range(background_hist, pi_n_window[0], pi_n_window[1])
+        pi_n_scale_factor = compute_positive_scale_factor(
+            data_pi_n_amp,
+            background_pi_n_amp,
+            "{} pi-n".format(context),
+            quiet=quiet,
+        )
+        scale_components["pi_n"].update(
+            {
+                "data_amp": data_pi_n_amp,
+                "background_amp": background_pi_n_amp,
+                "scale_factor": pi_n_scale_factor,
+            }
+        )
+
+    pi_delta_scale_factor = 0.0
+    if pi_delta_window is not None:
+        data_pi_delta_amp = integrate_hist_range(data_hist, pi_delta_window[0], pi_delta_window[1])
+        background_pi_delta_amp = integrate_hist_range(background_hist, pi_delta_window[0], pi_delta_window[1])
+        residual_pi_delta_amp = data_pi_delta_amp - (pi_n_scale_factor * background_pi_delta_amp)
+        pi_delta_scale_factor = compute_positive_scale_factor(
+            residual_pi_delta_amp,
+            background_pi_delta_amp,
+            "{} pi-delta".format(context),
+            quiet=quiet,
+        )
+        scale_components["pi_delta"].update(
+            {
+                "data_amp": data_pi_delta_amp,
+                "background_amp": background_pi_delta_amp,
+                "residual_amp": residual_pi_delta_amp,
+                "scale_factor": pi_delta_scale_factor,
+            }
+        )
+
+    scale_components["total_scale_factor"] = pi_n_scale_factor + pi_delta_scale_factor
+    return scale_components
 
 ##################################################################################################################################################            
 

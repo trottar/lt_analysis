@@ -147,9 +147,13 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
     "kaon": {
         "pion": {
             "apply_mm_offset_data": True,
+            "enabled_windows": {
+                "pi_n": True,
+                "pi_delta": True,
+            },
             "windows": {
                 "pi_n": (0.88, 0.94),
-                "pi_delta": (1.35, 1.45),
+                "pi_delta": (1.35, 1.40),
             },
         },
     },
@@ -1143,8 +1147,11 @@ def resolve_particle_subtraction_windows(particle_type, subtracted_particle, mm_
         return {}
 
     offset = float(mm_offset_data) if bool(config.get("apply_mm_offset_data", False)) else 0.0
+    enabled_windows = config.get("enabled_windows") or {}
     resolved = {}
     for window_name, bounds in (config.get("windows") or {}).items():
+        if not bool(enabled_windows.get(window_name, True)):
+            continue
         if len(bounds) != 2:
             raise ValueError(
                 "Particle subtraction window '{}' for {} -> {} must contain exactly two bounds".format(

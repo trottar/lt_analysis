@@ -2092,14 +2092,6 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
                 SubtractedParticle,
                 MM_offset_DATA,
             )
-            if not subtraction_windows:
-                raise ValueError(
-                    "No particle subtraction windows configured for {} -> {}".format(
-                        ParticleType,
-                        SubtractedParticle,
-                    )
-                )
-
             scale_components = compute_staged_particle_subtraction_scales(
                 H_MM_nosub_DATA,
                 subDict["H_MM_nosub_SUB_DATA"],
