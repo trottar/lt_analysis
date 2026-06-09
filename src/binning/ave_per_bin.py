@@ -669,22 +669,39 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
                         )
                     )
 
-                kaon_amp = 0.0
-                pion_background_amp = 0.0
-                for window_min, window_max in subtraction_windows.values():
-                    kaon_amp += integrate_hist_range(
-                        hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
-                        window_min,
-                        window_max,
+                pi_n_window = subtraction_windows.get("pi_n")
+                pi_delta_window = subtraction_windows.get("pi_delta")
+                if pi_n_window is None or pi_delta_window is None:
+                    raise ValueError(
+                        "Expected pi_n and pi_delta subtraction windows for {} -> {}".format(
+                            ParticleType,
+                            SubtractedParticle,
+                        )
                     )
-                    pion_background_amp += integrate_hist_range(
-                        subDict[f"H_MM_nosub_SUB_DATA_{j}"],
-                        window_min,
-                        window_max,
-                    )
+
+                kaon_pi_n_amp = integrate_hist_range(
+                    hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
+                    pi_n_window[0],
+                    pi_n_window[1],
+                )
+                kaon_pi_delta_amp = integrate_hist_range(
+                    hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
+                    pi_delta_window[0],
+                    pi_delta_window[1],
+                )
+                pion_background_pi_n_amp = integrate_hist_range(
+                    subDict[f"H_MM_nosub_SUB_DATA_{j}"],
+                    pi_n_window[0],
+                    pi_n_window[1],
+                )
+                pion_background_pi_delta_amp = integrate_hist_range(
+                    subDict[f"H_MM_nosub_SUB_DATA_{j}"],
+                    pi_delta_window[0],
+                    pi_delta_window[1],
+                )
                 scale_factor = compute_positive_scale_factor(
-                    kaon_amp,
-                    pion_background_amp,
+                    kaon_pi_n_amp + kaon_pi_delta_amp,
+                    pion_background_pi_n_amp + pion_background_pi_delta_amp,
                     "pion subtraction (t-bin {})".format(j),
                 )
             except ZeroDivisionError:
