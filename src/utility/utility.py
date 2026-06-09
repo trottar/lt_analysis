@@ -1349,6 +1349,64 @@ def compute_positive_scale_factor(signal_amp: float, background_amp: float, cont
 
     return signal_amp / background_amp
 
+##################################################################################################################################################
+
+def compute_staged_particle_subtraction_scales(
+    data_hist,
+    background_hist,
+    subtraction_windows,
+    context: str = "particle subtraction",
+    quiet: bool = False,
+):
+    """
+    Resolve particle-subtraction normalization in two explicit stages:
+    1. Normalize in the pi-n window on the unmodified input spectrum.
+    2. Normalize in the pi-delta window on the residual after the pi-n step.
+
+    The final subtraction scale is the sum of the two stage contributions.
+    """
+
+    pi_n_window = subtraction_windows.get("pi_n")
+    pi_delta_window = subtraction_windows.get("pi_delta")
+    if pi_n_window is None or pi_delta_window is None:
+        raise ValueError("Expected pi_n and pi_delta subtraction windows for staged particle subtraction")
+
+    data_pi_n_amp = integrate_hist_range(data_hist, pi_n_window[0], pi_n_window[1])
+    background_pi_n_amp = integrate_hist_range(background_hist, pi_n_window[0], pi_n_window[1])
+    pi_n_scale_factor = compute_positive_scale_factor(
+        data_pi_n_amp,
+        background_pi_n_amp,
+        "{} pi-n".format(context),
+        quiet=quiet,
+    )
+
+    data_pi_delta_amp = integrate_hist_range(data_hist, pi_delta_window[0], pi_delta_window[1])
+    background_pi_delta_amp = integrate_hist_range(background_hist, pi_delta_window[0], pi_delta_window[1])
+    residual_pi_delta_amp = data_pi_delta_amp - (pi_n_scale_factor * background_pi_delta_amp)
+    pi_delta_scale_factor = compute_positive_scale_factor(
+        residual_pi_delta_amp,
+        background_pi_delta_amp,
+        "{} pi-delta".format(context),
+        quiet=quiet,
+    )
+
+    return {
+        "pi_n": {
+            "window": tuple(pi_n_window),
+            "data_amp": data_pi_n_amp,
+            "background_amp": background_pi_n_amp,
+            "scale_factor": pi_n_scale_factor,
+        },
+        "pi_delta": {
+            "window": tuple(pi_delta_window),
+            "data_amp": data_pi_delta_amp,
+            "background_amp": background_pi_delta_amp,
+            "residual_amp": residual_pi_delta_amp,
+            "scale_factor": pi_delta_scale_factor,
+        },
+        "total_scale_factor": pi_n_scale_factor + pi_delta_scale_factor,
+    }
+
 ##################################################################################################################################################            
 
 # Define a function for fitting a Gaussian with dynamically determined FWHM range

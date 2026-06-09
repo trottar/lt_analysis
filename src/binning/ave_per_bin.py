@@ -56,7 +56,12 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import remove_bad_bins, get_centroid, integrate_hist_range, prune_hist, compute_positive_scale_factor
+from utility import (
+    remove_bad_bins,
+    get_centroid,
+    prune_hist,
+    compute_staged_particle_subtraction_scales,
+)
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
     resolve_particle_subtraction_windows,
@@ -301,7 +306,17 @@ def _process_ave_simc_tree(
         hist_group["epsilon"][t_index].Fill(evt.epsilon, evt.iter_weight)
 
 
-def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None, sub_event_cache=None):
+def process_hist_data(
+    tree_data,
+    tree_dummy,
+    t_bins,
+    nWindows,
+    phi_setting,
+    inpDict,
+    event_cache=None,
+    sub_event_cache=None,
+    particle_subtraction_scale_factor=None,
+):
 
     processed_dict = {}
 
@@ -654,58 +669,32 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
-            
-            try:
-                subtraction_windows = resolve_particle_subtraction_windows(
-                    ParticleType,
-                    SubtractedParticle,
-                    MM_offset_DATA,
-                )
-                if not subtraction_windows:
-                    raise ValueError(
-                        "No particle subtraction windows configured for {} -> {}".format(
-                            ParticleType,
-                            SubtractedParticle,
-                        )
+            if particle_subtraction_scale_factor is not None:
+                scale_factor = float(particle_subtraction_scale_factor)
+            else:
+                try:
+                    subtraction_windows = resolve_particle_subtraction_windows(
+                        ParticleType,
+                        SubtractedParticle,
+                        MM_offset_DATA,
                     )
-
-                pi_n_window = subtraction_windows.get("pi_n")
-                pi_delta_window = subtraction_windows.get("pi_delta")
-                if pi_n_window is None or pi_delta_window is None:
-                    raise ValueError(
-                        "Expected pi_n and pi_delta subtraction windows for {} -> {}".format(
-                            ParticleType,
-                            SubtractedParticle,
+                    if not subtraction_windows:
+                        raise ValueError(
+                            "No particle subtraction windows configured for {} -> {}".format(
+                                ParticleType,
+                                SubtractedParticle,
+                            )
                         )
-                    )
 
-                kaon_pi_n_amp = integrate_hist_range(
-                    hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
-                    pi_n_window[0],
-                    pi_n_window[1],
-                )
-                kaon_pi_delta_amp = integrate_hist_range(
-                    hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
-                    pi_delta_window[0],
-                    pi_delta_window[1],
-                )
-                pion_background_pi_n_amp = integrate_hist_range(
-                    subDict[f"H_MM_nosub_SUB_DATA_{j}"],
-                    pi_n_window[0],
-                    pi_n_window[1],
-                )
-                pion_background_pi_delta_amp = integrate_hist_range(
-                    subDict[f"H_MM_nosub_SUB_DATA_{j}"],
-                    pi_delta_window[0],
-                    pi_delta_window[1],
-                )
-                scale_factor = compute_positive_scale_factor(
-                    kaon_pi_n_amp + kaon_pi_delta_amp,
-                    pion_background_pi_n_amp + pion_background_pi_delta_amp,
-                    "pion subtraction (t-bin {})".format(j),
-                )
-            except ZeroDivisionError:
-                scale_factor = 0.0
+                    scale_components = compute_staged_particle_subtraction_scales(
+                        hist_bin_dict[f"H_MM_nosub_DATA_{j}"],
+                        subDict[f"H_MM_nosub_SUB_DATA_{j}"],
+                        subtraction_windows,
+                        context="pion subtraction (t-bin {})".format(j),
+                    )
+                    scale_factor = scale_components["total_scale_factor"]
+                except ZeroDivisionError:
+                    scale_factor = 0.0
             '''
             if scale_factor > 10.0:
                 print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
@@ -918,9 +907,30 @@ def process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpD
             
     return processed_dict
 
-def bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=None, sub_event_cache=None):
+def bin_data(
+    kinematic_types,
+    tree_data,
+    tree_dummy,
+    t_bins,
+    nWindows,
+    phi_setting,
+    inpDict,
+    event_cache=None,
+    sub_event_cache=None,
+    particle_subtraction_scale_factor=None,
+):
 
-    processed_dict = process_hist_data(tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache, sub_event_cache=sub_event_cache)
+    processed_dict = process_hist_data(
+        tree_data,
+        tree_dummy,
+        t_bins,
+        nWindows,
+        phi_setting,
+        inpDict,
+        event_cache=event_cache,
+        sub_event_cache=sub_event_cache,
+        particle_subtraction_scale_factor=particle_subtraction_scale_factor,
+    )
     
     binned_dict = {}
 
@@ -1040,7 +1050,19 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     event_cache = hist.get("_yield_data_event_cache")
     sub_event_cache = hist.get("_yield_sub_event_cache")
-    binned_dict = bin_data(kinematic_types, tree_data, tree_dummy, t_bins, nWindows, phi_setting, inpDict, event_cache=event_cache, sub_event_cache=sub_event_cache)
+    particle_subtraction_scale_factor = hist.get("particle_subtraction_scale_factor")
+    binned_dict = bin_data(
+        kinematic_types,
+        tree_data,
+        tree_dummy,
+        t_bins,
+        nWindows,
+        phi_setting,
+        inpDict,
+        event_cache=event_cache,
+        sub_event_cache=sub_event_cache,
+        particle_subtraction_scale_factor=particle_subtraction_scale_factor,
+    )
 
     group_dict = {}
     bad_bins = set()  # <-- collect (tbin_index, phibin_index) that have sem==1000.0 anywhere

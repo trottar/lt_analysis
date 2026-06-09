@@ -54,7 +54,12 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, remove_bad_bins, create_polar_plot, integrate_hist_range, compute_positive_scale_factor
+from utility import (
+    open_root_file,
+    remove_bad_bins,
+    create_polar_plot,
+    compute_staged_particle_subtraction_scales,
+)
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
     BG_OPT_MM_PLOT_MAX,
@@ -2078,7 +2083,9 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
-        
+
+        subtraction_windows = None
+        scale_components = None
         try:
             subtraction_windows = resolve_particle_subtraction_windows(
                 ParticleType,
@@ -2093,42 +2100,13 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
                     )
                 )
 
-            pi_n_window = subtraction_windows.get("pi_n")
-            pi_delta_window = subtraction_windows.get("pi_delta")
-            if pi_n_window is None or pi_delta_window is None:
-                raise ValueError(
-                    "Expected pi_n and pi_delta subtraction windows for {} -> {}".format(
-                        ParticleType,
-                        SubtractedParticle,
-                    )
-                )
-
-            kaon_pi_n_amp = integrate_hist_range(
+            scale_components = compute_staged_particle_subtraction_scales(
                 H_MM_nosub_DATA,
-                pi_n_window[0],
-                pi_n_window[1],
-            )
-            kaon_pi_delta_amp = integrate_hist_range(
-                H_MM_nosub_DATA,
-                pi_delta_window[0],
-                pi_delta_window[1],
-            )
-            pion_background_pi_n_amp = integrate_hist_range(
                 subDict["H_MM_nosub_SUB_DATA"],
-                pi_n_window[0],
-                pi_n_window[1],
+                subtraction_windows,
+                context="pion subtraction ({})".format(phi_setting),
             )
-            pion_background_pi_delta_amp = integrate_hist_range(
-                subDict["H_MM_nosub_SUB_DATA"],
-                pi_delta_window[0],
-                pi_delta_window[1],
-            )
-
-            scale_factor = compute_positive_scale_factor(
-                kaon_pi_n_amp + kaon_pi_delta_amp,
-                pion_background_pi_n_amp + pion_background_pi_delta_amp,
-                "pion subtraction ({})".format(phi_setting),
-            )
+            scale_factor = scale_components["total_scale_factor"]
         except ZeroDivisionError:
             scale_factor = 0.0
         '''
@@ -2147,6 +2125,25 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
             raise ValueError("Invalid phi_setting: {}".format(phi_setting))
         
         scale_factor = scale_factor #* phi_scale   
+        histDict["particle_subtraction_scale_factor"] = scale_factor
+        histDict["particle_subtraction_scale_components"] = scale_components
+        histDict["particle_subtraction_windows"] = subtraction_windows
+        if scale_components is not None:
+            _print_rand_debug(
+                "particle subtraction normalization",
+                phi_setting=phi_setting,
+                epsset=EPSSET,
+                pi_n_window=scale_components["pi_n"]["window"],
+                pi_n_data_amp=scale_components["pi_n"]["data_amp"],
+                pi_n_background_amp=scale_components["pi_n"]["background_amp"],
+                pi_n_scale_factor=scale_components["pi_n"]["scale_factor"],
+                pi_delta_window=scale_components["pi_delta"]["window"],
+                pi_delta_data_amp=scale_components["pi_delta"]["data_amp"],
+                pi_delta_background_amp=scale_components["pi_delta"]["background_amp"],
+                pi_delta_residual_amp=scale_components["pi_delta"]["residual_amp"],
+                pi_delta_scale_factor=scale_components["pi_delta"]["scale_factor"],
+                total_scale_factor=scale_factor,
+            )
 
         # Apply scale factor
         subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
@@ -2810,6 +2807,10 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         "fit1": bg_diag1 if "bg_diag1" in locals() else None,
         "fit2": bg_diag2 if "bg_diag2" in locals() else None,
     }
+    if "particle_subtraction_scale_factor" not in histDict:
+        histDict["particle_subtraction_scale_factor"] = 0.0
+    if "particle_subtraction_scale_components" not in histDict:
+        histDict["particle_subtraction_scale_components"] = None
     histDict["H_th_DATA"] =     H_th_DATA
     histDict["H_ph_DATA"] =     H_ph_DATA
     histDict["H_ph_q_DATA"] =     H_ph_q_DATA

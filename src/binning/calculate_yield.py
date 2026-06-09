@@ -57,7 +57,13 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import is_hist, remove_bad_bins, integrate_hist_range, prune_hist, compute_positive_scale_factor
+from utility import (
+    is_hist,
+    remove_bad_bins,
+    integrate_hist_range,
+    prune_hist,
+    compute_staged_particle_subtraction_scales,
+)
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
     BG_OVERSUB_WARN_FRACTION,
@@ -676,7 +682,7 @@ def _process_yield_simc_tree(
         hist_group["mm_unweighted"][t_index][phi_index].Fill(evt.missmass)
 
 
-def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict):
+def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, particle_subtraction_scale_factor=None):
     emit_plots = inpDict.get("yield_emit_plots", True)
     suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
     progress_bar = Misc.progressBar if bool(inpDict.get("yield_show_progress", True)) else _noop_progress_bar
@@ -1186,79 +1192,49 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
-                
-                try:
-                    subtraction_windows = resolve_particle_subtraction_windows(
-                        ParticleType,
-                        SubtractedParticle,
-                        MM_offset_DATA,
-                    )
-                    if not subtraction_windows:
-                        raise ValueError(
-                            "No particle subtraction windows configured for {} -> {}".format(
-                                ParticleType,
-                                SubtractedParticle,
+                if particle_subtraction_scale_factor is not None:
+                    scale_factor = float(particle_subtraction_scale_factor)
+                else:
+                    try:
+                        subtraction_windows = resolve_particle_subtraction_windows(
+                            ParticleType,
+                            SubtractedParticle,
+                            MM_offset_DATA,
+                        )
+                        if not subtraction_windows:
+                            raise ValueError(
+                                "No particle subtraction windows configured for {} -> {}".format(
+                                    ParticleType,
+                                    SubtractedParticle,
+                                )
                             )
+
+                        scale_components = compute_staged_particle_subtraction_scales(
+                            hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                            subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                            subtraction_windows,
+                            context="pion subtraction (t-bin {}, phi-bin {})".format(j, k),
+                            quiet=suppress_scale_warnings,
+                        )
+                        scale_factor = scale_components["total_scale_factor"]
+
+                        # Check that pion background is not over subtracting within kaon MM range
+                        kaon_range_check = integrate_hist_range(
+                            hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                            mm_min, mm_max
                         )
 
-                    pi_n_window = subtraction_windows.get("pi_n")
-                    pi_delta_window = subtraction_windows.get("pi_delta")
-                    if pi_n_window is None or pi_delta_window is None:
-                        raise ValueError(
-                            "Expected pi_n and pi_delta subtraction windows for {} -> {}".format(
-                                ParticleType,
-                                SubtractedParticle,
-                            )
+                        pion_range_check = integrate_hist_range(
+                            subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                            mm_min, mm_max
                         )
 
-                    kaon_pi_n_amp = integrate_hist_range(
-                        hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                        pi_n_window[0],
-                        pi_n_window[1],
-                    )
-                    kaon_pi_delta_amp = integrate_hist_range(
-                        hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                        pi_delta_window[0],
-                        pi_delta_window[1],
-                    )
-                    pion_background_pi_n_amp = integrate_hist_range(
-                        subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                        pi_n_window[0],
-                        pi_n_window[1],
-                    )
-                    pion_background_pi_delta_amp = integrate_hist_range(
-                        subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                        pi_delta_window[0],
-                        pi_delta_window[1],
-                    )
-                    scale_factor = compute_positive_scale_factor(
-                        kaon_pi_n_amp + kaon_pi_delta_amp,
-                        pion_background_pi_n_amp + pion_background_pi_delta_amp,
-                        "pion subtraction (t-bin {}, phi-bin {})".format(j, k),
-                        quiet=suppress_scale_warnings,
-                    )
-
-                    # Check that pion background is not over subtracting within kaon MM range
-                    kaon_range_check = integrate_hist_range(
-                        hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                        mm_min, mm_max             
-                    )
-
-                    pion_range_check = integrate_hist_range(
-                        subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                        mm_min, mm_max                    
-                    )
-
-                    if pion_range_check > kaon_range_check:
-                        if not suppress_scale_warnings:
-                            print("\n\nWARNING: Pion background larger than kaon peak in t-bin {}, phi-bin {}. Setting scaling factor to zero....".format(j, k))
+                        if pion_range_check > kaon_range_check:
+                            if not suppress_scale_warnings:
+                                print("\n\nWARNING: Pion background larger than kaon peak in t-bin {}, phi-bin {}. Setting scaling factor to zero....".format(j, k))
+                            scale_factor = 0.0
+                    except ZeroDivisionError:
                         scale_factor = 0.0
-
-                    ##############
-                    ##############
-                    ##############
-                except ZeroDivisionError:
-                    scale_factor = 0.0
                 '''
                 if scale_factor > 10.0:
                     print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
@@ -1936,10 +1912,10 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
 
     return processed_dict, support_hist_dict, ave_event_cache, sub_event_cache
 
-def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, data_base_cache=None):
+def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, data_base_cache=None, particle_subtraction_scale_factor=None):
 
     if data_base_cache is None:
-        processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict)
+        processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, particle_subtraction_scale_factor=particle_subtraction_scale_factor)
     else:
         processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = _process_hist_data_from_base_cache(
             data_base_cache,
@@ -2048,6 +2024,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
     normfac_data, normfac_dummy = hist["normfac_data"], hist["normfac_dummy"]
     nWindows, phi_setting = hist["nWindows"], hist["phi_setting"]
+    particle_subtraction_scale_factor = hist.get("particle_subtraction_scale_factor")
 
     # Grab the setting by setting normalized error
     data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())]
@@ -2072,6 +2049,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         phi_setting,
         inpDict,
         data_base_cache=data_base_cache,
+        particle_subtraction_scale_factor=particle_subtraction_scale_factor,
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
