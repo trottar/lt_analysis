@@ -149,7 +149,7 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
             "apply_mm_offset_data": True,
             "enabled_windows": {
                 "pi_n": True,
-                "pi_delta": True,
+                "pi_delta": False,
             },
             "windows": {
                 "pi_n": (0.88, 0.94),
