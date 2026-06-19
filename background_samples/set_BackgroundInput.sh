@@ -59,6 +59,16 @@ sync_symlink() {
     echo "Updated ${label}: ${link_path}-->${target_path}"
 }
 
+resolve_physical_path() {
+    local input_path="$1"
+
+    if command -v readlink >/dev/null 2>&1; then
+        readlink -f "${input_path}" 2>/dev/null && return 0
+    fi
+
+    cd "${input_path}" >/dev/null 2>&1 && pwd -P
+}
+
 normalize_toggle() {
     local value
     value=$(printf '%s' "${1}" | tr '[:upper:]' '[:lower:]')
@@ -105,9 +115,9 @@ run_background_setting() {
     fi
 
     mkdir -p "${output_dir}" "${log_dir}"
-    sync_symlink "${BACKGROUND_SIMC_LINK}/input" "${input_dir}/" "${background_name} input"
-    sync_symlink "${BACKGROUND_SIMC_LINK}/OUTPUTS" "${output_dir}/" "${background_name} output"
-    sync_symlink "${BACKGROUND_SIMC_LINK}/worksim" "${VOLATILEPATH}/worksim/" "${background_name} worksim"
+    sync_symlink "${BACKGROUND_SIMC_RUNTIME_PATH}/input" "${input_dir}/" "${background_name} input"
+    sync_symlink "${BACKGROUND_SIMC_RUNTIME_PATH}/OUTPUTS" "${output_dir}/" "${background_name} output"
+    sync_symlink "${BACKGROUND_SIMC_RUNTIME_PATH}/worksim" "${VOLATILEPATH}/worksim/" "${background_name} worksim"
 
     for phi_setting in right left center; do
         input_name="Prod_Coin_Q${Q2}W${W}${phi_setting}_${EPSILON}e"
@@ -224,7 +234,13 @@ if [ ! -L "${BACKGROUND_SIMC_LINK}" ] || [ ! -e "${BACKGROUND_SIMC_LINK}" ]; the
     exit 1
 fi
 
-export SIMC_OVERRIDE_PATH="${BACKGROUND_SIMC_LINK}"
+BACKGROUND_SIMC_RUNTIME_PATH="$(resolve_physical_path "${BACKGROUND_SIMC_LINK}")"
+if [ -z "${BACKGROUND_SIMC_RUNTIME_PATH}" ] || [ ! -d "${BACKGROUND_SIMC_RUNTIME_PATH}" ]; then
+    echo "ERROR: failed to resolve a physical background SIMC path from ${BACKGROUND_SIMC_LINK}" >&2
+    exit 1
+fi
+
+export SIMC_OVERRIDE_PATH="${BACKGROUND_SIMC_RUNTIME_PATH}"
 # Background SIMC uses its own model definitions, so skip the production
 # physics_iterate.f/par.pl update helpers used by set_ProdInput.sh.
 

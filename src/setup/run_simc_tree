@@ -37,20 +37,43 @@ LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 SIMC_RUNTIME_PATH="${SIMC_OVERRIDE_PATH:-${SIMCPATH}}"
 SIMC_RUNTIME_LOG_DIR="${SIMC_LOG_DIR:-${LTANAPATH}/log}"
 
+resolve_physical_path() {
+    local input_path="$1"
+
+    if command -v readlink >/dev/null 2>&1; then
+        readlink -f "${input_path}" 2>/dev/null && return 0
+    fi
+
+    cd "${input_path}" >/dev/null 2>&1 && pwd -P
+}
+
 build_component() {
     local build_dir="$1"
     local label="$2"
+    local physical_dir=""
 
-    cd "${build_dir}" || exit 1
+    physical_dir="$(resolve_physical_path "${build_dir}")"
+    if [ -z "${physical_dir}" ] || [ ! -d "${physical_dir}" ]; then
+        echo "ERROR: failed to resolve ${label} build directory ${build_dir}" >&2
+        exit 1
+    fi
+
+    cd "${physical_dir}" || exit 1
     make clean
     if ! make; then
-        echo "ERROR: failed to build ${label} in ${build_dir}" >&2
+        echo "ERROR: failed to build ${label} in ${physical_dir}" >&2
         exit 1
     fi
 }
 
 if [ "$#" -lt 2 ]; then
     echo "ERROR: run_simc_tree requires an input name and reaction" >&2
+    exit 1
+fi
+
+SIMC_RUNTIME_PATH="$(resolve_physical_path "${SIMC_RUNTIME_PATH}")"
+if [ -z "${SIMC_RUNTIME_PATH}" ] || [ ! -d "${SIMC_RUNTIME_PATH}" ]; then
+    echo "ERROR: failed to resolve SIMC runtime path" >&2
     exit 1
 fi
 
