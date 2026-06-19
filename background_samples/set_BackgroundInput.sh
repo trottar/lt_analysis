@@ -131,7 +131,12 @@ run_background_setting() {
         echo
         echo "Running ${background_name} background for ${input_name}..."
         echo
-        SIMC_LOG_DIR="${log_dir}" "${LTANAPATH}/src/setup/run_simc_tree" "${input_name}" "${BACKGROUND_REACTION}" || exit 1
+        if SIMC_LOG_DIR="${log_dir}" "${LTANAPATH}/src/setup/run_simc_tree" "${input_name}" "${BACKGROUND_REACTION}"; then
+            COMPLETED_RUNS+=("${background_name}:${input_name}")
+        else
+            echo "WARNING: ${background_name} background failed for ${input_name}; continuing"
+            FAILED_RUNS+=("${background_name}:${input_name}")
+        fi
     done
 }
 
@@ -248,6 +253,8 @@ export SIMC_OVERRIDE_PATH="${BACKGROUND_SIMC_RUNTIME_PATH}"
 # physics_iterate.f/par.pl update helpers used by set_ProdInput.sh.
 
 declare -a ACTIVE_BACKGROUNDS=()
+declare -a COMPLETED_RUNS=()
+declare -a FAILED_RUNS=()
 append_background_if_enabled "neutron" "${RUN_NEUTRON:-true}"
 append_background_if_enabled "delta" "${RUN_DELTA:-true}"
 append_background_if_enabled "sidis" "${RUN_SIDIS:-true}"
@@ -262,4 +269,15 @@ for background_name in "${ACTIVE_BACKGROUNDS[@]}"; do
 done
 
 echo
-echo "Background sample generation complete for Q2=${Q2}, W=${W}, ${EPSILON} epsilon"
+echo "Completed ${#COMPLETED_RUNS[@]} background sample runs for Q2=${Q2}, W=${W}, ${EPSILON} epsilon"
+
+if [ "${#FAILED_RUNS[@]}" -gt 0 ]; then
+    echo
+    echo "The following background sample runs failed:"
+    for failed_run in "${FAILED_RUNS[@]}"; do
+        echo "  ${failed_run}"
+    done
+    exit 1
+fi
+
+echo "Background sample generation complete"
