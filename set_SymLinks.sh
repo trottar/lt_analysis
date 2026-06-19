@@ -87,6 +87,7 @@ ParticleType=$1
 BACKGROUND_SAMPLE_DIR="${LTANAPATH}/background_samples"
 BACKGROUND_CONFIG_FILE="${BACKGROUND_SAMPLE_DIR}/background_samples.conf"
 BACKGROUND_OUTPUT_DIR="${VOLATILEPATH}/OUTPUT/Analysis/${ANATYPE}LT/background_samples/"
+BACKGROUND_OUTPUT_LINK="${BACKGROUND_SAMPLE_DIR}/OUTPUTS"
 BACKGROUND_SIMC_LINK="${BACKGROUND_SAMPLE_DIR}/simc_gfortran"
 BACKGROUND_SIMC_PATH="${BACKGROUND_SIMC_PATH:-}"
 
@@ -207,8 +208,9 @@ if [ -n "${BACKGROUND_SIMC_PATH}" ]; then
     sync_symlink "${BACKGROUND_SIMC_LINK}" "${BACKGROUND_SIMC_PATH}" "${BACKGROUND_SIMC_LINK}" || exit 1
 fi
 
+sync_symlink "${BACKGROUND_OUTPUT_LINK}" "${BACKGROUND_OUTPUT_DIR}" "${BACKGROUND_OUTPUT_LINK}" || exit 1
+
 if [ -L "${BACKGROUND_SIMC_LINK}" ] && [ -e "${BACKGROUND_SIMC_LINK}" ]; then
-    sync_symlink "${BACKGROUND_SIMC_LINK}/OUTPUTS" "${BACKGROUND_OUTPUT_DIR}" "${BACKGROUND_SIMC_LINK}/OUTPUTS" || exit 1
     sync_symlink "${BACKGROUND_SIMC_LINK}/worksim" "${VOLATILEPATH}/worksim/" "${BACKGROUND_SIMC_LINK}/worksim" || exit 1
 else
     echo "Background SIMC symlink is not configured yet"

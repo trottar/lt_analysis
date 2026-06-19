@@ -170,6 +170,7 @@ Q2=$2
 W=$3
 
 CONFIG_FILE="${SCRIPT_DIR}/background_samples.conf"
+BACKGROUND_SAMPLE_DIR="${LTANAPATH}/background_samples"
 if [ ! -f "${CONFIG_FILE}" ]; then
     echo "ERROR: missing configuration file ${CONFIG_FILE}" >&2
     exit 1
@@ -179,6 +180,7 @@ fi
 source "${CONFIG_FILE}"
 
 BACKGROUND_OUTPUT_BASE="${VOLATILEPATH}/OUTPUT/Analysis/${ANATYPE}LT/background_samples"
+BACKGROUND_OUTPUT_LINK="${BACKGROUND_SAMPLE_DIR}/OUTPUTS"
 BACKGROUND_SIMC_LINK="${LTANAPATH}/background_samples/simc_gfortran"
 BACKGROUND_REACTION="${BACKGROUND_REACTION:-production}"
 
@@ -223,6 +225,7 @@ if [[ -z "$3" || ! "$W" =~ 3p02|2p74|3p14|2p32|2p95|2p40|2p20 ]]; then
 fi
 
 mkdir -p "${BACKGROUND_OUTPUT_BASE}" "${LTANAPATH}/log/background_samples"
+sync_symlink "${BACKGROUND_OUTPUT_LINK}" "${BACKGROUND_OUTPUT_BASE}/" "background output"
 
 if [ -n "${BACKGROUND_SIMC_PATH}" ]; then
     sync_symlink "${BACKGROUND_SIMC_LINK}" "${BACKGROUND_SIMC_PATH}" "background simc"
