@@ -92,7 +92,7 @@ append_background_if_enabled() {
 
 run_background_setting() {
     local background_name="$1"
-    local input_dir="${LTANAPATH}/input/${background_name}"
+    local input_dir="${LTANAPATH}/input/backgrounds/${background_name}"
     local output_dir="${BACKGROUND_OUTPUT_BASE}/${background_name}"
     local log_dir="${LTANAPATH}/log/background_samples/${background_name}"
     local phi_setting=""
