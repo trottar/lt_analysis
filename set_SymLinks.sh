@@ -36,6 +36,32 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
+sync_symlink() {
+    local link_path="$1"
+    local target_path="$2"
+    local label="$3"
+    local current_target=""
+
+    if [ -L "${link_path}" ]; then
+        current_target=$(readlink "${link_path}")
+        if [ "${current_target}" = "${target_path}" ] && [ -e "${link_path}" ]; then
+            echo "${label} sym link already exists and not broken"
+            echo "             ${link_path}-->${target_path}"
+            echo
+            echo
+            return 0
+        fi
+
+        echo "${label} sym link exists but needs updating, replacing"
+        rm "${link_path}"
+    elif [ -e "${link_path}" ]; then
+        echo "ERROR: ${link_path} exists and is not a symlink"
+        return 1
+    fi
+
+    ln -s "${target_path}" "${link_path}"
+}
+
 
 # Flag definitions (flags: h, a, o, s)
 while getopts 'h' flag; do
@@ -58,6 +84,18 @@ while getopts 'h' flag; do
 done
 
 ParticleType=$1
+BACKGROUND_SAMPLE_DIR="${LTANAPATH}/background_samples"
+BACKGROUND_CONFIG_FILE="${BACKGROUND_SAMPLE_DIR}/background_samples.conf"
+BACKGROUND_OUTPUT_DIR="${VOLATILEPATH}/OUTPUT/Analysis/${ANATYPE}LT/background_samples/"
+BACKGROUND_SIMC_LINK="${BACKGROUND_SAMPLE_DIR}/simc_gfortran"
+BACKGROUND_SIMC_PATH="${BACKGROUND_SIMC_PATH:-}"
+
+if [ -f "${BACKGROUND_CONFIG_FILE}" ]; then
+    # shellcheck disable=SC1090
+    source "${BACKGROUND_CONFIG_FILE}"
+fi
+
+mkdir -p "${BACKGROUND_OUTPUT_DIR}"
 
 # Check symlinks and create/fix if bad
 if [ ! -L "${LTANAPATH}/simc_gfortran" ]; then
@@ -162,7 +200,21 @@ elif [ -L "${LTANAPATH}/simc_gfortran/worksim" ]; then
 	echo "             ${LTANAPATH}/simc_gfortran/worksim-->${VOLATILEPATH}/worksim/"
 	echo
 	echo
-    fi
+	    fi
+fi
+
+if [ -n "${BACKGROUND_SIMC_PATH}" ]; then
+    sync_symlink "${BACKGROUND_SIMC_LINK}" "${BACKGROUND_SIMC_PATH}" "${BACKGROUND_SIMC_LINK}" || exit 1
+fi
+
+if [ -L "${BACKGROUND_SIMC_LINK}" ] && [ -e "${BACKGROUND_SIMC_LINK}" ]; then
+    sync_symlink "${BACKGROUND_SIMC_LINK}/OUTPUTS" "${BACKGROUND_OUTPUT_DIR}" "${BACKGROUND_SIMC_LINK}/OUTPUTS" || exit 1
+    sync_symlink "${BACKGROUND_SIMC_LINK}/worksim" "${VOLATILEPATH}/worksim/" "${BACKGROUND_SIMC_LINK}/worksim" || exit 1
+else
+    echo "Background SIMC symlink is not configured yet"
+    echo "             Set BACKGROUND_SIMC_PATH in ${BACKGROUND_CONFIG_FILE} to enable it"
+    echo
+    echo
 fi
 
 echo 

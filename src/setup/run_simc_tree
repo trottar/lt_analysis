@@ -32,9 +32,12 @@ HOST=`echo ${PATHFILE_INFO} | cut -d ','  -f16`
 SIMCPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f17`
 LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 
-mkdir -p "${LTANAPATH}/log"
+SIMC_RUNTIME_PATH="${SIMC_OVERRIDE_PATH:-${SIMCPATH}}"
+SIMC_RUNTIME_LOG_DIR="${SIMC_LOG_DIR:-${LTANAPATH}/log}"
 
-cd "$SIMCPATH" || exit 1
+mkdir -p "${SIMC_RUNTIME_LOG_DIR}"
+
+cd "${SIMC_RUNTIME_PATH}" || exit 1
 if [[ -f /site/12gev_phys/softenv.sh ]]; then
     source /site/12gev_phys/softenv.sh 2.3
 fi
@@ -47,19 +50,19 @@ else
 fi
 make clean
 make
-./simc << endofinput 2> "${LTANAPATH}/log/$1.log"
+./simc << endofinput 2> "${SIMC_RUNTIME_LOG_DIR}/$1.log"
 $1
 endofinput
-cd "${SIMCPATH}/util/root_tree" || exit 1
+cd "${SIMC_RUNTIME_PATH}/util/root_tree" || exit 1
 make clean
 make
 ./make_root_tree << endofinput
 $1
 endofinput
-cd "$SIMCPATH" || exit 1
+cd "${SIMC_RUNTIME_PATH}" || exit 1
 mv "worksim/$1.root" OUTPUTS
 
 REACTION=$2
 echo "Reaction selected: $2" 
-cd "${SIMCPATH}/recon_hcana" || exit 1
+cd "${SIMC_RUNTIME_PATH}/recon_hcana" || exit 1
 root -q -l "recon_hcana.C(\"$1\", \"$REACTION\" )"
