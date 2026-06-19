@@ -225,11 +225,8 @@ if [ ! -L "${BACKGROUND_SIMC_LINK}" ] || [ ! -e "${BACKGROUND_SIMC_LINK}" ]; the
 fi
 
 export SIMC_OVERRIDE_PATH="${BACKGROUND_SIMC_LINK}"
-
-cd "${LTANAPATH}/src/setup" || exit 1
-python3 set_q2_simc.py "${Q2}" || exit 1
-python3 set_w_simc.py "${W}" || exit 1
-python3 set_params_simc.py "${Q2}" "${W}" || exit 1
+# Background SIMC uses its own model definitions, so skip the production
+# physics_iterate.f/par.pl update helpers used by set_ProdInput.sh.
 
 declare -a ACTIVE_BACKGROUNDS=()
 append_background_if_enabled "neutron" "${RUN_NEUTRON:-true}"
