@@ -14,6 +14,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+    get_particle_subtraction_component_fit_window_config,
     resolve_particle_subtraction_component_fit_windows,
     resolve_particle_subtraction_mode,
 )
@@ -223,6 +224,407 @@ def _build_fit_inputs(
             for template_name, values in extra_template_columns.items()
         },
     }
+
+
+def _build_single_template_fit_inputs(
+    target_hist,
+    template_hist,
+    fit_min,
+    fit_max,
+    include_windows=None,
+    exclude_windows=None,
+):
+    if include_windows is None:
+        include_windows = []
+    if exclude_windows is None:
+        exclude_windows = []
+
+    x_values = []
+    y_values = []
+    sigma_values = []
+    template_values = []
+    fit_bin_indices = []
+
+    for bin_index in range(1, target_hist.GetNbinsX() + 1):
+        x_center = float(target_hist.GetBinCenter(bin_index))
+        if x_center < fit_min or x_center > fit_max:
+            continue
+        if include_windows and (
+            not any(window_min <= x_center <= window_max for window_min, window_max in include_windows)
+        ):
+            continue
+        if any(window_min <= x_center <= window_max for window_min, window_max in exclude_windows):
+            continue
+
+        y_value = float(target_hist.GetBinContent(bin_index))
+        sigma_value = float(target_hist.GetBinError(bin_index))
+        if not math.isfinite(y_value):
+            continue
+        if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
+            sigma_value = max(math.sqrt(abs(y_value)), 1.0)
+
+        x_values.append(x_center)
+        y_values.append(y_value)
+        sigma_values.append(sigma_value)
+        template_values.append(float(template_hist.GetBinContent(bin_index)))
+        fit_bin_indices.append(bin_index)
+
+    return {
+        "x": np.asarray(x_values, dtype=float),
+        "y": np.asarray(y_values, dtype=float),
+        "sigma": np.asarray(sigma_values, dtype=float),
+        "template": np.asarray(template_values, dtype=float),
+        "fit_bin_indices": fit_bin_indices,
+    }
+
+
+def _solve_nonnegative_template_amplitude(
+    target_hist,
+    template_hist,
+    fit_min,
+    fit_max,
+    include_windows=None,
+    exclude_windows=None,
+):
+    template_name = getattr(template_hist, "GetName", lambda: "template")()
+    validation_message = _validate_template_hist(template_hist, target_hist, template_name)
+    if validation_message:
+        return {
+            "success": False,
+            "amplitude": 0.0,
+            "chi2": None,
+            "n_fit_bins": 0,
+            "message": validation_message,
+        }
+
+    fit_inputs = _build_single_template_fit_inputs(
+        target_hist,
+        template_hist,
+        fit_min,
+        fit_max,
+        include_windows=include_windows,
+        exclude_windows=exclude_windows,
+    )
+    if len(fit_inputs["x"]) == 0:
+        return {
+            "success": False,
+            "amplitude": 0.0,
+            "chi2": None,
+            "n_fit_bins": 0,
+            "message": "no valid fit bins",
+        }
+
+    weighted_template = fit_inputs["template"] / fit_inputs["sigma"]
+    denominator = float(np.dot(weighted_template, weighted_template))
+    if (not math.isfinite(denominator)) or denominator <= 0.0:
+        return {
+            "success": False,
+            "amplitude": 0.0,
+            "chi2": None,
+            "n_fit_bins": int(len(fit_inputs["x"])),
+            "message": "template has zero support inside anchor window",
+        }
+
+    weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
+    amplitude = max(float(np.dot(weighted_template, weighted_target) / denominator), 0.0)
+    residual = fit_inputs["y"] - amplitude * fit_inputs["template"]
+    chi2_value = float(np.sum(np.square(residual / fit_inputs["sigma"])))
+    return {
+        "success": True,
+        "amplitude": amplitude,
+        "chi2": chi2_value,
+        "n_fit_bins": int(len(fit_inputs["x"])),
+        "message": "",
+    }
+
+
+def _coerce_window_map(window_map):
+    coerced = {}
+    for component_name, windows in (window_map or {}).items():
+        if windows is None:
+            continue
+        if isinstance(windows, tuple) and len(windows) == 2:
+            coerced[component_name] = [(float(windows[0]), float(windows[1]))]
+            continue
+
+        resolved_windows = []
+        for window in windows:
+            if window is None or len(window) != 2:
+                continue
+            resolved_windows.append((float(window[0]), float(window[1])))
+        if resolved_windows:
+            coerced[component_name] = resolved_windows
+    return coerced
+
+
+def _collect_unique_windows(window_map, ordered_names=None):
+    unique_windows = []
+    seen = set()
+    names = ordered_names or list((window_map or {}).keys())
+    for component_name in names:
+        for window_min, window_max in (window_map or {}).get(component_name, []):
+            key = (round(float(window_min), 8), round(float(window_max), 8))
+            if key in seen:
+                continue
+            seen.add(key)
+            unique_windows.append((float(window_min), float(window_max)))
+    return unique_windows
+
+
+def _compute_fit_quality(
+    target_hist,
+    fit_hist,
+    fit_min,
+    fit_max,
+    include_windows=None,
+    exclude_windows=None,
+    n_parameters=0,
+):
+    fit_inputs = _build_single_template_fit_inputs(
+        target_hist,
+        fit_hist,
+        fit_min,
+        fit_max,
+        include_windows=include_windows,
+        exclude_windows=exclude_windows,
+    )
+    if len(fit_inputs["x"]) == 0:
+        return {
+            "chi2": None,
+            "ndf": None,
+            "chi2_ndf": None,
+            "fit_p_value": None,
+            "n_fit_bins": 0,
+        }
+
+    residual = fit_inputs["y"] - fit_inputs["template"]
+    chi2_value = float(np.sum(np.square(residual / fit_inputs["sigma"])))
+    ndf_value = int(len(fit_inputs["x"]) - max(int(n_parameters), 0))
+    chi2_ndf_value = (chi2_value / ndf_value) if ndf_value > 0 else None
+    fit_p_value = float(chi2_dist.sf(chi2_value, ndf_value)) if ndf_value > 0 else None
+    return {
+        "chi2": chi2_value,
+        "ndf": ndf_value,
+        "chi2_ndf": chi2_ndf_value,
+        "fit_p_value": fit_p_value,
+        "n_fit_bins": int(len(fit_inputs["x"])),
+    }
+
+
+def _fit_staged_anchor_templates(
+    target_hist,
+    component_hists,
+    amplitude_prefix,
+    fit_min,
+    fit_max,
+    anchor_windows,
+    fit_order,
+    extra_positive_templates=None,
+    extra_anchor_windows=None,
+    n_passes=3,
+    context="",
+):
+    if extra_positive_templates is None:
+        extra_positive_templates = {}
+    if extra_anchor_windows is None:
+        extra_anchor_windows = {}
+
+    fallback_reason = _validate_component_shapes(component_hists, target_hist)
+    if fallback_reason:
+        return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+    for template_name, template_hist in extra_positive_templates.items():
+        fallback_reason = _validate_template_hist(template_hist, target_hist, template_name)
+        if fallback_reason:
+            return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+
+    anchor_window_map = _coerce_window_map(anchor_windows)
+    extra_window_map = _coerce_window_map(extra_anchor_windows)
+    template_hists = {
+        "pi_n": component_hists["pi_n"],
+        "pi_delta": component_hists["pi_delta"],
+        "pi_sidis": component_hists["pi_sidis"],
+    }
+    template_hists.update(extra_positive_templates)
+
+    ordered_fit_names = []
+    for component_name in fit_order or COMPONENT_NAMES:
+        if component_name in template_hists and component_name not in ordered_fit_names:
+            ordered_fit_names.append(component_name)
+    for template_name in extra_positive_templates:
+        if template_name not in ordered_fit_names:
+            ordered_fit_names.append(template_name)
+
+    combined_window_map = deepcopy(anchor_window_map)
+    combined_window_map.update(extra_window_map)
+    fitted_names = [
+        component_name for component_name in ordered_fit_names
+        if (combined_window_map.get(component_name) or [])
+    ]
+    if not fitted_names:
+        return _zero_fit_result(
+            target_hist,
+            amplitude_prefix,
+            context,
+            "no component anchor windows configured",
+        )
+
+    amplitude_map = {component_name: 0.0 for component_name in template_hists}
+    staged_pass_history = []
+    total_passes = max(int(n_passes or 1), 1)
+    for pass_index in range(total_passes):
+        pass_summary = {}
+        for component_name in fitted_names:
+            residual_hist = _clone_hist(
+                target_hist,
+                "{}_residual_{}_pass{}".format(
+                    amplitude_prefix,
+                    component_name,
+                    pass_index + 1,
+                ),
+            )
+            for other_name, other_hist in template_hists.items():
+                if other_name == component_name:
+                    continue
+                other_amplitude = float(amplitude_map.get(other_name, 0.0) or 0.0)
+                if other_hist is None or other_amplitude == 0.0:
+                    continue
+                residual_hist.Add(other_hist, -other_amplitude)
+
+            solve_result = _solve_nonnegative_template_amplitude(
+                residual_hist,
+                template_hists[component_name],
+                fit_min,
+                fit_max,
+                include_windows=combined_window_map.get(component_name),
+            )
+            amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
+            pass_summary[component_name] = {
+                "amplitude": amplitude_map[component_name],
+                "chi2": solve_result.get("chi2"),
+                "n_fit_bins": solve_result.get("n_fit_bins"),
+                "success": bool(solve_result.get("success", False)),
+                "message": solve_result.get("message", ""),
+            }
+        staged_pass_history.append(pass_summary)
+
+    pi_n_scaled_hist = _clone_hist(
+        component_hists["pi_n"],
+        "{}_pi_n_scaled_{}".format(amplitude_prefix, context),
+    )
+    pi_delta_scaled_hist = _clone_hist(
+        component_hists["pi_delta"],
+        "{}_pi_delta_scaled_{}".format(amplitude_prefix, context),
+    )
+    pi_sidis_scaled_hist = _clone_hist(
+        component_hists["pi_sidis"],
+        "{}_pi_sidis_scaled_{}".format(amplitude_prefix, context),
+    )
+    pi_n_scaled_hist.Scale(float(amplitude_map.get("pi_n", 0.0)))
+    pi_delta_scaled_hist.Scale(float(amplitude_map.get("pi_delta", 0.0)))
+    pi_sidis_scaled_hist.Scale(float(amplitude_map.get("pi_sidis", 0.0)))
+
+    extra_scaled_hists = {}
+    for template_name, template_hist in extra_positive_templates.items():
+        scaled_hist = _clone_hist(
+            template_hist,
+            "{}_{}_scaled_{}".format(amplitude_prefix, template_name, context),
+        )
+        scaled_hist.Scale(float(amplitude_map.get(template_name, 0.0)))
+        extra_scaled_hists[template_name] = scaled_hist
+
+    fit_hist = _clone_hist(
+        target_hist,
+        "{}_fit_hist_{}".format(amplitude_prefix, context),
+        reset=True,
+    )
+    pion_bg_fit_hist = _clone_hist(
+        target_hist,
+        "{}_pion_bg_fit_{}".format(amplitude_prefix, context),
+        reset=True,
+    )
+    residual_hist = _clone_hist(
+        target_hist,
+        "{}_fit_residual_{}".format(amplitude_prefix, context),
+    )
+
+    for component_name, scaled_hist in (
+        ("pi_n", pi_n_scaled_hist),
+        ("pi_delta", pi_delta_scaled_hist),
+        ("pi_sidis", pi_sidis_scaled_hist),
+    ):
+        if scaled_hist is None:
+            continue
+        fit_hist.Add(scaled_hist)
+        if amplitude_prefix == "A":
+            pion_bg_fit_hist.Add(scaled_hist)
+        residual_hist.Add(scaled_hist, -1.0)
+
+    for scaled_hist in extra_scaled_hists.values():
+        if scaled_hist is None:
+            continue
+        fit_hist.Add(scaled_hist)
+        residual_hist.Add(scaled_hist, -1.0)
+
+    include_windows = _collect_unique_windows(
+        combined_window_map,
+        ordered_names=fitted_names,
+    )
+    quality = _compute_fit_quality(
+        target_hist,
+        fit_hist,
+        fit_min,
+        fit_max,
+        include_windows=include_windows,
+        n_parameters=len(fitted_names),
+    )
+    extra_component_amplitudes = {
+        template_name: float(amplitude_map.get(template_name, 0.0) or 0.0)
+        for template_name in extra_positive_templates
+    }
+    diagnostics = {
+        "success": True,
+        "status_code": None,
+        "message": "staged anchored component fit",
+        "chi2": quality["chi2"],
+        "ndf": quality["ndf"],
+        "chi2_ndf": quality["chi2_ndf"],
+        "fit_p_value": quality["fit_p_value"],
+        "n_fit_bins": quality["n_fit_bins"],
+        "fit_min": float(fit_min),
+        "fit_max": float(fit_max),
+        "include_windows": deepcopy(include_windows),
+        "exclude_windows": [],
+        "fallback_used": False,
+        "fallback_reason": "",
+        "fit_strategy": "staged_anchor",
+        "n_passes": total_passes,
+        "fit_order": list(fitted_names),
+        "anchor_windows": deepcopy(combined_window_map),
+        "staged_pass_history": deepcopy(staged_pass_history),
+        "component_amplitudes": {
+            component_name: float(amplitude_map.get(component_name, 0.0) or 0.0)
+            for component_name in COMPONENT_NAMES
+        },
+        "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
+    }
+
+    result = {
+        "{}_n".format(amplitude_prefix): float(amplitude_map.get("pi_n", 0.0) or 0.0),
+        "{}_delta".format(amplitude_prefix): float(amplitude_map.get("pi_delta", 0.0) or 0.0),
+        "{}_sidis".format(amplitude_prefix): float(amplitude_map.get("pi_sidis", 0.0) or 0.0),
+        "fit_status": "success",
+        "diagnostics": diagnostics,
+        "fit_hist": fit_hist,
+        "residual_hist": residual_hist,
+        "pi_n_scaled_hist": pi_n_scaled_hist,
+        "pi_delta_scaled_hist": pi_delta_scaled_hist,
+        "pi_sidis_scaled_hist": pi_sidis_scaled_hist,
+        "extra_scaled_hists": extra_scaled_hists,
+        "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
+    }
+    if amplitude_prefix == "A":
+        result["pion_bg_fit_hist"] = pion_bg_fit_hist
+    return result
 
 
 def _run_component_fit(
@@ -457,13 +859,16 @@ def fit_pion_control_with_simc_shapes(
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
-    include_windows = list(
-        resolve_particle_subtraction_component_fit_windows(
-            "pion_control",
-            mm_offset_data=mm_offset_data,
-        ).values()
+    fit_config = get_particle_subtraction_component_fit_window_config("pion_control") or {}
+    resolved_windows = resolve_particle_subtraction_component_fit_windows(
+        "pion_control",
+        mm_offset_data=mm_offset_data,
     )
-    result = _run_component_fit(
+    anchor_windows = {
+        component_name: [window]
+        for component_name, window in resolved_windows.items()
+    }
+    result = _fit_staged_anchor_templates(
         h_pion_control,
         {
             "pi_n": h_pi_n_shape,
@@ -473,9 +878,9 @@ def fit_pion_control_with_simc_shapes(
         "B",
         fit_min,
         fit_max,
-        include_linear_background=False,
-        include_windows=include_windows,
-        exclude_windows=None,
+        anchor_windows=anchor_windows,
+        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_sidis", "pi_delta"),
+        n_passes=fit_config.get("staged_fit_passes", 3),
         context="{}_pion_control".format(context or "scope"),
     )
     return {
@@ -504,25 +909,24 @@ def fit_kaon_nosub_with_simc_pion_shapes(
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
-    include_windows = list(
-        resolve_particle_subtraction_component_fit_windows(
-            "kaon_nosub",
-            mm_offset_data=mm_offset_data,
-        ).values()
+    fit_config = get_particle_subtraction_component_fit_window_config("kaon_nosub") or {}
+    resolved_windows = resolve_particle_subtraction_component_fit_windows(
+        "kaon_nosub",
+        mm_offset_data=mm_offset_data,
     )
-    exclude_windows = []
+    anchor_windows = {
+        component_name: [window]
+        for component_name, window in resolved_windows.items()
+    }
     mm_min = float(inpDict.get("mm_min", fit_min))
     mm_max = float(inpDict.get("mm_max", fit_max))
     extra_positive_templates = {}
-    include_linear_background = True
+    extra_anchor_windows = {}
     if h_kaon_signal_shape is not None:
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
-        include_linear_background = False
         if mm_max > mm_min:
-            include_windows.append((mm_min, mm_max))
-    elif mm_max > mm_min:
-        exclude_windows.append((mm_min, mm_max))
-    result = _run_component_fit(
+            extra_anchor_windows[KAON_SIGNAL_TEMPLATE_NAME] = [(mm_min, mm_max)]
+    result = _fit_staged_anchor_templates(
         h_kaon_nosub,
         {
             "pi_n": h_pi_n_shape,
@@ -532,10 +936,11 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "A",
         fit_min,
         fit_max,
-        include_linear_background=include_linear_background,
+        anchor_windows=anchor_windows,
+        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_sidis", "pi_delta"),
         extra_positive_templates=extra_positive_templates,
-        include_windows=include_windows,
-        exclude_windows=exclude_windows,
+        extra_anchor_windows=extra_anchor_windows,
+        n_passes=fit_config.get("staged_fit_passes", 3),
         context="{}_kaon_nosub".format(context or "scope"),
     )
     signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
@@ -786,6 +1191,18 @@ def _format_fit_metric(value):
     return "{:.3g}".format(float(value))
 
 
+def _format_fit_strategy(diagnostics):
+    if not isinstance(diagnostics, dict):
+        return "n/a"
+    strategy = diagnostics.get("fit_strategy")
+    if not strategy:
+        return "n/a"
+    n_passes = diagnostics.get("n_passes")
+    if _is_finite_number(n_passes):
+        return "{} x{}".format(strategy, int(float(n_passes)))
+    return str(strategy)
+
+
 def _format_window_list(windows):
     if not windows:
         return "full-range"
@@ -907,6 +1324,9 @@ def print_particle_subtraction_component_fit_pages(
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
             "status: {}".format(component_fit_result.get("fit_status_pion", "unknown")),
+            "strategy: {}".format(
+                _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
+            ),
             "B_n={}  B_delta={}  B_sidis={}".format(
                 _format_fit_number(component_fit_result.get("B_n")),
                 _format_fit_number(component_fit_result.get("B_delta")),
@@ -916,7 +1336,7 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_pion")),
                 _format_fit_metric(component_fit_result.get("fit_p_value_pion")),
             ),
-            "fit windows: {}".format(
+            "anchor windows: {}".format(
                 _format_window_list(
                     ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("include_windows")
                 )
@@ -945,6 +1365,9 @@ def print_particle_subtraction_component_fit_pages(
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
             "status: {}".format(component_fit_result.get("fit_status_kaon", "unknown")),
+            "strategy: {}".format(
+                _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
+            ),
             "A_n={}  A_delta={}  A_sidis={}  S_lambda={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
                 _format_fit_number(component_fit_result.get("A_delta")),
@@ -955,7 +1378,7 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_kaon")),
                 _format_fit_metric(component_fit_result.get("fit_p_value_kaon")),
             ),
-            "fit windows: {}".format(
+            "anchor windows: {}".format(
                 _format_window_list(
                     ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("include_windows")
                 )

@@ -38,6 +38,9 @@ from binning_helpers import find_2d_bin_indices
 from hgcer_hole import apply_HGCer_hole_cut
 
 
+_SIMC_COMPONENT_SHAPE_CACHE = {}
+
+
 def _sanitize_token(value):
     token = re.sub(r"[^A-Za-z0-9_]+", "_", str(value or "").strip())
     return token.strip("_") or "component"
@@ -76,6 +79,85 @@ def _make_component_hist(component_name, phi_setting, context, prefix, n_bins, x
     )
     hist.SetDirectory(0)
     return hist
+
+
+def _clone_detached_hist(hist):
+    if hist is None:
+        return None
+    cloned = hist.Clone("{}_{}".format(hist.GetName(), uuid4().hex[:10]))
+    if hasattr(cloned, "SetDirectory"):
+        cloned.SetDirectory(0)
+    return cloned
+
+
+def _clone_binned_shape_map(binned_shapes):
+    cloned_shapes = {}
+    for t_key, phi_shape_map in (binned_shapes or {}).items():
+        cloned_shapes[t_key] = {}
+        for phi_key, hist in (phi_shape_map or {}).items():
+            cloned_shapes[t_key][phi_key] = _clone_detached_hist(hist)
+    return cloned_shapes
+
+
+def _clone_component_payload(payload):
+    if not isinstance(payload, dict):
+        return payload
+    return {
+        "setting_shape": _clone_detached_hist(payload.get("setting_shape")),
+        "setting_shape_full": _clone_detached_hist(payload.get("setting_shape_full")),
+        "binned_shapes": _clone_binned_shape_map(payload.get("binned_shapes") or {}),
+        "diagnostics": deepcopy(payload.get("diagnostics") or {}),
+    }
+
+
+def _freeze_bin_edges_for_cache(edges):
+    if edges is None:
+        return None
+    return tuple(round(float(value), 8) for value in np.asarray(edges, dtype=float))
+
+
+def _get_root_file_cache_token(root_filename):
+    try:
+        stat_result = os.stat(root_filename)
+        return (
+            os.path.abspath(root_filename),
+            int(getattr(stat_result, "st_mtime_ns", int(stat_result.st_mtime * 1e9))),
+            int(stat_result.st_size),
+        )
+    except OSError:
+        return (os.path.abspath(root_filename), None, None)
+
+
+def _build_component_shape_cache_key(
+    root_filename,
+    tree_name,
+    phi_setting,
+    particle_type,
+    component_name,
+    mm_min,
+    mm_max,
+    mm_plot_min,
+    mm_plot_max,
+    mm_plot_nbins,
+    t_bins,
+    phi_bins,
+    use_full_mm_range,
+):
+    return (
+        _get_root_file_cache_token(root_filename),
+        str(tree_name),
+        str(phi_setting),
+        str(particle_type).strip().lower(),
+        str(component_name),
+        round(float(mm_min), 8),
+        round(float(mm_max), 8),
+        round(float(mm_plot_min), 8),
+        round(float(mm_plot_max), 8),
+        int(mm_plot_nbins),
+        _freeze_bin_edges_for_cache(t_bins),
+        _freeze_bin_edges_for_cache(phi_bins),
+        bool(use_full_mm_range),
+    )
 
 
 def _build_binned_shape_map(component_name, phi_setting, context, n_bins, x_min, x_max, t_bins, phi_bins):
@@ -164,6 +246,33 @@ def load_pion_simc_component_shape(
     mm_plot_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     mm_plot_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
     mm_plot_nbins = int(inpDict.get("bg_opt_mm_plot_nbins", BG_OPT_MM_PLOT_NBINS))
+    cache_key = None
+    if root_filename and hgcer_cutg is None:
+        cache_key = _build_component_shape_cache_key(
+            root_filename,
+            tree_name,
+            phi_setting,
+            particle_type,
+            component_name,
+            mm_min,
+            mm_max,
+            mm_plot_min,
+            mm_plot_max,
+            mm_plot_nbins,
+            t_bins,
+            phi_bins,
+            use_full_mm_range,
+        )
+        cached_payload = _SIMC_COMPONENT_SHAPE_CACHE.get(cache_key)
+        if cached_payload is not None:
+            print(
+                "[SIMC TEMPLATE CACHE] {} {} file={}".format(
+                    phi_setting,
+                    component_name,
+                    root_filename,
+                )
+            )
+            return _clone_component_payload(cached_payload)
 
     full_nbins = mm_plot_nbins if use_full_mm_range else 100
     full_xmin = mm_plot_min if use_full_mm_range else mm_min
@@ -410,12 +519,15 @@ def load_pion_simc_component_shape(
         )
     )
 
-    return {
+    payload = {
         "setting_shape": setting_shape,
         "setting_shape_full": setting_shape_full,
         "binned_shapes": binned_shapes,
         "diagnostics": diagnostics,
     }
+    if cache_key is not None:
+        _SIMC_COMPONENT_SHAPE_CACHE[cache_key] = _clone_component_payload(payload)
+    return _clone_component_payload(payload) if cache_key is not None else payload
 
 
 def load_setting_pion_component_shapes(
