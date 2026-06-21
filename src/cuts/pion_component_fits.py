@@ -925,7 +925,9 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     if h_kaon_signal_shape is not None:
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
         if mm_max > mm_min:
-            extra_anchor_windows[KAON_SIGNAL_TEMPLATE_NAME] = [(mm_min, mm_max)]
+            tail_extension = max(float(fit_config.get("kaon_signal_tail_extension", 0.0) or 0.0), 0.0)
+            signal_window_max = min(fit_max, mm_max + tail_extension)
+            extra_anchor_windows[KAON_SIGNAL_TEMPLATE_NAME] = [(mm_min, signal_window_max)]
     result = _fit_staged_anchor_templates(
         h_kaon_nosub,
         {

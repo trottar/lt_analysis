@@ -177,8 +177,8 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
 PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
-        "staged_fit_passes": 3,
-        "fit_order": ("pi_n", "pi_sidis", "pi_delta"),
+        "staged_fit_passes": 1,
+        "fit_order": ("pi_n", "pi_delta", "pi_sidis"),
         "enabled_windows": {
             "pi_n": True,
             "pi_delta": True,
@@ -186,14 +186,15 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "windows": {
             "pi_n": (0.90, 0.94),
-            "pi_delta": (1.16, 1.24),
-            "pi_sidis": (1.28, 1.43),
+            "pi_delta": (1.16, 1.28),
+            "pi_sidis": (1.34, 1.45),
         },
     },
     "kaon_nosub": {
         "apply_mm_offset_data": True,
-        "staged_fit_passes": 3,
-        "fit_order": ("pi_n", "pi_sidis", "pi_delta"),
+        "staged_fit_passes": 1,
+        "fit_order": ("k_lambda_signal", "pi_n", "pi_delta", "pi_sidis"),
+        "kaon_signal_tail_extension": 0.02,
         "enabled_windows": {
             "pi_n": True,
             "pi_delta": True,
@@ -201,8 +202,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "windows": {
             "pi_n": (0.90, 0.94),
-            "pi_delta": (1.16, 1.24),
-            "pi_sidis": (1.28, 1.43),
+            "pi_delta": (1.18, 1.28),
+            "pi_sidis": (1.34, 1.45),
         },
     },
 }
