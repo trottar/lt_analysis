@@ -76,9 +76,12 @@ from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_fit_pages,
     resolve_scope_component_shapes,
+    resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
 )
-from pion_component_shapes import load_setting_pion_component_shapes
+from pion_component_shapes import (
+    load_setting_pion_component_shapes,
+)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -465,7 +468,14 @@ def _process_rand_sub_tree(
     _print_rand_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
     return mm_offset_value
 
-def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True, component_payload=None):
+def rand_sub(
+    phi_setting,
+    inpDict,
+    shift_mode="raw",
+    emit_plots=True,
+    component_payload=None,
+    kaon_signal_shape_payload=None,
+):
     total_start = perf_counter()
     setup_start = perf_counter()
 
@@ -2112,6 +2122,10 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True, component_
                 scope_shapes,
                 inpDict,
                 analysis_scope="setting-wide",
+                kaon_signal_shape=resolve_scope_single_shape(
+                    kaon_signal_shape_payload,
+                    analysis_scope="setting-wide",
+                ),
                 mm_offset_data=MM_offset_DATA,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
             )
@@ -2122,6 +2136,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True, component_
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
             histDict["H_simc_shape_pi_sidis_SIMC"] = component_fit_result.get("H_simc_shape_pi_sidis")
+            histDict["H_simc_shape_k_lambda_SIMC"] = component_fit_result.get("H_simc_shape_k_lambda")
             histDict["H_pion_fit_pi_n_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_n_scaled")
             histDict["H_pion_fit_pi_delta_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_delta_scaled")
             histDict["H_pion_fit_pi_sidis_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_sidis_scaled")
@@ -2129,6 +2144,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True, component_
             histDict["H_kaon_fit_pi_n_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_n_scaled")
             histDict["H_kaon_fit_pi_delta_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_delta_scaled")
             histDict["H_kaon_fit_pi_sidis_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_sidis_scaled")
+            histDict["H_kaon_fit_k_lambda_scaled_DATA"] = component_fit_result.get("H_kaon_fit_k_lambda_scaled")
             histDict["H_kaon_fit_total_DATA"] = component_fit_result.get("H_kaon_fit_total")
             histDict["H_kaon_pion_bg_fit_total_DATA"] = component_fit_result.get("H_kaon_pion_bg_fit_total")
             histDict["H_fit_residual_pion_DATA"] = component_fit_result.get("H_fit_residual_pion")

@@ -626,7 +626,11 @@ sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc import compare_simc
 sys.path.append("utility")
-from pion_component_shapes import attach_pion_component_payload, load_setting_pion_component_shapes
+from pion_component_shapes import (
+    attach_pion_component_payload,
+    load_kaon_simc_signal_shape,
+    load_setting_pion_component_shapes,
+)
 sys.path.append("plotting")
 from pion_component_backgrounds import plot_pion_component_background_payload
 
@@ -635,6 +639,7 @@ from pion_component_backgrounds import plot_pion_component_background_payload
 # Plus it makes the code below less repetitive
 histlist = []
 pion_component_payloads = {}
+kaon_signal_shape_payloads = {}
 if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
     stage_start = perf_counter()
     for phiset in phisetlist:
@@ -647,6 +652,28 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
         )
         record_stage_time("Step 3 pion component shapes {}".format(phiset), setting_start)
     record_stage_time("Step 3 pion component shapes total", stage_start)
+
+    if ParticleType == "kaon":
+        stage_start = perf_counter()
+        for phiset in phisetlist:
+            setting_start = perf_counter()
+            archived_simc_root = os.path.join(
+                OUTPATH,
+                "Prod_Coin_Q{}W{}{}_{}e.root".format(
+                    Q2,
+                    W,
+                    phiset.lower(),
+                    EPSSET,
+                ),
+            )
+            kaon_signal_shape_payloads[phiset] = load_kaon_simc_signal_shape(
+                archived_simc_root,
+                inpDict,
+                phiset,
+                context="main_step3_pre_rand_sub_signal",
+            )
+            record_stage_time("Step 3 kaon signal shape {}".format(phiset), setting_start)
+        record_stage_time("Step 3 kaon signal shapes total", stage_start)
 
     stage_start = perf_counter()
     for phiset in phisetlist:
@@ -664,6 +691,7 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             phiset,
             inpDict,
             component_plot_path,
+            kaon_signal_payload=kaon_signal_shape_payloads.get(phiset),
         )
         if created_plot:
             output_file_lst.append(created_plot)
@@ -683,6 +711,7 @@ for phiset in phisetlist:
         inpDict,
         shift_mode="raw",
         component_payload=pion_component_payloads.get(phiset),
+        kaon_signal_shape_payload=kaon_signal_shape_payloads.get(phiset),
     )
     if len(hist.keys()) <= 1:
         print("No {} setting found...".format(phiset))
