@@ -256,9 +256,14 @@ CACHEPATH=lt.CACHEPATH
 inpDict["LTANAPATH"] = LTANAPATH
 inpDict["OUTPATH"] = OUTPATH
 inpDict["background_samples"] = build_background_sample_manifest(LTANAPATH, Q2, W, EPSSET)
-inpDict["particle_subtraction_mode"] = resolve_particle_subtraction_mode(inpDict)
+inpDict["particle_subtraction_mode"] = resolve_particle_subtraction_mode()
 inpDict["simc_tree_name"] = resolve_simc_tree_name(inpDict)
 inpDict["simc_pion_component_files"] = resolve_simc_pion_component_files(inpDict)
+print(
+    "[PI-SIMC][main] particle_subtraction_mode = {}".format(
+        inpDict["particle_subtraction_mode"]
+    )
+)
 output_file_lst = []
 output_file_lst.append("utility/background_config.py")
 inpDict["bg_active_profile"] = get_active_bg_profile_name()
@@ -858,6 +863,7 @@ record_stage_time("Step 4 bin checker", bin_check_start)
 record_stage_time("Step 4 bin finding/check total", stage_start)
 
 if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    print("[PI-SIMC][main] entering Step 4 component background loading")
     from pion_component_shapes import load_setting_pion_component_shapes
     sys.path.append("plotting")
     from pion_component_backgrounds import plot_pion_component_backgrounds
@@ -907,6 +913,12 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             setting_start,
         )
     record_stage_time("Step 4 pion component background plots total", stage_start)
+else:
+    print(
+        "[PI-SIMC][main] skipping component background loading; mode = {}".format(
+            inpDict.get("particle_subtraction_mode")
+        )
+    )
 
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)

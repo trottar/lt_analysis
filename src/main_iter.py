@@ -350,9 +350,14 @@ histlist = prev_iter_combineDict["histlist"]
 inpDict.setdefault("mm_shift_summary", {})
 inpDict.setdefault("t_shift_summary", {})
 inpDict.setdefault("shift_mode", "raw")
-inpDict["particle_subtraction_mode"] = resolve_particle_subtraction_mode(inpDict)
+inpDict["particle_subtraction_mode"] = resolve_particle_subtraction_mode()
 inpDict["simc_tree_name"] = resolve_simc_tree_name(inpDict)
 inpDict["simc_pion_component_files"] = resolve_simc_pion_component_files(inpDict)
+print(
+    "[PI-SIMC][main_iter] particle_subtraction_mode = {}".format(
+        inpDict["particle_subtraction_mode"]
+    )
+)
 
 # Add closest and formatted dates to inpDict (used in plot comparison)
 inpDict["OutFilename"] = OutFilename
@@ -503,6 +508,7 @@ check_bins(histlist, inpDict)
 record_stage_time("Step 4 bin finding/check total", stage_start)
 
 if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    print("[PI-SIMC][main_iter] entering Step 4 component background loading")
     from pion_component_shapes import load_setting_pion_component_shapes
     sys.path.append("plotting")
     from pion_component_backgrounds import plot_pion_component_backgrounds
@@ -552,6 +558,12 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             setting_start,
         )
     record_stage_time("Step 4 pion component background plots total", stage_start)
+else:
+    print(
+        "[PI-SIMC][main_iter] skipping component background loading; mode = {}".format(
+            inpDict.get("particle_subtraction_mode")
+        )
+    )
 
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)

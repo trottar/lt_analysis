@@ -37,6 +37,11 @@ import shutil
 
 sys.path.append("utility")
 from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email, request_yn_response, run_bash_script
+from background_config import (
+    resolve_particle_subtraction_mode,
+    resolve_simc_pion_component_files,
+    resolve_simc_tree_name,
+)
 from frozen_manifest import (
     get_analysis_artifact_paths,
     get_correction_ledger_paths,
@@ -284,6 +289,14 @@ with open(prev_iter_json, 'r') as f:
 
 inpDict = prev_iter_combineDict["inpDict"]
 histlist = prev_iter_combineDict["histlist"]
+inpDict["particle_subtraction_mode"] = resolve_particle_subtraction_mode()
+inpDict["simc_tree_name"] = resolve_simc_tree_name(inpDict)
+inpDict["simc_pion_component_files"] = resolve_simc_pion_component_files(inpDict)
+print(
+    "[PI-SIMC][main_auto] particle_subtraction_mode = {}".format(
+        inpDict["particle_subtraction_mode"]
+    )
+)
 
 # Add closest and formatted dates to inpDict (used in plot comparison)
 inpDict["closest_date"] = closest_date
@@ -480,6 +493,49 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 
 check_bins(histlist, inpDict)
+
+if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    print("[PI-SIMC][main_auto] entering Step 4 component background loading")
+    from pion_component_shapes import load_setting_pion_component_shapes
+    sys.path.append("plotting")
+    from pion_component_backgrounds import plot_pion_component_backgrounds
+
+    for hist in histlist:
+        component_payload = load_setting_pion_component_shapes(
+            inpDict,
+            hist["phi_setting"],
+            particle_type=ParticleType,
+            t_bins=hist.get("t_bins"),
+            phi_bins=hist.get("phi_bins"),
+            context="main_auto_step4",
+        )
+        hist["_simc_pion_component_payload"] = component_payload
+        hist["simc_pion_component_files"] = component_payload["component_files"]
+        hist["simc_pion_component_diagnostics"] = component_payload["diagnostics"]
+
+        component_plot_path = os.path.join(
+            OUTPATH,
+            "{}_{}_pion_component_bg_{}.pdf".format(
+                hist["phi_setting"],
+                ParticleType,
+                OutFilename,
+            ),
+        )
+        created_plot = plot_pion_component_backgrounds(
+            hist,
+            inpDict,
+            component_plot_path,
+        )
+        if created_plot:
+            output_file_lst.append(created_plot)
+            if DEBUG:
+                show_pdf_with_evince(created_plot)
+else:
+    print(
+        "[PI-SIMC][main_auto] skipping component background loading; mode = {}".format(
+            inpDict.get("particle_subtraction_mode")
+        )
+    )
 
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
