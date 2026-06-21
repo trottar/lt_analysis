@@ -67,10 +67,18 @@ from background_config import (
     BG_OPT_MM_PLOT_NBINS,
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
+    resolve_particle_subtraction_mode,
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
+from pion_component_fits import (
+    build_particle_subtraction_component_result,
+    print_particle_subtraction_component_fit_pages,
+    resolve_scope_component_shapes,
+    serialize_particle_subtraction_component_result,
+)
+from pion_component_shapes import load_setting_pion_component_shapes
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -457,7 +465,7 @@ def _process_rand_sub_tree(
     _print_rand_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
     return mm_offset_value
 
-def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
+def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True, component_payload=None):
     total_start = perf_counter()
     setup_start = perf_counter()
 
@@ -2084,6 +2092,47 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
 
+        component_fit_result = None
+        if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
+            scope_payload = component_payload
+            if scope_payload is None:
+                scope_payload = load_setting_pion_component_shapes(
+                    inpDict,
+                    phi_setting,
+                    particle_type=ParticleType,
+                    context="rand_sub_setting_fit",
+                )
+            scope_shapes = resolve_scope_component_shapes(
+                scope_payload,
+                analysis_scope="setting-wide",
+            )
+            component_fit_result = build_particle_subtraction_component_result(
+                subDict["H_MM_nosub_SUB_DATA"],
+                H_MM_nosub_DATA,
+                scope_shapes,
+                inpDict,
+                analysis_scope="setting-wide",
+                context="{}_{}_setting".format(phi_setting, EPSSET),
+            )
+            histDict["_particle_subtraction_component_fit_setting"] = component_fit_result
+            histDict["particle_subtraction_component_fit_setting"] = (
+                serialize_particle_subtraction_component_result(component_fit_result)
+            )
+            histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
+            histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
+            histDict["H_simc_shape_pi_sidis_SIMC"] = component_fit_result.get("H_simc_shape_pi_sidis")
+            histDict["H_pion_fit_pi_n_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_n_scaled")
+            histDict["H_pion_fit_pi_delta_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_delta_scaled")
+            histDict["H_pion_fit_pi_sidis_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_sidis_scaled")
+            histDict["H_pion_fit_total_DATA"] = component_fit_result.get("H_pion_fit_total")
+            histDict["H_kaon_fit_pi_n_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_n_scaled")
+            histDict["H_kaon_fit_pi_delta_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_delta_scaled")
+            histDict["H_kaon_fit_pi_sidis_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_sidis_scaled")
+            histDict["H_kaon_fit_total_DATA"] = component_fit_result.get("H_kaon_fit_total")
+            histDict["H_kaon_pion_bg_fit_total_DATA"] = component_fit_result.get("H_kaon_pion_bg_fit_total")
+            histDict["H_fit_residual_pion_DATA"] = component_fit_result.get("H_fit_residual_pion")
+            histDict["H_fit_residual_kaon_DATA"] = component_fit_result.get("H_fit_residual_kaon")
+
         subtraction_windows = None
         scale_components = None
         try:
@@ -3005,6 +3054,14 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True):
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
 
     CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    if component_fit_result is not None:
+        print_particle_subtraction_component_fit_pages(
+            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            component_fit_result,
+            title_prefix="{} {}".format(phi_setting, ParticleType),
+            cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+        )
 
     ###
     # MM dummy plots    

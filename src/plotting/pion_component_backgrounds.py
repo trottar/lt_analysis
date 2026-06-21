@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import os
 
 import matplotlib
 
 matplotlib.use("Agg")
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
+logging.getLogger("matplotlib.backends.backend_pdf").setLevel(logging.WARNING)
 import matplotlib.pyplot as plt
 
 

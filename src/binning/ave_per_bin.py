@@ -56,6 +56,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
+sys.path.append("cuts")
 from utility import (
     remove_bad_bins,
     get_centroid,
@@ -64,9 +65,17 @@ from utility import (
 )
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
+    resolve_particle_subtraction_mode,
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
+)
+from pion_component_shapes import load_setting_pion_component_shapes
+from pion_component_fits import (
+    build_particle_subtraction_component_result,
+    print_particle_subtraction_component_fit_pages,
+    resolve_scope_component_shapes,
+    serialize_particle_subtraction_component_result,
 )
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -310,6 +319,7 @@ def process_hist_data(
     tree_data,
     tree_dummy,
     t_bins,
+    phi_bins,
     nWindows,
     phi_setting,
     inpDict,
@@ -368,6 +378,9 @@ def process_hist_data(
 
     hist_bin_dict = {}
     n_t = len(t_bins) - 1
+    particle_subtraction_mode = resolve_particle_subtraction_mode(inpDict)
+    component_shape_payload = None
+    component_fit_results = [None for _ in range(n_t)]
     data_hists = _init_ave_hist_group(("Q2", "W", "t", "epsilon", "mm", "fit1sub", "pisub", "nosub"), n_t)
     rand_hists = _init_ave_hist_group(("Q2", "W", "t", "epsilon", "mm", "fit1sub", "pisub", "nosub"), n_t)
     dummy_hists = _init_ave_hist_group(("Q2", "W", "t", "epsilon", "mm", "fit1sub", "pisub", "nosub"), n_t)
@@ -379,6 +392,16 @@ def process_hist_data(
         SubtractedParticle = "pion"
         subDict = {}
         fitDict = {}
+        if particle_subtraction_mode == "simc_shape_components":
+            component_shape_payload = load_setting_pion_component_shapes(
+                inpDict,
+                phi_setting,
+                particle_type=ParticleType,
+                t_bins=t_bins,
+                phi_bins=phi_bins,
+                hgcer_cutg=hgcer_cutg,
+                context="ave_per_bin_scope_fits",
+            )
 
     # Fit background and subtract
     from background_fit import bg_fit
@@ -669,6 +692,19 @@ def process_hist_data(
 
         # Pion subtraction by scaling simc to peak size
         if ParticleType == "kaon":
+            if component_shape_payload is not None:
+                component_fit_results[j] = build_particle_subtraction_component_result(
+                    subDict["H_MM_nosub_SUB_DATA_{}".format(j)],
+                    hist_bin_dict["H_MM_nosub_DATA_{}".format(j)],
+                    resolve_scope_component_shapes(
+                        component_shape_payload,
+                        analysis_scope="t_bin{}".format(j + 1),
+                        t_bin_index=j,
+                    ),
+                    inpDict,
+                    analysis_scope="t_bin{}".format(j + 1),
+                    context="ave_{}_t{}".format(phi_setting, j + 1),
+                )
             if particle_subtraction_scale_factor is not None:
                 scale_factor = float(particle_subtraction_scale_factor)
             else:
@@ -868,6 +904,10 @@ def process_hist_data(
             "H_MM_pisub_DATA" : hist_bin_dict["H_MM_pisub_DATA_{}".format(j)],
             "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
             "H_MM_fit1sub_DATA" : hist_bin_dict["H_MM_fit1sub_DATA_{}".format(j)],
+            "particle_subtraction_component_fit" : component_fit_results[j],
+            "particle_subtraction_component_fit_summary" : serialize_particle_subtraction_component_result(
+                component_fit_results[j]
+            ) if component_fit_results[j] is not None else None,
         }
 
         # Sort dictionary keys alphabetically
@@ -877,6 +917,8 @@ def process_hist_data(
         # Include Stat box
         ROOT.gStyle.SetOptStat(1)
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
+            if not hasattr(val, "Draw"):
+                continue
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             centroid = get_centroid(val, val.GetXaxis().GetXmin(), val.GetXaxis().GetXmax()) # [centroid, centroid_error]
             val.Draw()
@@ -895,6 +937,14 @@ def process_hist_data(
                 canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+')')
             else:
                 canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)))
+
+            if key == "H_MM_DATA" and component_fit_results[j] is not None:
+                print_particle_subtraction_component_fit_pages(
+                    outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)),
+                    component_fit_results[j],
+                    title_prefix="{} t{}".format(phi_setting, j + 1),
+                    cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                )
             del canvas
             
     return processed_dict
@@ -904,6 +954,7 @@ def bin_data(
     tree_data,
     tree_dummy,
     t_bins,
+    phi_bins,
     nWindows,
     phi_setting,
     inpDict,
@@ -916,6 +967,7 @@ def bin_data(
         tree_data,
         tree_dummy,
         t_bins,
+        phi_bins,
         nWindows,
         phi_setting,
         inpDict,
@@ -1043,11 +1095,14 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
     event_cache = hist.get("_yield_data_event_cache")
     sub_event_cache = hist.get("_yield_sub_event_cache")
     particle_subtraction_scale_factor = hist.get("particle_subtraction_scale_factor")
+    if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
+        particle_subtraction_scale_factor = None
     binned_dict = bin_data(
         kinematic_types,
         tree_data,
         tree_dummy,
         t_bins,
+        phi_bins,
         nWindows,
         phi_setting,
         inpDict,

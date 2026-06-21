@@ -678,7 +678,12 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
 stage_start = perf_counter()
 for phiset in phisetlist:
     setting_start = perf_counter()
-    hist = rand_sub(phiset, inpDict, shift_mode="raw")
+    hist = rand_sub(
+        phiset,
+        inpDict,
+        shift_mode="raw",
+        component_payload=pion_component_payloads.get(phiset),
+    )
     if len(hist.keys()) <= 1:
         print("No {} setting found...".format(phiset))
         record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)

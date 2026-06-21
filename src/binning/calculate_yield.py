@@ -57,6 +57,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
+sys.path.append("cuts")
 from utility import (
     is_hist,
     remove_bad_bins,
@@ -69,9 +70,17 @@ from background_config import (
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
     get_bg_scale_setting_key,
+    resolve_particle_subtraction_mode,
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
+)
+from pion_component_shapes import load_setting_pion_component_shapes
+from pion_component_fits import (
+    build_particle_subtraction_component_result,
+    print_particle_subtraction_component_fit_pages,
+    resolve_scope_component_shapes,
+    serialize_particle_subtraction_component_result,
 )
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -747,6 +756,9 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
     hist_bin_dict = {}
     n_t = len(t_bins) - 1
     n_phi = len(phi_bins) - 1
+    particle_subtraction_mode = resolve_particle_subtraction_mode(inpDict)
+    component_shape_payload = None
+    component_fit_results = [[None for _ in range(n_phi)] for _ in range(n_t)]
     dummy_norm_hist_dict = {}
     yield_hist_names = ("Q2", "W", "q2_w", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin", "ssxptar", "ssyptar", "hsxptar", "hsyptar")
     data_hists = _init_hist_group_matrices(yield_hist_names, n_t, n_phi)
@@ -760,6 +772,16 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
         SubtractedParticle = "pion"
         subDict = {}
         fitDict = {}
+        if particle_subtraction_mode == "simc_shape_components":
+            component_shape_payload = load_setting_pion_component_shapes(
+                inpDict,
+                phi_setting,
+                particle_type=ParticleType,
+                t_bins=t_bins,
+                phi_bins=phi_bins,
+                hgcer_cutg=hgcer_cutg,
+                context="calculate_yield_scope_fits",
+            )
 
     # Fit background and subtract
     from background_fit import bg_fit
@@ -1192,6 +1214,21 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
+                if component_shape_payload is not None:
+                    scope_result = build_particle_subtraction_component_result(
+                        subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                        hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                        resolve_scope_component_shapes(
+                            component_shape_payload,
+                            analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
+                            t_bin_index=j,
+                            phi_bin_index=k,
+                        ),
+                        inpDict,
+                        analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
+                        context="yield_{}_t{}_phi{}".format(phi_setting, j + 1, k + 1),
+                    )
+                    component_fit_results[j][k] = scope_result
                 if particle_subtraction_scale_factor is not None:
                     scale_factor = float(particle_subtraction_scale_factor)
                 else:
@@ -1504,6 +1541,10 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                 "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
                 "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
                 "scale_factor" : arr_scale_factor[j][k],
+                "particle_subtraction_component_fit" : component_fit_results[j][k],
+                "particle_subtraction_component_fit_summary" : serialize_particle_subtraction_component_result(
+                    component_fit_results[j][k]
+                ) if component_fit_results[j][k] is not None else None,
                 # Fractional background-fit error for this bin
                 "bg_fit1_frac_err" : bg_fit1_frac_err[j][k],        
                 "bg_fit2_frac_err" : bg_fit2_frac_err[j][k],
@@ -1637,6 +1678,14 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                             
                         # Close the canvas2 to free up memory
                         canvas4.Close()                                          
+
+                        if component_fit_results[j][k] is not None:
+                            print_particle_subtraction_component_fit_pages(
+                                pdf_name,
+                                component_fit_results[j][k],
+                                title_prefix="{} t{} phi{}".format(phi_setting, j + 1, k + 1),
+                                cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                            )
 
                     # Create a new canvas for each plot
                     canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
@@ -2017,6 +2066,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     normfac_data, normfac_dummy = hist["normfac_data"], hist["normfac_dummy"]
     nWindows, phi_setting = hist["nWindows"], hist["phi_setting"]
     particle_subtraction_scale_factor = hist.get("particle_subtraction_scale_factor")
+    if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
+        particle_subtraction_scale_factor = None
 
     # Grab the setting by setting normalized error
     data_charge_err = inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())]
