@@ -1620,11 +1620,11 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 		    echo "Using low epsilon t/phi bins for high epsilon..."
 		fi
 
-		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
+			export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
 
-		cd "${LTANAPATH}/src"
+			cd "${LTANAPATH}/src"
 
-		if [ ${#data_right[@]} -eq 0 ]; then
+			if [ ${#data_right[@]} -eq 0 ]; then
 	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
