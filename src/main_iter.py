@@ -501,57 +501,6 @@ print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 stage_start = perf_counter()
 check_bins(histlist, inpDict)
 record_stage_time("Step 4 bin finding/check total", stage_start)
-
-if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
-    from pion_component_shapes import load_setting_pion_component_shapes
-    sys.path.append("plotting")
-    from pion_component_backgrounds import plot_pion_component_backgrounds
-
-    stage_start = perf_counter()
-    for hist in histlist:
-        setting_start = perf_counter()
-        component_payload = load_setting_pion_component_shapes(
-            inpDict,
-            hist["phi_setting"],
-            particle_type=ParticleType,
-            t_bins=hist.get("t_bins"),
-            phi_bins=hist.get("phi_bins"),
-            context="main_iter_step4",
-        )
-        hist["_simc_pion_component_payload"] = component_payload
-        hist["simc_pion_component_files"] = component_payload["component_files"]
-        hist["simc_pion_component_diagnostics"] = component_payload["diagnostics"]
-        record_stage_time(
-            "Step 4 pion component shapes {}".format(hist["phi_setting"]),
-            setting_start,
-        )
-    record_stage_time("Step 4 pion component shapes total", stage_start)
-
-    stage_start = perf_counter()
-    for hist in histlist:
-        setting_start = perf_counter()
-        component_plot_path = os.path.join(
-            OUTPATH,
-            "{}_{}_pion_component_bg_{}.pdf".format(
-                hist["phi_setting"],
-                ParticleType,
-                OutFilename,
-            ),
-        )
-        created_plot = plot_pion_component_backgrounds(
-            hist,
-            inpDict,
-            component_plot_path,
-        )
-        if created_plot:
-            output_file_lst.append(created_plot)
-            if DEBUG:
-                show_pdf_with_evince(created_plot)
-        record_stage_time(
-            "Step 4 pion component background plot {}".format(hist["phi_setting"]),
-            setting_start,
-        )
-    record_stage_time("Step 4 pion component background plots total", stage_start)
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
@@ -626,6 +575,56 @@ shutil.copy(LTANAPATH+"/src/"+py_param, LTANAPATH+"/src/"+py_param_active)
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
+sys.path.append("utility")
+from pion_component_shapes import attach_pion_component_payload, load_setting_pion_component_shapes
+sys.path.append("plotting")
+from pion_component_backgrounds import plot_pion_component_background_payload
+
+if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    stage_start = perf_counter()
+    for hist in histlist:
+        setting_start = perf_counter()
+        component_payload = load_setting_pion_component_shapes(
+            inpDict,
+            hist["phi_setting"],
+            particle_type=ParticleType,
+            t_bins=hist.get("t_bins"),
+            phi_bins=hist.get("phi_bins"),
+            context="main_iter_step5_pre_compare",
+        )
+        attach_pion_component_payload(hist, component_payload)
+        record_stage_time(
+            "Step 5 pion component shapes {}".format(hist["phi_setting"]),
+            setting_start,
+        )
+    record_stage_time("Step 5 pion component shapes total", stage_start)
+
+    stage_start = perf_counter()
+    for hist in histlist:
+        setting_start = perf_counter()
+        component_plot_path = os.path.join(
+            OUTPATH,
+            "{}_{}_pion_component_bg_{}.pdf".format(
+                hist["phi_setting"],
+                ParticleType,
+                OutFilename,
+            ),
+        )
+        created_plot = plot_pion_component_background_payload(
+            hist.get("_simc_pion_component_payload"),
+            hist["phi_setting"],
+            inpDict,
+            component_plot_path,
+        )
+        if created_plot:
+            output_file_lst.append(created_plot)
+            if DEBUG:
+                show_pdf_with_evince(created_plot)
+        record_stage_time(
+            "Step 5 pion component background plot {}".format(hist["phi_setting"]),
+            setting_start,
+        )
+    record_stage_time("Step 5 pion component background plots total", stage_start)
 
 # Upate hist dictionary with effective charge and simc histograms
 iter_stage_start = perf_counter()

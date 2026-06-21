@@ -41,13 +41,13 @@ def _format_diag_line(component_name, diagnostics):
     )
 
 
-def plot_pion_component_backgrounds(hist, inpDict, pdf_path):
-    payload = hist.get("_simc_pion_component_payload") or {}
+def plot_pion_component_background_payload(payload, phi_setting, inpDict, pdf_path):
+    payload = payload or {}
     component_map = payload.get("components") or {}
     if not component_map:
         return None
 
-    phi_setting = hist.get("phi_setting", "Unknown")
+    phi_setting = phi_setting or "Unknown"
     particle_type = inpDict.get("ParticleType", "particle")
     q2 = inpDict.get("Q2", "")
     w = inpDict.get("W", "")
@@ -138,3 +138,12 @@ def plot_pion_component_backgrounds(hist, inpDict, pdf_path):
     fig.savefig(pdf_path)
     plt.close(fig)
     return pdf_path
+
+
+def plot_pion_component_backgrounds(hist, inpDict, pdf_path):
+    return plot_pion_component_background_payload(
+        hist.get("_simc_pion_component_payload"),
+        hist.get("phi_setting", "Unknown"),
+        inpDict,
+        pdf_path,
+    )

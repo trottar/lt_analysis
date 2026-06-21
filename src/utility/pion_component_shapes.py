@@ -465,3 +465,17 @@ def load_setting_pion_component_shapes(
         "components": component_payloads,
         "diagnostics": diagnostics,
     }
+
+
+def attach_pion_component_payload(hist_dict, component_payload):
+    if not isinstance(hist_dict, dict) or not isinstance(component_payload, dict):
+        return hist_dict
+
+    hist_dict["_simc_pion_component_payload"] = component_payload
+    hist_dict["simc_pion_component_files"] = deepcopy(
+        component_payload.get("component_files") or {}
+    )
+    hist_dict["simc_pion_component_diagnostics"] = deepcopy(
+        component_payload.get("diagnostics") or {}
+    )
+    return hist_dict

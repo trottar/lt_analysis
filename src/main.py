@@ -625,11 +625,56 @@ initial_param_file = '{}/src/models/par_{}_Q{}W{}'.format(LTANAPATH, pol_str, Q2
 sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc import compare_simc
+sys.path.append("utility")
+from pion_component_shapes import attach_pion_component_payload, load_setting_pion_component_shapes
+sys.path.append("plotting")
+from pion_component_backgrounds import plot_pion_component_background_payload
 
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
 histlist = []
+pion_component_payloads = {}
+if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    stage_start = perf_counter()
+    for phiset in phisetlist:
+        setting_start = perf_counter()
+        pion_component_payloads[phiset] = load_setting_pion_component_shapes(
+            inpDict,
+            phiset,
+            particle_type=ParticleType,
+            context="main_step3_pre_rand_sub",
+        )
+        record_stage_time("Step 3 pion component shapes {}".format(phiset), setting_start)
+    record_stage_time("Step 3 pion component shapes total", stage_start)
+
+    stage_start = perf_counter()
+    for phiset in phisetlist:
+        setting_start = perf_counter()
+        component_plot_path = os.path.join(
+            OUTPATH,
+            "{}_{}_pion_component_bg_{}.pdf".format(
+                phiset,
+                ParticleType,
+                OutFilename,
+            ),
+        )
+        created_plot = plot_pion_component_background_payload(
+            pion_component_payloads.get(phiset),
+            phiset,
+            inpDict,
+            component_plot_path,
+        )
+        if created_plot:
+            output_file_lst.append(created_plot)
+            if DEBUG:
+                show_pdf_with_evince(created_plot)
+        record_stage_time(
+            "Step 3 pion component background plot {}".format(phiset),
+            setting_start,
+        )
+    record_stage_time("Step 3 pion component background plots total", stage_start)
+
 stage_start = perf_counter()
 for phiset in phisetlist:
     setting_start = perf_counter()
@@ -638,6 +683,7 @@ for phiset in phisetlist:
         print("No {} setting found...".format(phiset))
         record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
         continue
+    attach_pion_component_payload(hist, pion_component_payloads.get(phiset))
     histlist.append(hist)
     record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
 record_stage_time("Step 3 rand_sub total", stage_start)
@@ -856,57 +902,6 @@ check_bins(histlist, inpDict)
 record_stage_time("Step 4 bin checker", bin_check_start)
 
 record_stage_time("Step 4 bin finding/check total", stage_start)
-
-if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
-    from pion_component_shapes import load_setting_pion_component_shapes
-    sys.path.append("plotting")
-    from pion_component_backgrounds import plot_pion_component_backgrounds
-
-    stage_start = perf_counter()
-    for hist in histlist:
-        setting_start = perf_counter()
-        component_payload = load_setting_pion_component_shapes(
-            inpDict,
-            hist["phi_setting"],
-            particle_type=ParticleType,
-            t_bins=hist.get("t_bins"),
-            phi_bins=hist.get("phi_bins"),
-            context="main_step4",
-        )
-        hist["_simc_pion_component_payload"] = component_payload
-        hist["simc_pion_component_files"] = component_payload["component_files"]
-        hist["simc_pion_component_diagnostics"] = component_payload["diagnostics"]
-        record_stage_time(
-            "Step 4 pion component shapes {}".format(hist["phi_setting"]),
-            setting_start,
-        )
-    record_stage_time("Step 4 pion component shapes total", stage_start)
-
-    stage_start = perf_counter()
-    for hist in histlist:
-        setting_start = perf_counter()
-        component_plot_path = os.path.join(
-            OUTPATH,
-            "{}_{}_pion_component_bg_{}.pdf".format(
-                hist["phi_setting"],
-                ParticleType,
-                OutFilename,
-            ),
-        )
-        created_plot = plot_pion_component_backgrounds(
-            hist,
-            inpDict,
-            component_plot_path,
-        )
-        if created_plot:
-            output_file_lst.append(created_plot)
-            if DEBUG:
-                show_pdf_with_evince(created_plot)
-        record_stage_time(
-            "Step 4 pion component background plot {}".format(hist["phi_setting"]),
-            setting_start,
-        )
-    record_stage_time("Step 4 pion component background plots total", stage_start)
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)
