@@ -21,6 +21,7 @@ from utility import normalize_hist_to_unit_area
 
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
+KAON_SIGNAL_TEMPLATE_NAME = "k_lambda_signal"
 
 
 def _is_root_hist(obj):
@@ -105,6 +106,8 @@ def _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason):
             "{}_pi_sidis_scaled_{}".format(amplitude_prefix, context),
             reset=True,
         ),
+        "extra_scaled_hists": {},
+        "extra_component_amplitudes": {},
     }
     if amplitude_prefix == "A":
         result["pion_bg_fit_hist"] = _clone_hist(
@@ -115,23 +118,40 @@ def _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason):
     return result
 
 
+def _validate_template_hist(template_hist, target_hist, template_name):
+    if target_hist is None:
+        return "missing target histogram"
+    if template_hist is None:
+        return "missing SIMC template shape for {}".format(template_name)
+    nbins = target_hist.GetNbinsX()
+    xmin = target_hist.GetXaxis().GetXmin()
+    xmax = target_hist.GetXaxis().GetXmax()
+    if template_hist.GetNbinsX() != nbins:
+        return "bin-count mismatch for {}".format(template_name)
+    if (
+        abs(template_hist.GetXaxis().GetXmin() - xmin) > 1e-9
+        or abs(template_hist.GetXaxis().GetXmax() - xmax) > 1e-9
+    ):
+        return "axis-range mismatch for {}".format(template_name)
+    if template_hist.Integral() <= 0.0:
+        return "non-positive integral for {}".format(template_name)
+    return ""
+
+
 def _validate_component_shapes(component_hists, target_hist):
     if target_hist is None:
         return "missing target histogram"
     if any(component_hists.get(name) is None for name in COMPONENT_NAMES):
         return "missing SIMC component shape"
 
-    nbins = target_hist.GetNbinsX()
-    xmin = target_hist.GetXaxis().GetXmin()
-    xmax = target_hist.GetXaxis().GetXmax()
     for component_name in COMPONENT_NAMES:
-        hist = component_hists[component_name]
-        if hist.GetNbinsX() != nbins:
-            return "bin-count mismatch for {}".format(component_name)
-        if abs(hist.GetXaxis().GetXmin() - xmin) > 1e-9 or abs(hist.GetXaxis().GetXmax() - xmax) > 1e-9:
-            return "axis-range mismatch for {}".format(component_name)
-        if hist.Integral() <= 0.0:
-            return "non-positive integral for {}".format(component_name)
+        message = _validate_template_hist(
+            component_hists[component_name],
+            target_hist,
+            component_name,
+        )
+        if message:
+            return message
     return ""
 
 
@@ -140,15 +160,19 @@ def _build_fit_inputs(
     component_hists,
     fit_min,
     fit_max,
+    extra_template_hists=None,
     include_windows=None,
     exclude_windows=None,
 ):
+    if extra_template_hists is None:
+        extra_template_hists = {}
     if include_windows is None:
         include_windows = []
     if exclude_windows is None:
         exclude_windows = []
 
     component_columns = {name: [] for name in COMPONENT_NAMES}
+    extra_template_columns = {name: [] for name in extra_template_hists}
     x_values = []
     y_values = []
     sigma_values = []
@@ -180,6 +204,10 @@ def _build_fit_inputs(
             component_columns[component_name].append(
                 float(component_hists[component_name].GetBinContent(bin_index))
             )
+        for template_name, template_hist in extra_template_hists.items():
+            extra_template_columns[template_name].append(
+                float(template_hist.GetBinContent(bin_index))
+            )
 
     return {
         "x": np.asarray(x_values, dtype=float),
@@ -189,6 +217,10 @@ def _build_fit_inputs(
         "component_columns": {
             component_name: np.asarray(values, dtype=float)
             for component_name, values in component_columns.items()
+        },
+        "extra_template_columns": {
+            template_name: np.asarray(values, dtype=float)
+            for template_name, values in extra_template_columns.items()
         },
     }
 
@@ -200,19 +232,27 @@ def _run_component_fit(
     fit_min,
     fit_max,
     include_linear_background=False,
+    extra_positive_templates=None,
     include_windows=None,
     exclude_windows=None,
     context="",
 ):
+    if extra_positive_templates is None:
+        extra_positive_templates = {}
     fallback_reason = _validate_component_shapes(component_hists, target_hist)
     if fallback_reason:
         return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+    for template_name, template_hist in extra_positive_templates.items():
+        fallback_reason = _validate_template_hist(template_hist, target_hist, template_name)
+        if fallback_reason:
+            return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
 
     fit_inputs = _build_fit_inputs(
         target_hist,
         component_hists,
         fit_min,
         fit_max,
+        extra_template_hists=extra_positive_templates,
         include_windows=include_windows,
         exclude_windows=exclude_windows,
     )
@@ -231,6 +271,11 @@ def _run_component_fit(
     design_columns = [fit_inputs["component_columns"][name] for name in COMPONENT_NAMES]
     lower_bounds = [0.0, 0.0, 0.0]
     upper_bounds = [np.inf, np.inf, np.inf]
+    for template_name in extra_positive_templates:
+        column_names.append(template_name)
+        design_columns.append(fit_inputs["extra_template_columns"][template_name])
+        lower_bounds.append(0.0)
+        upper_bounds.append(np.inf)
     if include_linear_background:
         column_names.extend(("C0", "C1"))
         design_columns.extend((np.ones_like(x_values), x_values))
@@ -278,6 +323,10 @@ def _run_component_fit(
     }
     for component_name in COMPONENT_NAMES:
         parameter_map[component_name] = max(parameter_map[component_name], 0.0)
+    extra_component_amplitudes = {}
+    for template_name in extra_positive_templates:
+        extra_component_amplitudes[template_name] = max(parameter_map[template_name], 0.0)
+        parameter_map[template_name] = extra_component_amplitudes[template_name]
 
     fit_values = design_matrix.dot(np.asarray(fit_result.x, dtype=float))
     residual_values = y_values - fit_values
@@ -301,6 +350,14 @@ def _run_component_fit(
     pi_n_scaled_hist.Scale(parameter_map["pi_n"])
     pi_delta_scaled_hist.Scale(parameter_map["pi_delta"])
     pi_sidis_scaled_hist.Scale(parameter_map["pi_sidis"])
+    extra_scaled_hists = {}
+    for template_name, template_hist in extra_positive_templates.items():
+        scaled_hist = _clone_hist(
+            template_hist,
+            "{}_{}_scaled_{}".format(amplitude_prefix, template_name, context),
+        )
+        scaled_hist.Scale(parameter_map[template_name])
+        extra_scaled_hists[template_name] = scaled_hist
 
     fit_hist = _clone_hist(
         target_hist,
@@ -328,7 +385,10 @@ def _run_component_fit(
             + parameter_map["pi_delta"] * component_hists["pi_delta"].GetBinContent(bin_index)
             + parameter_map["pi_sidis"] * component_hists["pi_sidis"].GetBinContent(bin_index)
         )
-        total_fit_value = pion_bg_value
+        extra_template_value = 0.0
+        for template_name, template_hist in extra_positive_templates.items():
+            extra_template_value += parameter_map[template_name] * template_hist.GetBinContent(bin_index)
+        total_fit_value = pion_bg_value + extra_template_value
         if include_linear_background:
             total_fit_value += parameter_map["C0"] + parameter_map["C1"] * x_center
         fit_bin_values.append(total_fit_value)
@@ -359,6 +419,7 @@ def _run_component_fit(
             component_name: float(parameter_map[component_name])
             for component_name in COMPONENT_NAMES
         },
+        "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
     }
     if include_linear_background:
         diagnostics["background_terms"] = {
@@ -377,6 +438,8 @@ def _run_component_fit(
         "pi_n_scaled_hist": pi_n_scaled_hist,
         "pi_delta_scaled_hist": pi_delta_scaled_hist,
         "pi_sidis_scaled_hist": pi_sidis_scaled_hist,
+        "extra_scaled_hists": extra_scaled_hists,
+        "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
     }
     if amplitude_prefix == "A":
         result["pion_bg_fit_hist"] = pion_bg_fit_hist
@@ -434,6 +497,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     h_pi_n_shape,
     h_pi_delta_shape,
     h_pi_sidis_shape,
+    h_kaon_signal_shape,
     inpDict,
     mm_offset_data=0.0,
     context="",
@@ -449,7 +513,14 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     exclude_windows = []
     mm_min = float(inpDict.get("mm_min", fit_min))
     mm_max = float(inpDict.get("mm_max", fit_max))
-    if mm_max > mm_min:
+    extra_positive_templates = {}
+    include_linear_background = True
+    if h_kaon_signal_shape is not None:
+        extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
+        include_linear_background = False
+        if mm_max > mm_min:
+            include_windows.append((mm_min, mm_max))
+    elif mm_max > mm_min:
         exclude_windows.append((mm_min, mm_max))
     result = _run_component_fit(
         h_kaon_nosub,
@@ -461,15 +532,19 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "A",
         fit_min,
         fit_max,
-        include_linear_background=True,
+        include_linear_background=include_linear_background,
+        extra_positive_templates=extra_positive_templates,
         include_windows=include_windows,
         exclude_windows=exclude_windows,
         context="{}_kaon_nosub".format(context or "scope"),
     )
+    signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
+    signal_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
     return {
         "A_n": result["A_n"],
         "A_delta": result["A_delta"],
         "A_sidis": result["A_sidis"],
+        "S_lambda": None if signal_amplitude is None else float(signal_amplitude),
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
         "fit_hist": result["fit_hist"],
@@ -478,6 +553,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "pi_n_scaled_hist": result["pi_n_scaled_hist"],
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
+        "k_lambda_scaled_hist": signal_scaled_hist,
     }
 
 
@@ -528,12 +604,36 @@ def resolve_scope_component_shapes(
     return resolved
 
 
+def resolve_scope_single_shape(
+    shape_payload,
+    analysis_scope="setting-wide",
+    t_bin_index=None,
+    phi_bin_index=None,
+):
+    if not isinstance(shape_payload, dict):
+        return None
+    if t_bin_index is None and phi_bin_index is None:
+        return shape_payload.get("setting_shape_full")
+
+    binned_shapes = shape_payload.get("binned_shapes") or {}
+    t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
+    if phi_bin_index is not None and t_key is not None:
+        return (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
+    if t_key is not None:
+        return _sum_hist_list_to_unit_area(
+            list((binned_shapes.get(t_key) or {}).values()),
+            "single_shape_{}_aggregated".format(analysis_scope or "scope"),
+        )
+    return shape_payload.get("setting_shape_full")
+
+
 def build_particle_subtraction_component_result(
     h_pion_control,
     h_kaon_nosub,
     component_shapes,
     inpDict,
     analysis_scope,
+    kaon_signal_shape=None,
     mm_offset_data=0.0,
     context="",
 ):
@@ -560,6 +660,7 @@ def build_particle_subtraction_component_result(
         component_shapes.get("pi_n"),
         component_shapes.get("pi_delta"),
         component_shapes.get("pi_sidis"),
+        kaon_signal_shape,
         inpDict,
         mm_offset_data=mm_offset_data,
         context=context,
@@ -571,6 +672,7 @@ def build_particle_subtraction_component_result(
     a_n = float(kaon_fit["A_n"])
     a_delta = float(kaon_fit["A_delta"])
     a_sidis = float(kaon_fit["A_sidis"])
+    s_lambda = kaon_fit["S_lambda"]
 
     fallback_reasons = []
     if pion_fit["diagnostics"].get("fallback_used"):
@@ -584,6 +686,7 @@ def build_particle_subtraction_component_result(
         "A_n": a_n,
         "A_delta": a_delta,
         "A_sidis": a_sidis,
+        "S_lambda": s_lambda,
         "B_n": b_n,
         "B_delta": b_delta,
         "B_sidis": b_sidis,
@@ -618,6 +721,10 @@ def build_particle_subtraction_component_result(
             component_shapes.get("pi_sidis"),
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
+        "H_simc_shape_k_lambda": _clone_hist(
+            kaon_signal_shape,
+            "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
+        ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
         "H_pion_fit_pi_delta_scaled": pion_fit["pi_delta_scaled_hist"],
         "H_pion_fit_pi_sidis_scaled": pion_fit["pi_sidis_scaled_hist"],
@@ -625,6 +732,7 @@ def build_particle_subtraction_component_result(
         "H_kaon_fit_pi_n_scaled": kaon_fit["pi_n_scaled_hist"],
         "H_kaon_fit_pi_delta_scaled": kaon_fit["pi_delta_scaled_hist"],
         "H_kaon_fit_pi_sidis_scaled": kaon_fit["pi_sidis_scaled_hist"],
+        "H_kaon_fit_k_lambda_scaled": kaon_fit["k_lambda_scaled_hist"],
         "H_kaon_fit_total": kaon_fit["fit_hist"],
         "H_kaon_pion_bg_fit_total": kaon_fit["pion_bg_fit_hist"],
         "H_fit_residual_pion": pion_fit["residual_hist"],
@@ -816,25 +924,32 @@ def print_particle_subtraction_component_fit_pages(
         ],
     )
 
+    has_kaon_signal = component_fit_result.get("H_kaon_fit_k_lambda_scaled") is not None
+    kaon_title = "{}kaon no-sub SIMC pion-background fit".format(title_prefix)
+    if has_kaon_signal:
+        kaon_title = "{}kaon no-sub SIMC decomposition fit".format(title_prefix)
+
     _print_component_overlay_page(
         pdf_name,
         component_fit_result.get("H_kaon_nosub_input"),
         "kaon no-sub data",
-        "{}kaon no-sub SIMC pion-background fit".format(title_prefix),
+        kaon_title,
         [
             (component_fit_result.get("H_kaon_fit_pi_n_scaled"), "pi-n", ROOT.kRed + 1, 1),
             (component_fit_result.get("H_kaon_fit_pi_delta_scaled"), "pi-delta", ROOT.kAzure + 2, 1),
             (component_fit_result.get("H_kaon_fit_pi_sidis_scaled"), "pi-SIDIS", ROOT.kMagenta + 2, 1),
+            (component_fit_result.get("H_kaon_fit_k_lambda_scaled"), "K-Lambda", ROOT.kBlue + 1, 1),
             (component_fit_result.get("H_kaon_pion_bg_fit_total"), "pion-bg sum", ROOT.kOrange + 7, 2),
             (component_fit_result.get("H_kaon_fit_total"), "total fit", ROOT.kGreen + 2, 3),
         ],
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
             "status: {}".format(component_fit_result.get("fit_status_kaon", "unknown")),
-            "A_n={}  A_delta={}  A_sidis={}".format(
+            "A_n={}  A_delta={}  A_sidis={}  S_lambda={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
                 _format_fit_number(component_fit_result.get("A_delta")),
                 _format_fit_number(component_fit_result.get("A_sidis")),
+                _format_fit_number(component_fit_result.get("S_lambda")),
             ),
             "chi2/ndf={}  p={}".format(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_kaon")),

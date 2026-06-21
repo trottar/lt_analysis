@@ -177,8 +177,16 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
 PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
-        "enabled_windows": {},
-        "windows": {},
+        "enabled_windows": {
+            "pi_n": True,
+            "pi_delta": True,
+            "pi_sidis": True,
+        },
+        "windows": {
+            "pi_n": (0.90, 0.94),
+            "pi_delta": (1.16, 1.24),
+            "pi_sidis": (1.28, 1.43),
+        },
     },
     "kaon_nosub": {
         "apply_mm_offset_data": True,
@@ -188,9 +196,9 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": True,
         },
         "windows": {
-            "pi_n": (0.88, 0.96),
-            "pi_delta": (1.16, 1.28),
-            "pi_sidis": (1.28, 1.45),
+            "pi_n": (0.90, 0.94),
+            "pi_delta": (1.16, 1.24),
+            "pi_sidis": (1.28, 1.43),
         },
     },
 }

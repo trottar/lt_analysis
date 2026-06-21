@@ -54,7 +54,7 @@ def _build_hist_name(prefix, component_name, phi_setting, context):
 
 
 def _warn_component_load(component_name, phi_setting, reason, **details):
-    print("WARNING: pion SIMC component shape load issue")
+    print("WARNING: SIMC template shape load issue")
     print("  component_name = {}".format(component_name))
     print("  phi_setting = {}".format(phi_setting))
     print("  reason = {}".format(reason))
@@ -284,7 +284,7 @@ def load_pion_simc_component_shape(
     total_entries = tree_simc.GetEntries()
 
     print(
-        "\nGrabbing {} {} background simc...".format(
+        "\nGrabbing {} {} SIMC template...".format(
             phi_setting,
             _display_component_name(component_name),
         )
@@ -398,7 +398,7 @@ def load_pion_simc_component_shape(
     }
 
     print(
-        "[PI-SIMC] {} {} tree={} seen={} passed={} mm_passed={} full_before={:.6e} full_after={:.6e}".format(
+        "[SIMC TEMPLATE] {} {} tree={} seen={} passed={} mm_passed={} full_before={:.6e} full_after={:.6e}".format(
             phi_setting,
             component_name,
             tree_name,
@@ -465,6 +465,30 @@ def load_setting_pion_component_shapes(
         "components": component_payloads,
         "diagnostics": diagnostics,
     }
+
+
+def load_kaon_simc_signal_shape(
+    root_filename,
+    inpDict,
+    phi_setting,
+    t_bins=None,
+    phi_bins=None,
+    hgcer_cutg=None,
+    use_full_mm_range=True,
+    context="",
+):
+    return load_pion_simc_component_shape(
+        root_filename,
+        inpDict,
+        phi_setting,
+        "kaon",
+        "k_lambda_signal",
+        t_bins=t_bins,
+        phi_bins=phi_bins,
+        hgcer_cutg=hgcer_cutg,
+        use_full_mm_range=use_full_mm_range,
+        context=context,
+    )
 
 
 def attach_pion_component_payload(hist_dict, component_payload):

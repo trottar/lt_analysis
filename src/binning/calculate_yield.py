@@ -75,11 +75,15 @@ from background_config import (
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
 )
-from pion_component_shapes import load_setting_pion_component_shapes
+from pion_component_shapes import (
+    load_kaon_simc_signal_shape,
+    load_setting_pion_component_shapes,
+)
 from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_fit_pages,
     resolve_scope_component_shapes,
+    resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
 )
 from mm_background_subtraction import (
@@ -117,6 +121,35 @@ def _clone_processed_entry(entry):
         else:
             cloned[key] = val
     return cloned
+
+
+def _get_cached_kaon_signal_shape_payload(hist, inpDict, t_bins, phi_bins, context):
+    if resolve_particle_subtraction_mode(inpDict) != "simc_shape_components":
+        return None
+    if str(inpDict.get("ParticleType", "")).strip().lower() != "kaon":
+        return None
+
+    cache_key = "_simc_kaon_signal_shape_payload"
+    cached_payload = hist.get(cache_key)
+    if cached_payload is not None:
+        return cached_payload
+
+    root_filename = hist.get("rootFileSimc")
+    if not root_filename:
+        simc_name = hist.get("InSIMCFilename")
+        if simc_name:
+            root_filename = os.path.join(OUTPATH, simc_name)
+
+    cached_payload = load_kaon_simc_signal_shape(
+        root_filename,
+        inpDict,
+        hist["phi_setting"],
+        t_bins=t_bins,
+        phi_bins=phi_bins,
+        context=context,
+    )
+    hist[cache_key] = cached_payload
+    return cached_payload
 
 
 def _clone_processed_dict(processed_dict):
@@ -691,7 +724,19 @@ def _process_yield_simc_tree(
         hist_group["mm_unweighted"][t_index][phi_index].Fill(evt.missmass)
 
 
-def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, particle_subtraction_scale_factor=None):
+def process_hist_data(
+    tree_data,
+    tree_dummy,
+    normfac_data,
+    normfac_dummy,
+    t_bins,
+    phi_bins,
+    nWindows,
+    phi_setting,
+    inpDict,
+    particle_subtraction_scale_factor=None,
+    kaon_signal_shape_payload=None,
+):
     emit_plots = inpDict.get("yield_emit_plots", True)
     suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
     progress_bar = Misc.progressBar if bool(inpDict.get("yield_show_progress", True)) else _noop_progress_bar
@@ -1226,6 +1271,12 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         ),
                         inpDict,
                         analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
+                        kaon_signal_shape=resolve_scope_single_shape(
+                            kaon_signal_shape_payload,
+                            analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
+                            t_bin_index=j,
+                            phi_bin_index=k,
+                        ),
                         mm_offset_data=MM_offset_DATA,
                         context="yield_{}_t{}_phi{}".format(phi_setting, j + 1, k + 1),
                     )
@@ -1746,6 +1797,13 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         get_bg_scale_setting_key(base_inp["EPSSET"], hist["phi_setting"]): 0.0
     }
 
+    kaon_signal_shape_payload = _get_cached_kaon_signal_shape_payload(
+        hist,
+        inpDict,
+        t_bins,
+        phi_bins,
+        "calculate_yield_bg_opt_signal",
+    )
     processed_dict, _, ave_event_cache, sub_event_cache = process_hist_data(
         hist["InFile_DATA"],
         hist["InFile_DUMMY"],
@@ -1756,6 +1814,7 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         hist["nWindows"],
         hist["phi_setting"],
         base_inp,
+        kaon_signal_shape_payload=kaon_signal_shape_payload,
     )
 
     base_cache = {
@@ -1954,10 +2013,36 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
 
     return processed_dict, support_hist_dict, ave_event_cache, sub_event_cache
 
-def bin_data(kin_type, tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, data_base_cache=None, particle_subtraction_scale_factor=None):
+def bin_data(
+    kin_type,
+    tree_data,
+    tree_dummy,
+    normfac_data,
+    normfac_dummy,
+    t_bins,
+    phi_bins,
+    nWindows,
+    phi_setting,
+    inpDict,
+    data_base_cache=None,
+    particle_subtraction_scale_factor=None,
+    kaon_signal_shape_payload=None,
+):
 
     if data_base_cache is None:
-        processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins, phi_bins, nWindows, phi_setting, inpDict, particle_subtraction_scale_factor=particle_subtraction_scale_factor)
+        processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = process_hist_data(
+            tree_data,
+            tree_dummy,
+            normfac_data,
+            normfac_dummy,
+            t_bins,
+            phi_bins,
+            nWindows,
+            phi_setting,
+            inpDict,
+            particle_subtraction_scale_factor=particle_subtraction_scale_factor,
+            kaon_signal_shape_payload=kaon_signal_shape_payload,
+        )
     else:
         processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = _process_hist_data_from_base_cache(
             data_base_cache,
@@ -2079,6 +2164,13 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     data_base_cache = None
     if inpDict.get("bg_opt_use_data_cache"):
         data_base_cache = hist.get("_bg_opt_data_base_cache")
+    kaon_signal_shape_payload = _get_cached_kaon_signal_shape_payload(
+        hist,
+        inpDict,
+        t_bins,
+        phi_bins,
+        "calculate_yield_signal",
+    )
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict, ave_event_cache, sub_event_cache = bin_data(
@@ -2094,6 +2186,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         inpDict,
         data_base_cache=data_base_cache,
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
+        kaon_signal_shape_payload=kaon_signal_shape_payload,
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
