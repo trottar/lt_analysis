@@ -12,6 +12,7 @@ from uuid import uuid4
 
 import ROOT
 import numpy as np
+from ltsep import Misc
 
 
 MODULE_DIR = Path(__file__).resolve().parent
@@ -59,6 +60,10 @@ def _warn_component_load(component_name, phi_setting, reason, **details):
     print("  reason = {}".format(reason))
     for key, value in details.items():
         print("  {} = {}".format(key, value))
+
+
+def _display_component_name(component_name):
+    return str(component_name).replace("_", "-")
 
 
 def _make_component_hist(component_name, phi_setting, context, prefix, n_bins, x_min, x_max):
@@ -276,8 +281,17 @@ def load_pion_simc_component_shape(
     n_events_seen = 0
     n_events_passed = 0
     n_events_passed_mm_window = 0
+    total_entries = tree_simc.GetEntries()
+
+    print(
+        "\nGrabbing {} {} background simc...".format(
+            phi_setting,
+            _display_component_name(component_name),
+        )
+    )
 
     for evt in tree_simc:
+        Misc.progressBar(n_events_seen, total_entries, bar_length=25)
         n_events_seen += 1
         adj_missmass = evt.missmass
         adj_t = -evt.t
