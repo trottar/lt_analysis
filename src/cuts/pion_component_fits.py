@@ -23,6 +23,12 @@ from utility import normalize_hist_to_unit_area
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
 KAON_SIGNAL_TEMPLATE_NAME = "k_lambda_signal"
+COMPONENT_PLOT_STYLE = {
+    "pi_n": {"label": "pi-n", "color": ROOT.kRed + 1},
+    "pi_delta": {"label": "pi-delta", "color": ROOT.kAzure + 2},
+    "pi_sidis": {"label": "pi-SIDIS", "color": ROOT.kMagenta + 2},
+    KAON_SIGNAL_TEMPLATE_NAME: {"label": "K-Lambda", "color": ROOT.kBlue + 1},
+}
 
 
 def _is_root_hist(obj):
@@ -470,10 +476,28 @@ def _fit_staged_anchor_templates(
 
     amplitude_map = {component_name: 0.0 for component_name in template_hists}
     staged_pass_history = []
+    step_overlays = []
     total_passes = max(int(n_passes or 1), 1)
     for pass_index in range(total_passes):
         pass_summary = {}
         for component_name in fitted_names:
+            baseline_before_hist = _clone_hist(
+                target_hist,
+                "{}_baseline_before_{}_pass{}".format(
+                    amplitude_prefix,
+                    component_name,
+                    pass_index + 1,
+                ),
+                reset=True,
+            )
+            for other_name, other_hist in template_hists.items():
+                if other_name == component_name:
+                    continue
+                other_amplitude = float(amplitude_map.get(other_name, 0.0) or 0.0)
+                if other_hist is None or other_amplitude == 0.0:
+                    continue
+                baseline_before_hist.Add(other_hist, other_amplitude)
+
             residual_hist = _clone_hist(
                 target_hist,
                 "{}_residual_{}_pass{}".format(
@@ -482,13 +506,7 @@ def _fit_staged_anchor_templates(
                     pass_index + 1,
                 ),
             )
-            for other_name, other_hist in template_hists.items():
-                if other_name == component_name:
-                    continue
-                other_amplitude = float(amplitude_map.get(other_name, 0.0) or 0.0)
-                if other_hist is None or other_amplitude == 0.0:
-                    continue
-                residual_hist.Add(other_hist, -other_amplitude)
+            residual_hist.Add(baseline_before_hist, -1.0)
 
             solve_result = _solve_nonnegative_template_amplitude(
                 residual_hist,
@@ -505,6 +523,38 @@ def _fit_staged_anchor_templates(
                 "success": bool(solve_result.get("success", False)),
                 "message": solve_result.get("message", ""),
             }
+            component_scaled_hist = _clone_hist(
+                template_hists[component_name],
+                "{}_component_scaled_{}_pass{}".format(
+                    amplitude_prefix,
+                    component_name,
+                    pass_index + 1,
+                ),
+            )
+            component_scaled_hist.Scale(amplitude_map[component_name])
+            cumulative_after_hist = _clone_hist(
+                baseline_before_hist,
+                "{}_cumulative_after_{}_pass{}".format(
+                    amplitude_prefix,
+                    component_name,
+                    pass_index + 1,
+                ),
+            )
+            cumulative_after_hist.Add(component_scaled_hist)
+            step_overlays.append(
+                {
+                    "pass_index": int(pass_index + 1),
+                    "step_index": int(len(step_overlays) + 1),
+                    "component_name": component_name,
+                    "component_label": _component_plot_label(component_name),
+                    "amplitude": float(amplitude_map[component_name]),
+                    "anchor_windows": deepcopy(combined_window_map.get(component_name) or []),
+                    "H_baseline_before": baseline_before_hist,
+                    "H_residual_input": residual_hist,
+                    "H_component_scaled": component_scaled_hist,
+                    "H_cumulative_after": cumulative_after_hist,
+                }
+            )
         staged_pass_history.append(pass_summary)
 
     pi_n_scaled_hist = _clone_hist(
@@ -621,6 +671,7 @@ def _fit_staged_anchor_templates(
         "pi_sidis_scaled_hist": pi_sidis_scaled_hist,
         "extra_scaled_hists": extra_scaled_hists,
         "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
+        "step_overlays": step_overlays,
     }
     if amplitude_prefix == "A":
         result["pion_bg_fit_hist"] = pion_bg_fit_hist
@@ -879,7 +930,7 @@ def fit_pion_control_with_simc_shapes(
         fit_min,
         fit_max,
         anchor_windows=anchor_windows,
-        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_sidis", "pi_delta"),
+        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
         n_passes=fit_config.get("staged_fit_passes", 3),
         context="{}_pion_control".format(context or "scope"),
     )
@@ -939,7 +990,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         fit_min,
         fit_max,
         anchor_windows=anchor_windows,
-        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_sidis", "pi_delta"),
+        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
         n_passes=fit_config.get("staged_fit_passes", 3),
@@ -1136,12 +1187,14 @@ def build_particle_subtraction_component_result(
         "H_pion_fit_pi_delta_scaled": pion_fit["pi_delta_scaled_hist"],
         "H_pion_fit_pi_sidis_scaled": pion_fit["pi_sidis_scaled_hist"],
         "H_pion_fit_total": pion_fit["fit_hist"],
+        "H_pion_fit_step_overlays": pion_fit.get("step_overlays") or [],
         "H_kaon_fit_pi_n_scaled": kaon_fit["pi_n_scaled_hist"],
         "H_kaon_fit_pi_delta_scaled": kaon_fit["pi_delta_scaled_hist"],
         "H_kaon_fit_pi_sidis_scaled": kaon_fit["pi_sidis_scaled_hist"],
         "H_kaon_fit_k_lambda_scaled": kaon_fit["k_lambda_scaled_hist"],
         "H_kaon_fit_total": kaon_fit["fit_hist"],
         "H_kaon_pion_bg_fit_total": kaon_fit["pion_bg_fit_hist"],
+        "H_kaon_fit_step_overlays": kaon_fit.get("step_overlays") or [],
         "H_fit_residual_pion": pion_fit["residual_hist"],
         "H_fit_residual_kaon": kaon_fit["residual_hist"],
         "H_pion_control_input": _clone_hist(
@@ -1191,6 +1244,14 @@ def _format_fit_metric(value):
     if not _is_finite_number(value):
         return "n/a"
     return "{:.3g}".format(float(value))
+
+
+def _component_plot_label(component_name):
+    return (COMPONENT_PLOT_STYLE.get(component_name) or {}).get("label", str(component_name))
+
+
+def _component_plot_color(component_name):
+    return (COMPONENT_PLOT_STYLE.get(component_name) or {}).get("color", ROOT.kBlack)
 
 
 def _format_fit_strategy(diagnostics):
@@ -1299,6 +1360,138 @@ def _print_component_overlay_page(
     canvas.Close()
 
 
+def _print_component_step_pages(
+    pdf_name,
+    target_hist,
+    step_overlays,
+    title_prefix,
+    sample_label,
+):
+    if target_hist is None or not step_overlays:
+        return
+
+    for step_overlay in step_overlays:
+        baseline_before = step_overlay.get("H_baseline_before")
+        residual_input = step_overlay.get("H_residual_input")
+        component_scaled = step_overlay.get("H_component_scaled")
+        cumulative_after = step_overlay.get("H_cumulative_after")
+        component_name = step_overlay.get("component_name")
+        component_label = step_overlay.get("component_label") or _component_plot_label(component_name)
+        component_color = _component_plot_color(component_name)
+        if baseline_before is None or residual_input is None or component_scaled is None or cumulative_after is None:
+            continue
+
+        canvas = ROOT.TCanvas("c_step_{}".format(step_overlay.get("step_index", 0)), "", 900, 900)
+        canvas.Divide(1, 2)
+
+        top_pad = canvas.cd(1)
+        top_pad.SetBottomMargin(0.12)
+        target_clone = _clone_hist(target_hist, "{}_step_target".format(target_hist.GetName()))
+        baseline_clone = _clone_hist(baseline_before, "{}_step_baseline".format(baseline_before.GetName()))
+        component_clone = _clone_hist(component_scaled, "{}_step_component".format(component_scaled.GetName()))
+        cumulative_clone = _clone_hist(cumulative_after, "{}_step_cumulative".format(cumulative_after.GetName()))
+        target_clone.SetTitle(
+            "{}{} step {}: {}".format(
+                title_prefix,
+                sample_label,
+                step_overlay.get("step_index", 0),
+                component_label,
+            )
+        )
+        target_clone.SetLineColor(ROOT.kBlack)
+        target_clone.SetLineWidth(2)
+        target_clone.SetFillStyle(3001)
+        target_clone.SetFillColor(ROOT.kGray + 1)
+        target_clone.SetMarkerStyle(20)
+        target_clone.SetMarkerSize(0.7)
+        _style_overlay_hist(baseline_clone, ROOT.kOrange + 7, line_style=2)
+        _style_overlay_hist(component_clone, component_color, line_style=1)
+        _style_overlay_hist(cumulative_clone, ROOT.kGreen + 2, line_style=3)
+        top_y_max = max(
+            target_clone.GetMaximum(),
+            baseline_clone.GetMaximum(),
+            component_clone.GetMaximum(),
+            cumulative_clone.GetMaximum(),
+            1.0,
+        )
+        target_clone.SetMaximum(1.20 * top_y_max)
+        target_clone.SetMinimum(0.0)
+        target_clone.Draw("hist")
+        baseline_clone.Draw("hist same")
+        component_clone.Draw("hist same")
+        cumulative_clone.Draw("hist same")
+        for window_min, window_max in (step_overlay.get("anchor_windows") or []):
+            _draw_vertical_window_lines(window_min, window_max, 0.0, 1.20 * top_y_max)
+
+        top_legend = ROOT.TLegend(0.58, 0.58, 0.88, 0.88)
+        top_legend.SetBorderSize(0)
+        top_legend.SetFillStyle(0)
+        top_legend.AddEntry(target_clone, "{} data".format(sample_label), "lf")
+        top_legend.AddEntry(baseline_clone, "baseline before step", "l")
+        top_legend.AddEntry(component_clone, "{} contribution".format(component_label), "l")
+        top_legend.AddEntry(cumulative_clone, "baseline after step", "l")
+        top_legend.Draw()
+
+        stats_box = ROOT.TPaveText(0.14, 0.60, 0.52, 0.88, "NDC")
+        stats_box.SetBorderSize(0)
+        stats_box.SetFillStyle(0)
+        stats_box.SetTextAlign(12)
+        stats_box.SetTextSize(0.028)
+        stats_box.AddText("pass: {}".format(step_overlay.get("pass_index", 0)))
+        stats_box.AddText("component: {}".format(component_label))
+        stats_box.AddText("amplitude: {}".format(_format_fit_number(step_overlay.get("amplitude"))))
+        stats_box.AddText("anchor: {}".format(_format_window_list(step_overlay.get("anchor_windows") or [])))
+        stats_box.Draw()
+
+        bottom_pad = canvas.cd(2)
+        bottom_pad.SetTopMargin(0.08)
+        bottom_pad.SetBottomMargin(0.12)
+        residual_clone = _clone_hist(residual_input, "{}_step_residual".format(residual_input.GetName()))
+        component_bottom_clone = _clone_hist(
+            component_scaled,
+            "{}_step_component_bottom".format(component_scaled.GetName()),
+        )
+        residual_clone.SetTitle("Residual input to {} step".format(component_label))
+        residual_clone.SetLineColor(ROOT.kBlack)
+        residual_clone.SetLineWidth(2)
+        residual_clone.SetFillStyle(3001)
+        residual_clone.SetFillColor(ROOT.kGray + 1)
+        residual_clone.SetMarkerStyle(20)
+        residual_clone.SetMarkerSize(0.7)
+        _style_overlay_hist(component_bottom_clone, component_color, line_style=1)
+        bottom_y_max = max(
+            residual_clone.GetMaximum(),
+            component_bottom_clone.GetMaximum(),
+            1.0,
+        )
+        bottom_y_min = min(
+            0.0,
+            residual_clone.GetMinimum(),
+            component_bottom_clone.GetMinimum(),
+        )
+        residual_clone.SetMaximum(1.20 * bottom_y_max)
+        residual_clone.SetMinimum(1.20 * bottom_y_min if bottom_y_min < 0.0 else 0.0)
+        residual_clone.Draw("hist")
+        component_bottom_clone.Draw("hist same")
+        for window_min, window_max in (step_overlay.get("anchor_windows") or []):
+            _draw_vertical_window_lines(
+                window_min,
+                window_max,
+                residual_clone.GetMinimum(),
+                residual_clone.GetMaximum(),
+            )
+
+        bottom_legend = ROOT.TLegend(0.58, 0.70, 0.88, 0.88)
+        bottom_legend.SetBorderSize(0)
+        bottom_legend.SetFillStyle(0)
+        bottom_legend.AddEntry(residual_clone, "residual before step", "lf")
+        bottom_legend.AddEntry(component_bottom_clone, "{} fit".format(component_label), "l")
+        bottom_legend.Draw()
+
+        canvas.Print(pdf_name)
+        canvas.Close()
+
+
 def print_particle_subtraction_component_fit_pages(
     pdf_name,
     component_fit_result,
@@ -1388,6 +1581,22 @@ def print_particle_subtraction_component_fit_pages(
         ],
         cut_window=cut_window,
     )
+
+    if component_fit_result.get("analysis_scope") == "setting-wide":
+        _print_component_step_pages(
+            pdf_name,
+            component_fit_result.get("H_pion_control_input"),
+            component_fit_result.get("H_pion_fit_step_overlays"),
+            title_prefix,
+            "pion-control",
+        )
+        _print_component_step_pages(
+            pdf_name,
+            component_fit_result.get("H_kaon_nosub_input"),
+            component_fit_result.get("H_kaon_fit_step_overlays"),
+            title_prefix,
+            "kaon no-sub",
+        )
 
 
 def serialize_particle_subtraction_component_result(result):
