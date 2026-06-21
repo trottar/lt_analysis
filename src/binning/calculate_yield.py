@@ -1226,6 +1226,7 @@ def process_hist_data(tree_data, tree_dummy, normfac_data, normfac_dummy, t_bins
                         ),
                         inpDict,
                         analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
+                        mm_offset_data=MM_offset_DATA,
                         context="yield_{}_t{}_phi{}".format(phi_setting, j + 1, k + 1),
                     )
                     component_fit_results[j][k] = scope_result

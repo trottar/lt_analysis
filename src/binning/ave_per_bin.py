@@ -703,6 +703,7 @@ def process_hist_data(
                     ),
                     inpDict,
                     analysis_scope="t_bin{}".format(j + 1),
+                    mm_offset_data=MM_offset_DATA,
                     context="ave_{}_t{}".format(phi_setting, j + 1),
                 )
             if particle_subtraction_scale_factor is not None:

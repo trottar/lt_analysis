@@ -14,6 +14,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+    resolve_particle_subtraction_component_fit_windows,
     resolve_particle_subtraction_mode,
 )
 from utility import normalize_hist_to_unit_area
@@ -139,8 +140,11 @@ def _build_fit_inputs(
     component_hists,
     fit_min,
     fit_max,
+    include_windows=None,
     exclude_windows=None,
 ):
+    if include_windows is None:
+        include_windows = []
     if exclude_windows is None:
         exclude_windows = []
 
@@ -153,6 +157,10 @@ def _build_fit_inputs(
     for bin_index in range(1, target_hist.GetNbinsX() + 1):
         x_center = float(target_hist.GetBinCenter(bin_index))
         if x_center < fit_min or x_center > fit_max:
+            continue
+        if include_windows and (
+            not any(window_min <= x_center <= window_max for window_min, window_max in include_windows)
+        ):
             continue
         if any(window_min <= x_center <= window_max for window_min, window_max in exclude_windows):
             continue
@@ -192,6 +200,7 @@ def _run_component_fit(
     fit_min,
     fit_max,
     include_linear_background=False,
+    include_windows=None,
     exclude_windows=None,
     context="",
 ):
@@ -204,6 +213,7 @@ def _run_component_fit(
         component_hists,
         fit_min,
         fit_max,
+        include_windows=include_windows,
         exclude_windows=exclude_windows,
     )
     x_values = fit_inputs["x"]
@@ -341,6 +351,7 @@ def _run_component_fit(
         "n_fit_bins": int(len(x_values)),
         "fit_min": float(fit_min),
         "fit_max": float(fit_max),
+        "include_windows": deepcopy(include_windows or []),
         "exclude_windows": deepcopy(exclude_windows or []),
         "fallback_used": False,
         "fallback_reason": "",
@@ -378,10 +389,17 @@ def fit_pion_control_with_simc_shapes(
     h_pi_delta_shape,
     h_pi_sidis_shape,
     inpDict,
+    mm_offset_data=0.0,
     context="",
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
+    include_windows = list(
+        resolve_particle_subtraction_component_fit_windows(
+            "pion_control",
+            mm_offset_data=mm_offset_data,
+        ).values()
+    )
     result = _run_component_fit(
         h_pion_control,
         {
@@ -393,6 +411,7 @@ def fit_pion_control_with_simc_shapes(
         fit_min,
         fit_max,
         include_linear_background=False,
+        include_windows=include_windows,
         exclude_windows=None,
         context="{}_pion_control".format(context or "scope"),
     )
@@ -416,10 +435,17 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     h_pi_delta_shape,
     h_pi_sidis_shape,
     inpDict,
+    mm_offset_data=0.0,
     context="",
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
+    include_windows = list(
+        resolve_particle_subtraction_component_fit_windows(
+            "kaon_nosub",
+            mm_offset_data=mm_offset_data,
+        ).values()
+    )
     exclude_windows = []
     mm_min = float(inpDict.get("mm_min", fit_min))
     mm_max = float(inpDict.get("mm_max", fit_max))
@@ -436,6 +462,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         fit_min,
         fit_max,
         include_linear_background=True,
+        include_windows=include_windows,
         exclude_windows=exclude_windows,
         context="{}_kaon_nosub".format(context or "scope"),
     )
@@ -507,6 +534,7 @@ def build_particle_subtraction_component_result(
     component_shapes,
     inpDict,
     analysis_scope,
+    mm_offset_data=0.0,
     context="",
 ):
     mode = resolve_particle_subtraction_mode(inpDict)
@@ -524,6 +552,7 @@ def build_particle_subtraction_component_result(
         component_shapes.get("pi_delta"),
         component_shapes.get("pi_sidis"),
         inpDict,
+        mm_offset_data=mm_offset_data,
         context=context,
     )
     kaon_fit = fit_kaon_nosub_with_simc_pion_shapes(
@@ -532,6 +561,7 @@ def build_particle_subtraction_component_result(
         component_shapes.get("pi_delta"),
         component_shapes.get("pi_sidis"),
         inpDict,
+        mm_offset_data=mm_offset_data,
         context=context,
     )
 
@@ -646,6 +676,15 @@ def _format_fit_metric(value):
     if not _is_finite_number(value):
         return "n/a"
     return "{:.3g}".format(float(value))
+
+
+def _format_window_list(windows):
+    if not windows:
+        return "full-range"
+    formatted = []
+    for window_min, window_max in windows:
+        formatted.append("[{:.3f}, {:.3f}]".format(float(window_min), float(window_max)))
+    return ", ".join(formatted)
 
 
 def _draw_vertical_window_lines(window_min, window_max, y_min, y_max):
@@ -769,6 +808,11 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_pion")),
                 _format_fit_metric(component_fit_result.get("fit_p_value_pion")),
             ),
+            "fit windows: {}".format(
+                _format_window_list(
+                    ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("include_windows")
+                )
+            ),
         ],
     )
 
@@ -795,6 +839,11 @@ def print_particle_subtraction_component_fit_pages(
             "chi2/ndf={}  p={}".format(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_kaon")),
                 _format_fit_metric(component_fit_result.get("fit_p_value_kaon")),
+            ),
+            "fit windows: {}".format(
+                _format_window_list(
+                    ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("include_windows")
+                )
             ),
         ],
         cut_window=cut_window,

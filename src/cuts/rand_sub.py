@@ -2112,6 +2112,7 @@ def rand_sub(phi_setting, inpDict, shift_mode="raw", emit_plots=True, component_
                 scope_shapes,
                 inpDict,
                 analysis_scope="setting-wide",
+                mm_offset_data=MM_offset_DATA,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
             )
             histDict["_particle_subtraction_component_fit_setting"] = component_fit_result

@@ -174,6 +174,27 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
     },
 }
 
+PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
+    "pion_control": {
+        "apply_mm_offset_data": True,
+        "enabled_windows": {},
+        "windows": {},
+    },
+    "kaon_nosub": {
+        "apply_mm_offset_data": True,
+        "enabled_windows": {
+            "pi_n": True,
+            "pi_delta": True,
+            "pi_sidis": True,
+        },
+        "windows": {
+            "pi_n": (0.88, 0.96),
+            "pi_delta": (1.16, 1.28),
+            "pi_sidis": (1.28, 1.45),
+        },
+    },
+}
+
 _PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
 
 # Variables used for lightweight SIMC-vs-data kinematic scoring.
@@ -1244,6 +1265,34 @@ def resolve_particle_subtraction_windows(particle_type, subtracted_particle, mm_
                     window_name,
                     particle_type,
                     subtracted_particle,
+                )
+            )
+        low_edge, high_edge = bounds
+        resolved[str(window_name)] = (float(low_edge) + offset, float(high_edge) + offset)
+    return resolved
+
+
+def get_particle_subtraction_component_fit_window_config(fit_target):
+    config = PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG.get(str(fit_target or "").strip())
+    return None if config is None else deepcopy(config)
+
+
+def resolve_particle_subtraction_component_fit_windows(fit_target, mm_offset_data=0.0):
+    config = get_particle_subtraction_component_fit_window_config(fit_target)
+    if not config:
+        return {}
+
+    offset = float(mm_offset_data) if bool(config.get("apply_mm_offset_data", False)) else 0.0
+    enabled_windows = config.get("enabled_windows") or {}
+    resolved = {}
+    for window_name, bounds in (config.get("windows") or {}).items():
+        if not bool(enabled_windows.get(window_name, True)):
+            continue
+        if len(bounds) != 2:
+            raise ValueError(
+                "Particle subtraction component-fit window '{}' for '{}' must contain exactly two bounds".format(
+                    window_name,
+                    fit_target,
                 )
             )
         low_edge, high_edge = bounds
