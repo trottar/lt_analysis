@@ -41,7 +41,12 @@ from time import perf_counter
 
 sys.path.append("utility")
 from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email, request_yn_response, run_bash_script
-from background_config import get_active_bg_profile_name
+from background_config import (
+    get_active_bg_profile_name,
+    resolve_particle_subtraction_mode,
+    resolve_simc_pion_component_files,
+    resolve_simc_tree_name,
+)
 from correction_ledger import build_correction_ledger, write_correction_ledger
 from epsilon_correction_compare import load_ledgers_and_compare, validate_epsilon_compare
 from frozen_manifest import (
@@ -251,6 +256,9 @@ CACHEPATH=lt.CACHEPATH
 inpDict["LTANAPATH"] = LTANAPATH
 inpDict["OUTPATH"] = OUTPATH
 inpDict["background_samples"] = build_background_sample_manifest(LTANAPATH, Q2, W, EPSSET)
+inpDict["particle_subtraction_mode"] = resolve_particle_subtraction_mode(inpDict)
+inpDict["simc_tree_name"] = resolve_simc_tree_name(inpDict)
+inpDict["simc_pion_component_files"] = resolve_simc_pion_component_files(inpDict)
 output_file_lst = []
 output_file_lst.append("utility/background_config.py")
 inpDict["bg_active_profile"] = get_active_bg_profile_name()
@@ -848,6 +856,28 @@ check_bins(histlist, inpDict)
 record_stage_time("Step 4 bin checker", bin_check_start)
 
 record_stage_time("Step 4 bin finding/check total", stage_start)
+
+if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    from pion_component_shapes import load_setting_pion_component_shapes
+
+    stage_start = perf_counter()
+    for hist in histlist:
+        setting_start = perf_counter()
+        component_payload = load_setting_pion_component_shapes(
+            inpDict,
+            hist["phi_setting"],
+            particle_type=ParticleType,
+            t_bins=hist.get("t_bins"),
+            phi_bins=hist.get("phi_bins"),
+            context="main_step4",
+        )
+        hist["simc_pion_component_files"] = component_payload["component_files"]
+        hist["simc_pion_component_diagnostics"] = component_payload["diagnostics"]
+        record_stage_time(
+            "Step 4 pion component shapes {}".format(hist["phi_setting"]),
+            setting_start,
+        )
+    record_stage_time("Step 4 pion component shapes total", stage_start)
 
 print("\n")
 print(f"{chr(sum(range(ord(min(str(not()))))))}"*25)

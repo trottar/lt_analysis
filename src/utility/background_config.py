@@ -141,6 +141,20 @@ BG_OPT_MM_PLOT_NBINS = 100
 BG_OPT_MM_SIMC_SCALE_MODE = "proper"
 #BG_OPT_MM_SIMC_SCALE_MODE = "window"
 
+PARTICLE_SUBTRACTION_MODE_DEFAULT = "simc_shape_components"
+#PARTICLE_SUBTRACTION_MODE_DEFAULT = "single_scale"
+PARTICLE_SUBTRACTION_MODE_COMPONENTS = "simc_shape_components"
+PARTICLE_SUBTRACTION_MODES = (
+    PARTICLE_SUBTRACTION_MODE_DEFAULT,
+    PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+)
+SIMC_TREE_NAME_DEFAULT = "h10"
+SIMC_PION_COMPONENT_BACKGROUND_MAP = {
+    "pi_n": "neutron",
+    "pi_delta": "delta",
+    "pi_sidis": "sidis",
+}
+
 # Separate normalization windows used when scaling the pion-selected
 # subtraction sample in kaon analyses.
 PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
@@ -1131,6 +1145,77 @@ def resolve_bg_stat_scale2(inpDict, phi_setting=None):
     if "bg_stat_scale2" in inpDict:
         return float(inpDict["bg_stat_scale2"])
     return float(BG_STAT_SCALE2)
+
+
+def _normalize_particle_subtraction_mode(value):
+    mode = str(value or PARTICLE_SUBTRACTION_MODE_DEFAULT).strip().lower()
+    if mode not in PARTICLE_SUBTRACTION_MODES:
+        raise ValueError(
+            "Invalid particle_subtraction_mode '{}'. Allowed values are {}.".format(
+                value,
+                ", ".join(PARTICLE_SUBTRACTION_MODES),
+            )
+        )
+    return mode
+
+
+def resolve_particle_subtraction_mode(inp_dict=None, mode=None):
+    if mode is None and isinstance(inp_dict, dict):
+        mode = inp_dict.get(
+            "particle_subtraction_mode",
+            PARTICLE_SUBTRACTION_MODE_DEFAULT,
+        )
+    elif mode is None:
+        mode = PARTICLE_SUBTRACTION_MODE_DEFAULT
+    return _normalize_particle_subtraction_mode(mode)
+
+
+def resolve_simc_tree_name(inp_dict=None):
+    tree_name = ""
+    if isinstance(inp_dict, dict):
+        tree_name = str(inp_dict.get("simc_tree_name", SIMC_TREE_NAME_DEFAULT)).strip()
+    return tree_name or SIMC_TREE_NAME_DEFAULT
+
+
+def _build_default_simc_pion_component_file_map(background_samples):
+    resolved = {phi_setting: {} for phi_setting in ("Center", "Left", "Right")}
+    by_phi = {}
+    if isinstance(background_samples, dict):
+        by_phi = background_samples.get("by_phi", {}) or {}
+
+    for phi_setting in resolved:
+        phi_samples = by_phi.get(phi_setting, {}) or {}
+        for component_name, background_name in SIMC_PION_COMPONENT_BACKGROUND_MAP.items():
+            sample_entry = phi_samples.get(background_name, {}) or {}
+            resolved[phi_setting][component_name] = sample_entry.get("root")
+
+    return resolved
+
+
+def resolve_simc_pion_component_files(inp_dict=None, phi_setting=None):
+    raw_map = None
+    background_samples = None
+    if isinstance(inp_dict, dict):
+        raw_map = inp_dict.get("simc_pion_component_files")
+        background_samples = inp_dict.get("background_samples")
+
+    resolved = _build_default_simc_pion_component_file_map(background_samples)
+    if isinstance(raw_map, dict):
+        for raw_phi_setting, raw_components in raw_map.items():
+            if raw_phi_setting not in resolved:
+                resolved[str(raw_phi_setting)] = {}
+            if not isinstance(raw_components, dict):
+                continue
+            for component_name, filename in raw_components.items():
+                resolved[str(raw_phi_setting)][str(component_name)] = filename
+
+    for resolved_phi_setting, component_map in resolved.items():
+        for component_name in SIMC_PION_COMPONENT_BACKGROUND_MAP:
+            component_map.setdefault(component_name, None)
+
+    if phi_setting is None:
+        return deepcopy(resolved)
+    return deepcopy(resolved.get(str(phi_setting), {}))
 
 
 def get_particle_subtraction_window_config(particle_type, subtracted_particle):

@@ -1287,6 +1287,29 @@ def prompt_valid_parameter_choice(sig_name, elements):
 
 ##################################################################################################################################################
 
+def normalize_hist_to_unit_area(hist, quiet=False, context=""):
+    if hist is None:
+        if not quiet:
+            print("WARNING: Cannot normalize empty histogram for {}.".format(context or "unit-area request"))
+        return False
+
+    integral = float(hist.Integral())
+    if not math.isfinite(integral) or integral <= 0.0:
+        if not quiet:
+            print(
+                "WARNING: Cannot normalize histogram for {} to unit area "
+                "(integral={}).".format(
+                    context or "unit-area request",
+                    integral,
+                )
+            )
+        return False
+
+    hist.Scale(1.0 / integral)
+    return True
+
+##################################################################################################################################################
+
 def integrate_hist_range(hist: ROOT.TH1F, x_min: float, x_max: float) -> float:
     """
     Integrates a TH1F histogram between x_min and x_max.
