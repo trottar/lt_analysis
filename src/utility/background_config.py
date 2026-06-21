@@ -179,6 +179,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_delta", "pi_sidis"),
+        "template_overlap_mode": "exclusive_residual",
         "enabled_windows": {
             "pi_n": True,
             "pi_delta": True,
@@ -194,6 +195,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_delta", "pi_sidis", "k_lambda_signal"),
+        "template_overlap_mode": "exclusive_residual",
         "kaon_signal_tail_extension": 0.02,
         "enabled_windows": {
             "pi_n": True,

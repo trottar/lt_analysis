@@ -417,6 +417,213 @@ def _compute_fit_quality(
     }
 
 
+def _build_template_projection_inputs(
+    target_hist,
+    basis_hists,
+    fit_min,
+    fit_max,
+    include_windows=None,
+):
+    if include_windows is None:
+        include_windows = []
+
+    y_values = []
+    basis_columns = {name: [] for name in basis_hists}
+    n_bins_used = 0
+    for bin_index in range(1, target_hist.GetNbinsX() + 1):
+        x_center = float(target_hist.GetBinCenter(bin_index))
+        if x_center < fit_min or x_center > fit_max:
+            continue
+        if include_windows and (
+            not any(window_min <= x_center <= window_max for window_min, window_max in include_windows)
+        ):
+            continue
+
+        target_value = float(target_hist.GetBinContent(bin_index))
+        basis_values = {
+            name: float(hist.GetBinContent(bin_index))
+            for name, hist in basis_hists.items()
+        }
+        if target_value <= 0.0 and all(value <= 0.0 for value in basis_values.values()):
+            continue
+
+        y_values.append(target_value)
+        for name, value in basis_values.items():
+            basis_columns[name].append(value)
+        n_bins_used += 1
+
+    return {
+        "y": np.asarray(y_values, dtype=float),
+        "basis_columns": {
+            name: np.asarray(values, dtype=float)
+            for name, values in basis_columns.items()
+        },
+        "n_fit_bins": int(n_bins_used),
+    }
+
+
+def _solve_template_projection(
+    target_hist,
+    basis_hists,
+    fit_min,
+    fit_max,
+    include_windows=None,
+):
+    if not basis_hists:
+        return {
+            "success": True,
+            "coefficients": {},
+            "message": "",
+            "n_fit_bins": 0,
+        }
+
+    projection_inputs = _build_template_projection_inputs(
+        target_hist,
+        basis_hists,
+        fit_min,
+        fit_max,
+        include_windows=include_windows,
+    )
+    y_values = projection_inputs["y"]
+    if len(y_values) == 0:
+        return {
+            "success": False,
+            "coefficients": {name: 0.0 for name in basis_hists},
+            "message": "no valid overlap bins",
+            "n_fit_bins": 0,
+        }
+
+    basis_names = list(basis_hists.keys())
+    design_matrix = np.column_stack(
+        [projection_inputs["basis_columns"][name] for name in basis_names]
+    )
+    if design_matrix.size == 0:
+        return {
+            "success": False,
+            "coefficients": {name: 0.0 for name in basis_hists},
+            "message": "empty overlap design matrix",
+            "n_fit_bins": int(projection_inputs["n_fit_bins"]),
+        }
+
+    try:
+        fit_result = lsq_linear(
+            design_matrix,
+            y_values,
+            bounds=(0.0, np.inf),
+            method="trf",
+        )
+    except Exception as exc:
+        return {
+            "success": False,
+            "coefficients": {name: 0.0 for name in basis_hists},
+            "message": "template projection exception: {}".format(exc),
+            "n_fit_bins": int(projection_inputs["n_fit_bins"]),
+        }
+
+    coefficients = {
+        name: max(float(value), 0.0)
+        for name, value in zip(basis_names, np.asarray(fit_result.x, dtype=float))
+    }
+    return {
+        "success": bool(getattr(fit_result, "success", False)),
+        "coefficients": coefficients,
+        "message": getattr(fit_result, "message", ""),
+        "n_fit_bins": int(projection_inputs["n_fit_bins"]),
+    }
+
+
+def _clamp_hist_nonnegative(hist):
+    if hist is None:
+        return
+    for bin_index in range(1, hist.GetNbinsX() + 1):
+        if hist.GetBinContent(bin_index) < 0.0:
+            hist.SetBinContent(bin_index, 0.0)
+            hist.SetBinError(bin_index, 0.0)
+
+
+def _build_overlap_exclusive_templates(
+    template_hists,
+    fit_order,
+    anchor_window_map,
+    fit_min,
+    fit_max,
+    overlap_mode="exclusive_residual",
+    context="",
+):
+    exclusive_hists = {}
+    overlap_diagnostics = {}
+    prior_pion_hists = {}
+
+    ordered_names = []
+    for component_name in fit_order or COMPONENT_NAMES:
+        if component_name in template_hists and component_name not in ordered_names:
+            ordered_names.append(component_name)
+    for component_name in template_hists:
+        if component_name not in ordered_names:
+            ordered_names.append(component_name)
+
+    for component_name in ordered_names:
+        raw_hist = template_hists.get(component_name)
+        if raw_hist is None:
+            exclusive_hists[component_name] = None
+            continue
+
+        exclusive_hist = _clone_hist(
+            raw_hist,
+            "{}_exclusive_{}".format(raw_hist.GetName(), context or "scope"),
+        )
+        overlap_info = {
+            "mode": overlap_mode,
+            "basis_names": [],
+            "coefficients": {},
+            "fallback_used": False,
+            "fallback_reason": "",
+            "n_fit_bins": 0,
+        }
+
+        if (
+            overlap_mode == "exclusive_residual"
+            and component_name in COMPONENT_NAMES
+            and prior_pion_hists
+        ):
+            projection = _solve_template_projection(
+                raw_hist,
+                prior_pion_hists,
+                fit_min,
+                fit_max,
+                include_windows=anchor_window_map.get(component_name),
+            )
+            overlap_info["basis_names"] = list(prior_pion_hists.keys())
+            overlap_info["coefficients"] = deepcopy(projection.get("coefficients") or {})
+            overlap_info["n_fit_bins"] = int(projection.get("n_fit_bins", 0) or 0)
+            overlap_info["projection_success"] = bool(projection.get("success", False))
+            overlap_info["projection_message"] = projection.get("message", "")
+            for basis_name, coefficient in overlap_info["coefficients"].items():
+                basis_hist = prior_pion_hists.get(basis_name)
+                if basis_hist is None or coefficient == 0.0:
+                    continue
+                exclusive_hist.Add(basis_hist, -float(coefficient))
+            _clamp_hist_nonnegative(exclusive_hist)
+            if not normalize_hist_to_unit_area(
+                exclusive_hist,
+                quiet=True,
+                context="exclusive template {} {}".format(component_name, context or "scope"),
+            ):
+                exclusive_hist = _clone_hist(
+                    raw_hist,
+                    "{}_exclusive_fallback_{}".format(raw_hist.GetName(), context or "scope"),
+                )
+                overlap_info["fallback_used"] = True
+                overlap_info["fallback_reason"] = "exclusive template integral became non-positive"
+
+        exclusive_hists[component_name] = exclusive_hist
+        overlap_diagnostics[component_name] = overlap_info
+        if component_name in COMPONENT_NAMES:
+            prior_pion_hists[component_name] = exclusive_hist
+
+    return exclusive_hists, overlap_diagnostics
+
+
 def _fit_staged_anchor_templates(
     target_hist,
     component_hists,
@@ -428,6 +635,7 @@ def _fit_staged_anchor_templates(
     extra_positive_templates=None,
     extra_anchor_windows=None,
     n_passes=3,
+    overlap_mode="exclusive_residual",
     context="",
 ):
     if extra_positive_templates is None:
@@ -474,6 +682,16 @@ def _fit_staged_anchor_templates(
             "no component anchor windows configured",
         )
 
+    effective_template_hists, overlap_diagnostics = _build_overlap_exclusive_templates(
+        template_hists,
+        ordered_fit_names,
+        combined_window_map,
+        fit_min,
+        fit_max,
+        overlap_mode=overlap_mode,
+        context=context,
+    )
+
     amplitude_map = {component_name: 0.0 for component_name in template_hists}
     staged_pass_history = []
     step_overlays = []
@@ -494,9 +712,10 @@ def _fit_staged_anchor_templates(
                 if other_name == component_name:
                     continue
                 other_amplitude = float(amplitude_map.get(other_name, 0.0) or 0.0)
-                if other_hist is None or other_amplitude == 0.0:
+                effective_other_hist = effective_template_hists.get(other_name)
+                if effective_other_hist is None or other_amplitude == 0.0:
                     continue
-                baseline_before_hist.Add(other_hist, other_amplitude)
+                baseline_before_hist.Add(effective_other_hist, other_amplitude)
 
             residual_hist = _clone_hist(
                 target_hist,
@@ -510,7 +729,7 @@ def _fit_staged_anchor_templates(
 
             solve_result = _solve_nonnegative_template_amplitude(
                 residual_hist,
-                template_hists[component_name],
+                effective_template_hists[component_name],
                 fit_min,
                 fit_max,
                 include_windows=combined_window_map.get(component_name),
@@ -524,7 +743,7 @@ def _fit_staged_anchor_templates(
                 "message": solve_result.get("message", ""),
             }
             component_scaled_hist = _clone_hist(
-                template_hists[component_name],
+                effective_template_hists[component_name],
                 "{}_component_scaled_{}_pass{}".format(
                     amplitude_prefix,
                     component_name,
@@ -558,15 +777,15 @@ def _fit_staged_anchor_templates(
         staged_pass_history.append(pass_summary)
 
     pi_n_scaled_hist = _clone_hist(
-        component_hists["pi_n"],
+        effective_template_hists["pi_n"],
         "{}_pi_n_scaled_{}".format(amplitude_prefix, context),
     )
     pi_delta_scaled_hist = _clone_hist(
-        component_hists["pi_delta"],
+        effective_template_hists["pi_delta"],
         "{}_pi_delta_scaled_{}".format(amplitude_prefix, context),
     )
     pi_sidis_scaled_hist = _clone_hist(
-        component_hists["pi_sidis"],
+        effective_template_hists["pi_sidis"],
         "{}_pi_sidis_scaled_{}".format(amplitude_prefix, context),
     )
     pi_n_scaled_hist.Scale(float(amplitude_map.get("pi_n", 0.0)))
@@ -576,7 +795,7 @@ def _fit_staged_anchor_templates(
     extra_scaled_hists = {}
     for template_name, template_hist in extra_positive_templates.items():
         scaled_hist = _clone_hist(
-            template_hist,
+            effective_template_hists[template_name],
             "{}_{}_scaled_{}".format(amplitude_prefix, template_name, context),
         )
         scaled_hist.Scale(float(amplitude_map.get(template_name, 0.0)))
@@ -647,10 +866,12 @@ def _fit_staged_anchor_templates(
         "fallback_used": False,
         "fallback_reason": "",
         "fit_strategy": "staged_anchor",
+        "template_overlap_mode": overlap_mode,
         "n_passes": total_passes,
         "fit_order": list(fitted_names),
         "anchor_windows": deepcopy(combined_window_map),
         "staged_pass_history": deepcopy(staged_pass_history),
+        "template_overlap_diagnostics": deepcopy(overlap_diagnostics),
         "component_amplitudes": {
             component_name: float(amplitude_map.get(component_name, 0.0) or 0.0)
             for component_name in COMPONENT_NAMES
@@ -666,6 +887,7 @@ def _fit_staged_anchor_templates(
         "diagnostics": diagnostics,
         "fit_hist": fit_hist,
         "residual_hist": residual_hist,
+        "effective_template_hists": effective_template_hists,
         "pi_n_scaled_hist": pi_n_scaled_hist,
         "pi_delta_scaled_hist": pi_delta_scaled_hist,
         "pi_sidis_scaled_hist": pi_sidis_scaled_hist,
@@ -932,6 +1154,7 @@ def fit_pion_control_with_simc_shapes(
         anchor_windows=anchor_windows,
         fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
         n_passes=fit_config.get("staged_fit_passes", 3),
+        overlap_mode=fit_config.get("template_overlap_mode", "exclusive_residual"),
         context="{}_pion_control".format(context or "scope"),
     )
     return {
@@ -940,6 +1163,7 @@ def fit_pion_control_with_simc_shapes(
         "B_sidis": result["B_sidis"],
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
+        "effective_template_hists": result.get("effective_template_hists") or {},
         "fit_hist": result["fit_hist"],
         "residual_hist": result["residual_hist"],
         "pi_n_scaled_hist": result["pi_n_scaled_hist"],
@@ -994,6 +1218,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
         n_passes=fit_config.get("staged_fit_passes", 3),
+        overlap_mode=fit_config.get("template_overlap_mode", "exclusive_residual"),
         context="{}_kaon_nosub".format(context or "scope"),
     )
     signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
@@ -1005,6 +1230,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "S_lambda": None if signal_amplitude is None else float(signal_amplitude),
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
+        "effective_template_hists": result.get("effective_template_hists") or {},
         "fit_hist": result["fit_hist"],
         "pion_bg_fit_hist": result["pion_bg_fit_hist"],
         "residual_hist": result["residual_hist"],
@@ -1168,19 +1394,19 @@ def build_particle_subtraction_component_result(
             "kaon": deepcopy(kaon_fit["diagnostics"]),
         },
         "H_simc_shape_pi_n": _clone_hist(
-            component_shapes.get("pi_n"),
+            (pion_fit.get("effective_template_hists") or {}).get("pi_n"),
             "H_simc_shape_pi_n_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_pi_delta": _clone_hist(
-            component_shapes.get("pi_delta"),
+            (pion_fit.get("effective_template_hists") or {}).get("pi_delta"),
             "H_simc_shape_pi_delta_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_pi_sidis": _clone_hist(
-            component_shapes.get("pi_sidis"),
+            (pion_fit.get("effective_template_hists") or {}).get("pi_sidis"),
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_k_lambda": _clone_hist(
-            kaon_signal_shape,
+            (kaon_fit.get("effective_template_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME),
             "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
         ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
@@ -1264,6 +1490,13 @@ def _format_fit_strategy(diagnostics):
     if _is_finite_number(n_passes):
         return "{} x{}".format(strategy, int(float(n_passes)))
     return str(strategy)
+
+
+def _format_overlap_mode(diagnostics):
+    if not isinstance(diagnostics, dict):
+        return "n/a"
+    mode = diagnostics.get("template_overlap_mode")
+    return str(mode) if mode else "n/a"
 
 
 def _format_window_list(windows):
@@ -1522,6 +1755,9 @@ def print_particle_subtraction_component_fit_pages(
             "strategy: {}".format(
                 _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
             ),
+            "overlap: {}".format(
+                _format_overlap_mode(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
+            ),
             "B_n={}  B_delta={}  B_sidis={}".format(
                 _format_fit_number(component_fit_result.get("B_n")),
                 _format_fit_number(component_fit_result.get("B_delta")),
@@ -1562,6 +1798,9 @@ def print_particle_subtraction_component_fit_pages(
             "status: {}".format(component_fit_result.get("fit_status_kaon", "unknown")),
             "strategy: {}".format(
                 _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
+            ),
+            "overlap: {}".format(
+                _format_overlap_mode(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
             ),
             "A_n={}  A_delta={}  A_sidis={}  S_lambda={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
