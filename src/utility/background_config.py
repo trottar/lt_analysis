@@ -42,8 +42,8 @@ BG_OPT_METRIC_WEIGHTS = {
     "valid_ratio_bins": 0.05,
 }
 
-BG_OPT_ACTIVE_PROFILE = "nominal_weighted"
-#BG_OPT_ACTIVE_PROFILE = "no_empirical_residual"
+#BG_OPT_ACTIVE_PROFILE = "nominal_weighted"
+BG_OPT_ACTIVE_PROFILE = "no_empirical_residual"
 
 BG_OPT_PROFILES = {
     "nominal_weighted": {
