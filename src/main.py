@@ -26,6 +26,7 @@ from collections import defaultdict
 import sys, math, os, subprocess
 import traceback
 from array import array
+from copy import deepcopy
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
 from functools import reduce
@@ -120,6 +121,52 @@ if inp_debug == "False":
 else:
     DEBUG = True # Flag for plot splash
 
+BACKGROUND_SAMPLE_PHI_ENV = {
+    "Right": "RIGHT",
+    "Left": "LEFT",
+    "Center": "CENTER",
+}
+
+BACKGROUND_SAMPLE_SUFFIXES = {
+    "base": "",
+    "root": ".root",
+    "hist": ".hist",
+    "gen": ".gen",
+    "geni": ".geni",
+    "random_state": "_start_random_state.dat",
+}
+
+def build_background_sample_manifest(ltanapath, q2, w, epsset):
+    env_base_dir = os.environ.get("LT_BG_SAMPLE_BASE")
+    base_dir = env_base_dir or os.path.join(ltanapath, "background_samples", "OUTPUTS")
+    sample_q2 = os.environ.get("LT_BG_SAMPLE_Q2", q2)
+    sample_w = os.environ.get("LT_BG_SAMPLE_W", w)
+    sample_eps = os.environ.get("LT_BG_SAMPLE_EPSILON", epsset)
+    manifest = {
+        "base_dir": base_dir,
+        "q2": sample_q2,
+        "w": sample_w,
+        "epsilon": sample_eps,
+        "by_background": {},
+        "by_phi": {phi_label: {} for phi_label in BACKGROUND_SAMPLE_PHI_ENV},
+    }
+
+    for background in ("neutron", "delta", "sidis"):
+        env_background = background.upper()
+        manifest["by_background"][background] = {}
+        for phi_label, phi_env in BACKGROUND_SAMPLE_PHI_ENV.items():
+            env_prefix = f"LT_BG_{env_background}_{phi_env}"
+            sample_name = f"Prod_Coin_Q{sample_q2}W{sample_w}{phi_label.lower()}_{sample_eps}e"
+            default_base = os.path.join(base_dir, background, sample_name)
+            sample_entry = {}
+            for key, suffix in BACKGROUND_SAMPLE_SUFFIXES.items():
+                env_name = f"{env_prefix}_{key.upper()}"
+                sample_entry[key] = os.environ.get(env_name, f"{default_base}{suffix}")
+            manifest["by_background"][background][phi_label] = sample_entry
+            manifest["by_phi"][phi_label][background] = sample_entry
+
+    return manifest
+
 if int(POL) == 1:
     pol_str = "pl"
 elif int(POL) == -1:
@@ -203,6 +250,7 @@ CACHEPATH=lt.CACHEPATH
 
 inpDict["LTANAPATH"] = LTANAPATH
 inpDict["OUTPATH"] = OUTPATH
+inpDict["background_samples"] = build_background_sample_manifest(LTANAPATH, Q2, W, EPSSET)
 output_file_lst = []
 output_file_lst.append("utility/background_config.py")
 inpDict["bg_active_profile"] = get_active_bg_profile_name()
@@ -591,6 +639,9 @@ print("\n\n")
 settingList = []
 for hist in histlist:
     settingList.append(hist["phi_setting"])
+    hist["background_samples"] = deepcopy(
+        inpDict["background_samples"]["by_phi"].get(hist["phi_setting"], {})
+    )
 phisetlist = settingList
 
 if DEBUG:

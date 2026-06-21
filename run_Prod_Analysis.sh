@@ -48,6 +48,54 @@ normalize_ltsep_dir() {
     fi
 }
 
+build_background_sample_base() {
+    local repo_base="${LTANAPATH}/background_samples/OUTPUTS"
+    local volatile_base="${VOLATILEPATH}/OUTPUT/Analysis/${ANATYPE}LT/background_samples"
+
+    if [[ -L "${repo_base}" || -d "${repo_base}" ]]; then
+        printf '%s\n' "${repo_base}"
+    else
+        printf '%s\n' "${volatile_base}"
+    fi
+}
+
+export_background_sample_paths() {
+    local q2="$1"
+    local w="$2"
+    local eps_token="$3"
+    local base_dir background background_upper background_dir phi phi_upper sample_name sample_base var_name
+
+    base_dir="$(build_background_sample_base)"
+
+    export LT_BG_SAMPLE_BASE="${base_dir}"
+    export LT_BG_SAMPLE_Q2="${q2}"
+    export LT_BG_SAMPLE_W="${w}"
+    export LT_BG_SAMPLE_EPSILON="${eps_token}"
+
+    for background in neutron delta sidis; do
+        background_upper="$(printf '%s' "${background}" | tr '[:lower:]' '[:upper:]')"
+        background_dir="${base_dir}/${background}"
+        for phi in right left center; do
+            phi_upper="$(printf '%s' "${phi}" | tr '[:lower:]' '[:upper:]')"
+            sample_name="Prod_Coin_Q${q2}W${w}${phi}_${eps_token}e"
+            sample_base="${background_dir}/${sample_name}"
+
+            printf -v var_name 'LT_BG_%s_%s_BASE' "${background_upper}" "${phi_upper}"
+            export "${var_name}=${sample_base}"
+            printf -v var_name 'LT_BG_%s_%s_ROOT' "${background_upper}" "${phi_upper}"
+            export "${var_name}=${sample_base}.root"
+            printf -v var_name 'LT_BG_%s_%s_HIST' "${background_upper}" "${phi_upper}"
+            export "${var_name}=${sample_base}.hist"
+            printf -v var_name 'LT_BG_%s_%s_GEN' "${background_upper}" "${phi_upper}"
+            export "${var_name}=${sample_base}.gen"
+            printf -v var_name 'LT_BG_%s_%s_GENI' "${background_upper}" "${phi_upper}"
+            export "${var_name}=${sample_base}.geni"
+            printf -v var_name 'LT_BG_%s_%s_RANDOM_STATE' "${background_upper}" "${phi_upper}"
+            export "${var_name}=${sample_base}_start_random_state.dat"
+        done
+    done
+}
+
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 mkdir -p "${OUTPATH}"
@@ -1567,14 +1615,16 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 	    python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}	
 	    echo
 	    echo "Finding t/phi bins for low epsilon..."
-	else
-	    echo
-	    echo "Using low epsilon t/phi bins for high epsilon..."
-	fi
+		else
+		    echo
+		    echo "Using low epsilon t/phi bins for high epsilon..."
+		fi
 
-	cd "${LTANAPATH}/src"
-	
-	if [ ${#data_right[@]} -eq 0 ]; then
+		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
+
+		cd "${LTANAPATH}/src"
+
+		if [ ${#data_right[@]} -eq 0 ]; then
 	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
@@ -2400,13 +2450,15 @@ elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
 		python3 set_sig_fortran.py ${Q2} ${W} ${ParticleType} ${POL}			
 		echo
 		echo "Finding new simc weight for low epsilon..."
-	    else
-		echo
-		echo "Finding new simc weight for for high epsilon..."
-	    fi
+		    else
+			echo
+			echo "Finding new simc weight for for high epsilon..."
+		    fi
 
-	    cd "${LTANAPATH}/src"	    
-	    python3 main_auto.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins} ${DEBUG} ${RATIO_THRESHOLD_SPREAD}
+		    export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
+
+		    cd "${LTANAPATH}/src"
+		    python3 main_auto.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins} ${DEBUG} ${RATIO_THRESHOLD_SPREAD}
 
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
