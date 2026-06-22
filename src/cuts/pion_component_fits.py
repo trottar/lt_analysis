@@ -2602,6 +2602,107 @@ def _print_single_hist_page(
     canvas.Close()
 
 
+def _print_component_application_status_page(
+    pdf_name,
+    component_payload,
+    title_prefix="",
+):
+    if not isinstance(component_payload, dict):
+        return
+
+    title_prefix = (title_prefix or "").strip()
+    if title_prefix:
+        title_prefix = "{} ".format(title_prefix)
+
+    canvas = ROOT.TCanvas()
+    frame = ROOT.TH1F(
+        "particle_subtraction_component_application_status_frame",
+        "{}Part 3 pion reweighting status".format(title_prefix),
+        1,
+        0.0,
+        1.0,
+    )
+    frame.SetStats(0)
+    frame.SetMinimum(0.0)
+    frame.SetMaximum(1.0)
+    frame.GetXaxis().SetLabelSize(0.0)
+    frame.GetYaxis().SetLabelSize(0.0)
+    frame.Draw()
+
+    header = ROOT.TPaveText(0.12, 0.82, 0.88, 0.92, "NDC")
+    header.SetBorderSize(0)
+    header.SetFillStyle(0)
+    header.SetTextAlign(12)
+    header.SetTextSize(0.040)
+    header.AddText(
+        "status: {}".format(
+            "accepted" if bool(component_payload.get("accepted")) else "rejected"
+        )
+    )
+    header.Draw()
+
+    details = ROOT.TPaveText(0.12, 0.18, 0.88, 0.78, "NDC")
+    details.SetBorderSize(0)
+    details.SetFillStyle(0)
+    details.SetTextAlign(12)
+    details.SetTextSize(0.028)
+    details.AddText(
+        "analysis scope: {}".format(
+            component_payload.get("analysis_scope")
+            or component_payload.get("analysis_scope_label")
+            or "unknown"
+        )
+    )
+    details.AddText(
+        "particle subtraction mode: {}".format(
+            component_payload.get("particle_subtraction_mode") or "unknown"
+        )
+    )
+    details.AddText(
+        "fallback used: {}".format(
+            "yes" if bool(component_payload.get("fallback_used")) else "no"
+        )
+    )
+    details.AddText(
+        "fallback mode: {}".format(
+            component_payload.get("fallback_mode") or "unknown"
+        )
+    )
+    details.AddText(
+        "fit status pion: {}".format(
+            component_payload.get("fit_status_pion") or "unknown"
+        )
+    )
+    details.AddText(
+        "fit status kaon: {}".format(
+            component_payload.get("fit_status_kaon") or "unknown"
+        )
+    )
+    details.AddText(
+        "fit validation pion: {}".format(
+            "pass" if bool(component_payload.get("fit_validation_pion")) else "fail"
+        )
+    )
+    details.AddText(
+        "fit validation kaon: {}".format(
+            "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail"
+        )
+    )
+
+    fallback_reason = str(
+        component_payload.get("fallback_reason")
+        or "no fallback reason recorded"
+    ).strip()
+    details.AddText("fallback reason:")
+    for line in fallback_reason.split("; "):
+        if line:
+            details.AddText("  {}".format(line))
+    details.Draw()
+
+    canvas.Print(pdf_name)
+    canvas.Close()
+
+
 def _print_component_step_pages(
     pdf_name,
     target_hist,
@@ -2788,6 +2889,11 @@ def print_particle_subtraction_component_application_pages(
     if not isinstance(component_payload, dict):
         return
     if not bool(component_payload.get("accepted")):
+        _print_component_application_status_page(
+            pdf_name,
+            component_payload,
+            title_prefix=title_prefix,
+        )
         return
 
     title_prefix = (title_prefix or "").strip()

@@ -2068,7 +2068,7 @@ def process_hist_data(
                                 title_prefix="{} t{} phi{}".format(phi_setting, j + 1, k + 1),
                                 cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
                             )
-                        if isinstance(component_payload, dict) and component_payload.get("accepted"):
+                        if isinstance(component_payload, dict):
                             print_particle_subtraction_component_application_pages(
                                 pdf_name,
                                 component_payload,

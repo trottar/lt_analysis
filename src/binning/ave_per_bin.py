@@ -1270,7 +1270,7 @@ def process_hist_data(
                     title_prefix="{} t{}".format(phi_setting, j + 1),
                     cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
                 )
-                if isinstance(component_subtraction_payloads[j], dict) and component_subtraction_payloads[j].get("accepted"):
+                if isinstance(component_subtraction_payloads[j], dict):
                     print_particle_subtraction_component_application_pages(
                         outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)),
                         component_subtraction_payloads[j],

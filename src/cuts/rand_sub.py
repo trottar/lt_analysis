@@ -3636,7 +3636,7 @@ def rand_sub(
             title_prefix="{} {}".format(phi_setting, ParticleType),
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
         )
-    if isinstance(component_subtraction_payload, dict) and component_subtraction_payload.get("accepted"):
+    if isinstance(component_subtraction_payload, dict):
         print_particle_subtraction_component_application_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_subtraction_payload,
