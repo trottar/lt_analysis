@@ -58,6 +58,49 @@ def _clone_hist(template_hist, name, title=None, reset=False):
     return cloned
 
 
+def _build_mm_shifted_hist(template_hist, shift, name, renormalize=False):
+    if template_hist is None:
+        return None
+    shift_value = float(shift) if _is_finite_number(shift) else 0.0
+    shifted_hist = _clone_hist(template_hist, name, reset=True)
+    if shifted_hist is None:
+        return None
+    if abs(shift_value) <= 1e-12:
+        shifted_hist.Add(template_hist)
+        return shifted_hist
+
+    x_axis = shifted_hist.GetXaxis()
+    x_min = float(x_axis.GetXmin())
+    x_max = float(x_axis.GetXmax())
+    for bin_index in range(1, template_hist.GetNbinsX() + 1):
+        content = float(template_hist.GetBinContent(bin_index))
+        error = float(template_hist.GetBinError(bin_index))
+        if content == 0.0 and error == 0.0:
+            continue
+
+        shifted_x = float(template_hist.GetBinCenter(bin_index)) + shift_value
+        if shifted_x < x_min or shifted_x >= x_max:
+            continue
+
+        target_bin = int(x_axis.FindBin(shifted_x))
+        shifted_hist.SetBinContent(
+            target_bin,
+            float(shifted_hist.GetBinContent(target_bin)) + content,
+        )
+        shifted_hist.SetBinError(
+            target_bin,
+            math.sqrt(float(shifted_hist.GetBinError(target_bin)) ** 2 + error ** 2),
+        )
+
+    if renormalize:
+        normalize_hist_to_unit_area(
+            shifted_hist,
+            quiet=True,
+            context=name,
+        )
+    return shifted_hist
+
+
 def _set_hist_values(hist, values):
     if hist is None:
         return
@@ -1821,21 +1864,49 @@ def build_particle_subtraction_component_result(
             "fallback_reason": "particle subtraction mode is not simc_shape_components",
         }
 
+    template_mm_offset_data = float(mm_offset_data) if _is_finite_number(mm_offset_data) else 0.0
+    aligned_component_shapes = {
+        "pi_n": _build_mm_shifted_hist(
+            component_shapes.get("pi_n"),
+            template_mm_offset_data,
+            "H_MM_component_shape_pi_n_aligned_{}".format(context or analysis_scope),
+            renormalize=True,
+        ),
+        "pi_delta": _build_mm_shifted_hist(
+            component_shapes.get("pi_delta"),
+            template_mm_offset_data,
+            "H_MM_component_shape_pi_delta_aligned_{}".format(context or analysis_scope),
+            renormalize=True,
+        ),
+        "pi_sidis": _build_mm_shifted_hist(
+            component_shapes.get("pi_sidis"),
+            template_mm_offset_data,
+            "H_MM_component_shape_pi_sidis_aligned_{}".format(context or analysis_scope),
+            renormalize=True,
+        ),
+    }
+    aligned_kaon_signal_shape = _build_mm_shifted_hist(
+        kaon_signal_shape,
+        template_mm_offset_data,
+        "H_MM_component_shape_k_lambda_aligned_{}".format(context or analysis_scope),
+        renormalize=True,
+    )
+
     pion_fit = fit_pion_control_with_simc_shapes(
         h_pion_control,
-        component_shapes.get("pi_n"),
-        component_shapes.get("pi_delta"),
-        component_shapes.get("pi_sidis"),
+        aligned_component_shapes.get("pi_n"),
+        aligned_component_shapes.get("pi_delta"),
+        aligned_component_shapes.get("pi_sidis"),
         inpDict,
         mm_offset_data=mm_offset_data,
         context=context,
     )
     kaon_fit = fit_kaon_nosub_with_simc_pion_shapes(
         h_kaon_nosub,
-        component_shapes.get("pi_n"),
-        component_shapes.get("pi_delta"),
-        component_shapes.get("pi_sidis"),
-        kaon_signal_shape,
+        aligned_component_shapes.get("pi_n"),
+        aligned_component_shapes.get("pi_delta"),
+        aligned_component_shapes.get("pi_sidis"),
+        aligned_kaon_signal_shape,
         inpDict,
         mm_offset_data=mm_offset_data,
         context=context,
@@ -1879,6 +1950,8 @@ def build_particle_subtraction_component_result(
         "ndf_kaon": kaon_fit["diagnostics"].get("ndf"),
         "chi2_ndf_kaon": kaon_fit["diagnostics"].get("chi2_ndf"),
         "fit_p_value_kaon": kaon_fit["diagnostics"].get("fit_p_value"),
+        "template_mm_offset_data": template_mm_offset_data,
+        "template_mm_shift_applied": bool(abs(template_mm_offset_data) > 1e-12),
         "fallback_used": bool(fallback_reasons),
         "fallback_reason": "; ".join(fallback_reasons),
         "diagnostics": {
@@ -1898,7 +1971,7 @@ def build_particle_subtraction_component_result(
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_k_lambda": _clone_hist(
-            kaon_signal_shape,
+            aligned_kaon_signal_shape,
             "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
         ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
@@ -1925,6 +1998,10 @@ def build_particle_subtraction_component_result(
             "H_kaon_nosub_input_{}".format(context or analysis_scope),
         ),
     }
+    result["diagnostics"]["pion"]["template_mm_offset_data"] = template_mm_offset_data
+    result["diagnostics"]["pion"]["template_mm_shift_applied"] = bool(abs(template_mm_offset_data) > 1e-12)
+    result["diagnostics"]["kaon"]["template_mm_offset_data"] = template_mm_offset_data
+    result["diagnostics"]["kaon"]["template_mm_shift_applied"] = bool(abs(template_mm_offset_data) > 1e-12)
     if result["fallback_used"]:
         print(
             "WARNING: pion component fit fallback used\n"
@@ -2325,6 +2402,9 @@ def print_particle_subtraction_component_fit_pages(
             "validation: {}".format(
                 _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
             ),
+            "template MM shift={:.6f}".format(
+                float(component_fit_result.get("template_mm_offset_data") or 0.0)
+            ),
             "B_n={}  B_delta={}  B_sidis={}".format(
                 _format_fit_number(component_fit_result.get("B_n")),
                 _format_fit_number(component_fit_result.get("B_delta")),
@@ -2382,6 +2462,9 @@ def print_particle_subtraction_component_fit_pages(
             ),
             "validation: {}".format(
                 _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
+            ),
+            "template MM shift={:.6f}".format(
+                float(component_fit_result.get("template_mm_offset_data") or 0.0)
             ),
             "A_n={}  A_delta={}  A_sidis={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
