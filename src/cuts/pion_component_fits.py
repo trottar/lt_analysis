@@ -298,6 +298,7 @@ def _solve_nonnegative_template_amplitude(
         return {
             "success": False,
             "amplitude": 0.0,
+            "sigma": None,
             "chi2": None,
             "n_fit_bins": 0,
             "message": validation_message,
@@ -315,6 +316,7 @@ def _solve_nonnegative_template_amplitude(
         return {
             "success": False,
             "amplitude": 0.0,
+            "sigma": None,
             "chi2": None,
             "n_fit_bins": 0,
             "message": "no valid fit bins",
@@ -326,6 +328,7 @@ def _solve_nonnegative_template_amplitude(
         return {
             "success": False,
             "amplitude": 0.0,
+            "sigma": None,
             "chi2": None,
             "n_fit_bins": int(len(fit_inputs["x"])),
             "message": "template has zero support inside anchor window",
@@ -335,9 +338,11 @@ def _solve_nonnegative_template_amplitude(
     amplitude = max(float(np.dot(weighted_template, weighted_target) / denominator), 0.0)
     residual = fit_inputs["y"] - amplitude * fit_inputs["template"]
     chi2_value = float(np.sum(np.square(residual / fit_inputs["sigma"])))
+    sigma_value = 1.0 / math.sqrt(denominator)
     return {
         "success": True,
         "amplitude": amplitude,
+        "sigma": sigma_value,
         "chi2": chi2_value,
         "n_fit_bins": int(len(fit_inputs["x"])),
         "message": "",
@@ -417,19 +422,26 @@ def _compute_fit_quality(
     }
 
 
-def _build_template_projection_inputs(
+def _build_multi_template_fit_inputs(
     target_hist,
-    basis_hists,
+    template_hists,
+    template_names,
     fit_min,
     fit_max,
     include_windows=None,
+    exclude_windows=None,
 ):
     if include_windows is None:
         include_windows = []
+    if exclude_windows is None:
+        exclude_windows = []
 
+    x_values = []
     y_values = []
-    basis_columns = {name: [] for name in basis_hists}
-    n_bins_used = 0
+    sigma_values = []
+    fit_bin_indices = []
+    template_columns = {name: [] for name in template_names}
+
     for bin_index in range(1, target_hist.GetNbinsX() + 1):
         x_center = float(target_hist.GetBinCenter(bin_index))
         if x_center < fit_min or x_center > fit_max:
@@ -438,190 +450,444 @@ def _build_template_projection_inputs(
             not any(window_min <= x_center <= window_max for window_min, window_max in include_windows)
         ):
             continue
-
-        target_value = float(target_hist.GetBinContent(bin_index))
-        basis_values = {
-            name: float(hist.GetBinContent(bin_index))
-            for name, hist in basis_hists.items()
-        }
-        if target_value <= 0.0 and all(value <= 0.0 for value in basis_values.values()):
+        if any(window_min <= x_center <= window_max for window_min, window_max in exclude_windows):
             continue
 
-        y_values.append(target_value)
-        for name, value in basis_values.items():
-            basis_columns[name].append(value)
-        n_bins_used += 1
+        y_value = float(target_hist.GetBinContent(bin_index))
+        sigma_value = float(target_hist.GetBinError(bin_index))
+        if not math.isfinite(y_value):
+            continue
+        if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
+            sigma_value = max(math.sqrt(abs(y_value)), 1.0)
+
+        x_values.append(x_center)
+        y_values.append(y_value)
+        sigma_values.append(sigma_value)
+        fit_bin_indices.append(bin_index)
+        for template_name in template_names:
+            template_columns[template_name].append(
+                float(template_hists[template_name].GetBinContent(bin_index))
+            )
 
     return {
+        "x": np.asarray(x_values, dtype=float),
         "y": np.asarray(y_values, dtype=float),
-        "basis_columns": {
-            name: np.asarray(values, dtype=float)
-            for name, values in basis_columns.items()
+        "sigma": np.asarray(sigma_values, dtype=float),
+        "fit_bin_indices": fit_bin_indices,
+        "template_columns": {
+            template_name: np.asarray(values, dtype=float)
+            for template_name, values in template_columns.items()
         },
-        "n_fit_bins": int(n_bins_used),
     }
 
 
-def _solve_template_projection(
+def _build_model_hist(target_hist, template_hists, amplitude_map, hist_name):
+    model_hist = _clone_hist(target_hist, hist_name, reset=True)
+    if model_hist is None:
+        return None
+    for template_name, template_hist in (template_hists or {}).items():
+        amplitude = float((amplitude_map or {}).get(template_name, 0.0) or 0.0)
+        if template_hist is None or amplitude == 0.0:
+            continue
+        model_hist.Add(template_hist, amplitude)
+    return model_hist
+
+
+def _build_scaled_hist_map(template_hists, amplitude_map, hist_name_prefix, context):
+    scaled_hists = {}
+    for template_name, template_hist in (template_hists or {}).items():
+        scaled_hist = _clone_hist(
+            template_hist,
+            "{}_{}_scaled_{}".format(hist_name_prefix, template_name, context),
+        )
+        if scaled_hist is not None:
+            scaled_hist.Scale(float((amplitude_map or {}).get(template_name, 0.0) or 0.0))
+        scaled_hists[template_name] = scaled_hist
+    return scaled_hists
+
+
+def _evaluate_model_validation(
     target_hist,
-    basis_hists,
+    fit_hist,
     fit_min,
     fit_max,
-    include_windows=None,
+    n_parameters=0,
+    oversub_sigma_tolerance=2.0,
+    max_oversub_bin_count=None,
+    max_oversub_bin_fraction=None,
+    max_full_range_chi2_ndf=None,
 ):
-    if not basis_hists:
-        return {
-            "success": True,
-            "coefficients": {},
-            "message": "",
-            "n_fit_bins": 0,
-        }
-
-    projection_inputs = _build_template_projection_inputs(
+    quality = _compute_fit_quality(
         target_hist,
-        basis_hists,
+        fit_hist,
         fit_min,
         fit_max,
-        include_windows=include_windows,
+        n_parameters=n_parameters,
     )
-    y_values = projection_inputs["y"]
-    if len(y_values) == 0:
+
+    oversub_bin_centers = []
+    total_bins = 0
+    sigma_tolerance = max(float(oversub_sigma_tolerance or 0.0), 0.0)
+    for bin_index in range(1, target_hist.GetNbinsX() + 1):
+        x_center = float(target_hist.GetBinCenter(bin_index))
+        if x_center < fit_min or x_center > fit_max:
+            continue
+        total_bins += 1
+        data_value = float(target_hist.GetBinContent(bin_index))
+        fit_value = float(fit_hist.GetBinContent(bin_index))
+        sigma_value = float(target_hist.GetBinError(bin_index))
+        if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
+            sigma_value = max(math.sqrt(abs(data_value)), 1.0)
+        if fit_value > data_value + sigma_tolerance * sigma_value:
+            oversub_bin_centers.append(x_center)
+
+    oversub_bin_count = int(len(oversub_bin_centers))
+    oversub_bin_fraction = (
+        float(oversub_bin_count) / float(total_bins)
+        if total_bins > 0 else 0.0
+    )
+    accepted = True
+    rejection_reasons = []
+    if _is_finite_number(max_oversub_bin_count) and oversub_bin_count > int(max_oversub_bin_count):
+        accepted = False
+        rejection_reasons.append(
+            "oversub_bin_count {} > {}".format(oversub_bin_count, int(max_oversub_bin_count))
+        )
+    if (
+        _is_finite_number(max_oversub_bin_fraction)
+        and oversub_bin_fraction > float(max_oversub_bin_fraction)
+    ):
+        accepted = False
+        rejection_reasons.append(
+            "oversub_bin_fraction {:.3f} > {:.3f}".format(
+                oversub_bin_fraction,
+                float(max_oversub_bin_fraction),
+            )
+        )
+    if (
+        _is_finite_number(max_full_range_chi2_ndf)
+        and _is_finite_number(quality.get("chi2_ndf"))
+        and float(quality["chi2_ndf"]) > float(max_full_range_chi2_ndf)
+    ):
+        accepted = False
+        rejection_reasons.append(
+            "chi2_ndf {:.3f} > {:.3f}".format(
+                float(quality["chi2_ndf"]),
+                float(max_full_range_chi2_ndf),
+            )
+        )
+
+    return {
+        "accepted": bool(accepted),
+        "rejection_reasons": rejection_reasons,
+        "oversub_bin_count": oversub_bin_count,
+        "oversub_bin_fraction": oversub_bin_fraction,
+        "oversub_sigma_tolerance": sigma_tolerance,
+        "oversub_mm_range": (
+            [float(min(oversub_bin_centers)), float(max(oversub_bin_centers))]
+            if oversub_bin_centers else []
+        ),
+        **quality,
+    }
+
+
+def _build_prior_sigma_map(fit_names, stage_uncertainties, prior_scale_map=None):
+    prior_sigmas = {}
+    for template_name in fit_names:
+        stage_sigma = float((stage_uncertainties or {}).get(template_name, 0.0) or 0.0)
+        if (not math.isfinite(stage_sigma)) or stage_sigma <= 0.0:
+            stage_sigma = 1.0
+        prior_scale = max(
+            float(((prior_scale_map or {}).get(template_name, 1.0) or 1.0)),
+            1e-6,
+        )
+        prior_sigmas[template_name] = max(stage_sigma * prior_scale, 1e-6)
+    return prior_sigmas
+
+
+def _run_staged_component_pass(
+    target_hist,
+    template_hists,
+    fit_names,
+    fit_min,
+    fit_max,
+    anchor_window_map,
+    amplitude_seed,
+    amplitude_prefix,
+    pass_index,
+):
+    amplitude_map = {
+        template_name: max(float((amplitude_seed or {}).get(template_name, 0.0) or 0.0), 0.0)
+        for template_name in template_hists
+    }
+    uncertainty_map = {}
+    pass_summary = {}
+    step_overlays = []
+
+    for component_name in fit_names:
+        baseline_before_hist = _clone_hist(
+            target_hist,
+            "{}_baseline_before_{}_pass{}".format(
+                amplitude_prefix,
+                component_name,
+                pass_index + 1,
+            ),
+            reset=True,
+        )
+        for other_name in fit_names:
+            if other_name == component_name:
+                continue
+            other_hist = template_hists.get(other_name)
+            other_amplitude = float(amplitude_map.get(other_name, 0.0) or 0.0)
+            if other_hist is None or other_amplitude == 0.0:
+                continue
+            baseline_before_hist.Add(other_hist, other_amplitude)
+
+        residual_hist = _clone_hist(
+            target_hist,
+            "{}_residual_{}_pass{}".format(
+                amplitude_prefix,
+                component_name,
+                pass_index + 1,
+            ),
+        )
+        residual_hist.Add(baseline_before_hist, -1.0)
+
+        solve_result = _solve_nonnegative_template_amplitude(
+            residual_hist,
+            template_hists[component_name],
+            fit_min,
+            fit_max,
+            include_windows=anchor_window_map.get(component_name),
+        )
+        amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
+        uncertainty_map[component_name] = solve_result.get("sigma")
+        pass_summary[component_name] = {
+            "amplitude": amplitude_map[component_name],
+            "sigma": solve_result.get("sigma"),
+            "chi2": solve_result.get("chi2"),
+            "n_fit_bins": solve_result.get("n_fit_bins"),
+            "success": bool(solve_result.get("success", False)),
+            "message": solve_result.get("message", ""),
+        }
+
+        component_scaled_hist = _clone_hist(
+            template_hists[component_name],
+            "{}_component_scaled_{}_pass{}".format(
+                amplitude_prefix,
+                component_name,
+                pass_index + 1,
+            ),
+        )
+        component_scaled_hist.Scale(amplitude_map[component_name])
+        cumulative_after_hist = _clone_hist(
+            baseline_before_hist,
+            "{}_cumulative_after_{}_pass{}".format(
+                amplitude_prefix,
+                component_name,
+                pass_index + 1,
+            ),
+        )
+        cumulative_after_hist.Add(component_scaled_hist)
+        step_overlays.append(
+            {
+                "pass_index": int(pass_index + 1),
+                "step_index": int(len(step_overlays) + 1),
+                "component_name": component_name,
+                "component_label": _component_plot_label(component_name),
+                "amplitude": float(amplitude_map[component_name]),
+                "anchor_windows": deepcopy(anchor_window_map.get(component_name) or []),
+                "H_baseline_before": baseline_before_hist,
+                "H_residual_input": residual_hist,
+                "H_component_scaled": component_scaled_hist,
+                "H_cumulative_after": cumulative_after_hist,
+            }
+        )
+
+    return amplitude_map, uncertainty_map, pass_summary, step_overlays
+
+
+def _solve_joint_template_amplitudes(
+    target_hist,
+    template_hists,
+    fit_names,
+    fit_min,
+    fit_max,
+    stage_amplitudes,
+    prior_sigmas,
+):
+    fit_inputs = _build_multi_template_fit_inputs(
+        target_hist,
+        template_hists,
+        fit_names,
+        fit_min,
+        fit_max,
+    )
+    if len(fit_inputs["x"]) == 0:
         return {
             "success": False,
-            "coefficients": {name: 0.0 for name in basis_hists},
-            "message": "no valid overlap bins",
+            "coefficients": {name: 0.0 for name in fit_names},
+            "uncertainties": {},
+            "prior_sigmas": deepcopy(prior_sigmas),
+            "message": "no valid full-range fit bins",
             "n_fit_bins": 0,
         }
 
-    basis_names = list(basis_hists.keys())
-    design_matrix = np.column_stack(
-        [projection_inputs["basis_columns"][name] for name in basis_names]
+    weighted_design = np.column_stack(
+        [fit_inputs["template_columns"][name] / fit_inputs["sigma"] for name in fit_names]
     )
-    if design_matrix.size == 0:
-        return {
-            "success": False,
-            "coefficients": {name: 0.0 for name in basis_hists},
-            "message": "empty overlap design matrix",
-            "n_fit_bins": int(projection_inputs["n_fit_bins"]),
-        }
+    weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
+    prior_rows = []
+    prior_targets = []
+    for index, template_name in enumerate(fit_names):
+        prior_sigma = float((prior_sigmas or {}).get(template_name, 0.0) or 0.0)
+        if (not math.isfinite(prior_sigma)) or prior_sigma <= 0.0:
+            continue
+        prior_row = np.zeros(len(fit_names), dtype=float)
+        prior_row[index] = 1.0 / prior_sigma
+        prior_rows.append(prior_row)
+        prior_targets.append(float((stage_amplitudes or {}).get(template_name, 0.0) or 0.0) / prior_sigma)
+
+    augmented_design = weighted_design
+    augmented_target = weighted_target
+    if prior_rows:
+        augmented_design = np.vstack([weighted_design] + prior_rows)
+        augmented_target = np.concatenate(
+            [weighted_target, np.asarray(prior_targets, dtype=float)]
+        )
 
     try:
         fit_result = lsq_linear(
-            design_matrix,
-            y_values,
+            augmented_design,
+            augmented_target,
             bounds=(0.0, np.inf),
             method="trf",
         )
     except Exception as exc:
         return {
             "success": False,
-            "coefficients": {name: 0.0 for name in basis_hists},
-            "message": "template projection exception: {}".format(exc),
-            "n_fit_bins": int(projection_inputs["n_fit_bins"]),
+            "coefficients": {name: 0.0 for name in fit_names},
+            "uncertainties": {},
+            "prior_sigmas": deepcopy(prior_sigmas),
+            "message": "joint refinement exception: {}".format(exc),
+            "n_fit_bins": int(len(fit_inputs["x"])),
         }
 
     coefficients = {
         name: max(float(value), 0.0)
-        for name, value in zip(basis_names, np.asarray(fit_result.x, dtype=float))
+        for name, value in zip(fit_names, np.asarray(fit_result.x, dtype=float))
     }
+    uncertainties = {}
+    try:
+        normal_matrix = np.dot(augmented_design.T, augmented_design)
+        covariance = np.linalg.pinv(normal_matrix)
+        for index, template_name in enumerate(fit_names):
+            variance = float(covariance[index, index])
+            uncertainties[template_name] = math.sqrt(max(variance, 0.0))
+    except Exception:
+        uncertainties = {}
+
     return {
         "success": bool(getattr(fit_result, "success", False)),
         "coefficients": coefficients,
+        "uncertainties": uncertainties,
+        "prior_sigmas": deepcopy(prior_sigmas),
         "message": getattr(fit_result, "message", ""),
-        "n_fit_bins": int(projection_inputs["n_fit_bins"]),
+        "n_fit_bins": int(len(fit_inputs["x"])),
     }
 
 
-def _clamp_hist_nonnegative(hist):
-    if hist is None:
-        return
-    for bin_index in range(1, hist.GetNbinsX() + 1):
-        if hist.GetBinContent(bin_index) < 0.0:
-            hist.SetBinContent(bin_index, 0.0)
-            hist.SetBinError(bin_index, 0.0)
-
-
-def _build_overlap_exclusive_templates(
+def _run_coordinate_template_updates(
+    target_hist,
     template_hists,
-    fit_order,
-    anchor_window_map,
+    fit_names,
     fit_min,
     fit_max,
-    overlap_mode="exclusive_residual",
-    context="",
+    initial_amplitudes,
+    prior_targets=None,
+    prior_sigmas=None,
+    max_cycles=50,
+    tolerance=1e-5,
 ):
-    exclusive_hists = {}
-    overlap_diagnostics = {}
-    prior_pion_hists = {}
-
-    ordered_names = []
-    for component_name in fit_order or COMPONENT_NAMES:
-        if component_name in template_hists and component_name not in ordered_names:
-            ordered_names.append(component_name)
-    for component_name in template_hists:
-        if component_name not in ordered_names:
-            ordered_names.append(component_name)
-
-    for component_name in ordered_names:
-        raw_hist = template_hists.get(component_name)
-        if raw_hist is None:
-            exclusive_hists[component_name] = None
-            continue
-
-        exclusive_hist = _clone_hist(
-            raw_hist,
-            "{}_exclusive_{}".format(raw_hist.GetName(), context or "scope"),
-        )
-        overlap_info = {
-            "mode": overlap_mode,
-            "basis_names": [],
-            "coefficients": {},
-            "fallback_used": False,
-            "fallback_reason": "",
+    fit_inputs = _build_multi_template_fit_inputs(
+        target_hist,
+        template_hists,
+        fit_names,
+        fit_min,
+        fit_max,
+    )
+    if len(fit_inputs["x"]) == 0:
+        return {
+            "success": False,
+            "converged": False,
+            "coefficients": {name: 0.0 for name in fit_names},
+            "message": "no valid full-range fit bins",
             "n_fit_bins": 0,
+            "cycles_run": 0,
+            "history": [],
         }
 
-        if (
-            overlap_mode == "exclusive_residual"
-            and component_name in COMPONENT_NAMES
-            and prior_pion_hists
-        ):
-            projection = _solve_template_projection(
-                raw_hist,
-                prior_pion_hists,
-                fit_min,
-                fit_max,
-                include_windows=anchor_window_map.get(component_name),
-            )
-            overlap_info["basis_names"] = list(prior_pion_hists.keys())
-            overlap_info["coefficients"] = deepcopy(projection.get("coefficients") or {})
-            overlap_info["n_fit_bins"] = int(projection.get("n_fit_bins", 0) or 0)
-            overlap_info["projection_success"] = bool(projection.get("success", False))
-            overlap_info["projection_message"] = projection.get("message", "")
-            for basis_name, coefficient in overlap_info["coefficients"].items():
-                basis_hist = prior_pion_hists.get(basis_name)
-                if basis_hist is None or coefficient == 0.0:
+    weights = 1.0 / np.square(fit_inputs["sigma"])
+    template_columns = fit_inputs["template_columns"]
+    amplitude_map = {
+        template_name: max(float((initial_amplitudes or {}).get(template_name, 0.0) or 0.0), 0.0)
+        for template_name in fit_names
+    }
+    history = []
+    cycles_allowed = max(int(max_cycles or 1), 1)
+    tolerance_value = max(float(tolerance or 0.0), 0.0)
+    converged = False
+
+    for cycle_index in range(cycles_allowed):
+        previous_map = deepcopy(amplitude_map)
+        for template_name in fit_names:
+            residual = np.asarray(fit_inputs["y"], dtype=float)
+            for other_name in fit_names:
+                if other_name == template_name:
                     continue
-                exclusive_hist.Add(basis_hist, -float(coefficient))
-            _clamp_hist_nonnegative(exclusive_hist)
-            if not normalize_hist_to_unit_area(
-                exclusive_hist,
-                quiet=True,
-                context="exclusive template {} {}".format(component_name, context or "scope"),
-            ):
-                exclusive_hist = _clone_hist(
-                    raw_hist,
-                    "{}_exclusive_fallback_{}".format(raw_hist.GetName(), context or "scope"),
-                )
-                overlap_info["fallback_used"] = True
-                overlap_info["fallback_reason"] = "exclusive template integral became non-positive"
+                residual = residual - float(amplitude_map.get(other_name, 0.0)) * template_columns[other_name]
 
-        exclusive_hists[component_name] = exclusive_hist
-        overlap_diagnostics[component_name] = overlap_info
-        if component_name in COMPONENT_NAMES:
-            prior_pion_hists[component_name] = exclusive_hist
+            template_values = template_columns[template_name]
+            numerator = float(np.dot(template_values * weights, residual))
+            denominator = float(np.dot(template_values * weights, template_values))
+            prior_sigma = float((prior_sigmas or {}).get(template_name, 0.0) or 0.0)
+            if math.isfinite(prior_sigma) and prior_sigma > 0.0:
+                numerator += float((prior_targets or {}).get(template_name, 0.0) or 0.0) / (prior_sigma ** 2)
+                denominator += 1.0 / (prior_sigma ** 2)
+            if (not math.isfinite(denominator)) or denominator <= 0.0:
+                amplitude_map[template_name] = 0.0
+                continue
+            amplitude_map[template_name] = max(numerator / denominator, 0.0)
 
-    return exclusive_hists, overlap_diagnostics
+        max_rel_change = 0.0
+        for template_name in fit_names:
+            previous_value = float(previous_map.get(template_name, 0.0) or 0.0)
+            current_value = float(amplitude_map.get(template_name, 0.0) or 0.0)
+            rel_change = abs(current_value - previous_value) / max(abs(previous_value), 1e-12)
+            max_rel_change = max(max_rel_change, rel_change)
+        history.append(
+            {
+                "cycle_index": int(cycle_index + 1),
+                "max_relative_change": float(max_rel_change),
+                "coefficients": deepcopy(amplitude_map),
+            }
+        )
+        if max_rel_change < tolerance_value:
+            converged = True
+            break
+
+    return {
+        "success": bool(converged),
+        "converged": bool(converged),
+        "coefficients": deepcopy(amplitude_map),
+        "message": (
+            "coordinate refinement converged"
+            if converged else "coordinate refinement reached max cycles"
+        ),
+        "n_fit_bins": int(len(fit_inputs["x"])),
+        "cycles_run": int(len(history)),
+        "history": history,
+    }
 
 
 def _fit_staged_anchor_templates(
@@ -634,14 +900,22 @@ def _fit_staged_anchor_templates(
     fit_order,
     extra_positive_templates=None,
     extra_anchor_windows=None,
-    n_passes=3,
-    overlap_mode="exclusive_residual",
+    n_passes=1,
+    prior_scale_map=None,
+    joint_refinement_enabled=True,
+    max_fit_cycles=50,
+    fit_tolerance=1e-5,
+    validation_options=None,
     context="",
 ):
     if extra_positive_templates is None:
         extra_positive_templates = {}
     if extra_anchor_windows is None:
         extra_anchor_windows = {}
+    if prior_scale_map is None:
+        prior_scale_map = {}
+    if validation_options is None:
+        validation_options = {}
 
     fallback_reason = _validate_component_shapes(component_hists, target_hist)
     if fallback_reason:
@@ -682,215 +956,283 @@ def _fit_staged_anchor_templates(
             "no component anchor windows configured",
         )
 
-    effective_template_hists, overlap_diagnostics = _build_overlap_exclusive_templates(
-        template_hists,
-        ordered_fit_names,
-        combined_window_map,
-        fit_min,
-        fit_max,
-        overlap_mode=overlap_mode,
-        context=context,
-    )
-
-    amplitude_map = {component_name: 0.0 for component_name in template_hists}
+    stage_amplitudes = {template_name: 0.0 for template_name in template_hists}
+    stage_uncertainties = {template_name: None for template_name in template_hists}
     staged_pass_history = []
     step_overlays = []
     total_passes = max(int(n_passes or 1), 1)
     for pass_index in range(total_passes):
-        pass_summary = {}
-        for component_name in fitted_names:
-            baseline_before_hist = _clone_hist(
-                target_hist,
-                "{}_baseline_before_{}_pass{}".format(
-                    amplitude_prefix,
-                    component_name,
-                    pass_index + 1,
-                ),
-                reset=True,
-            )
-            for other_name, other_hist in template_hists.items():
-                if other_name == component_name:
-                    continue
-                other_amplitude = float(amplitude_map.get(other_name, 0.0) or 0.0)
-                effective_other_hist = effective_template_hists.get(other_name)
-                if effective_other_hist is None or other_amplitude == 0.0:
-                    continue
-                baseline_before_hist.Add(effective_other_hist, other_amplitude)
-
-            residual_hist = _clone_hist(
-                target_hist,
-                "{}_residual_{}_pass{}".format(
-                    amplitude_prefix,
-                    component_name,
-                    pass_index + 1,
-                ),
-            )
-            residual_hist.Add(baseline_before_hist, -1.0)
-
-            solve_result = _solve_nonnegative_template_amplitude(
-                residual_hist,
-                effective_template_hists[component_name],
-                fit_min,
-                fit_max,
-                include_windows=combined_window_map.get(component_name),
-            )
-            amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
-            pass_summary[component_name] = {
-                "amplitude": amplitude_map[component_name],
-                "chi2": solve_result.get("chi2"),
-                "n_fit_bins": solve_result.get("n_fit_bins"),
-                "success": bool(solve_result.get("success", False)),
-                "message": solve_result.get("message", ""),
-            }
-            component_scaled_hist = _clone_hist(
-                effective_template_hists[component_name],
-                "{}_component_scaled_{}_pass{}".format(
-                    amplitude_prefix,
-                    component_name,
-                    pass_index + 1,
-                ),
-            )
-            component_scaled_hist.Scale(amplitude_map[component_name])
-            cumulative_after_hist = _clone_hist(
-                baseline_before_hist,
-                "{}_cumulative_after_{}_pass{}".format(
-                    amplitude_prefix,
-                    component_name,
-                    pass_index + 1,
-                ),
-            )
-            cumulative_after_hist.Add(component_scaled_hist)
-            step_overlays.append(
-                {
-                    "pass_index": int(pass_index + 1),
-                    "step_index": int(len(step_overlays) + 1),
-                    "component_name": component_name,
-                    "component_label": _component_plot_label(component_name),
-                    "amplitude": float(amplitude_map[component_name]),
-                    "anchor_windows": deepcopy(combined_window_map.get(component_name) or []),
-                    "H_baseline_before": baseline_before_hist,
-                    "H_residual_input": residual_hist,
-                    "H_component_scaled": component_scaled_hist,
-                    "H_cumulative_after": cumulative_after_hist,
-                }
-            )
-        staged_pass_history.append(pass_summary)
-
-    pi_n_scaled_hist = _clone_hist(
-        effective_template_hists["pi_n"],
-        "{}_pi_n_scaled_{}".format(amplitude_prefix, context),
-    )
-    pi_delta_scaled_hist = _clone_hist(
-        effective_template_hists["pi_delta"],
-        "{}_pi_delta_scaled_{}".format(amplitude_prefix, context),
-    )
-    pi_sidis_scaled_hist = _clone_hist(
-        effective_template_hists["pi_sidis"],
-        "{}_pi_sidis_scaled_{}".format(amplitude_prefix, context),
-    )
-    pi_n_scaled_hist.Scale(float(amplitude_map.get("pi_n", 0.0)))
-    pi_delta_scaled_hist.Scale(float(amplitude_map.get("pi_delta", 0.0)))
-    pi_sidis_scaled_hist.Scale(float(amplitude_map.get("pi_sidis", 0.0)))
-
-    extra_scaled_hists = {}
-    for template_name, template_hist in extra_positive_templates.items():
-        scaled_hist = _clone_hist(
-            effective_template_hists[template_name],
-            "{}_{}_scaled_{}".format(amplitude_prefix, template_name, context),
+        pass_amplitudes, pass_uncertainties, pass_summary, pass_steps = _run_staged_component_pass(
+            target_hist,
+            template_hists,
+            fitted_names,
+            fit_min,
+            fit_max,
+            combined_window_map,
+            stage_amplitudes,
+            amplitude_prefix,
+            pass_index,
         )
-        scaled_hist.Scale(float(amplitude_map.get(template_name, 0.0)))
-        extra_scaled_hists[template_name] = scaled_hist
-
-    fit_hist = _clone_hist(
-        target_hist,
-        "{}_fit_hist_{}".format(amplitude_prefix, context),
-        reset=True,
-    )
-    pion_bg_fit_hist = _clone_hist(
-        target_hist,
-        "{}_pion_bg_fit_{}".format(amplitude_prefix, context),
-        reset=True,
-    )
-    residual_hist = _clone_hist(
-        target_hist,
-        "{}_fit_residual_{}".format(amplitude_prefix, context),
-    )
-
-    for component_name, scaled_hist in (
-        ("pi_n", pi_n_scaled_hist),
-        ("pi_delta", pi_delta_scaled_hist),
-        ("pi_sidis", pi_sidis_scaled_hist),
-    ):
-        if scaled_hist is None:
-            continue
-        fit_hist.Add(scaled_hist)
-        if amplitude_prefix == "A":
-            pion_bg_fit_hist.Add(scaled_hist)
-        residual_hist.Add(scaled_hist, -1.0)
-
-    for scaled_hist in extra_scaled_hists.values():
-        if scaled_hist is None:
-            continue
-        fit_hist.Add(scaled_hist)
-        residual_hist.Add(scaled_hist, -1.0)
+        stage_amplitudes.update(pass_amplitudes)
+        stage_uncertainties.update(pass_uncertainties)
+        staged_pass_history.append(pass_summary)
+        step_overlays.extend(pass_steps)
 
     include_windows = _collect_unique_windows(
         combined_window_map,
         ordered_names=fitted_names,
     )
-    quality = _compute_fit_quality(
+    validation_kwargs = {
+        "oversub_sigma_tolerance": validation_options.get("oversub_sigma_tolerance", 2.0),
+        "max_oversub_bin_count": validation_options.get("max_oversub_bin_count"),
+        "max_oversub_bin_fraction": validation_options.get("max_oversub_bin_fraction"),
+        "max_full_range_chi2_ndf": validation_options.get("max_full_range_chi2_ndf"),
+    }
+
+    stage_fit_hist = _build_model_hist(
         target_hist,
-        fit_hist,
+        {name: template_hists[name] for name in fitted_names},
+        stage_amplitudes,
+        "{}_stage_fit_hist_{}".format(amplitude_prefix, context),
+    )
+    stage_validation = _evaluate_model_validation(
+        target_hist,
+        stage_fit_hist,
         fit_min,
         fit_max,
-        include_windows=include_windows,
         n_parameters=len(fitted_names),
+        **validation_kwargs
     )
+    prior_sigmas = _build_prior_sigma_map(
+        fitted_names,
+        stage_uncertainties,
+        prior_scale_map=prior_scale_map,
+    )
+
+    accepted_solution = "stage_only"
+    accepted_message = "ordered residual staged fit"
+    accepted_amplitudes = deepcopy(stage_amplitudes)
+    accepted_uncertainties = deepcopy(stage_uncertainties)
+    accepted_validation = deepcopy(stage_validation)
+
+    joint_diagnostics = {
+        "enabled": bool(joint_refinement_enabled),
+        "success": False,
+        "message": "joint refinement disabled",
+        "n_fit_bins": 0,
+        "prior_sigmas": deepcopy(prior_sigmas),
+        "coefficients": {},
+        "uncertainties": {},
+        "validation": {},
+    }
+    coordinate_diagnostics = {
+        "attempted": False,
+        "success": False,
+        "message": "coordinate refinement not attempted",
+        "n_fit_bins": 0,
+        "cycles_run": 0,
+        "history": [],
+        "coefficients": {},
+        "validation": {},
+    }
+
+    if joint_refinement_enabled:
+        joint_result = _solve_joint_template_amplitudes(
+            target_hist,
+            {name: template_hists[name] for name in fitted_names},
+            fitted_names,
+            fit_min,
+            fit_max,
+            stage_amplitudes,
+            prior_sigmas,
+        )
+        joint_diagnostics = {
+            "enabled": True,
+            "success": bool(joint_result.get("success", False)),
+            "message": joint_result.get("message", ""),
+            "n_fit_bins": joint_result.get("n_fit_bins"),
+            "prior_sigmas": deepcopy(joint_result.get("prior_sigmas") or prior_sigmas),
+            "coefficients": deepcopy(joint_result.get("coefficients") or {}),
+            "uncertainties": deepcopy(joint_result.get("uncertainties") or {}),
+            "validation": {},
+        }
+        if joint_result.get("coefficients"):
+            joint_fit_hist = _build_model_hist(
+                target_hist,
+                {name: template_hists[name] for name in fitted_names},
+                joint_result["coefficients"],
+                "{}_joint_fit_hist_{}".format(amplitude_prefix, context),
+            )
+            joint_validation = _evaluate_model_validation(
+                target_hist,
+                joint_fit_hist,
+                fit_min,
+                fit_max,
+                n_parameters=len(fitted_names),
+                **validation_kwargs
+            )
+            joint_diagnostics["validation"] = deepcopy(joint_validation)
+            if bool(joint_result.get("success", False)) and joint_validation["accepted"]:
+                accepted_solution = "joint_prior"
+                accepted_message = "ordered residual staged fit with joint prior refinement"
+                accepted_amplitudes.update(joint_result["coefficients"])
+                accepted_uncertainties.update(joint_result.get("uncertainties") or {})
+                accepted_validation = deepcopy(joint_validation)
+            else:
+                coordinate_result = _run_coordinate_template_updates(
+                    target_hist,
+                    {name: template_hists[name] for name in fitted_names},
+                    fitted_names,
+                    fit_min,
+                    fit_max,
+                    joint_result.get("coefficients") or stage_amplitudes,
+                    prior_targets=stage_amplitudes,
+                    prior_sigmas=joint_diagnostics["prior_sigmas"],
+                    max_cycles=max_fit_cycles,
+                    tolerance=fit_tolerance,
+                )
+                coordinate_diagnostics = {
+                    "attempted": True,
+                    "success": bool(coordinate_result.get("success", False)),
+                    "message": coordinate_result.get("message", ""),
+                    "n_fit_bins": coordinate_result.get("n_fit_bins"),
+                    "cycles_run": coordinate_result.get("cycles_run", 0),
+                    "history": deepcopy(coordinate_result.get("history") or []),
+                    "coefficients": deepcopy(coordinate_result.get("coefficients") or {}),
+                    "validation": {},
+                }
+                if coordinate_result.get("coefficients"):
+                    coordinate_fit_hist = _build_model_hist(
+                        target_hist,
+                        {name: template_hists[name] for name in fitted_names},
+                        coordinate_result["coefficients"],
+                        "{}_coordinate_fit_hist_{}".format(amplitude_prefix, context),
+                    )
+                    coordinate_validation = _evaluate_model_validation(
+                        target_hist,
+                        coordinate_fit_hist,
+                        fit_min,
+                        fit_max,
+                        n_parameters=len(fitted_names),
+                        **validation_kwargs
+                    )
+                    coordinate_diagnostics["validation"] = deepcopy(coordinate_validation)
+                    if coordinate_validation["accepted"]:
+                        accepted_solution = "coordinate_prior"
+                        accepted_message = "ordered residual staged fit with coordinate refinement"
+                        accepted_amplitudes.update(coordinate_result["coefficients"])
+                        accepted_validation = deepcopy(coordinate_validation)
+
+    accepted_template_hists = {name: template_hists[name] for name in fitted_names}
+    fit_hist = _build_model_hist(
+        target_hist,
+        accepted_template_hists,
+        accepted_amplitudes,
+        "{}_fit_hist_{}".format(amplitude_prefix, context),
+    )
+    residual_hist = _clone_hist(
+        target_hist,
+        "{}_fit_residual_{}".format(amplitude_prefix, context),
+    )
+    residual_hist.Add(fit_hist, -1.0)
+    scaled_hist_map = _build_scaled_hist_map(
+        accepted_template_hists,
+        accepted_amplitudes,
+        amplitude_prefix,
+        context,
+    )
+    extra_scaled_hists = {
+        template_name: scaled_hist_map.get(template_name)
+        for template_name in extra_positive_templates
+    }
+    pion_bg_fit_hist = _build_model_hist(
+        target_hist,
+        {
+            component_name: accepted_template_hists.get(component_name)
+            for component_name in COMPONENT_NAMES
+        },
+        accepted_amplitudes,
+        "{}_pion_bg_fit_{}".format(amplitude_prefix, context),
+    ) if amplitude_prefix == "A" else None
+
+    fit_status = "success"
+    fallback_used = False
+    fallback_reason = ""
+    if not accepted_validation["accepted"]:
+        fit_status = "fallback"
+        fallback_used = True
+        fallback_reason = (
+            "no ordered-fit candidate passed full-range validation: {}".format(
+                "; ".join(accepted_validation.get("rejection_reasons") or ["unknown"])
+            )
+        )
+
     extra_component_amplitudes = {
-        template_name: float(amplitude_map.get(template_name, 0.0) or 0.0)
+        template_name: float(accepted_amplitudes.get(template_name, 0.0) or 0.0)
         for template_name in extra_positive_templates
     }
     diagnostics = {
-        "success": True,
+        "success": (not fallback_used),
         "status_code": None,
-        "message": "staged anchored component fit",
-        "chi2": quality["chi2"],
-        "ndf": quality["ndf"],
-        "chi2_ndf": quality["chi2_ndf"],
-        "fit_p_value": quality["fit_p_value"],
-        "n_fit_bins": quality["n_fit_bins"],
+        "message": accepted_message,
+        "chi2": accepted_validation.get("chi2"),
+        "ndf": accepted_validation.get("ndf"),
+        "chi2_ndf": accepted_validation.get("chi2_ndf"),
+        "fit_p_value": accepted_validation.get("fit_p_value"),
+        "n_fit_bins": accepted_validation.get("n_fit_bins"),
         "fit_min": float(fit_min),
         "fit_max": float(fit_max),
         "include_windows": deepcopy(include_windows),
         "exclude_windows": [],
-        "fallback_used": False,
-        "fallback_reason": "",
-        "fit_strategy": "staged_anchor",
-        "template_overlap_mode": overlap_mode,
+        "fallback_used": bool(fallback_used),
+        "fallback_reason": fallback_reason,
+        "fit_strategy": "ordered_residual",
+        "accepted_solution": accepted_solution,
         "n_passes": total_passes,
         "fit_order": list(fitted_names),
         "anchor_windows": deepcopy(combined_window_map),
         "staged_pass_history": deepcopy(staged_pass_history),
-        "template_overlap_diagnostics": deepcopy(overlap_diagnostics),
+        "staged_component_amplitudes": {
+            component_name: float(stage_amplitudes.get(component_name, 0.0) or 0.0)
+            for component_name in fitted_names
+        },
+        "staged_component_uncertainties": {
+            component_name: (
+                None if stage_uncertainties.get(component_name) is None
+                else float(stage_uncertainties.get(component_name))
+            )
+            for component_name in fitted_names
+        },
+        "accepted_component_uncertainties": {
+            component_name: (
+                None if accepted_uncertainties.get(component_name) is None
+                else float(accepted_uncertainties.get(component_name))
+            )
+            for component_name in fitted_names
+        },
+        "prior_sigmas": deepcopy(prior_sigmas),
+        "joint_refinement": deepcopy(joint_diagnostics),
+        "coordinate_refinement": deepcopy(coordinate_diagnostics),
+        "validation": deepcopy(accepted_validation),
         "component_amplitudes": {
-            component_name: float(amplitude_map.get(component_name, 0.0) or 0.0)
+            component_name: float(accepted_amplitudes.get(component_name, 0.0) or 0.0)
             for component_name in COMPONENT_NAMES
         },
         "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
     }
 
     result = {
-        "{}_n".format(amplitude_prefix): float(amplitude_map.get("pi_n", 0.0) or 0.0),
-        "{}_delta".format(amplitude_prefix): float(amplitude_map.get("pi_delta", 0.0) or 0.0),
-        "{}_sidis".format(amplitude_prefix): float(amplitude_map.get("pi_sidis", 0.0) or 0.0),
-        "fit_status": "success",
+        "{}_n".format(amplitude_prefix): float(accepted_amplitudes.get("pi_n", 0.0) or 0.0),
+        "{}_delta".format(amplitude_prefix): float(accepted_amplitudes.get("pi_delta", 0.0) or 0.0),
+        "{}_sidis".format(amplitude_prefix): float(accepted_amplitudes.get("pi_sidis", 0.0) or 0.0),
+        "fit_status": fit_status,
         "diagnostics": diagnostics,
         "fit_hist": fit_hist,
         "residual_hist": residual_hist,
-        "effective_template_hists": effective_template_hists,
-        "pi_n_scaled_hist": pi_n_scaled_hist,
-        "pi_delta_scaled_hist": pi_delta_scaled_hist,
-        "pi_sidis_scaled_hist": pi_sidis_scaled_hist,
+        "template_hists": accepted_template_hists,
+        "pi_n_scaled_hist": scaled_hist_map.get("pi_n"),
+        "pi_delta_scaled_hist": scaled_hist_map.get("pi_delta"),
+        "pi_sidis_scaled_hist": scaled_hist_map.get("pi_sidis"),
         "extra_scaled_hists": extra_scaled_hists,
         "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
         "step_overlays": step_overlays,
@@ -1141,6 +1483,17 @@ def fit_pion_control_with_simc_shapes(
         component_name: [window]
         for component_name, window in resolved_windows.items()
     }
+    prior_scale_map = {
+        "pi_n": float(fit_config.get("particle_subtraction_prior_scale_pi_n", 1.0) or 1.0),
+        "pi_delta": float(fit_config.get("particle_subtraction_prior_scale_pi_delta", 1.5) or 1.5),
+        "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
+    }
+    validation_options = {
+        "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
+        "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
+        "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
+        "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
+    }
     result = _fit_staged_anchor_templates(
         h_pion_control,
         {
@@ -1153,8 +1506,12 @@ def fit_pion_control_with_simc_shapes(
         fit_max,
         anchor_windows=anchor_windows,
         fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
-        n_passes=fit_config.get("staged_fit_passes", 3),
-        overlap_mode=fit_config.get("template_overlap_mode", "exclusive_residual"),
+        n_passes=fit_config.get("staged_fit_passes", 1),
+        prior_scale_map=prior_scale_map,
+        joint_refinement_enabled=bool(fit_config.get("joint_refinement_enabled", True)),
+        max_fit_cycles=fit_config.get("particle_subtraction_max_fit_cycles", 50),
+        fit_tolerance=fit_config.get("particle_subtraction_fit_tolerance", 1e-5),
+        validation_options=validation_options,
         context="{}_pion_control".format(context or "scope"),
     )
     return {
@@ -1163,12 +1520,13 @@ def fit_pion_control_with_simc_shapes(
         "B_sidis": result["B_sidis"],
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
-        "effective_template_hists": result.get("effective_template_hists") or {},
+        "template_hists": result.get("template_hists") or {},
         "fit_hist": result["fit_hist"],
         "residual_hist": result["residual_hist"],
         "pi_n_scaled_hist": result["pi_n_scaled_hist"],
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
+        "step_overlays": result.get("step_overlays") or [],
     }
 
 
@@ -1197,8 +1555,22 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     mm_max = float(inpDict.get("mm_max", fit_max))
     extra_positive_templates = {}
     extra_anchor_windows = {}
+    prior_scale_map = {
+        "pi_n": float(fit_config.get("particle_subtraction_prior_scale_pi_n", 1.0) or 1.0),
+        "pi_delta": float(fit_config.get("particle_subtraction_prior_scale_pi_delta", 1.5) or 1.5),
+        "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
+    }
+    validation_options = {
+        "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
+        "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
+        "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
+        "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
+    }
     if h_kaon_signal_shape is not None:
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
+        prior_scale_map[KAON_SIGNAL_TEMPLATE_NAME] = float(
+            fit_config.get("particle_subtraction_prior_scale_k_lambda_signal", 1.0) or 1.0
+        )
         if mm_max > mm_min:
             tail_extension = max(float(fit_config.get("kaon_signal_tail_extension", 0.0) or 0.0), 0.0)
             signal_window_max = min(fit_max, mm_max + tail_extension)
@@ -1214,11 +1586,20 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         fit_min,
         fit_max,
         anchor_windows=anchor_windows,
-        fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
+        fit_order=fit_config.get("fit_order") or (
+            KAON_SIGNAL_TEMPLATE_NAME,
+            "pi_n",
+            "pi_delta",
+            "pi_sidis",
+        ),
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
-        n_passes=fit_config.get("staged_fit_passes", 3),
-        overlap_mode=fit_config.get("template_overlap_mode", "exclusive_residual"),
+        n_passes=fit_config.get("staged_fit_passes", 1),
+        prior_scale_map=prior_scale_map,
+        joint_refinement_enabled=bool(fit_config.get("joint_refinement_enabled", True)),
+        max_fit_cycles=fit_config.get("particle_subtraction_max_fit_cycles", 50),
+        fit_tolerance=fit_config.get("particle_subtraction_fit_tolerance", 1e-5),
+        validation_options=validation_options,
         context="{}_kaon_nosub".format(context or "scope"),
     )
     signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
@@ -1230,7 +1611,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "S_lambda": None if signal_amplitude is None else float(signal_amplitude),
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
-        "effective_template_hists": result.get("effective_template_hists") or {},
+        "template_hists": result.get("template_hists") or {},
         "fit_hist": result["fit_hist"],
         "pion_bg_fit_hist": result["pion_bg_fit_hist"],
         "residual_hist": result["residual_hist"],
@@ -1238,6 +1619,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
         "k_lambda_scaled_hist": signal_scaled_hist,
+        "step_overlays": result.get("step_overlays") or [],
     }
 
 
@@ -1394,19 +1776,19 @@ def build_particle_subtraction_component_result(
             "kaon": deepcopy(kaon_fit["diagnostics"]),
         },
         "H_simc_shape_pi_n": _clone_hist(
-            (pion_fit.get("effective_template_hists") or {}).get("pi_n"),
+            (pion_fit.get("template_hists") or {}).get("pi_n"),
             "H_simc_shape_pi_n_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_pi_delta": _clone_hist(
-            (pion_fit.get("effective_template_hists") or {}).get("pi_delta"),
+            (pion_fit.get("template_hists") or {}).get("pi_delta"),
             "H_simc_shape_pi_delta_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_pi_sidis": _clone_hist(
-            (pion_fit.get("effective_template_hists") or {}).get("pi_sidis"),
+            (pion_fit.get("template_hists") or {}).get("pi_sidis"),
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_k_lambda": _clone_hist(
-            (kaon_fit.get("effective_template_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME),
+            (kaon_fit.get("template_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME),
             "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
         ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
@@ -1492,11 +1874,18 @@ def _format_fit_strategy(diagnostics):
     return str(strategy)
 
 
-def _format_overlap_mode(diagnostics):
+def _format_solution_method(diagnostics):
     if not isinstance(diagnostics, dict):
         return "n/a"
-    mode = diagnostics.get("template_overlap_mode")
-    return str(mode) if mode else "n/a"
+    method = diagnostics.get("accepted_solution")
+    return str(method) if method else "n/a"
+
+
+def _format_validation_status(diagnostics):
+    if not isinstance(diagnostics, dict):
+        return "n/a"
+    validation = diagnostics.get("validation") or {}
+    return "pass" if bool(validation.get("accepted")) else "fail"
 
 
 def _format_window_list(windows):
@@ -1755,8 +2144,11 @@ def print_particle_subtraction_component_fit_pages(
             "strategy: {}".format(
                 _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
             ),
-            "overlap: {}".format(
-                _format_overlap_mode(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
+            "solution: {}".format(
+                _format_solution_method(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
+            ),
+            "validation: {}".format(
+                _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
             ),
             "B_n={}  B_delta={}  B_sidis={}".format(
                 _format_fit_number(component_fit_result.get("B_n")),
@@ -1799,8 +2191,11 @@ def print_particle_subtraction_component_fit_pages(
             "strategy: {}".format(
                 _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
             ),
-            "overlap: {}".format(
-                _format_overlap_mode(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
+            "solution: {}".format(
+                _format_solution_method(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
+            ),
+            "validation: {}".format(
+                _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
             ),
             "A_n={}  A_delta={}  A_sidis={}  S_lambda={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
