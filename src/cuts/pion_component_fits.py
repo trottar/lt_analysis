@@ -518,6 +518,25 @@ def _build_scaled_reference_hist(target_hist, reference_hist, x_min, x_max, hist
     return scaled_hist, scale_factor
 
 
+def _mask_hist_windows_inplace(hist, windows, zero_errors=True):
+    if hist is None:
+        return hist
+    for bin_index in range(1, hist.GetNbinsX() + 1):
+        x_center = float(hist.GetBinCenter(bin_index))
+        if any(window_min <= x_center <= window_max for window_min, window_max in (windows or [])):
+            hist.SetBinContent(bin_index, 0.0)
+            if zero_errors:
+                hist.SetBinError(bin_index, 0.0)
+    return hist
+
+
+def _masked_hist_clone(hist, hist_name, windows, zero_errors=True):
+    if hist is None:
+        return None
+    masked = _clone_hist(hist, hist_name)
+    return _mask_hist_windows_inplace(masked, windows, zero_errors=zero_errors)
+
+
 def _build_scaled_hist_map(template_hists, amplitude_map, hist_name_prefix, context):
     scaled_hists = {}
     for template_name, template_hist in (template_hists or {}).items():
@@ -1672,7 +1691,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         mm_max,
         "A_k_lambda_reference_{}_kaon_nosub".format(context or "scope"),
     )
-    return {
+    return_payload = {
         "A_n": result["A_n"],
         "A_delta": result["A_delta"],
         "A_sidis": result["A_sidis"],
@@ -1693,6 +1712,24 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
     }
+    if excluded_windows:
+        for key in (
+            "fit_hist",
+            "pion_bg_fit_hist",
+            "residual_hist",
+            "pi_n_scaled_hist",
+            "pi_delta_scaled_hist",
+            "pi_sidis_scaled_hist",
+        ):
+            hist = return_payload.get(key)
+            if hist is None:
+                continue
+            return_payload[key] = _masked_hist_clone(
+                hist,
+                "{}_masked".format(hist.GetName()),
+                excluded_windows,
+            )
+    return return_payload
 
 
 def _sum_hist_list_to_unit_area(hist_list, hist_name):
@@ -2117,6 +2154,11 @@ def _print_component_step_pages(
         baseline_clone = _clone_hist(baseline_before, "{}_step_baseline".format(baseline_before.GetName()))
         component_clone = _clone_hist(component_scaled, "{}_step_component".format(component_scaled.GetName()))
         cumulative_clone = _clone_hist(cumulative_after, "{}_step_cumulative".format(cumulative_after.GetName()))
+        excluded_windows = step_overlay.get("excluded_windows") or []
+        if excluded_windows:
+            _mask_hist_windows_inplace(baseline_clone, excluded_windows)
+            _mask_hist_windows_inplace(component_clone, excluded_windows)
+            _mask_hist_windows_inplace(cumulative_clone, excluded_windows)
         target_clone.SetTitle(
             "{}{} step {}: {}".format(
                 title_prefix,
@@ -2182,7 +2224,6 @@ def _print_component_step_pages(
         stats_box.AddText("component: {}".format(component_label))
         stats_box.AddText("amplitude: {}".format(_format_fit_number(step_overlay.get("amplitude"))))
         stats_box.AddText("anchor: {}".format(_format_window_list(step_overlay.get("anchor_windows") or [])))
-        excluded_windows = step_overlay.get("excluded_windows") or []
         if excluded_windows:
             stats_box.AddText("exclude: {}".format(_format_window_list(excluded_windows)))
         stats_box.Draw()
@@ -2195,6 +2236,9 @@ def _print_component_step_pages(
             component_scaled,
             "{}_step_component_bottom".format(component_scaled.GetName()),
         )
+        if excluded_windows:
+            _mask_hist_windows_inplace(residual_clone, excluded_windows)
+            _mask_hist_windows_inplace(component_bottom_clone, excluded_windows)
         residual_clone.SetTitle("Residual input to {} step".format(component_label))
         residual_clone.SetLineColor(ROOT.kBlack)
         residual_clone.SetLineWidth(2)
