@@ -179,6 +179,11 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
         "fit_order": ("pi_sidis", "pi_n", "pi_delta"),
+        "postfit_component_scales": {
+            "pi_n": 0.95,
+            "pi_delta": 0.95,
+            "pi_sidis": 0.50,
+        },
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
         "particle_subtraction_prior_scale_pi_delta": 1.5,
@@ -204,6 +209,11 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
         "fit_order": ("pi_sidis", "pi_n", "pi_delta"),
+        "postfit_component_scales": {
+            "pi_n": 0.95,
+            "pi_delta": 0.95,
+            "pi_sidis": 0.50,
+        },
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
@@ -1361,6 +1371,25 @@ def resolve_particle_subtraction_component_fit_excluded_windows(fit_target, mm_o
             )
         low_edge, high_edge = bounds
         resolved.append((float(low_edge) + offset, float(high_edge) + offset))
+    return resolved
+
+
+def resolve_particle_subtraction_component_postfit_scales(fit_target):
+    config = get_particle_subtraction_component_fit_window_config(fit_target)
+    if not config:
+        return {}
+
+    resolved = {}
+    for component_name in ("pi_n", "pi_delta", "pi_sidis"):
+        scale_value = float((config.get("postfit_component_scales") or {}).get(component_name, 1.0))
+        if scale_value != scale_value or scale_value < 0.0:
+            raise ValueError(
+                "Particle subtraction post-fit scale '{}' for '{}' must be finite and non-negative".format(
+                    component_name,
+                    fit_target,
+                )
+            )
+        resolved[component_name] = scale_value
     return resolved
 
 

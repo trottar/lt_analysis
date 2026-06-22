@@ -14,6 +14,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+    resolve_particle_subtraction_component_postfit_scales,
     resolve_particle_subtraction_component_fit_excluded_windows,
     get_particle_subtraction_component_fit_window_config,
     resolve_particle_subtraction_component_fit_windows,
@@ -591,6 +592,127 @@ def _build_scaled_hist_map(template_hists, amplitude_map, hist_name_prefix, cont
             scaled_hist.Scale(float((amplitude_map or {}).get(template_name, 0.0) or 0.0))
         scaled_hists[template_name] = scaled_hist
     return scaled_hists
+
+
+def _apply_component_postfit_scales(
+    result,
+    target_hist,
+    amplitude_prefix,
+    postfit_scale_map,
+    fit_min,
+    fit_max,
+    exclude_windows=None,
+    validation_options=None,
+    context="",
+):
+    if exclude_windows is None:
+        exclude_windows = []
+    if validation_options is None:
+        validation_options = {}
+    if not isinstance(result, dict):
+        return result
+
+    resolved_scale_map = {}
+    for component_name in COMPONENT_NAMES:
+        scale_value = float((postfit_scale_map or {}).get(component_name, 1.0) or 1.0)
+        resolved_scale_map[component_name] = scale_value
+    if all(abs(scale_value - 1.0) <= 1e-12 for scale_value in resolved_scale_map.values()):
+        return result
+
+    raw_component_amplitudes = {
+        "pi_n": float(result.get("{}_n".format(amplitude_prefix), 0.0) or 0.0),
+        "pi_delta": float(result.get("{}_delta".format(amplitude_prefix), 0.0) or 0.0),
+        "pi_sidis": float(result.get("{}_sidis".format(amplitude_prefix), 0.0) or 0.0),
+    }
+    scaled_component_amplitudes = {
+        component_name: raw_component_amplitudes[component_name] * resolved_scale_map[component_name]
+        for component_name in COMPONENT_NAMES
+    }
+    result["{}_n".format(amplitude_prefix)] = float(scaled_component_amplitudes["pi_n"])
+    result["{}_delta".format(amplitude_prefix)] = float(scaled_component_amplitudes["pi_delta"])
+    result["{}_sidis".format(amplitude_prefix)] = float(scaled_component_amplitudes["pi_sidis"])
+
+    extra_component_amplitudes = {
+        template_name: float(value or 0.0)
+        for template_name, value in ((result.get("extra_component_amplitudes") or {}).items())
+    }
+    full_amplitude_map = dict(extra_component_amplitudes)
+    full_amplitude_map.update(scaled_component_amplitudes)
+
+    template_hists = result.get("template_hists") or {}
+    scaled_hist_map = _build_scaled_hist_map(
+        template_hists,
+        full_amplitude_map,
+        amplitude_prefix,
+        "{}_postfit".format(context or "scope"),
+    )
+    result["pi_n_scaled_hist"] = scaled_hist_map.get("pi_n")
+    result["pi_delta_scaled_hist"] = scaled_hist_map.get("pi_delta")
+    result["pi_sidis_scaled_hist"] = scaled_hist_map.get("pi_sidis")
+    result["extra_scaled_hists"] = {
+        template_name: scaled_hist_map.get(template_name)
+        for template_name in extra_component_amplitudes
+    }
+
+    fit_hist = _build_model_hist(
+        target_hist,
+        template_hists,
+        full_amplitude_map,
+        "{}_fit_hist_postfit_{}".format(amplitude_prefix, context or "scope"),
+    )
+    residual_hist = _clone_hist(
+        target_hist,
+        "{}_fit_residual_postfit_{}".format(amplitude_prefix, context or "scope"),
+    )
+    if residual_hist is not None and fit_hist is not None:
+        residual_hist.Add(fit_hist, -1.0)
+    result["fit_hist"] = fit_hist
+    result["residual_hist"] = residual_hist
+
+    if amplitude_prefix == "A":
+        result["pion_bg_fit_hist"] = _build_model_hist(
+            target_hist,
+            {
+                component_name: template_hists.get(component_name)
+                for component_name in COMPONENT_NAMES
+            },
+            scaled_component_amplitudes,
+            "{}_pion_bg_fit_postfit_{}".format(amplitude_prefix, context or "scope"),
+        )
+
+    diagnostics = deepcopy(result.get("diagnostics") or {})
+    diagnostics["postfit_component_scales"] = deepcopy(resolved_scale_map)
+    diagnostics["component_amplitudes_pre_postfit_scale"] = deepcopy(raw_component_amplitudes)
+    diagnostics["component_amplitudes"] = deepcopy(scaled_component_amplitudes)
+    accepted_uncertainties = deepcopy(diagnostics.get("accepted_component_uncertainties") or {})
+    for component_name in COMPONENT_NAMES:
+        if accepted_uncertainties.get(component_name) is None:
+            continue
+        accepted_uncertainties[component_name] = (
+            float(accepted_uncertainties[component_name]) * resolved_scale_map[component_name]
+        )
+    diagnostics["accepted_component_uncertainties"] = accepted_uncertainties
+
+    validation = _evaluate_model_validation(
+        target_hist,
+        fit_hist,
+        fit_min,
+        fit_max,
+        n_parameters=len(template_hists),
+        exclude_windows=exclude_windows,
+        oversub_sigma_tolerance=validation_options.get("oversub_sigma_tolerance", 2.0),
+        max_oversub_bin_count=validation_options.get("max_oversub_bin_count"),
+        max_oversub_bin_fraction=validation_options.get("max_oversub_bin_fraction"),
+        max_full_range_chi2_ndf=validation_options.get("max_full_range_chi2_ndf"),
+    )
+    diagnostics["validation"] = deepcopy(validation)
+    diagnostics["chi2"] = validation.get("chi2")
+    diagnostics["ndf"] = validation.get("ndf")
+    diagnostics["chi2_ndf"] = validation.get("chi2_ndf")
+    diagnostics["fit_p_value"] = validation.get("fit_p_value")
+    diagnostics["n_fit_bins"] = validation.get("n_fit_bins")
+    result["diagnostics"] = diagnostics
+    return result
 
 
 def _evaluate_model_validation(
@@ -1605,6 +1727,7 @@ def fit_pion_control_with_simc_shapes(
         "pi_delta": float(fit_config.get("particle_subtraction_prior_scale_pi_delta", 1.5) or 1.5),
         "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
     }
+    postfit_scale_map = resolve_particle_subtraction_component_postfit_scales("pion_control")
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
@@ -1629,6 +1752,17 @@ def fit_pion_control_with_simc_shapes(
         joint_refinement_enabled=bool(fit_config.get("joint_refinement_enabled", True)),
         max_fit_cycles=fit_config.get("particle_subtraction_max_fit_cycles", 50),
         fit_tolerance=fit_config.get("particle_subtraction_fit_tolerance", 1e-5),
+        validation_options=validation_options,
+        context="{}_pion_control".format(context or "scope"),
+    )
+    result = _apply_component_postfit_scales(
+        result,
+        h_pion_control,
+        "B",
+        postfit_scale_map,
+        fit_min,
+        fit_max,
+        exclude_windows=excluded_windows,
         validation_options=validation_options,
         context="{}_pion_control".format(context or "scope"),
     )
@@ -1682,6 +1816,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "pi_delta": float(fit_config.get("particle_subtraction_prior_scale_pi_delta", 1.5) or 1.5),
         "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
     }
+    postfit_scale_map = resolve_particle_subtraction_component_postfit_scales("kaon_nosub")
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
@@ -1722,6 +1857,17 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         joint_refinement_enabled=bool(fit_config.get("joint_refinement_enabled", True)),
         max_fit_cycles=fit_config.get("particle_subtraction_max_fit_cycles", 50),
         fit_tolerance=fit_config.get("particle_subtraction_fit_tolerance", 1e-5),
+        validation_options=validation_options,
+        context="{}_kaon_nosub".format(context or "scope"),
+    )
+    result = _apply_component_postfit_scales(
+        result,
+        h_kaon_nosub,
+        "A",
+        postfit_scale_map,
+        fit_min,
+        fit_max,
+        exclude_windows=excluded_windows,
         validation_options=validation_options,
         context="{}_kaon_nosub".format(context or "scope"),
     )
@@ -2089,6 +2235,16 @@ def _format_excluded_window_list(windows):
     return _format_window_list(windows) if windows else "none"
 
 
+def _format_component_scale_map(scale_map):
+    if not isinstance(scale_map, dict) or not scale_map:
+        return "n/a"
+    return "n={:.2f}, delta={:.2f}, sidis={:.2f}".format(
+        float(scale_map.get("pi_n", 1.0) or 1.0),
+        float(scale_map.get("pi_delta", 1.0) or 1.0),
+        float(scale_map.get("pi_sidis", 1.0) or 1.0),
+    )
+
+
 def _draw_window_collection(windows, y_min, y_max, color, line_style, line_width=2):
     drawn_lines = []
     for window_min, window_max in windows or []:
@@ -2405,6 +2561,11 @@ def print_particle_subtraction_component_fit_pages(
             "template MM shift={:.6f}".format(
                 float(component_fit_result.get("template_mm_offset_data") or 0.0)
             ),
+            "post-fit scales: {}".format(
+                _format_component_scale_map(
+                    ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("postfit_component_scales")
+                )
+            ),
             "B_n={}  B_delta={}  B_sidis={}".format(
                 _format_fit_number(component_fit_result.get("B_n")),
                 _format_fit_number(component_fit_result.get("B_delta")),
@@ -2465,6 +2626,11 @@ def print_particle_subtraction_component_fit_pages(
             ),
             "template MM shift={:.6f}".format(
                 float(component_fit_result.get("template_mm_offset_data") or 0.0)
+            ),
+            "post-fit scales: {}".format(
+                _format_component_scale_map(
+                    ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("postfit_component_scales")
+                )
             ),
             "A_n={}  A_delta={}  A_sidis={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
