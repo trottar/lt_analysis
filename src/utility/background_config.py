@@ -178,7 +178,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("pi_n", "pi_delta", "pi_sidis"),
+        "fit_order": ("pi_n", "pi_sidis", "pi_delta"),
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
         "particle_subtraction_prior_scale_pi_delta": 1.5,
@@ -203,7 +203,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "kaon_nosub": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("k_lambda_signal", "pi_n", "pi_delta", "pi_sidis"),
+        "fit_order": ("k_lambda_signal", "pi_n", "pi_sidis", "pi_delta"),
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
         "particle_subtraction_prior_scale_pi_delta": 1.5,
