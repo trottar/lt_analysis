@@ -594,6 +594,103 @@ def _build_scaled_hist_map(template_hists, amplitude_map, hist_name_prefix, cont
     return scaled_hists
 
 
+def _rebuild_step_overlays_with_component_scales(
+    target_hist,
+    step_overlays,
+    template_hists,
+    component_scale_map,
+    context="",
+):
+    if target_hist is None or not step_overlays:
+        return step_overlays
+
+    resolved_scale_map = {
+        component_name: float((component_scale_map or {}).get(component_name, 1.0) or 1.0)
+        for component_name in COMPONENT_NAMES
+    }
+    if all(abs(scale_value - 1.0) <= 1e-12 for scale_value in resolved_scale_map.values()):
+        return step_overlays
+
+    rebuilt_overlays = []
+    running_model_hist = _clone_hist(
+        target_hist,
+        "{}_step_postfit_running_{}".format(target_hist.GetName(), context or "scope"),
+        reset=True,
+    )
+    for step_overlay in step_overlays:
+        component_name = step_overlay.get("component_name")
+        template_hist = (template_hists or {}).get(component_name)
+        if template_hist is None:
+            rebuilt_overlays.append(step_overlay)
+            continue
+
+        raw_amplitude = float(step_overlay.get("amplitude", 0.0) or 0.0)
+        scale_factor = resolved_scale_map.get(component_name, 1.0)
+        scaled_amplitude = raw_amplitude * scale_factor
+
+        baseline_before_hist = _clone_hist(
+            target_hist,
+            "{}_step_postfit_baseline_{}_{}".format(
+                target_hist.GetName(),
+                component_name,
+                step_overlay.get("step_index", 0),
+            ),
+            reset=True,
+        )
+        baseline_before_hist.Add(running_model_hist)
+
+        residual_input_hist = _clone_hist(
+            target_hist,
+            "{}_step_postfit_residual_{}_{}".format(
+                target_hist.GetName(),
+                component_name,
+                step_overlay.get("step_index", 0),
+            ),
+        )
+        residual_input_hist.Add(baseline_before_hist, -1.0)
+
+        component_scaled_hist = _clone_hist(
+            template_hist,
+            "{}_step_postfit_component_{}_{}".format(
+                template_hist.GetName(),
+                component_name,
+                step_overlay.get("step_index", 0),
+            ),
+        )
+        component_scaled_hist.Scale(scaled_amplitude)
+
+        cumulative_after_hist = _clone_hist(
+            baseline_before_hist,
+            "{}_step_postfit_cumulative_{}_{}".format(
+                baseline_before_hist.GetName(),
+                component_name,
+                step_overlay.get("step_index", 0),
+            ),
+        )
+        cumulative_after_hist.Add(component_scaled_hist)
+
+        running_model_hist = _clone_hist(
+            cumulative_after_hist,
+            "{}_step_postfit_running_{}_{}".format(
+                cumulative_after_hist.GetName(),
+                component_name,
+                step_overlay.get("step_index", 0),
+            ),
+        )
+
+        rebuilt_overlay = dict(step_overlay)
+        rebuilt_overlay["raw_amplitude"] = raw_amplitude
+        rebuilt_overlay["postfit_scale_factor"] = scale_factor
+        rebuilt_overlay["amplitude"] = scaled_amplitude
+        rebuilt_overlay["H_baseline_before"] = baseline_before_hist
+        rebuilt_overlay["H_residual_input"] = residual_input_hist
+        rebuilt_overlay["H_component_scaled"] = component_scaled_hist
+        rebuilt_overlay["H_cumulative_after"] = cumulative_after_hist
+        rebuilt_overlays.append(rebuilt_overlay)
+
+    return rebuilt_overlays
+
+
 def _apply_component_postfit_scales(
     result,
     target_hist,
@@ -712,6 +809,13 @@ def _apply_component_postfit_scales(
     diagnostics["fit_p_value"] = validation.get("fit_p_value")
     diagnostics["n_fit_bins"] = validation.get("n_fit_bins")
     result["diagnostics"] = diagnostics
+    result["step_overlays"] = _rebuild_step_overlays_with_component_scales(
+        target_hist,
+        result.get("step_overlays") or [],
+        template_hists,
+        resolved_scale_map,
+        context=context,
+    )
     return result
 
 
@@ -2456,6 +2560,12 @@ def _print_component_step_pages(
         stats_box.AddText("pass: {}".format(step_overlay.get("pass_index", 0)))
         stats_box.AddText("component: {}".format(component_label))
         stats_box.AddText("amplitude: {}".format(_format_fit_number(step_overlay.get("amplitude"))))
+        if step_overlay.get("postfit_scale_factor") is not None:
+            stats_box.AddText(
+                "post-fit scale: {}".format(
+                    _format_fit_number(step_overlay.get("postfit_scale_factor"))
+                )
+            )
         stats_box.AddText("anchor: {}".format(_format_window_list(step_overlay.get("anchor_windows") or [])))
         if excluded_windows:
             stats_box.AddText("exclude: {}".format(_format_window_list(excluded_windows)))
