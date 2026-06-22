@@ -234,7 +234,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "kaon_nosub": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("pi_n", "pi_delta", "k_sigma0_signal", "pi_sidis"),
+        "fit_order": ("pi_n", "pi_delta", "pi_sidis", "k_sigma0_signal"),
         "stage_amplitude_windows": {},
         "prior_scales": {
             "pi_n": 1.0,
@@ -244,7 +244,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "postfit_component_scales": {
             "pi_n": 0.95,
-            "pi_delta": 0.75,
+            "pi_delta": 0.65,
             "pi_sidis": 0.25,
             "k_sigma0_signal": 1.0,
         },
