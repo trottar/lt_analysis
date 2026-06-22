@@ -94,6 +94,7 @@ from pion_component_fits import (
 )
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
+    compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
     fill_simc_shape_pion_subtraction_templates,
     handle_particle_subtraction_fallback,
@@ -779,6 +780,7 @@ def _apply_component_pion_subtraction_for_bin(
     )
 
     h_mm_before = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+    h_mm_nosub_before = _clone_hist_for_plot(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
     h_mm_after = None
 
     hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(template_hists["Q2"], -1.0)
@@ -795,10 +797,17 @@ def _apply_component_pion_subtraction_for_bin(
     hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(template_hists["mm_nosub"], -1.0)
     hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(template_hists["mm"], -1.0)
     h_mm_after = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+    h_mm_nosub_after = _clone_hist_for_plot(h_mm_nosub_before)
+    h_mm_nosub_after.Add(template_hists["mm_nosub"], -1.0)
 
     pion_control_integral = _hist_integral(component_fit_result.get("H_pion_control_input"))
-    weighted_pion_integral = _hist_integral(template_hists["mm_nosub"])
-    effective_scale = weighted_pion_integral / pion_control_integral if pion_control_integral > 0.0 else 0.0
+    weighted_pion_integral_cut = _hist_integral(template_hists["mm"])
+    weighted_pion_integral_full = _hist_integral(template_hists["mm_nosub"])
+    effective_scale = weighted_pion_integral_full / pion_control_integral if pion_control_integral > 0.0 else 0.0
+    event_template_closure = compute_hist_closure_metrics(
+        weight_payload.get("H_kaon_pion_model"),
+        template_hists["mm_nosub"],
+    )
 
     payload.update(
         {
@@ -806,11 +815,16 @@ def _apply_component_pion_subtraction_for_bin(
             "fallback_used": False,
             "fallback_reason": "",
             "particle_subtraction_effective_scale": float(effective_scale),
-            "weighted_pion_integral": float(weighted_pion_integral),
+            "weighted_pion_integral": float(weighted_pion_integral_full),
+            "weighted_pion_integral_cut": float(weighted_pion_integral_cut),
+            "weighted_pion_integral_full": float(weighted_pion_integral_full),
             "kaon_integral_before_pion_sub": _hist_integral(h_mm_before),
             "kaon_integral_after_pion_sub": _hist_integral(h_mm_after),
+            "kaon_integral_before_pion_sub_full": _hist_integral(h_mm_nosub_before),
+            "kaon_integral_after_pion_sub_full": _hist_integral(h_mm_nosub_after),
             "H_pion_control_model": weight_payload["H_pion_control_model"],
             "H_kaon_pion_model": weight_payload["H_kaon_pion_model"],
+            "H_weighted_pion_control_model": weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
             "H_pion_control_unscaled": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
@@ -819,9 +833,12 @@ def _apply_component_pion_subtraction_for_bin(
             "H_pion_subtraction_template_t": template_hists["t"],
             "H_MM_before_pion_subtraction": h_mm_before,
             "H_MM_after_pion_subtraction": h_mm_after,
+            "H_MM_nosub_before_pion_subtraction": h_mm_nosub_before,
+            "H_MM_nosub_after_pion_subtraction": h_mm_nosub_after,
             "diagnostics": {
                 **deepcopy(weight_payload["diagnostics"]),
                 **deepcopy(fill_stats),
+                "event_template_closure": event_template_closure,
             },
         }
     )

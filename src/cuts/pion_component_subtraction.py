@@ -57,6 +57,47 @@ def _hist_integral(hist):
         return 0.0
 
 
+def compute_hist_closure_metrics(reference_hist, comparison_hist):
+    metrics = {
+        "signature_match": False,
+        "reference_integral": _hist_integral(reference_hist),
+        "comparison_integral": _hist_integral(comparison_hist),
+        "integral_difference": None,
+        "integral_ratio": None,
+        "abs_diff_integral": None,
+        "max_abs_bin_diff": None,
+        "max_abs_bin_center": None,
+    }
+    if reference_hist is None or comparison_hist is None:
+        return metrics
+    if _hist_bin_signature(reference_hist) != _hist_bin_signature(comparison_hist):
+        return metrics
+
+    metrics["signature_match"] = True
+    ref_integral = metrics["reference_integral"]
+    cmp_integral = metrics["comparison_integral"]
+    metrics["integral_difference"] = float(cmp_integral - ref_integral)
+    if ref_integral > 0.0:
+        metrics["integral_ratio"] = float(cmp_integral / ref_integral)
+
+    abs_diff_integral = 0.0
+    max_abs_bin_diff = 0.0
+    max_abs_bin_center = None
+    for bin_index in range(1, reference_hist.GetNbinsX() + 1):
+        ref_value = float(reference_hist.GetBinContent(bin_index))
+        cmp_value = float(comparison_hist.GetBinContent(bin_index))
+        abs_diff = abs(cmp_value - ref_value)
+        abs_diff_integral += abs_diff
+        if abs_diff > max_abs_bin_diff:
+            max_abs_bin_diff = abs_diff
+            max_abs_bin_center = float(reference_hist.GetBinCenter(bin_index))
+
+    metrics["abs_diff_integral"] = float(abs_diff_integral)
+    metrics["max_abs_bin_diff"] = float(max_abs_bin_diff)
+    metrics["max_abs_bin_center"] = max_abs_bin_center
+    return metrics
+
+
 def _resolve_component_template_map(component_fit_result):
     return {
         "pi_n": component_fit_result.get("H_simc_shape_pi_n"),
@@ -197,6 +238,11 @@ def build_simc_shape_pion_control_weights(
         "H_pion_weight_vs_MM_{}".format(component_fit_result.get("analysis_scope", "scope")),
         reset=True,
     )
+    h_weighted_pion_control_model = _clone_hist(
+        reference_hist,
+        "H_weighted_pion_control_model_{}".format(component_fit_result.get("analysis_scope", "scope")),
+        reset=True,
+    )
 
     pion_amplitudes = {
         "pi_n": float(component_fit_result.get("B_n", 0.0) or 0.0),
@@ -247,6 +293,9 @@ def build_simc_shape_pion_control_weights(
         weights[bin_index] = float(weight)
         h_pion_weight.SetBinContent(bin_index, float(weight))
         h_pion_weight.SetBinError(bin_index, 0.0)
+        weighted_model_value = float(weight) * denominator
+        h_weighted_pion_control_model.SetBinContent(bin_index, weighted_model_value)
+        h_weighted_pion_control_model.SetBinError(bin_index, 0.0)
         unclipped_values.append(unclipped_weight)
         clipped_values.append(float(weight))
         ratio_max_abs_error = max(
@@ -266,6 +315,7 @@ def build_simc_shape_pion_control_weights(
         "pion_control_integral": _hist_integral(component_fit_result.get("H_pion_control_input")),
         "pion_control_model_integral": _hist_integral(h_pion_control_model),
         "kaon_pion_model_integral": _hist_integral(h_kaon_pion_model),
+        "weighted_pion_control_model_integral": _hist_integral(h_weighted_pion_control_model),
         "pion_weight_min_unclipped": min(unclipped_values) if unclipped_values else 0.0,
         "pion_weight_max_unclipped": max(unclipped_values) if unclipped_values else 0.0,
         "pion_weight_min": min(clipped_values) if clipped_values else 0.0,
@@ -282,11 +332,16 @@ def build_simc_shape_pion_control_weights(
         "clip_min": None if clip_min is None else float(clip_min),
         "clip_max": None if clip_max is None else float(clip_max),
     }
+    diagnostics["model_closure"] = compute_hist_closure_metrics(
+        h_kaon_pion_model,
+        h_weighted_pion_control_model,
+    )
 
     return {
         "weights": weights,
         "H_pion_control_model": h_pion_control_model,
         "H_kaon_pion_model": h_kaon_pion_model,
+        "H_weighted_pion_control_model": h_weighted_pion_control_model,
         "H_pion_weight_vs_MM": h_pion_weight,
         "diagnostics": diagnostics,
     }

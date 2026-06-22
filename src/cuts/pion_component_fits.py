@@ -2902,6 +2902,8 @@ def print_particle_subtraction_component_application_pages(
 
     diagnostics = component_payload.get("diagnostics") or {}
     scope_label = component_payload.get("analysis_scope") or component_payload.get("analysis_scope_label") or "unknown"
+    model_closure = diagnostics.get("model_closure") or {}
+    event_template_closure = diagnostics.get("event_template_closure") or {}
 
     _print_single_hist_page(
         pdf_name,
@@ -2932,23 +2934,83 @@ def print_particle_subtraction_component_application_pages(
 
     _print_component_overlay_page(
         pdf_name,
-        component_payload.get("H_MM_before_pion_subtraction"),
+        component_payload.get("H_kaon_pion_model"),
+        "kaon pion-bg model",
+        "{}Part 3 model closure: weighted pion model vs kaon bg model".format(title_prefix),
+        [
+            (component_payload.get("H_weighted_pion_control_model"), "weighted pion-control model", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "signature match={}".format(
+                "pass" if bool(model_closure.get("signature_match")) else "fail"
+            ),
+            "kaon pion model integral={}".format(
+                _format_fit_number(model_closure.get("reference_integral"))
+            ),
+            "weighted pion model integral={}".format(
+                _format_fit_number(model_closure.get("comparison_integral"))
+            ),
+            "integral ratio={}".format(
+                _format_fit_metric(model_closure.get("integral_ratio"))
+            ),
+            "max abs bin diff={} @ MM={}".format(
+                _format_fit_number(model_closure.get("max_abs_bin_diff")),
+                _format_fit_metric(model_closure.get("max_abs_bin_center")),
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_kaon_pion_model"),
+        "kaon pion-bg model",
+        "{}Part 3 event-template closure vs kaon bg model".format(title_prefix),
+        [
+            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template (full)", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "signature match={}".format(
+                "pass" if bool(event_template_closure.get("signature_match")) else "fail"
+            ),
+            "kaon pion model integral={}".format(
+                _format_fit_number(event_template_closure.get("reference_integral"))
+            ),
+            "weighted event-template integral={}".format(
+                _format_fit_number(event_template_closure.get("comparison_integral"))
+            ),
+            "integral ratio={}".format(
+                _format_fit_metric(event_template_closure.get("integral_ratio"))
+            ),
+            "max abs bin diff={} @ MM={}".format(
+                _format_fit_number(event_template_closure.get("max_abs_bin_diff")),
+                _format_fit_metric(event_template_closure.get("max_abs_bin_center")),
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_MM_nosub_before_pion_subtraction"),
         "kaon data before pion subtraction",
         "{}Part 3 kaon data vs pion-background models".format(title_prefix),
         [
             (component_payload.get("H_kaon_pion_model"), "kaon pion-bg model", ROOT.kBlue + 1, 1),
-            (component_payload.get("H_pion_subtraction_template_MM"), "weighted pion template", ROOT.kOrange + 7, 2),
+            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template", ROOT.kOrange + 7, 2),
         ],
         [
             "scope: {}".format(scope_label),
-            "before integral={}".format(
-                _format_fit_number(component_payload.get("kaon_integral_before_pion_sub"))
+            "before full integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_before_pion_sub_full"))
             ),
             "kaon pion model integral={}".format(
                 _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
             ),
-            "weighted pion integral={}".format(
-                _format_fit_number(component_payload.get("weighted_pion_integral"))
+            "weighted template full integral={}".format(
+                _format_fit_number(component_payload.get("weighted_pion_integral_full"))
             ),
             "effective scale={}".format(
                 _format_fit_number(component_payload.get("particle_subtraction_effective_scale"))
@@ -2959,50 +3021,23 @@ def print_particle_subtraction_component_application_pages(
 
     _print_component_overlay_page(
         pdf_name,
-        component_payload.get("H_kaon_pion_model"),
-        "kaon pion-bg model",
-        "{}Part 3 kaon vs pion background models".format(title_prefix),
-        [
-            (component_payload.get("H_pion_control_model"), "pion-control model", ROOT.kRed + 1, 1),
-            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template (full)", ROOT.kOrange + 7, 2),
-        ],
-        [
-            "scope: {}".format(scope_label),
-            "kaon pion model integral={}".format(
-                _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
-            ),
-            "pion control model integral={}".format(
-                _format_fit_number(diagnostics.get("pion_control_model_integral"))
-            ),
-            "weighted pion integral={}".format(
-                _format_fit_number(component_payload.get("weighted_pion_integral"))
-            ),
-            "ratio consistency={}".format(
-                "pass" if bool(diagnostics.get("ratio_consistency_ok")) else "fail"
-            ),
-        ],
-        cut_window=cut_window,
-    )
-
-    _print_component_overlay_page(
-        pdf_name,
-        component_payload.get("H_MM_before_pion_subtraction"),
+        component_payload.get("H_MM_nosub_before_pion_subtraction"),
         "before pion subtraction",
-        "{}Part 3 MM before/after pion subtraction".format(title_prefix),
+        "{}Part 3 full-range MM before/after pion subtraction".format(title_prefix),
         [
-            (component_payload.get("H_pion_subtraction_template_MM"), "weighted pion template", ROOT.kOrange + 7, 2),
-            (component_payload.get("H_MM_after_pion_subtraction"), "after pion subtraction", ROOT.kGreen + 2, 1),
+            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template", ROOT.kOrange + 7, 2),
+            (component_payload.get("H_MM_nosub_after_pion_subtraction"), "after pion subtraction", ROOT.kGreen + 2, 1),
         ],
         [
             "scope: {}".format(scope_label),
-            "before integral={}".format(
-                _format_fit_number(component_payload.get("kaon_integral_before_pion_sub"))
+            "before full integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_before_pion_sub_full"))
             ),
-            "template integral={}".format(
-                _format_fit_number(component_payload.get("weighted_pion_integral"))
+            "template full integral={}".format(
+                _format_fit_number(component_payload.get("weighted_pion_integral_full"))
             ),
-            "after integral={}".format(
-                _format_fit_number(component_payload.get("kaon_integral_after_pion_sub"))
+            "after full integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
             ),
             "fit validation pion/kaon={}/{}".format(
                 "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
