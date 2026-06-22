@@ -192,7 +192,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("pi_sidis", "pi_n", "pi_delta"),
+        "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
             "pi_delta": (1.17, 1.23),
         },
@@ -201,10 +201,12 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_delta": 0.95,
             "pi_sidis": 0.75,
         },
+        "include_sigma0_signal_template": True,
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
         "particle_subtraction_prior_scale_pi_delta": 1.5,
         "particle_subtraction_prior_scale_pi_sidis": 2.0,
+        "particle_subtraction_prior_scale_k_sigma0_signal": 1.0,
         "particle_subtraction_max_fit_cycles": 50,
         "particle_subtraction_fit_tolerance": 1e-5,
         "oversub_sigma_tolerance": 2.0,
@@ -218,6 +220,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_delta": True,
             "pi_sidis": True,
         },
+        "sigma0_signal_anchor_window": (1.18, 1.23),
         "windows": {
             "pi_n": (0.90, 0.94),
             "pi_delta": (1.16, 1.25),
@@ -227,7 +230,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "kaon_nosub": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("pi_sidis", "pi_n", "pi_delta"),
+        "fit_order": ("pi_n", "k_sigma0_signal", "pi_delta", "pi_sidis"),
         "stage_amplitude_windows": {},
         "postfit_component_scales": {
             "pi_n": 0.95,
@@ -235,11 +238,13 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 0.25,
         },
         "include_kaon_signal_template": False,
+        "include_sigma0_signal_template": True,
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
         "particle_subtraction_prior_scale_pi_delta": 1.5,
         "particle_subtraction_prior_scale_pi_sidis": 2.0,
         "particle_subtraction_prior_scale_k_lambda_signal": 1.0,
+        "particle_subtraction_prior_scale_k_sigma0_signal": 1.0,
         "particle_subtraction_max_fit_cycles": 50,
         "particle_subtraction_fit_tolerance": 1e-5,
         "oversub_sigma_tolerance": 2.0,
@@ -249,6 +254,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         #"max_oversub_bin_fraction": 0.20,
         "max_full_range_chi2_ndf": None,
         "kaon_signal_tail_extension": 0.02,
+        "sigma0_signal_anchor_window": (1.18, 1.23),
         "enabled_windows": {
             "pi_n": True,
             "pi_delta": True,
@@ -260,7 +266,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": (1.36, 1.45),
         },
         "enabled_excluded_windows": {
-            "sigma_peak": True,
+            "sigma_peak": False,
         },
         "excluded_windows": {
             "sigma_peak": (1.18, 1.23),

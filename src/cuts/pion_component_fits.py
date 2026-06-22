@@ -26,11 +26,13 @@ from utility import normalize_hist_to_unit_area
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
 KAON_SIGNAL_TEMPLATE_NAME = "k_lambda_signal"
+KAON_SIGMA0_TEMPLATE_NAME = "k_sigma0_signal"
 COMPONENT_PLOT_STYLE = {
     "pi_n": {"label": "pi-n", "color": ROOT.kRed + 1},
     "pi_delta": {"label": "pi-delta", "color": ROOT.kAzure + 2},
     "pi_sidis": {"label": "pi-SIDIS", "color": ROOT.kMagenta + 2},
     KAON_SIGNAL_TEMPLATE_NAME: {"label": "K-Lambda", "color": ROOT.kBlue + 1},
+    KAON_SIGMA0_TEMPLATE_NAME: {"label": "K-Sigma0", "color": ROOT.kCyan + 2},
 }
 
 
@@ -1874,6 +1876,7 @@ def fit_pion_control_with_simc_shapes(
     h_pi_n_shape,
     h_pi_delta_shape,
     h_pi_sidis_shape,
+    h_kaon_sigma0_shape,
     inpDict,
     mm_offset_data=0.0,
     context="",
@@ -1903,6 +1906,24 @@ def fit_pion_control_with_simc_shapes(
         "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
     }
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales("pion_control")
+    extra_positive_templates = {}
+    extra_anchor_windows = {}
+    include_sigma0_signal_template = bool(fit_config.get("include_sigma0_signal_template", False))
+    if include_sigma0_signal_template and _hist_has_usable_support(h_kaon_sigma0_shape):
+        extra_positive_templates[KAON_SIGMA0_TEMPLATE_NAME] = h_kaon_sigma0_shape
+        prior_scale_map[KAON_SIGMA0_TEMPLATE_NAME] = float(
+            fit_config.get("particle_subtraction_prior_scale_k_sigma0_signal", 1.0) or 1.0
+        )
+        sigma0_anchor_window = fit_config.get("sigma0_signal_anchor_window")
+        if sigma0_anchor_window is not None and len(sigma0_anchor_window) == 2:
+            sigma0_window_min = float(sigma0_anchor_window[0])
+            sigma0_window_max = float(sigma0_anchor_window[1])
+            if bool(fit_config.get("apply_mm_offset_data", False)):
+                sigma0_window_min += float(mm_offset_data)
+                sigma0_window_max += float(mm_offset_data)
+            extra_anchor_windows[KAON_SIGMA0_TEMPLATE_NAME] = [
+                (sigma0_window_min, sigma0_window_max)
+            ]
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
@@ -1923,6 +1944,8 @@ def fit_pion_control_with_simc_shapes(
         fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
         stage_amplitude_windows=stage_amplitude_windows,
         exclude_windows=excluded_windows,
+        extra_positive_templates=extra_positive_templates,
+        extra_anchor_windows=extra_anchor_windows,
         n_passes=fit_config.get("staged_fit_passes", 1),
         prior_scale_map=prior_scale_map,
         joint_refinement_enabled=bool(fit_config.get("joint_refinement_enabled", True)),
@@ -1942,10 +1965,13 @@ def fit_pion_control_with_simc_shapes(
         validation_options=validation_options,
         context="{}_pion_control".format(context or "scope"),
     )
+    sigma0_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
+    sigma0_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
     return {
         "B_n": result["B_n"],
         "B_delta": result["B_delta"],
         "B_sidis": result["B_sidis"],
+        "B_sigma0": None if sigma0_amplitude is None else float(sigma0_amplitude),
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
         "template_hists": result.get("template_hists") or {},
@@ -1954,6 +1980,7 @@ def fit_pion_control_with_simc_shapes(
         "pi_n_scaled_hist": result["pi_n_scaled_hist"],
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
+        "k_sigma0_scaled_hist": sigma0_scaled_hist,
         "step_overlays": result.get("step_overlays") or [],
     }
 
@@ -1964,6 +1991,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     h_pi_delta_shape,
     h_pi_sidis_shape,
     h_kaon_signal_shape,
+    h_kaon_sigma0_shape,
     inpDict,
     mm_offset_data=0.0,
     context="",
@@ -2004,7 +2032,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
     }
     include_kaon_signal_template = bool(fit_config.get("include_kaon_signal_template", False))
-    if include_kaon_signal_template and h_kaon_signal_shape is not None:
+    if include_kaon_signal_template and _hist_has_usable_support(h_kaon_signal_shape):
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
         prior_scale_map[KAON_SIGNAL_TEMPLATE_NAME] = float(
             fit_config.get("particle_subtraction_prior_scale_k_lambda_signal", 1.0) or 1.0
@@ -2013,6 +2041,22 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             tail_extension = max(float(fit_config.get("kaon_signal_tail_extension", 0.0) or 0.0), 0.0)
             signal_window_max = min(fit_max, mm_max + tail_extension)
             extra_anchor_windows[KAON_SIGNAL_TEMPLATE_NAME] = [(mm_min, signal_window_max)]
+    include_sigma0_signal_template = bool(fit_config.get("include_sigma0_signal_template", False))
+    if include_sigma0_signal_template and _hist_has_usable_support(h_kaon_sigma0_shape):
+        extra_positive_templates[KAON_SIGMA0_TEMPLATE_NAME] = h_kaon_sigma0_shape
+        prior_scale_map[KAON_SIGMA0_TEMPLATE_NAME] = float(
+            fit_config.get("particle_subtraction_prior_scale_k_sigma0_signal", 1.0) or 1.0
+        )
+        sigma0_anchor_window = fit_config.get("sigma0_signal_anchor_window")
+        if sigma0_anchor_window is not None and len(sigma0_anchor_window) == 2:
+            sigma0_window_min = float(sigma0_anchor_window[0])
+            sigma0_window_max = float(sigma0_anchor_window[1])
+            if bool(fit_config.get("apply_mm_offset_data", False)):
+                sigma0_window_min += float(mm_offset_data)
+                sigma0_window_max += float(mm_offset_data)
+            extra_anchor_windows[KAON_SIGMA0_TEMPLATE_NAME] = [
+                (sigma0_window_min, sigma0_window_max)
+            ]
     result = _fit_staged_anchor_templates(
         h_kaon_nosub,
         {
@@ -2054,6 +2098,8 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     )
     signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
     signal_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
+    sigma0_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
+    sigma0_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
     signal_reference_hist, signal_reference_scale = _build_scaled_reference_hist(
         h_kaon_nosub,
         h_kaon_signal_shape,
@@ -2066,6 +2112,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "A_delta": result["A_delta"],
         "A_sidis": result["A_sidis"],
         "S_lambda": None if signal_amplitude is None else float(signal_amplitude),
+        "S_sigma0": None if sigma0_amplitude is None else float(sigma0_amplitude),
         "S_lambda_reference_scale": (
             None if signal_reference_scale is None else float(signal_reference_scale)
         ),
@@ -2079,6 +2126,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
         "k_lambda_scaled_hist": signal_scaled_hist,
+        "k_sigma0_scaled_hist": sigma0_scaled_hist,
         "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
     }
@@ -2090,6 +2138,8 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "pi_n_scaled_hist",
             "pi_delta_scaled_hist",
             "pi_sidis_scaled_hist",
+            "k_lambda_scaled_hist",
+            "k_sigma0_scaled_hist",
         ):
             hist = return_payload.get(key)
             if hist is None:
@@ -2115,6 +2165,91 @@ def _sum_hist_list_to_unit_area(hist_list, hist_name):
     return summed_hist
 
 
+def _hist_has_usable_support(hist, min_integral=1e-12):
+    if hist is None:
+        return False
+    try:
+        integral = float(hist.Integral())
+    except Exception:
+        return False
+    return math.isfinite(integral) and integral > float(min_integral)
+
+
+def _resolve_component_scope_hist(component_entry, component_name, analysis_scope, t_bin_index=None, phi_bin_index=None):
+    if not isinstance(component_entry, dict):
+        return None
+
+    setting_shape_full = component_entry.get("setting_shape_full")
+    if t_bin_index is None and phi_bin_index is None:
+        return setting_shape_full
+
+    binned_shapes = component_entry.get("binned_shapes") or {}
+    t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
+    if phi_bin_index is not None and t_key is not None:
+        direct_hist = (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
+        if _hist_has_usable_support(direct_hist):
+            return direct_hist
+
+        # Sparse or empty (t,phi) component bins are expected in fine slicing.
+        # Fall back to the t-aggregated template before using the setting-wide shape.
+        phi_shape_map = binned_shapes.get(t_key) or {}
+        aggregated_hist = _sum_hist_list_to_unit_area(
+            list(phi_shape_map.values()),
+            "{}_{}_fallback_tbin{}".format(component_name, analysis_scope or "scope", int(t_bin_index) + 1),
+        )
+        if _hist_has_usable_support(aggregated_hist):
+            return aggregated_hist
+        return setting_shape_full
+
+    if t_key is not None:
+        phi_shape_map = binned_shapes.get(t_key) or {}
+        aggregated_hist = _sum_hist_list_to_unit_area(
+            list(phi_shape_map.values()),
+            "{}_{}_aggregated".format(component_name, analysis_scope or "scope"),
+        )
+        if _hist_has_usable_support(aggregated_hist):
+            return aggregated_hist
+        return setting_shape_full
+
+    return setting_shape_full
+
+
+def _resolve_single_scope_hist(shape_payload, analysis_scope, t_bin_index=None, phi_bin_index=None):
+    if not isinstance(shape_payload, dict):
+        return None
+
+    setting_shape_full = shape_payload.get("setting_shape_full")
+    if t_bin_index is None and phi_bin_index is None:
+        return setting_shape_full
+
+    binned_shapes = shape_payload.get("binned_shapes") or {}
+    t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
+    if phi_bin_index is not None and t_key is not None:
+        direct_hist = (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
+        if _hist_has_usable_support(direct_hist):
+            return direct_hist
+
+        phi_shape_map = binned_shapes.get(t_key) or {}
+        aggregated_hist = _sum_hist_list_to_unit_area(
+            list(phi_shape_map.values()),
+            "single_shape_{}_fallback_tbin{}".format(analysis_scope or "scope", int(t_bin_index) + 1),
+        )
+        if _hist_has_usable_support(aggregated_hist):
+            return aggregated_hist
+        return setting_shape_full
+
+    if t_key is not None:
+        aggregated_hist = _sum_hist_list_to_unit_area(
+            list((binned_shapes.get(t_key) or {}).values()),
+            "single_shape_{}_aggregated".format(analysis_scope or "scope"),
+        )
+        if _hist_has_usable_support(aggregated_hist):
+            return aggregated_hist
+        return setting_shape_full
+
+    return setting_shape_full
+
+
 def resolve_scope_component_shapes(
     component_payload,
     analysis_scope="setting-wide",
@@ -2125,27 +2260,13 @@ def resolve_scope_component_shapes(
     resolved = {}
     for component_name in COMPONENT_NAMES:
         component_entry = payload_components.get(component_name) or {}
-        if t_bin_index is None and phi_bin_index is None:
-            resolved[component_name] = component_entry.get("setting_shape_full")
-            continue
-
-        binned_shapes = component_entry.get("binned_shapes") or {}
-        t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
-        if phi_bin_index is not None and t_key is not None:
-            resolved[component_name] = (
-                (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
-            )
-            continue
-
-        if t_key is not None:
-            phi_shape_map = binned_shapes.get(t_key) or {}
-            resolved[component_name] = _sum_hist_list_to_unit_area(
-                list(phi_shape_map.values()),
-                "{}_{}_aggregated".format(component_name, analysis_scope),
-            )
-            continue
-
-        resolved[component_name] = component_entry.get("setting_shape_full")
+        resolved[component_name] = _resolve_component_scope_hist(
+            component_entry,
+            component_name,
+            analysis_scope,
+            t_bin_index=t_bin_index,
+            phi_bin_index=phi_bin_index,
+        )
     return resolved
 
 
@@ -2155,21 +2276,12 @@ def resolve_scope_single_shape(
     t_bin_index=None,
     phi_bin_index=None,
 ):
-    if not isinstance(shape_payload, dict):
-        return None
-    if t_bin_index is None and phi_bin_index is None:
-        return shape_payload.get("setting_shape_full")
-
-    binned_shapes = shape_payload.get("binned_shapes") or {}
-    t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
-    if phi_bin_index is not None and t_key is not None:
-        return (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
-    if t_key is not None:
-        return _sum_hist_list_to_unit_area(
-            list((binned_shapes.get(t_key) or {}).values()),
-            "single_shape_{}_aggregated".format(analysis_scope or "scope"),
-        )
-    return shape_payload.get("setting_shape_full")
+    return _resolve_single_scope_hist(
+        shape_payload,
+        analysis_scope or "scope",
+        t_bin_index=t_bin_index,
+        phi_bin_index=phi_bin_index,
+    )
 
 
 def build_particle_subtraction_component_result(
@@ -2179,6 +2291,7 @@ def build_particle_subtraction_component_result(
     inpDict,
     analysis_scope,
     kaon_signal_shape=None,
+    kaon_sigma0_shape=None,
     mm_offset_data=0.0,
     context="",
 ):
@@ -2218,12 +2331,19 @@ def build_particle_subtraction_component_result(
         "H_MM_component_shape_k_lambda_aligned_{}".format(context or analysis_scope),
         renormalize=True,
     )
+    aligned_kaon_sigma0_shape = _build_mm_shifted_hist(
+        kaon_sigma0_shape,
+        template_mm_offset_data,
+        "H_MM_component_shape_k_sigma0_aligned_{}".format(context or analysis_scope),
+        renormalize=True,
+    )
 
     pion_fit = fit_pion_control_with_simc_shapes(
         h_pion_control,
         aligned_component_shapes.get("pi_n"),
         aligned_component_shapes.get("pi_delta"),
         aligned_component_shapes.get("pi_sidis"),
+        aligned_kaon_sigma0_shape,
         inpDict,
         mm_offset_data=mm_offset_data,
         context=context,
@@ -2234,6 +2354,7 @@ def build_particle_subtraction_component_result(
         aligned_component_shapes.get("pi_delta"),
         aligned_component_shapes.get("pi_sidis"),
         aligned_kaon_signal_shape,
+        aligned_kaon_sigma0_shape,
         inpDict,
         mm_offset_data=mm_offset_data,
         context=context,
@@ -2242,10 +2363,12 @@ def build_particle_subtraction_component_result(
     b_n = float(pion_fit["B_n"])
     b_delta = float(pion_fit["B_delta"])
     b_sidis = float(pion_fit["B_sidis"])
+    b_sigma0 = pion_fit["B_sigma0"]
     a_n = float(kaon_fit["A_n"])
     a_delta = float(kaon_fit["A_delta"])
     a_sidis = float(kaon_fit["A_sidis"])
     s_lambda = kaon_fit["S_lambda"]
+    s_sigma0 = kaon_fit["S_sigma0"]
 
     fallback_reasons = []
     if pion_fit["diagnostics"].get("fallback_used"):
@@ -2260,10 +2383,12 @@ def build_particle_subtraction_component_result(
         "A_delta": a_delta,
         "A_sidis": a_sidis,
         "S_lambda": s_lambda,
+        "S_sigma0": s_sigma0,
         "S_lambda_reference_scale": kaon_fit.get("S_lambda_reference_scale"),
         "B_n": b_n,
         "B_delta": b_delta,
         "B_sidis": b_sidis,
+        "B_sigma0": b_sigma0,
         "A_over_B_n": (a_n / b_n) if b_n > 0.0 else None,
         "A_over_B_delta": (a_delta / b_delta) if b_delta > 0.0 else None,
         "A_over_B_sidis": (a_sidis / b_sidis) if b_sidis > 0.0 else None,
@@ -2301,15 +2426,21 @@ def build_particle_subtraction_component_result(
             aligned_kaon_signal_shape,
             "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
         ),
+        "H_simc_shape_k_sigma0": _clone_hist(
+            aligned_kaon_sigma0_shape,
+            "H_simc_shape_k_sigma0_{}".format(context or analysis_scope),
+        ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
         "H_pion_fit_pi_delta_scaled": pion_fit["pi_delta_scaled_hist"],
         "H_pion_fit_pi_sidis_scaled": pion_fit["pi_sidis_scaled_hist"],
+        "H_pion_fit_k_sigma0_scaled": pion_fit["k_sigma0_scaled_hist"],
         "H_pion_fit_total": pion_fit["fit_hist"],
         "H_pion_fit_step_overlays": pion_fit.get("step_overlays") or [],
         "H_kaon_fit_pi_n_scaled": kaon_fit["pi_n_scaled_hist"],
         "H_kaon_fit_pi_delta_scaled": kaon_fit["pi_delta_scaled_hist"],
         "H_kaon_fit_pi_sidis_scaled": kaon_fit["pi_sidis_scaled_hist"],
         "H_kaon_fit_k_lambda_scaled": kaon_fit["k_lambda_scaled_hist"],
+        "H_kaon_fit_k_sigma0_scaled": kaon_fit["k_sigma0_scaled_hist"],
         "H_kaon_fit_k_lambda_reference": kaon_fit.get("k_lambda_reference_hist"),
         "H_kaon_fit_total": kaon_fit["fit_hist"],
         "H_kaon_pion_bg_fit_total": kaon_fit["pion_bg_fit_hist"],
@@ -3068,8 +3199,9 @@ def print_particle_subtraction_component_fit_pages(
         "{}pion-control SIMC component fit".format(title_prefix),
         [
             (component_fit_result.get("H_pion_fit_pi_n_scaled"), "pi-n", ROOT.kRed + 1, 1),
-            (component_fit_result.get("H_pion_fit_pi_delta_scaled"), "pi-delta", ROOT.kAzure + 2, 1),
             (component_fit_result.get("H_pion_fit_pi_sidis_scaled"), "pi-SIDIS", ROOT.kMagenta + 2, 1),
+            (component_fit_result.get("H_pion_fit_pi_delta_scaled"), "pi-delta", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_pion_fit_k_sigma0_scaled"), "K-Sigma0", ROOT.kCyan + 2, 1),
             (component_fit_result.get("H_pion_fit_total"), "total fit", ROOT.kGreen + 2, 2),
         ],
         [
@@ -3097,6 +3229,9 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_number(component_fit_result.get("B_delta")),
                 _format_fit_number(component_fit_result.get("B_sidis")),
             ),
+            "K-Sigma0 scale={}".format(
+                _format_fit_number(component_fit_result.get("B_sigma0"))
+            ),
             "chi2/ndf={}  p={}".format(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_pion")),
                 _format_fit_metric(component_fit_result.get("fit_p_value_pion")),
@@ -3115,15 +3250,22 @@ def print_particle_subtraction_component_fit_pages(
     )
 
     has_kaon_signal_reference = component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None
+    has_sigma0_component = component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None
     kaon_title = "{}kaon no-sub SIMC pion-background fit".format(title_prefix)
     if has_kaon_signal_reference:
         kaon_title = "{}kaon no-sub SIMC pion-background fit + K-Lambda gauge".format(title_prefix)
+    if has_sigma0_component:
+        kaon_title = "{} + K-Sigma0".format(kaon_title)
 
     kaon_overlay_specs = [
         (component_fit_result.get("H_kaon_fit_pi_n_scaled"), "pi-n", ROOT.kRed + 1, 1),
         (component_fit_result.get("H_kaon_fit_pi_delta_scaled"), "pi-delta", ROOT.kAzure + 2, 1),
         (component_fit_result.get("H_kaon_fit_pi_sidis_scaled"), "pi-SIDIS", ROOT.kMagenta + 2, 1),
     ]
+    if has_sigma0_component:
+        kaon_overlay_specs.append(
+            (component_fit_result.get("H_kaon_fit_k_sigma0_scaled"), "K-Sigma0", ROOT.kCyan + 2, 1)
+        )
     if has_kaon_signal_reference:
         kaon_overlay_specs.append(
             (component_fit_result.get("H_kaon_fit_k_lambda_reference"), "K-Lambda gauge", ROOT.kBlue + 1, 2)
@@ -3163,6 +3305,9 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_number(component_fit_result.get("A_delta")),
                 _format_fit_number(component_fit_result.get("A_sidis")),
             ),
+            "K-Sigma0 scale={}".format(
+                _format_fit_number(component_fit_result.get("S_sigma0"))
+            ) if has_sigma0_component else "K-Sigma0 scale=n/a",
             "K-Lambda gauge scale={}".format(
                 _format_fit_number(component_fit_result.get("S_lambda_reference_scale"))
             ) if has_kaon_signal_reference else "K-Lambda gauge scale=n/a",

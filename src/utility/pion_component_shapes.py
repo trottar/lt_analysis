@@ -579,10 +579,11 @@ def load_setting_pion_component_shapes(
     }
 
 
-def load_kaon_simc_signal_shape(
+def load_kaon_simc_extra_shape(
     root_filename,
     inpDict,
     phi_setting,
+    component_name,
     t_bins=None,
     phi_bins=None,
     hgcer_cutg=None,
@@ -594,7 +595,53 @@ def load_kaon_simc_signal_shape(
         inpDict,
         phi_setting,
         "kaon",
+        component_name,
+        t_bins=t_bins,
+        phi_bins=phi_bins,
+        hgcer_cutg=hgcer_cutg,
+        use_full_mm_range=use_full_mm_range,
+        context=context,
+    )
+
+
+def load_kaon_simc_signal_shape(
+    root_filename,
+    inpDict,
+    phi_setting,
+    t_bins=None,
+    phi_bins=None,
+    hgcer_cutg=None,
+    use_full_mm_range=True,
+    context="",
+):
+    return load_kaon_simc_extra_shape(
+        root_filename,
+        inpDict,
+        phi_setting,
         "k_lambda_signal",
+        t_bins=t_bins,
+        phi_bins=phi_bins,
+        hgcer_cutg=hgcer_cutg,
+        use_full_mm_range=use_full_mm_range,
+        context=context,
+    )
+
+
+def load_kaon_simc_sigma0_shape(
+    root_filename,
+    inpDict,
+    phi_setting,
+    t_bins=None,
+    phi_bins=None,
+    hgcer_cutg=None,
+    use_full_mm_range=True,
+    context="",
+):
+    return load_kaon_simc_extra_shape(
+        root_filename,
+        inpDict,
+        phi_setting,
+        "k_sigma0_signal",
         t_bins=t_bins,
         phi_bins=phi_bins,
         hgcer_cutg=hgcer_cutg,

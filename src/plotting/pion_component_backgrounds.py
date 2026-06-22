@@ -19,7 +19,10 @@ COMPONENT_STYLES = {
     "pi_delta": {"color": "#d62728", "label": "pi-delta"},
     "pi_sidis": {"color": "#2ca02c", "label": "pi-SIDIS"},
 }
-SIGNAL_STYLE = {"color": "#6a3d9a", "label": "K-Lambda"}
+KAON_AUX_STYLES = {
+    "k_lambda_signal": {"color": "#6a3d9a", "label": "K-Lambda"},
+    "k_sigma0_signal": {"color": "#17becf", "label": "K-Sigma0"},
+}
 
 
 def _hist_to_stairs(hist):
@@ -52,11 +55,13 @@ def plot_pion_component_background_payload(
     inpDict,
     pdf_path,
     kaon_signal_payload=None,
+    kaon_sigma0_payload=None,
 ):
     payload = payload or {}
     component_map = payload.get("components") or {}
     kaon_signal_payload = kaon_signal_payload or {}
-    if not component_map and not kaon_signal_payload:
+    kaon_sigma0_payload = kaon_sigma0_payload or {}
+    if not component_map and not kaon_signal_payload and not kaon_sigma0_payload:
         return None
 
     phi_setting = phi_setting or "Unknown"
@@ -104,37 +109,46 @@ def plot_pion_component_background_payload(
                 linewidth=1.8,
             )
 
-    signal_diag = kaon_signal_payload.get("diagnostics", {})
-    signal_full_hist = kaon_signal_payload.get("setting_shape_full")
-    signal_cut_hist = kaon_signal_payload.get("setting_shape")
-    signal_full_edges, signal_full_values = _hist_to_stairs(signal_full_hist)
-    signal_cut_edges, signal_cut_values = _hist_to_stairs(signal_cut_hist)
-    if signal_full_edges is not None:
-        full_ax.stairs(
-            signal_full_values,
-            signal_full_edges,
-            label="{} | pass={} | fallback={}".format(
-                SIGNAL_STYLE["label"],
-                signal_diag.get("n_events_passed", 0),
-                signal_diag.get("fallback_used", False),
-            ),
-            color=SIGNAL_STYLE["color"],
-            linewidth=1.8,
-        )
-    if signal_cut_edges is not None:
-        cut_ax.stairs(
-            signal_cut_values,
-            signal_cut_edges,
-            label=SIGNAL_STYLE["label"],
-            color=SIGNAL_STYLE["color"],
-            linewidth=1.8,
-        )
+    aux_payloads = [
+        ("k_lambda_signal", kaon_signal_payload),
+        ("k_sigma0_signal", kaon_sigma0_payload),
+    ]
+    aux_present = []
+    for aux_name, aux_payload in aux_payloads:
+        aux_diag = aux_payload.get("diagnostics", {})
+        aux_full_hist = aux_payload.get("setting_shape_full")
+        aux_cut_hist = aux_payload.get("setting_shape")
+        aux_full_edges, aux_full_values = _hist_to_stairs(aux_full_hist)
+        aux_cut_edges, aux_cut_values = _hist_to_stairs(aux_cut_hist)
+        aux_style = KAON_AUX_STYLES.get(aux_name, {"color": "black", "label": aux_name})
+
+        if aux_full_edges is not None:
+            full_ax.stairs(
+                aux_full_values,
+                aux_full_edges,
+                label="{} | pass={} | fallback={}".format(
+                    aux_style["label"],
+                    aux_diag.get("n_events_passed", 0),
+                    aux_diag.get("fallback_used", False),
+                ),
+                color=aux_style["color"],
+                linewidth=1.8,
+            )
+            aux_present.append(aux_name)
+        if aux_cut_edges is not None:
+            cut_ax.stairs(
+                aux_cut_values,
+                aux_cut_edges,
+                label=aux_style["label"],
+                color=aux_style["color"],
+                linewidth=1.8,
+            )
 
     full_ax.axvline(mm_min, color="0.4", linestyle="--", linewidth=1.0)
     full_ax.axvline(mm_max, color="0.4", linestyle="--", linewidth=1.0)
     title_label = "pion-background SIMC components"
-    if signal_full_edges is not None or signal_cut_edges is not None:
-        title_label = "pion-background + K-Lambda SIMC components"
+    if aux_present:
+        title_label = "pion-background + kaon auxiliary SIMC components"
     full_ax.set_title(
         "{} {} {} | Q{} W{} {}".format(
             phi_setting,
@@ -165,9 +179,13 @@ def plot_pion_component_background_payload(
         diag_lines.append(
             _format_diag_line(component_name, diagnostics.get(component_name))
         )
-    if signal_full_edges is not None or signal_cut_edges is not None:
+    for aux_name, aux_payload in aux_payloads:
+        aux_full_hist = aux_payload.get("setting_shape_full")
+        aux_cut_hist = aux_payload.get("setting_shape")
+        if aux_full_hist is None and aux_cut_hist is None:
+            continue
         diag_lines.append(
-            _format_diag_line("k_lambda_signal", signal_diag)
+            _format_diag_line(aux_name, aux_payload.get("diagnostics", {}))
         )
     fig.text(
         0.015,
@@ -193,4 +211,5 @@ def plot_pion_component_backgrounds(hist, inpDict, pdf_path):
         inpDict,
         pdf_path,
         kaon_signal_payload=hist.get("_simc_kaon_signal_shape_payload"),
+        kaon_sigma0_payload=hist.get("_simc_kaon_sigma0_shape_payload"),
     )

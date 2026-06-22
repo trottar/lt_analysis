@@ -1,0 +1,399 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\title{SIMC-Shape Pion-Background Subtraction Procedure}
+\author{KaonLT Production Analysis}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Purpose}
+
+This note documents the current \texttt{simc\_shape\_components} pion-background
+subtraction procedure implemented in the production analysis.
+The goal is to replace the legacy single-scale pion subtraction with an
+MM-dependent weighting constructed from SIMC component fits.
+
+The three pion-background components are
+\begin{itemize}[leftmargin=2em]
+  \item $\pi$-$n$,
+  \item $\pi$-$\Delta$,
+  \item $\pi$-SIDIS.
+\end{itemize}
+
+The procedure is implemented through the following code paths:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{src/cuts/pion\_component\_fits.py},
+  \item \texttt{src/cuts/pion\_component\_subtraction.py},
+  \item \texttt{src/cuts/rand\_sub.py},
+  \item \texttt{src/binning/calculate\_yield.py},
+  \item \texttt{src/binning/ave\_per\_bin.py},
+  \item \texttt{src/utility/background\_config.py}.
+\end{itemize}
+
+\section{Definitions}
+
+Let the unit-normalized SIMC MM templates be
+\begin{align}
+  T_n(MM), \qquad
+  T_\Delta(MM), \qquad
+  T_{\mathrm{SIDIS}}(MM).
+\end{align}
+
+The pion-control fitted model is
+\begin{align}
+  P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
+  =
+  B_n T_n(MM)
+  +
+  B_\Delta T_\Delta(MM)
+  +
+  B_{\mathrm{SIDIS}} T_{\mathrm{SIDIS}}(MM),
+\end{align}
+and the kaon-side fitted pion-background model is
+\begin{align}
+  K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM)
+  =
+  A_n T_n(MM)
+  +
+  A_\Delta T_\Delta(MM)
+  +
+  A_{\mathrm{SIDIS}} T_{\mathrm{SIDIS}}(MM).
+\end{align}
+
+The event-by-event pion weight is defined as
+\begin{align}
+  w_\pi(MM)
+  =
+  \frac{K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM)}
+       {P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)}.
+\end{align}
+
+The weighted pion-control model is therefore
+\begin{align}
+  w_\pi(MM)\,P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
+  =
+  K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM),
+\end{align}
+which is the model-level closure identity.
+
+\section{Part 1: Load SIMC Component Shapes}
+
+The SIMC component shapes are loaded from existing ROOT files and converted into
+unit-normalized MM templates.
+
+\subsection{Inputs}
+
+The current mode is controlled in
+\texttt{src/utility/background\_config.py} through
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{PARTICLE\_SUBTRACTION\_MODE\_DEFAULT},
+  \item \texttt{SIMC\_TREE\_NAME\_DEFAULT},
+  \item \texttt{SIMC\_PION\_COMPONENT\_BACKGROUND\_MAP}.
+\end{itemize}
+
+The default SIMC tree name is
+\begin{align}
+  \texttt{h10}.
+\end{align}
+
+\subsection{Shape construction}
+
+For each component:
+\begin{enumerate}[leftmargin=2em]
+  \item open the corresponding SIMC ROOT file,
+  \item read the SIMC tree,
+  \item loop over events,
+  \item fill an MM histogram using the SIMC event weight,
+  \item apply the same SIMC-side cuts used for MM-shape comparisons,
+  \item normalize the resulting MM histogram to unit area.
+\end{enumerate}
+
+The loader can produce:
+\begin{itemize}[leftmargin=2em]
+  \item a setting-wide full-range MM template,
+  \item optional binned templates in $(t,\phi)$.
+\end{itemize}
+
+If a fine $(t,\phi)$ component template is empty or has non-usable support, the
+analysis can fall back hierarchically to:
+\begin{enumerate}[leftmargin=2em]
+  \item the direct $(t,\phi)$ template,
+  \item the corresponding $t$-aggregated template,
+  \item the setting-wide template.
+\end{enumerate}
+
+\subsection{MM alignment}
+
+When the target data side uses an MM offset, the SIMC component templates are
+shifted by the same data-side MM offset before fitting. This is handled inside
+\texttt{build\_particle\_subtraction\_component\_result(...)} so that the fit is
+performed with aligned MM locations.
+
+\section{Part 2: Fit the SIMC Shapes}
+
+\subsection{Two fit targets}
+
+The templates are fit to two different histograms:
+\begin{itemize}[leftmargin=2em]
+  \item the pion-control data histogram,
+  \item the kaon no-subtraction histogram.
+\end{itemize}
+
+For binned yield and averaging paths, the fit first attempts the direct
+$(t,\phi)$ component template for each channel. If that template is empty or
+non-usable, the code falls back to a broader support level as described in
+Part~1 rather than treating ordinary sparse-bin behavior as a fatal physics
+failure.
+
+The pion-control fit determines
+\begin{align}
+  B_n,\quad B_\Delta,\quad B_{\mathrm{SIDIS}},
+\end{align}
+while the kaon-side fit determines
+\begin{align}
+  A_n,\quad A_\Delta,\quad A_{\mathrm{SIDIS}}.
+\end{align}
+
+\subsection{Ordered staged fit}
+
+The current default staged fit order in the config is
+\begin{align}
+  \pi\mathrm{-SIDIS}
+  \;\rightarrow\;
+  \pi\mathrm{-}n
+  \;\rightarrow\;
+  \pi\mathrm{-}\Delta.
+\end{align}
+
+Each stage fits the residual remaining after the previous fitted components have
+been subtracted from the input histogram. Conceptually:
+\begin{align}
+  R_0(MM) &= D(MM), \\
+  R_1(MM) &= D(MM) - C_1 T_1(MM), \\
+  R_2(MM) &= D(MM) - C_1 T_1(MM) - C_2 T_2(MM),
+\end{align}
+where $D(MM)$ is the fit target and the $C_i$ are the staged component
+amplitudes in the configured fit order.
+
+The anchor windows for the current defaults are stored in
+\texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
+
+\subsection{Current default windows}
+
+\subsubsection*{Pion-control fit}
+\begin{align}
+  \pi\mathrm{-}n &: [0.90,\,0.94], \\
+  \pi\mathrm{-}\Delta &: [1.16,\,1.25], \\
+  \pi\mathrm{-SIDIS} &: [1.36,\,1.45].
+\end{align}
+
+There is also a current stage-amplitude core window for $\pi$-$\Delta$:
+\begin{align}
+  [1.17,\,1.23].
+\end{align}
+
+\subsubsection*{Kaon no-sub fit}
+\begin{align}
+  \pi\mathrm{-}n &: [0.90,\,0.94], \\
+  \pi\mathrm{-}\Delta &: [1.18,\,1.26], \\
+  \pi\mathrm{-SIDIS} &: [1.36,\,1.45].
+\end{align}
+
+The kaon-side fit currently excludes the configured Sigma region
+\begin{align}
+  [1.18,\,1.23]
+\end{align}
+from the relevant fit objects used for validation and staged diagnostics.
+
+\subsection{Post-fit component scales}
+
+After the staged amplitudes are extracted, the code can apply component-specific
+post-fit scale factors from the config.
+
+Current defaults:
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Fit target & $\pi$-$n$ & $\pi$-$\Delta$ & $\pi$-SIDIS \\
+\midrule
+Pion control & 0.95 & 0.95 & 0.75 \\
+Kaon no-sub  & 0.95 & 0.95 & 0.25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Refinement and validation}
+
+The current implementation also supports:
+\begin{itemize}[leftmargin=2em]
+  \item joint refinement with Gaussian-like prior penalties around the staged solution,
+  \item ordered coordinate updates,
+  \item full-range validation checks,
+  \item over-subtraction diagnostics.
+\end{itemize}
+
+The fallback mode is currently set to
+\begin{align}
+  \texttt{error},
+\end{align}
+so component mode is expected to fail hard rather than silently revert to the
+legacy subtraction path.
+
+\section{Part 3: Build and Apply the Event Weight}
+
+\subsection{Histogram-level weight construction}
+
+Once the fitted amplitudes are available, the code constructs:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{H\_pion\_control\_model},
+  \item \texttt{H\_kaon\_pion\_model},
+  \item \texttt{H\_pion\_weight\_vs\_MM},
+  \item \texttt{H\_weighted\_pion\_control\_model}.
+\end{itemize}
+
+The MM weight is evaluated bin by bin as
+\begin{align}
+  w_i = \frac{K_{\pi\mathrm{-bg},i}^{\mathrm{fit}}}
+               {P_{\mathrm{ctrl},i}^{\mathrm{fit}}},
+\end{align}
+subject to the configured denominator floor and clip bounds.
+
+\subsection{Event-template construction}
+
+The actual subtraction template is not the weighted model.
+It is built by looping over the pion-control event source:
+\begin{itemize}[leftmargin=2em]
+  \item prompt,
+  \item random,
+  \item dummy,
+  \item dummy-random,
+\end{itemize}
+with the usual signs and normalization coefficients, and applying
+\begin{align}
+  w_\pi(MM_{\mathrm{event}})
+\end{align}
+to each accepted event.
+
+This produces the weighted pion-control event template that is actually
+subtracted from the kaon data histograms.
+
+\subsection{Subtraction}
+
+For the relevant analysis scope, the corrected kaon histogram is formed as
+\begin{align}
+  H_{\mathrm{kaon,after}}
+  =
+  H_{\mathrm{kaon,before}}
+  -
+  H_{\mathrm{weighted\ pion\ template}}.
+\end{align}
+
+This same logic is applied in:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{rand\_sub.py},
+  \item \texttt{calculate\_yield.py},
+  \item \texttt{ave\_per\_bin.py},
+\end{itemize}
+with scope-specific histograms and caches.
+
+\section{Diagnostic Interpretation}
+
+\subsection{Model closure}
+
+The page
+\begin{quote}
+\texttt{Part 3 model closure: weighted pion model vs kaon bg model}
+\end{quote}
+checks the algebraic identity
+\begin{align}
+  w_\pi(MM)\,P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
+  =
+  K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM).
+\end{align}
+
+If this page fails, the problem is in the weight construction itself:
+binning mismatch, normalization inconsistency, or an implementation bug.
+
+\subsection{Event-template closure}
+
+The page
+\begin{quote}
+\texttt{Part 3 event-template closure vs kaon bg model}
+\end{quote}
+checks whether the weighted \emph{actual pion-control events} reproduce the
+kaon-side fitted pion-background model.
+
+This is the physically relevant closure test because the weighted event template
+is what is actually subtracted from kaon data.
+
+If model closure is good but event-template closure is poor, then the weight
+formula is behaving correctly while the fitted pion-control model does not map
+cleanly onto the real pion-control event distribution.
+
+\subsection{Kaon data vs pion-background models}
+
+The page
+\begin{quote}
+\texttt{Part 3 kaon data vs pion-background models}
+\end{quote}
+is a full-range comparison of:
+\begin{itemize}[leftmargin=2em]
+  \item the kaon data before pion subtraction,
+  \item the fitted kaon-side pion-background model,
+  \item the weighted pion-control event template.
+\end{itemize}
+
+This page is intended only to show how large the subtraction source is relative
+to the full kaon spectrum. It is not itself the closure test.
+
+\subsection{Before/after subtraction}
+
+The page
+\begin{quote}
+\texttt{Part 3 full-range MM before/after pion subtraction}
+\end{quote}
+shows the full-range kaon histogram before subtraction, the weighted pion
+template, and the resulting after-subtraction histogram.
+
+\section{Current Main Configuration Knobs}
+
+The principal controls for the current implementation are:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{PARTICLE\_SUBTRACTION\_MODE\_DEFAULT},
+  \item \texttt{PARTICLE\_SUBTRACTION\_FALLBACK\_MODE\_DEFAULT},
+  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_DENOM\_FLOOR\_DEFAULT},
+  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_CLIP\_MIN\_DEFAULT},
+  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_CLIP\_MAX\_DEFAULT},
+  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_WARN\_MAX\_DEFAULT},
+  \item \texttt{PARTICLE\_SUBTRACTION\_WINDOW\_CONFIG},
+  \item \texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
+\end{itemize}
+
+\section{Summary}
+
+The procedure has three logically separate steps:
+\begin{enumerate}[leftmargin=2em]
+  \item load aligned unit-area SIMC component shapes;
+  \item fit those shapes to pion-control and kaon no-sub histograms;
+  \item form an MM-dependent event weight and apply it to the actual pion-control events.
+\end{enumerate}
+
+The key distinction is:
+\begin{itemize}[leftmargin=2em]
+  \item \emph{weighted pion-control model}: an algebra/implementation check,
+  \item \emph{weighted pion event template}: the actual subtraction object.
+\end{itemize}
+
+For physics diagnosis, the most important page is the event-template closure page,
+because it tests whether the weighted pion-control event sample really reproduces
+the kaon-side fitted pion background that the subtraction is meant to remove.
+
+\end{document}

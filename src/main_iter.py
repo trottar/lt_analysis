@@ -576,7 +576,11 @@ sys.path.append("simc_ana")
 from iter_weight import iter_weight
 from compare_simc_iter import compare_simc
 sys.path.append("utility")
-from pion_component_shapes import attach_pion_component_payload, load_setting_pion_component_shapes
+from pion_component_shapes import (
+    attach_pion_component_payload,
+    load_kaon_simc_sigma0_shape,
+    load_setting_pion_component_shapes,
+)
 sys.path.append("plotting")
 from pion_component_backgrounds import plot_pion_component_background_payload
 
@@ -593,6 +597,18 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             context="main_iter_step5_pre_compare",
         )
         attach_pion_component_payload(hist, component_payload)
+        kaon_sigma0_payload = None
+        if ParticleType == "kaon":
+            sigma0_root = (((inpDict.get("background_samples") or {}).get("by_phi") or {}).get(hist["phi_setting"], {}) or {}).get("sigma0", {}).get("root")
+            kaon_sigma0_payload = load_kaon_simc_sigma0_shape(
+                sigma0_root,
+                inpDict,
+                hist["phi_setting"],
+                t_bins=hist.get("t_bins"),
+                phi_bins=hist.get("phi_bins"),
+                context="main_iter_step5_pre_compare_sigma0",
+            )
+        hist["_simc_kaon_sigma0_shape_payload"] = kaon_sigma0_payload
         record_stage_time(
             "Step 5 pion component shapes {}".format(hist["phi_setting"]),
             setting_start,
@@ -615,6 +631,7 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             hist["phi_setting"],
             inpDict,
             component_plot_path,
+            kaon_sigma0_payload=hist.get("_simc_kaon_sigma0_shape_payload"),
         )
         if created_plot:
             output_file_lst.append(created_plot)

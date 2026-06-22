@@ -75,6 +75,7 @@ from background_config import (
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
+    load_kaon_simc_sigma0_shape,
     load_setting_pion_component_shapes,
 )
 from pion_component_fits import (
@@ -136,6 +137,16 @@ def _fill_cached_ave_section(cache_section, hist_group, t_bins, update_mm_offset
     return mm_offset_data
 
 
+def _resolve_hist_background_sample_root(hist, inpDict, background_name):
+    phi_setting = hist.get("phi_setting")
+    background_samples = hist.get("background_samples") or {}
+    sample_entry = background_samples.get(background_name) or {}
+    if not sample_entry:
+        background_samples = (((inpDict.get("background_samples") or {}).get("by_phi") or {}).get(phi_setting, {}) or {})
+        sample_entry = background_samples.get(background_name) or {}
+    return sample_entry.get("root")
+
+
 def _get_cached_kaon_signal_shape_payload(hist, inpDict, t_bins, phi_bins, context):
     if resolve_particle_subtraction_mode(inpDict) != "simc_shape_components":
         return None
@@ -154,6 +165,30 @@ def _get_cached_kaon_signal_shape_payload(hist, inpDict, t_bins, phi_bins, conte
             root_filename = os.path.join(OUTPATH, simc_name)
 
     cached_payload = load_kaon_simc_signal_shape(
+        root_filename,
+        inpDict,
+        hist["phi_setting"],
+        t_bins=t_bins,
+        phi_bins=phi_bins,
+        context=context,
+    )
+    hist[cache_key] = cached_payload
+    return cached_payload
+
+
+def _get_cached_kaon_sigma0_shape_payload(hist, inpDict, t_bins, phi_bins, context):
+    if resolve_particle_subtraction_mode(inpDict) != "simc_shape_components":
+        return None
+    if str(inpDict.get("ParticleType", "")).strip().lower() != "kaon":
+        return None
+
+    cache_key = "_simc_kaon_sigma0_shape_payload"
+    cached_payload = hist.get(cache_key)
+    if cached_payload is not None:
+        return cached_payload
+
+    root_filename = _resolve_hist_background_sample_root(hist, inpDict, "sigma0")
+    cached_payload = load_kaon_simc_sigma0_shape(
         root_filename,
         inpDict,
         hist["phi_setting"],
@@ -637,6 +672,7 @@ def process_hist_data(
     sub_event_cache=None,
     particle_subtraction_scale_factor=None,
     kaon_signal_shape_payload=None,
+    kaon_sigma0_shape_payload=None,
 ):
 
     processed_dict = {}
@@ -1016,16 +1052,21 @@ def process_hist_data(
                         analysis_scope="t_bin{}".format(j + 1),
                         t_bin_index=j,
                     ),
-                    inpDict,
-                    analysis_scope="t_bin{}".format(j + 1),
-                    kaon_signal_shape=resolve_scope_single_shape(
-                        kaon_signal_shape_payload,
+                        inpDict,
                         analysis_scope="t_bin{}".format(j + 1),
-                        t_bin_index=j,
-                    ),
-                    mm_offset_data=MM_offset_DATA,
-                    context="ave_{}_t{}".format(phi_setting, j + 1),
-                )
+                        kaon_signal_shape=resolve_scope_single_shape(
+                            kaon_signal_shape_payload,
+                            analysis_scope="t_bin{}".format(j + 1),
+                            t_bin_index=j,
+                        ),
+                        kaon_sigma0_shape=resolve_scope_single_shape(
+                            kaon_sigma0_shape_payload,
+                            analysis_scope="t_bin{}".format(j + 1),
+                            t_bin_index=j,
+                        ),
+                        mm_offset_data=MM_offset_DATA,
+                        context="ave_{}_t{}".format(phi_setting, j + 1),
+                    )
                 component_payload = _apply_component_pion_subtraction_for_tbin(
                     hist_bin_dict,
                     j,
@@ -1341,6 +1382,7 @@ def bin_data(
     sub_event_cache=None,
     particle_subtraction_scale_factor=None,
     kaon_signal_shape_payload=None,
+    kaon_sigma0_shape_payload=None,
 ):
 
     processed_dict = process_hist_data(
@@ -1355,6 +1397,7 @@ def bin_data(
         sub_event_cache=sub_event_cache,
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
+        kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
     )
     
     binned_dict = {}
@@ -1485,6 +1528,13 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         phi_bins,
         "ave_per_bin_signal",
     )
+    kaon_sigma0_shape_payload = _get_cached_kaon_sigma0_shape_payload(
+        hist,
+        inpDict,
+        t_bins,
+        phi_bins,
+        "ave_per_bin_sigma0",
+    )
     binned_dict = bin_data(
         kinematic_types,
         tree_data,
@@ -1498,6 +1548,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         sub_event_cache=sub_event_cache,
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
+        kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
     )
 
     group_dict = {}

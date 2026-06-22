@@ -156,7 +156,7 @@ def build_background_sample_manifest(ltanapath, q2, w, epsset):
         "by_phi": {phi_label: {} for phi_label in BACKGROUND_SAMPLE_PHI_ENV},
     }
 
-    for background in ("neutron", "delta", "sidis"):
+    for background in ("neutron", "delta", "sidis", "sigma0"):
         env_background = background.upper()
         manifest["by_background"][background] = {}
         for phi_label, phi_env in BACKGROUND_SAMPLE_PHI_ENV.items():
@@ -629,6 +629,7 @@ sys.path.append("utility")
 from pion_component_shapes import (
     attach_pion_component_payload,
     load_kaon_simc_signal_shape,
+    load_kaon_simc_sigma0_shape,
     load_setting_pion_component_shapes,
 )
 sys.path.append("plotting")
@@ -640,6 +641,7 @@ from pion_component_backgrounds import plot_pion_component_background_payload
 histlist = []
 pion_component_payloads = {}
 kaon_signal_shape_payloads = {}
+kaon_sigma0_shape_payloads = {}
 if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
     stage_start = perf_counter()
     for phiset in phisetlist:
@@ -675,6 +677,23 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             record_stage_time("Step 3 kaon signal shape {}".format(phiset), setting_start)
         record_stage_time("Step 3 kaon signal shapes total", stage_start)
 
+        stage_start = perf_counter()
+        for phiset in phisetlist:
+            setting_start = perf_counter()
+            sigma0_root = (
+                (((inpDict.get("background_samples") or {}).get("by_phi") or {}).get(phiset, {}) or {})
+                .get("sigma0", {})
+                .get("root")
+            )
+            kaon_sigma0_shape_payloads[phiset] = load_kaon_simc_sigma0_shape(
+                sigma0_root,
+                inpDict,
+                phiset,
+                context="main_step3_pre_rand_sub_sigma0",
+            )
+            record_stage_time("Step 3 sigma0 signal shape {}".format(phiset), setting_start)
+        record_stage_time("Step 3 sigma0 signal shapes total", stage_start)
+
     stage_start = perf_counter()
     for phiset in phisetlist:
         setting_start = perf_counter()
@@ -692,6 +711,7 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
             inpDict,
             component_plot_path,
             kaon_signal_payload=kaon_signal_shape_payloads.get(phiset),
+            kaon_sigma0_payload=kaon_sigma0_shape_payloads.get(phiset),
         )
         if created_plot:
             output_file_lst.append(created_plot)
@@ -712,12 +732,15 @@ for phiset in phisetlist:
         shift_mode="raw",
         component_payload=pion_component_payloads.get(phiset),
         kaon_signal_shape_payload=kaon_signal_shape_payloads.get(phiset),
+        kaon_sigma0_shape_payload=kaon_sigma0_shape_payloads.get(phiset),
     )
     if len(hist.keys()) <= 1:
         print("No {} setting found...".format(phiset))
         record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
         continue
     attach_pion_component_payload(hist, pion_component_payloads.get(phiset))
+    hist["_simc_kaon_signal_shape_payload"] = kaon_signal_shape_payloads.get(phiset)
+    hist["_simc_kaon_sigma0_shape_payload"] = kaon_sigma0_shape_payloads.get(phiset)
     histlist.append(hist)
     record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
 record_stage_time("Step 3 rand_sub total", stage_start)

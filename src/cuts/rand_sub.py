@@ -803,6 +803,7 @@ def rand_sub(
     emit_plots=True,
     component_payload=None,
     kaon_signal_shape_payload=None,
+    kaon_sigma0_shape_payload=None,
 ):
     total_start = perf_counter()
     setup_start = perf_counter()
@@ -2457,6 +2458,10 @@ def rand_sub(
                     kaon_signal_shape_payload,
                     analysis_scope="setting-wide",
                 ),
+                kaon_sigma0_shape=resolve_scope_single_shape(
+                    kaon_sigma0_shape_payload,
+                    analysis_scope="setting-wide",
+                ),
                 mm_offset_data=MM_offset_DATA,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
             )
@@ -2552,6 +2557,7 @@ def rand_sub(
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
             histDict["H_simc_shape_pi_sidis_SIMC"] = component_fit_result.get("H_simc_shape_pi_sidis")
             histDict["H_simc_shape_k_lambda_SIMC"] = component_fit_result.get("H_simc_shape_k_lambda")
+            histDict["H_simc_shape_k_sigma0_SIMC"] = component_fit_result.get("H_simc_shape_k_sigma0")
             histDict["H_pion_fit_pi_n_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_n_scaled")
             histDict["H_pion_fit_pi_delta_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_delta_scaled")
             histDict["H_pion_fit_pi_sidis_scaled_DATA"] = component_fit_result.get("H_pion_fit_pi_sidis_scaled")
@@ -2560,6 +2566,7 @@ def rand_sub(
             histDict["H_kaon_fit_pi_delta_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_delta_scaled")
             histDict["H_kaon_fit_pi_sidis_scaled_DATA"] = component_fit_result.get("H_kaon_fit_pi_sidis_scaled")
             histDict["H_kaon_fit_k_lambda_scaled_DATA"] = component_fit_result.get("H_kaon_fit_k_lambda_scaled")
+            histDict["H_kaon_fit_k_sigma0_scaled_DATA"] = component_fit_result.get("H_kaon_fit_k_sigma0_scaled")
             histDict["H_kaon_fit_total_DATA"] = component_fit_result.get("H_kaon_fit_total")
             histDict["H_kaon_pion_bg_fit_total_DATA"] = component_fit_result.get("H_kaon_pion_bg_fit_total")
             histDict["H_fit_residual_pion_DATA"] = component_fit_result.get("H_fit_residual_pion")
