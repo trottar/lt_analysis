@@ -2034,8 +2034,10 @@ def _print_component_step_pages(
             baseline_clone.GetMaximum(),
             component_clone.GetMaximum(),
             cumulative_clone.GetMaximum(),
-            1.0,
+            0.0,
         )
+        if top_y_max <= 0.0:
+            top_y_max = 1.0
         target_clone.SetMaximum(1.20 * top_y_max)
         target_clone.SetMinimum(0.0)
         target_clone.Draw("hist")
@@ -2084,8 +2086,10 @@ def _print_component_step_pages(
         bottom_y_max = max(
             residual_clone.GetMaximum(),
             component_bottom_clone.GetMaximum(),
-            1.0,
+            0.0,
         )
+        if bottom_y_max <= 0.0:
+            bottom_y_max = 1.0
         bottom_y_min = min(
             0.0,
             residual_clone.GetMinimum(),
