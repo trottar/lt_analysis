@@ -89,6 +89,7 @@ from pion_component_shapes import (
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
     evaluate_particle_subtraction_component_fit_result,
+    handle_particle_subtraction_fallback,
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
@@ -587,10 +588,17 @@ def _apply_component_pion_subtraction_setting(
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
     if not gate_result["accepted"]:
-        return payload
+        return handle_particle_subtraction_fallback(
+            payload,
+            payload["fallback_reason"],
+            context="rand_sub component pion subtraction ({})".format(phi_setting),
+        )
     if not isinstance(sub_tree_bundle, dict):
-        payload["fallback_reason"] = "missing subtraction-tree bundle for component-weight subtraction"
-        return payload
+        return handle_particle_subtraction_fallback(
+            payload,
+            "missing subtraction-tree bundle for component-weight subtraction",
+            context="rand_sub component pion subtraction ({})".format(phi_setting),
+        )
 
     clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inpDict)
     weight_payload = build_simc_shape_pion_control_weights(
@@ -607,8 +615,11 @@ def _apply_component_pion_subtraction_setting(
             if float(pion_reference.GetBinContent(int(bin_index))) > 0.0:
                 unsupported_overlap += 1
     if unsupported_overlap > 0:
-        payload["fallback_reason"] = "unsupported pion-weight bins overlap pion-control content"
-        return payload
+        return handle_particle_subtraction_fallback(
+            payload,
+            "unsupported pion-weight bins overlap pion-control content",
+            context="rand_sub component pion subtraction ({})".format(phi_setting),
+        )
 
     if weight_payload["diagnostics"]["pion_weight_max"] > resolve_particle_subtraction_weight_warn_max(inpDict):
         print(
@@ -2554,6 +2565,13 @@ def rand_sub(
                 scale_factor = float(component_subtraction_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0)
             else:
                 fallback_mode = component_subtraction_payload.get("fallback_mode") or "single_scale"
+                if fallback_mode == "error":
+                    raise RuntimeError(
+                        "rand_sub component pion subtraction ({}) rejected: {}".format(
+                            phi_setting,
+                            component_subtraction_payload.get("fallback_reason") or "unknown reason",
+                        )
+                    )
                 if fallback_mode == "single_scale":
                     use_legacy_scalar_subtraction = True
                 elif fallback_mode in ("zero", "skip_bin"):

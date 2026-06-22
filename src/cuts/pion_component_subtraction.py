@@ -65,6 +65,22 @@ def _resolve_component_template_map(component_fit_result):
     }
 
 
+def handle_particle_subtraction_fallback(payload, reason, context="particle subtraction"):
+    fallback_mode = None
+    if isinstance(payload, dict):
+        fallback_mode = payload.get("fallback_mode")
+        payload["fallback_reason"] = reason
+    fallback_mode = str(fallback_mode or "").strip().lower()
+    if fallback_mode == "error":
+        raise RuntimeError(
+            "{} failed in simc_shape_components mode: {}".format(
+                context,
+                reason,
+            )
+        )
+    return payload
+
+
 def evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict=None):
     fallback_mode = resolve_particle_subtraction_fallback_mode(inpDict)
     failures = []

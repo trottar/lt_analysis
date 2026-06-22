@@ -95,6 +95,7 @@ from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
     evaluate_particle_subtraction_component_fit_result,
     fill_simc_shape_pion_subtraction_templates,
+    handle_particle_subtraction_fallback,
     iter_component_control_source_specs,
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
@@ -398,10 +399,23 @@ def _apply_component_pion_subtraction_for_tbin(
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
     if not gate_result["accepted"]:
-        return payload
+        return handle_particle_subtraction_fallback(
+            payload,
+            payload["fallback_reason"],
+            context="ave_per_bin component pion subtraction ({}, t{})".format(
+                inpDict.get("phi_setting", ""),
+                int(j) + 1,
+            ),
+        )
     if sub_event_cache is None:
-        payload["fallback_reason"] = "missing sub_event_cache for component-weight subtraction"
-        return payload
+        return handle_particle_subtraction_fallback(
+            payload,
+            "missing sub_event_cache for component-weight subtraction",
+            context="ave_per_bin component pion subtraction ({}, t{})".format(
+                inpDict.get("phi_setting", ""),
+                int(j) + 1,
+            ),
+        )
 
     clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inpDict)
     weight_payload = build_simc_shape_pion_control_weights(
@@ -418,8 +432,14 @@ def _apply_component_pion_subtraction_for_tbin(
             if float(pion_reference.GetBinContent(int(bin_index))) > 0.0:
                 unsupported_overlap += 1
     if unsupported_overlap > 0:
-        payload["fallback_reason"] = "unsupported pion-weight bins overlap pion-control content"
-        return payload
+        return handle_particle_subtraction_fallback(
+            payload,
+            "unsupported pion-weight bins overlap pion-control content",
+            context="ave_per_bin component pion subtraction ({}, t{})".format(
+                inpDict.get("phi_setting", ""),
+                int(j) + 1,
+            ),
+        )
 
     if weight_payload["diagnostics"]["pion_weight_max"] > resolve_particle_subtraction_weight_warn_max(inpDict):
         print(
@@ -1005,6 +1025,14 @@ def process_hist_data(
                     scale_factor = float(component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0)
                 else:
                     fallback_mode = component_payload.get("fallback_mode") or "single_scale"
+                    if fallback_mode == "error":
+                        raise RuntimeError(
+                            "ave_per_bin component pion subtraction ({}, t{}) rejected: {}".format(
+                                phi_setting,
+                                int(j) + 1,
+                                component_payload.get("fallback_reason") or "unknown reason",
+                            )
+                        )
                     if fallback_mode == "single_scale":
                         use_legacy_scalar_subtraction = True
                     elif fallback_mode in ("zero", "skip_bin"):
