@@ -2903,37 +2903,6 @@ def print_particle_subtraction_component_application_pages(
     diagnostics = component_payload.get("diagnostics") or {}
     scope_label = component_payload.get("analysis_scope") or component_payload.get("analysis_scope_label") or "unknown"
 
-    _print_component_overlay_page(
-        pdf_name,
-        component_payload.get("H_pion_control_model"),
-        "pion-control model",
-        "{}Part 3 weighted pion-control model".format(title_prefix),
-        [
-            (component_payload.get("H_kaon_pion_model"), "kaon pion model", ROOT.kBlue + 1, 1),
-            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template", ROOT.kOrange + 7, 2),
-        ],
-        [
-            "scope: {}".format(scope_label),
-            "status: accepted",
-            "effective scale={}".format(
-                _format_fit_number(component_payload.get("particle_subtraction_effective_scale"))
-            ),
-            "weighted pion integral={}".format(
-                _format_fit_number(component_payload.get("weighted_pion_integral"))
-            ),
-            "control model integral={}".format(
-                _format_fit_number(diagnostics.get("pion_control_model_integral"))
-            ),
-            "kaon pion model integral={}".format(
-                _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
-            ),
-            "ratio consistency={}".format(
-                "pass" if bool(diagnostics.get("ratio_consistency_ok")) else "fail"
-            ),
-        ],
-        cut_window=cut_window,
-    )
-
     _print_single_hist_page(
         pdf_name,
         component_payload.get("H_pion_weight_vs_MM"),
@@ -2959,6 +2928,60 @@ def print_particle_subtraction_component_application_pages(
         ],
         cut_window=cut_window,
         line_color=ROOT.kViolet + 1,
+    )
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_MM_before_pion_subtraction"),
+        "kaon data before pion subtraction",
+        "{}Part 3 kaon data vs pion-background models".format(title_prefix),
+        [
+            (component_payload.get("H_kaon_pion_model"), "kaon pion-bg model", ROOT.kBlue + 1, 1),
+            (component_payload.get("H_pion_subtraction_template_MM"), "weighted pion template", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "before integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_before_pion_sub"))
+            ),
+            "kaon pion model integral={}".format(
+                _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
+            ),
+            "weighted pion integral={}".format(
+                _format_fit_number(component_payload.get("weighted_pion_integral"))
+            ),
+            "effective scale={}".format(
+                _format_fit_number(component_payload.get("particle_subtraction_effective_scale"))
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_kaon_pion_model"),
+        "kaon pion-bg model",
+        "{}Part 3 kaon vs pion background models".format(title_prefix),
+        [
+            (component_payload.get("H_pion_control_model"), "pion-control model", ROOT.kRed + 1, 1),
+            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template (full)", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "kaon pion model integral={}".format(
+                _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
+            ),
+            "pion control model integral={}".format(
+                _format_fit_number(diagnostics.get("pion_control_model_integral"))
+            ),
+            "weighted pion integral={}".format(
+                _format_fit_number(component_payload.get("weighted_pion_integral"))
+            ),
+            "ratio consistency={}".format(
+                "pass" if bool(diagnostics.get("ratio_consistency_ok")) else "fail"
+            ),
+        ],
+        cut_window=cut_window,
     )
 
     _print_component_overlay_page(
