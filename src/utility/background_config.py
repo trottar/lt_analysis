@@ -195,18 +195,21 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
             "pi_delta": (1.17, 1.23),
+            "k_sigma0_signal": (1.18, 1.23),
+        },
+        "prior_scales": {
+            "pi_n": 1.0,
+            "pi_delta": 1.5,
+            "pi_sidis": 2.0,
+            "k_sigma0_signal": 1.0,
         },
         "postfit_component_scales": {
             "pi_n": 0.95,
             "pi_delta": 0.95,
             "pi_sidis": 0.75,
+            "k_sigma0_signal": 1.0,
         },
-        "include_sigma0_signal_template": True,
         "joint_refinement_enabled": True,
-        "particle_subtraction_prior_scale_pi_n": 1.0,
-        "particle_subtraction_prior_scale_pi_delta": 1.5,
-        "particle_subtraction_prior_scale_pi_sidis": 2.0,
-        "particle_subtraction_prior_scale_k_sigma0_signal": 1.0,
         "particle_subtraction_max_fit_cycles": 50,
         "particle_subtraction_fit_tolerance": 1e-5,
         "oversub_sigma_tolerance": 2.0,
@@ -219,12 +222,13 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_n": True,
             "pi_delta": True,
             "pi_sidis": True,
+            "k_sigma0_signal": True,
         },
-        "sigma0_signal_anchor_window": (1.18, 1.23),
         "windows": {
             "pi_n": (0.90, 0.94),
             "pi_delta": (1.16, 1.25),
             "pi_sidis": (1.36, 1.45),
+            "k_sigma0_signal": (1.18, 1.23),
         },
     },
     "kaon_nosub": {
@@ -232,19 +236,21 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_delta", "k_sigma0_signal", "pi_sidis"),
         "stage_amplitude_windows": {},
+        "prior_scales": {
+            "pi_n": 1.0,
+            "pi_delta": 1.5,
+            "pi_sidis": 2.0,
+            "k_sigma0_signal": 1.0,
+        },
         "postfit_component_scales": {
             "pi_n": 0.95,
-            "pi_delta": 0.95,
+            "pi_delta": 0.50,
             "pi_sidis": 0.25,
+            "k_sigma0_signal": 1.0,
         },
         "include_kaon_signal_template": False,
-        "include_sigma0_signal_template": True,
         "joint_refinement_enabled": True,
-        "particle_subtraction_prior_scale_pi_n": 1.0,
-        "particle_subtraction_prior_scale_pi_delta": 1.5,
-        "particle_subtraction_prior_scale_pi_sidis": 2.0,
         "particle_subtraction_prior_scale_k_lambda_signal": 1.0,
-        "particle_subtraction_prior_scale_k_sigma0_signal": 1.0,
         "particle_subtraction_max_fit_cycles": 50,
         "particle_subtraction_fit_tolerance": 1e-5,
         "oversub_sigma_tolerance": 2.0,
@@ -254,16 +260,17 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         #"max_oversub_bin_fraction": 0.20,
         "max_full_range_chi2_ndf": None,
         "kaon_signal_tail_extension": 0.02,
-        "sigma0_signal_anchor_window": (1.18, 1.23),
         "enabled_windows": {
             "pi_n": True,
             "pi_delta": True,
             "pi_sidis": True,
+            "k_sigma0_signal": True,
         },
         "windows": {
             "pi_n": (0.90, 0.94),
             "pi_delta": (1.18, 1.26),
             "pi_sidis": (1.36, 1.45),
+            "k_sigma0_signal": (1.18, 1.23),
         },
         "enabled_excluded_windows": {
             "sigma_peak": False,
@@ -272,6 +279,14 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "sigma_peak": (1.18, 1.23),
         },
     },
+}
+
+PARTICLE_SUBTRACTION_COMPONENT_PRIOR_SCALE_LEGACY_KEYS = {
+    "pi_n": "particle_subtraction_prior_scale_pi_n",
+    "pi_delta": "particle_subtraction_prior_scale_pi_delta",
+    "pi_sidis": "particle_subtraction_prior_scale_pi_sidis",
+    "k_lambda_signal": "particle_subtraction_prior_scale_k_lambda_signal",
+    "k_sigma0_signal": "particle_subtraction_prior_scale_k_sigma0_signal",
 }
 
 _PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
@@ -1484,14 +1499,52 @@ def resolve_particle_subtraction_component_stage_amplitude_windows(fit_target, m
     return resolved
 
 
-def resolve_particle_subtraction_component_postfit_scales(fit_target):
+def resolve_particle_subtraction_component_prior_scales(fit_target, component_names=None):
     config = get_particle_subtraction_component_fit_window_config(fit_target)
     if not config:
         return {}
 
+    configured_scales = config.get("prior_scales") or {}
+    requested_names = [str(name) for name in (component_names or []) if str(name)]
+    if not requested_names:
+        requested_names = list(configured_scales.keys()) or ["pi_n", "pi_delta", "pi_sidis"]
+
     resolved = {}
-    for component_name in ("pi_n", "pi_delta", "pi_sidis"):
-        scale_value = float((config.get("postfit_component_scales") or {}).get(component_name, 1.0))
+    for component_name in requested_names:
+        if component_name in configured_scales:
+            scale_value = configured_scales.get(component_name, 1.0)
+        else:
+            legacy_key = PARTICLE_SUBTRACTION_COMPONENT_PRIOR_SCALE_LEGACY_KEYS.get(component_name)
+            scale_value = config.get(legacy_key, 1.0) if legacy_key else 1.0
+        scale_value = float(scale_value)
+        if scale_value != scale_value or scale_value < 0.0:
+            raise ValueError(
+                "Particle subtraction prior scale '{}' for '{}' must be finite and non-negative".format(
+                    component_name,
+                    fit_target,
+                )
+            )
+        resolved[component_name] = scale_value
+    return resolved
+
+
+def resolve_particle_subtraction_component_postfit_scales(fit_target, component_names=None):
+    config = get_particle_subtraction_component_fit_window_config(fit_target)
+    if not config:
+        return {}
+
+    configured_scales = config.get("postfit_component_scales") or {}
+    requested_names = [str(name) for name in (component_names or []) if str(name)]
+    if not requested_names:
+        requested_names = ["pi_n", "pi_delta", "pi_sidis"]
+        for component_name in configured_scales.keys():
+            component_name = str(component_name)
+            if component_name not in requested_names:
+                requested_names.append(component_name)
+
+    resolved = {}
+    for component_name in requested_names:
+        scale_value = float(configured_scales.get(component_name, 1.0))
         if scale_value != scale_value or scale_value < 0.0:
             raise ValueError(
                 "Particle subtraction post-fit scale '{}' for '{}' must be finite and non-negative".format(

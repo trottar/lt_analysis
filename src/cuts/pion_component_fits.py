@@ -15,6 +15,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     resolve_particle_subtraction_component_postfit_scales,
+    resolve_particle_subtraction_component_prior_scales,
     resolve_particle_subtraction_component_stage_amplitude_windows,
     resolve_particle_subtraction_component_fit_excluded_windows,
     get_particle_subtraction_component_fit_window_config,
@@ -657,9 +658,11 @@ def _rebuild_step_overlays_with_component_scales(
         return step_overlays
 
     resolved_scale_map = {
-        component_name: float((component_scale_map or {}).get(component_name, 1.0) or 1.0)
-        for component_name in COMPONENT_NAMES
+        str(component_name): float(scale_value or 1.0)
+        for component_name, scale_value in ((component_scale_map or {}).items())
     }
+    if not resolved_scale_map:
+        return step_overlays
     if all(abs(scale_value - 1.0) <= 1e-12 for scale_value in resolved_scale_map.values()):
         return step_overlays
 
@@ -763,10 +766,12 @@ def _apply_component_postfit_scales(
     if not isinstance(result, dict):
         return result
 
-    resolved_scale_map = {}
-    for component_name in COMPONENT_NAMES:
-        scale_value = float((postfit_scale_map or {}).get(component_name, 1.0) or 1.0)
-        resolved_scale_map[component_name] = scale_value
+    resolved_scale_map = {
+        str(component_name): float(scale_value or 1.0)
+        for component_name, scale_value in ((postfit_scale_map or {}).items())
+    }
+    if not resolved_scale_map:
+        return result
     if all(abs(scale_value - 1.0) <= 1e-12 for scale_value in resolved_scale_map.values()):
         return result
 
@@ -787,7 +792,16 @@ def _apply_component_postfit_scales(
         template_name: float(value or 0.0)
         for template_name, value in ((result.get("extra_component_amplitudes") or {}).items())
     }
-    full_amplitude_map = dict(extra_component_amplitudes)
+    raw_extra_component_amplitudes = deepcopy(extra_component_amplitudes)
+    scaled_extra_component_amplitudes = {
+        template_name: (
+            raw_extra_component_amplitudes[template_name]
+            * float(resolved_scale_map.get(template_name, 1.0) or 1.0)
+        )
+        for template_name in raw_extra_component_amplitudes
+    }
+    result["extra_component_amplitudes"] = deepcopy(scaled_extra_component_amplitudes)
+    full_amplitude_map = dict(scaled_extra_component_amplitudes)
     full_amplitude_map.update(scaled_component_amplitudes)
 
     template_hists = result.get("template_hists") or {}
@@ -802,7 +816,7 @@ def _apply_component_postfit_scales(
     result["pi_sidis_scaled_hist"] = scaled_hist_map.get("pi_sidis")
     result["extra_scaled_hists"] = {
         template_name: scaled_hist_map.get(template_name)
-        for template_name in extra_component_amplitudes
+        for template_name in scaled_extra_component_amplitudes
     }
 
     fit_hist = _build_model_hist(
@@ -835,12 +849,14 @@ def _apply_component_postfit_scales(
     diagnostics["postfit_component_scales"] = deepcopy(resolved_scale_map)
     diagnostics["component_amplitudes_pre_postfit_scale"] = deepcopy(raw_component_amplitudes)
     diagnostics["component_amplitudes"] = deepcopy(scaled_component_amplitudes)
+    diagnostics["extra_component_amplitudes_pre_postfit_scale"] = deepcopy(raw_extra_component_amplitudes)
+    diagnostics["extra_component_amplitudes"] = deepcopy(scaled_extra_component_amplitudes)
     accepted_uncertainties = deepcopy(diagnostics.get("accepted_component_uncertainties") or {})
-    for component_name in COMPONENT_NAMES:
+    for component_name, scale_value in resolved_scale_map.items():
         if accepted_uncertainties.get(component_name) is None:
             continue
         accepted_uncertainties[component_name] = (
-            float(accepted_uncertainties[component_name]) * resolved_scale_map[component_name]
+            float(accepted_uncertainties[component_name]) * float(scale_value)
         )
     diagnostics["accepted_component_uncertainties"] = accepted_uncertainties
 
@@ -1900,30 +1916,18 @@ def fit_pion_control_with_simc_shapes(
         component_name: [window]
         for component_name, window in resolved_windows.items()
     }
-    prior_scale_map = {
-        "pi_n": float(fit_config.get("particle_subtraction_prior_scale_pi_n", 1.0) or 1.0),
-        "pi_delta": float(fit_config.get("particle_subtraction_prior_scale_pi_delta", 1.5) or 1.5),
-        "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
-    }
-    postfit_scale_map = resolve_particle_subtraction_component_postfit_scales("pion_control")
+    prior_scale_map = resolve_particle_subtraction_component_prior_scales(
+        "pion_control",
+        component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+    )
+    postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
+        "pion_control",
+        component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+    )
     extra_positive_templates = {}
     extra_anchor_windows = {}
-    include_sigma0_signal_template = bool(fit_config.get("include_sigma0_signal_template", False))
-    if include_sigma0_signal_template and _hist_has_usable_support(h_kaon_sigma0_shape):
+    if anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME) and _hist_has_usable_support(h_kaon_sigma0_shape):
         extra_positive_templates[KAON_SIGMA0_TEMPLATE_NAME] = h_kaon_sigma0_shape
-        prior_scale_map[KAON_SIGMA0_TEMPLATE_NAME] = float(
-            fit_config.get("particle_subtraction_prior_scale_k_sigma0_signal", 1.0) or 1.0
-        )
-        sigma0_anchor_window = fit_config.get("sigma0_signal_anchor_window")
-        if sigma0_anchor_window is not None and len(sigma0_anchor_window) == 2:
-            sigma0_window_min = float(sigma0_anchor_window[0])
-            sigma0_window_max = float(sigma0_anchor_window[1])
-            if bool(fit_config.get("apply_mm_offset_data", False)):
-                sigma0_window_min += float(mm_offset_data)
-                sigma0_window_max += float(mm_offset_data)
-            extra_anchor_windows[KAON_SIGMA0_TEMPLATE_NAME] = [
-                (sigma0_window_min, sigma0_window_max)
-            ]
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
@@ -2019,12 +2023,14 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     mm_max = float(inpDict.get("mm_max", fit_max))
     extra_positive_templates = {}
     extra_anchor_windows = {}
-    prior_scale_map = {
-        "pi_n": float(fit_config.get("particle_subtraction_prior_scale_pi_n", 1.0) or 1.0),
-        "pi_delta": float(fit_config.get("particle_subtraction_prior_scale_pi_delta", 1.5) or 1.5),
-        "pi_sidis": float(fit_config.get("particle_subtraction_prior_scale_pi_sidis", 2.0) or 2.0),
-    }
-    postfit_scale_map = resolve_particle_subtraction_component_postfit_scales("kaon_nosub")
+    prior_scale_map = resolve_particle_subtraction_component_prior_scales(
+        "kaon_nosub",
+        component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME, KAON_SIGNAL_TEMPLATE_NAME),
+    )
+    postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
+        "kaon_nosub",
+        component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+    )
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
@@ -2034,29 +2040,12 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     include_kaon_signal_template = bool(fit_config.get("include_kaon_signal_template", False))
     if include_kaon_signal_template and _hist_has_usable_support(h_kaon_signal_shape):
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
-        prior_scale_map[KAON_SIGNAL_TEMPLATE_NAME] = float(
-            fit_config.get("particle_subtraction_prior_scale_k_lambda_signal", 1.0) or 1.0
-        )
         if mm_max > mm_min:
             tail_extension = max(float(fit_config.get("kaon_signal_tail_extension", 0.0) or 0.0), 0.0)
             signal_window_max = min(fit_max, mm_max + tail_extension)
             extra_anchor_windows[KAON_SIGNAL_TEMPLATE_NAME] = [(mm_min, signal_window_max)]
-    include_sigma0_signal_template = bool(fit_config.get("include_sigma0_signal_template", False))
-    if include_sigma0_signal_template and _hist_has_usable_support(h_kaon_sigma0_shape):
+    if anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME) and _hist_has_usable_support(h_kaon_sigma0_shape):
         extra_positive_templates[KAON_SIGMA0_TEMPLATE_NAME] = h_kaon_sigma0_shape
-        prior_scale_map[KAON_SIGMA0_TEMPLATE_NAME] = float(
-            fit_config.get("particle_subtraction_prior_scale_k_sigma0_signal", 1.0) or 1.0
-        )
-        sigma0_anchor_window = fit_config.get("sigma0_signal_anchor_window")
-        if sigma0_anchor_window is not None and len(sigma0_anchor_window) == 2:
-            sigma0_window_min = float(sigma0_anchor_window[0])
-            sigma0_window_max = float(sigma0_anchor_window[1])
-            if bool(fit_config.get("apply_mm_offset_data", False)):
-                sigma0_window_min += float(mm_offset_data)
-                sigma0_window_max += float(mm_offset_data)
-            extra_anchor_windows[KAON_SIGMA0_TEMPLATE_NAME] = [
-                (sigma0_window_min, sigma0_window_max)
-            ]
     result = _fit_staged_anchor_templates(
         h_kaon_nosub,
         {
@@ -2550,11 +2539,29 @@ def _format_excluded_window_list(windows):
 def _format_component_scale_map(scale_map):
     if not isinstance(scale_map, dict) or not scale_map:
         return "n/a"
-    return "n={:.2f}, delta={:.2f}, sidis={:.2f}".format(
-        float(scale_map.get("pi_n", 1.0) or 1.0),
-        float(scale_map.get("pi_delta", 1.0) or 1.0),
-        float(scale_map.get("pi_sidis", 1.0) or 1.0),
+    label_map = {
+        "pi_n": "n",
+        "pi_delta": "delta",
+        "pi_sidis": "sidis",
+        KAON_SIGMA0_TEMPLATE_NAME: "sigma0",
+        KAON_SIGNAL_TEMPLATE_NAME: "lambda",
+    }
+    ordered_names = ["pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME, KAON_SIGNAL_TEMPLATE_NAME]
+    ordered_names.extend(
+        component_name for component_name in scale_map.keys()
+        if component_name not in ordered_names
     )
+    formatted = []
+    for component_name in ordered_names:
+        if component_name not in scale_map:
+            continue
+        formatted.append(
+            "{}={:.2f}".format(
+                label_map.get(component_name, component_name),
+                float(scale_map.get(component_name, 1.0) or 1.0),
+            )
+        )
+    return ", ".join(formatted) if formatted else "n/a"
 
 
 def _draw_window_collection(windows, y_min, y_max, color, line_style, line_width=2):
