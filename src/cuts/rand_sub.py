@@ -71,9 +71,13 @@ from background_config import (
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
+    resolve_particle_subtraction_weight_clip_bounds,
+    resolve_particle_subtraction_weight_denominator_floor,
+    resolve_particle_subtraction_weight_warn_max,
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
+    print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_fit_pages,
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
@@ -81,6 +85,12 @@ from pion_component_fits import (
 )
 from pion_component_shapes import (
     load_setting_pion_component_shapes,
+)
+from pion_component_subtraction import (
+    build_simc_shape_pion_control_weights,
+    evaluate_particle_subtraction_component_fit_result,
+    simc_shape_pion_weight_from_value,
+    summarize_particle_subtraction_component_payload,
 )
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -243,8 +253,14 @@ def _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
 
 def _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, weight, hists):
     hists["hgcer_xy"].Fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, weight * evt.P_hgcer_npeSum)
+    if "hgcer_xy_nohole" in hists:
+        hists["hgcer_xy_nohole"].Fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, weight * evt.P_hgcer_npeSum)
     hists["hgcer_x_mm"].Fill(evt.P_hgcer_xAtCer, adj_MM, weight * evt.P_hgcer_npeSum)
+    if "hgcer_x_mm_nohole" in hists:
+        hists["hgcer_x_mm_nohole"].Fill(evt.P_hgcer_xAtCer, adj_MM, weight * evt.P_hgcer_npeSum)
     hists["hgcer_y_mm"].Fill(evt.P_hgcer_yAtCer, adj_MM, weight * evt.P_hgcer_npeSum)
+    if "hgcer_y_mm_nohole" in hists:
+        hists["hgcer_y_mm_nohole"].Fill(evt.P_hgcer_yAtCer, adj_MM, weight * evt.P_hgcer_npeSum)
 
     phi_shift = evt.ph_q
 
@@ -291,11 +307,16 @@ def _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, weight, his
     hists["h_t"].Fill(adj_t, weight)
     hists["h_w"].Fill(evt.W, weight)
     hists["h_epsilon"].Fill(evt.epsilon, weight)
-    hists["h_cal"].Fill(evt.H_cal_etottracknorm, weight)
-    hists["h_cer"].Fill(evt.H_cer_npeSum, weight)
-    hists["p_cal"].Fill(evt.P_cal_etottracknorm, weight)
-    hists["p_hgcer"].Fill(evt.P_hgcer_npeSum, weight)
-    hists["p_aero"].Fill(evt.P_aero_npeSum, weight)
+    if "h_cal" in hists:
+        hists["h_cal"].Fill(evt.H_cal_etottracknorm, weight)
+    if "h_cer" in hists:
+        hists["h_cer"].Fill(evt.H_cer_npeSum, weight)
+    if "p_cal" in hists:
+        hists["p_cal"].Fill(evt.P_cal_etottracknorm, weight)
+    if "p_hgcer" in hists:
+        hists["p_hgcer"].Fill(evt.P_hgcer_npeSum, weight)
+    if "p_aero" in hists:
+        hists["p_aero"].Fill(evt.P_aero_npeSum, weight)
 
 
 def _create_rand_sub_bg_templates(target_hists):
@@ -304,6 +325,132 @@ def _create_rand_sub_bg_templates(target_hists):
         for key, hist in target_hists.items()
         if hist is not None
     }
+
+
+def _hist_integral(hist):
+    if hist is None:
+        return 0.0
+    try:
+        return float(hist.Integral())
+    except Exception:
+        return 0.0
+
+
+def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_particle, data_filename, dummy_filename, epsset):
+    sub_data_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{data_filename}.root"
+    sub_dummy_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{dummy_filename}.root"
+    _print_rand_debug(
+        "opening subtraction ROOT files",
+        phi_setting=phi_setting,
+        epsset=epsset,
+        subtracted_particle=subtracted_particle,
+        data_path=sub_data_path,
+        data_exists=os.path.exists(sub_data_path),
+        dummy_path=sub_dummy_path,
+        dummy_exists=os.path.exists(sub_dummy_path),
+    )
+    sub_root_data = open_root_file(sub_data_path)
+    sub_root_dummy = open_root_file(sub_dummy_path)
+    sub_prompt_tree_name = get_prompt_tree_name(subtracted_particle, epsset)
+    sub_rand_tree_name = get_rand_tree_name(subtracted_particle, epsset)
+    bundle = {
+        "sub_root_data": sub_root_data,
+        "sub_root_dummy": sub_root_dummy,
+        "prompt_tree_name": sub_prompt_tree_name,
+        "rand_tree_name": sub_rand_tree_name,
+        "prompt_tree": sub_root_data.Get(sub_prompt_tree_name),
+        "rand_tree": sub_root_data.Get(sub_rand_tree_name),
+        "dummy_prompt_tree": sub_root_dummy.Get(sub_prompt_tree_name),
+        "dummy_rand_tree": sub_root_dummy.Get(sub_rand_tree_name),
+    }
+    _print_rand_debug(
+        "resolved subtraction tree names",
+        prompt_tree_name=sub_prompt_tree_name,
+        rand_tree_name=sub_rand_tree_name,
+    )
+    _debug_tree_status("sub_data_prompt", bundle["prompt_tree"])
+    _debug_tree_status("sub_data_rand", bundle["rand_tree"])
+    _debug_tree_status("sub_dummy_prompt", bundle["dummy_prompt_tree"])
+    _debug_tree_status("sub_dummy_rand", bundle["dummy_rand_tree"])
+    return bundle
+
+
+def _create_rand_sub_component_templates(target_hists):
+    return {
+        key: clone_reset_hist(hist, "_pi_component_template")
+        for key, hist in target_hists.items()
+        if hist is not None
+    }
+
+
+def _process_component_weighted_subtracted_particle_tree(
+    tree,
+    mm_offset_data,
+    template_hists,
+    particle_type,
+    hole_contains,
+    evaluate_event,
+    shifted_t_getter,
+    mm_min,
+    mm_max,
+    source_coeff,
+    pion_reference_hist,
+    pion_mm_weights,
+    stats=None,
+    tree_label=None,
+):
+    if tree is None:
+        raise RuntimeError("Subtracted-particle tree '{}' is None".format(tree_label or "unnamed"))
+
+    mm_offset_correction = 0.0 if get_shift_mode() == "shifted" else mm_offset_data
+
+    for evt in tree:
+        base_all_cuts, base_nomm_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_correction)
+
+        if particle_type == "kaon":
+            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            pid_pass = evt.P_hgcer_npeSum > 2.0
+            allcuts = base_all_cuts and not hole_rejected and pid_pass
+            nommcuts = base_nomm_cuts and not hole_rejected and pid_pass
+        else:
+            allcuts = base_all_cuts
+            nommcuts = base_nomm_cuts
+
+        if not (allcuts or nommcuts):
+            continue
+
+        adj_MM = get_shifted_mm(evt, mm_offset=mm_offset_correction)
+        pion_weight = source_coeff * simc_shape_pion_weight_from_value(
+            adj_MM,
+            pion_reference_hist,
+            pion_mm_weights,
+        )
+        if pion_weight == 0.0 or not math.isfinite(pion_weight):
+            continue
+
+        if nommcuts:
+            if "h_mm_nosub" in template_hists:
+                template_hists["h_mm_nosub"].Fill(adj_MM, pion_weight)
+            if "h_mm_fit2sub" in template_hists:
+                template_hists["h_mm_fit2sub"].Fill(adj_MM, pion_weight)
+            if "h_mm_fit1sub" in template_hists:
+                template_hists["h_mm_fit1sub"].Fill(adj_MM, pion_weight)
+            if "h_mm_pisub" in template_hists:
+                template_hists["h_mm_pisub"].Fill(adj_MM, pion_weight)
+            if "h_mm_full" in template_hists:
+                template_hists["h_mm_full"].Fill(adj_MM, pion_weight)
+            if stats is not None:
+                stats["n_events_nommcuts"] += 1
+
+        if not allcuts:
+            continue
+
+        adj_t = shifted_t_getter(evt)
+        _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, pion_weight, template_hists)
+        if stats is not None:
+            stats["n_events_allcuts"] += 1
+            stats["sum_event_weight"] += float(pion_weight)
+            stats["sum_event_weight_sq"] += float(pion_weight * pion_weight)
 
 
 def _process_rand_sub_background_tree(
@@ -365,6 +512,8 @@ def _process_subtracted_particle_background_tree(
     mm_reference_hist,
     mm_background_weights,
     source_coeff,
+    pion_reference_hist=None,
+    pion_mm_weights=None,
     residual_weights=None,
     tree_label=None,
 ):
@@ -395,10 +544,160 @@ def _process_subtracted_particle_background_tree(
             mm_background_weights,
             residual_weights=residual_weights,
         )
+        if pion_reference_hist is not None and pion_mm_weights is not None:
+            event_weight *= simc_shape_pion_weight_from_value(
+                adj_MM,
+                pion_reference_hist,
+                pion_mm_weights,
+            )
         if event_weight == 0.0:
             continue
 
         _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, event_weight, template_hists)
+
+
+def _apply_component_pion_subtraction_setting(
+    component_fit_result,
+    sub_tree_bundle,
+    phi_setting,
+    inpDict,
+    particle_type,
+    mm_offset_data,
+    hole_contains,
+    evaluate_event,
+    shifted_t_getter,
+    mm_min,
+    mm_max,
+    norm_factor_data,
+    norm_factor_dummy,
+    nWindows,
+    data_targets,
+):
+    gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
+    payload = {
+        "accepted": False,
+        "fallback_used": True,
+        "fallback_mode": gate_result.get("fallback_mode"),
+        "fallback_reason": gate_result.get("reason") or "component-fit result rejected",
+        "analysis_scope": component_fit_result.get("analysis_scope") if isinstance(component_fit_result, dict) else None,
+        "particle_subtraction_mode": component_fit_result.get("particle_subtraction_mode") if isinstance(component_fit_result, dict) else None,
+        "fit_status_pion": component_fit_result.get("fit_status_pion") if isinstance(component_fit_result, dict) else None,
+        "fit_status_kaon": component_fit_result.get("fit_status_kaon") if isinstance(component_fit_result, dict) else None,
+        "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
+        "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
+    }
+    if not gate_result["accepted"]:
+        return payload
+    if not isinstance(sub_tree_bundle, dict):
+        payload["fallback_reason"] = "missing subtraction-tree bundle for component-weight subtraction"
+        return payload
+
+    clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inpDict)
+    weight_payload = build_simc_shape_pion_control_weights(
+        component_fit_result,
+        clip_min=clip_min,
+        clip_max=clip_max,
+        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+    )
+    unsupported_bins = set(weight_payload["diagnostics"].get("unsupported_bins") or [])
+    pion_reference = component_fit_result.get("H_pion_control_input")
+    unsupported_overlap = 0
+    if pion_reference is not None and unsupported_bins:
+        for bin_index in unsupported_bins:
+            if float(pion_reference.GetBinContent(int(bin_index))) > 0.0:
+                unsupported_overlap += 1
+    if unsupported_overlap > 0:
+        payload["fallback_reason"] = "unsupported pion-weight bins overlap pion-control content"
+        return payload
+
+    if weight_payload["diagnostics"]["pion_weight_max"] > resolve_particle_subtraction_weight_warn_max(inpDict):
+        print(
+            "WARNING: pion component weight exceeded threshold\n"
+            "  epsset = {}\n"
+            "  phi_setting = {}\n"
+            "  max_weight = {:.4f}".format(
+                inpDict.get("EPSSET", ""),
+                phi_setting,
+                float(weight_payload["diagnostics"]["pion_weight_max"]),
+            )
+        )
+
+    template_hists = _create_rand_sub_component_templates(data_targets)
+    stats = {
+        "n_events_allcuts": 0,
+        "n_events_nommcuts": 0,
+        "sum_event_weight": 0.0,
+        "sum_event_weight_sq": 0.0,
+    }
+    source_specs = [
+        ("prompt", sub_tree_bundle.get("prompt_tree"), float(norm_factor_data)),
+        ("rand", sub_tree_bundle.get("rand_tree"), -float(norm_factor_data) / float(nWindows)),
+        ("dummy", sub_tree_bundle.get("dummy_prompt_tree"), -float(norm_factor_dummy)),
+        ("dummy_rand", sub_tree_bundle.get("dummy_rand_tree"), float(norm_factor_dummy) / float(nWindows)),
+    ]
+
+    for label, tree, coeff in source_specs:
+        _process_component_weighted_subtracted_particle_tree(
+            tree,
+            mm_offset_data,
+            template_hists,
+            particle_type,
+            hole_contains,
+            evaluate_event,
+            shifted_t_getter,
+            mm_min,
+            mm_max,
+            coeff,
+            weight_payload["H_pion_control_model"],
+            weight_payload["weights"],
+            stats=stats,
+            tree_label="component {}".format(label),
+        )
+
+    h_mm_before = clone_reset_hist(data_targets["h_mm"], "_before_pion_sub")
+    h_mm_before.Add(data_targets["h_mm"])
+
+    for key, target_hist in data_targets.items():
+        template_hist = template_hists.get(key)
+        if target_hist is None or template_hist is None:
+            continue
+        target_hist.Add(template_hist, -1.0)
+
+    h_mm_after = clone_reset_hist(data_targets["h_mm"], "_after_pion_sub")
+    h_mm_after.Add(data_targets["h_mm"])
+
+    pion_control_integral = _hist_integral(component_fit_result.get("H_pion_control_input"))
+    weighted_pion_integral = _hist_integral(template_hists.get("h_mm_full"))
+    effective_scale = weighted_pion_integral / pion_control_integral if pion_control_integral > 0.0 else 0.0
+
+    payload.update(
+        {
+            "accepted": True,
+            "fallback_used": False,
+            "fallback_reason": "",
+            "particle_subtraction_effective_scale": float(effective_scale),
+            "weighted_pion_integral": float(weighted_pion_integral),
+            "kaon_integral_before_pion_sub": _hist_integral(h_mm_before),
+            "kaon_integral_after_pion_sub": _hist_integral(h_mm_after),
+            "H_pion_control_model": weight_payload["H_pion_control_model"],
+            "H_kaon_pion_model": weight_payload["H_kaon_pion_model"],
+            "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
+            "weights": weight_payload["weights"],
+            "H_pion_control_unscaled": component_fit_result.get("H_pion_control_input").Clone(
+                "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
+            ) if component_fit_result.get("H_pion_control_input") is not None else None,
+            "H_pion_subtraction_template_MM": template_hists.get("h_mm"),
+            "H_pion_subtraction_template_MM_nosub": template_hists.get("h_mm_full"),
+            "H_MM_before_pion_subtraction": h_mm_before,
+            "H_MM_after_pion_subtraction": h_mm_after,
+            "diagnostics": {
+                **dict(weight_payload["diagnostics"]),
+                **dict(stats),
+            },
+        }
+    )
+    return payload
+
 
 def _process_rand_sub_tree(
     tree,
@@ -2094,6 +2393,10 @@ def rand_sub(
     print("\n\n{} data total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
     print("{} dummy total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))      
 
+    component_fit_result = None
+    component_subtraction_payload = None
+    sub_tree_bundle = None
+
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
         stage_start = perf_counter()
@@ -2102,7 +2405,6 @@ def rand_sub(
         subDict["MM_offset_DATA"] = MM_offset_DATA
         particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
 
-        component_fit_result = None
         if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
             scope_payload = component_payload
             if scope_payload is None:
@@ -2129,9 +2431,93 @@ def rand_sub(
                 mm_offset_data=MM_offset_DATA,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
             )
+            sub_tree_bundle = _open_subtracted_particle_tree_bundle(
+                OUTPATH,
+                phi_setting,
+                SubtractedParticle,
+                InDATAFilename,
+                InDUMMYFilename,
+                EPSSET,
+            )
+            component_targets = {
+                "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_DATA,
+                "hgcer_xy_nohole": P_hgcer_nohole_xAtCer_vs_yAtCer_DATA if ParticleType == "kaon" else None,
+                "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_DATA,
+                "hgcer_x_mm_nohole": P_hgcer_nohole_xAtCer_vs_MM_DATA if ParticleType == "kaon" else None,
+                "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_DATA,
+                "hgcer_y_mm_nohole": P_hgcer_nohole_yAtCer_vs_MM_DATA if ParticleType == "kaon" else None,
+                "mm_ct": MM_vs_CoinTime_DATA,
+                "ct_beta": CoinTime_vs_beta_DATA,
+                "mm_beta": MM_vs_beta_DATA,
+                "mm_h_cer": MM_vs_H_cer_DATA,
+                "mm_h_cal": MM_vs_H_cal_DATA,
+                "mm_p_cal": MM_vs_P_cal_DATA,
+                "mm_p_hgcer": MM_vs_P_hgcer_DATA,
+                "mm_p_aero": MM_vs_P_aero_DATA,
+                "phiq_t": phiq_vs_t_DATA,
+                "q2_w": Q2_vs_W_DATA,
+                "q2_t": Q2_vs_t_DATA,
+                "w_t": W_vs_t_DATA,
+                "eps_t": EPS_vs_t_DATA,
+                "mm_t": MM_vs_t_DATA,
+                "h_ct": H_ct_DATA,
+                "h_ssxfp": H_ssxfp_DATA,
+                "h_ssyfp": H_ssyfp_DATA,
+                "h_ssxpfp": H_ssxpfp_DATA,
+                "h_ssypfp": H_ssypfp_DATA,
+                "h_hsxfp": H_hsxfp_DATA,
+                "h_hsyfp": H_hsyfp_DATA,
+                "h_hsxpfp": H_hsxpfp_DATA,
+                "h_hsypfp": H_hsypfp_DATA,
+                "h_ssxptar": H_ssxptar_DATA,
+                "h_ssyptar": H_ssyptar_DATA,
+                "h_hsxptar": H_hsxptar_DATA,
+                "h_hsyptar": H_hsyptar_DATA,
+                "h_ssdelta": H_ssdelta_DATA,
+                "h_hsdelta": H_hsdelta_DATA,
+                "h_ph_q": H_ph_q_DATA,
+                "h_th_q": H_th_q_DATA,
+                "h_ph_recoil": H_ph_recoil_DATA,
+                "h_th_recoil": H_th_recoil_DATA,
+                "h_q2": H_Q2_DATA,
+                "h_t": H_t_DATA,
+                "h_w": H_W_DATA,
+                "h_epsilon": H_epsilon_DATA,
+                "h_mm": H_MM_DATA,
+                "h_mm_fit2sub": H_MM_fit2sub_DATA,
+                "h_mm_fit1sub": H_MM_fit1sub_DATA,
+                "h_mm_pisub": H_MM_pisub_DATA,
+                "h_mm_full": H_MM_full_DATA,
+                "h_pmiss": H_pmiss_DATA,
+                "h_emiss": H_emiss_DATA,
+                "h_pmx": H_pmx_DATA,
+                "h_pmy": H_pmy_DATA,
+                "h_pmz": H_pmz_DATA,
+            }
+            component_subtraction_payload = _apply_component_pion_subtraction_setting(
+                component_fit_result,
+                sub_tree_bundle,
+                phi_setting,
+                inpDict,
+                ParticleType,
+                MM_offset_DATA,
+                hole_contains,
+                evaluate_data_event,
+                get_shifted_t,
+                mm_min,
+                mm_max,
+                norm_factor_data,
+                norm_factor_dummy,
+                nWindows,
+                component_targets,
+            )
             histDict["_particle_subtraction_component_fit_setting"] = component_fit_result
             histDict["particle_subtraction_component_fit_setting"] = (
                 serialize_particle_subtraction_component_result(component_fit_result)
+            )
+            histDict["_particle_subtraction_component_payload_setting"] = component_subtraction_payload
+            histDict["particle_subtraction_component_payload_setting"] = summarize_particle_subtraction_component_payload(
+                component_subtraction_payload
             )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
@@ -2149,40 +2535,64 @@ def rand_sub(
             histDict["H_kaon_pion_bg_fit_total_DATA"] = component_fit_result.get("H_kaon_pion_bg_fit_total")
             histDict["H_fit_residual_pion_DATA"] = component_fit_result.get("H_fit_residual_pion")
             histDict["H_fit_residual_kaon_DATA"] = component_fit_result.get("H_fit_residual_kaon")
+            if isinstance(component_subtraction_payload, dict):
+                histDict["H_pion_control_model_DATA"] = component_subtraction_payload.get("H_pion_control_model")
+                histDict["H_kaon_pion_model_DATA"] = component_subtraction_payload.get("H_kaon_pion_model")
+                histDict["H_pion_weight_vs_MM_DATA"] = component_subtraction_payload.get("H_pion_weight_vs_MM")
+                histDict["H_pion_subtraction_template_MM_DATA"] = component_subtraction_payload.get("H_pion_subtraction_template_MM")
+                histDict["H_pion_subtraction_template_MM_nosub_DATA"] = component_subtraction_payload.get("H_pion_subtraction_template_MM_nosub")
+                histDict["H_MM_before_pion_subtraction_DATA"] = component_subtraction_payload.get("H_MM_before_pion_subtraction")
+                histDict["H_MM_after_pion_subtraction_DATA"] = component_subtraction_payload.get("H_MM_after_pion_subtraction")
 
         subtraction_windows = None
         scale_components = None
-        try:
-            subtraction_windows = resolve_particle_subtraction_windows(
-                ParticleType,
-                SubtractedParticle,
-                MM_offset_DATA,
-            )
-            scale_components = compute_staged_particle_subtraction_scales(
-                H_MM_nosub_DATA,
-                subDict["H_MM_nosub_SUB_DATA"],
-                subtraction_windows,
-                context="pion subtraction ({})".format(phi_setting),
-            )
-            scale_factor = scale_components["total_scale_factor"]
-        except ZeroDivisionError:
-            scale_factor = 0.0
-        '''
-        if scale_factor > 10.0:
-            print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
-            scale_factor = 0.0
-        '''          
+        scale_factor = 0.0
+        use_legacy_scalar_subtraction = True
+        if isinstance(component_subtraction_payload, dict):
+            if component_subtraction_payload.get("accepted"):
+                use_legacy_scalar_subtraction = False
+                scale_factor = float(component_subtraction_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0)
+            else:
+                fallback_mode = component_subtraction_payload.get("fallback_mode") or "single_scale"
+                if fallback_mode == "single_scale":
+                    use_legacy_scalar_subtraction = True
+                elif fallback_mode in ("zero", "skip_bin"):
+                    use_legacy_scalar_subtraction = False
+                else:
+                    use_legacy_scalar_subtraction = True
 
-        if phi_setting == "Center":
-            phi_scale = 0.95
-        elif phi_setting == "Left":
-            phi_scale = 0.65
-        elif phi_setting == "Right":
-            phi_scale = 0.65
-        else:
-            raise ValueError("Invalid phi_setting: {}".format(phi_setting))
-        
-        scale_factor = scale_factor #* phi_scale   
+        if use_legacy_scalar_subtraction:
+            try:
+                subtraction_windows = resolve_particle_subtraction_windows(
+                    ParticleType,
+                    SubtractedParticle,
+                    MM_offset_DATA,
+                )
+                scale_components = compute_staged_particle_subtraction_scales(
+                    H_MM_nosub_DATA,
+                    subDict["H_MM_nosub_SUB_DATA"],
+                    subtraction_windows,
+                    context="pion subtraction ({})".format(phi_setting),
+                )
+                scale_factor = scale_components["total_scale_factor"]
+            except ZeroDivisionError:
+                scale_factor = 0.0
+            '''
+            if scale_factor > 10.0:
+                print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
+                scale_factor = 0.0
+            '''
+
+            if phi_setting == "Center":
+                phi_scale = 0.95
+            elif phi_setting == "Left":
+                phi_scale = 0.65
+            elif phi_setting == "Right":
+                phi_scale = 0.65
+            else:
+                raise ValueError("Invalid phi_setting: {}".format(phi_setting))
+
+            scale_factor = scale_factor #* phi_scale
         histDict["particle_subtraction_scale_factor"] = scale_factor
         histDict["particle_subtraction_scale_components"] = scale_components
         histDict["particle_subtraction_windows"] = subtraction_windows
@@ -2203,114 +2613,115 @@ def rand_sub(
                 total_scale_factor=scale_factor,
             )
 
-        # Apply scale factor
-        subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_CoinTime_SUB_DATA"].Scale(scale_factor)
-        subDict["CoinTime_vs_beta_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_beta_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_H_cer_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_H_cal_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_P_cal_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_P_hgcer_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_P_aero_SUB_DATA"].Scale(scale_factor)
-        subDict["phiq_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["Q2_vs_W_SUB_DATA"].Scale(scale_factor)
-        subDict["Q2_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["W_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["EPS_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["MM_vs_t_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ct_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssxfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssyfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssxpfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssypfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsxfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsyfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsxpfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsypfp_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssxptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssyptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsxptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsyptar_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ssdelta_SUB_DATA"].Scale(scale_factor)
-        subDict["H_hsdelta_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ph_q_SUB_DATA"].Scale(scale_factor)
-        subDict["H_th_q_SUB_DATA"].Scale(scale_factor)
-        subDict["H_ph_recoil_SUB_DATA"].Scale(scale_factor)
-        subDict["H_th_recoil_SUB_DATA"].Scale(scale_factor)
-        subDict["H_Q2_SUB_DATA"].Scale(scale_factor)
-        subDict["H_W_SUB_DATA"].Scale(scale_factor)
-        subDict["H_t_SUB_DATA"].Scale(scale_factor)
-        subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
-        subDict["H_MM_SUB_DATA"].Scale(scale_factor)
-        subDict["H_MM_nosub_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
-        subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmy_SUB_DATA"].Scale(scale_factor)
-        subDict["H_pmz_SUB_DATA"].Scale(scale_factor)
-        histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
-        histDict["H_MM_nosub_SUB_DATA"] = subDict["H_MM_nosub_SUB_DATA"]
+        if use_legacy_scalar_subtraction:
+            # Apply scale factor
+            subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
+            subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"].Scale(scale_factor)
+            subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+            subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+            subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+            subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_CoinTime_SUB_DATA"].Scale(scale_factor)
+            subDict["CoinTime_vs_beta_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_beta_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_H_cer_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_H_cal_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_P_cal_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_P_hgcer_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_P_aero_SUB_DATA"].Scale(scale_factor)
+            subDict["phiq_vs_t_SUB_DATA"].Scale(scale_factor)
+            subDict["Q2_vs_W_SUB_DATA"].Scale(scale_factor)
+            subDict["Q2_vs_t_SUB_DATA"].Scale(scale_factor)
+            subDict["W_vs_t_SUB_DATA"].Scale(scale_factor)
+            subDict["EPS_vs_t_SUB_DATA"].Scale(scale_factor)
+            subDict["MM_vs_t_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ct_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssxfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssyfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssxpfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssypfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsxfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsyfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsxpfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsypfp_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssxptar_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssyptar_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsxptar_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsyptar_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ssdelta_SUB_DATA"].Scale(scale_factor)
+            subDict["H_hsdelta_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ph_q_SUB_DATA"].Scale(scale_factor)
+            subDict["H_th_q_SUB_DATA"].Scale(scale_factor)
+            subDict["H_ph_recoil_SUB_DATA"].Scale(scale_factor)
+            subDict["H_th_recoil_SUB_DATA"].Scale(scale_factor)
+            subDict["H_Q2_SUB_DATA"].Scale(scale_factor)
+            subDict["H_W_SUB_DATA"].Scale(scale_factor)
+            subDict["H_t_SUB_DATA"].Scale(scale_factor)
+            subDict["H_epsilon_SUB_DATA"].Scale(scale_factor)
+            subDict["H_MM_SUB_DATA"].Scale(scale_factor)
+            subDict["H_MM_nosub_SUB_DATA"].Scale(scale_factor)
+            subDict["H_pmiss_SUB_DATA"].Scale(scale_factor)
+            subDict["H_emiss_SUB_DATA"].Scale(scale_factor)
+            subDict["H_pmx_SUB_DATA"].Scale(scale_factor)
+            subDict["H_pmy_SUB_DATA"].Scale(scale_factor)
+            subDict["H_pmz_SUB_DATA"].Scale(scale_factor)
+            histDict["H_MM_SUB_DATA"] = subDict["H_MM_SUB_DATA"]
+            histDict["H_MM_nosub_SUB_DATA"] = subDict["H_MM_nosub_SUB_DATA"]
 
-        # Subtract pion
-        P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
-        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
-        P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"],-1)
-        P_hgcer_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"],-1)
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"],-1)        
-        MM_vs_CoinTime_DATA.Add(subDict["MM_vs_CoinTime_SUB_DATA"],-1)
-        CoinTime_vs_beta_DATA.Add(subDict["CoinTime_vs_beta_SUB_DATA"],-1)
-        MM_vs_beta_DATA.Add(subDict["MM_vs_beta_SUB_DATA"],-1)
-        MM_vs_H_cer_DATA.Add(subDict["MM_vs_H_cer_SUB_DATA"],-1)
-        MM_vs_H_cal_DATA.Add(subDict["MM_vs_H_cal_SUB_DATA"],-1)
-        MM_vs_P_cal_DATA.Add(subDict["MM_vs_P_cal_SUB_DATA"],-1)    
-        MM_vs_P_hgcer_DATA.Add(subDict["MM_vs_P_hgcer_SUB_DATA"],-1)
-        MM_vs_P_aero_DATA.Add(subDict["MM_vs_P_aero_SUB_DATA"],-1)
-        phiq_vs_t_DATA.Add(subDict["phiq_vs_t_SUB_DATA"],-1)
-        Q2_vs_W_DATA.Add(subDict["Q2_vs_W_SUB_DATA"],-1)
-        Q2_vs_t_DATA.Add(subDict["Q2_vs_t_SUB_DATA"],-1)
-        W_vs_t_DATA.Add(subDict["W_vs_t_SUB_DATA"],-1)
-        EPS_vs_t_DATA.Add(subDict["EPS_vs_t_SUB_DATA"],-1)
-        MM_vs_t_DATA.Add(subDict["MM_vs_t_SUB_DATA"],-1)    
-        H_ssxfp_DATA.Add(subDict["H_ssxfp_SUB_DATA"],-1)
-        H_ssyfp_DATA.Add(subDict["H_ssyfp_SUB_DATA"],-1)
-        H_ssxpfp_DATA.Add(subDict["H_ssxpfp_SUB_DATA"],-1)
-        H_ssypfp_DATA.Add(subDict["H_ssypfp_SUB_DATA"],-1)
-        H_hsxfp_DATA.Add(subDict["H_hsxfp_SUB_DATA"],-1)
-        H_hsyfp_DATA.Add(subDict["H_hsyfp_SUB_DATA"],-1)
-        H_hsxpfp_DATA.Add(subDict["H_hsxpfp_SUB_DATA"],-1)
-        H_hsypfp_DATA.Add(subDict["H_hsypfp_SUB_DATA"],-1)
-        H_ssxptar_DATA.Add(subDict["H_ssxptar_SUB_DATA"],-1)
-        H_ssyptar_DATA.Add(subDict["H_ssyptar_SUB_DATA"],-1)
-        H_hsxptar_DATA.Add(subDict["H_hsxptar_SUB_DATA"],-1)
-        H_hsyptar_DATA.Add(subDict["H_hsyptar_SUB_DATA"],-1)
-        H_ssdelta_DATA.Add(subDict["H_ssdelta_SUB_DATA"],-1)
-        H_hsdelta_DATA.Add(subDict["H_hsdelta_SUB_DATA"],-1)
-        H_ph_q_DATA.Add(subDict["H_ph_q_SUB_DATA"],-1)
-        H_th_q_DATA.Add(subDict["H_th_q_SUB_DATA"],-1)
-        H_ph_recoil_DATA.Add(subDict["H_ph_recoil_SUB_DATA"],-1)
-        H_th_recoil_DATA.Add(subDict["H_th_recoil_SUB_DATA"],-1)
-        H_Q2_DATA.Add(subDict["H_Q2_SUB_DATA"],-1)
-        H_W_DATA.Add(subDict["H_W_SUB_DATA"],-1)
-        H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
-        H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
-        H_MM_fit2sub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
-        H_MM_fit1sub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
-        H_MM_pisub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
-        H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
-        H_MM_full_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)        
-        H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
-        H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
-        H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)
-        H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
-        H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
-        H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1) 
+            # Subtract pion
+            P_hgcer_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_xAtCer_vs_yAtCer_SUB_DATA"],-1)
+            P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_yAtCer_SUB_DATA"],-1)
+            P_hgcer_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_xAtCer_vs_MM_SUB_DATA"],-1)
+            P_hgcer_nohole_xAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_xAtCer_vs_MM_SUB_DATA"],-1)
+            P_hgcer_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_yAtCer_vs_MM_SUB_DATA"],-1)
+            P_hgcer_nohole_yAtCer_vs_MM_DATA.Add(subDict["P_hgcer_nohole_yAtCer_vs_MM_SUB_DATA"],-1)
+            MM_vs_CoinTime_DATA.Add(subDict["MM_vs_CoinTime_SUB_DATA"],-1)
+            CoinTime_vs_beta_DATA.Add(subDict["CoinTime_vs_beta_SUB_DATA"],-1)
+            MM_vs_beta_DATA.Add(subDict["MM_vs_beta_SUB_DATA"],-1)
+            MM_vs_H_cer_DATA.Add(subDict["MM_vs_H_cer_SUB_DATA"],-1)
+            MM_vs_H_cal_DATA.Add(subDict["MM_vs_H_cal_SUB_DATA"],-1)
+            MM_vs_P_cal_DATA.Add(subDict["MM_vs_P_cal_SUB_DATA"],-1)
+            MM_vs_P_hgcer_DATA.Add(subDict["MM_vs_P_hgcer_SUB_DATA"],-1)
+            MM_vs_P_aero_DATA.Add(subDict["MM_vs_P_aero_SUB_DATA"],-1)
+            phiq_vs_t_DATA.Add(subDict["phiq_vs_t_SUB_DATA"],-1)
+            Q2_vs_W_DATA.Add(subDict["Q2_vs_W_SUB_DATA"],-1)
+            Q2_vs_t_DATA.Add(subDict["Q2_vs_t_SUB_DATA"],-1)
+            W_vs_t_DATA.Add(subDict["W_vs_t_SUB_DATA"],-1)
+            EPS_vs_t_DATA.Add(subDict["EPS_vs_t_SUB_DATA"],-1)
+            MM_vs_t_DATA.Add(subDict["MM_vs_t_SUB_DATA"],-1)
+            H_ssxfp_DATA.Add(subDict["H_ssxfp_SUB_DATA"],-1)
+            H_ssyfp_DATA.Add(subDict["H_ssyfp_SUB_DATA"],-1)
+            H_ssxpfp_DATA.Add(subDict["H_ssxpfp_SUB_DATA"],-1)
+            H_ssypfp_DATA.Add(subDict["H_ssypfp_SUB_DATA"],-1)
+            H_hsxfp_DATA.Add(subDict["H_hsxfp_SUB_DATA"],-1)
+            H_hsyfp_DATA.Add(subDict["H_hsyfp_SUB_DATA"],-1)
+            H_hsxpfp_DATA.Add(subDict["H_hsxpfp_SUB_DATA"],-1)
+            H_hsypfp_DATA.Add(subDict["H_hsypfp_SUB_DATA"],-1)
+            H_ssxptar_DATA.Add(subDict["H_ssxptar_SUB_DATA"],-1)
+            H_ssyptar_DATA.Add(subDict["H_ssyptar_SUB_DATA"],-1)
+            H_hsxptar_DATA.Add(subDict["H_hsxptar_SUB_DATA"],-1)
+            H_hsyptar_DATA.Add(subDict["H_hsyptar_SUB_DATA"],-1)
+            H_ssdelta_DATA.Add(subDict["H_ssdelta_SUB_DATA"],-1)
+            H_hsdelta_DATA.Add(subDict["H_hsdelta_SUB_DATA"],-1)
+            H_ph_q_DATA.Add(subDict["H_ph_q_SUB_DATA"],-1)
+            H_th_q_DATA.Add(subDict["H_th_q_SUB_DATA"],-1)
+            H_ph_recoil_DATA.Add(subDict["H_ph_recoil_SUB_DATA"],-1)
+            H_th_recoil_DATA.Add(subDict["H_th_recoil_SUB_DATA"],-1)
+            H_Q2_DATA.Add(subDict["H_Q2_SUB_DATA"],-1)
+            H_W_DATA.Add(subDict["H_W_SUB_DATA"],-1)
+            H_t_DATA.Add(subDict["H_t_SUB_DATA"],-1)
+            H_epsilon_DATA.Add(subDict["H_epsilon_SUB_DATA"],-1)
+            H_MM_fit2sub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
+            H_MM_fit1sub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
+            H_MM_pisub_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
+            H_MM_DATA.Add(subDict["H_MM_SUB_DATA"],-1)
+            H_MM_full_DATA.Add(subDict["H_MM_nosub_SUB_DATA"],-1)
+            H_pmiss_DATA.Add(subDict["H_pmiss_SUB_DATA"],-1)
+            H_emiss_DATA.Add(subDict["H_emiss_SUB_DATA"],-1)
+            H_pmx_DATA.Add(subDict["H_pmx_SUB_DATA"],-1)
+            H_pmy_DATA.Add(subDict["H_pmy_SUB_DATA"],-1)
+            H_pmz_DATA.Add(subDict["H_pmz_SUB_DATA"],-1)
+            H_ct_DATA.Add(subDict["H_ct_SUB_DATA"],-1)
         _print_rand_timer("rand_sub pion subtraction {}".format(phi_setting), perf_counter() - stage_start)
 
     data_bg_targets = {
@@ -2369,43 +2780,26 @@ def rand_sub(
     rand_debug_stage = "post-pion-subtraction"
     bg_diag1 = None
     bg_diag2 = None
-    TBRANCH_SUB_DATA = None
-    TBRANCH_SUB_RAND = None
-    TBRANCH_SUB_DUMMY = None
-    TBRANCH_SUB_DUMMY_RAND = None
+    TBRANCH_SUB_DATA = sub_tree_bundle.get("prompt_tree") if isinstance(sub_tree_bundle, dict) else None
+    TBRANCH_SUB_RAND = sub_tree_bundle.get("rand_tree") if isinstance(sub_tree_bundle, dict) else None
+    TBRANCH_SUB_DUMMY = sub_tree_bundle.get("dummy_prompt_tree") if isinstance(sub_tree_bundle, dict) else None
+    TBRANCH_SUB_DUMMY_RAND = sub_tree_bundle.get("dummy_rand_tree") if isinstance(sub_tree_bundle, dict) else None
 
     try:
-        if ParticleType == "kaon":
+        if ParticleType == "kaon" and TBRANCH_SUB_DATA is None:
             rand_debug_stage = "open subtracted-particle ROOT files"
-            sub_data_path = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDATAFilename}.root"
-            sub_dummy_path = f"{OUTPATH}/{phi_setting}_{SubtractedParticle}_{InDUMMYFilename}.root"
-            _print_rand_debug(
-                "opening subtraction ROOT files",
-                phi_setting=phi_setting,
-                epsset=EPSSET,
-                subtracted_particle=SubtractedParticle,
-                data_path=sub_data_path,
-                data_exists=os.path.exists(sub_data_path),
-                dummy_path=sub_dummy_path,
-                dummy_exists=os.path.exists(sub_dummy_path),
+            sub_tree_bundle = _open_subtracted_particle_tree_bundle(
+                OUTPATH,
+                phi_setting,
+                SubtractedParticle,
+                InDATAFilename,
+                InDUMMYFilename,
+                EPSSET,
             )
-            sub_root_data = open_root_file(sub_data_path)
-            sub_root_dummy = open_root_file(sub_dummy_path)
-            sub_prompt_tree_name = get_prompt_tree_name(SubtractedParticle, EPSSET)
-            sub_rand_tree_name = get_rand_tree_name(SubtractedParticle, EPSSET)
-            TBRANCH_SUB_DATA = sub_root_data.Get(sub_prompt_tree_name)
-            TBRANCH_SUB_RAND = sub_root_data.Get(sub_rand_tree_name)
-            TBRANCH_SUB_DUMMY = sub_root_dummy.Get(sub_prompt_tree_name)
-            TBRANCH_SUB_DUMMY_RAND = sub_root_dummy.Get(sub_rand_tree_name)
-            _print_rand_debug(
-                "resolved subtraction tree names",
-                prompt_tree_name=sub_prompt_tree_name,
-                rand_tree_name=sub_rand_tree_name,
-            )
-            _debug_tree_status("sub_data_prompt", TBRANCH_SUB_DATA)
-            _debug_tree_status("sub_data_rand", TBRANCH_SUB_RAND)
-            _debug_tree_status("sub_dummy_prompt", TBRANCH_SUB_DUMMY)
-            _debug_tree_status("sub_dummy_rand", TBRANCH_SUB_DUMMY_RAND)
+            TBRANCH_SUB_DATA = sub_tree_bundle.get("prompt_tree")
+            TBRANCH_SUB_RAND = sub_tree_bundle.get("rand_tree")
+            TBRANCH_SUB_DUMMY = sub_tree_bundle.get("dummy_prompt_tree")
+            TBRANCH_SUB_DUMMY_RAND = sub_tree_bundle.get("dummy_rand_tree")
 
         # Fit background and subtract
         # --------------------------------------------------------------
@@ -2423,6 +2817,9 @@ def rand_sub(
             bg_stat_scale1=inpDict["bg_stat_scale1"],
             scale_factor=scale_factor if "scale_factor" in locals() else None,
         )
+        active_component_payload = component_subtraction_payload if (
+            isinstance(component_subtraction_payload, dict) and component_subtraction_payload.get("accepted")
+        ) else None
 
         if inpDict["bg_stat_scale1"] > 0.0:
             rand_debug_stage = "fit 1 function build"
@@ -2512,7 +2909,80 @@ def rand_sub(
                 tree_label="random dummy fit1",
             )
 
-            if ParticleType == "kaon" and scale_factor != 0.0:
+            if ParticleType == "kaon" and active_component_payload is not None:
+                rand_debug_stage = "fit 1 subtracted prompt data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DATA,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    -norm_factor_data,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    tree_label="subtracted prompt data fit1",
+                )
+                rand_debug_stage = "fit 1 subtracted random data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_RAND,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    norm_factor_data / nWindows,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    tree_label="subtracted random data fit1",
+                )
+                rand_debug_stage = "fit 1 subtracted prompt dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    norm_factor_dummy,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    tree_label="subtracted prompt dummy fit1",
+                )
+                rand_debug_stage = "fit 1 subtracted random dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY_RAND,
+                    MM_offset_DATA,
+                    bg_templates1,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage1_input,
+                    bg_weights1,
+                    -norm_factor_dummy / nWindows,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    tree_label="subtracted random dummy fit1",
+                )
+            elif ParticleType == "kaon" and scale_factor != 0.0:
                 rand_debug_stage = "fit 1 subtracted prompt data background pass"
                 _process_subtracted_particle_background_tree(
                     TBRANCH_SUB_DATA,
@@ -2693,7 +3163,84 @@ def rand_sub(
                 tree_label="random dummy fit2",
             )
 
-            if ParticleType == "kaon" and scale_factor != 0.0:
+            if ParticleType == "kaon" and active_component_payload is not None:
+                rand_debug_stage = "fit 2 subtracted prompt data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DATA,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    -norm_factor_data,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted prompt data fit2",
+                )
+                rand_debug_stage = "fit 2 subtracted random data background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_RAND,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    norm_factor_data / nWindows,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted random data fit2",
+                )
+                rand_debug_stage = "fit 2 subtracted prompt dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    norm_factor_dummy,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted prompt dummy fit2",
+                )
+                rand_debug_stage = "fit 2 subtracted random dummy background pass"
+                _process_subtracted_particle_background_tree(
+                    TBRANCH_SUB_DUMMY_RAND,
+                    MM_offset_DATA,
+                    bg_templates2,
+                    ParticleType,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    mm_stage2_input,
+                    bg_weights2,
+                    -norm_factor_dummy / nWindows,
+                    pion_reference_hist=active_component_payload["H_pion_control_model"],
+                    pion_mm_weights=active_component_payload["weights"],
+                    residual_weights=residual_bg_weights1,
+                    tree_label="subtracted random dummy fit2",
+                )
+            elif ParticleType == "kaon" and scale_factor != 0.0:
                 rand_debug_stage = "fit 2 subtracted prompt data background pass"
                 _process_subtracted_particle_background_tree(
                     TBRANCH_SUB_DATA,
@@ -2865,6 +3412,16 @@ def rand_sub(
         "fit1": bg_diag1 if "bg_diag1" in locals() else None,
         "fit2": bg_diag2 if "bg_diag2" in locals() else None,
     }
+    if "H_MM_SUB_DATA" not in histDict:
+        if isinstance(component_subtraction_payload, dict) and component_subtraction_payload.get("H_pion_subtraction_template_MM") is not None:
+            histDict["H_MM_SUB_DATA"] = component_subtraction_payload.get("H_pion_subtraction_template_MM")
+        else:
+            histDict["H_MM_SUB_DATA"] = clone_reset_hist(subDict["H_MM_SUB_DATA"], "_component_empty")
+    if "H_MM_nosub_SUB_DATA" not in histDict:
+        if isinstance(component_subtraction_payload, dict) and component_subtraction_payload.get("H_pion_subtraction_template_MM_nosub") is not None:
+            histDict["H_MM_nosub_SUB_DATA"] = component_subtraction_payload.get("H_pion_subtraction_template_MM_nosub")
+        else:
+            histDict["H_MM_nosub_SUB_DATA"] = clone_reset_hist(subDict["H_MM_nosub_SUB_DATA"], "_component_empty")
     if "particle_subtraction_scale_factor" not in histDict:
         histDict["particle_subtraction_scale_factor"] = 0.0
     if "particle_subtraction_scale_components" not in histDict:
@@ -3076,6 +3633,13 @@ def rand_sub(
         print_particle_subtraction_component_fit_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_fit_result,
+            title_prefix="{} {}".format(phi_setting, ParticleType),
+            cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+        )
+    if isinstance(component_subtraction_payload, dict) and component_subtraction_payload.get("accepted"):
+        print_particle_subtraction_component_application_pages(
+            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            component_subtraction_payload,
             title_prefix="{} {}".format(phi_setting, ParticleType),
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
         )

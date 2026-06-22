@@ -109,6 +109,23 @@ def _build_sub_allcut_bin_index(cache_section):
     }
 
 
+def _build_sub_nommcut_bin_index(cache_section):
+    if len(cache_section["nommcuts"]) == 0:
+        return {}
+
+    index_map = {}
+    nommcut_indices = np.flatnonzero(cache_section["nommcuts"])
+    for idx in nommcut_indices:
+        key = (int(cache_section["t_index"][idx]), int(cache_section["phi_index"][idx]))
+        if key not in index_map:
+            index_map[key] = []
+        index_map[key].append(int(idx))
+    return {
+        key: np.asarray(indices, dtype=np.int32)
+        for key, indices in index_map.items()
+    }
+
+
 def _append_sub_event(cache_section, adj_t, adj_MM, theta_cm_deg, q2, w, epsilon, ssxptar, ssyptar, hsxptar, hsyptar, allcuts, nommcuts, t_index=-1, phi_index=-1):
     if not (allcuts or nommcuts):
         return
@@ -149,6 +166,7 @@ def _freeze_sub_event_cache(event_cache):
             "phi_index": np.asarray(cache_section["phi_index"], dtype=np.int32),
         }
         frozen_cache[cache_key]["allcut_bin_index"] = _build_sub_allcut_bin_index(frozen_cache[cache_key])
+        frozen_cache[cache_key]["nommcut_bin_index"] = _build_sub_nommcut_bin_index(frozen_cache[cache_key])
     return frozen_cache
 
 

@@ -23,6 +23,7 @@ import scipy.integrate as integrate
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from copy import deepcopy
 import sys, math, os, subprocess
 from array import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
@@ -70,7 +71,11 @@ from background_config import (
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
     get_bg_scale_setting_key,
+    resolve_particle_subtraction_fallback_mode,
     resolve_particle_subtraction_mode,
+    resolve_particle_subtraction_weight_clip_bounds,
+    resolve_particle_subtraction_weight_denominator_floor,
+    resolve_particle_subtraction_weight_warn_max,
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
@@ -81,10 +86,19 @@ from pion_component_shapes import (
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
+    print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_fit_pages,
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
+)
+from pion_component_subtraction import (
+    build_simc_shape_pion_control_weights,
+    evaluate_particle_subtraction_component_fit_result,
+    fill_simc_shape_pion_subtraction_templates,
+    iter_component_control_source_specs,
+    simc_shape_pion_weight_from_value,
+    summarize_particle_subtraction_component_payload,
 )
 from mm_background_subtraction import (
     build_mm_background_weights,
@@ -104,6 +118,15 @@ def integral_with_stat_error(hist):
         bin_error = hist.GetBinError(bin_index)
         variance += bin_error * bin_error
     return total, math.sqrt(max(variance, 0.0))
+
+
+def _hist_integral(hist):
+    if hist is None:
+        return 0.0
+    try:
+        return float(hist.Integral())
+    except Exception:
+        return 0.0
 
 
 def _clone_hist_for_plot(hist):
@@ -336,6 +359,7 @@ def _freeze_ave_event_cache(event_cache):
             "phi_shift_deg": np.asarray(cache_section["phi_shift_deg"], dtype=np.float64),
         }
         frozen_section["allcut_bin_index"] = _build_allcut_bin_index(frozen_section)
+        frozen_section["nommcut_bin_index"] = _build_nommcut_bin_index(frozen_section)
         frozen_cache[cache_key] = frozen_section
     return frozen_cache
 
@@ -343,6 +367,20 @@ def _freeze_ave_event_cache(event_cache):
 def _build_allcut_bin_index(cache_section):
     bin_index = {}
     for idx in np.flatnonzero(cache_section["allcuts"]):
+        t_bin = int(cache_section["t_index"][idx])
+        phi_bin = int(cache_section["phi_index"][idx])
+        if t_bin < 0 or phi_bin < 0:
+            continue
+        bin_index.setdefault((t_bin, phi_bin), []).append(int(idx))
+    return {
+        key: np.asarray(indices, dtype=np.int32)
+        for key, indices in bin_index.items()
+    }
+
+
+def _build_nommcut_bin_index(cache_section):
+    bin_index = {}
+    for idx in np.flatnonzero(cache_section["nommcuts"]):
         t_bin = int(cache_section["t_index"][idx])
         phi_bin = int(cache_section["phi_index"][idx])
         if t_bin < 0 or phi_bin < 0:
@@ -398,19 +436,75 @@ def _freeze_ave_simc_event_cache(event_cache):
     }
 
 
-def _iter_yield_source_specs(data_event_cache, sub_event_cache, normfac_data, normfac_dummy, nWindows, scale_factor):
-    yield data_event_cache["prompt"], normfac_data
-    yield data_event_cache["rand"], -normfac_data / nWindows
-    yield data_event_cache["dummy"], -normfac_dummy
-    yield data_event_cache["dummy_rand"], normfac_dummy / nWindows
+def _iter_yield_source_specs(
+    data_event_cache,
+    sub_event_cache,
+    normfac_data,
+    normfac_dummy,
+    nWindows,
+    scale_factor,
+    pion_component_payload=None,
+):
+    yield {
+        "cache_section": data_event_cache["prompt"],
+        "coefficient": float(normfac_data),
+        "apply_pion_weight": False,
+    }
+    yield {
+        "cache_section": data_event_cache["rand"],
+        "coefficient": -float(normfac_data) / float(nWindows),
+        "apply_pion_weight": False,
+    }
+    yield {
+        "cache_section": data_event_cache["dummy"],
+        "coefficient": -float(normfac_dummy),
+        "apply_pion_weight": False,
+    }
+    yield {
+        "cache_section": data_event_cache["dummy_rand"],
+        "coefficient": float(normfac_dummy) / float(nWindows),
+        "apply_pion_weight": False,
+    }
 
-    if sub_event_cache is None or scale_factor == 0.0:
+    if sub_event_cache is None:
         return
 
-    yield sub_event_cache["prompt"], -scale_factor * normfac_data
-    yield sub_event_cache["rand"], scale_factor * normfac_data / nWindows
-    yield sub_event_cache["dummy"], scale_factor * normfac_dummy
-    yield sub_event_cache["dummy_rand"], -scale_factor * normfac_dummy / nWindows
+    if pion_component_payload is not None:
+        for source_spec in iter_component_control_source_specs(
+            sub_event_cache,
+            normfac_data,
+            normfac_dummy,
+            nWindows,
+            positive_template=False,
+        ):
+            source_spec = dict(source_spec)
+            source_spec["apply_pion_weight"] = True
+            yield source_spec
+        return
+
+    if scale_factor == 0.0:
+        return
+
+    yield {
+        "cache_section": sub_event_cache["prompt"],
+        "coefficient": -float(scale_factor) * float(normfac_data),
+        "apply_pion_weight": False,
+    }
+    yield {
+        "cache_section": sub_event_cache["rand"],
+        "coefficient": float(scale_factor) * float(normfac_data) / float(nWindows),
+        "apply_pion_weight": False,
+    }
+    yield {
+        "cache_section": sub_event_cache["dummy"],
+        "coefficient": float(scale_factor) * float(normfac_dummy),
+        "apply_pion_weight": False,
+    }
+    yield {
+        "cache_section": sub_event_cache["dummy_rand"],
+        "coefficient": -float(scale_factor) * float(normfac_dummy) / float(nWindows),
+        "apply_pion_weight": False,
+    }
 
 
 def _fill_yield_background_templates_for_bin(
@@ -422,9 +516,13 @@ def _fill_yield_background_templates_for_bin(
     phi_index,
     particle_type,
     pol,
+    pion_component_payload=None,
     residual_weights=None,
 ):
-    for cache_section, coeff in source_specs:
+    for source_spec in source_specs:
+        cache_section = source_spec.get("cache_section")
+        coeff = float(source_spec.get("coefficient", 0.0) or 0.0)
+        apply_pion_weight = bool(source_spec.get("apply_pion_weight"))
         if cache_section is None or coeff == 0.0:
             continue
 
@@ -439,7 +537,14 @@ def _fill_yield_background_templates_for_bin(
                 continue
 
             adj_mm = cache_section["adj_MM"][idx]
-            event_weight = coeff * mm_background_weight_from_value(
+            event_weight = coeff
+            if apply_pion_weight:
+                event_weight *= simc_shape_pion_weight_from_value(
+                    adj_mm,
+                    pion_component_payload["H_pion_control_model"],
+                    pion_component_payload["weights"],
+                )
+            event_weight *= mm_background_weight_from_value(
                 adj_mm,
                 mm_reference_hist,
                 mm_background_weights,
@@ -497,6 +602,7 @@ def _subtract_yield_mm_background_for_bin(
     scale_factor,
     particle_type,
     pol,
+    pion_component_payload=None,
     residual_weights=None,
 ):
     mm_background_weights, diagnostics = build_mm_background_weights_with_diagnostics(
@@ -518,13 +624,22 @@ def _subtract_yield_mm_background_for_bin(
 
     _fill_yield_background_templates_for_bin(
         template_hists,
-        _iter_yield_source_specs(data_event_cache, sub_event_cache, normfac_data, normfac_dummy, nWindows, scale_factor),
+        _iter_yield_source_specs(
+            data_event_cache,
+            sub_event_cache,
+            normfac_data,
+            normfac_dummy,
+            nWindows,
+            scale_factor,
+            pion_component_payload=pion_component_payload,
+        ),
         mm_reference_hist,
         mm_background_weights,
         j,
         k,
         particle_type,
         pol,
+        pion_component_payload=pion_component_payload,
         residual_weights=residual_weights,
     )
 
@@ -540,6 +655,154 @@ def _subtract_yield_mm_background_for_bin(
     hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(template_hists["t_vs_tmin"], -1)
 
     return mm_background_weights, diagnostics
+
+
+def _build_yield_component_template_hists(hist_bin_dict, j, k):
+    return {
+        "Q2": clone_reset_hist(hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "W": clone_reset_hist(hist_bin_dict["H_W_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "q2_w": clone_reset_hist(hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "theta_cm": clone_reset_hist(hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "t": clone_reset_hist(hist_bin_dict["H_t_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "hsxptar": clone_reset_hist(hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "hsyptar": clone_reset_hist(hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "ssxptar": clone_reset_hist(hist_bin_dict["H_ssxptar_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "ssyptar": clone_reset_hist(hist_bin_dict["H_ssyptar_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "t_vs_tmin": clone_reset_hist(hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "mm": clone_reset_hist(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+        "mm_nosub": clone_reset_hist(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], "_pi_component_template"),
+    }
+
+
+def _apply_component_pion_subtraction_for_bin(
+    hist_bin_dict,
+    j,
+    k,
+    component_fit_result,
+    sub_event_cache,
+    normfac_data,
+    normfac_dummy,
+    nWindows,
+    particle_type,
+    pol,
+    inpDict,
+):
+    gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
+    payload = {
+        "accepted": False,
+        "fallback_used": True,
+        "fallback_mode": gate_result.get("fallback_mode"),
+        "fallback_reason": gate_result.get("reason") or "component-fit result rejected",
+        "analysis_scope": component_fit_result.get("analysis_scope") if isinstance(component_fit_result, dict) else None,
+        "particle_subtraction_mode": component_fit_result.get("particle_subtraction_mode") if isinstance(component_fit_result, dict) else None,
+        "fit_status_pion": component_fit_result.get("fit_status_pion") if isinstance(component_fit_result, dict) else None,
+        "fit_status_kaon": component_fit_result.get("fit_status_kaon") if isinstance(component_fit_result, dict) else None,
+        "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
+        "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
+    }
+    if not gate_result["accepted"]:
+        return payload
+    if sub_event_cache is None:
+        payload["fallback_reason"] = "missing sub_event_cache for component-weight subtraction"
+        return payload
+
+    clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inpDict)
+    weight_payload = build_simc_shape_pion_control_weights(
+        component_fit_result,
+        clip_min=clip_min,
+        clip_max=clip_max,
+        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+    )
+    unsupported_bins = set(weight_payload["diagnostics"].get("unsupported_bins") or [])
+    pion_reference = component_fit_result.get("H_pion_control_input")
+    unsupported_overlap = 0
+    if pion_reference is not None and unsupported_bins:
+        for bin_index in unsupported_bins:
+            if float(pion_reference.GetBinContent(int(bin_index))) > 0.0:
+                unsupported_overlap += 1
+    if unsupported_overlap > 0:
+        payload["fallback_reason"] = "unsupported pion-weight bins overlap pion-control content"
+        return payload
+
+    if weight_payload["diagnostics"]["pion_weight_max"] > resolve_particle_subtraction_weight_warn_max(inpDict):
+        print(
+            "WARNING: pion component weight exceeded threshold\n"
+            "  phi_setting = {}\n"
+            "  t_bin = {}\n"
+            "  phi_bin = {}\n"
+            "  max_weight = {:.4f}".format(
+                inpDict.get("phi_setting", ""),
+                int(j) + 1,
+                int(k) + 1,
+                float(weight_payload["diagnostics"]["pion_weight_max"]),
+            )
+        )
+
+    template_hists = _build_yield_component_template_hists(hist_bin_dict, j, k)
+    fill_stats = fill_simc_shape_pion_subtraction_templates(
+        template_hists,
+        iter_component_control_source_specs(
+            sub_event_cache,
+            normfac_data,
+            normfac_dummy,
+            nWindows,
+            positive_template=True,
+        ),
+        weight_payload["H_pion_control_model"],
+        weight_payload["weights"],
+        {"t_index": j, "phi_index": k},
+        particle_type,
+        pol,
+    )
+
+    h_mm_before = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+    h_mm_after = None
+
+    hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(template_hists["Q2"], -1.0)
+    hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(template_hists["W"], -1.0)
+    hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(template_hists["q2_w"], -1.0)
+    hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(template_hists["theta_cm"], -1.0)
+    hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(template_hists["t"], -1.0)
+    hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Add(template_hists["hsxptar"], -1.0)
+    hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Add(template_hists["hsyptar"], -1.0)
+    hist_bin_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Add(template_hists["ssxptar"], -1.0)
+    hist_bin_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Add(template_hists["ssyptar"], -1.0)
+    hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(template_hists["t_vs_tmin"], -1.0)
+    hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(template_hists["mm_nosub"], -1.0)
+    hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(template_hists["mm_nosub"], -1.0)
+    hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(template_hists["mm"], -1.0)
+    h_mm_after = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+
+    pion_control_integral = _hist_integral(component_fit_result.get("H_pion_control_input"))
+    weighted_pion_integral = _hist_integral(template_hists["mm_nosub"])
+    effective_scale = weighted_pion_integral / pion_control_integral if pion_control_integral > 0.0 else 0.0
+
+    payload.update(
+        {
+            "accepted": True,
+            "fallback_used": False,
+            "fallback_reason": "",
+            "particle_subtraction_effective_scale": float(effective_scale),
+            "weighted_pion_integral": float(weighted_pion_integral),
+            "kaon_integral_before_pion_sub": _hist_integral(h_mm_before),
+            "kaon_integral_after_pion_sub": _hist_integral(h_mm_after),
+            "H_pion_control_model": weight_payload["H_pion_control_model"],
+            "H_kaon_pion_model": weight_payload["H_kaon_pion_model"],
+            "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
+            "weights": weight_payload["weights"],
+            "H_pion_control_unscaled": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
+            "H_pion_subtraction_template_MM": template_hists["mm"],
+            "H_pion_subtraction_template_MM_nosub": template_hists["mm_nosub"],
+            "H_pion_subtraction_template_t": template_hists["t"],
+            "H_MM_before_pion_subtraction": h_mm_before,
+            "H_MM_after_pion_subtraction": h_mm_after,
+            "diagnostics": {
+                **deepcopy(weight_payload["diagnostics"]),
+                **deepcopy(fill_stats),
+            },
+        }
+    )
+    return payload
 
 
 def _init_hist_group_matrices(names, n_t, n_phi):
@@ -804,6 +1067,7 @@ def process_hist_data(
     particle_subtraction_mode = resolve_particle_subtraction_mode(inpDict)
     component_shape_payload = None
     component_fit_results = [[None for _ in range(n_phi)] for _ in range(n_t)]
+    component_subtraction_payloads = [[None for _ in range(n_phi)] for _ in range(n_t)]
     dummy_norm_hist_dict = {}
     yield_hist_names = ("Q2", "W", "q2_w", "theta_cm", "mm", "fit1sub", "pisub", "nosub", "t", "t_vs_tmin", "ssxptar", "ssyptar", "hsxptar", "hsyptar")
     data_hists = _init_hist_group_matrices(yield_hist_names, n_t, n_phi)
@@ -1259,6 +1523,10 @@ def process_hist_data(
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
+                scale_factor = 0.0
+                component_payload = None
+                use_legacy_scalar_subtraction = True
+
                 if component_shape_payload is not None:
                     scope_result = build_particle_subtraction_component_result(
                         subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
@@ -1281,88 +1549,116 @@ def process_hist_data(
                         context="yield_{}_t{}_phi{}".format(phi_setting, j + 1, k + 1),
                     )
                     component_fit_results[j][k] = scope_result
-                if particle_subtraction_scale_factor is not None:
-                    scale_factor = float(particle_subtraction_scale_factor)
-                else:
-                    try:
-                        subtraction_windows = resolve_particle_subtraction_windows(
-                            ParticleType,
-                            SubtractedParticle,
-                            MM_offset_DATA,
-                        )
-                        scale_components = compute_staged_particle_subtraction_scales(
-                            hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                            subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                            subtraction_windows,
-                            context="pion subtraction (t-bin {}, phi-bin {})".format(j, k),
-                            quiet=suppress_scale_warnings,
-                        )
-                        scale_factor = scale_components["total_scale_factor"]
-
-                        # Check that pion background is not over subtracting within kaon MM range
-                        kaon_range_check = integrate_hist_range(
-                            hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                            mm_min, mm_max
-                        )
-
-                        pion_range_check = integrate_hist_range(
-                            subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
-                            mm_min, mm_max
-                        )
-
-                        if pion_range_check > kaon_range_check:
-                            if not suppress_scale_warnings:
-                                print("\n\nWARNING: Pion background larger than kaon peak in t-bin {}, phi-bin {}. Setting scaling factor to zero....".format(j, k))
+                    component_payload = _apply_component_pion_subtraction_for_bin(
+                        hist_bin_dict,
+                        j,
+                        k,
+                        scope_result,
+                        sub_event_cache,
+                        normfac_data,
+                        normfac_dummy,
+                        nWindows,
+                        ParticleType,
+                        POL,
+                        {**inpDict, "phi_setting": phi_setting},
+                    )
+                    component_subtraction_payloads[j][k] = component_payload
+                    if component_payload.get("accepted"):
+                        use_legacy_scalar_subtraction = False
+                        scale_factor = float(component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0)
+                    else:
+                        fallback_mode = component_payload.get("fallback_mode") or "single_scale"
+                        if fallback_mode == "single_scale":
+                            use_legacy_scalar_subtraction = True
+                        elif fallback_mode in ("zero", "skip_bin"):
+                            use_legacy_scalar_subtraction = False
                             scale_factor = 0.0
-                    except ZeroDivisionError:
+                        else:
+                            use_legacy_scalar_subtraction = True
+
+                if use_legacy_scalar_subtraction:
+                    if particle_subtraction_scale_factor is not None:
+                        scale_factor = float(particle_subtraction_scale_factor)
+                    else:
+                        try:
+                            subtraction_windows = resolve_particle_subtraction_windows(
+                                ParticleType,
+                                SubtractedParticle,
+                                MM_offset_DATA,
+                            )
+                            scale_components = compute_staged_particle_subtraction_scales(
+                                hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                                subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                                subtraction_windows,
+                                context="pion subtraction (t-bin {}, phi-bin {})".format(j, k),
+                                quiet=suppress_scale_warnings,
+                            )
+                            scale_factor = scale_components["total_scale_factor"]
+
+                            # Check that pion background is not over subtracting within kaon MM range
+                            kaon_range_check = integrate_hist_range(
+                                hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
+                                mm_min, mm_max
+                            )
+
+                            pion_range_check = integrate_hist_range(
+                                subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                                mm_min, mm_max
+                            )
+
+                            if pion_range_check > kaon_range_check:
+                                if not suppress_scale_warnings:
+                                    print("\n\nWARNING: Pion background larger than kaon peak in t-bin {}, phi-bin {}. Setting scaling factor to zero....".format(j, k))
+                                scale_factor = 0.0
+                        except ZeroDivisionError:
+                            scale_factor = 0.0
+                    '''
+                    if scale_factor > 10.0:
+                        print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
                         scale_factor = 0.0
-                '''
-                if scale_factor > 10.0:
-                    print("\n\nWARNING: Pion scaling factor too large, likely no pion peak. Setting to zero....")
-                    scale_factor = 0.0
-                '''  
+                    '''
 
-                if phi_setting == "Center":
-                    phi_scale = 0.95
-                elif phi_setting == "Left":
-                    phi_scale = 0.65
-                elif phi_setting == "Right":
-                    phi_scale = 0.65
-                else:
-                    raise ValueError("Invalid phi_setting: {}".format(phi_setting))
-                
-                scale_factor = scale_factor #* phi_scale
+                    if phi_setting == "Center":
+                        phi_scale = 0.95
+                    elif phi_setting == "Left":
+                        phi_scale = 0.65
+                    elif phi_setting == "Right":
+                        phi_scale = 0.65
+                    else:
+                        raise ValueError("Invalid phi_setting: {}".format(phi_setting))
 
-                arr_scale_factor[j][k] = scale_factor #* phi_scale
+                    scale_factor = scale_factor #* phi_scale
 
-                # Scale pion to subtraction proper peak
-                subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_W_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_hsxptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_hsyptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_ssxptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_ssyptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
-                
-                # Apply pion subtraction
-                hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(subDict["H_W_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Add(subDict["H_hsxptar_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Add(subDict["H_hsyptar_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Add(subDict["H_ssxptar_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Add(subDict["H_ssyptar_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)],-1)
-                hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
+                    # Scale pion to subtraction proper peak
+                    subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_W_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_t_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_hsxptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_hsyptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_ssxptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_ssyptar_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_MM_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+                    subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)].Scale(scale_factor)
+
+                    # Apply pion subtraction
+                    hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)].Add(subDict["H_Q2_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_W_DATA_{}_{}".format(j, k)].Add(subDict["H_W_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)].Add(subDict["H_Q2_vs_W_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)].Add(subDict["H_theta_cm_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_t_DATA_{}_{}".format(j, k)].Add(subDict["H_t_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)].Add(subDict["H_hsxptar_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)].Add(subDict["H_hsyptar_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_ssxptar_DATA_{}_{}".format(j, k)].Add(subDict["H_ssxptar_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_ssyptar_DATA_{}_{}".format(j, k)].Add(subDict["H_ssyptar_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)].Add(subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)],-1)
+                    hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)].Add(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],-1)
+
+                arr_scale_factor[j][k] = scale_factor
 
             # Fit background and subtract
             # ---- Statistic‑scale for this (t,phi) bin ----------------
@@ -1383,6 +1679,12 @@ def process_hist_data(
                 )
 
                 mm_stage1_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+                active_component_payload = component_subtraction_payloads[j][k]
+                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
+                    active_component_payload = None
+                active_component_payload = entry.get("particle_subtraction_component_payload")
+                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
+                    active_component_payload = None
                 bg_weights1, fit1_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
@@ -1397,6 +1699,7 @@ def process_hist_data(
                     arr_scale_factor[j][k],
                     ParticleType,
                     POL,
+                    pion_component_payload=active_component_payload,
                 )
                 bg_oversub_diagnostics[j][k]["fit1"] = fit1_diagnostics
                 _warn_if_oversub_diagnostics(
@@ -1484,6 +1787,9 @@ def process_hist_data(
                 )
 
                 mm_stage2_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+                active_component_payload = component_subtraction_payloads[j][k]
+                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
+                    active_component_payload = None
                 _, fit2_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
@@ -1498,6 +1804,7 @@ def process_hist_data(
                     arr_scale_factor[j][k],
                     ParticleType,
                     POL,
+                    pion_component_payload=active_component_payload,
                     residual_weights=residual_bg_weights1,
                 )
                 bg_oversub_diagnostics[j][k]["fit2"] = fit2_diagnostics
@@ -1583,6 +1890,16 @@ def process_hist_data(
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
         for k in range(len(phi_bins)-1): 
+            component_payload = component_subtraction_payloads[j][k]
+            display_mm_sub_hist = subDict["H_MM_SUB_DATA_{}_{}".format(j, k)]
+            display_t_sub_hist = subDict["H_t_SUB_DATA_{}_{}".format(j, k)]
+            if isinstance(component_payload, dict):
+                if component_payload.get("accepted"):
+                    display_mm_sub_hist = component_payload.get("H_pion_subtraction_template_MM") or display_mm_sub_hist
+                    display_t_sub_hist = component_payload.get("H_pion_subtraction_template_t") or display_t_sub_hist
+                elif component_payload.get("fallback_mode") in ("zero", "skip_bin"):
+                    display_mm_sub_hist = clone_reset_hist(subDict["H_MM_SUB_DATA_{}_{}".format(j, k)], "_component_empty_display")
+                    display_t_sub_hist = clone_reset_hist(subDict["H_t_SUB_DATA_{}_{}".format(j, k)], "_component_empty_display")
             
             processed_entry = {
                 "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
@@ -1590,13 +1907,21 @@ def process_hist_data(
                 "H_MM_RAW_PROMPT_DATA" : stage_snapshot_dict["H_MM_RAW_PROMPT_DATA_{}_{}".format(j, k)],
                 "H_MM_AFTER_RANDOM_DATA" : stage_snapshot_dict["H_MM_AFTER_RANDOM_DATA_{}_{}".format(j, k)],
                 "H_t_DATA" : hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
-                "H_MM_SUB_DATA" : subDict["H_MM_SUB_DATA_{}_{}".format(j, k)],
-                "H_t_SUB_DATA" : subDict["H_t_SUB_DATA_{}_{}".format(j, k)],
+                "H_MM_SUB_DATA" : display_mm_sub_hist,
+                "H_t_SUB_DATA" : display_t_sub_hist,
                 "scale_factor" : arr_scale_factor[j][k],
                 "particle_subtraction_component_fit" : component_fit_results[j][k],
                 "particle_subtraction_component_fit_summary" : serialize_particle_subtraction_component_result(
                     component_fit_results[j][k]
                 ) if component_fit_results[j][k] is not None else None,
+                "particle_subtraction_component_payload" : component_subtraction_payloads[j][k],
+                "particle_subtraction_component_payload_summary" : summarize_particle_subtraction_component_payload(
+                    component_subtraction_payloads[j][k]
+                ) if component_subtraction_payloads[j][k] is not None else None,
+                "particle_subtraction_component_applied" : bool(
+                    isinstance(component_subtraction_payloads[j][k], dict)
+                    and component_subtraction_payloads[j][k].get("accepted")
+                ),
                 # Fractional background-fit error for this bin
                 "bg_fit1_frac_err" : bg_fit1_frac_err[j][k],        
                 "bg_fit2_frac_err" : bg_fit2_frac_err[j][k],
@@ -1653,7 +1978,12 @@ def process_hist_data(
                         mm_nosub_plot.SetFillColor(kBlack)  # Set fill color to black
                         mm_nosub_plot.Draw()
                         if ParticleType == "kaon":
-                            mm_sub_plot = _clone_hist_for_plot(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)])
+                            if isinstance(component_payload, dict) and component_payload.get("accepted"):
+                                mm_sub_plot = _clone_hist_for_plot(component_payload.get("H_pion_subtraction_template_MM_nosub"))
+                            elif isinstance(component_payload, dict) and component_payload.get("fallback_mode") in ("zero", "skip_bin"):
+                                mm_sub_plot = clone_reset_hist(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)], "_component_empty_plot")
+                            else:
+                                mm_sub_plot = _clone_hist_for_plot(subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)])
                             mm_sub_plot.SetLineColor(2)
                             mm_sub_plot.Draw("same, E1")
                         mm_nosub_plot.SetTitle(mm_nosub_plot.GetName())
@@ -1735,6 +2065,13 @@ def process_hist_data(
                             print_particle_subtraction_component_fit_pages(
                                 pdf_name,
                                 component_fit_results[j][k],
+                                title_prefix="{} t{} phi{}".format(phi_setting, j + 1, k + 1),
+                                cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                            )
+                        if isinstance(component_payload, dict) and component_payload.get("accepted"):
+                            print_particle_subtraction_component_application_pages(
+                                pdf_name,
+                                component_payload,
                                 title_prefix="{} t{} phi{}".format(phi_setting, j + 1, k + 1),
                                 cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
                             )
@@ -1893,6 +2230,7 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     entry["scale_factor"],
                     ParticleType,
                     POL,
+                    pion_component_payload=active_component_payload,
                 )
                 entry["oversub_diagnostics"]["fit1"] = fit1_diagnostics
                 _warn_if_oversub_diagnostics(
@@ -1940,6 +2278,9 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 )
 
                 mm_stage2_input = _clone_hist_for_plot(entry["H_MM_DATA"])
+                active_component_payload = entry.get("particle_subtraction_component_payload")
+                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
+                    active_component_payload = None
                 _, fit2_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
@@ -1954,6 +2295,7 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                     entry["scale_factor"],
                     ParticleType,
                     POL,
+                    pion_component_payload=active_component_payload,
                     residual_weights=residual_bg_weights1,
                 )
                 entry["oversub_diagnostics"]["fit2"] = fit2_diagnostics

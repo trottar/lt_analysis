@@ -2538,6 +2538,70 @@ def _print_component_overlay_page(
     canvas.Close()
 
 
+def _format_mm_range(range_values):
+    if not isinstance(range_values, (list, tuple)) or len(range_values) != 2:
+        return "none"
+    if not (_is_finite_number(range_values[0]) and _is_finite_number(range_values[1])):
+        return "none"
+    return "[{:.3f}, {:.3f}]".format(float(range_values[0]), float(range_values[1]))
+
+
+def _print_single_hist_page(
+    pdf_name,
+    hist,
+    label,
+    title,
+    stats_lines,
+    cut_window=None,
+    line_color=None,
+):
+    if hist is None:
+        return
+
+    canvas = ROOT.TCanvas()
+    hist_clone = _clone_hist(hist, "{}_single_plot".format(hist.GetName()))
+    hist_clone.SetTitle(title)
+    hist_clone.SetLineColor(ROOT.kBlack if line_color is None else line_color)
+    hist_clone.SetLineWidth(2)
+    hist_clone.SetFillStyle(0)
+    hist_clone.SetMarkerStyle(20)
+    hist_clone.SetMarkerSize(0.6)
+    y_max = max(hist_clone.GetMaximum(), 0.0)
+    y_min = min(hist_clone.GetMinimum(), 0.0)
+    if y_max <= 0.0:
+        y_max = 1.0
+    hist_clone.SetMaximum(1.20 * y_max)
+    hist_clone.SetMinimum(1.20 * y_min if y_min < 0.0 else 0.0)
+    hist_clone.Draw("hist")
+
+    if cut_window is not None:
+        _draw_vertical_window_lines(
+            cut_window[0],
+            cut_window[1],
+            hist_clone.GetMinimum(),
+            hist_clone.GetMaximum(),
+        )
+
+    legend = ROOT.TLegend(0.62, 0.78, 0.88, 0.88)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    legend.AddEntry(hist_clone, label, "l")
+    legend.Draw()
+
+    if stats_lines:
+        stats_box = ROOT.TPaveText(0.14, 0.58, 0.56, 0.88, "NDC")
+        stats_box.SetBorderSize(0)
+        stats_box.SetFillStyle(0)
+        stats_box.SetTextAlign(12)
+        stats_box.SetTextSize(0.028)
+        for line in stats_lines:
+            stats_box.AddText(line)
+        stats_box.Draw()
+
+    canvas.Print(pdf_name)
+    canvas.Close()
+
+
 def _print_component_step_pages(
     pdf_name,
     target_hist,
@@ -2713,6 +2777,111 @@ def _print_component_step_pages(
 
         canvas.Print(pdf_name)
         canvas.Close()
+
+
+def print_particle_subtraction_component_application_pages(
+    pdf_name,
+    component_payload,
+    title_prefix="",
+    cut_window=None,
+):
+    if not isinstance(component_payload, dict):
+        return
+    if not bool(component_payload.get("accepted")):
+        return
+
+    title_prefix = (title_prefix or "").strip()
+    if title_prefix:
+        title_prefix = "{} ".format(title_prefix)
+
+    diagnostics = component_payload.get("diagnostics") or {}
+    scope_label = component_payload.get("analysis_scope") or component_payload.get("analysis_scope_label") or "unknown"
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_pion_control_model"),
+        "pion-control model",
+        "{}Part 3 weighted pion-control model".format(title_prefix),
+        [
+            (component_payload.get("H_kaon_pion_model"), "kaon pion model", ROOT.kBlue + 1, 1),
+            (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "status: accepted",
+            "effective scale={}".format(
+                _format_fit_number(component_payload.get("particle_subtraction_effective_scale"))
+            ),
+            "weighted pion integral={}".format(
+                _format_fit_number(component_payload.get("weighted_pion_integral"))
+            ),
+            "control model integral={}".format(
+                _format_fit_number(diagnostics.get("pion_control_model_integral"))
+            ),
+            "kaon pion model integral={}".format(
+                _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
+            ),
+            "ratio consistency={}".format(
+                "pass" if bool(diagnostics.get("ratio_consistency_ok")) else "fail"
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_single_hist_page(
+        pdf_name,
+        component_payload.get("H_pion_weight_vs_MM"),
+        "w_pi(MM)",
+        "{}Part 3 pion weight vs MM".format(title_prefix),
+        [
+            "scope: {}".format(scope_label),
+            "min/max={} / {}".format(
+                _format_fit_metric(diagnostics.get("pion_weight_min")),
+                _format_fit_metric(diagnostics.get("pion_weight_max")),
+            ),
+            "mean/rms={} / {}".format(
+                _format_fit_metric(diagnostics.get("pion_weight_mean")),
+                _format_fit_metric(diagnostics.get("pion_weight_rms")),
+            ),
+            "unclipped min/max={} / {}".format(
+                _format_fit_metric(diagnostics.get("pion_weight_min_unclipped")),
+                _format_fit_metric(diagnostics.get("pion_weight_max_unclipped")),
+            ),
+            "clipped bins={}".format(int(diagnostics.get("pion_weight_clipped_bin_count", 0) or 0)),
+            "unsupported bins={}".format(int(diagnostics.get("pion_weight_unsupported_bin_count", 0) or 0)),
+            "unsupported MM={}".format(_format_mm_range(diagnostics.get("pion_weight_unsupported_mm_range"))),
+        ],
+        cut_window=cut_window,
+        line_color=ROOT.kViolet + 1,
+    )
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_MM_before_pion_subtraction"),
+        "before pion subtraction",
+        "{}Part 3 MM before/after pion subtraction".format(title_prefix),
+        [
+            (component_payload.get("H_pion_subtraction_template_MM"), "weighted pion template", ROOT.kOrange + 7, 2),
+            (component_payload.get("H_MM_after_pion_subtraction"), "after pion subtraction", ROOT.kGreen + 2, 1),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "before integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_before_pion_sub"))
+            ),
+            "template integral={}".format(
+                _format_fit_number(component_payload.get("weighted_pion_integral"))
+            ),
+            "after integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_after_pion_sub"))
+            ),
+            "fit validation pion/kaon={}/{}".format(
+                "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
+                "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail",
+            ),
+        ],
+        cut_window=cut_window,
+    )
 
 
 def print_particle_subtraction_component_fit_pages(

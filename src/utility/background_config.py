@@ -149,6 +149,16 @@ PARTICLE_SUBTRACTION_MODES = (
     PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
 )
+PARTICLE_SUBTRACTION_FALLBACK_MODE_DEFAULT = PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE
+PARTICLE_SUBTRACTION_FALLBACK_MODES = (
+    PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE,
+    "zero",
+    "skip_bin",
+)
+PARTICLE_SUBTRACTION_WEIGHT_DENOM_FLOOR_DEFAULT = 1e-12
+PARTICLE_SUBTRACTION_WEIGHT_CLIP_MIN_DEFAULT = 0.0
+PARTICLE_SUBTRACTION_WEIGHT_CLIP_MAX_DEFAULT = None
+PARTICLE_SUBTRACTION_WEIGHT_WARN_MAX_DEFAULT = 10.0
 SIMC_TREE_NAME_DEFAULT = "h10"
 SIMC_PION_COMPONENT_BACKGROUND_MAP = {
     "pi_n": "neutron",
@@ -1245,6 +1255,68 @@ def resolve_particle_subtraction_mode(inp_dict=None, mode=None):
     elif mode is None:
         mode = PARTICLE_SUBTRACTION_MODE_DEFAULT
     return _normalize_particle_subtraction_mode(mode)
+
+
+def _normalize_particle_subtraction_fallback_mode(value):
+    mode = str(value or PARTICLE_SUBTRACTION_FALLBACK_MODE_DEFAULT).strip().lower()
+    if mode not in PARTICLE_SUBTRACTION_FALLBACK_MODES:
+        raise ValueError(
+            "Invalid particle_subtraction_fallback_mode '{}'. Allowed values are {}.".format(
+                value,
+                ", ".join(PARTICLE_SUBTRACTION_FALLBACK_MODES),
+            )
+        )
+    return mode
+
+
+def resolve_particle_subtraction_fallback_mode(inp_dict=None, mode=None):
+    if mode is None and isinstance(inp_dict, dict):
+        mode = inp_dict.get(
+            "particle_subtraction_fallback_mode",
+            PARTICLE_SUBTRACTION_FALLBACK_MODE_DEFAULT,
+        )
+    elif mode is None:
+        mode = PARTICLE_SUBTRACTION_FALLBACK_MODE_DEFAULT
+    return _normalize_particle_subtraction_fallback_mode(mode)
+
+
+def resolve_particle_subtraction_weight_denominator_floor(inp_dict=None):
+    if isinstance(inp_dict, dict):
+        return float(
+            inp_dict.get(
+                "particle_subtraction_weight_denom_floor",
+                PARTICLE_SUBTRACTION_WEIGHT_DENOM_FLOOR_DEFAULT,
+            )
+        )
+    return float(PARTICLE_SUBTRACTION_WEIGHT_DENOM_FLOOR_DEFAULT)
+
+
+def resolve_particle_subtraction_weight_clip_bounds(inp_dict=None):
+    clip_min = PARTICLE_SUBTRACTION_WEIGHT_CLIP_MIN_DEFAULT
+    clip_max = PARTICLE_SUBTRACTION_WEIGHT_CLIP_MAX_DEFAULT
+    if isinstance(inp_dict, dict):
+        clip_min = inp_dict.get(
+            "particle_subtraction_weight_clip_min",
+            PARTICLE_SUBTRACTION_WEIGHT_CLIP_MIN_DEFAULT,
+        )
+        clip_max = inp_dict.get(
+            "particle_subtraction_weight_clip_max",
+            PARTICLE_SUBTRACTION_WEIGHT_CLIP_MAX_DEFAULT,
+        )
+    clip_min = None if clip_min is None else float(clip_min)
+    clip_max = None if clip_max is None else float(clip_max)
+    return clip_min, clip_max
+
+
+def resolve_particle_subtraction_weight_warn_max(inp_dict=None):
+    if isinstance(inp_dict, dict):
+        return float(
+            inp_dict.get(
+                "particle_subtraction_weight_warn_max",
+                PARTICLE_SUBTRACTION_WEIGHT_WARN_MAX_DEFAULT,
+            )
+        )
+    return float(PARTICLE_SUBTRACTION_WEIGHT_WARN_MAX_DEFAULT)
 
 
 def resolve_simc_tree_name(inp_dict=None):
