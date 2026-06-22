@@ -179,10 +179,13 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
         "fit_order": ("pi_sidis", "pi_n", "pi_delta"),
+        "stage_amplitude_windows": {
+            "pi_delta": (1.17, 1.23),
+        },
         "postfit_component_scales": {
             "pi_n": 0.95,
             "pi_delta": 0.95,
-            "pi_sidis": 0.50,
+            "pi_sidis": 0.75,
         },
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
@@ -209,10 +212,11 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
         "fit_order": ("pi_sidis", "pi_n", "pi_delta"),
+        "stage_amplitude_windows": {},
         "postfit_component_scales": {
             "pi_n": 0.95,
             "pi_delta": 0.95,
-            "pi_sidis": 0.50,
+            "pi_sidis": 0.25,
         },
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
@@ -1371,6 +1375,26 @@ def resolve_particle_subtraction_component_fit_excluded_windows(fit_target, mm_o
             )
         low_edge, high_edge = bounds
         resolved.append((float(low_edge) + offset, float(high_edge) + offset))
+    return resolved
+
+
+def resolve_particle_subtraction_component_stage_amplitude_windows(fit_target, mm_offset_data=0.0):
+    config = get_particle_subtraction_component_fit_window_config(fit_target)
+    if not config:
+        return {}
+
+    offset = float(mm_offset_data) if bool(config.get("apply_mm_offset_data", False)) else 0.0
+    resolved = {}
+    for component_name, bounds in (config.get("stage_amplitude_windows") or {}).items():
+        if len(bounds) != 2:
+            raise ValueError(
+                "Particle subtraction component stage-amplitude window '{}' for '{}' must contain exactly two bounds".format(
+                    component_name,
+                    fit_target,
+                )
+            )
+        low_edge, high_edge = bounds
+        resolved[str(component_name)] = (float(low_edge) + offset, float(high_edge) + offset)
     return resolved
 
 

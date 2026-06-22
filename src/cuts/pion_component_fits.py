@@ -15,6 +15,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     resolve_particle_subtraction_component_postfit_scales,
+    resolve_particle_subtraction_component_stage_amplitude_windows,
     resolve_particle_subtraction_component_fit_excluded_windows,
     get_particle_subtraction_component_fit_window_config,
     resolve_particle_subtraction_component_fit_windows,
@@ -336,6 +337,8 @@ def _solve_nonnegative_template_amplitude(
     fit_max,
     include_windows=None,
     exclude_windows=None,
+    amplitude_windows=None,
+    amplitude_mode="least_squares",
 ):
     template_name = getattr(template_hist, "GetName", lambda: "template")()
     validation_message = _validate_template_hist(template_hist, target_hist, template_name)
@@ -347,6 +350,8 @@ def _solve_nonnegative_template_amplitude(
             "chi2": None,
             "n_fit_bins": 0,
             "message": validation_message,
+            "amplitude_mode": str(amplitude_mode or "least_squares"),
+            "amplitude_windows": deepcopy(amplitude_windows or include_windows or []),
         }
 
     fit_inputs = _build_single_template_fit_inputs(
@@ -365,25 +370,68 @@ def _solve_nonnegative_template_amplitude(
             "chi2": None,
             "n_fit_bins": 0,
             "message": "no valid fit bins",
+            "amplitude_mode": str(amplitude_mode or "least_squares"),
+            "amplitude_windows": deepcopy(amplitude_windows or include_windows or []),
         }
 
-    weighted_template = fit_inputs["template"] / fit_inputs["sigma"]
-    denominator = float(np.dot(weighted_template, weighted_template))
-    if (not math.isfinite(denominator)) or denominator <= 0.0:
-        return {
-            "success": False,
-            "amplitude": 0.0,
-            "sigma": None,
-            "chi2": None,
-            "n_fit_bins": int(len(fit_inputs["x"])),
-            "message": "template has zero support inside anchor window",
-        }
+    resolved_amplitude_mode = str(amplitude_mode or "least_squares")
+    resolved_amplitude_windows = deepcopy(amplitude_windows or include_windows or [])
+    if resolved_amplitude_mode == "window_integral":
+        amplitude_inputs = _build_single_template_fit_inputs(
+            target_hist,
+            template_hist,
+            fit_min,
+            fit_max,
+            include_windows=amplitude_windows,
+            exclude_windows=exclude_windows,
+        )
+        if len(amplitude_inputs["x"]) == 0:
+            return {
+                "success": False,
+                "amplitude": 0.0,
+                "sigma": None,
+                "chi2": None,
+                "n_fit_bins": 0,
+                "message": "no valid amplitude-window bins",
+                "amplitude_mode": resolved_amplitude_mode,
+                "amplitude_windows": resolved_amplitude_windows,
+            }
+        template_sum = float(np.sum(amplitude_inputs["template"]))
+        if (not math.isfinite(template_sum)) or template_sum <= 0.0:
+            return {
+                "success": False,
+                "amplitude": 0.0,
+                "sigma": None,
+                "chi2": None,
+                "n_fit_bins": int(len(amplitude_inputs["x"])),
+                "message": "template has zero support inside amplitude window",
+                "amplitude_mode": resolved_amplitude_mode,
+                "amplitude_windows": resolved_amplitude_windows,
+            }
+        target_sum = float(np.sum(amplitude_inputs["y"]))
+        amplitude = max(target_sum / template_sum, 0.0)
+        sigma_value = math.sqrt(float(np.sum(np.square(amplitude_inputs["sigma"])))) / template_sum
+    else:
+        weighted_template = fit_inputs["template"] / fit_inputs["sigma"]
+        denominator = float(np.dot(weighted_template, weighted_template))
+        if (not math.isfinite(denominator)) or denominator <= 0.0:
+            return {
+                "success": False,
+                "amplitude": 0.0,
+                "sigma": None,
+                "chi2": None,
+                "n_fit_bins": int(len(fit_inputs["x"])),
+                "message": "template has zero support inside anchor window",
+                "amplitude_mode": resolved_amplitude_mode,
+                "amplitude_windows": resolved_amplitude_windows,
+            }
 
-    weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
-    amplitude = max(float(np.dot(weighted_template, weighted_target) / denominator), 0.0)
+        weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
+        amplitude = max(float(np.dot(weighted_template, weighted_target) / denominator), 0.0)
+        sigma_value = 1.0 / math.sqrt(denominator)
+
     residual = fit_inputs["y"] - amplitude * fit_inputs["template"]
     chi2_value = float(np.sum(np.square(residual / fit_inputs["sigma"])))
-    sigma_value = 1.0 / math.sqrt(denominator)
     return {
         "success": True,
         "amplitude": amplitude,
@@ -391,6 +439,8 @@ def _solve_nonnegative_template_amplitude(
         "chi2": chi2_value,
         "n_fit_bins": int(len(fit_inputs["x"])),
         "message": "",
+        "amplitude_mode": resolved_amplitude_mode,
+        "amplitude_windows": resolved_amplitude_windows,
     }
 
 
@@ -682,6 +732,8 @@ def _rebuild_step_overlays_with_component_scales(
         rebuilt_overlay["raw_amplitude"] = raw_amplitude
         rebuilt_overlay["postfit_scale_factor"] = scale_factor
         rebuilt_overlay["amplitude"] = scaled_amplitude
+        rebuilt_overlay["amplitude_mode"] = step_overlay.get("amplitude_mode", "least_squares")
+        rebuilt_overlay["amplitude_windows"] = deepcopy(step_overlay.get("amplitude_windows") or [])
         rebuilt_overlay["H_baseline_before"] = baseline_before_hist
         rebuilt_overlay["H_residual_input"] = residual_input_hist
         rebuilt_overlay["H_component_scaled"] = component_scaled_hist
@@ -931,6 +983,7 @@ def _run_staged_component_pass(
     fit_min,
     fit_max,
     anchor_window_map,
+    stage_amplitude_window_map,
     exclude_windows,
     amplitude_seed,
     amplitude_prefix,
@@ -980,6 +1033,12 @@ def _run_staged_component_pass(
             fit_max,
             include_windows=anchor_window_map.get(component_name),
             exclude_windows=exclude_windows,
+            amplitude_windows=stage_amplitude_window_map.get(component_name),
+            amplitude_mode=(
+                "window_integral"
+                if (stage_amplitude_window_map.get(component_name) or [])
+                else "least_squares"
+            ),
         )
         amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
         uncertainty_map[component_name] = solve_result.get("sigma")
@@ -990,6 +1049,8 @@ def _run_staged_component_pass(
             "n_fit_bins": solve_result.get("n_fit_bins"),
             "success": bool(solve_result.get("success", False)),
             "message": solve_result.get("message", ""),
+            "amplitude_mode": solve_result.get("amplitude_mode", "least_squares"),
+            "amplitude_windows": deepcopy(solve_result.get("amplitude_windows") or []),
         }
 
         component_scaled_hist = _clone_hist(
@@ -1018,6 +1079,8 @@ def _run_staged_component_pass(
                 "component_label": _component_plot_label(component_name),
                 "amplitude": float(amplitude_map[component_name]),
                 "anchor_windows": deepcopy(anchor_window_map.get(component_name) or []),
+                "amplitude_mode": solve_result.get("amplitude_mode", "least_squares"),
+                "amplitude_windows": deepcopy(solve_result.get("amplitude_windows") or []),
                 "excluded_windows": deepcopy(exclude_windows or []),
                 "H_baseline_before": baseline_before_hist,
                 "H_residual_input": residual_hist,
@@ -1228,6 +1291,7 @@ def _fit_staged_anchor_templates(
     fit_max,
     anchor_windows,
     fit_order,
+    stage_amplitude_windows=None,
     exclude_windows=None,
     extra_positive_templates=None,
     extra_anchor_windows=None,
@@ -1259,6 +1323,7 @@ def _fit_staged_anchor_templates(
             return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
 
     anchor_window_map = _coerce_window_map(anchor_windows)
+    stage_amplitude_window_map = _coerce_window_map(stage_amplitude_windows)
     extra_window_map = _coerce_window_map(extra_anchor_windows)
     template_hists = {
         "pi_n": component_hists["pi_n"],
@@ -1302,6 +1367,7 @@ def _fit_staged_anchor_templates(
             fit_min,
             fit_max,
             combined_window_map,
+            stage_amplitude_window_map,
             exclude_windows,
             stage_amplitudes,
             amplitude_prefix,
@@ -1530,6 +1596,7 @@ def _fit_staged_anchor_templates(
         "n_passes": total_passes,
         "fit_order": list(fitted_names),
         "anchor_windows": deepcopy(combined_window_map),
+        "stage_amplitude_windows": deepcopy(stage_amplitude_window_map),
         "staged_pass_history": deepcopy(staged_pass_history),
         "staged_component_amplitudes": {
             component_name: float(stage_amplitudes.get(component_name, 0.0) or 0.0)
@@ -1818,6 +1885,10 @@ def fit_pion_control_with_simc_shapes(
         "pion_control",
         mm_offset_data=mm_offset_data,
     )
+    stage_amplitude_windows = resolve_particle_subtraction_component_stage_amplitude_windows(
+        "pion_control",
+        mm_offset_data=mm_offset_data,
+    )
     excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
         "pion_control",
         mm_offset_data=mm_offset_data,
@@ -1850,6 +1921,7 @@ def fit_pion_control_with_simc_shapes(
         fit_max,
         anchor_windows=anchor_windows,
         fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
+        stage_amplitude_windows=stage_amplitude_windows,
         exclude_windows=excluded_windows,
         n_passes=fit_config.get("staged_fit_passes", 1),
         prior_scale_map=prior_scale_map,
@@ -1900,6 +1972,10 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
     fit_config = get_particle_subtraction_component_fit_window_config("kaon_nosub") or {}
     resolved_windows = resolve_particle_subtraction_component_fit_windows(
+        "kaon_nosub",
+        mm_offset_data=mm_offset_data,
+    )
+    stage_amplitude_windows = resolve_particle_subtraction_component_stage_amplitude_windows(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
     )
@@ -1954,6 +2030,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "pi_sidis",
             "pi_delta",
         ),
+        stage_amplitude_windows=stage_amplitude_windows,
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
         n_passes=fit_config.get("staged_fit_passes", 1),
@@ -2560,6 +2637,12 @@ def _print_component_step_pages(
         stats_box.AddText("pass: {}".format(step_overlay.get("pass_index", 0)))
         stats_box.AddText("component: {}".format(component_label))
         stats_box.AddText("amplitude: {}".format(_format_fit_number(step_overlay.get("amplitude"))))
+        if str(step_overlay.get("amplitude_mode") or "least_squares") != "least_squares":
+            stats_box.AddText("mode: {}".format(str(step_overlay.get("amplitude_mode"))))
+        if step_overlay.get("amplitude_windows"):
+            stats_box.AddText(
+                "core: {}".format(_format_window_list(step_overlay.get("amplitude_windows") or []))
+            )
         if step_overlay.get("postfit_scale_factor") is not None:
             stats_box.AddText(
                 "post-fit scale: {}".format(
