@@ -14,6 +14,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+    resolve_particle_subtraction_component_fit_excluded_windows,
     get_particle_subtraction_component_fit_window_config,
     resolve_particle_subtraction_component_fit_windows,
     resolve_particle_subtraction_mode,
@@ -493,6 +494,30 @@ def _build_model_hist(target_hist, template_hists, amplitude_map, hist_name):
     return model_hist
 
 
+def _integrate_hist_range(hist, x_min, x_max):
+    if hist is None:
+        return 0.0
+    integral = 0.0
+    for bin_index in range(1, hist.GetNbinsX() + 1):
+        x_center = float(hist.GetBinCenter(bin_index))
+        if x_min <= x_center <= x_max:
+            integral += float(hist.GetBinContent(bin_index))
+    return float(integral)
+
+
+def _build_scaled_reference_hist(target_hist, reference_hist, x_min, x_max, hist_name):
+    if target_hist is None or reference_hist is None:
+        return None, None
+    target_integral = _integrate_hist_range(target_hist, x_min, x_max)
+    reference_integral = _integrate_hist_range(reference_hist, x_min, x_max)
+    if (not math.isfinite(reference_integral)) or reference_integral <= 0.0:
+        return None, None
+    scale_factor = float(target_integral / reference_integral)
+    scaled_hist = _clone_hist(reference_hist, hist_name)
+    scaled_hist.Scale(scale_factor)
+    return scaled_hist, scale_factor
+
+
 def _build_scaled_hist_map(template_hists, amplitude_map, hist_name_prefix, context):
     scaled_hists = {}
     for template_name, template_hist in (template_hists or {}).items():
@@ -512,16 +537,20 @@ def _evaluate_model_validation(
     fit_min,
     fit_max,
     n_parameters=0,
+    exclude_windows=None,
     oversub_sigma_tolerance=2.0,
     max_oversub_bin_count=None,
     max_oversub_bin_fraction=None,
     max_full_range_chi2_ndf=None,
 ):
+    if exclude_windows is None:
+        exclude_windows = []
     quality = _compute_fit_quality(
         target_hist,
         fit_hist,
         fit_min,
         fit_max,
+        exclude_windows=exclude_windows,
         n_parameters=n_parameters,
     )
 
@@ -531,6 +560,8 @@ def _evaluate_model_validation(
     for bin_index in range(1, target_hist.GetNbinsX() + 1):
         x_center = float(target_hist.GetBinCenter(bin_index))
         if x_center < fit_min or x_center > fit_max:
+            continue
+        if any(window_min <= x_center <= window_max for window_min, window_max in exclude_windows):
             continue
         total_bins += 1
         data_value = float(target_hist.GetBinContent(bin_index))
@@ -612,6 +643,7 @@ def _run_staged_component_pass(
     fit_min,
     fit_max,
     anchor_window_map,
+    exclude_windows,
     amplitude_seed,
     amplitude_prefix,
     pass_index,
@@ -659,6 +691,7 @@ def _run_staged_component_pass(
             fit_min,
             fit_max,
             include_windows=anchor_window_map.get(component_name),
+            exclude_windows=exclude_windows,
         )
         amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
         uncertainty_map[component_name] = solve_result.get("sigma")
@@ -697,6 +730,7 @@ def _run_staged_component_pass(
                 "component_label": _component_plot_label(component_name),
                 "amplitude": float(amplitude_map[component_name]),
                 "anchor_windows": deepcopy(anchor_window_map.get(component_name) or []),
+                "excluded_windows": deepcopy(exclude_windows or []),
                 "H_baseline_before": baseline_before_hist,
                 "H_residual_input": residual_hist,
                 "H_component_scaled": component_scaled_hist,
@@ -715,13 +749,17 @@ def _solve_joint_template_amplitudes(
     fit_max,
     stage_amplitudes,
     prior_sigmas,
+    exclude_windows=None,
 ):
+    if exclude_windows is None:
+        exclude_windows = []
     fit_inputs = _build_multi_template_fit_inputs(
         target_hist,
         template_hists,
         fit_names,
         fit_min,
         fit_max,
+        exclude_windows=exclude_windows,
     )
     if len(fit_inputs["x"]) == 0:
         return {
@@ -808,13 +846,17 @@ def _run_coordinate_template_updates(
     prior_sigmas=None,
     max_cycles=50,
     tolerance=1e-5,
+    exclude_windows=None,
 ):
+    if exclude_windows is None:
+        exclude_windows = []
     fit_inputs = _build_multi_template_fit_inputs(
         target_hist,
         template_hists,
         fit_names,
         fit_min,
         fit_max,
+        exclude_windows=exclude_windows,
     )
     if len(fit_inputs["x"]) == 0:
         return {
@@ -898,6 +940,7 @@ def _fit_staged_anchor_templates(
     fit_max,
     anchor_windows,
     fit_order,
+    exclude_windows=None,
     extra_positive_templates=None,
     extra_anchor_windows=None,
     n_passes=1,
@@ -908,6 +951,8 @@ def _fit_staged_anchor_templates(
     validation_options=None,
     context="",
 ):
+    if exclude_windows is None:
+        exclude_windows = []
     if extra_positive_templates is None:
         extra_positive_templates = {}
     if extra_anchor_windows is None:
@@ -969,6 +1014,7 @@ def _fit_staged_anchor_templates(
             fit_min,
             fit_max,
             combined_window_map,
+            exclude_windows,
             stage_amplitudes,
             amplitude_prefix,
             pass_index,
@@ -1001,6 +1047,7 @@ def _fit_staged_anchor_templates(
         fit_min,
         fit_max,
         n_parameters=len(fitted_names),
+        exclude_windows=exclude_windows,
         **validation_kwargs
     )
     prior_sigmas = _build_prior_sigma_map(
@@ -1045,6 +1092,7 @@ def _fit_staged_anchor_templates(
             fit_max,
             stage_amplitudes,
             prior_sigmas,
+            exclude_windows=exclude_windows,
         )
         joint_diagnostics = {
             "enabled": True,
@@ -1064,13 +1112,14 @@ def _fit_staged_anchor_templates(
                 "{}_joint_fit_hist_{}".format(amplitude_prefix, context),
             )
             joint_validation = _evaluate_model_validation(
-                target_hist,
-                joint_fit_hist,
-                fit_min,
-                fit_max,
-                n_parameters=len(fitted_names),
-                **validation_kwargs
-            )
+                        target_hist,
+                        joint_fit_hist,
+                        fit_min,
+                        fit_max,
+                        n_parameters=len(fitted_names),
+                        exclude_windows=exclude_windows,
+                        **validation_kwargs
+                    )
             joint_diagnostics["validation"] = deepcopy(joint_validation)
             if bool(joint_result.get("success", False)) and joint_validation["accepted"]:
                 accepted_solution = "joint_prior"
@@ -1090,6 +1139,7 @@ def _fit_staged_anchor_templates(
                     prior_sigmas=joint_diagnostics["prior_sigmas"],
                     max_cycles=max_fit_cycles,
                     tolerance=fit_tolerance,
+                    exclude_windows=exclude_windows,
                 )
                 coordinate_diagnostics = {
                     "attempted": True,
@@ -1114,6 +1164,7 @@ def _fit_staged_anchor_templates(
                         fit_min,
                         fit_max,
                         n_parameters=len(fitted_names),
+                        exclude_windows=exclude_windows,
                         **validation_kwargs
                     )
                     coordinate_diagnostics["validation"] = deepcopy(coordinate_validation)
@@ -1183,7 +1234,7 @@ def _fit_staged_anchor_templates(
         "fit_min": float(fit_min),
         "fit_max": float(fit_max),
         "include_windows": deepcopy(include_windows),
-        "exclude_windows": [],
+        "exclude_windows": deepcopy(exclude_windows),
         "fallback_used": bool(fallback_used),
         "fallback_reason": fallback_reason,
         "fit_strategy": "ordered_residual",
@@ -1479,6 +1530,10 @@ def fit_pion_control_with_simc_shapes(
         "pion_control",
         mm_offset_data=mm_offset_data,
     )
+    excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
+        "pion_control",
+        mm_offset_data=mm_offset_data,
+    )
     anchor_windows = {
         component_name: [window]
         for component_name, window in resolved_windows.items()
@@ -1506,6 +1561,7 @@ def fit_pion_control_with_simc_shapes(
         fit_max,
         anchor_windows=anchor_windows,
         fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
+        exclude_windows=excluded_windows,
         n_passes=fit_config.get("staged_fit_passes", 1),
         prior_scale_map=prior_scale_map,
         joint_refinement_enabled=bool(fit_config.get("joint_refinement_enabled", True)),
@@ -1547,6 +1603,10 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
     )
+    excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
+        "kaon_nosub",
+        mm_offset_data=mm_offset_data,
+    )
     anchor_windows = {
         component_name: [window]
         for component_name, window in resolved_windows.items()
@@ -1566,7 +1626,8 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
         "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
     }
-    if h_kaon_signal_shape is not None:
+    include_kaon_signal_template = bool(fit_config.get("include_kaon_signal_template", False))
+    if include_kaon_signal_template and h_kaon_signal_shape is not None:
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
         prior_scale_map[KAON_SIGNAL_TEMPLATE_NAME] = float(
             fit_config.get("particle_subtraction_prior_scale_k_lambda_signal", 1.0) or 1.0
@@ -1586,11 +1647,11 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         fit_min,
         fit_max,
         anchor_windows=anchor_windows,
+        exclude_windows=excluded_windows,
         fit_order=fit_config.get("fit_order") or (
-            KAON_SIGNAL_TEMPLATE_NAME,
             "pi_n",
-            "pi_delta",
             "pi_sidis",
+            "pi_delta",
         ),
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
@@ -1604,11 +1665,21 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     )
     signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
     signal_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
+    signal_reference_hist, signal_reference_scale = _build_scaled_reference_hist(
+        h_kaon_nosub,
+        h_kaon_signal_shape,
+        mm_min,
+        mm_max,
+        "A_k_lambda_reference_{}_kaon_nosub".format(context or "scope"),
+    )
     return {
         "A_n": result["A_n"],
         "A_delta": result["A_delta"],
         "A_sidis": result["A_sidis"],
         "S_lambda": None if signal_amplitude is None else float(signal_amplitude),
+        "S_lambda_reference_scale": (
+            None if signal_reference_scale is None else float(signal_reference_scale)
+        ),
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
         "template_hists": result.get("template_hists") or {},
@@ -1619,6 +1690,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
         "k_lambda_scaled_hist": signal_scaled_hist,
+        "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
     }
 
@@ -1753,6 +1825,7 @@ def build_particle_subtraction_component_result(
         "A_delta": a_delta,
         "A_sidis": a_sidis,
         "S_lambda": s_lambda,
+        "S_lambda_reference_scale": kaon_fit.get("S_lambda_reference_scale"),
         "B_n": b_n,
         "B_delta": b_delta,
         "B_sidis": b_sidis,
@@ -1788,7 +1861,7 @@ def build_particle_subtraction_component_result(
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_k_lambda": _clone_hist(
-            (kaon_fit.get("template_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME),
+            kaon_signal_shape,
             "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
         ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
@@ -1800,6 +1873,7 @@ def build_particle_subtraction_component_result(
         "H_kaon_fit_pi_delta_scaled": kaon_fit["pi_delta_scaled_hist"],
         "H_kaon_fit_pi_sidis_scaled": kaon_fit["pi_sidis_scaled_hist"],
         "H_kaon_fit_k_lambda_scaled": kaon_fit["k_lambda_scaled_hist"],
+        "H_kaon_fit_k_lambda_reference": kaon_fit.get("k_lambda_reference_hist"),
         "H_kaon_fit_total": kaon_fit["fit_hist"],
         "H_kaon_pion_bg_fit_total": kaon_fit["pion_bg_fit_hist"],
         "H_kaon_fit_step_overlays": kaon_fit.get("step_overlays") or [],
@@ -1897,13 +1971,44 @@ def _format_window_list(windows):
     return ", ".join(formatted)
 
 
-def _draw_vertical_window_lines(window_min, window_max, y_min, y_max):
+def _format_excluded_window_list(windows):
+    return _format_window_list(windows) if windows else "none"
+
+
+def _draw_window_collection(windows, y_min, y_max, color, line_style, line_width=2):
+    drawn_lines = []
+    for window_min, window_max in windows or []:
+        drawn_lines.extend(
+            _draw_vertical_window_lines(
+                window_min,
+                window_max,
+                y_min,
+                y_max,
+                color=color,
+                line_style=line_style,
+                line_width=line_width,
+            )
+        )
+    return drawn_lines
+
+
+def _draw_vertical_window_lines(
+    window_min,
+    window_max,
+    y_min,
+    y_max,
+    color=None,
+    line_style=None,
+    line_width=2,
+):
     lines = []
+    line_color = ROOT.kBlue + 1 if color is None else color
+    style_value = 3 if line_style is None else line_style
     for x_value in (window_min, window_max):
         line = ROOT.TLine(float(x_value), float(y_min), float(x_value), float(y_max))
-        line.SetLineColor(ROOT.kBlue + 1)
-        line.SetLineStyle(3)
-        line.SetLineWidth(2)
+        line.SetLineColor(line_color)
+        line.SetLineStyle(style_value)
+        line.SetLineWidth(line_width)
         line.Draw("same")
         lines.append(line)
     return lines
@@ -2044,8 +2149,20 @@ def _print_component_step_pages(
         baseline_clone.Draw("hist same")
         component_clone.Draw("hist same")
         cumulative_clone.Draw("hist same")
-        for window_min, window_max in (step_overlay.get("anchor_windows") or []):
-            _draw_vertical_window_lines(window_min, window_max, 0.0, 1.20 * top_y_max)
+        _draw_window_collection(
+            step_overlay.get("anchor_windows") or [],
+            0.0,
+            1.20 * top_y_max,
+            ROOT.kBlue + 1,
+            3,
+        )
+        _draw_window_collection(
+            step_overlay.get("excluded_windows") or [],
+            0.0,
+            1.20 * top_y_max,
+            ROOT.kGray + 2,
+            2,
+        )
 
         top_legend = ROOT.TLegend(0.58, 0.58, 0.88, 0.88)
         top_legend.SetBorderSize(0)
@@ -2065,6 +2182,9 @@ def _print_component_step_pages(
         stats_box.AddText("component: {}".format(component_label))
         stats_box.AddText("amplitude: {}".format(_format_fit_number(step_overlay.get("amplitude"))))
         stats_box.AddText("anchor: {}".format(_format_window_list(step_overlay.get("anchor_windows") or [])))
+        excluded_windows = step_overlay.get("excluded_windows") or []
+        if excluded_windows:
+            stats_box.AddText("exclude: {}".format(_format_window_list(excluded_windows)))
         stats_box.Draw()
 
         bottom_pad = canvas.cd(2)
@@ -2099,13 +2219,20 @@ def _print_component_step_pages(
         residual_clone.SetMinimum(1.20 * bottom_y_min if bottom_y_min < 0.0 else 0.0)
         residual_clone.Draw("hist")
         component_bottom_clone.Draw("hist same")
-        for window_min, window_max in (step_overlay.get("anchor_windows") or []):
-            _draw_vertical_window_lines(
-                window_min,
-                window_max,
-                residual_clone.GetMinimum(),
-                residual_clone.GetMaximum(),
-            )
+        _draw_window_collection(
+            step_overlay.get("anchor_windows") or [],
+            residual_clone.GetMinimum(),
+            residual_clone.GetMaximum(),
+            ROOT.kBlue + 1,
+            3,
+        )
+        _draw_window_collection(
+            step_overlay.get("excluded_windows") or [],
+            residual_clone.GetMinimum(),
+            residual_clone.GetMaximum(),
+            ROOT.kGray + 2,
+            2,
+        )
 
         bottom_legend = ROOT.TLegend(0.58, 0.70, 0.88, 0.88)
         bottom_legend.SetBorderSize(0)
@@ -2168,27 +2295,38 @@ def print_particle_subtraction_component_fit_pages(
                     ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("include_windows")
                 )
             ),
+            "excluded windows: {}".format(
+                _format_excluded_window_list(
+                    ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("exclude_windows")
+                )
+            ),
         ],
     )
 
-    has_kaon_signal = component_fit_result.get("H_kaon_fit_k_lambda_scaled") is not None
+    has_kaon_signal_reference = component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None
     kaon_title = "{}kaon no-sub SIMC pion-background fit".format(title_prefix)
-    if has_kaon_signal:
-        kaon_title = "{}kaon no-sub SIMC decomposition fit".format(title_prefix)
+    if has_kaon_signal_reference:
+        kaon_title = "{}kaon no-sub SIMC pion-background fit + K-Lambda gauge".format(title_prefix)
+
+    kaon_overlay_specs = [
+        (component_fit_result.get("H_kaon_fit_pi_n_scaled"), "pi-n", ROOT.kRed + 1, 1),
+        (component_fit_result.get("H_kaon_fit_pi_delta_scaled"), "pi-delta", ROOT.kAzure + 2, 1),
+        (component_fit_result.get("H_kaon_fit_pi_sidis_scaled"), "pi-SIDIS", ROOT.kMagenta + 2, 1),
+    ]
+    if has_kaon_signal_reference:
+        kaon_overlay_specs.append(
+            (component_fit_result.get("H_kaon_fit_k_lambda_reference"), "K-Lambda gauge", ROOT.kBlue + 1, 2)
+        )
+    kaon_overlay_specs.append(
+        (component_fit_result.get("H_kaon_pion_bg_fit_total"), "pion-bg sum", ROOT.kOrange + 7, 2)
+    )
 
     _print_component_overlay_page(
         pdf_name,
         component_fit_result.get("H_kaon_nosub_input"),
         "kaon no-sub data",
         kaon_title,
-        [
-            (component_fit_result.get("H_kaon_fit_pi_n_scaled"), "pi-n", ROOT.kRed + 1, 1),
-            (component_fit_result.get("H_kaon_fit_pi_delta_scaled"), "pi-delta", ROOT.kAzure + 2, 1),
-            (component_fit_result.get("H_kaon_fit_pi_sidis_scaled"), "pi-SIDIS", ROOT.kMagenta + 2, 1),
-            (component_fit_result.get("H_kaon_fit_k_lambda_scaled"), "K-Lambda", ROOT.kBlue + 1, 1),
-            (component_fit_result.get("H_kaon_pion_bg_fit_total"), "pion-bg sum", ROOT.kOrange + 7, 2),
-            (component_fit_result.get("H_kaon_fit_total"), "total fit", ROOT.kGreen + 2, 3),
-        ],
+        kaon_overlay_specs,
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
             "status: {}".format(component_fit_result.get("fit_status_kaon", "unknown")),
@@ -2201,12 +2339,14 @@ def print_particle_subtraction_component_fit_pages(
             "validation: {}".format(
                 _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
             ),
-            "A_n={}  A_delta={}  A_sidis={}  S_lambda={}".format(
+            "A_n={}  A_delta={}  A_sidis={}".format(
                 _format_fit_number(component_fit_result.get("A_n")),
                 _format_fit_number(component_fit_result.get("A_delta")),
                 _format_fit_number(component_fit_result.get("A_sidis")),
-                _format_fit_number(component_fit_result.get("S_lambda")),
             ),
+            "K-Lambda gauge scale={}".format(
+                _format_fit_number(component_fit_result.get("S_lambda_reference_scale"))
+            ) if has_kaon_signal_reference else "K-Lambda gauge scale=n/a",
             "chi2/ndf={}  p={}".format(
                 _format_fit_metric(component_fit_result.get("chi2_ndf_kaon")),
                 _format_fit_metric(component_fit_result.get("fit_p_value_kaon")),
@@ -2214,6 +2354,11 @@ def print_particle_subtraction_component_fit_pages(
             "anchor windows: {}".format(
                 _format_window_list(
                     ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("include_windows")
+                )
+            ),
+            "excluded windows: {}".format(
+                _format_excluded_window_list(
+                    ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("exclude_windows")
                 )
             ),
         ],

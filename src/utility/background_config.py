@@ -203,7 +203,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "kaon_nosub": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("k_lambda_signal", "pi_n", "pi_sidis", "pi_delta"),
+        "fit_order": ("pi_n", "pi_sidis", "pi_delta"),
+        "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
         "particle_subtraction_prior_scale_pi_n": 1.0,
         "particle_subtraction_prior_scale_pi_delta": 1.5,
@@ -225,6 +226,12 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_n": (0.90, 0.94),
             "pi_delta": (1.18, 1.26),
             "pi_sidis": (1.36, 1.45),
+        },
+        "enabled_excluded_windows": {
+            "sigma_peak": True,
+        },
+        "excluded_windows": {
+            "sigma_peak": (1.18, 1.23),
         },
     },
 }
@@ -1331,6 +1338,29 @@ def resolve_particle_subtraction_component_fit_windows(fit_target, mm_offset_dat
             )
         low_edge, high_edge = bounds
         resolved[str(window_name)] = (float(low_edge) + offset, float(high_edge) + offset)
+    return resolved
+
+
+def resolve_particle_subtraction_component_fit_excluded_windows(fit_target, mm_offset_data=0.0):
+    config = get_particle_subtraction_component_fit_window_config(fit_target)
+    if not config:
+        return []
+
+    offset = float(mm_offset_data) if bool(config.get("apply_mm_offset_data", False)) else 0.0
+    enabled_windows = config.get("enabled_excluded_windows") or {}
+    resolved = []
+    for window_name, bounds in (config.get("excluded_windows") or {}).items():
+        if not bool(enabled_windows.get(window_name, True)):
+            continue
+        if len(bounds) != 2:
+            raise ValueError(
+                "Particle subtraction component-fit excluded window '{}' for '{}' must contain exactly two bounds".format(
+                    window_name,
+                    fit_target,
+                )
+            )
+        low_edge, high_edge = bounds
+        resolved.append((float(low_edge) + offset, float(high_edge) + offset))
     return resolved
 
 
