@@ -3500,21 +3500,6 @@ def print_particle_subtraction_component_application_pages(
     model_closure = diagnostics.get("model_closure") or {}
     event_template_closure = diagnostics.get("event_template_closure") or {}
 
-    _print_component_step_pages(
-        pdf_name,
-        component_payload.get("H_pion_control_input"),
-        component_payload.get("H_pion_fit_step_overlays"),
-        title_prefix,
-        "pion-control",
-    )
-    _print_component_step_pages(
-        pdf_name,
-        component_payload.get("H_kaon_nosub_input"),
-        component_payload.get("H_kaon_fit_step_overlays"),
-        title_prefix,
-        "kaon no-sub",
-    )
-
     _print_single_hist_page(
         pdf_name,
         component_payload.get("H_pion_weight_vs_MM"),
