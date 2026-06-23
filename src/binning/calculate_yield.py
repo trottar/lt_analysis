@@ -853,6 +853,8 @@ def _apply_component_pion_subtraction_for_bin(
             "H_weighted_pion_control_model": weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
+            "H_pion_control_input": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
+            "H_kaon_nosub_input": _clone_hist_for_plot(component_fit_result.get("H_kaon_nosub_input")),
             "H_pion_control_unscaled": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
             "H_pion_subtraction_template_MM": template_hists["mm"],
             "H_pion_subtraction_template_MM_nosub": template_hists["mm_nosub"],
@@ -861,6 +863,8 @@ def _apply_component_pion_subtraction_for_bin(
             "H_MM_after_pion_subtraction": h_mm_after,
             "H_MM_nosub_before_pion_subtraction": h_mm_nosub_before,
             "H_MM_nosub_after_pion_subtraction": h_mm_nosub_after,
+            "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
+            "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
             "diagnostics": {
                 **deepcopy(weight_payload["diagnostics"]),
                 **deepcopy(fill_stats),

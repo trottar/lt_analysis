@@ -703,6 +703,12 @@ def _apply_component_pion_subtraction_setting(
             "H_weighted_pion_control_model": weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
+            "H_pion_control_input": component_fit_result.get("H_pion_control_input").Clone(
+                "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
+            ) if component_fit_result.get("H_pion_control_input") is not None else None,
+            "H_kaon_nosub_input": component_fit_result.get("H_kaon_nosub_input").Clone(
+                "{}_clone".format(component_fit_result.get("H_kaon_nosub_input").GetName())
+            ) if component_fit_result.get("H_kaon_nosub_input") is not None else None,
             "H_pion_control_unscaled": component_fit_result.get("H_pion_control_input").Clone(
                 "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
             ) if component_fit_result.get("H_pion_control_input") is not None else None,
@@ -712,6 +718,8 @@ def _apply_component_pion_subtraction_setting(
             "H_MM_after_pion_subtraction": h_mm_after,
             "H_MM_nosub_before_pion_subtraction": h_mm_full_before,
             "H_MM_nosub_after_pion_subtraction": h_mm_full_after,
+            "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
+            "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
                 **dict(stats),
