@@ -23,6 +23,7 @@ import scipy.integrate as integrate
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from copy import deepcopy
 import sys, math, os, subprocess
 from array import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
