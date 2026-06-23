@@ -431,6 +431,11 @@ def _apply_component_pion_subtraction_for_tbin(
         "fallback_reason": gate_result.get("reason") or "component-fit result rejected",
         "analysis_scope": component_fit_result.get("analysis_scope") if isinstance(component_fit_result, dict) else None,
         "particle_subtraction_mode": component_fit_result.get("particle_subtraction_mode") if isinstance(component_fit_result, dict) else None,
+        "particle_subtraction_setting_key": component_fit_result.get("particle_subtraction_setting_key") if isinstance(component_fit_result, dict) else None,
+        "particle_subtraction_phi_setting": component_fit_result.get("particle_subtraction_phi_setting") if isinstance(component_fit_result, dict) else None,
+        "resolved_subtraction_config": deepcopy(
+            component_fit_result.get("resolved_subtraction_config") or {}
+        ) if isinstance(component_fit_result, dict) else {},
         "fit_status_pion": component_fit_result.get("fit_status_pion") if isinstance(component_fit_result, dict) else None,
         "fit_status_kaon": component_fit_result.get("fit_status_kaon") if isinstance(component_fit_result, dict) else None,
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
@@ -1065,6 +1070,7 @@ def process_hist_data(
                             t_bin_index=j,
                         ),
                         mm_offset_data=MM_offset_DATA,
+                        phi_setting=phi_setting,
                         context="ave_{}_t{}".format(phi_setting, j + 1),
                     )
                 component_payload = _apply_component_pion_subtraction_for_tbin(
@@ -1110,6 +1116,8 @@ def process_hist_data(
                             ParticleType,
                             SubtractedParticle,
                             MM_offset_DATA,
+                            inp_dict=inpDict,
+                            phi_setting=phi_setting,
                         )
                         scale_components = compute_staged_particle_subtraction_scales(
                             hist_bin_dict[f"H_MM_nosub_DATA_{j}"],

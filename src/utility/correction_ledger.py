@@ -250,6 +250,7 @@ def build_correction_ledger(histlist, inp_dict, bg_summary=None):
         "particle_subtraction_windows": get_particle_subtraction_window_config(
             inp_dict.get("ParticleType"),
             "pion",
+            inp_dict=inp_dict,
         ),
         "active_profile": inp_dict.get("bg_active_profile"),
         "resolved_optimizer_settings": deepcopy(inp_dict.get("bg_resolved_profile", {})),

@@ -14,6 +14,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+    get_particle_subtraction_setting_key,
     resolve_particle_subtraction_component_postfit_scales,
     resolve_particle_subtraction_component_prior_scales,
     resolve_particle_subtraction_component_stage_amplitude_modes,
@@ -1143,6 +1144,14 @@ def _run_staged_component_pass(
                 "excluded_windows": deepcopy(exclude_windows or []),
                 "H_baseline_before": baseline_before_hist,
                 "H_residual_input": residual_hist,
+                "H_component_template": _clone_hist(
+                    template_hists[component_name],
+                    "{}_component_template_{}_pass{}".format(
+                        amplitude_prefix,
+                        component_name,
+                        pass_index + 1,
+                    ),
+                ),
                 "H_component_scaled": component_scaled_hist,
                 "H_cumulative_after": cumulative_after_hist,
             }
@@ -1942,25 +1951,38 @@ def fit_pion_control_with_simc_shapes(
     h_kaon_sigma0_shape,
     inpDict,
     mm_offset_data=0.0,
+    phi_setting=None,
     context="",
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
-    fit_config = get_particle_subtraction_component_fit_window_config("pion_control") or {}
+    fit_config = get_particle_subtraction_component_fit_window_config(
+        "pion_control",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    ) or {}
     resolved_windows = resolve_particle_subtraction_component_fit_windows(
         "pion_control",
         mm_offset_data=mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     stage_amplitude_windows = resolve_particle_subtraction_component_stage_amplitude_windows(
         "pion_control",
         mm_offset_data=mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     stage_amplitude_modes = resolve_particle_subtraction_component_stage_amplitude_modes(
         "pion_control",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
         "pion_control",
         mm_offset_data=mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     anchor_windows = {
         component_name: [window]
@@ -1969,10 +1991,14 @@ def fit_pion_control_with_simc_shapes(
     prior_scale_map = resolve_particle_subtraction_component_prior_scales(
         "pion_control",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "pion_control",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     extra_positive_templates = {}
     extra_anchor_windows = {}
@@ -2037,6 +2063,24 @@ def fit_pion_control_with_simc_shapes(
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
         "k_sigma0_scaled_hist": sigma0_scaled_hist,
         "step_overlays": result.get("step_overlays") or [],
+        "resolved_config_summary": {
+            "fit_target": "pion_control",
+            "particle_subtraction_setting_key": fit_config.get("particle_subtraction_setting_key"),
+            "particle_subtraction_phi_setting": fit_config.get("particle_subtraction_phi_setting"),
+            "particle_subtraction_override_layers": deepcopy(
+                fit_config.get("particle_subtraction_override_layers") or []
+            ),
+            "particle_subtraction_override_applied": bool(
+                fit_config.get("particle_subtraction_override_applied", False)
+            ),
+            "fit_order": deepcopy(fit_config.get("fit_order") or []),
+            "anchor_windows": deepcopy(anchor_windows),
+            "excluded_windows": deepcopy(excluded_windows),
+            "stage_amplitude_windows": deepcopy(stage_amplitude_windows),
+            "stage_amplitude_modes": deepcopy(stage_amplitude_modes),
+            "prior_scales": deepcopy(prior_scale_map),
+            "postfit_component_scales": deepcopy(postfit_scale_map),
+        },
     }
 
 
@@ -2049,25 +2093,38 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     h_kaon_sigma0_shape,
     inpDict,
     mm_offset_data=0.0,
+    phi_setting=None,
     context="",
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
-    fit_config = get_particle_subtraction_component_fit_window_config("kaon_nosub") or {}
+    fit_config = get_particle_subtraction_component_fit_window_config(
+        "kaon_nosub",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    ) or {}
     resolved_windows = resolve_particle_subtraction_component_fit_windows(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     stage_amplitude_windows = resolve_particle_subtraction_component_stage_amplitude_windows(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     stage_amplitude_modes = resolve_particle_subtraction_component_stage_amplitude_modes(
         "kaon_nosub",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     anchor_windows = {
         component_name: [window]
@@ -2080,10 +2137,14 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     prior_scale_map = resolve_particle_subtraction_component_prior_scales(
         "kaon_nosub",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME, KAON_SIGNAL_TEMPLATE_NAME),
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "kaon_nosub",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
     )
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
@@ -2173,6 +2234,24 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "k_sigma0_scaled_hist": sigma0_scaled_hist,
         "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
+        "resolved_config_summary": {
+            "fit_target": "kaon_nosub",
+            "particle_subtraction_setting_key": fit_config.get("particle_subtraction_setting_key"),
+            "particle_subtraction_phi_setting": fit_config.get("particle_subtraction_phi_setting"),
+            "particle_subtraction_override_layers": deepcopy(
+                fit_config.get("particle_subtraction_override_layers") or []
+            ),
+            "particle_subtraction_override_applied": bool(
+                fit_config.get("particle_subtraction_override_applied", False)
+            ),
+            "fit_order": deepcopy(fit_config.get("fit_order") or []),
+            "anchor_windows": deepcopy(anchor_windows),
+            "excluded_windows": deepcopy(excluded_windows),
+            "stage_amplitude_windows": deepcopy(stage_amplitude_windows),
+            "stage_amplitude_modes": deepcopy(stage_amplitude_modes),
+            "prior_scales": deepcopy(prior_scale_map),
+            "postfit_component_scales": deepcopy(postfit_scale_map),
+        },
     }
     if excluded_windows:
         for key in (
@@ -2337,6 +2416,7 @@ def build_particle_subtraction_component_result(
     kaon_signal_shape=None,
     kaon_sigma0_shape=None,
     mm_offset_data=0.0,
+    phi_setting=None,
     context="",
 ):
     mode = resolve_particle_subtraction_mode(inpDict)
@@ -2381,6 +2461,10 @@ def build_particle_subtraction_component_result(
         "H_MM_component_shape_k_sigma0_aligned_{}".format(context or analysis_scope),
         renormalize=True,
     )
+    resolved_phi_setting = phi_setting
+    if resolved_phi_setting is None and isinstance(inpDict, dict):
+        resolved_phi_setting = inpDict.get("phi_setting")
+    setting_key = get_particle_subtraction_setting_key(inpDict)
 
     pion_fit = fit_pion_control_with_simc_shapes(
         h_pion_control,
@@ -2390,6 +2474,7 @@ def build_particle_subtraction_component_result(
         aligned_kaon_sigma0_shape,
         inpDict,
         mm_offset_data=mm_offset_data,
+        phi_setting=resolved_phi_setting,
         context=context,
     )
     kaon_fit = fit_kaon_nosub_with_simc_pion_shapes(
@@ -2401,6 +2486,7 @@ def build_particle_subtraction_component_result(
         aligned_kaon_sigma0_shape,
         inpDict,
         mm_offset_data=mm_offset_data,
+        phi_setting=resolved_phi_setting,
         context=context,
     )
 
@@ -2448,8 +2534,16 @@ def build_particle_subtraction_component_result(
         "fit_p_value_kaon": kaon_fit["diagnostics"].get("fit_p_value"),
         "template_mm_offset_data": template_mm_offset_data,
         "template_mm_shift_applied": bool(abs(template_mm_offset_data) > 1e-12),
+        "particle_subtraction_setting_key": setting_key,
+        "particle_subtraction_phi_setting": resolved_phi_setting,
         "fallback_used": bool(fallback_reasons),
         "fallback_reason": "; ".join(fallback_reasons),
+        "resolved_subtraction_config": {
+            "setting_key": setting_key,
+            "phi_setting": resolved_phi_setting,
+            "pion_control": deepcopy(pion_fit.get("resolved_config_summary") or {}),
+            "kaon_nosub": deepcopy(kaon_fit.get("resolved_config_summary") or {}),
+        },
         "diagnostics": {
             "pion": deepcopy(pion_fit["diagnostics"]),
             "kaon": deepcopy(kaon_fit["diagnostics"]),
@@ -2634,6 +2728,31 @@ def _draw_window_collection(windows, y_min, y_max, color, line_style, line_width
             )
         )
     return drawn_lines
+
+
+def _draw_window_band_collection(
+    windows,
+    y_min,
+    y_max,
+    color,
+    alpha=0.10,
+    fill_style=1001,
+):
+    drawn_bands = []
+    for window_min, window_max in windows or []:
+        band = ROOT.TBox(float(window_min), float(y_min), float(window_max), float(y_max))
+        band.SetLineColor(color)
+        band.SetLineStyle(1)
+        band.SetLineWidth(1)
+        if hasattr(band, "SetFillColorAlpha"):
+            band.SetFillColorAlpha(color, float(alpha))
+            band.SetFillStyle(fill_style)
+        else:
+            band.SetFillColor(color)
+            band.SetFillStyle(3002)
+        band.Draw("same")
+        drawn_bands.append(band)
+    return drawn_bands
 
 
 def _draw_vertical_window_lines(
@@ -2909,6 +3028,7 @@ def _print_component_step_pages(
     for step_overlay in step_overlays:
         baseline_before = step_overlay.get("H_baseline_before")
         residual_input = step_overlay.get("H_residual_input")
+        component_template = step_overlay.get("H_component_template")
         component_scaled = step_overlay.get("H_component_scaled")
         cumulative_after = step_overlay.get("H_cumulative_after")
         component_name = step_overlay.get("component_name")
@@ -2924,11 +3044,16 @@ def _print_component_step_pages(
         top_pad.SetBottomMargin(0.12)
         target_clone = _clone_hist(target_hist, "{}_step_target".format(target_hist.GetName()))
         baseline_clone = _clone_hist(baseline_before, "{}_step_baseline".format(baseline_before.GetName()))
+        template_clone = _clone_hist(
+            component_template,
+            "{}_step_template".format(component_template.GetName()),
+        ) if component_template is not None else None
         component_clone = _clone_hist(component_scaled, "{}_step_component".format(component_scaled.GetName()))
         cumulative_clone = _clone_hist(cumulative_after, "{}_step_cumulative".format(cumulative_after.GetName()))
         excluded_windows = step_overlay.get("excluded_windows") or []
         if excluded_windows:
             _mask_hist_windows_inplace(baseline_clone, excluded_windows)
+            _mask_hist_windows_inplace(template_clone, excluded_windows)
             _mask_hist_windows_inplace(component_clone, excluded_windows)
             _mask_hist_windows_inplace(cumulative_clone, excluded_windows)
         target_clone.SetTitle(
@@ -2946,11 +3071,13 @@ def _print_component_step_pages(
         target_clone.SetMarkerStyle(20)
         target_clone.SetMarkerSize(0.7)
         _style_overlay_hist(baseline_clone, ROOT.kOrange + 7, line_style=2)
+        _style_overlay_hist(template_clone, ROOT.kBlue + 1, line_style=2)
         _style_overlay_hist(component_clone, component_color, line_style=1)
         _style_overlay_hist(cumulative_clone, ROOT.kGreen + 2, line_style=3)
         top_y_max = max(
             target_clone.GetMaximum(),
             baseline_clone.GetMaximum(),
+            template_clone.GetMaximum() if template_clone is not None else 0.0,
             component_clone.GetMaximum(),
             cumulative_clone.GetMaximum(),
             0.0,
@@ -2960,24 +3087,33 @@ def _print_component_step_pages(
         target_clone.SetMaximum(1.20 * top_y_max)
         target_clone.SetMinimum(0.0)
         target_clone.Draw("hist")
+        top_bands = _draw_window_band_collection(
+            step_overlay.get("amplitude_windows") or [],
+            0.0,
+            1.20 * top_y_max,
+            ROOT.kMagenta + 2,
+            alpha=0.10,
+        )
         baseline_clone.Draw("hist same")
+        if template_clone is not None:
+            template_clone.Draw("hist same")
         component_clone.Draw("hist same")
         cumulative_clone.Draw("hist same")
-        _draw_window_collection(
+        top_anchor_lines = _draw_window_collection(
             step_overlay.get("anchor_windows") or [],
             0.0,
             1.20 * top_y_max,
             ROOT.kBlue + 1,
             3,
         )
-        _draw_window_collection(
+        top_core_lines = _draw_window_collection(
             step_overlay.get("amplitude_windows") or [],
             0.0,
             1.20 * top_y_max,
             ROOT.kMagenta + 2,
             7,
         )
-        _draw_window_collection(
+        top_exclude_lines = _draw_window_collection(
             step_overlay.get("excluded_windows") or [],
             0.0,
             1.20 * top_y_max,
@@ -2990,6 +3126,8 @@ def _print_component_step_pages(
         top_legend.SetFillStyle(0)
         top_legend.AddEntry(target_clone, "{} data".format(sample_label), "lf")
         top_legend.AddEntry(baseline_clone, "baseline before step", "l")
+        if template_clone is not None:
+            top_legend.AddEntry(template_clone, "raw SIMC template", "l")
         top_legend.AddEntry(component_clone, "{} contribution".format(component_label), "l")
         top_legend.AddEntry(cumulative_clone, "baseline after step", "l")
         top_legend.Draw()
@@ -3043,12 +3181,17 @@ def _print_component_step_pages(
         bottom_pad.SetTopMargin(0.08)
         bottom_pad.SetBottomMargin(0.12)
         residual_clone = _clone_hist(residual_input, "{}_step_residual".format(residual_input.GetName()))
+        template_bottom_clone = _clone_hist(
+            component_template,
+            "{}_step_template_bottom".format(component_template.GetName()),
+        ) if component_template is not None else None
         component_bottom_clone = _clone_hist(
             component_scaled,
             "{}_step_component_bottom".format(component_scaled.GetName()),
         )
         if excluded_windows:
             _mask_hist_windows_inplace(residual_clone, excluded_windows)
+            _mask_hist_windows_inplace(template_bottom_clone, excluded_windows)
             _mask_hist_windows_inplace(component_bottom_clone, excluded_windows)
         residual_clone.SetTitle("Residual input to {} step".format(component_label))
         residual_clone.SetLineColor(ROOT.kBlack)
@@ -3057,9 +3200,11 @@ def _print_component_step_pages(
         residual_clone.SetFillColor(ROOT.kGray + 1)
         residual_clone.SetMarkerStyle(20)
         residual_clone.SetMarkerSize(0.7)
+        _style_overlay_hist(template_bottom_clone, ROOT.kBlue + 1, line_style=2)
         _style_overlay_hist(component_bottom_clone, component_color, line_style=1)
         bottom_y_max = max(
             residual_clone.GetMaximum(),
+            template_bottom_clone.GetMaximum() if template_bottom_clone is not None else 0.0,
             component_bottom_clone.GetMaximum(),
             0.0,
         )
@@ -3068,27 +3213,37 @@ def _print_component_step_pages(
         bottom_y_min = min(
             0.0,
             residual_clone.GetMinimum(),
+            template_bottom_clone.GetMinimum() if template_bottom_clone is not None else 0.0,
             component_bottom_clone.GetMinimum(),
         )
         residual_clone.SetMaximum(1.20 * bottom_y_max)
         residual_clone.SetMinimum(1.20 * bottom_y_min if bottom_y_min < 0.0 else 0.0)
         residual_clone.Draw("hist")
+        bottom_bands = _draw_window_band_collection(
+            step_overlay.get("amplitude_windows") or [],
+            residual_clone.GetMinimum(),
+            residual_clone.GetMaximum(),
+            ROOT.kMagenta + 2,
+            alpha=0.10,
+        )
+        if template_bottom_clone is not None:
+            template_bottom_clone.Draw("hist same")
         component_bottom_clone.Draw("hist same")
-        _draw_window_collection(
+        bottom_anchor_lines = _draw_window_collection(
             step_overlay.get("anchor_windows") or [],
             residual_clone.GetMinimum(),
             residual_clone.GetMaximum(),
             ROOT.kBlue + 1,
             3,
         )
-        _draw_window_collection(
+        bottom_core_lines = _draw_window_collection(
             step_overlay.get("amplitude_windows") or [],
             residual_clone.GetMinimum(),
             residual_clone.GetMaximum(),
             ROOT.kMagenta + 2,
             7,
         )
-        _draw_window_collection(
+        bottom_exclude_lines = _draw_window_collection(
             step_overlay.get("excluded_windows") or [],
             residual_clone.GetMinimum(),
             residual_clone.GetMaximum(),
@@ -3100,6 +3255,8 @@ def _print_component_step_pages(
         bottom_legend.SetBorderSize(0)
         bottom_legend.SetFillStyle(0)
         bottom_legend.AddEntry(residual_clone, "residual before step", "lf")
+        if template_bottom_clone is not None:
+            bottom_legend.AddEntry(template_bottom_clone, "raw SIMC template", "l")
         bottom_legend.AddEntry(component_bottom_clone, "{} fit".format(component_label), "l")
         bottom_legend.Draw()
 

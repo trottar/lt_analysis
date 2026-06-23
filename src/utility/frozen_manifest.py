@@ -318,6 +318,7 @@ def build_frozen_manifest_payload(
         "particle_subtraction_windows": get_particle_subtraction_window_config(
             particle_type,
             "pion",
+            inp_dict=current_inp_dict,
         ),
         "t_bin_edges": t_bins,
         "phi_bin_edges": phi_bins,
@@ -568,6 +569,7 @@ def reconstruct_frozen_manifest_from_cache(base_dir, particle_type, q2, w):
         "particle_subtraction_windows": get_particle_subtraction_window_config(
             particle_type,
             "pion",
+            inp_dict=primary_inp,
         ),
         "t_bin_edges": _json_ready(np.asarray(t_bins, dtype=float)),
         "phi_bin_edges": _json_ready(np.asarray(phi_bins, dtype=float)),

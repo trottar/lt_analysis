@@ -293,6 +293,23 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     },
 }
 
+PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES = {}
+
+PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES = {}
+
+PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS = frozenset(
+    {
+        "enabled_windows",
+        "windows",
+        "enabled_excluded_windows",
+        "excluded_windows",
+        "stage_amplitude_windows",
+        "stage_amplitude_modes",
+        "prior_scales",
+        "postfit_component_scales",
+    }
+)
+
 PARTICLE_SUBTRACTION_COMPONENT_PRIOR_SCALE_LEGACY_KEYS = {
     "pi_n": "particle_subtraction_prior_scale_pi_n",
     "pi_delta": "particle_subtraction_prior_scale_pi_delta",
@@ -1408,16 +1425,189 @@ def resolve_simc_pion_component_files(inp_dict=None, phi_setting=None):
     return deepcopy(resolved.get(str(phi_setting), {}))
 
 
-def get_particle_subtraction_window_config(particle_type, subtracted_particle):
+def _normalize_particle_subtraction_setting_key(q2=None, w=None):
+    q2_text = str(q2 or "").strip()
+    w_text = str(w or "").strip()
+    if not q2_text or not w_text:
+        return None
+    if q2_text.lower().startswith("q"):
+        q2_text = q2_text[1:]
+    if w_text.lower().startswith("w"):
+        w_text = w_text[1:]
+    if not q2_text or not w_text:
+        return None
+    return "Q{}W{}".format(q2_text, w_text)
+
+
+def get_particle_subtraction_setting_key(inp_dict=None, q2=None, w=None):
+    if isinstance(inp_dict, dict):
+        if q2 is None:
+            q2 = inp_dict.get("Q2")
+        if w is None:
+            w = inp_dict.get("W")
+    return _normalize_particle_subtraction_setting_key(q2=q2, w=w)
+
+
+def _get_casefold_mapping_entry(mapping, key):
+    if not isinstance(mapping, dict):
+        return None
+    normalized_key = str(key or "").strip().lower()
+    if not normalized_key:
+        return None
+    for candidate_key, candidate_value in mapping.items():
+        if str(candidate_key or "").strip().lower() == normalized_key:
+            return candidate_value
+    return None
+
+
+def _deep_merge_particle_subtraction_config(base_config, override_config):
+    if base_config is None:
+        merged = {}
+    else:
+        merged = deepcopy(base_config)
+    if not isinstance(override_config, dict):
+        return merged
+    for raw_key, raw_value in override_config.items():
+        key = str(raw_key)
+        if (
+            key in PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS
+            and isinstance(merged.get(key), dict)
+            and isinstance(raw_value, dict)
+        ):
+            child = deepcopy(merged.get(key) or {})
+            for child_key, child_value in raw_value.items():
+                child[str(child_key)] = deepcopy(child_value)
+            merged[key] = child
+        else:
+            merged[key] = deepcopy(raw_value)
+    return merged
+
+
+def _resolve_particle_subtraction_override_context(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    resolved_setting_key = str(setting_key).strip() if setting_key is not None else ""
+    if not resolved_setting_key:
+        resolved_setting_key = get_particle_subtraction_setting_key(inp_dict)
+    resolved_setting_key = resolved_setting_key or None
+    resolved_phi_setting = phi_setting
+    if resolved_phi_setting is None and isinstance(inp_dict, dict):
+        resolved_phi_setting = inp_dict.get("phi_setting")
+    resolved_phi_setting = str(resolved_phi_setting).strip() if resolved_phi_setting is not None else None
+    if resolved_phi_setting == "":
+        resolved_phi_setting = None
+    return resolved_setting_key, resolved_phi_setting
+
+
+def _resolve_particle_subtraction_override_layers(
+    override_root,
+    setting_key=None,
+    phi_setting=None,
+):
+    if not isinstance(override_root, dict) or not setting_key:
+        return []
+    setting_entry = override_root.get(str(setting_key))
+    if not isinstance(setting_entry, dict):
+        return []
+
+    layers = []
+    default_override = setting_entry.get("default")
+    if isinstance(default_override, dict) and default_override:
+        layers.append(
+            {
+                "layer": "default",
+                "path": "{}:default".format(setting_key),
+                "payload": default_override,
+            }
+        )
+
+    if phi_setting:
+        phi_override = _get_casefold_mapping_entry(setting_entry.get("by_phi"), phi_setting)
+        if isinstance(phi_override, dict) and phi_override:
+            layers.append(
+                {
+                    "layer": "by_phi",
+                    "path": "{}:by_phi:{}".format(setting_key, phi_setting),
+                    "payload": phi_override,
+                }
+            )
+
+    return layers
+
+
+def _attach_particle_subtraction_resolution_metadata(
+    config,
+    setting_key=None,
+    phi_setting=None,
+    override_layers=None,
+):
+    if config is None:
+        return None
+    metadata_ready = deepcopy(config)
+    metadata_ready["particle_subtraction_setting_key"] = setting_key
+    metadata_ready["particle_subtraction_phi_setting"] = phi_setting
+    metadata_ready["particle_subtraction_override_layers"] = list(override_layers or [])
+    metadata_ready["particle_subtraction_override_applied"] = bool(override_layers)
+    return metadata_ready
+
+
+def get_particle_subtraction_window_config(
+    particle_type,
+    subtracted_particle,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
     particle_key = str(particle_type or "").strip().lower()
     subtracted_key = str(subtracted_particle or "").strip().lower()
     particle_config = PARTICLE_SUBTRACTION_WINDOW_CONFIG.get(particle_key, {})
-    config = particle_config.get(subtracted_key)
-    return None if config is None else deepcopy(config)
+    config = deepcopy(particle_config.get(subtracted_key)) if subtracted_key in particle_config else None
+
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+
+    for override_layer in override_layers:
+        layer_payload = override_layer.get("payload")
+        particle_override = _get_casefold_mapping_entry(layer_payload, particle_key)
+        config_override = _get_casefold_mapping_entry(particle_override, subtracted_key)
+        if isinstance(config_override, dict):
+            config = _deep_merge_particle_subtraction_config(config, config_override)
+
+    if config is None:
+        return None
+    return _attach_particle_subtraction_resolution_metadata(
+        config,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+        override_layers=[layer.get("path") for layer in override_layers],
+    )
 
 
-def resolve_particle_subtraction_windows(particle_type, subtracted_particle, mm_offset_data=0.0):
-    config = get_particle_subtraction_window_config(particle_type, subtracted_particle)
+def resolve_particle_subtraction_windows(
+    particle_type,
+    subtracted_particle,
+    mm_offset_data=0.0,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_window_config(
+        particle_type,
+        subtracted_particle,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return {}
 
@@ -1440,13 +1630,61 @@ def resolve_particle_subtraction_windows(particle_type, subtracted_particle, mm_
     return resolved
 
 
-def get_particle_subtraction_component_fit_window_config(fit_target):
-    config = PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG.get(str(fit_target or "").strip())
-    return None if config is None else deepcopy(config)
+def get_particle_subtraction_component_fit_window_config(
+    fit_target,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    fit_target_key = str(fit_target or "").strip()
+    config = (
+        deepcopy(PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG.get(fit_target_key))
+        if fit_target_key in PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG
+        else None
+    )
+
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+
+    for override_layer in override_layers:
+        config_override = _get_casefold_mapping_entry(
+            override_layer.get("payload"),
+            fit_target_key,
+        )
+        if isinstance(config_override, dict):
+            config = _deep_merge_particle_subtraction_config(config, config_override)
+
+    if config is None:
+        return None
+    return _attach_particle_subtraction_resolution_metadata(
+        config,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+        override_layers=[layer.get("path") for layer in override_layers],
+    )
 
 
-def resolve_particle_subtraction_component_fit_windows(fit_target, mm_offset_data=0.0):
-    config = get_particle_subtraction_component_fit_window_config(fit_target)
+def resolve_particle_subtraction_component_fit_windows(
+    fit_target,
+    mm_offset_data=0.0,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return {}
 
@@ -1468,8 +1706,19 @@ def resolve_particle_subtraction_component_fit_windows(fit_target, mm_offset_dat
     return resolved
 
 
-def resolve_particle_subtraction_component_fit_excluded_windows(fit_target, mm_offset_data=0.0):
-    config = get_particle_subtraction_component_fit_window_config(fit_target)
+def resolve_particle_subtraction_component_fit_excluded_windows(
+    fit_target,
+    mm_offset_data=0.0,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return []
 
@@ -1491,8 +1740,19 @@ def resolve_particle_subtraction_component_fit_excluded_windows(fit_target, mm_o
     return resolved
 
 
-def resolve_particle_subtraction_component_stage_amplitude_windows(fit_target, mm_offset_data=0.0):
-    config = get_particle_subtraction_component_fit_window_config(fit_target)
+def resolve_particle_subtraction_component_stage_amplitude_windows(
+    fit_target,
+    mm_offset_data=0.0,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return {}
 
@@ -1511,8 +1771,18 @@ def resolve_particle_subtraction_component_stage_amplitude_windows(fit_target, m
     return resolved
 
 
-def resolve_particle_subtraction_component_stage_amplitude_modes(fit_target):
-    config = get_particle_subtraction_component_fit_window_config(fit_target)
+def resolve_particle_subtraction_component_stage_amplitude_modes(
+    fit_target,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return {}
 
@@ -1530,8 +1800,19 @@ def resolve_particle_subtraction_component_stage_amplitude_modes(fit_target):
     return resolved
 
 
-def resolve_particle_subtraction_component_prior_scales(fit_target, component_names=None):
-    config = get_particle_subtraction_component_fit_window_config(fit_target)
+def resolve_particle_subtraction_component_prior_scales(
+    fit_target,
+    component_names=None,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return {}
 
@@ -1559,8 +1840,19 @@ def resolve_particle_subtraction_component_prior_scales(fit_target, component_na
     return resolved
 
 
-def resolve_particle_subtraction_component_postfit_scales(fit_target, component_names=None):
-    config = get_particle_subtraction_component_fit_window_config(fit_target)
+def resolve_particle_subtraction_component_postfit_scales(
+    fit_target,
+    component_names=None,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
     if not config:
         return {}
 

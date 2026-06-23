@@ -57,22 +57,35 @@ if utility_path not in sys.path:
 import background_config as bgcfg
 from background_config import (
     get_particle_subtraction_window_config,
+    get_particle_subtraction_component_fit_window_config,
+    get_particle_subtraction_setting_key,
     resolve_particle_subtraction_windows,
+    resolve_particle_subtraction_component_fit_windows,
 )
 
 config = get_particle_subtraction_window_config("kaon", "pion")
 if config is None:
     raise AssertionError("Expected kaon->pion subtraction-window config to exist")
-if config.get("enabled_windows") != {"pi_n": True, "pi_delta": True}:
-    raise AssertionError("Unexpected subtraction-window enabled flags: {}".format(config.get("enabled_windows")))
-if tuple(config["windows"]["pi_n"]) != (0.88, 0.94):
-    raise AssertionError("Unexpected pi_n subtraction window: {}".format(config["windows"]["pi_n"]))
-if tuple(config["windows"]["pi_delta"]) != (1.35, 1.45):
-    raise AssertionError("Unexpected pi_delta subtraction window: {}".format(config["windows"]["pi_delta"]))
+baseline_enabled_windows = copy.deepcopy(config.get("enabled_windows") or {})
+baseline_windows = {
+    str(name): tuple(bounds)
+    for name, bounds in (config.get("windows") or {}).items()
+}
 
 resolved_nominal = resolve_particle_subtraction_windows("kaon", "pion", 0.0)
 resolved_shifted = resolve_particle_subtraction_windows("kaon", "pion", 0.02)
-for key, expected in {"pi_n": (0.88, 0.94), "pi_delta": (1.35, 1.45)}.items():
+expected_window_names = {
+    name
+    for name, enabled in baseline_enabled_windows.items()
+    if bool(enabled)
+}
+if set(resolved_nominal.keys()) != expected_window_names:
+    raise AssertionError(
+        "Resolved nominal windows did not match enabled defaults: {}".format(resolved_nominal)
+    )
+for key, expected in baseline_windows.items():
+    if key not in expected_window_names:
+        continue
     actual = resolved_nominal.get(key)
     if actual is None or any(not math.isclose(actual[idx], expected[idx], rel_tol=0.0, abs_tol=1e-12) for idx in range(2)):
         raise AssertionError("Unexpected nominal resolved window for {}: {}".format(key, actual))
@@ -97,6 +110,128 @@ try:
         raise AssertionError("Unexpected pi_delta-only resolved windows: {}".format(resolved_pi_delta_only))
 finally:
     bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG["kaon"]["pion"]["enabled_windows"] = orig_enabled
+
+test_inp = {"Q2": "3p0", "W": "3p14", "phi_setting": "Left"}
+if get_particle_subtraction_setting_key(test_inp) != "Q3p0W3p14":
+    raise AssertionError(
+        "Unexpected particle-subtraction setting key: {}".format(
+            get_particle_subtraction_setting_key(test_inp)
+        )
+    )
+
+orig_window_overrides = copy.deepcopy(bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES)
+orig_component_overrides = copy.deepcopy(bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES)
+try:
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES.clear()
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES.update(
+        {
+            "Q3p0W3p14": {
+                "default": {
+                    "kaon": {
+                        "pion": {
+                            "enabled_windows": {"pi_delta": True},
+                            "windows": {"pi_delta": (1.31, 1.41)},
+                        }
+                    }
+                },
+                "by_phi": {
+                    "Left": {
+                        "kaon": {
+                            "pion": {
+                                "windows": {"pi_n": (0.87, 0.93)},
+                            }
+                        }
+                    }
+                },
+            }
+        }
+    )
+    override_cfg = get_particle_subtraction_window_config(
+        "kaon",
+        "pion",
+        inp_dict=test_inp,
+        phi_setting="Left",
+    )
+    if tuple(override_cfg["windows"]["pi_delta"]) != (1.31, 1.41):
+        raise AssertionError("Default Q2/W override was not applied: {}".format(override_cfg))
+    if tuple(override_cfg["windows"]["pi_n"]) != (0.87, 0.93):
+        raise AssertionError("Phi override did not win for pi_n: {}".format(override_cfg))
+    if override_cfg.get("particle_subtraction_override_layers") != [
+        "Q3p0W3p14:default",
+        "Q3p0W3p14:by_phi:Left",
+    ]:
+        raise AssertionError(
+            "Unexpected window override layer trace: {}".format(
+                override_cfg.get("particle_subtraction_override_layers")
+            )
+        )
+    shifted_override = resolve_particle_subtraction_windows(
+        "kaon",
+        "pion",
+        0.02,
+        inp_dict=test_inp,
+        phi_setting="Left",
+    )
+    shifted_pi_n = shifted_override.get("pi_n")
+    if shifted_pi_n is None or any(
+        not math.isclose(shifted_pi_n[idx], expected, rel_tol=0.0, abs_tol=1e-12)
+        for idx, expected in enumerate((0.89, 0.95))
+    ):
+        raise AssertionError("Shifted pi_n override incorrect: {}".format(shifted_override))
+
+    bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES.clear()
+    bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES.update(
+        {
+            "Q3p0W3p14": {
+                "default": {
+                    "pion_control": {
+                        "fit_order": ("pi_sidis", "pi_n"),
+                        "windows": {"pi_delta": (1.20, 1.28)},
+                        "prior_scales": {"pi_delta": 3.0},
+                    }
+                },
+                "by_phi": {
+                    "Left": {
+                        "pion_control": {
+                            "fit_order": ("pi_n", "pi_delta", "pi_sidis"),
+                            "excluded_windows": {"sigma_peak": (1.19, 1.24)},
+                            "enabled_excluded_windows": {"sigma_peak": True},
+                        }
+                    }
+                },
+            }
+        }
+    )
+    component_cfg = get_particle_subtraction_component_fit_window_config(
+        "pion_control",
+        inp_dict=test_inp,
+        phi_setting="Left",
+    )
+    if tuple(component_cfg.get("fit_order") or ()) != ("pi_n", "pi_delta", "pi_sidis"):
+        raise AssertionError("Phi override fit_order did not win: {}".format(component_cfg))
+    if tuple((component_cfg.get("windows") or {}).get("pi_delta") or ()) != (1.20, 1.28):
+        raise AssertionError("Default component override was not merged: {}".format(component_cfg))
+    resolved_component_windows = resolve_particle_subtraction_component_fit_windows(
+        "pion_control",
+        0.01,
+        inp_dict=test_inp,
+        phi_setting="Left",
+    )
+    shifted_pi_delta = resolved_component_windows.get("pi_delta")
+    if shifted_pi_delta is None or any(
+        not math.isclose(shifted_pi_delta[idx], expected, rel_tol=0.0, abs_tol=1e-12)
+        for idx, expected in enumerate((1.21, 1.29))
+    ):
+        raise AssertionError(
+            "Component-fit windows did not apply MM offset after merge: {}".format(
+                resolved_component_windows
+            )
+        )
+finally:
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES.clear()
+    bgcfg.PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES.update(orig_window_overrides)
+    bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES.clear()
+    bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES.update(orig_component_overrides)
 
 print("analysis hardening subtraction-window resolver smoke OK")
 PY
