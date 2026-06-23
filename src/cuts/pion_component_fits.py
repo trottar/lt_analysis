@@ -2727,8 +2727,8 @@ def _print_component_overlay_page(
         stats_box.Draw()
         drawn_hists.append(stats_box)
 
-    canvas.Print(pdf_name)
-    canvas.Close()
+        canvas.Print(pdf_name)
+        canvas.Close()
 
 
 def _format_mm_range(range_values):
@@ -3103,8 +3103,8 @@ def _print_component_step_pages(
         bottom_legend.AddEntry(component_bottom_clone, "{} fit".format(component_label), "l")
         bottom_legend.Draw()
 
-    canvas.Print(pdf_name)
-    canvas.Close()
+        canvas.Print(pdf_name)
+        canvas.Close()
 
 
 def _format_component_template_diag_line(component_label, diagnostics):

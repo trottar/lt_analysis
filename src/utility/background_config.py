@@ -256,7 +256,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "postfit_component_scales": {
             "pi_n": 0.95,
-            "pi_delta": 0.50,
+            "pi_delta": 0.40,
             "pi_sidis": 0.35,
             "k_sigma0_signal": 1.0,
         },
