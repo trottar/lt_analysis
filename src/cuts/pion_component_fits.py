@@ -16,6 +16,7 @@ from background_config import (
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     resolve_particle_subtraction_component_postfit_scales,
     resolve_particle_subtraction_component_prior_scales,
+    resolve_particle_subtraction_component_stage_amplitude_modes,
     resolve_particle_subtraction_component_stage_amplitude_windows,
     resolve_particle_subtraction_component_fit_excluded_windows,
     get_particle_subtraction_component_fit_window_config,
@@ -1002,6 +1003,7 @@ def _run_staged_component_pass(
     fit_max,
     anchor_window_map,
     stage_amplitude_window_map,
+    stage_amplitude_mode_map,
     exclude_windows,
     amplitude_seed,
     amplitude_prefix,
@@ -1044,19 +1046,28 @@ def _run_staged_component_pass(
         )
         residual_hist.Add(baseline_before_hist, -1.0)
 
+        stage_windows = stage_amplitude_window_map.get(component_name)
+        stage_mode = str(
+            (stage_amplitude_mode_map or {}).get(
+                component_name,
+                "window_integral" if (stage_windows or []) else "least_squares",
+            )
+        ).strip().lower() or "least_squares"
+        include_windows = anchor_window_map.get(component_name)
+        amplitude_windows = stage_windows
+        if stage_mode == "least_squares" and (stage_windows or []):
+            include_windows = stage_windows
+            amplitude_windows = None
+
         solve_result = _solve_nonnegative_template_amplitude(
             residual_hist,
             template_hists[component_name],
             fit_min,
             fit_max,
-            include_windows=anchor_window_map.get(component_name),
+            include_windows=include_windows,
             exclude_windows=exclude_windows,
-            amplitude_windows=stage_amplitude_window_map.get(component_name),
-            amplitude_mode=(
-                "window_integral"
-                if (stage_amplitude_window_map.get(component_name) or [])
-                else "least_squares"
-            ),
+            amplitude_windows=amplitude_windows,
+            amplitude_mode=stage_mode,
         )
         amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
         uncertainty_map[component_name] = solve_result.get("sigma")
@@ -1310,6 +1321,7 @@ def _fit_staged_anchor_templates(
     anchor_windows,
     fit_order,
     stage_amplitude_windows=None,
+    stage_amplitude_modes=None,
     exclude_windows=None,
     extra_positive_templates=None,
     extra_anchor_windows=None,
@@ -1342,6 +1354,10 @@ def _fit_staged_anchor_templates(
 
     anchor_window_map = _coerce_window_map(anchor_windows)
     stage_amplitude_window_map = _coerce_window_map(stage_amplitude_windows)
+    stage_amplitude_mode_map = {
+        str(component_name): str(mode_name or "").strip().lower()
+        for component_name, mode_name in ((stage_amplitude_modes or {}).items())
+    }
     extra_window_map = _coerce_window_map(extra_anchor_windows)
     template_hists = {
         "pi_n": component_hists["pi_n"],
@@ -1386,6 +1402,7 @@ def _fit_staged_anchor_templates(
             fit_max,
             combined_window_map,
             stage_amplitude_window_map,
+            stage_amplitude_mode_map,
             exclude_windows,
             stage_amplitudes,
             amplitude_prefix,
@@ -1908,6 +1925,9 @@ def fit_pion_control_with_simc_shapes(
         "pion_control",
         mm_offset_data=mm_offset_data,
     )
+    stage_amplitude_modes = resolve_particle_subtraction_component_stage_amplitude_modes(
+        "pion_control",
+    )
     excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
         "pion_control",
         mm_offset_data=mm_offset_data,
@@ -1947,6 +1967,7 @@ def fit_pion_control_with_simc_shapes(
         anchor_windows=anchor_windows,
         fit_order=fit_config.get("fit_order") or ("pi_n", "pi_delta", "pi_sidis"),
         stage_amplitude_windows=stage_amplitude_windows,
+        stage_amplitude_modes=stage_amplitude_modes,
         exclude_windows=excluded_windows,
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
@@ -2011,6 +2032,9 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
     )
+    stage_amplitude_modes = resolve_particle_subtraction_component_stage_amplitude_modes(
+        "kaon_nosub",
+    )
     excluded_windows = resolve_particle_subtraction_component_fit_excluded_windows(
         "kaon_nosub",
         mm_offset_data=mm_offset_data,
@@ -2064,6 +2088,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "pi_delta",
         ),
         stage_amplitude_windows=stage_amplitude_windows,
+        stage_amplitude_modes=stage_amplitude_modes,
         extra_positive_templates=extra_positive_templates,
         extra_anchor_windows=extra_anchor_windows,
         n_passes=fit_config.get("staged_fit_passes", 1),

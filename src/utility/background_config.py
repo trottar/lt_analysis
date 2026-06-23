@@ -194,8 +194,12 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
-            "pi_delta": (1.16, 1.19),
-            "k_sigma0_signal": (1.19, 1.23),
+            "pi_delta": (1.16, 1.18),
+            "k_sigma0_signal": (1.18, 1.23),
+        },
+        "stage_amplitude_modes": {
+            "pi_delta": "window_integral",
+            "k_sigma0_signal": "least_squares",
         },
         "prior_scales": {
             "pi_n": 1.0,
@@ -234,10 +238,14 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "kaon_nosub": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("pi_n", "pi_delta", "pi_sidis", "k_sigma0_signal"),
+        "fit_order": ("pi_n", "pi_delta", "k_sigma0_signal", "pi_sidis"),
         "stage_amplitude_windows": {
-            "pi_delta": (1.16, 1.19),
-            "k_sigma0_signal": (1.19, 1.23),
+            "pi_delta": (1.16, 1.18),
+            "k_sigma0_signal": (1.18, 1.23),
+        },
+        "stage_amplitude_modes": {
+            "pi_delta": "window_integral",
+            "k_sigma0_signal": "least_squares",
         },
         "prior_scales": {
             "pi_n": 1.0,
@@ -1499,6 +1507,25 @@ def resolve_particle_subtraction_component_stage_amplitude_windows(fit_target, m
             )
         low_edge, high_edge = bounds
         resolved[str(component_name)] = (float(low_edge) + offset, float(high_edge) + offset)
+    return resolved
+
+
+def resolve_particle_subtraction_component_stage_amplitude_modes(fit_target):
+    config = get_particle_subtraction_component_fit_window_config(fit_target)
+    if not config:
+        return {}
+
+    resolved = {}
+    for component_name, mode_name in (config.get("stage_amplitude_modes") or {}).items():
+        normalized_mode = str(mode_name or "").strip().lower() or "least_squares"
+        if normalized_mode not in ("least_squares", "window_integral"):
+            raise ValueError(
+                "Particle subtraction component stage-amplitude mode '{}' for '{}' must be 'least_squares' or 'window_integral'".format(
+                    component_name,
+                    fit_target,
+                )
+            )
+        resolved[str(component_name)] = normalized_mode
     return resolved
 
 
