@@ -399,6 +399,7 @@ def _solve_nonnegative_template_amplitude(
                 "message": "no valid amplitude-window bins",
                 "amplitude_mode": resolved_amplitude_mode,
                 "amplitude_windows": resolved_amplitude_windows,
+                "fit_diagnostics": {},
             }
         template_sum = float(np.sum(amplitude_inputs["template"]))
         if (not math.isfinite(template_sum)) or template_sum <= 0.0:
@@ -411,10 +412,19 @@ def _solve_nonnegative_template_amplitude(
                 "message": "template has zero support inside amplitude window",
                 "amplitude_mode": resolved_amplitude_mode,
                 "amplitude_windows": resolved_amplitude_windows,
+                "fit_diagnostics": {
+                    "target_sum": float(np.sum(amplitude_inputs["y"])),
+                    "template_sum": template_sum,
+                },
             }
         target_sum = float(np.sum(amplitude_inputs["y"]))
         amplitude = max(target_sum / template_sum, 0.0)
         sigma_value = math.sqrt(float(np.sum(np.square(amplitude_inputs["sigma"])))) / template_sum
+        fit_diagnostics = {
+            "target_sum": target_sum,
+            "template_sum": template_sum,
+            "estimator": "window_integral",
+        }
     else:
         weighted_template = fit_inputs["template"] / fit_inputs["sigma"]
         denominator = float(np.dot(weighted_template, weighted_template))
@@ -428,11 +438,18 @@ def _solve_nonnegative_template_amplitude(
                 "message": "template has zero support inside anchor window",
                 "amplitude_mode": resolved_amplitude_mode,
                 "amplitude_windows": resolved_amplitude_windows,
+                "fit_diagnostics": {},
             }
 
         weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
-        amplitude = max(float(np.dot(weighted_template, weighted_target) / denominator), 0.0)
+        numerator = float(np.dot(weighted_template, weighted_target))
+        amplitude = max(float(numerator / denominator), 0.0)
         sigma_value = 1.0 / math.sqrt(denominator)
+        fit_diagnostics = {
+            "weighted_numerator": numerator,
+            "weighted_denominator": denominator,
+            "estimator": "least_squares",
+        }
 
     residual = fit_inputs["y"] - amplitude * fit_inputs["template"]
     chi2_value = float(np.sum(np.square(residual / fit_inputs["sigma"])))
@@ -445,6 +462,7 @@ def _solve_nonnegative_template_amplitude(
         "message": "",
         "amplitude_mode": resolved_amplitude_mode,
         "amplitude_windows": resolved_amplitude_windows,
+        "fit_diagnostics": fit_diagnostics,
     }
 
 
@@ -1107,9 +1125,13 @@ def _run_staged_component_pass(
                 "component_name": component_name,
                 "component_label": _component_plot_label(component_name),
                 "amplitude": float(amplitude_map[component_name]),
+                "sigma": solve_result.get("sigma"),
+                "chi2": solve_result.get("chi2"),
+                "n_fit_bins": solve_result.get("n_fit_bins"),
                 "anchor_windows": deepcopy(anchor_window_map.get(component_name) or []),
                 "amplitude_mode": solve_result.get("amplitude_mode", "least_squares"),
                 "amplitude_windows": deepcopy(solve_result.get("amplitude_windows") or []),
+                "fit_diagnostics": deepcopy(solve_result.get("fit_diagnostics") or {}),
                 "excluded_windows": deepcopy(exclude_windows or []),
                 "H_baseline_before": baseline_before_hist,
                 "H_residual_input": residual_hist,
@@ -2941,6 +2963,13 @@ def _print_component_step_pages(
             3,
         )
         _draw_window_collection(
+            step_overlay.get("amplitude_windows") or [],
+            0.0,
+            1.20 * top_y_max,
+            ROOT.kMagenta + 2,
+            7,
+        )
+        _draw_window_collection(
             step_overlay.get("excluded_windows") or [],
             0.0,
             1.20 * top_y_max,
@@ -2962,14 +2991,34 @@ def _print_component_step_pages(
         stats_box.SetFillStyle(0)
         stats_box.SetTextAlign(12)
         stats_box.SetTextSize(0.028)
+        fit_diagnostics = step_overlay.get("fit_diagnostics") or {}
         stats_box.AddText("pass: {}".format(step_overlay.get("pass_index", 0)))
         stats_box.AddText("component: {}".format(component_label))
         stats_box.AddText("amplitude: {}".format(_format_fit_number(step_overlay.get("amplitude"))))
+        if step_overlay.get("sigma") is not None:
+            stats_box.AddText("sigma: {}".format(_format_fit_number(step_overlay.get("sigma"))))
+        if step_overlay.get("chi2") is not None:
+            stats_box.AddText("chi2: {}".format(_format_fit_metric(step_overlay.get("chi2"))))
+        stats_box.AddText("fit bins: {}".format(int(step_overlay.get("n_fit_bins", 0) or 0)))
         if str(step_overlay.get("amplitude_mode") or "least_squares") != "least_squares":
             stats_box.AddText("mode: {}".format(str(step_overlay.get("amplitude_mode"))))
         if step_overlay.get("amplitude_windows"):
             stats_box.AddText(
                 "core: {}".format(_format_window_list(step_overlay.get("amplitude_windows") or []))
+            )
+        if fit_diagnostics.get("estimator") == "window_integral":
+            stats_box.AddText(
+                "core target int: {}".format(_format_fit_number(fit_diagnostics.get("target_sum")))
+            )
+            stats_box.AddText(
+                "core template int: {}".format(_format_fit_number(fit_diagnostics.get("template_sum")))
+            )
+        elif fit_diagnostics.get("estimator") == "least_squares":
+            stats_box.AddText(
+                "LS num: {}".format(_format_fit_number(fit_diagnostics.get("weighted_numerator")))
+            )
+            stats_box.AddText(
+                "LS den: {}".format(_format_fit_number(fit_diagnostics.get("weighted_denominator")))
             )
         if step_overlay.get("postfit_scale_factor") is not None:
             stats_box.AddText(
@@ -3023,6 +3072,13 @@ def _print_component_step_pages(
             residual_clone.GetMaximum(),
             ROOT.kBlue + 1,
             3,
+        )
+        _draw_window_collection(
+            step_overlay.get("amplitude_windows") or [],
+            residual_clone.GetMinimum(),
+            residual_clone.GetMaximum(),
+            ROOT.kMagenta + 2,
+            7,
         )
         _draw_window_collection(
             step_overlay.get("excluded_windows") or [],
