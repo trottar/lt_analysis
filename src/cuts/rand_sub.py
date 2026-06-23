@@ -79,6 +79,7 @@ from background_config import (
 from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_application_pages,
+    print_particle_subtraction_component_template_pages,
     print_particle_subtraction_component_fit_pages,
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
@@ -3674,6 +3675,16 @@ def rand_sub(
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
 
     CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    if component_payload is not None:
+        print_particle_subtraction_component_template_pages(
+            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            component_payload,
+            title_prefix="{} {}".format(phi_setting, ParticleType),
+            cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+            kaon_signal_payload=kaon_signal_shape_payload,
+            kaon_sigma0_payload=kaon_sigma0_shape_payload,
+        )
 
     if component_fit_result is not None:
         print_particle_subtraction_component_fit_pages(

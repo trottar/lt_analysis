@@ -424,6 +424,10 @@ def _solve_nonnegative_template_amplitude(
             "target_sum": target_sum,
             "template_sum": template_sum,
             "estimator": "window_integral",
+            "fit_bin_indices": [int(value) for value in amplitude_inputs["fit_bin_indices"]],
+            "fit_y": [float(value) for value in amplitude_inputs["y"]],
+            "fit_sigma": [float(value) for value in amplitude_inputs["sigma"]],
+            "fit_template": [float(value) for value in amplitude_inputs["template"]],
         }
     else:
         weighted_template = fit_inputs["template"] / fit_inputs["sigma"]
@@ -449,6 +453,10 @@ def _solve_nonnegative_template_amplitude(
             "weighted_numerator": numerator,
             "weighted_denominator": denominator,
             "estimator": "least_squares",
+            "fit_bin_indices": [int(value) for value in fit_inputs["fit_bin_indices"]],
+            "fit_y": [float(value) for value in fit_inputs["y"]],
+            "fit_sigma": [float(value) for value in fit_inputs["sigma"]],
+            "fit_template": [float(value) for value in fit_inputs["template"]],
         }
 
     residual = fit_inputs["y"] - amplitude * fit_inputs["template"]
@@ -3095,8 +3103,376 @@ def _print_component_step_pages(
         bottom_legend.AddEntry(component_bottom_clone, "{} fit".format(component_label), "l")
         bottom_legend.Draw()
 
+    canvas.Print(pdf_name)
+    canvas.Close()
+
+
+def _format_component_template_diag_line(component_label, diagnostics):
+    diagnostics = diagnostics or {}
+    return (
+        "{}: seen={} passed={} mm_passed={} norm={} fallback={}".format(
+            component_label,
+            int(diagnostics.get("n_events_seen", 0) or 0),
+            int(diagnostics.get("n_events_passed", 0) or 0),
+            int(diagnostics.get("n_events_passed_mm_window", 0) or 0),
+            bool(diagnostics.get("normalized", False)),
+            bool(diagnostics.get("fallback_used", False)),
+        )
+    )
+
+
+def _print_component_amplitude_pages(
+    pdf_name,
+    target_hist,
+    step_overlays,
+    title_prefix,
+    sample_label,
+):
+    if target_hist is None or not step_overlays:
+        return
+
+    for step_overlay in step_overlays:
+        fit_diagnostics = step_overlay.get("fit_diagnostics") or {}
+        fit_bin_indices = [int(value) for value in (fit_diagnostics.get("fit_bin_indices") or [])]
+        fit_y = [float(value) for value in (fit_diagnostics.get("fit_y") or [])]
+        fit_sigma = [float(value) for value in (fit_diagnostics.get("fit_sigma") or [])]
+        fit_template = [float(value) for value in (fit_diagnostics.get("fit_template") or [])]
+        if not fit_bin_indices or not fit_y or not fit_template:
+            continue
+        if not (len(fit_bin_indices) == len(fit_y) == len(fit_template)):
+            continue
+        if len(fit_sigma) != len(fit_y):
+            fit_sigma = [0.0] * len(fit_y)
+
+        component_name = step_overlay.get("component_name")
+        component_label = step_overlay.get("component_label") or _component_plot_label(component_name)
+        component_color = _component_plot_color(component_name)
+        amplitude = float(step_overlay.get("amplitude", 0.0) or 0.0)
+
+        residual_fit_hist = _clone_hist(target_hist, "{}_amp_resid".format(target_hist.GetName()), reset=True)
+        template_fit_hist = _clone_hist(target_hist, "{}_amp_template".format(target_hist.GetName()), reset=True)
+        fitted_template_hist = _clone_hist(target_hist, "{}_amp_fitted_template".format(target_hist.GetName()), reset=True)
+        ratio_raw_hist = _clone_hist(target_hist, "{}_amp_ratio_raw".format(target_hist.GetName()), reset=True)
+        ratio_scaled_hist = _clone_hist(target_hist, "{}_amp_ratio_scaled".format(target_hist.GetName()), reset=True)
+        ratio_raw_values = []
+        ratio_scaled_values = []
+
+        for idx, bin_index in enumerate(fit_bin_indices):
+            y_value = float(fit_y[idx])
+            sigma_value = float(fit_sigma[idx])
+            template_value = float(fit_template[idx])
+            fitted_value = amplitude * template_value
+
+            residual_fit_hist.SetBinContent(bin_index, y_value)
+            residual_fit_hist.SetBinError(bin_index, sigma_value)
+            template_fit_hist.SetBinContent(bin_index, template_value)
+            fitted_template_hist.SetBinContent(bin_index, fitted_value)
+
+            if abs(template_value) > 1e-12:
+                raw_ratio = y_value / template_value
+                raw_ratio_err = abs(sigma_value / template_value) if sigma_value > 0.0 else 0.0
+                ratio_raw_hist.SetBinContent(bin_index, raw_ratio)
+                ratio_raw_hist.SetBinError(bin_index, raw_ratio_err)
+                if math.isfinite(raw_ratio):
+                    ratio_raw_values.append(raw_ratio)
+            if abs(fitted_value) > 1e-12:
+                scaled_ratio = y_value / fitted_value
+                scaled_ratio_err = abs(sigma_value / fitted_value) if sigma_value > 0.0 else 0.0
+                ratio_scaled_hist.SetBinContent(bin_index, scaled_ratio)
+                ratio_scaled_hist.SetBinError(bin_index, scaled_ratio_err)
+                if math.isfinite(scaled_ratio):
+                    ratio_scaled_values.append(scaled_ratio)
+
+        canvas = ROOT.TCanvas(
+            "c_amp_step_{}".format(step_overlay.get("step_index", 0)),
+            "",
+            900,
+            900,
+        )
+        canvas.Divide(1, 2)
+
+        top_pad = canvas.cd(1)
+        top_pad.SetBottomMargin(0.12)
+        residual_fit_hist.SetTitle(
+            "{}{} amplitude diagnostic step {}: {}".format(
+                title_prefix,
+                sample_label,
+                step_overlay.get("step_index", 0),
+                component_label,
+            )
+        )
+        residual_fit_hist.SetLineColor(ROOT.kBlack)
+        residual_fit_hist.SetLineWidth(2)
+        residual_fit_hist.SetFillStyle(3001)
+        residual_fit_hist.SetFillColor(ROOT.kGray + 1)
+        residual_fit_hist.SetMarkerStyle(20)
+        residual_fit_hist.SetMarkerSize(0.7)
+        _style_overlay_hist(template_fit_hist, ROOT.kBlue + 1, line_style=2)
+        _style_overlay_hist(fitted_template_hist, component_color, line_style=1)
+        top_y_max = max(
+            residual_fit_hist.GetMaximum(),
+            template_fit_hist.GetMaximum(),
+            fitted_template_hist.GetMaximum(),
+            0.0,
+        )
+        if top_y_max <= 0.0:
+            top_y_max = 1.0
+        top_y_min = min(
+            0.0,
+            residual_fit_hist.GetMinimum(),
+            template_fit_hist.GetMinimum(),
+            fitted_template_hist.GetMinimum(),
+        )
+        residual_fit_hist.SetMaximum(1.20 * top_y_max)
+        residual_fit_hist.SetMinimum(1.20 * top_y_min if top_y_min < 0.0 else 0.0)
+        residual_fit_hist.Draw("E1")
+        template_fit_hist.Draw("hist same")
+        fitted_template_hist.Draw("hist same")
+        _draw_window_collection(
+            step_overlay.get("anchor_windows") or [],
+            residual_fit_hist.GetMinimum(),
+            residual_fit_hist.GetMaximum(),
+            ROOT.kBlue + 1,
+            3,
+        )
+        _draw_window_collection(
+            step_overlay.get("amplitude_windows") or [],
+            residual_fit_hist.GetMinimum(),
+            residual_fit_hist.GetMaximum(),
+            ROOT.kMagenta + 2,
+            7,
+        )
+        _draw_window_collection(
+            step_overlay.get("excluded_windows") or [],
+            residual_fit_hist.GetMinimum(),
+            residual_fit_hist.GetMaximum(),
+            ROOT.kGray + 2,
+            2,
+        )
+
+        top_legend = ROOT.TLegend(0.56, 0.60, 0.88, 0.88)
+        top_legend.SetBorderSize(0)
+        top_legend.SetFillStyle(0)
+        top_legend.AddEntry(residual_fit_hist, "fit-bin residual input", "lep")
+        top_legend.AddEntry(template_fit_hist, "raw template", "l")
+        top_legend.AddEntry(fitted_template_hist, "fitted template", "l")
+        top_legend.Draw()
+
+        stats_box = ROOT.TPaveText(0.14, 0.56, 0.52, 0.88, "NDC")
+        stats_box.SetBorderSize(0)
+        stats_box.SetFillStyle(0)
+        stats_box.SetTextAlign(12)
+        stats_box.SetTextSize(0.026)
+        stats_box.AddText("pass: {}".format(step_overlay.get("pass_index", 0)))
+        stats_box.AddText("component: {}".format(component_label))
+        stats_box.AddText("amplitude: {}".format(_format_fit_number(amplitude)))
+        if step_overlay.get("sigma") is not None:
+            stats_box.AddText("sigma: {}".format(_format_fit_number(step_overlay.get("sigma"))))
+        if step_overlay.get("chi2") is not None:
+            stats_box.AddText("chi2: {}".format(_format_fit_metric(step_overlay.get("chi2"))))
+        stats_box.AddText("fit bins: {}".format(int(step_overlay.get("n_fit_bins", 0) or 0)))
+        stats_box.AddText("mode: {}".format(str(step_overlay.get("amplitude_mode") or "least_squares")))
+        if step_overlay.get("amplitude_windows"):
+            stats_box.AddText("core: {}".format(_format_window_list(step_overlay.get("amplitude_windows") or [])))
+        if fit_diagnostics.get("estimator") == "window_integral":
+            stats_box.AddText("target int: {}".format(_format_fit_number(fit_diagnostics.get("target_sum"))))
+            stats_box.AddText("template int: {}".format(_format_fit_number(fit_diagnostics.get("template_sum"))))
+        elif fit_diagnostics.get("estimator") == "least_squares":
+            stats_box.AddText("LS num: {}".format(_format_fit_number(fit_diagnostics.get("weighted_numerator"))))
+            stats_box.AddText("LS den: {}".format(_format_fit_number(fit_diagnostics.get("weighted_denominator"))))
+        stats_box.Draw()
+
+        bottom_pad = canvas.cd(2)
+        bottom_pad.SetTopMargin(0.08)
+        bottom_pad.SetBottomMargin(0.12)
+        ratio_raw_hist.SetTitle("Residual/template ratios by fit bin")
+        ratio_raw_hist.SetLineColor(component_color)
+        ratio_raw_hist.SetLineWidth(2)
+        ratio_raw_hist.SetMarkerColor(component_color)
+        ratio_raw_hist.SetMarkerStyle(20)
+        ratio_raw_hist.SetMarkerSize(0.7)
+        ratio_scaled_hist.SetLineColor(ROOT.kGreen + 2)
+        ratio_scaled_hist.SetLineWidth(2)
+        ratio_scaled_hist.SetMarkerColor(ROOT.kGreen + 2)
+        ratio_scaled_hist.SetMarkerStyle(24)
+        ratio_scaled_hist.SetMarkerSize(0.6)
+        ratio_values = [
+            float(value)
+            for value in (ratio_raw_values + ratio_scaled_values + [amplitude, 1.0])
+            if math.isfinite(float(value))
+        ]
+        ratio_y_min = min(ratio_values) if ratio_values else 0.0
+        ratio_y_max = max(ratio_values) if ratio_values else 1.0
+        ratio_span = max(ratio_y_max - ratio_y_min, 0.25)
+        ratio_raw_hist.SetMaximum(ratio_y_max + 0.20 * ratio_span)
+        ratio_raw_hist.SetMinimum(ratio_y_min - 0.20 * ratio_span)
+        ratio_raw_hist.Draw("E1")
+        ratio_scaled_hist.Draw("E1 same")
+        _draw_window_collection(
+            step_overlay.get("anchor_windows") or [],
+            ratio_raw_hist.GetMinimum(),
+            ratio_raw_hist.GetMaximum(),
+            ROOT.kBlue + 1,
+            3,
+        )
+        _draw_window_collection(
+            step_overlay.get("amplitude_windows") or [],
+            ratio_raw_hist.GetMinimum(),
+            ratio_raw_hist.GetMaximum(),
+            ROOT.kMagenta + 2,
+            7,
+        )
+        _draw_window_collection(
+            step_overlay.get("excluded_windows") or [],
+            ratio_raw_hist.GetMinimum(),
+            ratio_raw_hist.GetMaximum(),
+            ROOT.kGray + 2,
+            2,
+        )
+        amplitude_line = ROOT.TLine(
+            float(target_hist.GetXaxis().GetXmin()),
+            amplitude,
+            float(target_hist.GetXaxis().GetXmax()),
+            amplitude,
+        )
+        amplitude_line.SetLineColor(component_color)
+        amplitude_line.SetLineStyle(2)
+        amplitude_line.SetLineWidth(2)
+        amplitude_line.Draw("same")
+        unity_line = ROOT.TLine(
+            float(target_hist.GetXaxis().GetXmin()),
+            1.0,
+            float(target_hist.GetXaxis().GetXmax()),
+            1.0,
+        )
+        unity_line.SetLineColor(ROOT.kGreen + 2)
+        unity_line.SetLineStyle(3)
+        unity_line.SetLineWidth(2)
+        unity_line.Draw("same")
+
+        bottom_legend = ROOT.TLegend(0.50, 0.64, 0.88, 0.88)
+        bottom_legend.SetBorderSize(0)
+        bottom_legend.SetFillStyle(0)
+        bottom_legend.AddEntry(ratio_raw_hist, "residual / raw template", "lep")
+        bottom_legend.AddEntry(amplitude_line, "fitted amplitude", "l")
+        bottom_legend.AddEntry(ratio_scaled_hist, "residual / fitted template", "lep")
+        bottom_legend.AddEntry(unity_line, "unity closure", "l")
+        bottom_legend.Draw()
+
+        closure_mean = (
+            sum(ratio_scaled_values) / len(ratio_scaled_values)
+            if ratio_scaled_values else float("nan")
+        )
+        closure_rms = (
+            math.sqrt(
+                sum((value - closure_mean) ** 2 for value in ratio_scaled_values) / len(ratio_scaled_values)
+            )
+            if ratio_scaled_values and math.isfinite(closure_mean) else float("nan")
+        )
+        ratio_stats = ROOT.TPaveText(0.14, 0.74, 0.44, 0.88, "NDC")
+        ratio_stats.SetBorderSize(0)
+        ratio_stats.SetFillStyle(0)
+        ratio_stats.SetTextAlign(12)
+        ratio_stats.SetTextSize(0.024)
+        ratio_stats.AddText("mean(resid/[A*T])={}".format(_format_fit_metric(closure_mean)))
+        ratio_stats.AddText("rms(resid/[A*T])={}".format(_format_fit_metric(closure_rms)))
+        ratio_stats.Draw()
+
         canvas.Print(pdf_name)
         canvas.Close()
+
+
+def print_particle_subtraction_component_template_pages(
+    pdf_name,
+    component_shape_payload,
+    title_prefix="",
+    cut_window=None,
+    kaon_signal_payload=None,
+    kaon_sigma0_payload=None,
+):
+    component_shape_payload = component_shape_payload or {}
+    component_map = component_shape_payload.get("components") or {}
+    kaon_signal_payload = kaon_signal_payload or {}
+    kaon_sigma0_payload = kaon_sigma0_payload or {}
+
+    component_specs = [
+        ("pi_n", "pi-n", ROOT.kRed + 1),
+        ("pi_sidis", "pi-SIDIS", ROOT.kMagenta + 2),
+        ("pi_delta", "pi-delta", ROOT.kAzure + 2),
+    ]
+    aux_specs = [
+        ("k_lambda_signal", "K-Lambda", ROOT.kBlue + 1, kaon_signal_payload),
+        ("k_sigma0_signal", "K-Sigma0", ROOT.kCyan + 2, kaon_sigma0_payload),
+    ]
+
+    def _build_page(hist_key):
+        base_hist = None
+        base_label = None
+        overlay_specs = []
+        stats_lines = [
+            "mode: {}".format(component_shape_payload.get("mode", "unknown")),
+            "tree: {}".format(component_shape_payload.get("tree_name", "unknown")),
+        ]
+
+        for component_name, label, color in component_specs:
+            component_payload = component_map.get(component_name) or {}
+            hist = component_payload.get(hist_key)
+            if hist is None:
+                continue
+            if base_hist is None:
+                base_hist = hist
+                base_label = label
+            else:
+                overlay_specs.append((hist, label, color, 1))
+            stats_lines.append(
+                _format_component_template_diag_line(
+                    label,
+                    (component_shape_payload.get("diagnostics") or {}).get(component_name),
+                )
+            )
+
+        for _, label, color, aux_payload in aux_specs:
+            hist = aux_payload.get(hist_key)
+            if hist is None:
+                continue
+            if base_hist is None:
+                base_hist = hist
+                base_label = label
+            else:
+                overlay_specs.append((hist, label, color, 2))
+            stats_lines.append(
+                _format_component_template_diag_line(label, aux_payload.get("diagnostics"))
+            )
+
+        return base_hist, base_label, overlay_specs, stats_lines
+
+    title_prefix = (title_prefix or "").strip()
+    if title_prefix:
+        title_prefix = "{} ".format(title_prefix)
+
+    full_base, full_label, full_overlays, full_stats = _build_page("setting_shape_full")
+    if full_base is not None:
+        _print_component_overlay_page(
+            pdf_name,
+            full_base,
+            full_label,
+            "{}SIMC component templates (full MM range)".format(title_prefix),
+            full_overlays,
+            full_stats,
+            cut_window=cut_window,
+        )
+
+    cut_base, cut_label, cut_overlays, cut_stats = _build_page("setting_shape")
+    if cut_base is not None:
+        _print_component_overlay_page(
+            pdf_name,
+            cut_base,
+            cut_label,
+            "{}SIMC component templates (analysis MM-cut window)".format(title_prefix),
+            cut_overlays,
+            cut_stats,
+            cut_window=cut_window,
+        )
 
 
 def print_particle_subtraction_component_application_pages(
@@ -3440,7 +3816,21 @@ def print_particle_subtraction_component_fit_pages(
             title_prefix,
             "pion-control",
         )
+        _print_component_amplitude_pages(
+            pdf_name,
+            component_fit_result.get("H_pion_control_input"),
+            component_fit_result.get("H_pion_fit_step_overlays"),
+            title_prefix,
+            "pion-control",
+        )
         _print_component_step_pages(
+            pdf_name,
+            component_fit_result.get("H_kaon_nosub_input"),
+            component_fit_result.get("H_kaon_fit_step_overlays"),
+            title_prefix,
+            "kaon no-sub",
+        )
+        _print_component_amplitude_pages(
             pdf_name,
             component_fit_result.get("H_kaon_nosub_input"),
             component_fit_result.get("H_kaon_fit_step_overlays"),
