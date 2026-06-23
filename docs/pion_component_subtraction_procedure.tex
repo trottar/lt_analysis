@@ -164,14 +164,30 @@ while the kaon-side fit determines
 
 \subsection{Ordered staged fit}
 
-The current default staged fit order in the config is
-\begin{align}
-  \pi\mathrm{-SIDIS}
-  \;\rightarrow\;
-  \pi\mathrm{-}n
-  \;\rightarrow\;
-  \pi\mathrm{-}\Delta.
-\end{align}
+The staged fit order is controlled directly in
+\texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
+
+Current defaults are:
+\begin{itemize}[leftmargin=2em]
+  \item pion-control:
+  \begin{align}
+    \pi\mathrm{-}n
+    \;\rightarrow\;
+    \pi\mathrm{-SIDIS}
+    \;\rightarrow\;
+    \pi\mathrm{-}\Delta,
+  \end{align}
+  \item kaon no-sub:
+  \begin{align}
+    \pi\mathrm{-}n
+    \;\rightarrow\;
+    \pi\mathrm{-}\Delta
+    \;\rightarrow\;
+    K\mathrm{-}\Sigma^0
+    \;\rightarrow\;
+    \pi\mathrm{-SIDIS}.
+  \end{align}
+\end{itemize}
 
 Each stage fits the residual remaining after the previous fitted components have
 been subtracted from the input histogram. Conceptually:
@@ -185,6 +201,138 @@ amplitudes in the configured fit order.
 
 The anchor windows for the current defaults are stored in
 \texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
+
+\subsection{How the amplitudes are found}
+
+At each staged step, the code solves for a single non-negative amplitude against
+the current residual histogram. The exact rule depends on the configured
+\texttt{stage\_amplitude\_mode}.
+
+\subsubsection*{Window-integral mode}
+
+If a component is configured with
+\texttt{stage\_amplitude\_mode = window\_integral}, then the amplitude is taken
+from the ratio of the residual integral to the unit-normalized template
+integral inside the configured stage-amplitude window:
+\begin{align}
+  C
+  =
+  \max\!\left(
+    0,\,
+    \frac{\sum\limits_{i \in W_{\mathrm{amp}}} R(i)}
+         {\sum\limits_{i \in W_{\mathrm{amp}}} T(i)}
+  \right),
+\end{align}
+where
+\begin{itemize}[leftmargin=2em]
+  \item $R(i)$ is the residual bin content,
+  \item $T(i)$ is the template bin content,
+  \item $W_{\mathrm{amp}}$ is the configured stage-amplitude window.
+\end{itemize}
+
+This is a direct window-normalization estimate. The implementation then stores
+the resulting amplitude uncertainty as the residual quadrature error inside the
+same window divided by the template integral in that window.
+
+\subsubsection*{Least-squares mode}
+
+If a component is configured with
+\texttt{stage\_amplitude\_mode = least\_squares}, the code minimizes the
+single-template weighted residual over the selected fit bins:
+\begin{align}
+  \chi^2(C)
+  =
+  \sum_i
+  \frac{\left[R(i) - C\,T(i)\right]^2}{\sigma_i^2}.
+\end{align}
+
+For one template, the solution is
+\begin{align}
+  C
+  =
+  \max\!\left(
+    0,\,
+    \frac{\sum_i T(i)\,R(i)/\sigma_i^2}
+         {\sum_i T(i)^2/\sigma_i^2}
+  \right).
+\end{align}
+
+The reported one-parameter uncertainty is
+\begin{align}
+  \delta C
+  =
+  \left(
+    \sum_i \frac{T(i)^2}{\sigma_i^2}
+  \right)^{-1/2}.
+\end{align}
+
+So in practical terms:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{window\_integral} uses an area match inside a core window,
+  \item \texttt{least\_squares} uses the actual template shape against the
+  residual.
+\end{itemize}
+
+\subsubsection*{Residual update}
+
+After a stage amplitude $C_j$ is found, the cumulative staged model is updated
+and the next component is fit to the new residual:
+\begin{align}
+  R_j(MM)
+  =
+  D(MM)
+  -
+  \sum_{k=1}^{j} C_k T_k(MM).
+\end{align}
+
+The amplitudes are explicitly constrained to remain non-negative at every
+staged step.
+
+\subsubsection*{Joint refinement after the staged pass}
+
+Once the ordered staged amplitudes are available, the code can refine all
+component amplitudes simultaneously with a non-negative bounded linear least
+squares solve. The staged solution provides the starting point and prior target.
+
+The refined objective is equivalent to minimizing
+\begin{align}
+  \chi^2_{\mathrm{data}}
+  +
+  \sum_j
+  \left(
+    \frac{C_j - C^{\mathrm{stage}}_j}{\tau_j}
+  \right)^2,
+\end{align}
+where $\tau_j$ is the configured prior width for component $j$.
+
+The implementation solves this as an augmented linear system with
+\begin{align}
+  C_j \ge 0
+\end{align}
+for all components.
+
+\subsubsection*{Coordinate-update fallback}
+
+If the joint prior refinement is not accepted by the validation logic, the code
+can perform ordered coordinate updates. For a given component $j$, it forms the
+residual with all other components held fixed:
+\begin{align}
+  R_{-j}(i)
+  =
+  D(i) - \sum_{k \ne j} C_k T_k(i),
+\end{align}
+and updates
+\begin{align}
+  C_j
+  =
+  \max\!\left(
+    0,\,
+    \frac{\sum_i T_j(i)\,R_{-j}(i)/\sigma_i^2}
+         {\sum_i T_j(i)^2/\sigma_i^2}
+  \right),
+\end{align}
+with the prior penalty included in the numerator and denominator when the prior
+width is finite.
 
 \subsection{Current default windows}
 
