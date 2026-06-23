@@ -91,6 +91,7 @@ from pion_component_subtraction import (
     compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
     handle_particle_subtraction_fallback,
+    print_particle_subtraction_weight_support_warning,
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
@@ -608,19 +609,12 @@ def _apply_component_pion_subtraction_setting(
         clip_max=clip_max,
         denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
     )
-    unsupported_bins = set(weight_payload["diagnostics"].get("unsupported_bins") or [])
-    pion_reference = component_fit_result.get("H_pion_control_input")
-    unsupported_overlap = 0
-    if pion_reference is not None and unsupported_bins:
-        for bin_index in unsupported_bins:
-            if float(pion_reference.GetBinContent(int(bin_index))) > 0.0:
-                unsupported_overlap += 1
-    if unsupported_overlap > 0:
-        return handle_particle_subtraction_fallback(
-            payload,
-            "unsupported pion-weight bins overlap pion-control content",
-            context="rand_sub component pion subtraction ({})".format(phi_setting),
-        )
+    print_particle_subtraction_weight_support_warning(
+        weight_payload,
+        context="rand_sub component pion subtraction",
+        epsset=inpDict.get("EPSSET", ""),
+        phi_setting=phi_setting,
+    )
 
     if weight_payload["diagnostics"]["pion_weight_max"] > resolve_particle_subtraction_weight_warn_max(inpDict):
         print(

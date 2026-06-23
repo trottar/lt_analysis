@@ -57,6 +57,17 @@ def _hist_integral(hist):
         return 0.0
 
 
+def _bin_index_mm_range(hist, bin_indices):
+    if hist is None or not bin_indices:
+        return None
+    axis = hist.GetXaxis()
+    sorted_bins = sorted(int(bin_index) for bin_index in bin_indices)
+    return [
+        float(axis.GetBinLowEdge(sorted_bins[0])),
+        float(axis.GetBinUpEdge(sorted_bins[-1])),
+    ]
+
+
 def compute_hist_closure_metrics(reference_hist, comparison_hist):
     metrics = {
         "signature_match": False,
@@ -96,6 +107,39 @@ def compute_hist_closure_metrics(reference_hist, comparison_hist):
     metrics["max_abs_bin_diff"] = float(max_abs_bin_diff)
     metrics["max_abs_bin_center"] = max_abs_bin_center
     return metrics
+
+
+def print_particle_subtraction_weight_support_warning(weight_payload, context="", **details):
+    diagnostics = (weight_payload or {}).get("diagnostics") or {}
+    unsupported_count = int(diagnostics.get("pion_weight_unsupported_bin_count", 0) or 0)
+    overlap_count = int(diagnostics.get("pion_weight_unsupported_overlap_bin_count", 0) or 0)
+    if unsupported_count <= 0 and overlap_count <= 0:
+        return
+
+    print("WARNING: unsupported pion-weight bins encountered")
+    if context:
+        print("  context = {}".format(context))
+    for key, value in details.items():
+        print("  {} = {}".format(key, value))
+    print("  unsupported_bin_count = {}".format(unsupported_count))
+    unsupported_mm_range = diagnostics.get("pion_weight_unsupported_mm_range")
+    if unsupported_mm_range is not None:
+        print(
+            "  unsupported_mm_range = [{:.4f}, {:.4f}]".format(
+                float(unsupported_mm_range[0]),
+                float(unsupported_mm_range[1]),
+            )
+        )
+    if overlap_count > 0:
+        print("  overlap_pion_control_bin_count = {}".format(overlap_count))
+        overlap_mm_range = diagnostics.get("pion_weight_unsupported_overlap_mm_range")
+        if overlap_mm_range is not None:
+            print(
+                "  overlap_pion_control_mm_range = [{:.4f}, {:.4f}]".format(
+                    float(overlap_mm_range[0]),
+                    float(overlap_mm_range[1]),
+                )
+            )
 
 
 def _resolve_component_template_map(component_fit_result):
@@ -311,6 +355,13 @@ def build_simc_shape_pion_control_weights(
             float(axis.GetBinUpEdge(max(unsupported_bins))),
         ]
 
+    pion_reference = component_fit_result.get("H_pion_control_input")
+    unsupported_overlap_bins = []
+    if pion_reference is not None and unsupported_bins:
+        for bin_index in unsupported_bins:
+            if float(pion_reference.GetBinContent(int(bin_index))) > 0.0:
+                unsupported_overlap_bins.append(int(bin_index))
+
     diagnostics = {
         "pion_control_integral": _hist_integral(component_fit_result.get("H_pion_control_input")),
         "pion_control_model_integral": _hist_integral(h_pion_control_model),
@@ -326,6 +377,12 @@ def build_simc_shape_pion_control_weights(
         "pion_weight_unsupported_bin_count": int(len(unsupported_bins)),
         "pion_weight_unsupported_mm_range": unsupported_mm_range,
         "unsupported_bins": list(unsupported_bins),
+        "pion_weight_unsupported_overlap_bin_count": int(len(unsupported_overlap_bins)),
+        "pion_weight_unsupported_overlap_mm_range": _bin_index_mm_range(
+            pion_reference,
+            unsupported_overlap_bins,
+        ),
+        "unsupported_overlap_bins": list(unsupported_overlap_bins),
         "denom_floor": float(denom_floor),
         "ratio_max_abs_error": float(ratio_max_abs_error),
         "ratio_consistency_ok": bool(ratio_max_abs_error <= 1e-9),
