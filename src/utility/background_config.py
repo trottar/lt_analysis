@@ -209,14 +209,14 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "postfit_component_scales": {
             '''
-            "pi_n": 1.0,
-            "pi_delta": 1.0,
-            "pi_sidis": 1.0,
-            "k_sigma0_signal": 1.0,
-            '''
             "pi_n": 0.95,
             "pi_delta": 0.95,
             "pi_sidis": 0.75,
+            "k_sigma0_signal": 1.0,            
+            '''
+            "pi_n": 1.0,
+            "pi_delta": 1.0,
+            "pi_sidis": 1.0,
             "k_sigma0_signal": 1.0,
         },
         "joint_refinement_enabled": True,
@@ -261,16 +261,16 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "k_sigma0_signal": 1.0,
         },
         "postfit_component_scales": {
-            '''        
-            "pi_n": 0.95,
-            "pi_delta": 0.40,
-            "pi_sidis": 0.35,
-            "k_sigma0_signal": 1.0,
             '''
             "pi_n": 1.0,
             "pi_delta": 1.0,
             "pi_sidis": 1.0,
-            "k_sigma0_signal": 1.0,                    
+            "k_sigma0_signal": 1.0,     
+            '''        
+            "pi_n": 0.95,
+            "pi_delta": 0.40,
+            "pi_sidis": 0.35,
+            "k_sigma0_signal": 1.0,               
         },
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
