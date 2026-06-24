@@ -238,7 +238,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "windows": {
             "pi_n": (0.90, 0.95),
             "pi_delta": (1.16, 1.25),
-            "pi_sidis": (1.00, 1.10),
+            "pi_sidis": ((1.00, 1.10), (1.45, 1.50)),
             "k_sigma0_signal": (1.17, 1.23),
         },
     },
@@ -294,7 +294,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "windows": {
             "pi_n": (0.90, 0.95),
             "pi_delta": (1.16, 1.25),
-            "pi_sidis": (1.00, 1.10),
+            "pi_sidis": ((1.00, 1.10), (1.45, 1.50)),
             "k_sigma0_signal": (1.17, 1.23),
         },
         "enabled_excluded_windows": {
@@ -1685,6 +1685,39 @@ def get_particle_subtraction_component_fit_window_config(
     )
 
 
+def _is_particle_subtraction_numeric_pair(bounds):
+    if not isinstance(bounds, (list, tuple)) or len(bounds) != 2:
+        return False
+    try:
+        float(bounds[0])
+        float(bounds[1])
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
+def _resolve_particle_subtraction_window_collection(bounds, offset, context):
+    if bounds is None:
+        return []
+
+    if _is_particle_subtraction_numeric_pair(bounds):
+        return [(float(bounds[0]) + offset, float(bounds[1]) + offset)]
+
+    resolved = []
+    if not isinstance(bounds, (list, tuple)):
+        raise ValueError("{} must contain one window pair or an iterable of window pairs".format(context))
+
+    for window_bounds in bounds:
+        if not _is_particle_subtraction_numeric_pair(window_bounds):
+            raise ValueError(
+                "{} must contain only window pairs of the form (min, max)".format(context)
+            )
+        resolved.append(
+            (float(window_bounds[0]) + offset, float(window_bounds[1]) + offset)
+        )
+    return resolved
+
+
 def resolve_particle_subtraction_component_fit_windows(
     fit_target,
     mm_offset_data=0.0,
@@ -1707,15 +1740,14 @@ def resolve_particle_subtraction_component_fit_windows(
     for window_name, bounds in (config.get("windows") or {}).items():
         if not bool(enabled_windows.get(window_name, True)):
             continue
-        if len(bounds) != 2:
-            raise ValueError(
-                "Particle subtraction component-fit window '{}' for '{}' must contain exactly two bounds".format(
-                    window_name,
-                    fit_target,
-                )
-            )
-        low_edge, high_edge = bounds
-        resolved[str(window_name)] = (float(low_edge) + offset, float(high_edge) + offset)
+        resolved[str(window_name)] = _resolve_particle_subtraction_window_collection(
+            bounds,
+            offset,
+            "Particle subtraction component-fit window '{}' for '{}'".format(
+                window_name,
+                fit_target,
+            ),
+        )
     return resolved
 
 
@@ -1741,15 +1773,16 @@ def resolve_particle_subtraction_component_fit_excluded_windows(
     for window_name, bounds in (config.get("excluded_windows") or {}).items():
         if not bool(enabled_windows.get(window_name, True)):
             continue
-        if len(bounds) != 2:
-            raise ValueError(
-                "Particle subtraction component-fit excluded window '{}' for '{}' must contain exactly two bounds".format(
+        resolved.extend(
+            _resolve_particle_subtraction_window_collection(
+                bounds,
+                offset,
+                "Particle subtraction component-fit excluded window '{}' for '{}'".format(
                     window_name,
                     fit_target,
-                )
+                ),
             )
-        low_edge, high_edge = bounds
-        resolved.append((float(low_edge) + offset, float(high_edge) + offset))
+        )
     return resolved
 
 
@@ -1772,15 +1805,14 @@ def resolve_particle_subtraction_component_stage_amplitude_windows(
     offset = float(mm_offset_data) if bool(config.get("apply_mm_offset_data", False)) else 0.0
     resolved = {}
     for component_name, bounds in (config.get("stage_amplitude_windows") or {}).items():
-        if len(bounds) != 2:
-            raise ValueError(
-                "Particle subtraction component stage-amplitude window '{}' for '{}' must contain exactly two bounds".format(
-                    component_name,
-                    fit_target,
-                )
-            )
-        low_edge, high_edge = bounds
-        resolved[str(component_name)] = (float(low_edge) + offset, float(high_edge) + offset)
+        resolved[str(component_name)] = _resolve_particle_subtraction_window_collection(
+            bounds,
+            offset,
+            "Particle subtraction component stage-amplitude window '{}' for '{}'".format(
+                component_name,
+                fit_target,
+            ),
+        )
     return resolved
 
 

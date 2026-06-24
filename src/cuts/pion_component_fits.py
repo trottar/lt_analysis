@@ -2012,8 +2012,8 @@ def fit_pion_control_with_simc_shapes(
         phi_setting=phi_setting,
     )
     anchor_windows = {
-        component_name: [window]
-        for component_name, window in resolved_windows.items()
+        component_name: deepcopy(windows)
+        for component_name, windows in resolved_windows.items()
     }
     prior_scale_map = resolve_particle_subtraction_component_prior_scales(
         "pion_control",
@@ -2154,8 +2154,8 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         phi_setting=phi_setting,
     )
     anchor_windows = {
-        component_name: [window]
-        for component_name, window in resolved_windows.items()
+        component_name: deepcopy(windows)
+        for component_name, windows in resolved_windows.items()
     }
     mm_min = float(inpDict.get("mm_min", fit_min))
     mm_max = float(inpDict.get("mm_max", fit_max))
