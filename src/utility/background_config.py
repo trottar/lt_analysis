@@ -194,7 +194,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
-            "pi_delta": (1.16, 1.18),
+            "pi_delta": (1.16, 1.25),
             "k_sigma0_signal": (1.18, 1.23),
         },
         "stage_amplitude_modes": {
@@ -230,9 +230,9 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "k_sigma0_signal": False,
         },
         "windows": {
-            "pi_n": (0.90, 0.94),
+            "pi_n": (0.90, 0.95),
             "pi_delta": (1.16, 1.25),
-            "pi_sidis": (1.36, 1.45),
+            "pi_sidis": (1.32, 1.45),
             "k_sigma0_signal": (1.18, 1.23),
         },
     },
@@ -241,8 +241,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_delta", "k_sigma0_signal", "pi_sidis"),
         "stage_amplitude_windows": {
-            "pi_delta": (1.16, 1.18),
-            "k_sigma0_signal": (1.18, 1.23),
+            "pi_delta": (1.16, 1.25),
+            "k_sigma0_signal": (1.17, 1.23),
         },
         "stage_amplitude_modes": {
             "pi_delta": "window_integral",
@@ -279,16 +279,16 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "k_sigma0_signal": True,
         },
         "windows": {
-            "pi_n": (0.90, 0.94),
-            "pi_delta": (1.16, 1.26),
-            "pi_sidis": (1.36, 1.45),
-            "k_sigma0_signal": (1.18, 1.23),
+            "pi_n": (0.90, 0.95),
+            "pi_delta": (1.16, 1.25),
+            "pi_sidis": (1.32, 1.45),
+            "k_sigma0_signal": (1.17, 1.23),
         },
         "enabled_excluded_windows": {
             "sigma_peak": False,
         },
         "excluded_windows": {
-            "sigma_peak": (1.18, 1.23),
+            "sigma_peak": (1.17, 1.23),
         },
     },
 }
