@@ -288,7 +288,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_n": True,
             "pi_delta": True,
             "pi_sidis": True,
-            "k_sigma0_signal": True,
+            #"k_sigma0_signal": True,
+            "k_sigma0_signal": False,
         },
         "windows": {
             "pi_n": (0.90, 0.95),
