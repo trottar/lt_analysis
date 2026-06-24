@@ -192,7 +192,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
         "staged_fit_passes": 1,
-        "fit_order": ("pi_n", "pi_delta", "pi_sidis", "k_sigma0_signal"),
+        "fit_order": ("pi_sidis", "pi_n", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
             "pi_delta": (1.16, 1.25),
             "k_sigma0_signal": (1.18, 1.23),
@@ -207,13 +207,10 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 2.0,
             "k_sigma0_signal": 1.0,
         },
+        # Keep pion_control post-fit scales fixed at unity.
+        # This fit defines the control-model denominator in w_pi(MM), so only
+        # the kaon_nosub side should be manually tuned with post-fit scales.
         "postfit_component_scales": {
-            '''
-            "pi_n": 0.95,
-            "pi_delta": 0.95,
-            "pi_sidis": 0.75,
-            "k_sigma0_signal": 1.0,            
-            '''
             "pi_n": 1.0,
             "pi_delta": 1.0,
             "pi_sidis": 1.0,
@@ -260,17 +257,14 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 2.0,
             "k_sigma0_signal": 1.0,
         },
+        # Kaon-side post-fit scales may be tuned phenomenologically after the
+        # raw component fit if the unscaled kaon pion-background model is too
+        # large or shape-misaligned relative to the kaon no-sub spectrum.
         "postfit_component_scales": {
-            '''
-            "pi_n": 1.0,
-            "pi_delta": 1.0,
-            "pi_sidis": 1.0,
-            "k_sigma0_signal": 1.0,     
-            '''        
             "pi_n": 0.95,
             "pi_delta": 0.40,
             "pi_sidis": 0.35,
-            "k_sigma0_signal": 1.0,               
+            "k_sigma0_signal": 1.0,
         },
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
