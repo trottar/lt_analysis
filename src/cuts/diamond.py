@@ -734,12 +734,37 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         "high": get_acceptance_c0_value(kin_q2_key, kin_w_key, "high", ParticleType),
     }
 
-    def _passes_source_acceptance(event, eps_tag):
+    hole_cut_cache = {}
+
+    def _get_hole_contains(eps_tag, phi_label):
+        if ParticleType not in ("kaon", "pion"):
+            return None
+        cache_key = (str(eps_tag).lower(), str(phi_label or phi_setting))
+        if cache_key not in hole_cut_cache:
+            cuts_path = os.path.dirname(__file__)
+            if cuts_path not in sys.path:
+                sys.path.append(cuts_path)
+            from hgcer_hole import apply_HGCer_hole_cut
+            hgcer_cutg = apply_HGCer_hole_cut(
+                inpDict.get("Q2", Qs),
+                inpDict.get("W", Ws),
+                eps_tag,
+                phi_label or phi_setting,
+            )
+            hole_cut_cache[cache_key] = hgcer_cutg.IsInside
+        return hole_cut_cache[cache_key]
+
+    def _passes_source_acceptance(event, eps_tag, phi_label=None):
         passes_acceptance, _ = evaluate_data_acceptance(
             event,
             acceptance_c0_by_eps.get(eps_tag, 0.0),
         )
-        return passes_acceptance
+        if not passes_acceptance:
+            return False
+        hole_contains = _get_hole_contains(eps_tag, phi_label)
+        if hole_contains and hole_contains(event.P_hgcer_xAtCer, event.P_hgcer_yAtCer):
+            return False
+        return True
 
     if (phi_setting == "Center") and (not use_hardcoded_diamond_fits):
         def _find_shortest_root_any(phi_tokens, eps_tag):
@@ -773,7 +798,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                         cand_len = len(f)
             return cand
 
-        def _build_q2w_hist_inmem(root_path, hname, eps_tag):
+        def _build_q2w_hist_inmem(root_path, hname, eps_tag, phi_label):
             if root_path is None:
                 return None
             infile = open_root_file(root_path, "READ")
@@ -793,7 +818,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             h = TH2D(hname, "", nbins, Q2min, Q2max, nbins, Wmin, Wmax)
             h.SetDirectory(0)
             for ev in tree:
-                if _passes_source_acceptance(ev, eps_tag):
+                if _passes_source_acceptance(ev, eps_tag, phi_label):
                     h.Fill(ev.Q2, ev.W)
             apply_bin_threshold(h, event_threshold_common)
             infile.Close()
@@ -841,6 +866,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                     src_file,
                     "Q2vsW_{}_{}_common_{}".format(eps_tag, phi_lbl.lower(), FilenameOverride),
                     eps_tag,
+                    phi_lbl,
                 )
                 if not htmp:
                     continue
@@ -938,8 +964,8 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     else:
         cut_poly = None
 
-    def _passes_active_cut(event, eps_tag):
-        if not _passes_source_acceptance(event, eps_tag):
+    def _passes_active_cut(event, eps_tag, phi_label=None):
+        if not _passes_source_acceptance(event, eps_tag, phi_label):
             return False
         if cut_poly is None:
             return False
@@ -998,21 +1024,21 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         if (k==2): # High
             # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
-                if not _passes_source_acceptance(event, eps_tag):
+                if not _passes_source_acceptance(event, eps_tag, phi_setting):
                     continue
                 Q2vsW_cut.Fill(event.Q2, event.W)
                 Q2vsW_hi_cut.Fill(event.Q2, event.W)
         elif (k==1): # Mid
             # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
-                if not _passes_source_acceptance(event, eps_tag):
+                if not _passes_source_acceptance(event, eps_tag, phi_setting):
                     continue
                 Q2vsW_mide_cut.Fill(event.Q2, event.W)
                 Q2vsW_mi_cut.Fill(event.Q2, event.W)
         elif (k==0): # Low
             # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
-                if not _passes_source_acceptance(event, eps_tag):
+                if not _passes_source_acceptance(event, eps_tag, phi_setting):
                     continue
                 Q2vsW_lowe_cut.Fill(event.Q2, event.W)
                 Q2vsW_lo_cut.Fill(event.Q2, event.W)
@@ -1061,7 +1087,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 cut_poly_source = "low_fallback"
 
             for event in Cut_Events_all_noRF_tree:
-                if _passes_active_cut(event, eps_tag):
+                if _passes_active_cut(event, eps_tag, phi_setting):
                     Q2vsW_lolo_cut.Fill(event.Q2, event.W)
                     countA += 1
                     
@@ -1069,7 +1095,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             print("\n\n")
             if (k==2):
                 for event in Cut_Events_all_noRF_tree:
-                    if _passes_active_cut(event, eps_tag):
+                    if _passes_active_cut(event, eps_tag, phi_setting):
                         if (tmax != False):
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
                             t_cut.Fill(getattr(event, "t_shift", -event.MandelT))
@@ -1078,7 +1104,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                             Q2vsW_hilo_cut.Fill(event.Q2, event.W)
             elif (k==1):
                 for event in Cut_Events_all_noRF_tree:
-                    if _passes_active_cut(event, eps_tag):
+                    if _passes_active_cut(event, eps_tag, phi_setting):
                         if (tmax != False):
                             Q2vsW_milo_cut.Fill(event.Q2, event.W)
                             t_mi_cut.Fill(getattr(event, "t_shift", -event.MandelT))

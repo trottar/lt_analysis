@@ -412,14 +412,14 @@ def _process_component_weighted_subtracted_particle_tree(
     for evt in tree:
         base_all_cuts, base_nomm_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_correction)
 
-        if particle_type == "kaon":
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            pid_pass = evt.P_hgcer_npeSum > 2.0
-            allcuts = base_all_cuts and not hole_rejected and pid_pass
-            nommcuts = base_nomm_cuts and not hole_rejected and pid_pass
-        else:
-            allcuts = base_all_cuts
-            nommcuts = base_nomm_cuts
+        hole_rejected = (
+            hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if hole_contains is not None
+            else False
+        )
+        pid_pass = evt.P_hgcer_npeSum > 2.0 if particle_type == "kaon" else True
+        allcuts = base_all_cuts and not hole_rejected and pid_pass
+        nommcuts = base_nomm_cuts and not hole_rejected and pid_pass
 
         if not (allcuts or nommcuts):
             continue
@@ -478,13 +478,13 @@ def _process_rand_sub_background_tree(
         raise RuntimeError("Background tree '{}' is None".format(tree_label or "unnamed"))
 
     for evt in tree:
-        if particle_type == "kaon":
-            base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            allcuts = base_all_cuts and not hole_rejected
-        else:
-            base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            allcuts = base_all_cuts
+        base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+        hole_rejected = (
+            hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if hole_contains is not None
+            else False
+        )
+        allcuts = base_all_cuts and not hole_rejected
 
         if not allcuts:
             continue
@@ -530,12 +530,13 @@ def _process_subtracted_particle_background_tree(
     for evt in tree:
         base_all_cuts, _, adj_hsdelta = evaluate_event(evt, mm_min, mm_max, mm_offset=mm_offset_correction)
 
-        if particle_type == "kaon":
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            pid_pass = evt.P_hgcer_npeSum > 2.0
-            allcuts = base_all_cuts and not hole_rejected and pid_pass
-        else:
-            allcuts = base_all_cuts
+        hole_rejected = (
+            hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if hole_contains is not None
+            else False
+        )
+        pid_pass = evt.P_hgcer_npeSum > 2.0 if particle_type == "kaon" else True
+        allcuts = base_all_cuts and not hole_rejected and pid_pass
 
         if not allcuts:
             continue
@@ -767,17 +768,15 @@ def _process_rand_sub_tree(
         progress_bar(i, entries, bar_length=25)
         progress_time += perf_counter() - progress_start
 
-        if particle_type == "kaon":
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            allcuts = base_all_cuts and not hole_rejected
-            noholecuts = base_all_cuts
-            nommcuts = base_sub_cuts and not hole_rejected
-        else:
-            base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            allcuts = base_all_cuts
-            nommcuts = base_sub_cuts
-            noholecuts = False
+        base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+        hole_rejected = (
+            hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if hole_contains is not None
+            else False
+        )
+        allcuts = base_all_cuts and not hole_rejected
+        nommcuts = base_sub_cuts and not hole_rejected
+        noholecuts = base_all_cuts if particle_type == "kaon" else False
 
         if not (noholecuts or nommcuts or allcuts):
             continue
@@ -914,7 +913,8 @@ def rand_sub(
 
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
-    if ParticleType == "kaon":
+    hgcer_cutg = None
+    if ParticleType in ("kaon", "pion"):
         from hgcer_hole import apply_HGCer_hole_cut
         hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
 
@@ -1608,7 +1608,7 @@ def rand_sub(
     ################################################################################################################################################
     # Fill histograms for various trees called above
 
-    hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
+    hole_contains = hgcer_cutg.IsInside if hgcer_cutg is not None else None
 
     if ParticleType == "kaon":
         data_nohole_xy_fill = P_hgcer_nohole_xAtCer_vs_yAtCer_DATA.Fill

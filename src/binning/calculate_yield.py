@@ -911,13 +911,14 @@ def _process_yield_data_tree(
     for i, evt in enumerate(tree):
         progress_bar(i, total_entries, bar_length=25)
 
-        if particle_type == "kaon":
-            base_allcuts, base_nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            allcuts = base_allcuts and not hole_rejected
-            nommcuts = base_nommcuts and not hole_rejected
-        else:
-            allcuts, nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
+        base_allcuts, base_nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
+        hole_rejected = (
+            hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+            if hole_contains is not None
+            else False
+        )
+        allcuts = base_allcuts and not hole_rejected
+        nommcuts = base_nommcuts and not hole_rejected
 
         if not (allcuts or nommcuts):
             continue
@@ -1121,7 +1122,8 @@ def process_hist_data(
     
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
-    if ParticleType == "kaon":
+    hgcer_cutg = None
+    if ParticleType in ("kaon", "pion"):
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
         hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
@@ -1354,7 +1356,7 @@ def process_hist_data(
                 subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]  \
                     = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
                 
-    hole_contains = hgcer_cutg.IsInside if ParticleType == "kaon" else None
+    hole_contains = hgcer_cutg.IsInside if hgcer_cutg is not None else None
 
     print("\nBinning data...")
     MM_offset_DATA = _process_yield_data_tree(

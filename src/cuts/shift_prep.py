@@ -120,7 +120,7 @@ def _build_cut_data_hists(phi_setting, particle_type, data_filename, inpDict, mm
     set_shift_context(phi_setting=phi_setting, shift_mode="raw", mm_shift_summary={}, t_shift_summary={})
 
     hole_contains = None
-    if particle_type == "kaon":
+    if particle_type in ("kaon", "pion"):
         from hgcer_hole import apply_HGCer_hole_cut
         hgcer_cutg = apply_HGCer_hole_cut(inpDict["Q2"], inpDict["W"], inpDict["EPSSET"], phi_setting)
         hole_contains = hgcer_cutg.IsInside
