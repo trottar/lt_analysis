@@ -232,8 +232,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "windows": {
             "pi_n": (0.90, 0.95),
             "pi_delta": (1.16, 1.25),
-            "pi_sidis": (1.32, 1.45),
-            "k_sigma0_signal": (1.18, 1.23),
+            "pi_sidis": (1.05, 1.10),
+            "k_sigma0_signal": (1.17, 1.23),
         },
     },
     "kaon_nosub": {
@@ -281,7 +281,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "windows": {
             "pi_n": (0.90, 0.95),
             "pi_delta": (1.16, 1.25),
-            "pi_sidis": (1.32, 1.45),
+            "pi_sidis": (1.05, 1.10),
             "k_sigma0_signal": (1.17, 1.23),
         },
         "enabled_excluded_windows": {

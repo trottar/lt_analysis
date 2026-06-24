@@ -24,6 +24,33 @@ def _is_root_hist(obj):
         return False
 
 
+_JSON_SKIP = object()
+
+
+def _json_ready_particle_subtraction_value(value):
+    if _is_root_hist(value):
+        return _JSON_SKIP
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, dict):
+        cleaned = {}
+        for key, child_value in value.items():
+            child = _json_ready_particle_subtraction_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned[key] = child
+        return cleaned
+    if isinstance(value, (list, tuple)):
+        cleaned = []
+        for child_value in value:
+            child = _json_ready_particle_subtraction_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned.append(child)
+        return cleaned
+    return deepcopy(value)
+
+
 def _clone_hist(template_hist, name, reset=False):
     if template_hist is None:
         return None
@@ -585,10 +612,8 @@ def summarize_particle_subtraction_component_payload(payload):
     for key, value in payload.items():
         if key.startswith("H_") and _is_root_hist(value):
             continue
-        if isinstance(value, dict):
-            summary[key] = deepcopy(value)
-        elif isinstance(value, np.ndarray):
+        cleaned_value = _json_ready_particle_subtraction_value(value)
+        if cleaned_value is _JSON_SKIP:
             continue
-        else:
-            summary[key] = value
+        summary[key] = cleaned_value
     return summary

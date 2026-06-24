@@ -46,6 +46,33 @@ def _is_root_hist(obj):
         return False
 
 
+_JSON_SKIP = object()
+
+
+def _json_ready_particle_subtraction_value(value):
+    if _is_root_hist(value):
+        return _JSON_SKIP
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, dict):
+        cleaned = {}
+        for key, child_value in value.items():
+            child = _json_ready_particle_subtraction_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned[key] = child
+        return cleaned
+    if isinstance(value, (list, tuple)):
+        cleaned = []
+        for child_value in value:
+            child = _json_ready_particle_subtraction_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned.append(child)
+        return cleaned
+    return deepcopy(value)
+
+
 def _is_finite_number(value):
     try:
         return math.isfinite(float(value))
@@ -3990,5 +4017,8 @@ def serialize_particle_subtraction_component_result(result):
             continue
         if key.startswith("H_"):
             continue
-        serializable[key] = deepcopy(value)
+        cleaned_value = _json_ready_particle_subtraction_value(value)
+        if cleaned_value is _JSON_SKIP:
+            continue
+        serializable[key] = cleaned_value
     return serializable
