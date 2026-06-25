@@ -217,6 +217,12 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 1.0,
             "k_sigma0_signal": 1.0,
         },
+        "postrefine_component_scales": {
+            "pi_n": 1.0,
+            "pi_delta": 1.0,
+            "pi_sidis": 1.0,
+            "k_sigma0_signal": 1.0,
+        },
         "joint_refinement_enabled": True,
         "joint_refinement_amplitude_floor": 1e-3,
         "template_corr_warn": 0.95,
@@ -266,6 +272,12 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         # raw component fit if the unscaled kaon pion-background model is too
         # large or shape-misaligned relative to the kaon no-sub spectrum.
         "postfit_component_scales": {
+            "pi_n": 0.95,
+            "pi_delta": 0.40,
+            "pi_sidis": 0.35,
+            "k_sigma0_signal": 1.0,
+        },
+        "postrefine_component_scales": {
             "pi_n": 0.95,
             "pi_delta": 0.40,
             "pi_sidis": 0.35,
@@ -322,6 +334,7 @@ PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS = frozenset(
         "stage_amplitude_modes",
         "prior_scales",
         "postfit_component_scales",
+        "postrefine_component_scales",
     }
 )
 
@@ -1968,6 +1981,45 @@ def resolve_particle_subtraction_component_postfit_scales(
         if scale_value != scale_value or scale_value < 0.0:
             raise ValueError(
                 "Particle subtraction post-fit scale '{}' for '{}' must be finite and non-negative".format(
+                    component_name,
+                    fit_target,
+                )
+            )
+        resolved[component_name] = scale_value
+    return resolved
+
+
+def resolve_particle_subtraction_component_postrefine_scales(
+    fit_target,
+    component_names=None,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    if not config:
+        return {}
+
+    configured_scales = config.get("postrefine_component_scales") or {}
+    requested_names = [str(name) for name in (component_names or []) if str(name)]
+    if not requested_names:
+        requested_names = ["pi_n", "pi_delta", "pi_sidis"]
+        for component_name in configured_scales.keys():
+            component_name = str(component_name)
+            if component_name not in requested_names:
+                requested_names.append(component_name)
+
+    resolved = {}
+    for component_name in requested_names:
+        scale_value = float(configured_scales.get(component_name, 1.0))
+        if scale_value != scale_value or scale_value < 0.0:
+            raise ValueError(
+                "Particle subtraction post-refine scale '{}' for '{}' must be finite and non-negative".format(
                     component_name,
                     fit_target,
                 )

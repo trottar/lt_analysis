@@ -17,6 +17,7 @@ from background_config import (
     get_particle_subtraction_setting_key,
     resolve_particle_subtraction_component_fit_mode,
     resolve_particle_subtraction_component_postfit_scales,
+    resolve_particle_subtraction_component_postrefine_scales,
     resolve_particle_subtraction_component_prior_scales,
     resolve_particle_subtraction_component_stage_amplitude_modes,
     resolve_particle_subtraction_component_stage_amplitude_windows,
@@ -1120,6 +1121,14 @@ def _build_regularization_width_map(
     return resolved
 
 
+def _apply_component_scale_map_to_coefficients(coefficients, scale_map=None):
+    resolved = {}
+    for template_name, coefficient_value in (coefficients or {}).items():
+        scale_value = float((scale_map or {}).get(template_name, 1.0) or 1.0)
+        resolved[str(template_name)] = float(coefficient_value or 0.0) * scale_value
+    return resolved
+
+
 def _compute_template_matrix_diagnostics(weighted_design, fit_names):
     diagnostics = {
         "weighted_design_condition_number": None,
@@ -1400,6 +1409,7 @@ def _apply_joint_component_refinement(
     fit_max,
     exclude_windows=None,
     prior_scale_map=None,
+    postrefine_scale_map=None,
     validation_options=None,
     context="",
     template_corr_warn=0.95,
@@ -1436,6 +1446,7 @@ def _apply_joint_component_refinement(
 
     diagnostics["staged_amplitudes_raw"] = deepcopy(staged_raw_amplitudes)
     diagnostics["staged_amplitudes_scaled"] = deepcopy(staged_scaled_amplitudes)
+    diagnostics["postrefine_component_scales"] = deepcopy(postrefine_scale_map or {})
 
     if normalized_fit_mode == "staged_only":
         staged_scaled_hist_map = {
@@ -1511,7 +1522,14 @@ def _apply_joint_component_refinement(
     diagnostics["joint_refinement"] = deepcopy(refinement_result)
     diagnostics["joint_refinement_status"] = str(refinement_result.get("status") or "failure")
 
-    refined_coefficients = refinement_result.get("coefficients") or {}
+    refined_coefficients_raw = {
+        str(template_name): float(value or 0.0)
+        for template_name, value in (refinement_result.get("coefficients") or {}).items()
+    }
+    refined_coefficients = _apply_component_scale_map_to_coefficients(
+        refined_coefficients_raw,
+        scale_map=postrefine_scale_map,
+    )
     refined_fit_hist = _build_model_hist(
         target_hist,
         template_hists,
@@ -1564,6 +1582,7 @@ def _apply_joint_component_refinement(
     }
     refined_full_map = dict(refined_extra_component_amplitudes)
     refined_full_map.update(refined_component_amplitudes)
+    diagnostics["refined_amplitudes_pre_postrefine_scale"] = deepcopy(refined_coefficients_raw)
     diagnostics["refined_amplitudes"] = deepcopy(refined_full_map)
     diagnostics["amplitude_shifts"] = {
         template_name: float(refined_full_map.get(template_name, 0.0) - staged_scaled_amplitudes.get(template_name, 0.0))
@@ -1615,6 +1634,14 @@ def _apply_joint_component_refinement(
     diagnostics["accepted_component_uncertainties"] = deepcopy(
         refinement_result.get("uncertainties") or {}
     )
+    accepted_uncertainties = deepcopy(diagnostics.get("accepted_component_uncertainties") or {})
+    for component_name, scale_value in (postrefine_scale_map or {}).items():
+        if accepted_uncertainties.get(component_name) is None:
+            continue
+        accepted_uncertainties[component_name] = (
+            float(accepted_uncertainties[component_name]) * float(scale_value)
+        )
+    diagnostics["accepted_component_uncertainties"] = accepted_uncertainties
 
     result["fit_status"] = "success" if bool(diagnostics["success"]) else "fallback"
     result["diagnostics"] = diagnostics
@@ -2511,6 +2538,12 @@ def fit_pion_control_with_simc_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    postrefine_scale_map = resolve_particle_subtraction_component_postrefine_scales(
+        "pion_control",
+        component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
     extra_positive_templates = {}
     extra_anchor_windows = {}
     if anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME) and _hist_has_usable_support(h_kaon_sigma0_shape):
@@ -2568,6 +2601,7 @@ def fit_pion_control_with_simc_shapes(
         fit_max,
         exclude_windows=excluded_windows,
         prior_scale_map=prior_scale_map,
+        postrefine_scale_map=postrefine_scale_map,
         validation_options=validation_options,
         context="{}_pion_control".format(context or "scope"),
         template_corr_warn=template_corr_warn,
@@ -2615,6 +2649,7 @@ def fit_pion_control_with_simc_shapes(
             "stage_amplitude_modes": deepcopy(stage_amplitude_modes),
             "prior_scales": deepcopy(prior_scale_map),
             "postfit_component_scales": deepcopy(postfit_scale_map),
+            "postrefine_component_scales": deepcopy(postrefine_scale_map),
             "fit_mode": fit_mode,
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
@@ -2689,6 +2724,12 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    postrefine_scale_map = resolve_particle_subtraction_component_postrefine_scales(
+        "kaon_nosub",
+        component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME, KAON_SIGNAL_TEMPLATE_NAME),
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
     validation_options = {
         "oversub_sigma_tolerance": fit_config.get("oversub_sigma_tolerance", 2.0),
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
@@ -2755,6 +2796,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         fit_max,
         exclude_windows=excluded_windows,
         prior_scale_map=prior_scale_map,
+        postrefine_scale_map=postrefine_scale_map,
         validation_options=validation_options,
         context="{}_kaon_nosub".format(context or "scope"),
         template_corr_warn=template_corr_warn,
@@ -2820,6 +2862,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "stage_amplitude_modes": deepcopy(stage_amplitude_modes),
             "prior_scales": deepcopy(prior_scale_map),
             "postfit_component_scales": deepcopy(postfit_scale_map),
+            "postrefine_component_scales": deepcopy(postrefine_scale_map),
             "fit_mode": fit_mode,
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
