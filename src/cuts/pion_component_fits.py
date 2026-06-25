@@ -1455,14 +1455,61 @@ def _apply_joint_component_refinement(
     diagnostics["staged_amplitudes_scaled"] = deepcopy(staged_scaled_amplitudes)
     diagnostics["postrefine_component_scales"] = deepcopy(postrefine_scale_map or {})
 
-    if normalized_fit_mode == "staged_only":
-        staged_scaled_hist_map = {
-            "pi_n": result.get("pi_n_scaled_hist"),
-            "pi_delta": result.get("pi_delta_scaled_hist"),
-            "pi_sidis": result.get("pi_sidis_scaled_hist"),
+    staged_scaled_hist_map = {
+        "pi_n": result.get("pi_n_scaled_hist"),
+        "pi_delta": result.get("pi_delta_scaled_hist"),
+        "pi_sidis": result.get("pi_sidis_scaled_hist"),
+    }
+    staged_scaled_hist_map.update(deepcopy(result.get("extra_scaled_hists") or {}))
+
+    def _retain_staged_solution(joint_refinement_summary, message_override=None):
+        diagnostics["joint_refinement"] = deepcopy(joint_refinement_summary or {})
+        diagnostics["joint_refinement_status"] = str(
+            (joint_refinement_summary or {}).get("status") or "not_requested"
+        )
+        diagnostics["refined_amplitudes_pre_postrefine_scale"] = deepcopy(staged_scaled_amplitudes)
+        diagnostics["refined_amplitudes"] = deepcopy(staged_scaled_amplitudes)
+        diagnostics["amplitude_shifts"] = {
+            template_name: 0.0
+            for template_name in fit_names
         }
-        staged_scaled_hist_map.update(deepcopy(result.get("extra_scaled_hists") or {}))
-        diagnostics["joint_refinement"] = {
+        diagnostics["amplitude_shift_fractions"] = {
+            template_name: 0.0
+            for template_name in fit_names
+        }
+        diagnostics["validation"] = deepcopy(stage_validation)
+        diagnostics["success"] = bool(stage_validation.get("accepted"))
+        diagnostics["message"] = str(
+            message_override
+            or (joint_refinement_summary or {}).get("message")
+            or ""
+        )
+        diagnostics["chi2"] = stage_validation.get("chi2")
+        diagnostics["ndf"] = stage_validation.get("ndf")
+        diagnostics["chi2_ndf"] = stage_validation.get("chi2_ndf")
+        diagnostics["fit_p_value"] = stage_validation.get("fit_p_value")
+        diagnostics["n_fit_bins"] = (joint_refinement_summary or {}).get("active_bin_count", 0)
+        diagnostics["fallback_used"] = not bool(diagnostics["success"])
+        diagnostics["fallback_reason"] = (
+            ""
+            if bool(diagnostics["success"]) else (
+                message_override
+                or "staged validation rejected: {}".format(
+                    "; ".join(stage_validation.get("rejection_reasons") or ["unknown"])
+                )
+            )
+        )
+        result["fit_status"] = "success" if bool(diagnostics["success"]) else "fallback"
+        result["diagnostics"] = diagnostics
+        result["refined_fit_hist"] = result.get("fit_hist")
+        result["refined_residual_hist"] = result.get("residual_hist")
+        result["refined_scaled_hist_map"] = staged_scaled_hist_map
+        if amplitude_prefix == "A":
+            result["refined_pion_bg_fit_hist"] = result.get("pion_bg_fit_hist")
+        return result
+
+    if normalized_fit_mode == "staged_only":
+        return _retain_staged_solution({
             "requested": False,
             "status": "not_requested",
             "success": False,
@@ -1485,34 +1532,7 @@ def _apply_joint_component_refinement(
             "template_correlation_matrix": {},
             "weighted_design_condition_number": None,
             "weighted_design_effective_rank": None,
-        }
-        diagnostics["joint_refinement_status"] = "not_requested"
-        diagnostics["refined_amplitudes"] = deepcopy(staged_scaled_amplitudes)
-        diagnostics["amplitude_shifts"] = {
-            template_name: 0.0
-            for template_name in fit_names
-        }
-        diagnostics["amplitude_shift_fractions"] = {
-            template_name: 0.0
-            for template_name in fit_names
-        }
-        diagnostics["validation"] = deepcopy(stage_validation)
-        diagnostics["success"] = bool(stage_validation.get("accepted"))
-        diagnostics["fallback_used"] = not bool(stage_validation.get("accepted"))
-        diagnostics["fallback_reason"] = (
-            "" if bool(stage_validation.get("accepted"))
-            else "staged-only validation rejected: {}".format(
-                "; ".join(stage_validation.get("rejection_reasons") or ["unknown"])
-            )
-        )
-        result["fit_status"] = "success" if bool(stage_validation.get("accepted")) else "fallback"
-        result["diagnostics"] = diagnostics
-        result["refined_fit_hist"] = result.get("fit_hist")
-        result["refined_residual_hist"] = result.get("residual_hist")
-        result["refined_scaled_hist_map"] = staged_scaled_hist_map
-        if amplitude_prefix == "A":
-            result["refined_pion_bg_fit_hist"] = result.get("pion_bg_fit_hist")
-        return result
+        })
 
     refinement_result = _run_joint_template_refinement(
         target_hist,
@@ -1528,6 +1548,22 @@ def _apply_joint_component_refinement(
     )
     diagnostics["joint_refinement"] = deepcopy(refinement_result)
     diagnostics["joint_refinement_status"] = str(refinement_result.get("status") or "failure")
+
+    if (
+        not bool(refinement_result.get("success", False))
+        and bool(stage_validation.get("accepted"))
+        and int(refinement_result.get("active_bin_count") or 0) <= 0
+    ):
+        skipped_summary = deepcopy(refinement_result)
+        skipped_summary["status"] = "skipped_no_valid_bins"
+        skipped_summary["success"] = False
+        skipped_summary["message"] = (
+            "joint refinement skipped: no valid full-range fit bins; staged solution retained"
+        )
+        return _retain_staged_solution(
+            skipped_summary,
+            message_override=skipped_summary["message"],
+        )
 
     refined_coefficients_raw = {
         str(template_name): float(value or 0.0)
@@ -3406,6 +3442,18 @@ def _format_component_scale_map(scale_map):
     return ", ".join(formatted) if formatted else "n/a"
 
 
+def _component_scale_map_has_nonunity(scale_map, tolerance=1e-12):
+    if not isinstance(scale_map, dict):
+        return False
+    for scale_value in scale_map.values():
+        try:
+            if abs(float(scale_value) - 1.0) > float(tolerance):
+                return True
+        except Exception:
+            continue
+    return False
+
+
 def _draw_window_collection(windows, y_min, y_max, color, line_style, line_width=2):
     drawn_lines = []
     for window_min, window_max in windows or []:
@@ -4643,6 +4691,13 @@ def print_particle_subtraction_component_application_pages(
     model_closure_stage = diagnostics.get("model_closure_stage") or {}
     event_template_closure = diagnostics.get("event_template_closure") or {}
     weight_diagnostics_stage = diagnostics.get("weight_diagnostics_stage") or {}
+    pion_diag = (component_payload.get("diagnostics") or {}).get("pion") or {}
+    kaon_diag = (component_payload.get("diagnostics") or {}).get("kaon") or {}
+    pion_postfit_scales = pion_diag.get("postfit_component_scales") or {}
+    kaon_postfit_scales = kaon_diag.get("postfit_component_scales") or {}
+    pion_postrefine_scales = pion_diag.get("postrefine_component_scales") or {}
+    kaon_postrefine_scales = kaon_diag.get("postrefine_component_scales") or {}
+    kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
 
     _print_single_hist_page(
         pdf_name,
@@ -4667,6 +4722,10 @@ def print_particle_subtraction_component_application_pages(
             "clipped bins={}".format(int(diagnostics.get("pion_weight_clipped_bin_count", 0) or 0)),
             "unsupported bins={}".format(int(diagnostics.get("pion_weight_unsupported_bin_count", 0) or 0)),
             "unsupported MM={}".format(_format_mm_range(diagnostics.get("pion_weight_unsupported_mm_range"))),
+            "denominator: pion-control model (unity-scale convention)",
+            "numerator: kaon pion-bg model{}".format(
+                " after kaon-side scaling" if kaon_manual_scaling_active else ""
+            ),
         ],
         cut_window=cut_window,
         line_color=ROOT.kViolet + 1,
@@ -4699,6 +4758,8 @@ def print_particle_subtraction_component_application_pages(
                     _format_fit_metric(diagnostics.get("pion_weight_mean")),
                     _format_fit_metric(diagnostics.get("pion_weight_rms")),
                 ),
+                "kaon-side post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
+                "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
             ],
             cut_window=cut_window,
         )
@@ -4737,6 +4798,11 @@ def print_particle_subtraction_component_application_pages(
                 _format_fit_number(model_closure.get("max_abs_bin_diff")),
                 _format_fit_metric(model_closure.get("max_abs_bin_center")),
             ),
+            "kaon bg curve shown{}.".format(
+                " after kaon-side post-refine scaling" if kaon_manual_scaling_active else " without manual kaon-side scaling"
+            ),
+            "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
+            "pion-control post-refine scales: {}".format(_format_component_scale_map(pion_postrefine_scales)),
         ],
         cut_window=cut_window,
     )
@@ -4770,6 +4836,10 @@ def print_particle_subtraction_component_application_pages(
                 _format_fit_number(event_template_closure.get("max_abs_bin_diff")),
                 _format_fit_metric(event_template_closure.get("max_abs_bin_center")),
             ),
+            "weighted event-template inherits kaon-side numerator scaling={}".format(
+                "yes" if kaon_manual_scaling_active else "no"
+            ),
+            "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
         ],
         cut_window=cut_window,
     )
@@ -4797,6 +4867,11 @@ def print_particle_subtraction_component_application_pages(
             "effective scale={}".format(
                 _format_fit_number(component_payload.get("particle_subtraction_effective_scale"))
             ),
+            "kaon pion-bg model shown{}.".format(
+                " after kaon-side post-refine scaling" if kaon_manual_scaling_active else " without manual kaon-side scaling"
+            ),
+            "kaon-side post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
+            "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
         ],
         cut_window=cut_window,
     )
@@ -4827,6 +4902,8 @@ def print_particle_subtraction_component_application_pages(
                 "refined weighted model integral={}".format(
                     _format_fit_number((model_closure or {}).get("comparison_integral"))
                 ),
+                "kaon-side staged post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
+                "kaon-side refined post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
             ],
             cut_window=cut_window,
         )
@@ -4851,6 +4928,10 @@ def print_particle_subtraction_component_application_pages(
             "after full integral={}".format(
                 _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
             ),
+            "weighted template uses kaon-side scaled numerator={}".format(
+                "yes" if kaon_manual_scaling_active else "no"
+            ),
+            "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
             "fit validation pion/kaon={}/{}".format(
                 "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
                 "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail",
@@ -4883,6 +4964,28 @@ def print_particle_subtraction_component_fit_pages(
     staged_amplitudes_scaled = component_fit_result.get("staged_amplitudes_scaled") or {}
     refined_amplitudes = component_fit_result.get("refined_amplitudes") or {}
     amplitude_shift_fractions = component_fit_result.get("amplitude_shift_fractions") or {}
+    pion_stage_raw = (staged_amplitudes_raw.get("pion_control") or {})
+    kaon_stage_raw = (staged_amplitudes_raw.get("kaon_nosub") or {})
+    pion_stage_scaled = (staged_amplitudes_scaled.get("pion_control") or {})
+    kaon_stage_scaled = (staged_amplitudes_scaled.get("kaon_nosub") or {})
+    pion_refined_final = (refined_amplitudes.get("pion_control") or {})
+    kaon_refined_final = (refined_amplitudes.get("kaon_nosub") or {})
+    pion_refined_pre = (
+        pion_diagnostics.get("refined_amplitudes_pre_postrefine_scale")
+        or pion_refined_final
+        or {}
+    )
+    kaon_refined_pre = (
+        kaon_diagnostics.get("refined_amplitudes_pre_postrefine_scale")
+        or kaon_refined_final
+        or {}
+    )
+    pion_postfit_scales = pion_diagnostics.get("postfit_component_scales") or {}
+    kaon_postfit_scales = kaon_diagnostics.get("postfit_component_scales") or {}
+    pion_postrefine_scales = pion_diagnostics.get("postrefine_component_scales") or {}
+    kaon_postrefine_scales = kaon_diagnostics.get("postrefine_component_scales") or {}
+    pion_manual_scaling_active = _component_scale_map_has_nonunity(pion_postfit_scales) or _component_scale_map_has_nonunity(pion_postrefine_scales)
+    kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
 
     _print_component_overlay_page(
         pdf_name,
@@ -4912,6 +5015,9 @@ def print_particle_subtraction_component_fit_pages(
                 _format_component_scale_map(
                     pion_diagnostics.get("postfit_component_scales")
                 )
+            ),
+            "manual scaling active: {} (pion-control denominator convention)".format(
+                "yes" if pion_manual_scaling_active else "no"
             ),
             "B_n={}  B_delta={}  B_sidis={}".format(
                 _format_fit_number(pion_stage_amplitudes.get("pi_n")),
@@ -4986,6 +5092,9 @@ def print_particle_subtraction_component_fit_pages(
                     kaon_diagnostics.get("postfit_component_scales")
                 )
             ),
+            "manual kaon-side scaling active: {}".format(
+                "yes" if kaon_manual_scaling_active else "no"
+            ),
             "A_n={}  A_delta={}  A_sidis={}".format(
                 _format_fit_number(kaon_stage_amplitudes.get("pi_n")),
                 _format_fit_number(kaon_stage_amplitudes.get("pi_delta")),
@@ -5032,9 +5141,29 @@ def print_particle_subtraction_component_fit_pages(
             "fit mode: {}".format(component_fit_result.get("fit_mode_pion") or component_fit_result.get("fit_mode") or "unknown"),
             "joint status: {}".format(pion_diagnostics.get("joint_refinement_status") or "unknown"),
             "refined validation: {}".format("pass" if bool((pion_diagnostics.get("validation") or {}).get("accepted")) else "fail"),
+            "manual scaling active: {} (pion-control kept as denominator)".format(
+                "yes" if pion_manual_scaling_active else "no"
+            ),
+            "post-fit scales: {}".format(_format_component_scale_map(pion_postfit_scales)),
+            "post-refine scales: {}".format(_format_component_scale_map(pion_postrefine_scales)),
             "staged chi2/ndf={}  refined chi2/ndf={}".format(
                 _format_fit_metric(pion_stage_validation.get("chi2_ndf")),
                 _format_fit_metric(pion_diagnostics.get("chi2_ndf")),
+            ),
+            "B_n raw stage / refined(pre-scale) / final = {} / {} / {}".format(
+                _format_fit_number(pion_stage_raw.get("pi_n")),
+                _format_fit_number(pion_refined_pre.get("pi_n")),
+                _format_fit_number(pion_refined_final.get("pi_n")),
+            ),
+            "B_delta raw stage / refined(pre-scale) / final = {} / {} / {}".format(
+                _format_fit_number(pion_stage_raw.get("pi_delta")),
+                _format_fit_number(pion_refined_pre.get("pi_delta")),
+                _format_fit_number(pion_refined_final.get("pi_delta")),
+            ),
+            "B_sidis raw stage / refined(pre-scale) / final = {} / {} / {}".format(
+                _format_fit_number(pion_stage_raw.get("pi_sidis")),
+                _format_fit_number(pion_refined_pre.get("pi_sidis")),
+                _format_fit_number(pion_refined_final.get("pi_sidis")),
             ),
             "B_n stage/refined = {} / {}".format(
                 _format_fit_number(pion_stage_amplitudes.get("pi_n")),
@@ -5071,9 +5200,29 @@ def print_particle_subtraction_component_fit_pages(
             "fit mode: {}".format(component_fit_result.get("fit_mode_kaon") or component_fit_result.get("fit_mode") or "unknown"),
             "joint status: {}".format(kaon_diagnostics.get("joint_refinement_status") or "unknown"),
             "refined validation: {}".format("pass" if bool((kaon_diagnostics.get("validation") or {}).get("accepted")) else "fail"),
+            "manual kaon-side scaling active: {}".format(
+                "yes" if kaon_manual_scaling_active else "no"
+            ),
+            "post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
+            "post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
             "staged chi2/ndf={}  refined chi2/ndf={}".format(
                 _format_fit_metric(kaon_stage_validation.get("chi2_ndf")),
                 _format_fit_metric(kaon_diagnostics.get("chi2_ndf")),
+            ),
+            "A_n raw stage / refined(pre-scale) / final = {} / {} / {}".format(
+                _format_fit_number(kaon_stage_raw.get("pi_n")),
+                _format_fit_number(kaon_refined_pre.get("pi_n")),
+                _format_fit_number(kaon_refined_final.get("pi_n")),
+            ),
+            "A_delta raw stage / refined(pre-scale) / final = {} / {} / {}".format(
+                _format_fit_number(kaon_stage_raw.get("pi_delta")),
+                _format_fit_number(kaon_refined_pre.get("pi_delta")),
+                _format_fit_number(kaon_refined_final.get("pi_delta")),
+            ),
+            "A_sidis raw stage / refined(pre-scale) / final = {} / {} / {}".format(
+                _format_fit_number(kaon_stage_raw.get("pi_sidis")),
+                _format_fit_number(kaon_refined_pre.get("pi_sidis")),
+                _format_fit_number(kaon_refined_final.get("pi_sidis")),
             ),
             "A_n stage/refined = {} / {}".format(
                 _format_fit_number(kaon_stage_amplitudes.get("pi_n")),
