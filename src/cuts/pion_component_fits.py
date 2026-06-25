@@ -3688,12 +3688,12 @@ def _print_joint_refinement_overlay_page(
     if data_hist is None or staged_total_hist is None or refined_total_hist is None:
         return
 
-    canvas = ROOT.TCanvas("c_joint_refine_{}".format(data_hist.GetName()), "", 980, 1450)
+    canvas = ROOT.TCanvas("c_joint_refine_{}".format(data_hist.GetName()), "", 1000, 1180)
     top_pad = ROOT.TPad(
         "c_joint_refine_top_{}".format(data_hist.GetName()),
         "",
         0.0,
-        0.42,
+        0.50,
         1.0,
         1.0,
     )
@@ -3701,9 +3701,9 @@ def _print_joint_refinement_overlay_page(
         "c_joint_refine_mid_{}".format(data_hist.GetName()),
         "",
         0.0,
-        0.20,
+        0.25,
         1.0,
-        0.42,
+        0.50,
     )
     bottom_pad = ROOT.TPad(
         "c_joint_refine_bot_{}".format(data_hist.GetName()),
@@ -3716,12 +3716,12 @@ def _print_joint_refinement_overlay_page(
     for pad in (top_pad, middle_pad, bottom_pad):
         pad.SetLeftMargin(0.10)
         pad.SetRightMargin(0.04)
-    top_pad.SetTopMargin(0.06)
-    top_pad.SetBottomMargin(0.03)
-    middle_pad.SetTopMargin(0.04)
-    middle_pad.SetBottomMargin(0.04)
-    bottom_pad.SetTopMargin(0.04)
-    bottom_pad.SetBottomMargin(0.20)
+    top_pad.SetTopMargin(0.05)
+    top_pad.SetBottomMargin(0.04)
+    middle_pad.SetTopMargin(0.03)
+    middle_pad.SetBottomMargin(0.05)
+    bottom_pad.SetTopMargin(0.03)
+    bottom_pad.SetBottomMargin(0.18)
     top_pad.Draw()
     middle_pad.Draw()
     bottom_pad.Draw()
@@ -3767,10 +3767,10 @@ def _print_joint_refinement_overlay_page(
     if cut_window is not None:
         _draw_vertical_window_lines(cut_window[0], cut_window[1], 0.0, 1.20 * y_max)
 
-    legend = ROOT.TLegend(0.48, 0.62, 0.96, 0.90)
+    legend = ROOT.TLegend(0.50, 0.62, 0.96, 0.89)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
-    legend.SetTextSize(0.028)
+    legend.SetTextSize(0.024)
     legend.SetNColumns(2)
     legend.AddEntry(data_clone, "data", "lf")
     legend.AddEntry(staged_clone, "staged total", "l")
@@ -3780,11 +3780,11 @@ def _print_joint_refinement_overlay_page(
     legend.Draw()
 
     if stats_lines:
-        stats_box = ROOT.TPaveText(0.12, 0.62, 0.46, 0.90, "NDC")
+        stats_box = ROOT.TPaveText(0.12, 0.64, 0.44, 0.90, "NDC")
         stats_box.SetBorderSize(0)
         stats_box.SetFillStyle(0)
         stats_box.SetTextAlign(12)
-        stats_box.SetTextSize(0.024)
+        stats_box.SetTextSize(0.022)
         for line in stats_lines:
             stats_box.AddText(line)
         stats_box.Draw()
@@ -3842,10 +3842,10 @@ def _print_joint_refinement_overlay_page(
             stage_resid.GetMinimum(),
             stage_resid.GetMaximum(),
         )
-    resid_legend = ROOT.TLegend(0.66, 0.72, 0.95, 0.88)
+    resid_legend = ROOT.TLegend(0.68, 0.72, 0.95, 0.88)
     resid_legend.SetBorderSize(0)
     resid_legend.SetFillStyle(0)
-    resid_legend.SetTextSize(0.032)
+    resid_legend.SetTextSize(0.028)
     resid_legend.AddEntry(stage_resid, "staged residual", "l")
     resid_legend.AddEntry(refined_resid, "refined residual", "l")
     resid_legend.Draw()
@@ -3879,10 +3879,10 @@ def _print_joint_refinement_overlay_page(
     pull_span = max(pull_y_max - pull_y_min, 1.0)
     stage_pull.SetMaximum(pull_y_max + 0.20 * pull_span)
     stage_pull.SetMinimum(pull_y_min - 0.20 * pull_span)
-    stage_pull.GetXaxis().SetLabelSize(0.085)
-    stage_pull.GetXaxis().SetTitleSize(0.095)
-    stage_pull.GetYaxis().SetTitleSize(0.058)
-    stage_pull.GetYaxis().SetLabelSize(0.060)
+    stage_pull.GetXaxis().SetLabelSize(0.070)
+    stage_pull.GetXaxis().SetTitleSize(0.080)
+    stage_pull.GetYaxis().SetTitleSize(0.050)
+    stage_pull.GetYaxis().SetLabelSize(0.050)
     stage_pull.GetYaxis().SetTitleOffset(0.75)
     stage_pull.Draw("hist")
     refined_pull.Draw("hist same")
@@ -3902,10 +3902,10 @@ def _print_joint_refinement_overlay_page(
             stage_pull.GetMinimum(),
             stage_pull.GetMaximum(),
         )
-    pull_legend = ROOT.TLegend(0.66, 0.66, 0.95, 0.88)
+    pull_legend = ROOT.TLegend(0.68, 0.66, 0.95, 0.88)
     pull_legend.SetBorderSize(0)
     pull_legend.SetFillStyle(0)
-    pull_legend.SetTextSize(0.050)
+    pull_legend.SetTextSize(0.040)
     pull_legend.AddEntry(stage_pull, "staged pull", "l")
     pull_legend.AddEntry(refined_pull, "refined pull", "l")
     pull_legend.Draw()
