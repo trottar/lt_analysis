@@ -191,7 +191,7 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
 PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
-        "pion_component_fit_mode": "staged_plus_joint",
+        "pion_component_fit_mode": "staged_plus_regularized_joint",
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
@@ -245,7 +245,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     },
     "kaon_nosub": {
         "apply_mm_offset_data": True,
-        "pion_component_fit_mode": "staged_plus_joint",
+        "pion_component_fit_mode": "staged_plus_regularized_joint",
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
