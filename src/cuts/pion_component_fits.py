@@ -225,13 +225,20 @@ def _validate_template_hist(template_hist, target_hist, template_name):
     return ""
 
 
-def _validate_component_shapes(component_hists, target_hist):
+def _validate_component_shapes(component_hists, target_hist, component_names=None):
     if target_hist is None:
         return "missing target histogram"
-    if any(component_hists.get(name) is None for name in COMPONENT_NAMES):
+    requested_names = [
+        str(component_name)
+        for component_name in (component_names or COMPONENT_NAMES)
+        if str(component_name) in COMPONENT_NAMES
+    ]
+    if not requested_names:
+        requested_names = list(COMPONENT_NAMES)
+    if any(component_hists.get(name) is None for name in requested_names):
         return "missing SIMC component shape"
 
-    for component_name in COMPONENT_NAMES:
+    for component_name in requested_names:
         message = _validate_template_hist(
             component_hists[component_name],
             target_hist,
@@ -2018,14 +2025,6 @@ def _fit_staged_anchor_templates(
     if validation_options is None:
         validation_options = {}
 
-    fallback_reason = _validate_component_shapes(component_hists, target_hist)
-    if fallback_reason:
-        return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
-    for template_name, template_hist in extra_positive_templates.items():
-        fallback_reason = _validate_template_hist(template_hist, target_hist, template_name)
-        if fallback_reason:
-            return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
-
     anchor_window_map = _coerce_window_map(anchor_windows)
     stage_amplitude_window_map = _coerce_window_map(stage_amplitude_windows)
     stage_amplitude_mode_map = {
@@ -2061,6 +2060,18 @@ def _fit_staged_anchor_templates(
             context,
             "no component anchor windows configured",
         )
+
+    fallback_reason = _validate_component_shapes(
+        component_hists,
+        target_hist,
+        component_names=fitted_names,
+    )
+    if fallback_reason:
+        return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+    for template_name, template_hist in extra_positive_templates.items():
+        fallback_reason = _validate_template_hist(template_hist, target_hist, template_name)
+        if fallback_reason:
+            return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
 
     stage_amplitudes = {template_name: 0.0 for template_name in template_hists}
     stage_uncertainties = {template_name: None for template_name in template_hists}

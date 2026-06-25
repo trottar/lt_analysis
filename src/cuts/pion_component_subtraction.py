@@ -177,6 +177,36 @@ def _resolve_component_template_map(component_fit_result):
     }
 
 
+def _resolve_active_component_names(component_fit_result):
+    resolved = []
+    diagnostics = {}
+    if isinstance(component_fit_result, dict):
+        diagnostics = component_fit_result.get("diagnostics") or {}
+    for scope_name in ("pion", "kaon"):
+        fit_order = ((diagnostics.get(scope_name) or {}).get("fit_order")) or []
+        for component_name in fit_order:
+            component_name = str(component_name)
+            if component_name in COMPONENT_NAMES and component_name not in resolved:
+                resolved.append(component_name)
+
+    if not resolved and isinstance(component_fit_result, dict):
+        resolved_config = component_fit_result.get("resolved_subtraction_config") or {}
+        for fit_target in ("pion_control", "kaon_nosub"):
+            anchor_windows = ((resolved_config.get(fit_target) or {}).get("anchor_windows")) or {}
+            for component_name in anchor_windows.keys():
+                component_name = str(component_name)
+                if component_name in COMPONENT_NAMES and component_name not in resolved:
+                    resolved.append(component_name)
+
+    if not resolved and isinstance(component_fit_result, dict):
+        template_map = _resolve_component_template_map(component_fit_result)
+        for component_name in COMPONENT_NAMES:
+            if _is_root_hist(template_map.get(component_name)):
+                resolved.append(component_name)
+
+    return resolved or list(COMPONENT_NAMES)
+
+
 def handle_particle_subtraction_fallback(payload, reason, context="particle subtraction"):
     fallback_mode = None
     if isinstance(payload, dict):
@@ -246,10 +276,13 @@ def evaluate_particle_subtraction_component_fit_result(component_fit_result, inp
         elif amplitude_value < 0.0:
             failures.append("{} is negative".format(amplitude_name))
     diagnostics["amplitudes"] = amplitudes
+    active_component_names = _resolve_active_component_names(component_fit_result)
+    diagnostics["active_component_names"] = list(active_component_names)
 
     component_templates = _resolve_component_template_map(component_fit_result)
     template_signature = None
-    for component_name, template_hist in component_templates.items():
+    for component_name in active_component_names:
+        template_hist = component_templates.get(component_name)
         if not _is_root_hist(template_hist):
             failures.append("missing template {}".format(component_name))
             continue
@@ -282,15 +315,16 @@ def build_simc_shape_pion_control_weights(
         raise ValueError(gate_result["reason"] or "component-fit result rejected")
 
     template_map = _resolve_component_template_map(component_fit_result)
+    active_component_names = _resolve_active_component_names(component_fit_result)
     reference_hist = None
-    for component_name in COMPONENT_NAMES:
+    for component_name in active_component_names:
         reference_hist = template_map.get(component_name)
         if _is_root_hist(reference_hist):
             break
     if reference_hist is None:
         raise ValueError("No valid reference histogram is available for pion weights")
 
-    for component_name in COMPONENT_NAMES:
+    for component_name in active_component_names:
         template_hist = template_map[component_name]
         if _hist_bin_signature(template_hist) != _hist_bin_signature(reference_hist):
             raise ValueError("Template binning mismatch for {}".format(component_name))
@@ -357,7 +391,7 @@ def build_simc_shape_pion_control_weights(
         "pi_sidis": float(kaon_amplitude_source.get("pi_sidis", component_fit_result.get("A_sidis", 0.0)) or 0.0),
     }
 
-    for component_name in COMPONENT_NAMES:
+    for component_name in active_component_names:
         h_pion_control_model.Add(template_map[component_name], pion_amplitudes[component_name])
         h_kaon_pion_model.Add(template_map[component_name], kaon_amplitudes[component_name])
 
@@ -422,6 +456,7 @@ def build_simc_shape_pion_control_weights(
 
     diagnostics = {
         "model_variant": mode_key,
+        "active_component_names": list(active_component_names),
         "pion_control_integral": _hist_integral(component_fit_result.get("H_pion_control_input")),
         "pion_control_model_integral": _hist_integral(h_pion_control_model),
         "kaon_pion_model_integral": _hist_integral(h_kaon_pion_model),
