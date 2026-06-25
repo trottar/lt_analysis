@@ -275,6 +275,7 @@ def build_simc_shape_pion_control_weights(
     clip_min=0.0,
     clip_max=None,
     denom_floor=1e-12,
+    model_variant="final",
 ):
     gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result)
     if not gate_result["accepted"]:
@@ -296,34 +297,64 @@ def build_simc_shape_pion_control_weights(
 
     h_pion_control_model = _clone_hist(
         reference_hist,
-        "H_pion_control_model_{}".format(component_fit_result.get("analysis_scope", "scope")),
+        "H_pion_control_model_{}_{}".format(
+            str(model_variant or "final"),
+            component_fit_result.get("analysis_scope", "scope"),
+        ),
         reset=True,
     )
     h_kaon_pion_model = _clone_hist(
         reference_hist,
-        "H_kaon_pion_model_{}".format(component_fit_result.get("analysis_scope", "scope")),
+        "H_kaon_pion_model_{}_{}".format(
+            str(model_variant or "final"),
+            component_fit_result.get("analysis_scope", "scope"),
+        ),
         reset=True,
     )
     h_pion_weight = _clone_hist(
         reference_hist,
-        "H_pion_weight_vs_MM_{}".format(component_fit_result.get("analysis_scope", "scope")),
+        "H_pion_weight_vs_MM_{}_{}".format(
+            str(model_variant or "final"),
+            component_fit_result.get("analysis_scope", "scope"),
+        ),
         reset=True,
     )
     h_weighted_pion_control_model = _clone_hist(
         reference_hist,
-        "H_weighted_pion_control_model_{}".format(component_fit_result.get("analysis_scope", "scope")),
+        "H_weighted_pion_control_model_{}_{}".format(
+            str(model_variant or "final"),
+            component_fit_result.get("analysis_scope", "scope"),
+        ),
         reset=True,
     )
 
+    mode_key = str(model_variant or "final").strip().lower()
+    diagnostics = component_fit_result.get("diagnostics") or {}
+    pion_diagnostics = diagnostics.get("pion") or {}
+    kaon_diagnostics = diagnostics.get("kaon") or {}
+    if mode_key == "staged":
+        pion_amplitude_source = pion_diagnostics.get("staged_amplitudes_scaled") or {}
+        kaon_amplitude_source = kaon_diagnostics.get("staged_amplitudes_scaled") or {}
+    else:
+        pion_amplitude_source = (
+            pion_diagnostics.get("refined_amplitudes")
+            or pion_diagnostics.get("staged_amplitudes_scaled")
+            or {}
+        )
+        kaon_amplitude_source = (
+            kaon_diagnostics.get("refined_amplitudes")
+            or kaon_diagnostics.get("staged_amplitudes_scaled")
+            or {}
+        )
     pion_amplitudes = {
-        "pi_n": float(component_fit_result.get("B_n", 0.0) or 0.0),
-        "pi_delta": float(component_fit_result.get("B_delta", 0.0) or 0.0),
-        "pi_sidis": float(component_fit_result.get("B_sidis", 0.0) or 0.0),
+        "pi_n": float(pion_amplitude_source.get("pi_n", component_fit_result.get("B_n", 0.0)) or 0.0),
+        "pi_delta": float(pion_amplitude_source.get("pi_delta", component_fit_result.get("B_delta", 0.0)) or 0.0),
+        "pi_sidis": float(pion_amplitude_source.get("pi_sidis", component_fit_result.get("B_sidis", 0.0)) or 0.0),
     }
     kaon_amplitudes = {
-        "pi_n": float(component_fit_result.get("A_n", 0.0) or 0.0),
-        "pi_delta": float(component_fit_result.get("A_delta", 0.0) or 0.0),
-        "pi_sidis": float(component_fit_result.get("A_sidis", 0.0) or 0.0),
+        "pi_n": float(kaon_amplitude_source.get("pi_n", component_fit_result.get("A_n", 0.0)) or 0.0),
+        "pi_delta": float(kaon_amplitude_source.get("pi_delta", component_fit_result.get("A_delta", 0.0)) or 0.0),
+        "pi_sidis": float(kaon_amplitude_source.get("pi_sidis", component_fit_result.get("A_sidis", 0.0)) or 0.0),
     }
 
     for component_name in COMPONENT_NAMES:
@@ -390,6 +421,7 @@ def build_simc_shape_pion_control_weights(
                 unsupported_overlap_bins.append(int(bin_index))
 
     diagnostics = {
+        "model_variant": mode_key,
         "pion_control_integral": _hist_integral(component_fit_result.get("H_pion_control_input")),
         "pion_control_model_integral": _hist_integral(h_pion_control_model),
         "kaon_pion_model_integral": _hist_integral(h_kaon_pion_model),

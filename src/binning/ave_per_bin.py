@@ -436,6 +436,9 @@ def _apply_component_pion_subtraction_for_tbin(
         "resolved_subtraction_config": deepcopy(
             component_fit_result.get("resolved_subtraction_config") or {}
         ) if isinstance(component_fit_result, dict) else {},
+        "fit_mode": component_fit_result.get("fit_mode") if isinstance(component_fit_result, dict) else None,
+        "fit_mode_pion": component_fit_result.get("fit_mode_pion") if isinstance(component_fit_result, dict) else None,
+        "fit_mode_kaon": component_fit_result.get("fit_mode_kaon") if isinstance(component_fit_result, dict) else None,
         "fit_status_pion": component_fit_result.get("fit_status_pion") if isinstance(component_fit_result, dict) else None,
         "fit_status_kaon": component_fit_result.get("fit_status_kaon") if isinstance(component_fit_result, dict) else None,
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
@@ -466,6 +469,13 @@ def _apply_component_pion_subtraction_for_tbin(
         clip_min=clip_min,
         clip_max=clip_max,
         denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+    )
+    stage_weight_payload = build_simc_shape_pion_control_weights(
+        component_fit_result,
+        clip_min=clip_min,
+        clip_max=clip_max,
+        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+        model_variant="staged",
     )
     print_particle_subtraction_weight_support_warning(
         weight_payload,
@@ -507,6 +517,14 @@ def _apply_component_pion_subtraction_for_tbin(
     h_mm_before.Add(hist_bin_dict["H_MM_DATA_{}".format(j)])
     h_mm_nosub_before = clone_reset_hist(hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], "_before_pion_sub_full")
     h_mm_nosub_before.Add(hist_bin_dict["H_MM_nosub_DATA_{}".format(j)])
+    h_mm_nosub_after_stage_model = clone_reset_hist(h_mm_nosub_before, "_after_pion_sub_stage_model_full")
+    h_mm_nosub_after_stage_model.Add(h_mm_nosub_before)
+    if stage_weight_payload.get("H_kaon_pion_model") is not None:
+        h_mm_nosub_after_stage_model.Add(stage_weight_payload["H_kaon_pion_model"], -1.0)
+    h_mm_nosub_after_final_model = clone_reset_hist(h_mm_nosub_before, "_after_pion_sub_final_model_full")
+    h_mm_nosub_after_final_model.Add(h_mm_nosub_before)
+    if weight_payload.get("H_kaon_pion_model") is not None:
+        h_mm_nosub_after_final_model.Add(weight_payload["H_kaon_pion_model"], -1.0)
 
     hist_bin_dict["H_Q2_DATA_{}".format(j)].Add(template_hists["Q2"], -1.0)
     hist_bin_dict["H_W_DATA_{}".format(j)].Add(template_hists["W"], -1.0)
@@ -548,6 +566,10 @@ def _apply_component_pion_subtraction_for_tbin(
             "H_kaon_pion_model": weight_payload["H_kaon_pion_model"],
             "H_weighted_pion_control_model": weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
+            "H_pion_control_model_stage": stage_weight_payload["H_pion_control_model"],
+            "H_kaon_pion_model_stage": stage_weight_payload["H_kaon_pion_model"],
+            "H_weighted_pion_control_model_stage": stage_weight_payload.get("H_weighted_pion_control_model"),
+            "H_pion_weight_vs_MM_stage": stage_weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
             "H_pion_control_input": component_fit_result.get("H_pion_control_input").Clone(
                 "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
@@ -564,10 +586,14 @@ def _apply_component_pion_subtraction_for_tbin(
             "H_MM_after_pion_subtraction": h_mm_after,
             "H_MM_nosub_before_pion_subtraction": h_mm_nosub_before,
             "H_MM_nosub_after_pion_subtraction": h_mm_nosub_after,
+            "H_MM_nosub_after_pion_subtraction_model_stage": h_mm_nosub_after_stage_model,
+            "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
             "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
             "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
+                "weight_diagnostics_stage": dict(stage_weight_payload.get("diagnostics") or {}),
+                "model_closure_stage": dict((stage_weight_payload.get("diagnostics") or {}).get("model_closure") or {}),
                 **dict(fill_stats),
                 "event_template_closure": event_template_closure,
             },

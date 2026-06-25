@@ -191,6 +191,7 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG = {
 PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     "pion_control": {
         "apply_mm_offset_data": True,
+        "pion_component_fit_mode": "staged_plus_joint",
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
@@ -217,6 +218,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "k_sigma0_signal": 1.0,
         },
         "joint_refinement_enabled": True,
+        "joint_refinement_amplitude_floor": 1e-3,
+        "template_corr_warn": 0.95,
         "particle_subtraction_max_fit_cycles": 50,
         "particle_subtraction_fit_tolerance": 1e-5,
         "oversub_sigma_tolerance": 2.0,
@@ -242,6 +245,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     },
     "kaon_nosub": {
         "apply_mm_offset_data": True,
+        "pion_component_fit_mode": "staged_plus_joint",
         "staged_fit_passes": 1,
         "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
         "stage_amplitude_windows": {
@@ -269,6 +273,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
+        "joint_refinement_amplitude_floor": 1e-3,
+        "template_corr_warn": 0.95,
         "particle_subtraction_prior_scale_k_lambda_signal": 1.0,
         "particle_subtraction_max_fit_cycles": 50,
         "particle_subtraction_fit_tolerance": 1e-5,
@@ -326,6 +332,19 @@ PARTICLE_SUBTRACTION_COMPONENT_PRIOR_SCALE_LEGACY_KEYS = {
     "k_lambda_signal": "particle_subtraction_prior_scale_k_lambda_signal",
     "k_sigma0_signal": "particle_subtraction_prior_scale_k_sigma0_signal",
 }
+
+PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_ONLY = "staged_only"
+PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_JOINT = "staged_plus_joint"
+PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_REGULARIZED_JOINT = (
+    "staged_plus_regularized_joint"
+)
+PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_VALUES = frozenset(
+    {
+        PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_ONLY,
+        PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_JOINT,
+        PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_REGULARIZED_JOINT,
+    }
+)
 
 _PROFILE_OVERRIDE_ENV = "LT_BG_PROFILE_SNAPSHOT_JSON"
 
@@ -1879,6 +1898,43 @@ def resolve_particle_subtraction_component_prior_scales(
             )
         resolved[component_name] = scale_value
     return resolved
+
+
+def resolve_particle_subtraction_component_fit_mode(
+    fit_target,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    if not config:
+        return PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_JOINT
+
+    explicit_mode = str(config.get("pion_component_fit_mode") or "").strip().lower()
+    if explicit_mode:
+        if explicit_mode not in PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_VALUES:
+            raise ValueError(
+                "Particle subtraction fit mode '{}' for '{}' must be one of {}".format(
+                    explicit_mode,
+                    fit_target,
+                    sorted(PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_VALUES),
+                )
+            )
+        return explicit_mode
+
+    if "joint_refinement_enabled" in config:
+        return (
+            PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_JOINT
+            if bool(config.get("joint_refinement_enabled"))
+            else PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_ONLY
+        )
+
+    return PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_JOINT
 
 
 def resolve_particle_subtraction_component_postfit_scales(

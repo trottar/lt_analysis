@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import numpy as np
 import ROOT
-from scipy.optimize import lsq_linear
+from scipy.optimize import least_squares, lsq_linear
 from scipy.stats import chi2 as chi2_dist
 
 from background_config import (
@@ -15,6 +15,7 @@ from background_config import (
     BG_OPT_MM_PLOT_MIN,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     get_particle_subtraction_setting_key,
+    resolve_particle_subtraction_component_fit_mode,
     resolve_particle_subtraction_component_postfit_scales,
     resolve_particle_subtraction_component_prior_scales,
     resolve_particle_subtraction_component_stage_amplitude_modes,
@@ -594,6 +595,7 @@ def _build_multi_template_fit_inputs(
     sigma_values = []
     fit_bin_indices = []
     template_columns = {name: [] for name in template_names}
+    excluded_invalid_variance_bins = []
 
     for bin_index in range(1, target_hist.GetNbinsX() + 1):
         x_center = float(target_hist.GetBinCenter(bin_index))
@@ -611,7 +613,8 @@ def _build_multi_template_fit_inputs(
         if not math.isfinite(y_value):
             continue
         if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
-            sigma_value = max(math.sqrt(abs(y_value)), 1.0)
+            excluded_invalid_variance_bins.append(int(bin_index))
+            continue
 
         x_values.append(x_center)
         y_values.append(y_value)
@@ -631,6 +634,8 @@ def _build_multi_template_fit_inputs(
             template_name: np.asarray(values, dtype=float)
             for template_name, values in template_columns.items()
         },
+        "excluded_invalid_variance_bins": excluded_invalid_variance_bins,
+        "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
     }
 
 
@@ -1047,6 +1052,582 @@ def _build_prior_sigma_map(fit_names, stage_uncertainties, prior_scale_map=None)
         )
         prior_sigmas[template_name] = max(stage_sigma * prior_scale, 1e-6)
     return prior_sigmas
+
+
+def _resolve_component_fit_mode_label(mode_name):
+    normalized_mode = str(mode_name or "").strip().lower()
+    if not normalized_mode:
+        return "staged_plus_joint"
+    return normalized_mode
+
+
+def _extract_component_amplitude_maps(result):
+    diagnostics = deepcopy((result or {}).get("diagnostics") or {})
+    raw_component_amplitudes = {
+        component_name: float(
+            (diagnostics.get("component_amplitudes_pre_postfit_scale") or {}).get(
+                component_name,
+                (diagnostics.get("component_amplitudes") or {}).get(component_name, 0.0),
+            ) or 0.0
+        )
+        for component_name in COMPONENT_NAMES
+    }
+    scaled_component_amplitudes = {
+        component_name: float(
+            (diagnostics.get("component_amplitudes") or {}).get(component_name, 0.0) or 0.0
+        )
+        for component_name in COMPONENT_NAMES
+    }
+    raw_extra_component_amplitudes = {
+        str(template_name): float(value or 0.0)
+        for template_name, value in (
+            diagnostics.get("extra_component_amplitudes_pre_postfit_scale")
+            or result.get("extra_component_amplitudes")
+            or {}
+        ).items()
+    }
+    scaled_extra_component_amplitudes = {
+        str(template_name): float(value or 0.0)
+        for template_name, value in (
+            diagnostics.get("extra_component_amplitudes")
+            or result.get("extra_component_amplitudes")
+            or {}
+        ).items()
+    }
+    return (
+        raw_component_amplitudes,
+        scaled_component_amplitudes,
+        raw_extra_component_amplitudes,
+        scaled_extra_component_amplitudes,
+    )
+
+
+def _build_regularization_width_map(
+    fit_names,
+    stage_amplitudes,
+    prior_scale_map=None,
+    amplitude_floor=1e-3,
+):
+    floor_value = max(float(amplitude_floor or 0.0), 1e-12)
+    resolved = {}
+    for template_name in fit_names:
+        prior_scale = max(float((prior_scale_map or {}).get(template_name, 1.0) or 1.0), 1e-12)
+        reference_scale = max(
+            abs(float((stage_amplitudes or {}).get(template_name, 0.0) or 0.0)),
+            floor_value,
+        )
+        resolved[template_name] = float(prior_scale * reference_scale)
+    return resolved
+
+
+def _compute_template_matrix_diagnostics(weighted_design, fit_names):
+    diagnostics = {
+        "weighted_design_condition_number": None,
+        "weighted_design_effective_rank": None,
+        "template_correlation_matrix": {},
+    }
+    if weighted_design is None or len(fit_names) == 0:
+        return diagnostics
+
+    try:
+        diagnostics["weighted_design_condition_number"] = float(np.linalg.cond(weighted_design))
+    except Exception:
+        diagnostics["weighted_design_condition_number"] = None
+    try:
+        diagnostics["weighted_design_effective_rank"] = int(np.linalg.matrix_rank(weighted_design))
+    except Exception:
+        diagnostics["weighted_design_effective_rank"] = None
+
+    try:
+        gram_matrix = np.dot(weighted_design.T, weighted_design)
+        template_corr = {}
+        for i, left_name in enumerate(fit_names):
+            left_diag = float(gram_matrix[i, i])
+            row = {}
+            for j, right_name in enumerate(fit_names):
+                right_diag = float(gram_matrix[j, j])
+                if left_diag > 0.0 and right_diag > 0.0:
+                    rho = float(gram_matrix[i, j] / math.sqrt(left_diag * right_diag))
+                else:
+                    rho = None
+                row[right_name] = rho
+            template_corr[left_name] = row
+        diagnostics["template_correlation_matrix"] = template_corr
+    except Exception:
+        diagnostics["template_correlation_matrix"] = {}
+    return diagnostics
+
+
+def _compute_parameter_covariance(weighted_design, fit_names):
+    covariance_matrix = {}
+    correlation_matrix = {}
+    uncertainties = {}
+    if weighted_design is None or len(fit_names) == 0:
+        return covariance_matrix, correlation_matrix, uncertainties
+
+    try:
+        normal_matrix = np.dot(weighted_design.T, weighted_design)
+        covariance = np.linalg.pinv(normal_matrix)
+    except Exception:
+        return covariance_matrix, correlation_matrix, uncertainties
+
+    for i, left_name in enumerate(fit_names):
+        variance = float(covariance[i, i])
+        uncertainties[left_name] = math.sqrt(max(variance, 0.0))
+        covariance_row = {}
+        correlation_row = {}
+        for j, right_name in enumerate(fit_names):
+            covariance_value = float(covariance[i, j])
+            covariance_row[right_name] = covariance_value
+            left_var = float(covariance[i, i])
+            right_var = float(covariance[j, j])
+            if left_var > 0.0 and right_var > 0.0:
+                correlation_row[right_name] = float(
+                    covariance_value / math.sqrt(left_var * right_var)
+                )
+            else:
+                correlation_row[right_name] = None
+        covariance_matrix[left_name] = covariance_row
+        correlation_matrix[left_name] = correlation_row
+    return covariance_matrix, correlation_matrix, uncertainties
+
+
+def _run_joint_template_refinement(
+    target_hist,
+    template_hists,
+    fit_names,
+    fit_min,
+    fit_max,
+    initial_amplitudes,
+    fit_mode,
+    exclude_windows=None,
+    prior_scale_map=None,
+    amplitude_floor=1e-3,
+):
+    if exclude_windows is None:
+        exclude_windows = []
+
+    fit_inputs = _build_multi_template_fit_inputs(
+        target_hist,
+        template_hists,
+        fit_names,
+        fit_min,
+        fit_max,
+        exclude_windows=exclude_windows,
+    )
+    n_fit_bins = int(len(fit_inputs["x"]))
+    if n_fit_bins == 0:
+        return {
+            "success": False,
+            "status": "failure",
+            "message": "no valid full-range fit bins",
+            "coefficients": {name: 0.0 for name in fit_names},
+            "uncertainties": {},
+            "active_bin_count": 0,
+            "excluded_invalid_variance_bin_count": int(
+                len(fit_inputs.get("excluded_invalid_variance_bins") or [])
+            ),
+            "invalid_bin_rule": fit_inputs.get("invalid_bin_rule"),
+            "bound_hit_flags": {},
+            "regularization_enabled": False,
+            "regularization_widths": {},
+            "regularization_contribution": 0.0,
+            "data_chi2_contribution": None,
+            "total_objective": None,
+            "chi2_data": None,
+            "ndf": None,
+            "chi2_ndf": None,
+            "fit_p_value": None,
+            "covariance_matrix": {},
+            "correlation_matrix": {},
+            "template_correlation_matrix": {},
+            "weighted_design_condition_number": None,
+            "weighted_design_effective_rank": None,
+            "fit_bin_indices": [],
+        }
+
+    data_values = np.asarray(fit_inputs["y"], dtype=float)
+    sigma_values = np.asarray(fit_inputs["sigma"], dtype=float)
+    design_matrix = np.column_stack(
+        [np.asarray(fit_inputs["template_columns"][name], dtype=float) for name in fit_names]
+    )
+    weighted_design = design_matrix / sigma_values[:, None]
+    initial_vector = np.asarray(
+        [
+            max(float((initial_amplitudes or {}).get(template_name, 0.0) or 0.0), 0.0)
+            for template_name in fit_names
+        ],
+        dtype=float,
+    )
+    regularization_enabled = (
+        _resolve_component_fit_mode_label(fit_mode) == "staged_plus_regularized_joint"
+    )
+    regularization_widths = (
+        _build_regularization_width_map(
+            fit_names,
+            initial_amplitudes,
+            prior_scale_map=prior_scale_map,
+            amplitude_floor=amplitude_floor,
+        )
+        if regularization_enabled else {}
+    )
+
+    def _residual_vector(parameters):
+        model_values = design_matrix.dot(parameters)
+        residuals = (data_values - model_values) / sigma_values
+        if not regularization_enabled:
+            return residuals
+        reg_residuals = []
+        for index, template_name in enumerate(fit_names):
+            tau_value = float((regularization_widths or {}).get(template_name, 0.0) or 0.0)
+            if (not math.isfinite(tau_value)) or tau_value <= 0.0:
+                continue
+            reg_residuals.append(
+                (float(parameters[index]) - float(initial_vector[index])) / tau_value
+            )
+        if reg_residuals:
+            residuals = np.concatenate([residuals, np.asarray(reg_residuals, dtype=float)])
+        return residuals
+
+    try:
+        least_squares_result = least_squares(
+            _residual_vector,
+            initial_vector,
+            bounds=(np.zeros(len(fit_names), dtype=float), np.full(len(fit_names), np.inf, dtype=float)),
+            method="trf",
+        )
+    except Exception as exc:
+        return {
+            "success": False,
+            "status": "failure",
+            "message": "joint refinement exception: {}".format(exc),
+            "coefficients": {name: 0.0 for name in fit_names},
+            "uncertainties": {},
+            "active_bin_count": int(n_fit_bins),
+            "excluded_invalid_variance_bin_count": int(
+                len(fit_inputs.get("excluded_invalid_variance_bins") or [])
+            ),
+            "invalid_bin_rule": fit_inputs.get("invalid_bin_rule"),
+            "bound_hit_flags": {},
+            "regularization_enabled": bool(regularization_enabled),
+            "regularization_widths": deepcopy(regularization_widths),
+            "regularization_contribution": None,
+            "data_chi2_contribution": None,
+            "total_objective": None,
+            "chi2_data": None,
+            "ndf": None,
+            "chi2_ndf": None,
+            "fit_p_value": None,
+            "covariance_matrix": {},
+            "correlation_matrix": {},
+            "template_correlation_matrix": {},
+            "weighted_design_condition_number": None,
+            "weighted_design_effective_rank": None,
+            "fit_bin_indices": [int(value) for value in fit_inputs.get("fit_bin_indices") or []],
+        }
+
+    parameter_vector = np.asarray(least_squares_result.x, dtype=float)
+    parameter_vector = np.clip(parameter_vector, 0.0, np.inf)
+    coefficients = {
+        template_name: float(parameter_vector[index])
+        for index, template_name in enumerate(fit_names)
+    }
+
+    model_values = design_matrix.dot(parameter_vector)
+    data_residuals = (data_values - model_values) / sigma_values
+    chi2_data = float(np.sum(np.square(data_residuals)))
+    regularization_contribution = 0.0
+    if regularization_enabled:
+        for index, template_name in enumerate(fit_names):
+            tau_value = float((regularization_widths or {}).get(template_name, 0.0) or 0.0)
+            if (not math.isfinite(tau_value)) or tau_value <= 0.0:
+                continue
+            regularization_contribution += (
+                (float(parameter_vector[index]) - float(initial_vector[index])) / tau_value
+            ) ** 2
+    total_objective = float(chi2_data + regularization_contribution)
+    n_parameters = int(len(fit_names))
+    ndf = int(n_fit_bins - n_parameters)
+    chi2_ndf = float(chi2_data / ndf) if ndf > 0 else None
+    fit_p_value = float(chi2_dist.sf(chi2_data, ndf)) if ndf > 0 else None
+    bound_hit_flags = {
+        template_name: bool(abs(float(parameter_vector[index])) <= 1e-10)
+        for index, template_name in enumerate(fit_names)
+    }
+    template_diagnostics = _compute_template_matrix_diagnostics(weighted_design, fit_names)
+    covariance_matrix, correlation_matrix, uncertainties = _compute_parameter_covariance(
+        weighted_design,
+        fit_names,
+    )
+
+    return {
+        "success": bool(getattr(least_squares_result, "success", False)),
+        "status": "success" if bool(getattr(least_squares_result, "success", False)) else "failure",
+        "message": str(getattr(least_squares_result, "message", "")),
+        "status_code": getattr(least_squares_result, "status", None),
+        "coefficients": coefficients,
+        "uncertainties": uncertainties,
+        "active_bin_count": int(n_fit_bins),
+        "excluded_invalid_variance_bin_count": int(
+            len(fit_inputs.get("excluded_invalid_variance_bins") or [])
+        ),
+        "invalid_bin_rule": fit_inputs.get("invalid_bin_rule"),
+        "bound_hit_flags": bound_hit_flags,
+        "regularization_enabled": bool(regularization_enabled),
+        "regularization_widths": deepcopy(regularization_widths),
+        "regularization_contribution": float(regularization_contribution),
+        "data_chi2_contribution": float(chi2_data),
+        "total_objective": float(total_objective),
+        "chi2_data": float(chi2_data),
+        "ndf": ndf,
+        "chi2_ndf": chi2_ndf,
+        "fit_p_value": fit_p_value,
+        "covariance_matrix": covariance_matrix,
+        "correlation_matrix": correlation_matrix,
+        "template_correlation_matrix": template_diagnostics.get("template_correlation_matrix") or {},
+        "weighted_design_condition_number": template_diagnostics.get("weighted_design_condition_number"),
+        "weighted_design_effective_rank": template_diagnostics.get("weighted_design_effective_rank"),
+        "fit_bin_indices": [int(value) for value in fit_inputs.get("fit_bin_indices") or []],
+    }
+
+
+def _apply_joint_component_refinement(
+    result,
+    target_hist,
+    amplitude_prefix,
+    fit_mode,
+    fit_min,
+    fit_max,
+    exclude_windows=None,
+    prior_scale_map=None,
+    validation_options=None,
+    context="",
+    template_corr_warn=0.95,
+    amplitude_floor=1e-3,
+):
+    if exclude_windows is None:
+        exclude_windows = []
+    if validation_options is None:
+        validation_options = {}
+    if not isinstance(result, dict):
+        return result
+
+    normalized_fit_mode = _resolve_component_fit_mode_label(fit_mode)
+    diagnostics = deepcopy(result.get("diagnostics") or {})
+    template_hists = result.get("template_hists") or {}
+    fit_names = list(diagnostics.get("fit_order") or list(template_hists.keys()))
+    fit_names = [name for name in fit_names if name in template_hists]
+    stage_validation = deepcopy(diagnostics.get("validation") or {})
+    diagnostics["stage_validation"] = deepcopy(diagnostics.get("stage_validation") or stage_validation)
+    diagnostics["fit_mode"] = normalized_fit_mode
+    diagnostics["final_solution_method"] = normalized_fit_mode
+    diagnostics["stage_solution_method"] = "stage_only"
+
+    (
+        raw_component_amplitudes,
+        scaled_component_amplitudes,
+        raw_extra_component_amplitudes,
+        scaled_extra_component_amplitudes,
+    ) = _extract_component_amplitude_maps(result)
+    staged_scaled_amplitudes = dict(scaled_extra_component_amplitudes)
+    staged_scaled_amplitudes.update(scaled_component_amplitudes)
+    staged_raw_amplitudes = dict(raw_extra_component_amplitudes)
+    staged_raw_amplitudes.update(raw_component_amplitudes)
+
+    diagnostics["staged_amplitudes_raw"] = deepcopy(staged_raw_amplitudes)
+    diagnostics["staged_amplitudes_scaled"] = deepcopy(staged_scaled_amplitudes)
+
+    if normalized_fit_mode == "staged_only":
+        staged_scaled_hist_map = {
+            "pi_n": result.get("pi_n_scaled_hist"),
+            "pi_delta": result.get("pi_delta_scaled_hist"),
+            "pi_sidis": result.get("pi_sidis_scaled_hist"),
+        }
+        staged_scaled_hist_map.update(deepcopy(result.get("extra_scaled_hists") or {}))
+        diagnostics["joint_refinement"] = {
+            "requested": False,
+            "status": "not_requested",
+            "success": False,
+            "message": "fit mode is staged_only",
+            "active_bin_count": 0,
+            "excluded_invalid_variance_bin_count": 0,
+            "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
+            "bound_hit_flags": {},
+            "regularization_enabled": False,
+            "regularization_widths": {},
+            "regularization_contribution": 0.0,
+            "data_chi2_contribution": stage_validation.get("chi2"),
+            "total_objective": stage_validation.get("chi2"),
+            "chi2_data": stage_validation.get("chi2"),
+            "ndf": stage_validation.get("ndf"),
+            "chi2_ndf": stage_validation.get("chi2_ndf"),
+            "fit_p_value": stage_validation.get("fit_p_value"),
+            "covariance_matrix": {},
+            "correlation_matrix": {},
+            "template_correlation_matrix": {},
+            "weighted_design_condition_number": None,
+            "weighted_design_effective_rank": None,
+        }
+        diagnostics["joint_refinement_status"] = "not_requested"
+        diagnostics["refined_amplitudes"] = deepcopy(staged_scaled_amplitudes)
+        diagnostics["amplitude_shifts"] = {
+            template_name: 0.0
+            for template_name in fit_names
+        }
+        diagnostics["amplitude_shift_fractions"] = {
+            template_name: 0.0
+            for template_name in fit_names
+        }
+        diagnostics["validation"] = deepcopy(stage_validation)
+        diagnostics["success"] = bool(stage_validation.get("accepted"))
+        diagnostics["fallback_used"] = not bool(stage_validation.get("accepted"))
+        diagnostics["fallback_reason"] = (
+            "" if bool(stage_validation.get("accepted"))
+            else "staged-only validation rejected: {}".format(
+                "; ".join(stage_validation.get("rejection_reasons") or ["unknown"])
+            )
+        )
+        result["fit_status"] = "success" if bool(stage_validation.get("accepted")) else "fallback"
+        result["diagnostics"] = diagnostics
+        result["refined_fit_hist"] = result.get("fit_hist")
+        result["refined_residual_hist"] = result.get("residual_hist")
+        result["refined_scaled_hist_map"] = staged_scaled_hist_map
+        if amplitude_prefix == "A":
+            result["refined_pion_bg_fit_hist"] = result.get("pion_bg_fit_hist")
+        return result
+
+    refinement_result = _run_joint_template_refinement(
+        target_hist,
+        template_hists,
+        fit_names,
+        fit_min,
+        fit_max,
+        staged_scaled_amplitudes,
+        normalized_fit_mode,
+        exclude_windows=exclude_windows,
+        prior_scale_map=prior_scale_map,
+        amplitude_floor=amplitude_floor,
+    )
+    diagnostics["joint_refinement"] = deepcopy(refinement_result)
+    diagnostics["joint_refinement_status"] = str(refinement_result.get("status") or "failure")
+
+    refined_coefficients = refinement_result.get("coefficients") or {}
+    refined_fit_hist = _build_model_hist(
+        target_hist,
+        template_hists,
+        refined_coefficients,
+        "{}_fit_hist_refined_{}".format(amplitude_prefix, context or "scope"),
+    )
+    refined_residual_hist = _clone_hist(
+        target_hist,
+        "{}_fit_residual_refined_{}".format(amplitude_prefix, context or "scope"),
+    )
+    if refined_residual_hist is not None and refined_fit_hist is not None:
+        refined_residual_hist.Add(refined_fit_hist, -1.0)
+    refined_scaled_hist_map = _build_scaled_hist_map(
+        template_hists,
+        refined_coefficients,
+        amplitude_prefix,
+        "{}_refined".format(context or "scope"),
+    )
+    refined_pion_bg_fit_hist = _build_model_hist(
+        target_hist,
+        {
+            component_name: template_hists.get(component_name)
+            for component_name in COMPONENT_NAMES
+        },
+        refined_coefficients,
+        "{}_pion_bg_fit_refined_{}".format(amplitude_prefix, context or "scope"),
+    ) if amplitude_prefix == "A" else None
+
+    validation = _evaluate_model_validation(
+        target_hist,
+        refined_fit_hist,
+        fit_min,
+        fit_max,
+        n_parameters=len(fit_names),
+        exclude_windows=exclude_windows,
+        oversub_sigma_tolerance=validation_options.get("oversub_sigma_tolerance", 2.0),
+        max_oversub_bin_count=validation_options.get("max_oversub_bin_count"),
+        max_oversub_bin_fraction=validation_options.get("max_oversub_bin_fraction"),
+        max_full_range_chi2_ndf=validation_options.get("max_full_range_chi2_ndf"),
+    )
+
+    refined_component_amplitudes = {
+        component_name: float(refined_coefficients.get(component_name, 0.0) or 0.0)
+        for component_name in COMPONENT_NAMES
+    }
+    refined_extra_component_amplitudes = {
+        template_name: float(refined_coefficients.get(template_name, 0.0) or 0.0)
+        for template_name in fit_names
+        if template_name not in COMPONENT_NAMES
+    }
+    refined_full_map = dict(refined_extra_component_amplitudes)
+    refined_full_map.update(refined_component_amplitudes)
+    diagnostics["refined_amplitudes"] = deepcopy(refined_full_map)
+    diagnostics["amplitude_shifts"] = {
+        template_name: float(refined_full_map.get(template_name, 0.0) - staged_scaled_amplitudes.get(template_name, 0.0))
+        for template_name in fit_names
+    }
+    diagnostics["amplitude_shift_fractions"] = {
+        template_name: (
+            float(
+                (refined_full_map.get(template_name, 0.0) - staged_scaled_amplitudes.get(template_name, 0.0))
+                / max(abs(staged_scaled_amplitudes.get(template_name, 0.0)), 1e-12)
+            )
+        )
+        for template_name in fit_names
+    }
+    diagnostics["template_corr_warn"] = float(template_corr_warn)
+    diagnostics["high_template_correlations"] = [
+        {
+            "left": left_name,
+            "right": right_name,
+            "rho": float(rho_value),
+        }
+        for left_name, row in (refinement_result.get("template_correlation_matrix") or {}).items()
+        for right_name, rho_value in (row or {}).items()
+        if right_name > left_name and _is_finite_number(rho_value) and abs(float(rho_value)) > float(template_corr_warn)
+    ]
+    diagnostics["validation"] = deepcopy(validation)
+    diagnostics["success"] = bool(
+        refinement_result.get("success", False) and validation.get("accepted", False)
+    )
+    diagnostics["message"] = str(refinement_result.get("message") or "")
+    diagnostics["chi2"] = refinement_result.get("chi2_data")
+    diagnostics["ndf"] = refinement_result.get("ndf")
+    diagnostics["chi2_ndf"] = refinement_result.get("chi2_ndf")
+    diagnostics["fit_p_value"] = refinement_result.get("fit_p_value")
+    diagnostics["n_fit_bins"] = refinement_result.get("active_bin_count")
+    diagnostics["fallback_used"] = not bool(diagnostics["success"])
+    diagnostics["fallback_reason"] = (
+        ""
+        if bool(diagnostics["success"]) else (
+            "joint refinement failed validation: {}".format(
+                "; ".join(validation.get("rejection_reasons") or [])
+            ) if validation.get("rejection_reasons") else (
+                "joint refinement failed: {}".format(refinement_result.get("message") or "unknown")
+            )
+        )
+    )
+    diagnostics["component_amplitudes"] = deepcopy(refined_component_amplitudes)
+    diagnostics["extra_component_amplitudes"] = deepcopy(refined_extra_component_amplitudes)
+    diagnostics["accepted_component_uncertainties"] = deepcopy(
+        refinement_result.get("uncertainties") or {}
+    )
+
+    result["fit_status"] = "success" if bool(diagnostics["success"]) else "fallback"
+    result["diagnostics"] = diagnostics
+    result["{}_n".format(amplitude_prefix)] = float(refined_component_amplitudes.get("pi_n", 0.0) or 0.0)
+    result["{}_delta".format(amplitude_prefix)] = float(refined_component_amplitudes.get("pi_delta", 0.0) or 0.0)
+    result["{}_sidis".format(amplitude_prefix)] = float(refined_component_amplitudes.get("pi_sidis", 0.0) or 0.0)
+    result["extra_component_amplitudes"] = deepcopy(refined_extra_component_amplitudes)
+    result["refined_fit_hist"] = refined_fit_hist
+    result["refined_residual_hist"] = refined_residual_hist
+    result["refined_scaled_hist_map"] = refined_scaled_hist_map
+    if amplitude_prefix == "A":
+        result["refined_pion_bg_fit_hist"] = refined_pion_bg_fit_hist
+    return result
 
 
 def _run_staged_component_pass(
@@ -1490,15 +2071,31 @@ def _fit_staged_anchor_templates(
         "max_full_range_chi2_ndf": validation_options.get("max_full_range_chi2_ndf"),
     }
 
-    stage_fit_hist = _build_model_hist(
+    staged_template_hists = {name: template_hists[name] for name in fitted_names}
+    fit_hist = _build_model_hist(
         target_hist,
-        {name: template_hists[name] for name in fitted_names},
+        staged_template_hists,
         stage_amplitudes,
-        "{}_stage_fit_hist_{}".format(amplitude_prefix, context),
+        "{}_fit_hist_{}".format(amplitude_prefix, context),
     )
+    residual_hist = _clone_hist(
+        target_hist,
+        "{}_fit_residual_{}".format(amplitude_prefix, context),
+    )
+    residual_hist.Add(fit_hist, -1.0)
+    scaled_hist_map = _build_scaled_hist_map(
+        staged_template_hists,
+        stage_amplitudes,
+        amplitude_prefix,
+        context,
+    )
+    extra_scaled_hists = {
+        template_name: scaled_hist_map.get(template_name)
+        for template_name in extra_positive_templates
+    }
     stage_validation = _evaluate_model_validation(
         target_hist,
-        stage_fit_hist,
+        fit_hist,
         fit_min,
         fit_max,
         n_parameters=len(fitted_names),
@@ -1510,182 +2107,41 @@ def _fit_staged_anchor_templates(
         stage_uncertainties,
         prior_scale_map=prior_scale_map,
     )
-
-    accepted_solution = "stage_only"
-    accepted_message = "ordered residual staged fit"
-    accepted_amplitudes = deepcopy(stage_amplitudes)
-    accepted_uncertainties = deepcopy(stage_uncertainties)
-    accepted_validation = deepcopy(stage_validation)
-
-    joint_diagnostics = {
-        "enabled": bool(joint_refinement_enabled),
-        "success": False,
-        "message": "joint refinement disabled",
-        "n_fit_bins": 0,
-        "prior_sigmas": deepcopy(prior_sigmas),
-        "coefficients": {},
-        "uncertainties": {},
-        "validation": {},
-    }
-    coordinate_diagnostics = {
-        "attempted": False,
-        "success": False,
-        "message": "coordinate refinement not attempted",
-        "n_fit_bins": 0,
-        "cycles_run": 0,
-        "history": [],
-        "coefficients": {},
-        "validation": {},
-    }
-
-    if joint_refinement_enabled:
-        joint_result = _solve_joint_template_amplitudes(
-            target_hist,
-            {name: template_hists[name] for name in fitted_names},
-            fitted_names,
-            fit_min,
-            fit_max,
-            stage_amplitudes,
-            prior_sigmas,
-            exclude_windows=exclude_windows,
-        )
-        joint_diagnostics = {
-            "enabled": True,
-            "success": bool(joint_result.get("success", False)),
-            "message": joint_result.get("message", ""),
-            "n_fit_bins": joint_result.get("n_fit_bins"),
-            "prior_sigmas": deepcopy(joint_result.get("prior_sigmas") or prior_sigmas),
-            "coefficients": deepcopy(joint_result.get("coefficients") or {}),
-            "uncertainties": deepcopy(joint_result.get("uncertainties") or {}),
-            "validation": {},
-        }
-        if joint_result.get("coefficients"):
-            joint_fit_hist = _build_model_hist(
-                target_hist,
-                {name: template_hists[name] for name in fitted_names},
-                joint_result["coefficients"],
-                "{}_joint_fit_hist_{}".format(amplitude_prefix, context),
-            )
-            joint_validation = _evaluate_model_validation(
-                        target_hist,
-                        joint_fit_hist,
-                        fit_min,
-                        fit_max,
-                        n_parameters=len(fitted_names),
-                        exclude_windows=exclude_windows,
-                        **validation_kwargs
-                    )
-            joint_diagnostics["validation"] = deepcopy(joint_validation)
-            if bool(joint_result.get("success", False)) and joint_validation["accepted"]:
-                accepted_solution = "joint_prior"
-                accepted_message = "ordered residual staged fit with joint prior refinement"
-                accepted_amplitudes.update(joint_result["coefficients"])
-                accepted_uncertainties.update(joint_result.get("uncertainties") or {})
-                accepted_validation = deepcopy(joint_validation)
-            else:
-                coordinate_result = _run_coordinate_template_updates(
-                    target_hist,
-                    {name: template_hists[name] for name in fitted_names},
-                    fitted_names,
-                    fit_min,
-                    fit_max,
-                    joint_result.get("coefficients") or stage_amplitudes,
-                    prior_targets=stage_amplitudes,
-                    prior_sigmas=joint_diagnostics["prior_sigmas"],
-                    max_cycles=max_fit_cycles,
-                    tolerance=fit_tolerance,
-                    exclude_windows=exclude_windows,
-                )
-                coordinate_diagnostics = {
-                    "attempted": True,
-                    "success": bool(coordinate_result.get("success", False)),
-                    "message": coordinate_result.get("message", ""),
-                    "n_fit_bins": coordinate_result.get("n_fit_bins"),
-                    "cycles_run": coordinate_result.get("cycles_run", 0),
-                    "history": deepcopy(coordinate_result.get("history") or []),
-                    "coefficients": deepcopy(coordinate_result.get("coefficients") or {}),
-                    "validation": {},
-                }
-                if coordinate_result.get("coefficients"):
-                    coordinate_fit_hist = _build_model_hist(
-                        target_hist,
-                        {name: template_hists[name] for name in fitted_names},
-                        coordinate_result["coefficients"],
-                        "{}_coordinate_fit_hist_{}".format(amplitude_prefix, context),
-                    )
-                    coordinate_validation = _evaluate_model_validation(
-                        target_hist,
-                        coordinate_fit_hist,
-                        fit_min,
-                        fit_max,
-                        n_parameters=len(fitted_names),
-                        exclude_windows=exclude_windows,
-                        **validation_kwargs
-                    )
-                    coordinate_diagnostics["validation"] = deepcopy(coordinate_validation)
-                    if coordinate_validation["accepted"]:
-                        accepted_solution = "coordinate_prior"
-                        accepted_message = "ordered residual staged fit with coordinate refinement"
-                        accepted_amplitudes.update(coordinate_result["coefficients"])
-                        accepted_validation = deepcopy(coordinate_validation)
-
-    accepted_template_hists = {name: template_hists[name] for name in fitted_names}
-    fit_hist = _build_model_hist(
-        target_hist,
-        accepted_template_hists,
-        accepted_amplitudes,
-        "{}_fit_hist_{}".format(amplitude_prefix, context),
-    )
-    residual_hist = _clone_hist(
-        target_hist,
-        "{}_fit_residual_{}".format(amplitude_prefix, context),
-    )
-    residual_hist.Add(fit_hist, -1.0)
-    scaled_hist_map = _build_scaled_hist_map(
-        accepted_template_hists,
-        accepted_amplitudes,
-        amplitude_prefix,
-        context,
-    )
-    extra_scaled_hists = {
-        template_name: scaled_hist_map.get(template_name)
-        for template_name in extra_positive_templates
-    }
     pion_bg_fit_hist = _build_model_hist(
         target_hist,
         {
-            component_name: accepted_template_hists.get(component_name)
+            component_name: staged_template_hists.get(component_name)
             for component_name in COMPONENT_NAMES
         },
-        accepted_amplitudes,
+        stage_amplitudes,
         "{}_pion_bg_fit_{}".format(amplitude_prefix, context),
     ) if amplitude_prefix == "A" else None
 
     fit_status = "success"
     fallback_used = False
     fallback_reason = ""
-    if not accepted_validation["accepted"]:
+    if not stage_validation["accepted"]:
         fit_status = "fallback"
         fallback_used = True
         fallback_reason = (
-            "no ordered-fit candidate passed full-range validation: {}".format(
-                "; ".join(accepted_validation.get("rejection_reasons") or ["unknown"])
+            "ordered residual staged fit failed full-range validation: {}".format(
+                "; ".join(stage_validation.get("rejection_reasons") or ["unknown"])
             )
         )
 
     extra_component_amplitudes = {
-        template_name: float(accepted_amplitudes.get(template_name, 0.0) or 0.0)
+        template_name: float(stage_amplitudes.get(template_name, 0.0) or 0.0)
         for template_name in extra_positive_templates
     }
     diagnostics = {
         "success": (not fallback_used),
         "status_code": None,
-        "message": accepted_message,
-        "chi2": accepted_validation.get("chi2"),
-        "ndf": accepted_validation.get("ndf"),
-        "chi2_ndf": accepted_validation.get("chi2_ndf"),
-        "fit_p_value": accepted_validation.get("fit_p_value"),
-        "n_fit_bins": accepted_validation.get("n_fit_bins"),
+        "message": "ordered residual staged fit",
+        "chi2": stage_validation.get("chi2"),
+        "ndf": stage_validation.get("ndf"),
+        "chi2_ndf": stage_validation.get("chi2_ndf"),
+        "fit_p_value": stage_validation.get("fit_p_value"),
+        "n_fit_bins": stage_validation.get("n_fit_bins"),
         "fit_min": float(fit_min),
         "fit_max": float(fit_max),
         "include_windows": deepcopy(include_windows),
@@ -1693,11 +2149,12 @@ def _fit_staged_anchor_templates(
         "fallback_used": bool(fallback_used),
         "fallback_reason": fallback_reason,
         "fit_strategy": "ordered_residual",
-        "accepted_solution": accepted_solution,
+        "accepted_solution": "stage_only",
         "n_passes": total_passes,
         "fit_order": list(fitted_names),
         "anchor_windows": deepcopy(combined_window_map),
         "stage_amplitude_windows": deepcopy(stage_amplitude_window_map),
+        "stage_amplitude_modes": deepcopy(stage_amplitude_mode_map),
         "staged_pass_history": deepcopy(staged_pass_history),
         "staged_component_amplitudes": {
             component_name: float(stage_amplitudes.get(component_name, 0.0) or 0.0)
@@ -1712,31 +2169,53 @@ def _fit_staged_anchor_templates(
         },
         "accepted_component_uncertainties": {
             component_name: (
-                None if accepted_uncertainties.get(component_name) is None
-                else float(accepted_uncertainties.get(component_name))
+                None if stage_uncertainties.get(component_name) is None
+                else float(stage_uncertainties.get(component_name))
             )
             for component_name in fitted_names
         },
+        "prior_scales": deepcopy(prior_scale_map),
         "prior_sigmas": deepcopy(prior_sigmas),
-        "joint_refinement": deepcopy(joint_diagnostics),
-        "coordinate_refinement": deepcopy(coordinate_diagnostics),
-        "validation": deepcopy(accepted_validation),
+        "joint_refinement": {
+            "enabled": bool(joint_refinement_enabled),
+            "requested": bool(joint_refinement_enabled),
+            "status": "not_requested",
+            "success": False,
+            "message": "joint refinement not run inside staged fitter",
+            "n_fit_bins": 0,
+            "prior_sigmas": deepcopy(prior_sigmas),
+            "coefficients": {},
+            "uncertainties": {},
+            "validation": {},
+        },
+        "coordinate_refinement": {
+            "attempted": False,
+            "success": False,
+            "message": "coordinate refinement disabled by staged-seeded joint update",
+            "n_fit_bins": 0,
+            "cycles_run": 0,
+            "history": [],
+            "coefficients": {},
+            "validation": {},
+        },
+        "stage_validation": deepcopy(stage_validation),
+        "validation": deepcopy(stage_validation),
         "component_amplitudes": {
-            component_name: float(accepted_amplitudes.get(component_name, 0.0) or 0.0)
+            component_name: float(stage_amplitudes.get(component_name, 0.0) or 0.0)
             for component_name in COMPONENT_NAMES
         },
         "extra_component_amplitudes": deepcopy(extra_component_amplitudes),
     }
 
     result = {
-        "{}_n".format(amplitude_prefix): float(accepted_amplitudes.get("pi_n", 0.0) or 0.0),
-        "{}_delta".format(amplitude_prefix): float(accepted_amplitudes.get("pi_delta", 0.0) or 0.0),
-        "{}_sidis".format(amplitude_prefix): float(accepted_amplitudes.get("pi_sidis", 0.0) or 0.0),
+        "{}_n".format(amplitude_prefix): float(stage_amplitudes.get("pi_n", 0.0) or 0.0),
+        "{}_delta".format(amplitude_prefix): float(stage_amplitudes.get("pi_delta", 0.0) or 0.0),
+        "{}_sidis".format(amplitude_prefix): float(stage_amplitudes.get("pi_sidis", 0.0) or 0.0),
         "fit_status": fit_status,
         "diagnostics": diagnostics,
         "fit_hist": fit_hist,
         "residual_hist": residual_hist,
-        "template_hists": accepted_template_hists,
+        "template_hists": staged_template_hists,
         "pi_n_scaled_hist": scaled_hist_map.get("pi_n"),
         "pi_delta_scaled_hist": scaled_hist_map.get("pi_delta"),
         "pi_sidis_scaled_hist": scaled_hist_map.get("pi_sidis"),
@@ -2021,6 +2500,11 @@ def fit_pion_control_with_simc_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    fit_mode = resolve_particle_subtraction_component_fit_mode(
+        "pion_control",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "pion_control",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
@@ -2037,6 +2521,8 @@ def fit_pion_control_with_simc_shapes(
         "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
         "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
     }
+    amplitude_floor = float(fit_config.get("joint_refinement_amplitude_floor", 1e-3) or 1e-3)
+    template_corr_warn = float(fit_config.get("template_corr_warn", 0.95) or 0.95)
     result = _fit_staged_anchor_templates(
         h_pion_control,
         {
@@ -2073,13 +2559,29 @@ def fit_pion_control_with_simc_shapes(
         validation_options=validation_options,
         context="{}_pion_control".format(context or "scope"),
     )
+    result = _apply_joint_component_refinement(
+        result,
+        h_pion_control,
+        "B",
+        fit_mode,
+        fit_min,
+        fit_max,
+        exclude_windows=excluded_windows,
+        prior_scale_map=prior_scale_map,
+        validation_options=validation_options,
+        context="{}_pion_control".format(context or "scope"),
+        template_corr_warn=template_corr_warn,
+        amplitude_floor=amplitude_floor,
+    )
     sigma0_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
     sigma0_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
+    refined_scaled_hist_map = result.get("refined_scaled_hist_map") or {}
     return {
         "B_n": result["B_n"],
         "B_delta": result["B_delta"],
         "B_sidis": result["B_sidis"],
         "B_sigma0": None if sigma0_amplitude is None else float(sigma0_amplitude),
+        "fit_mode": fit_mode,
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
         "template_hists": result.get("template_hists") or {},
@@ -2089,6 +2591,12 @@ def fit_pion_control_with_simc_shapes(
         "pi_delta_scaled_hist": result["pi_delta_scaled_hist"],
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
         "k_sigma0_scaled_hist": sigma0_scaled_hist,
+        "refined_fit_hist": result.get("refined_fit_hist") or result["fit_hist"],
+        "refined_residual_hist": result.get("refined_residual_hist") or result["residual_hist"],
+        "refined_pi_n_scaled_hist": refined_scaled_hist_map.get("pi_n") or result["pi_n_scaled_hist"],
+        "refined_pi_delta_scaled_hist": refined_scaled_hist_map.get("pi_delta") or result["pi_delta_scaled_hist"],
+        "refined_pi_sidis_scaled_hist": refined_scaled_hist_map.get("pi_sidis") or result["pi_sidis_scaled_hist"],
+        "refined_k_sigma0_scaled_hist": refined_scaled_hist_map.get(KAON_SIGMA0_TEMPLATE_NAME) or sigma0_scaled_hist,
         "step_overlays": result.get("step_overlays") or [],
         "resolved_config_summary": {
             "fit_target": "pion_control",
@@ -2107,6 +2615,9 @@ def fit_pion_control_with_simc_shapes(
             "stage_amplitude_modes": deepcopy(stage_amplitude_modes),
             "prior_scales": deepcopy(prior_scale_map),
             "postfit_component_scales": deepcopy(postfit_scale_map),
+            "fit_mode": fit_mode,
+            "joint_refinement_amplitude_floor": amplitude_floor,
+            "template_corr_warn": template_corr_warn,
         },
     }
 
@@ -2167,6 +2678,11 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    fit_mode = resolve_particle_subtraction_component_fit_mode(
+        "kaon_nosub",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "kaon_nosub",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
@@ -2179,6 +2695,8 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
         "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
     }
+    amplitude_floor = float(fit_config.get("joint_refinement_amplitude_floor", 1e-3) or 1e-3)
+    template_corr_warn = float(fit_config.get("template_corr_warn", 0.95) or 0.95)
     include_kaon_signal_template = bool(fit_config.get("include_kaon_signal_template", False))
     if include_kaon_signal_template and _hist_has_usable_support(h_kaon_signal_shape):
         extra_positive_templates[KAON_SIGNAL_TEMPLATE_NAME] = h_kaon_signal_shape
@@ -2228,10 +2746,25 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         validation_options=validation_options,
         context="{}_kaon_nosub".format(context or "scope"),
     )
+    result = _apply_joint_component_refinement(
+        result,
+        h_kaon_nosub,
+        "A",
+        fit_mode,
+        fit_min,
+        fit_max,
+        exclude_windows=excluded_windows,
+        prior_scale_map=prior_scale_map,
+        validation_options=validation_options,
+        context="{}_kaon_nosub".format(context or "scope"),
+        template_corr_warn=template_corr_warn,
+        amplitude_floor=amplitude_floor,
+    )
     signal_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
     signal_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGNAL_TEMPLATE_NAME)
     sigma0_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
     sigma0_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
+    refined_scaled_hist_map = result.get("refined_scaled_hist_map") or {}
     signal_reference_hist, signal_reference_scale = _build_scaled_reference_hist(
         h_kaon_nosub,
         h_kaon_signal_shape,
@@ -2245,6 +2778,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "A_sidis": result["A_sidis"],
         "S_lambda": None if signal_amplitude is None else float(signal_amplitude),
         "S_sigma0": None if sigma0_amplitude is None else float(sigma0_amplitude),
+        "fit_mode": fit_mode,
         "S_lambda_reference_scale": (
             None if signal_reference_scale is None else float(signal_reference_scale)
         ),
@@ -2259,6 +2793,14 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "pi_sidis_scaled_hist": result["pi_sidis_scaled_hist"],
         "k_lambda_scaled_hist": signal_scaled_hist,
         "k_sigma0_scaled_hist": sigma0_scaled_hist,
+        "refined_fit_hist": result.get("refined_fit_hist") or result["fit_hist"],
+        "refined_pion_bg_fit_hist": result.get("refined_pion_bg_fit_hist") or result["pion_bg_fit_hist"],
+        "refined_residual_hist": result.get("refined_residual_hist") or result["residual_hist"],
+        "refined_pi_n_scaled_hist": refined_scaled_hist_map.get("pi_n") or result["pi_n_scaled_hist"],
+        "refined_pi_delta_scaled_hist": refined_scaled_hist_map.get("pi_delta") or result["pi_delta_scaled_hist"],
+        "refined_pi_sidis_scaled_hist": refined_scaled_hist_map.get("pi_sidis") or result["pi_sidis_scaled_hist"],
+        "refined_k_lambda_scaled_hist": refined_scaled_hist_map.get(KAON_SIGNAL_TEMPLATE_NAME) or signal_scaled_hist,
+        "refined_k_sigma0_scaled_hist": refined_scaled_hist_map.get(KAON_SIGMA0_TEMPLATE_NAME) or sigma0_scaled_hist,
         "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
         "resolved_config_summary": {
@@ -2278,6 +2820,9 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "stage_amplitude_modes": deepcopy(stage_amplitude_modes),
             "prior_scales": deepcopy(prior_scale_map),
             "postfit_component_scales": deepcopy(postfit_scale_map),
+            "fit_mode": fit_mode,
+            "joint_refinement_amplitude_floor": amplitude_floor,
+            "template_corr_warn": template_corr_warn,
         },
     }
     if excluded_windows:
@@ -2290,6 +2835,14 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "pi_sidis_scaled_hist",
             "k_lambda_scaled_hist",
             "k_sigma0_scaled_hist",
+            "refined_fit_hist",
+            "refined_pion_bg_fit_hist",
+            "refined_residual_hist",
+            "refined_pi_n_scaled_hist",
+            "refined_pi_delta_scaled_hist",
+            "refined_pi_sidis_scaled_hist",
+            "refined_k_lambda_scaled_hist",
+            "refined_k_sigma0_scaled_hist",
         ):
             hist = return_payload.get(key)
             if hist is None:
@@ -2533,9 +3086,49 @@ def build_particle_subtraction_component_result(
     if kaon_fit["diagnostics"].get("fallback_used"):
         fallback_reasons.append("kaon: {}".format(kaon_fit["diagnostics"].get("fallback_reason")))
 
+    pion_diagnostics = deepcopy(pion_fit["diagnostics"])
+    kaon_diagnostics = deepcopy(kaon_fit["diagnostics"])
+    pion_fit_mode = str(pion_fit.get("fit_mode") or pion_diagnostics.get("fit_mode") or "staged_only")
+    kaon_fit_mode = str(kaon_fit.get("fit_mode") or kaon_diagnostics.get("fit_mode") or "staged_only")
+    combined_fit_mode = pion_fit_mode if pion_fit_mode == kaon_fit_mode else "mixed"
+
+    staged_amplitudes_raw = {
+        "pion_control": deepcopy(pion_diagnostics.get("staged_amplitudes_raw") or {}),
+        "kaon_nosub": deepcopy(kaon_diagnostics.get("staged_amplitudes_raw") or {}),
+    }
+    staged_amplitudes_scaled = {
+        "pion_control": deepcopy(pion_diagnostics.get("staged_amplitudes_scaled") or {}),
+        "kaon_nosub": deepcopy(kaon_diagnostics.get("staged_amplitudes_scaled") or {}),
+    }
+    refined_amplitudes = {
+        "pion_control": deepcopy(
+            pion_diagnostics.get("refined_amplitudes")
+            or pion_diagnostics.get("staged_amplitudes_scaled")
+            or {}
+        ),
+        "kaon_nosub": deepcopy(
+            kaon_diagnostics.get("refined_amplitudes")
+            or kaon_diagnostics.get("staged_amplitudes_scaled")
+            or {}
+        ),
+    }
+    amplitude_shifts = {
+        "pion_control": deepcopy(pion_diagnostics.get("amplitude_shifts") or {}),
+        "kaon_nosub": deepcopy(kaon_diagnostics.get("amplitude_shifts") or {}),
+    }
+    amplitude_shift_fractions = {
+        "pion_control": deepcopy(pion_diagnostics.get("amplitude_shift_fractions") or {}),
+        "kaon_nosub": deepcopy(kaon_diagnostics.get("amplitude_shift_fractions") or {}),
+    }
+
     result = {
         "particle_subtraction_mode": mode,
         "analysis_scope": analysis_scope,
+        "fit_mode": combined_fit_mode,
+        "fit_mode_pion": pion_fit_mode,
+        "fit_mode_kaon": kaon_fit_mode,
+        "joint_refinement_status_pion": pion_diagnostics.get("joint_refinement_status"),
+        "joint_refinement_status_kaon": kaon_diagnostics.get("joint_refinement_status"),
         "A_n": a_n,
         "A_delta": a_delta,
         "A_sidis": a_sidis,
@@ -2565,6 +3158,11 @@ def build_particle_subtraction_component_result(
         "particle_subtraction_phi_setting": resolved_phi_setting,
         "fallback_used": bool(fallback_reasons),
         "fallback_reason": "; ".join(fallback_reasons),
+        "staged_amplitudes_raw": staged_amplitudes_raw,
+        "staged_amplitudes_scaled": staged_amplitudes_scaled,
+        "refined_amplitudes": refined_amplitudes,
+        "amplitude_shifts": amplitude_shifts,
+        "amplitude_shift_fractions": amplitude_shift_fractions,
         "resolved_subtraction_config": {
             "setting_key": setting_key,
             "phi_setting": resolved_phi_setting,
@@ -2572,8 +3170,8 @@ def build_particle_subtraction_component_result(
             "kaon_nosub": deepcopy(kaon_fit.get("resolved_config_summary") or {}),
         },
         "diagnostics": {
-            "pion": deepcopy(pion_fit["diagnostics"]),
-            "kaon": deepcopy(kaon_fit["diagnostics"]),
+            "pion": deepcopy(pion_diagnostics),
+            "kaon": deepcopy(kaon_diagnostics),
         },
         "H_simc_shape_pi_n": _clone_hist(
             (pion_fit.get("template_hists") or {}).get("pi_n"),
@@ -2600,6 +3198,11 @@ def build_particle_subtraction_component_result(
         "H_pion_fit_pi_sidis_scaled": pion_fit["pi_sidis_scaled_hist"],
         "H_pion_fit_k_sigma0_scaled": pion_fit["k_sigma0_scaled_hist"],
         "H_pion_fit_total": pion_fit["fit_hist"],
+        "H_pion_fit_pi_n_scaled_refined": pion_fit.get("refined_pi_n_scaled_hist"),
+        "H_pion_fit_pi_delta_scaled_refined": pion_fit.get("refined_pi_delta_scaled_hist"),
+        "H_pion_fit_pi_sidis_scaled_refined": pion_fit.get("refined_pi_sidis_scaled_hist"),
+        "H_pion_fit_k_sigma0_scaled_refined": pion_fit.get("refined_k_sigma0_scaled_hist"),
+        "H_pion_fit_total_refined": pion_fit.get("refined_fit_hist"),
         "H_pion_fit_step_overlays": pion_fit.get("step_overlays") or [],
         "H_kaon_fit_pi_n_scaled": kaon_fit["pi_n_scaled_hist"],
         "H_kaon_fit_pi_delta_scaled": kaon_fit["pi_delta_scaled_hist"],
@@ -2609,9 +3212,18 @@ def build_particle_subtraction_component_result(
         "H_kaon_fit_k_lambda_reference": kaon_fit.get("k_lambda_reference_hist"),
         "H_kaon_fit_total": kaon_fit["fit_hist"],
         "H_kaon_pion_bg_fit_total": kaon_fit["pion_bg_fit_hist"],
+        "H_kaon_fit_pi_n_scaled_refined": kaon_fit.get("refined_pi_n_scaled_hist"),
+        "H_kaon_fit_pi_delta_scaled_refined": kaon_fit.get("refined_pi_delta_scaled_hist"),
+        "H_kaon_fit_pi_sidis_scaled_refined": kaon_fit.get("refined_pi_sidis_scaled_hist"),
+        "H_kaon_fit_k_lambda_scaled_refined": kaon_fit.get("refined_k_lambda_scaled_hist"),
+        "H_kaon_fit_k_sigma0_scaled_refined": kaon_fit.get("refined_k_sigma0_scaled_hist"),
+        "H_kaon_fit_total_refined": kaon_fit.get("refined_fit_hist"),
+        "H_kaon_pion_bg_fit_total_refined": kaon_fit.get("refined_pion_bg_fit_hist"),
         "H_kaon_fit_step_overlays": kaon_fit.get("step_overlays") or [],
         "H_fit_residual_pion": pion_fit["residual_hist"],
         "H_fit_residual_kaon": kaon_fit["residual_hist"],
+        "H_fit_residual_pion_refined": pion_fit.get("refined_residual_hist"),
+        "H_fit_residual_kaon_refined": kaon_fit.get("refined_residual_hist"),
         "H_pion_control_input": _clone_hist(
             h_pion_control,
             "H_pion_control_input_{}".format(context or analysis_scope),
@@ -3040,6 +3652,263 @@ def _print_component_application_status_page(
 
     canvas.Print(pdf_name)
     canvas.Close()
+
+
+def _build_difference_hist(data_hist, model_hist, name, divide_by_sigma=False):
+    if data_hist is None or model_hist is None:
+        return None
+    diff_hist = _clone_hist(data_hist, name, reset=True)
+    if diff_hist is None:
+        return None
+    for bin_index in range(1, data_hist.GetNbinsX() + 1):
+        data_value = float(data_hist.GetBinContent(bin_index))
+        model_value = float(model_hist.GetBinContent(bin_index))
+        diff_value = data_value - model_value
+        if divide_by_sigma:
+            sigma_value = float(data_hist.GetBinError(bin_index))
+            if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
+                diff_value = 0.0
+            else:
+                diff_value = diff_value / sigma_value
+        diff_hist.SetBinContent(bin_index, float(diff_value))
+        diff_hist.SetBinError(bin_index, 0.0)
+    return diff_hist
+
+
+def _print_joint_refinement_overlay_page(
+    pdf_name,
+    data_hist,
+    staged_total_hist,
+    refined_total_hist,
+    overlay_specs,
+    title,
+    stats_lines,
+    cut_window=None,
+):
+    if data_hist is None or staged_total_hist is None or refined_total_hist is None:
+        return
+
+    canvas = ROOT.TCanvas("c_joint_refine_{}".format(data_hist.GetName()), "", 900, 1100)
+    canvas.Divide(1, 3)
+
+    top_pad = canvas.cd(1)
+    top_pad.SetBottomMargin(0.10)
+    data_clone = _clone_hist(data_hist, "{}_joint_data".format(data_hist.GetName()))
+    staged_clone = _clone_hist(staged_total_hist, "{}_joint_stage".format(staged_total_hist.GetName()))
+    refined_clone = _clone_hist(refined_total_hist, "{}_joint_refined".format(refined_total_hist.GetName()))
+    data_clone.SetTitle(title)
+    data_clone.SetLineColor(ROOT.kBlack)
+    data_clone.SetLineWidth(2)
+    data_clone.SetFillStyle(3001)
+    data_clone.SetFillColor(ROOT.kGray + 1)
+    data_clone.SetMarkerStyle(20)
+    data_clone.SetMarkerSize(0.7)
+    _style_overlay_hist(staged_clone, ROOT.kOrange + 7, line_style=2)
+    _style_overlay_hist(refined_clone, ROOT.kGreen + 2, line_style=3)
+    extra_clones = []
+    y_max = max(data_clone.GetMaximum(), staged_clone.GetMaximum(), refined_clone.GetMaximum(), 0.0)
+    for hist, _, _, _ in overlay_specs or []:
+        if hist is None:
+            continue
+        y_max = max(y_max, hist.GetMaximum())
+    if y_max <= 0.0:
+        y_max = 1.0
+    data_clone.SetMaximum(1.20 * y_max)
+    data_clone.SetMinimum(0.0)
+    data_clone.Draw("hist")
+    staged_clone.Draw("hist same")
+    refined_clone.Draw("hist same")
+    for hist, label, color, line_style in overlay_specs or []:
+        if hist is None:
+            continue
+        hist_clone = _clone_hist(hist, "{}_joint_overlay".format(hist.GetName()))
+        _style_overlay_hist(hist_clone, color, line_style=line_style)
+        hist_clone.Draw("hist same")
+        extra_clones.append((hist_clone, label))
+    if cut_window is not None:
+        _draw_vertical_window_lines(cut_window[0], cut_window[1], 0.0, 1.20 * y_max)
+
+    legend = ROOT.TLegend(0.56, 0.54, 0.88, 0.88)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    legend.AddEntry(data_clone, "data", "lf")
+    legend.AddEntry(staged_clone, "staged total", "l")
+    legend.AddEntry(refined_clone, "refined total", "l")
+    for hist_clone, label in extra_clones:
+        legend.AddEntry(hist_clone, label, "l")
+    legend.Draw()
+
+    if stats_lines:
+        stats_box = ROOT.TPaveText(0.14, 0.52, 0.52, 0.88, "NDC")
+        stats_box.SetBorderSize(0)
+        stats_box.SetFillStyle(0)
+        stats_box.SetTextAlign(12)
+        stats_box.SetTextSize(0.026)
+        for line in stats_lines:
+            stats_box.AddText(line)
+        stats_box.Draw()
+
+    stage_resid = _build_difference_hist(
+        data_hist,
+        staged_total_hist,
+        "{}_joint_stage_resid".format(data_hist.GetName()),
+        divide_by_sigma=False,
+    )
+    refined_resid = _build_difference_hist(
+        data_hist,
+        refined_total_hist,
+        "{}_joint_refined_resid".format(data_hist.GetName()),
+        divide_by_sigma=False,
+    )
+    middle_pad = canvas.cd(2)
+    middle_pad.SetTopMargin(0.08)
+    middle_pad.SetBottomMargin(0.10)
+    stage_resid.SetTitle("Residuals: data - model")
+    stage_resid.SetLineColor(ROOT.kOrange + 7)
+    stage_resid.SetLineWidth(2)
+    stage_resid.SetFillStyle(0)
+    stage_resid.SetMarkerStyle(20)
+    stage_resid.SetMarkerColor(ROOT.kOrange + 7)
+    stage_resid.SetMarkerSize(0.6)
+    refined_resid.SetLineColor(ROOT.kGreen + 2)
+    refined_resid.SetLineWidth(2)
+    refined_resid.SetMarkerStyle(24)
+    refined_resid.SetMarkerColor(ROOT.kGreen + 2)
+    refined_resid.SetMarkerSize(0.6)
+    resid_y_min = min(stage_resid.GetMinimum(), refined_resid.GetMinimum(), 0.0)
+    resid_y_max = max(stage_resid.GetMaximum(), refined_resid.GetMaximum(), 0.0)
+    resid_span = max(resid_y_max - resid_y_min, 1e-3)
+    stage_resid.SetMaximum(resid_y_max + 0.20 * resid_span)
+    stage_resid.SetMinimum(resid_y_min - 0.20 * resid_span)
+    stage_resid.Draw("hist")
+    refined_resid.Draw("hist same")
+    zero_line_mid = ROOT.TLine(
+        float(data_hist.GetXaxis().GetXmin()),
+        0.0,
+        float(data_hist.GetXaxis().GetXmax()),
+        0.0,
+    )
+    zero_line_mid.SetLineColor(ROOT.kBlack)
+    zero_line_mid.SetLineStyle(3)
+    zero_line_mid.Draw("same")
+    if cut_window is not None:
+        _draw_vertical_window_lines(
+            cut_window[0],
+            cut_window[1],
+            stage_resid.GetMinimum(),
+            stage_resid.GetMaximum(),
+        )
+    resid_legend = ROOT.TLegend(0.62, 0.72, 0.88, 0.88)
+    resid_legend.SetBorderSize(0)
+    resid_legend.SetFillStyle(0)
+    resid_legend.AddEntry(stage_resid, "staged residual", "l")
+    resid_legend.AddEntry(refined_resid, "refined residual", "l")
+    resid_legend.Draw()
+
+    stage_pull = _build_difference_hist(
+        data_hist,
+        staged_total_hist,
+        "{}_joint_stage_pull".format(data_hist.GetName()),
+        divide_by_sigma=True,
+    )
+    refined_pull = _build_difference_hist(
+        data_hist,
+        refined_total_hist,
+        "{}_joint_refined_pull".format(data_hist.GetName()),
+        divide_by_sigma=True,
+    )
+    bottom_pad = canvas.cd(3)
+    bottom_pad.SetTopMargin(0.08)
+    bottom_pad.SetBottomMargin(0.12)
+    stage_pull.SetTitle("Pulls: (data - model) / sigma")
+    stage_pull.SetLineColor(ROOT.kOrange + 7)
+    stage_pull.SetLineWidth(2)
+    stage_pull.SetMarkerStyle(20)
+    stage_pull.SetMarkerColor(ROOT.kOrange + 7)
+    stage_pull.SetMarkerSize(0.6)
+    refined_pull.SetLineColor(ROOT.kGreen + 2)
+    refined_pull.SetLineWidth(2)
+    refined_pull.SetMarkerStyle(24)
+    refined_pull.SetMarkerColor(ROOT.kGreen + 2)
+    refined_pull.SetMarkerSize(0.6)
+    pull_y_min = min(stage_pull.GetMinimum(), refined_pull.GetMinimum(), -1.0)
+    pull_y_max = max(stage_pull.GetMaximum(), refined_pull.GetMaximum(), 1.0)
+    pull_span = max(pull_y_max - pull_y_min, 1.0)
+    stage_pull.SetMaximum(pull_y_max + 0.20 * pull_span)
+    stage_pull.SetMinimum(pull_y_min - 0.20 * pull_span)
+    stage_pull.Draw("hist")
+    refined_pull.Draw("hist same")
+    zero_line_bot = ROOT.TLine(
+        float(data_hist.GetXaxis().GetXmin()),
+        0.0,
+        float(data_hist.GetXaxis().GetXmax()),
+        0.0,
+    )
+    zero_line_bot.SetLineColor(ROOT.kBlack)
+    zero_line_bot.SetLineStyle(3)
+    zero_line_bot.Draw("same")
+    if cut_window is not None:
+        _draw_vertical_window_lines(
+            cut_window[0],
+            cut_window[1],
+            stage_pull.GetMinimum(),
+            stage_pull.GetMaximum(),
+        )
+    pull_legend = ROOT.TLegend(0.62, 0.72, 0.88, 0.88)
+    pull_legend.SetBorderSize(0)
+    pull_legend.SetFillStyle(0)
+    pull_legend.AddEntry(stage_pull, "staged pull", "l")
+    pull_legend.AddEntry(refined_pull, "refined pull", "l")
+    pull_legend.Draw()
+
+    canvas.Print(pdf_name)
+    canvas.Close()
+
+
+def _print_component_text_page(pdf_name, title, header_lines, body_lines):
+    canvas = ROOT.TCanvas("c_component_text_{}".format(abs(hash(title))), "", 900, 900)
+    frame = ROOT.TH1F("component_text_frame_{}".format(abs(hash(title))), title, 1, 0.0, 1.0)
+    frame.SetStats(0)
+    frame.SetMinimum(0.0)
+    frame.SetMaximum(1.0)
+    frame.GetXaxis().SetLabelSize(0.0)
+    frame.GetYaxis().SetLabelSize(0.0)
+    frame.Draw()
+
+    header = ROOT.TPaveText(0.10, 0.82, 0.90, 0.92, "NDC")
+    header.SetBorderSize(0)
+    header.SetFillStyle(0)
+    header.SetTextAlign(12)
+    header.SetTextSize(0.032)
+    for line in header_lines or []:
+        header.AddText(str(line))
+    header.Draw()
+
+    body = ROOT.TPaveText(0.10, 0.10, 0.90, 0.80, "NDC")
+    body.SetBorderSize(0)
+    body.SetFillStyle(0)
+    body.SetTextAlign(12)
+    body.SetTextSize(0.024)
+    for line in body_lines or []:
+        body.AddText(str(line))
+    body.Draw()
+
+    canvas.Print(pdf_name)
+    canvas.Close()
+
+
+def _format_matrix_text_lines(matrix_map, ordered_names):
+    lines = []
+    if not isinstance(matrix_map, dict) or not matrix_map:
+        return ["n/a"]
+    for left_name in ordered_names:
+        row = matrix_map.get(left_name) or {}
+        row_values = []
+        for right_name in ordered_names:
+            value = row.get(right_name)
+            row_values.append("{}={}".format(right_name, _format_fit_metric(value)))
+        lines.append("{}: {}".format(left_name, ", ".join(row_values)))
+    return lines
 
 
 def _print_component_step_pages(
@@ -3681,16 +4550,27 @@ def print_particle_subtraction_component_application_pages(
 
     diagnostics = component_payload.get("diagnostics") or {}
     scope_label = component_payload.get("analysis_scope") or component_payload.get("analysis_scope_label") or "unknown"
+    fit_mode = str(
+        component_payload.get("fit_mode")
+        or component_payload.get("fit_mode_kaon")
+        or component_payload.get("fit_mode_pion")
+        or "staged_only"
+    ).strip().lower()
+    joint_mode_active = fit_mode in ("staged_plus_joint", "staged_plus_regularized_joint")
+    closure_label = "refined" if joint_mode_active else "staged"
     model_closure = diagnostics.get("model_closure") or {}
+    model_closure_stage = diagnostics.get("model_closure_stage") or {}
     event_template_closure = diagnostics.get("event_template_closure") or {}
+    weight_diagnostics_stage = diagnostics.get("weight_diagnostics_stage") or {}
 
     _print_single_hist_page(
         pdf_name,
         component_payload.get("H_pion_weight_vs_MM"),
         "w_pi(MM)",
-        "{}Part 3 pion weight vs MM".format(title_prefix),
+        "{}Part 3 {} pion weight vs MM".format(title_prefix, closure_label),
         [
             "scope: {}".format(scope_label),
+            "fit mode: {}".format(fit_mode or "unknown"),
             "min/max={} / {}".format(
                 _format_fit_metric(diagnostics.get("pion_weight_min")),
                 _format_fit_metric(diagnostics.get("pion_weight_max")),
@@ -3711,13 +4591,52 @@ def print_particle_subtraction_component_application_pages(
         line_color=ROOT.kViolet + 1,
     )
 
+    if joint_mode_active and component_payload.get("H_pion_weight_vs_MM_stage") is not None:
+        _print_component_overlay_page(
+            pdf_name,
+            component_payload.get("H_pion_weight_vs_MM_stage"),
+            "staged w_pi(MM)",
+            "{}Part 3 staged vs refined pion weight".format(title_prefix),
+            [
+                (component_payload.get("H_pion_weight_vs_MM"), "refined w_pi(MM)", ROOT.kViolet + 1, 1),
+            ],
+            [
+                "scope: {}".format(scope_label),
+                "staged min/max={} / {}".format(
+                    _format_fit_metric(weight_diagnostics_stage.get("pion_weight_min")),
+                    _format_fit_metric(weight_diagnostics_stage.get("pion_weight_max")),
+                ),
+                "refined min/max={} / {}".format(
+                    _format_fit_metric(diagnostics.get("pion_weight_min")),
+                    _format_fit_metric(diagnostics.get("pion_weight_max")),
+                ),
+                "staged mean/rms={} / {}".format(
+                    _format_fit_metric(weight_diagnostics_stage.get("pion_weight_mean")),
+                    _format_fit_metric(weight_diagnostics_stage.get("pion_weight_rms")),
+                ),
+                "refined mean/rms={} / {}".format(
+                    _format_fit_metric(diagnostics.get("pion_weight_mean")),
+                    _format_fit_metric(diagnostics.get("pion_weight_rms")),
+                ),
+            ],
+            cut_window=cut_window,
+        )
+
     _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_kaon_pion_model"),
         "kaon pion-bg model",
-        "{}Part 3 model closure: weighted pion model vs kaon bg model".format(title_prefix),
+        "{}Part 3 {} model closure: weighted pion model vs kaon bg model".format(
+            title_prefix,
+            closure_label,
+        ),
         [
-            (component_payload.get("H_weighted_pion_control_model"), "weighted pion-control model", ROOT.kOrange + 7, 2),
+            (
+                component_payload.get("H_weighted_pion_control_model"),
+                "{} weighted pion-control model".format(closure_label),
+                ROOT.kOrange + 7,
+                2,
+            ),
         ],
         [
             "scope: {}".format(scope_label),
@@ -3745,7 +4664,10 @@ def print_particle_subtraction_component_application_pages(
         pdf_name,
         component_payload.get("H_kaon_pion_model"),
         "kaon pion-bg model",
-        "{}Part 3 event-template closure vs kaon bg model".format(title_prefix),
+        "{}Part 3 {} event-template closure vs kaon bg model".format(
+            title_prefix,
+            closure_label,
+        ),
         [
             (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template (full)", ROOT.kOrange + 7, 2),
         ],
@@ -3798,6 +4720,36 @@ def print_particle_subtraction_component_application_pages(
         cut_window=cut_window,
     )
 
+    if joint_mode_active and component_payload.get("H_kaon_pion_model_stage") is not None:
+        _print_component_overlay_page(
+            pdf_name,
+            component_payload.get("H_MM_nosub_before_pion_subtraction"),
+            "kaon data before pion subtraction",
+            "{}Part 3 staged vs refined subtraction comparison".format(title_prefix),
+            [
+                (component_payload.get("H_kaon_pion_model_stage"), "staged kaon pion-bg model", ROOT.kOrange + 7, 2),
+                (component_payload.get("H_kaon_pion_model"), "refined kaon pion-bg model", ROOT.kBlue + 1, 1),
+                (component_payload.get("H_MM_nosub_after_pion_subtraction_model_stage"), "staged model-subtracted", ROOT.kMagenta + 2, 2),
+                (component_payload.get("H_MM_nosub_after_pion_subtraction_model_final"), "refined model-subtracted", ROOT.kGreen + 2, 1),
+            ],
+            [
+                "scope: {}".format(scope_label),
+                "staged model integral={}".format(
+                    _format_fit_number((model_closure_stage or {}).get("reference_integral"))
+                ),
+                "refined model integral={}".format(
+                    _format_fit_number((model_closure or {}).get("reference_integral"))
+                ),
+                "staged weighted model integral={}".format(
+                    _format_fit_number((model_closure_stage or {}).get("comparison_integral"))
+                ),
+                "refined weighted model integral={}".format(
+                    _format_fit_number((model_closure or {}).get("comparison_integral"))
+                ),
+            ],
+            cut_window=cut_window,
+        )
+
     _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_MM_nosub_before_pion_subtraction"),
@@ -3840,11 +4792,22 @@ def print_particle_subtraction_component_fit_pages(
     if title_prefix:
         title_prefix = "{} ".format(title_prefix)
 
+    pion_diagnostics = ((component_fit_result.get("diagnostics") or {}).get("pion") or {})
+    kaon_diagnostics = ((component_fit_result.get("diagnostics") or {}).get("kaon") or {})
+    pion_stage_amplitudes = pion_diagnostics.get("staged_amplitudes_scaled") or {}
+    kaon_stage_amplitudes = kaon_diagnostics.get("staged_amplitudes_scaled") or {}
+    pion_stage_validation = pion_diagnostics.get("stage_validation") or pion_diagnostics.get("validation") or {}
+    kaon_stage_validation = kaon_diagnostics.get("stage_validation") or kaon_diagnostics.get("validation") or {}
+    staged_amplitudes_raw = component_fit_result.get("staged_amplitudes_raw") or {}
+    staged_amplitudes_scaled = component_fit_result.get("staged_amplitudes_scaled") or {}
+    refined_amplitudes = component_fit_result.get("refined_amplitudes") or {}
+    amplitude_shift_fractions = component_fit_result.get("amplitude_shift_fractions") or {}
+
     _print_component_overlay_page(
         pdf_name,
         component_fit_result.get("H_pion_control_input"),
         "pion-control data",
-        "{}pion-control SIMC component fit".format(title_prefix),
+        "{}pion-control staged SIMC component fit".format(title_prefix),
         [
             (component_fit_result.get("H_pion_fit_pi_n_scaled"), "pi-n", ROOT.kRed + 1, 1),
             (component_fit_result.get("H_pion_fit_pi_sidis_scaled"), "pi-SIDIS", ROOT.kMagenta + 2, 1),
@@ -3854,44 +4817,41 @@ def print_particle_subtraction_component_fit_pages(
         ],
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
-            "status: {}".format(component_fit_result.get("fit_status_pion", "unknown")),
+            "status: staged baseline",
+            "fit mode: {}".format(component_fit_result.get("fit_mode_pion") or component_fit_result.get("fit_mode") or "unknown"),
             "strategy: {}".format(
-                _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
+                _format_fit_strategy(pion_diagnostics)
             ),
-            "solution: {}".format(
-                _format_solution_method(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
-            ),
-            "validation: {}".format(
-                _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("pion") or {}))
-            ),
+            "solution: stage_only",
+            "validation: {}".format("pass" if bool(pion_stage_validation.get("accepted")) else "fail"),
             "template MM shift={:.6f}".format(
                 float(component_fit_result.get("template_mm_offset_data") or 0.0)
             ),
             "post-fit scales: {}".format(
                 _format_component_scale_map(
-                    ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("postfit_component_scales")
+                    pion_diagnostics.get("postfit_component_scales")
                 )
             ),
             "B_n={}  B_delta={}  B_sidis={}".format(
-                _format_fit_number(component_fit_result.get("B_n")),
-                _format_fit_number(component_fit_result.get("B_delta")),
-                _format_fit_number(component_fit_result.get("B_sidis")),
+                _format_fit_number(pion_stage_amplitudes.get("pi_n")),
+                _format_fit_number(pion_stage_amplitudes.get("pi_delta")),
+                _format_fit_number(pion_stage_amplitudes.get("pi_sidis")),
             ),
             "K-Sigma0 scale={}".format(
-                _format_fit_number(component_fit_result.get("B_sigma0"))
+                _format_fit_number(pion_stage_amplitudes.get(KAON_SIGMA0_TEMPLATE_NAME))
             ),
             "chi2/ndf={}  p={}".format(
-                _format_fit_metric(component_fit_result.get("chi2_ndf_pion")),
-                _format_fit_metric(component_fit_result.get("fit_p_value_pion")),
+                _format_fit_metric(pion_stage_validation.get("chi2_ndf")),
+                _format_fit_metric(pion_stage_validation.get("fit_p_value")),
             ),
             "anchor windows: {}".format(
                 _format_window_list(
-                    ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("include_windows")
+                    pion_diagnostics.get("include_windows")
                 )
             ),
             "excluded windows: {}".format(
                 _format_excluded_window_list(
-                    ((component_fit_result.get("diagnostics") or {}).get("pion") or {}).get("exclude_windows")
+                    pion_diagnostics.get("exclude_windows")
                 )
             ),
         ],
@@ -3926,55 +4886,237 @@ def print_particle_subtraction_component_fit_pages(
         pdf_name,
         component_fit_result.get("H_kaon_nosub_input"),
         "kaon no-sub data",
-        kaon_title,
+        kaon_title.replace("SIMC pion-background fit", "staged SIMC pion-background fit"),
         kaon_overlay_specs,
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
-            "status: {}".format(component_fit_result.get("fit_status_kaon", "unknown")),
+            "status: staged baseline",
+            "fit mode: {}".format(component_fit_result.get("fit_mode_kaon") or component_fit_result.get("fit_mode") or "unknown"),
             "strategy: {}".format(
-                _format_fit_strategy(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
+                _format_fit_strategy(kaon_diagnostics)
             ),
-            "solution: {}".format(
-                _format_solution_method(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
-            ),
-            "validation: {}".format(
-                _format_validation_status(((component_fit_result.get("diagnostics") or {}).get("kaon") or {}))
-            ),
+            "solution: stage_only",
+            "validation: {}".format("pass" if bool(kaon_stage_validation.get("accepted")) else "fail"),
             "template MM shift={:.6f}".format(
                 float(component_fit_result.get("template_mm_offset_data") or 0.0)
             ),
             "post-fit scales: {}".format(
                 _format_component_scale_map(
-                    ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("postfit_component_scales")
+                    kaon_diagnostics.get("postfit_component_scales")
                 )
             ),
             "A_n={}  A_delta={}  A_sidis={}".format(
-                _format_fit_number(component_fit_result.get("A_n")),
-                _format_fit_number(component_fit_result.get("A_delta")),
-                _format_fit_number(component_fit_result.get("A_sidis")),
+                _format_fit_number(kaon_stage_amplitudes.get("pi_n")),
+                _format_fit_number(kaon_stage_amplitudes.get("pi_delta")),
+                _format_fit_number(kaon_stage_amplitudes.get("pi_sidis")),
             ),
             "K-Sigma0 scale={}".format(
-                _format_fit_number(component_fit_result.get("S_sigma0"))
+                _format_fit_number(kaon_stage_amplitudes.get(KAON_SIGMA0_TEMPLATE_NAME))
             ) if has_sigma0_component else "K-Sigma0 scale=n/a",
             "K-Lambda gauge scale={}".format(
-                _format_fit_number(component_fit_result.get("S_lambda_reference_scale"))
+                _format_fit_number(kaon_stage_amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME))
             ) if has_kaon_signal_reference else "K-Lambda gauge scale=n/a",
             "chi2/ndf={}  p={}".format(
-                _format_fit_metric(component_fit_result.get("chi2_ndf_kaon")),
-                _format_fit_metric(component_fit_result.get("fit_p_value_kaon")),
+                _format_fit_metric(kaon_stage_validation.get("chi2_ndf")),
+                _format_fit_metric(kaon_stage_validation.get("fit_p_value")),
             ),
             "anchor windows: {}".format(
                 _format_window_list(
-                    ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("include_windows")
+                    kaon_diagnostics.get("include_windows")
                 )
             ),
             "excluded windows: {}".format(
                 _format_excluded_window_list(
-                    ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get("exclude_windows")
+                    kaon_diagnostics.get("exclude_windows")
                 )
             ),
         ],
         cut_window=cut_window,
+    )
+
+    _print_joint_refinement_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_pion_control_input"),
+        component_fit_result.get("H_pion_fit_total"),
+        component_fit_result.get("H_pion_fit_total_refined"),
+        [
+            (component_fit_result.get("H_pion_fit_pi_n_scaled_refined"), "refined pi-n", ROOT.kRed + 1, 1),
+            (component_fit_result.get("H_pion_fit_pi_sidis_scaled_refined"), "refined pi-SIDIS", ROOT.kMagenta + 2, 1),
+            (component_fit_result.get("H_pion_fit_pi_delta_scaled_refined"), "refined pi-delta", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_pion_fit_k_sigma0_scaled_refined"), "refined K-Sigma0", ROOT.kCyan + 2, 1),
+        ],
+        "{}pion-control staged vs refined component fit".format(title_prefix),
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            "fit mode: {}".format(component_fit_result.get("fit_mode_pion") or component_fit_result.get("fit_mode") or "unknown"),
+            "joint status: {}".format(pion_diagnostics.get("joint_refinement_status") or "unknown"),
+            "refined validation: {}".format("pass" if bool((pion_diagnostics.get("validation") or {}).get("accepted")) else "fail"),
+            "staged chi2/ndf={}  refined chi2/ndf={}".format(
+                _format_fit_metric(pion_stage_validation.get("chi2_ndf")),
+                _format_fit_metric(pion_diagnostics.get("chi2_ndf")),
+            ),
+            "B_n stage/refined = {} / {}".format(
+                _format_fit_number(pion_stage_amplitudes.get("pi_n")),
+                _format_fit_number(component_fit_result.get("B_n")),
+            ),
+            "B_delta stage/refined = {} / {}".format(
+                _format_fit_number(pion_stage_amplitudes.get("pi_delta")),
+                _format_fit_number(component_fit_result.get("B_delta")),
+            ),
+            "B_sidis stage/refined = {} / {}".format(
+                _format_fit_number(pion_stage_amplitudes.get("pi_sidis")),
+                _format_fit_number(component_fit_result.get("B_sidis")),
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_joint_refinement_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_kaon_nosub_input"),
+        component_fit_result.get("H_kaon_fit_total"),
+        component_fit_result.get("H_kaon_fit_total_refined"),
+        [
+            (component_fit_result.get("H_kaon_fit_pi_n_scaled_refined"), "refined pi-n", ROOT.kRed + 1, 1),
+            (component_fit_result.get("H_kaon_fit_pi_sidis_scaled_refined"), "refined pi-SIDIS", ROOT.kMagenta + 2, 1),
+            (component_fit_result.get("H_kaon_fit_pi_delta_scaled_refined"), "refined pi-delta", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined"), "refined K-Sigma0", ROOT.kCyan + 2, 1),
+            (component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined"), "refined K-Lambda", ROOT.kBlue + 1, 1),
+            (component_fit_result.get("H_kaon_pion_bg_fit_total_refined"), "refined pion-bg sum", ROOT.kOrange + 7, 2),
+        ],
+        "{}kaon no-sub staged vs refined component fit".format(title_prefix),
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            "fit mode: {}".format(component_fit_result.get("fit_mode_kaon") or component_fit_result.get("fit_mode") or "unknown"),
+            "joint status: {}".format(kaon_diagnostics.get("joint_refinement_status") or "unknown"),
+            "refined validation: {}".format("pass" if bool((kaon_diagnostics.get("validation") or {}).get("accepted")) else "fail"),
+            "staged chi2/ndf={}  refined chi2/ndf={}".format(
+                _format_fit_metric(kaon_stage_validation.get("chi2_ndf")),
+                _format_fit_metric(kaon_diagnostics.get("chi2_ndf")),
+            ),
+            "A_n stage/refined = {} / {}".format(
+                _format_fit_number(kaon_stage_amplitudes.get("pi_n")),
+                _format_fit_number(component_fit_result.get("A_n")),
+            ),
+            "A_delta stage/refined = {} / {}".format(
+                _format_fit_number(kaon_stage_amplitudes.get("pi_delta")),
+                _format_fit_number(component_fit_result.get("A_delta")),
+            ),
+            "A_sidis stage/refined = {} / {}".format(
+                _format_fit_number(kaon_stage_amplitudes.get("pi_sidis")),
+                _format_fit_number(component_fit_result.get("A_sidis")),
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_component_text_page(
+        pdf_name,
+        "{}joint-refinement amplitude comparison".format(title_prefix),
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            "fit modes: pion={} kaon={}".format(
+                component_fit_result.get("fit_mode_pion") or "unknown",
+                component_fit_result.get("fit_mode_kaon") or "unknown",
+            ),
+        ],
+        [
+            "pion-control staged raw: {}".format(staged_amplitudes_raw.get("pion_control") or {}),
+            "pion-control staged scaled: {}".format(staged_amplitudes_scaled.get("pion_control") or {}),
+            "pion-control refined: {}".format(refined_amplitudes.get("pion_control") or {}),
+            "pion-control frac shifts: {}".format(amplitude_shift_fractions.get("pion_control") or {}),
+            "",
+            "kaon no-sub staged raw: {}".format(staged_amplitudes_raw.get("kaon_nosub") or {}),
+            "kaon no-sub staged scaled: {}".format(staged_amplitudes_scaled.get("kaon_nosub") or {}),
+            "kaon no-sub refined: {}".format(refined_amplitudes.get("kaon_nosub") or {}),
+            "kaon no-sub frac shifts: {}".format(amplitude_shift_fractions.get("kaon_nosub") or {}),
+        ],
+    )
+
+    _print_component_text_page(
+        pdf_name,
+        "{}joint-refinement diagnostics".format(title_prefix),
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+        ],
+        [
+            "pion status={} active_bins={} excluded_var_bins={}".format(
+                pion_diagnostics.get("joint_refinement_status") or "unknown",
+                _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("active_bin_count"))),
+                _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("excluded_invalid_variance_bin_count"))),
+            ),
+            "pion chi2/ndf={} p={} reg={} data_obj={} total_obj={}".format(
+                _format_fit_metric(pion_diagnostics.get("chi2_ndf")),
+                _format_fit_metric(pion_diagnostics.get("fit_p_value")),
+                _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("regularization_contribution"))),
+                _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("data_chi2_contribution"))),
+                _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("total_objective"))),
+            ),
+            "pion reg widths={}".format(((pion_diagnostics.get("joint_refinement") or {}).get("regularization_widths")) or {}),
+            "",
+            "kaon status={} active_bins={} excluded_var_bins={}".format(
+                kaon_diagnostics.get("joint_refinement_status") or "unknown",
+                _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("active_bin_count"))),
+                _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("excluded_invalid_variance_bin_count"))),
+            ),
+            "kaon chi2/ndf={} p={} reg={} data_obj={} total_obj={}".format(
+                _format_fit_metric(kaon_diagnostics.get("chi2_ndf")),
+                _format_fit_metric(kaon_diagnostics.get("fit_p_value")),
+                _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("regularization_contribution"))),
+                _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("data_chi2_contribution"))),
+                _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("total_objective"))),
+            ),
+            "kaon reg widths={}".format(((kaon_diagnostics.get("joint_refinement") or {}).get("regularization_widths")) or {}),
+        ],
+    )
+
+    pion_fit_names = list(pion_diagnostics.get("fit_order") or [])
+    kaon_fit_names = list(kaon_diagnostics.get("fit_order") or [])
+    _print_component_text_page(
+        pdf_name,
+        "{}joint-refinement correlations".format(title_prefix),
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+        ],
+        (
+            [
+                "pion template corr cond={} rank={}".format(
+                    _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("weighted_design_condition_number"))),
+                    _format_fit_metric(((pion_diagnostics.get("joint_refinement") or {}).get("weighted_design_effective_rank"))),
+                )
+            ]
+            + _format_matrix_text_lines(
+                ((pion_diagnostics.get("joint_refinement") or {}).get("template_correlation_matrix")) or {},
+                pion_fit_names,
+            )
+            + [""]
+            + [
+                "pion parameter corr:"
+            ]
+            + _format_matrix_text_lines(
+                ((pion_diagnostics.get("joint_refinement") or {}).get("correlation_matrix")) or {},
+                pion_fit_names,
+            )
+            + [""]
+            + [
+                "kaon template corr cond={} rank={}".format(
+                    _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("weighted_design_condition_number"))),
+                    _format_fit_metric(((kaon_diagnostics.get("joint_refinement") or {}).get("weighted_design_effective_rank"))),
+                )
+            ]
+            + _format_matrix_text_lines(
+                ((kaon_diagnostics.get("joint_refinement") or {}).get("template_correlation_matrix")) or {},
+                kaon_fit_names,
+            )
+            + [""]
+            + [
+                "kaon parameter corr:"
+            ]
+            + _format_matrix_text_lines(
+                ((kaon_diagnostics.get("joint_refinement") or {}).get("correlation_matrix")) or {},
+                kaon_fit_names,
+            )
+        ),
     )
 
     if component_fit_result.get("analysis_scope") == "setting-wide":
