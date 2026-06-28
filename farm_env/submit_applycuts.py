@@ -435,10 +435,34 @@ def derive_zombie_rerun_destination(destination: Path) -> Optional[Path]:
     return None
 
 
+def derive_rerun_pass_destination(destination: Path) -> Optional[Path]:
+    parts = destination.parts
+    if len(parts) >= 6 and parts[0] == "/" and parts[1] == "mss" and parts[2] == "hallc" and parts[3] == "kaonlt":
+        tail = parts[5:]
+        return Path("/mss/hallc/kaonlt") / DEFAULT_ZOMBIE_RERUN_PASS / Path(*tail)
+    return None
+
+
 def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Tuple[Optional[Path], str]:
     exact_name = f"{anatype}_coin_replay_production_{run}_-1.root"
     glob_name = f"*coin_replay_production_{run}_-1.root"
     for destination in variant.replay_destinations:
+        exact = destination / exact_name
+        if exact.exists():
+            return exact, "primary"
+        matches = sorted(destination.glob(glob_name))
+        if matches:
+            return matches[0], "primary"
+
+        rerun_pass_destination = derive_rerun_pass_destination(destination)
+        if rerun_pass_destination is not None:
+            exact = rerun_pass_destination / exact_name
+            if exact.exists():
+                return exact, "rerun_pass"
+            matches = sorted(rerun_pass_destination.glob(glob_name))
+            if matches:
+                return matches[0], "rerun_pass"
+
         zombie_destination = derive_zombie_rerun_destination(destination)
         if zombie_destination is not None:
             exact = zombie_destination / exact_name
@@ -447,12 +471,6 @@ def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Tuple[
             matches = sorted(zombie_destination.glob(glob_name))
             if matches:
                 return matches[0], "rerun_zombie"
-        exact = destination / exact_name
-        if exact.exists():
-            return exact, "primary"
-        matches = sorted(destination.glob(glob_name))
-        if matches:
-            return matches[0], "primary"
     return None, "missing"
 
 

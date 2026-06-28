@@ -700,6 +700,38 @@ build_rerun_zombie_replay_input_file() {
     esac
 }
 
+build_rerun_pass_replay_input_file() {
+    local root_real="$1"
+    local root_cache_dir=""
+    local suffix_after_kaonlt=""
+    local suffix_after_pass=""
+    local rerun_root_base=""
+
+    if ! root_cache_dir="$(cache_path_to_jcache_request_path "${root_real}")"; then
+        return 1
+    fi
+    case "${root_cache_dir}" in
+        /cache/hallc/kaonlt/*)
+            suffix_after_kaonlt="${root_cache_dir#/cache/hallc/kaonlt/}"
+            suffix_after_pass="${suffix_after_kaonlt#*/}"
+            rerun_root_base="/cache/hallc/kaonlt/${ZOMBIE_RERUN_PASS}/${suffix_after_pass}"
+            build_replay_input_file "${rerun_root_base}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+normalize_replay_input_override() {
+    local override_path="$1"
+    if [[ "${override_path}" == *.root ]]; then
+        printf '%s\n' "${override_path}"
+    else
+        build_replay_input_file "${override_path}"
+    fi
+}
+
 select_replay_input_file() {
     local root_base="$1"
     local primary_file=""
@@ -708,9 +740,12 @@ select_replay_input_file() {
     local rerun_file=""
     local rerun_real_dir=""
     local rerun_real=""
+    local rerun_pass_file=""
+    local rerun_pass_real_dir=""
+    local rerun_pass_real=""
 
     if [[ -n "${REPLAY_INPUT_OVERRIDE:-}" ]]; then
-        printf '%s\t%s\n' "${REPLAY_INPUT_OVERRIDE}" "${REPLAY_INPUT_OVERRIDE_SOURCE:-override}"
+        printf '%s\t%s\n' "$(normalize_replay_input_override "${REPLAY_INPUT_OVERRIDE}")" "${REPLAY_INPUT_OVERRIDE_SOURCE:-override}"
         return 0
     fi
 
@@ -720,6 +755,22 @@ select_replay_input_file() {
     if [[ -e "${primary_real}" && -s "${primary_real}" ]]; then
         printf '%s\t%s\n' "${primary_file}" "primary"
         return 0
+    fi
+
+    rerun_pass_file="$(build_rerun_pass_replay_input_file "$(resolve_real_path "${root_base}")" 2>/dev/null || true)"
+    if [[ -n "${rerun_pass_file}" ]]; then
+        rerun_pass_real_dir="$(resolve_real_path "$(dirname "${rerun_pass_file}")")"
+        rerun_pass_real="${rerun_pass_real_dir}/$(basename "${rerun_pass_file}")"
+        if [[ -e "${rerun_pass_real}" && -s "${rerun_pass_real}" ]]; then
+            printf '%s\t%s\n' "${rerun_pass_file}" "rerun_pass"
+            return 0
+        fi
+        case "${rerun_pass_real}" in
+            /cache/*|/lustre*/expphy/cache/*)
+                printf '%s\t%s\n' "${rerun_pass_file}" "rerun_pass"
+                return 0
+                ;;
+        esac
     fi
 
     rerun_file="$(build_rerun_zombie_replay_input_file "$(resolve_real_path "${root_base}")" 2>/dev/null || true)"
@@ -795,7 +846,8 @@ ensure_cache_backed_replay_input_ready() {
                 echo "ERROR: replay input resolves into cache, but a jcache request path could not be derived from ${replay_input_real}"
                 return 2
             fi
-            if [[ "${replay_input_cache_request}" != /cache/hallc/kaonlt/*/ROOTfiles/Analysis/*/*.root ]]; then
+            if [[ "${replay_input_cache_request}" != /cache/hallc/kaonlt/*/ROOTfiles/Analysis/*/*.root ]] \
+                && [[ "${replay_input_cache_request}" != /cache/hallc/kaonlt/*/*/ROOTfiles/Analysis/*/*.root ]]; then
                 echo "ERROR: derived jcache recovery path looks invalid: ${replay_input_cache_request}"
                 return 2
             fi
