@@ -557,19 +557,6 @@ normalize_ltsep_dir() {
     fi
 }
 
-if [[ $TargetType = "dummy" ]]; then
-    DataType="dummy"
-else
-    DataType="data"
-fi
-
-cd "${LTANAPATH}/src/setup"
-SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
-mkdir -p "${SKIM_OUTPUT_DIR}"
-PATH_DIAGNOSTICS_DONE=0
-ZOMBIE_RERUN_PASS="Pass4b_Apr_2026"
-ZOMBIE_RERUN_SUBDIR="rerun_zombies"
-
 resolve_real_path() {
     local input_path="$1"
     local resolved_path=""
@@ -579,6 +566,47 @@ resolve_real_path() {
         printf '%s\n' "${input_path}"
     fi
 }
+
+build_skim_output_root() {
+    local base_path="${1%/}"
+    if [[ "${base_path}" == *"/Skim_ROOTfiles/"* ]]; then
+        printf '%s/Skim_ROOTfiles\n' "${base_path%%/Skim_ROOTfiles/*}"
+    elif [[ "${base_path}" == *"/Skim_ROOTfiles" ]]; then
+        printf '%s\n' "${base_path}"
+    else
+        printf '%s\n' "${base_path}"
+    fi
+}
+
+build_skim_output_dir() {
+    local base_path="$1"
+    local skim_subpath="${SKIM_OUTPUT_SUBPATH:-}"
+    local output_dir=""
+    if [[ -n "${SKIM_OUTPUT_OVERRIDE_DIR:-}" ]]; then
+        output_dir="${SKIM_OUTPUT_OVERRIDE_DIR}"
+    elif [[ -n "${skim_subpath}" ]]; then
+        local skim_root
+        skim_root="$(build_skim_output_root "${base_path}")"
+        output_dir="$(resolve_real_path "${skim_root}")/${skim_subpath#/}"
+    else
+        output_dir="$(normalize_ltsep_dir "${base_path}")"
+        output_dir="$(resolve_real_path "${output_dir}")"
+    fi
+    printf '%s\n' "${output_dir}"
+}
+
+if [[ $TargetType = "dummy" ]]; then
+    DataType="dummy"
+else
+    DataType="data"
+fi
+
+cd "${LTANAPATH}/src/setup"
+SKIM_OUTPUT_DIR="$(build_skim_output_dir "${SKIMPATH}")"
+mkdir -p "${SKIM_OUTPUT_DIR}"
+PATH_DIAGNOSTICS_DONE=0
+ZOMBIE_RERUN_PASS="Pass4b_Apr_2026"
+ZOMBIE_RERUN_SUBDIR="rerun_zombies"
 
 build_replay_input_dir() {
     local analysis_leaf="${ANATYPE}LT"
@@ -707,6 +735,9 @@ print_applycuts_path_diagnostics() {
         echo "Replay override   : ${replay_input_source}"
     fi
     echo "Skim base path    : ${SKIMPATH}"
+    if [[ -n "${SKIM_OUTPUT_SUBPATH:-}" ]]; then
+        echo "Skim subpath      : ${SKIM_OUTPUT_SUBPATH}"
+    fi
     echo "Skim output dir   : ${SKIM_OUTPUT_DIR}"
     echo "Skim output real  : $(resolve_real_path "${SKIM_OUTPUT_DIR}")"
 }
@@ -810,6 +841,7 @@ run_applycuts_particle() {
     fi
 
     rm -f "$log_file"
+    SKIM_OUTPUT_OVERRIDE_DIR="${SKIM_OUTPUT_DIR}" \
     "${LTSEP_PYTHON}" Analysed_Prod.py "${RUNNUM}" "${particle}" "${ANATYPE}_coin_replay_production" |& tee -a "$log_file"
     local rc=${PIPESTATUS[0]}
     if [[ $rc -ne 0 ]]; then

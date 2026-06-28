@@ -485,6 +485,20 @@ def skim_mss_output_file(plan: RunPlan, particle: str) -> Path:
     return skim_mss_output_file_for(plan.skim_destination, plan.run, particle)
 
 
+def derive_skim_output_subpath(skim_destination: Path) -> str:
+    parts = skim_destination.parts
+    try:
+        root_index = parts.index("Skim_ROOTfiles")
+    except ValueError as exc:
+        raise ValueError(
+            f"skim_destination does not contain Skim_ROOTfiles anchor: {skim_destination}"
+        ) from exc
+    tail = parts[root_index + 1 :]
+    if not tail:
+        raise ValueError(f"skim_destination tail is empty: {skim_destination}")
+    return "/".join(tail)
+
+
 def plan_has_missing_mss_output(plan: RunPlan) -> bool:
     return not (plan.skim_kaon_output_exists and plan.skim_pion_output_exists)
 
@@ -664,14 +678,20 @@ def build_add_job_command(
     family_prefix: str,
     args: argparse.Namespace,
 ) -> List[str]:
-    job_cmd: List[str] = [applycuts_script]
+    job_env: List[str] = [
+        f"SKIM_OUTPUT_SUBPATH={derive_skim_output_subpath(plan.skim_destination)}",
+        f"SKIM_MSS_DESTINATION={plan.skim_destination}",
+    ]
     if plan.replay_source != "primary" and plan.replay_cache_file is not None:
-        job_cmd = [
-            "/usr/bin/env",
-            f"REPLAY_INPUT_OVERRIDE={plan.replay_cache_file}",
-            f"REPLAY_INPUT_OVERRIDE_SOURCE={plan.replay_source}",
-            applycuts_script,
-        ]
+        job_env.extend(
+            [
+                f"REPLAY_INPUT_OVERRIDE={plan.replay_cache_file}",
+                f"REPLAY_INPUT_OVERRIDE_SOURCE={plan.replay_source}",
+            ]
+        )
+    job_cmd: List[str] = [applycuts_script]
+    if job_env:
+        job_cmd = ["/usr/bin/env", *job_env, applycuts_script]
 
     cmd = [
         swif2_bin,
