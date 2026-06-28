@@ -578,6 +578,45 @@ build_skim_output_root() {
     fi
 }
 
+path_is_mss_like() {
+    local candidate="$1"
+    case "${candidate}" in
+        /mss/*|/w/mss/*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+resolve_local_skim_root() {
+    local base_path="$1"
+    local util_skim_root="${UTILPATH%/}/Skim_ROOTfiles"
+    local volatile_skim_root="${VOLATILEPATH%/}/Skim_ROOTfiles"
+    local fallback_root=""
+    local resolved=""
+
+    if [[ -L "${util_skim_root}" || -d "${util_skim_root}" ]]; then
+        resolved="$(resolve_real_path "${util_skim_root}")"
+        if ! path_is_mss_like "${resolved}"; then
+            printf '%s\n' "${resolved}"
+            return 0
+        fi
+    fi
+
+    resolved="$(resolve_real_path "${volatile_skim_root}")"
+    if ! path_is_mss_like "${resolved}"; then
+        printf '%s\n' "${resolved}"
+        return 0
+    fi
+
+    fallback_root="$(build_skim_output_root "${base_path}")"
+    resolved="$(resolve_real_path "${fallback_root}")"
+    printf '%s\n' "${resolved}"
+    return 0
+}
+
 build_skim_output_dir() {
     local base_path="$1"
     local skim_subpath="${SKIM_OUTPUT_SUBPATH:-}"
@@ -586,8 +625,8 @@ build_skim_output_dir() {
         output_dir="${SKIM_OUTPUT_OVERRIDE_DIR}"
     elif [[ -n "${skim_subpath}" ]]; then
         local skim_root
-        skim_root="$(build_skim_output_root "${base_path}")"
-        output_dir="$(resolve_real_path "${skim_root}")/${skim_subpath#/}"
+        skim_root="$(resolve_local_skim_root "${base_path}")"
+        output_dir="${skim_root%/}/${skim_subpath#/}"
     else
         output_dir="$(normalize_ltsep_dir "${base_path}")"
         output_dir="$(resolve_real_path "${output_dir}")"
