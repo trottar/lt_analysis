@@ -19,12 +19,13 @@ UTILITY_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "u
 if UTILITY_PATH not in sys.path:
     sys.path.append(UTILITY_PATH)
 
+from background_config import BG_OPT_MM_PLOT_MAX, BG_OPT_MM_PLOT_MIN
 from prompt_trees import get_prompt_tree_name
 
 
 HIST_NBINS = 200
-FIT_HIST_XMIN = 0.7
-FIT_HIST_XMAX = 1.5
+FIT_HIST_XMIN = BG_OPT_MM_PLOT_MIN
+FIT_HIST_XMAX = BG_OPT_MM_PLOT_MAX
 
 
 def get_hist_nbins(hist_xmin, hist_xmax):

@@ -849,7 +849,7 @@ done
 
 # Full spectrum
 #MissMassMin=0.7
-#MissMassMax=1.5
+#MissMassMax=1.3
 # MM cut (kaon)
 MissMassMin=1.10
 MissMassMax=1.16

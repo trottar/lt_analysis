@@ -68,6 +68,8 @@ from utility import (
 )
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
+    BG_OPT_MM_PLOT_MAX,
+    BG_OPT_MM_PLOT_MIN,
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
     get_bg_scale_setting_key,
@@ -1206,9 +1208,9 @@ def process_hist_data(
             hist_bin_dict["H_Q2_vs_W_DATA_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_DATA_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_DATA_{}_{}".format(j, k)] = TH1D("H_theta_cm_DATA_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_DATA_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
-            hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DATA_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DATA_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DATA_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
+            hist_bin_dict["H_MM_fit1sub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DATA_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DATA_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DATA_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
             hist_bin_dict["H_t_DATA_{}_{}".format(j, k)]       = TH1D("H_t_DATA_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
             hist_bin_dict["H_hsxptar_DATA_{}_{}".format(j, k)] = TH1D("H_hsxptar_DATA_{}_{}".format(j, k), "HMS xptar", 100, -0.1, 0.1)
             hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)] = TH1D("H_hsyptar_DATA_{}_{}".format(j, k), "HMS yptar", 100, -0.1, 0.1)
@@ -1221,9 +1223,9 @@ def process_hist_data(
             hist_bin_dict["H_Q2_vs_W_RAND_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_RAND_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_RAND_{}_{}".format(j, k)] = TH1D("H_theta_cm_RAND_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_RAND_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
-            hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
+            hist_bin_dict["H_MM_fit1sub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_RAND_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_pisub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_RAND_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_nosub_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_RAND_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
             hist_bin_dict["H_t_RAND_{}_{}".format(j, k)]       = TH1D("H_t_RAND_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
             hist_bin_dict["H_hsxptar_RAND_{}_{}".format(j, k)] = TH1D("H_hsxptar_RAND_{}_{}".format(j, k), "HMS xptar", 100, -0.1, 0.1)
             hist_bin_dict["H_hsyptar_RAND_{}_{}".format(j, k)] = TH1D("H_hsyptar_RAND_{}_{}".format(j, k), "HMS yptar", 100, -0.1, 0.1)
@@ -1236,9 +1238,9 @@ def process_hist_data(
             hist_bin_dict["H_Q2_vs_W_DUMMY_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_DUMMY_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_DUMMY_{}_{}".format(j, k)] = TH1D("H_theta_cm_DUMMY_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
-            hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DUMMY_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DUMMY_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
+            hist_bin_dict["H_MM_fit1sub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DUMMY_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_pisub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DUMMY_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_nosub_DUMMY_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
             hist_bin_dict["H_t_DUMMY_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
             hist_bin_dict["H_hsxptar_DUMMY_{}_{}".format(j, k)] = TH1D("H_hsxptar_DUMMY_{}_{}".format(j, k), "HMS xptar", 100, -0.1, 0.1)
             hist_bin_dict["H_hsyptar_DUMMY_{}_{}".format(j, k)] = TH1D("H_hsyptar_DUMMY_{}_{}".format(j, k), "HMS yptar", 100, -0.1, 0.1)
@@ -1251,9 +1253,9 @@ def process_hist_data(
             hist_bin_dict["H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k)] = TH2D("H_Q2_vs_W_DUMMY_RAND_{}_{}".format(j, k), "Q^{2} vs W; Q^{2}; W", 50, inpDict["Q2min"], inpDict["Q2max"], 50, inpDict["Wmin"], inpDict["Wmax"])
             hist_bin_dict["H_theta_cm_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_theta_cm_DUMMY_RAND_{}_{}".format(j, k), "theta_cm", 100, theta_cm_min, theta_cm_max)
             hist_bin_dict["H_MM_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, inpDict["mm_min"], inpDict["mm_max"])
-            hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
-            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, 0.7, 1.5)
+            hist_bin_dict["H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_fit1sub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_pisub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
+            hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_MM_nosub_DUMMY_RAND_{}_{}".format(j, k),"MM", 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
             hist_bin_dict["H_t_DUMMY_RAND_{}_{}".format(j, k)]       = TH1D("H_t_DUMMY_RAND_{}_{}".format(j, k),"-t", 100, inpDict["tmin"], inpDict["tmax"])
             hist_bin_dict["H_hsxptar_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_hsxptar_DUMMY_RAND_{}_{}".format(j, k), "HMS xptar", 100, -0.1, 0.1)
             hist_bin_dict["H_hsyptar_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_hsyptar_DUMMY_RAND_{}_{}".format(j, k), "HMS yptar", 100, -0.1, 0.1)
@@ -1336,7 +1338,7 @@ def process_hist_data(
                 subDict["H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_DATA_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_MM_SUB_DATA_{}_{}".format(j, k)]  = TH1D("H_MM_SUB_DATA_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, inpDict["mm_min"], inpDict["mm_max"])
                 subDict["H_MM_nosub_SUB_DATA_{}_{}".format(j, k)]  \
-                    = TH1D("H_MM_nosub_SUB_DATA_{}_{}".format(j, k),"MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+                    = TH1D("H_MM_nosub_SUB_DATA_{}_{}".format(j, k),"MM_nosub_{}".format(SubtractedParticle), 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
 
                 subDict["H_Q2_SUB_RAND_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_RAND_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_RAND_{}_{}".format(j, k)] = TH1D("H_W_SUB_RAND_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
@@ -1350,7 +1352,7 @@ def process_hist_data(
                 subDict["H_t_vs_tmin_SUB_RAND_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_RAND_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_MM_SUB_RAND_{}_{}".format(j, k)]  = TH1D("H_MM_SUB_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, inpDict["mm_min"], inpDict["mm_max"])
                 subDict["H_MM_nosub_SUB_RAND_{}_{}".format(j, k)]  \
-                    = TH1D("H_MM_nosub_SUB_RAND_{}_{}".format(j, k),"MM_nosub_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+                    = TH1D("H_MM_nosub_SUB_RAND_{}_{}".format(j, k),"MM_nosub_{}".format(SubtractedParticle), 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
 
                 subDict["H_Q2_SUB_DUMMY_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_DUMMY_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_DUMMY_{}_{}".format(j, k)] = TH1D("H_W_SUB_DUMMY_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
@@ -1364,7 +1366,7 @@ def process_hist_data(
                 subDict["H_t_vs_tmin_SUB_DUMMY_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_DUMMY_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_MM_SUB_DUMMY_{}_{}".format(j, k)]  = TH1D("H_MM_SUB_DUMMY_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, inpDict["mm_min"], inpDict["mm_max"])
                 subDict["H_MM_nosub_SUB_DUMMY_{}_{}".format(j, k)]  \
-                    = TH1D("H_MM_nosub_SUB_DUMMY_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+                    = TH1D("H_MM_nosub_SUB_DUMMY_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
 
                 subDict["H_Q2_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_Q2_SUB_DUMMY_RAND_{}_{}".format(j, k), "Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
                 subDict["H_W_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH1D("H_W_SUB_DUMMY_RAND_{}_{}".format(j, k), "W", 100, inpDict["Wmin"], inpDict["Wmax"])
@@ -1378,7 +1380,7 @@ def process_hist_data(
                 subDict["H_t_vs_tmin_SUB_DUMMY_RAND_{}_{}".format(j, k)] = TH2D("H_t_vs_tmin_SUB_DUMMY_RAND_{}_{}".format(j, k), "; -t_{min}; -t", 100, tmin_plot_min, tmin_plot_max, 100, inpDict["tmin"], inpDict["tmax"])
                 subDict["H_MM_SUB_DUMMY_RAND_{}_{}".format(j, k)]  = TH1D("H_MM_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, inpDict["mm_min"], inpDict["mm_max"])
                 subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]  \
-                    = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, 0.7, 1.5)
+                    = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
                 
     hole_contains = hgcer_cutg.IsInside if hgcer_cutg is not None else None
 
