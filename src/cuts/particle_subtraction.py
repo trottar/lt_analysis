@@ -69,6 +69,58 @@ def _print_sub_timer(label, elapsed, total_events=None):
         print("[TIMER] {}: {}".format(label, _format_elapsed(elapsed)))
 
 
+def _parse_pid_cut_text(raw_text):
+    return [
+        piece.strip()
+        for piece in raw_text.replace("[", "").replace("]", "").replace("{", "").replace("}", "").replace("'", "").replace("&", ",").split(",")
+        if piece.strip()
+    ]
+
+
+def _load_pid_cut_text(inpDict, phi_setting, particle_type):
+    run_key_map = {
+        "Right": "runNumRight",
+        "Left": "runNumLeft",
+        "Center": "runNumCenter",
+    }
+    run_key = run_key_map.get(phi_setting)
+    run_values = str(inpDict.get(run_key, "") or "").split()
+    out_filename = str(inpDict.get("OutFilename", "") or "")
+    pid_text = None
+    last_pid_log = None
+
+    for run in run_values:
+        pid_log = f"{LTANAPATH}/log/{phi_setting}_{particle_type}_{run}_{out_filename.replace('FullAnalysis_','')}.log"
+        last_pid_log = pid_log
+        if os.path.exists(pid_log):
+            with open(pid_log, "r") as f_log:
+                for line in f_log:
+                    if (
+                        "coin_ek_cut_prompt_noRF" in line
+                        or "coin_epi_cut_prompt_noRF" in line
+                        or "coin_ep_cut_prompt_noRF" in line
+                    ):
+                        try:
+                            pid_text = _parse_pid_cut_text(next(f_log))
+                        except StopIteration:
+                            pid_text = []
+                        break
+        else:
+            print("WARNING: Run {} does not have a valid PID log for {} background!".format(run, particle_type))
+
+    if pid_text is None:
+        print("ERROR: Invalid {} background log {}!".format(phi_setting.lower(), last_pid_log))
+        pid_text = "\nNo {} background cuts file found in logs...".format(phi_setting.lower())
+
+    return pid_text
+
+
+def _print_background_pid_cuts(inpDict, phi_setting, particle_type):
+    pid_text = _load_pid_cut_text(inpDict, phi_setting, particle_type)
+    print("\n\n", phi_setting, "Background PID Cuts ({}) = ".format(str(particle_type).lower()), pid_text, "\n\n")
+    return pid_text
+
+
 def _init_sub_event_cache():
     cache_template = {
         "adj_t": [],
@@ -314,6 +366,7 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
 
     # Upate hist dictionary with effective charge
     get_eff_charge(histDict, inpDict, all_data=False)
+    _print_background_pid_cuts(inpDict, phi_setting, SubtractedParticle)
 
     norm_factor_data = inpDict["normfac_data"]
     norm_factor_dummy = inpDict["normfac_dummy"]
