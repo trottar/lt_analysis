@@ -361,6 +361,9 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
     InDATAFilename = inpDict["InDATAFilename"] 
     InDUMMYFilename = inpDict["InDUMMYFilename"] 
 
+    nWindows = subDict["nWindows"]
+    phi_setting = subDict["phi_setting"]
+
     sys.path.append("normalize")
     from get_eff_charge import get_eff_charge
 
@@ -370,9 +373,6 @@ def particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hg
 
     norm_factor_data = inpDict["normfac_data"]
     norm_factor_dummy = inpDict["normfac_dummy"]
-
-    nWindows = subDict["nWindows"]
-    phi_setting = subDict["phi_setting"]
 
     MM_offset_DATA = subDict["MM_offset_DATA"]
     
