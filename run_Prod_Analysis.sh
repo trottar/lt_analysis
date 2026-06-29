@@ -171,7 +171,7 @@ export_background_sample_paths() {
     done
 }
 
-SKIM_OUTPUT_DIR="$(build_skim_output_dir "${SKIMPATH}")"
+SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 mkdir -p "${OUTPATH}"
 
