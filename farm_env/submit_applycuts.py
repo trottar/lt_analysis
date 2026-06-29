@@ -59,9 +59,6 @@ DEFAULT_JASMINE_DISK = "20g"
 DEFAULT_JASMINE_TIME = "12h"
 DEFAULT_JASMINE_STAGE_ROOT = "/scratch/$USER/jasmine_stage"
 DEFAULT_CACHE_REQUEST_TEMPLATE = "jcache get {mss_file}"
-DEFAULT_ZOMBIE_RERUN_PASS = "Pass4b_Apr_2026"
-DEFAULT_ZOMBIE_RERUN_SUBDIR = "rerun_zombies"
-
 RUN_LINE_RE = re.compile(r"^\s*(\d+)\s*$")
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9_.-]+")
 VARIANT_RE = re.compile(
@@ -427,22 +424,6 @@ def render_template(template: str, run: int, extra: Optional[Dict[str, str]] = N
     return os.path.expandvars(template).format(**values)
 
 
-def derive_zombie_rerun_destination(destination: Path) -> Optional[Path]:
-    parts = destination.parts
-    if len(parts) >= 6 and parts[0] == "/" and parts[1] == "mss" and parts[2] == "hallc" and parts[3] == "kaonlt":
-        tail = parts[5:]
-        return Path("/mss/hallc/kaonlt") / DEFAULT_ZOMBIE_RERUN_PASS / DEFAULT_ZOMBIE_RERUN_SUBDIR / Path(*tail)
-    return None
-
-
-def derive_rerun_pass_destination(destination: Path) -> Optional[Path]:
-    parts = destination.parts
-    if len(parts) >= 6 and parts[0] == "/" and parts[1] == "mss" and parts[2] == "hallc" and parts[3] == "kaonlt":
-        tail = parts[5:]
-        return Path("/mss/hallc/kaonlt") / DEFAULT_ZOMBIE_RERUN_PASS / Path(*tail)
-    return None
-
-
 def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Tuple[Optional[Path], str]:
     exact_name = f"{anatype}_coin_replay_production_{run}_-1.root"
     glob_name = f"*coin_replay_production_{run}_-1.root"
@@ -453,24 +434,6 @@ def find_replay_mss_file(variant: JsonVariant, anatype: str, run: int) -> Tuple[
         matches = sorted(destination.glob(glob_name))
         if matches:
             return matches[0], "primary"
-
-        rerun_pass_destination = derive_rerun_pass_destination(destination)
-        if rerun_pass_destination is not None:
-            exact = rerun_pass_destination / exact_name
-            if exact.exists():
-                return exact, "rerun_pass"
-            matches = sorted(rerun_pass_destination.glob(glob_name))
-            if matches:
-                return matches[0], "rerun_pass"
-
-        zombie_destination = derive_zombie_rerun_destination(destination)
-        if zombie_destination is not None:
-            exact = zombie_destination / exact_name
-            if exact.exists():
-                return exact, "rerun_zombie"
-            matches = sorted(zombie_destination.glob(glob_name))
-            if matches:
-                return matches[0], "rerun_zombie"
     return None, "missing"
 
 
