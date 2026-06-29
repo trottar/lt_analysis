@@ -57,6 +57,31 @@ def absolute_path_has_cache(path_obj):
     return "cache" in str(path_obj).lower()
 
 
+def mss_path_to_cache(path_obj):
+    path_text = str(path_obj)
+
+    for prefix, replacement in (
+        ("/w/mss/hallc/kaonlt", "/cache/hallc/kaonlt"),
+        ("/mss/hallc/kaonlt", "/cache/hallc/kaonlt"),
+        ("/w/mss", "/cache"),
+        ("/mss", "/cache"),
+    ):
+        index = path_text.find(prefix)
+        if index != -1:
+            suffix = path_text[index + len(prefix):]
+            return Path(replacement + suffix)
+
+    return None
+
+
+def resolve_runtime_input_root(path_obj):
+    resolved = resolve_absolute_path(path_obj)
+    cache_equivalent = mss_path_to_cache(resolved)
+    if cache_equivalent is not None:
+        return cache_equivalent
+    return resolved
+
+
 def cache_path_to_mss(path_obj):
     path_text = str(path_obj)
     kaonlt_cache_index = path_text.find("/cache/hallc/kaonlt")
@@ -102,22 +127,23 @@ def run_jcache_in_batches(mss_files, batch_size=50):
 
 
 input_root_abs = resolve_absolute_path(input_root_path)
+runtime_input_root = resolve_runtime_input_root(input_root_path)
 output_root_abs = resolve_absolute_path(output_root_path)
 print("\nCombining ROOT files from: {}".format(input_root_path))
-print("Absolute skim source path: {}".format(input_root_abs))
+print("Absolute skim source path: {}".format(runtime_input_root))
 print("Writing merged ROOT file to: {}".format(output_root_abs))
 
 arr_run_nums = [int(x) for x in string_run_nums.split()]
 input_root_files = [
-    input_root_path / (particle + "_" + str(run_num) + inp_file_name + ".root")
+    runtime_input_root / (particle + "_" + str(run_num) + inp_file_name + ".root")
     for run_num in arr_run_nums
 ]
 absolute_input_root_files = [
-    input_root_abs / (particle + "_" + str(run_num) + inp_file_name + ".root")
+    runtime_input_root / (particle + "_" + str(run_num) + inp_file_name + ".root")
     for run_num in arr_run_nums
 ]
 
-if absolute_path_has_cache(input_root_abs):
+if absolute_path_has_cache(runtime_input_root):
     mss_stage_files = []
     for path_obj in absolute_input_root_files:
         if path_obj.exists():
@@ -148,7 +174,7 @@ for tree in inp_tree_names.split():
             Misc.progressBar(i, len(arr_run_nums)-1,bar_length=25)
         else:
             Misc.progressBar(len(arr_run_nums), len(arr_run_nums),bar_length=25)
-        inp_root_file = os.path.join(input_root_path, particle + "_" + str(n) + inp_file_name + ".root")
+        inp_root_file = os.path.join(str(runtime_input_root), particle + "_" + str(n) + inp_file_name + ".root")
         if not os.path.isfile(inp_root_file):
             warning = "WARNING: File {} not found. Removing...".format(inp_root_file)
             log_bad_runs(inp_root_file, err_fout, warning)
