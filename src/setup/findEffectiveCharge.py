@@ -51,12 +51,25 @@ from utility import check_runs_in_effcharge
 
 if "None" in OUTPATH:
     OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
-if str(SKIMPATH).endswith(f"{ANATYPE}LT"):
-    SKIM_OUTPATH = str(SKIMPATH)
-elif "None" in str(SKIMPATH):
-    SKIM_OUTPATH = str(SKIMPATH).replace("None", f"{ANATYPE}LT")
-else:
-    SKIM_OUTPATH = os.path.join(str(SKIMPATH), f"{ANATYPE}LT")
+def resolve_skim_outpath(raw_skimpath, anatype):
+    skim_text = str(raw_skimpath)
+    leaf = f"{anatype}LT"
+    analysis_leaf = os.path.join("Analysis", leaf)
+    if skim_text.endswith(analysis_leaf) or skim_text.endswith(leaf):
+        return skim_text
+    if "Analysis/None" in skim_text:
+        return skim_text.replace("Analysis/None", analysis_leaf)
+    if "Analysis\\None" in skim_text:
+        return skim_text.replace("Analysis\\None", analysis_leaf.replace("/", "\\"))
+    if "None" in skim_text:
+        return skim_text.replace("None", analysis_leaf)
+    if skim_text.endswith("Analysis") or skim_text.endswith("Analysis\\"):
+        return os.path.join(skim_text, leaf)
+    if skim_text.endswith("Skim_ROOTfiles") or skim_text.endswith("Skim_ROOTfiles\\"):
+        return os.path.join(skim_text, "Analysis", leaf)
+    return os.path.join(skim_text, "Analysis", leaf)
+
+SKIM_OUTPATH = resolve_skim_outpath(SKIMPATH, ANATYPE)
 
 OutFilename = f"table_{ParticleType}_{kinematics}"
 foutcsv = OUTPATH + "/" + OutFilename + ".csv"

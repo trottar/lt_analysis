@@ -39,12 +39,20 @@ LTANAPATH=`echo ${PATHFILE_INFO} | cut -d ','  -f18`
 normalize_ltsep_dir() {
     local base_dir="$1"
     local leaf="${ANATYPE}LT"
-    if [[ "${base_dir}" == *"/${leaf}" ]]; then
+    if [[ "${base_dir}" == *"/Analysis/${leaf}" ]]; then
         printf '%s\n' "${base_dir}"
+    elif [[ "${base_dir}" == *"/${leaf}" ]]; then
+        printf '%s\n' "${base_dir}"
+    elif [[ "${base_dir}" == *"/Analysis/None"* ]]; then
+        printf '%s\n' "${base_dir/Analysis\/None/Analysis\/${leaf}}"
     elif [[ "${base_dir}" == *"None"* ]]; then
-        printf '%s\n' "${base_dir/None/${leaf}}"
-    else
+        printf '%s\n' "${base_dir/None/Analysis\/${leaf}}"
+    elif [[ "${base_dir}" == *"/Analysis" ]]; then
         printf '%s\n' "${base_dir}/${leaf}"
+    elif [[ "${base_dir}" == *"/Skim_ROOTfiles" ]]; then
+        printf '%s\n' "${base_dir}/Analysis/${leaf}"
+    else
+        printf '%s\n' "${base_dir}/Analysis/${leaf}"
     fi
 }
 
