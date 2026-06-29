@@ -48,6 +48,73 @@ normalize_ltsep_dir() {
     fi
 }
 
+resolve_real_path() {
+    local input_path="$1"
+    local resolved_path=""
+    if resolved_path="$(readlink -f -- "${input_path}" 2>/dev/null)" && [[ -n "${resolved_path}" ]]; then
+        printf '%s\n' "${resolved_path}"
+    else
+        printf '%s\n' "${input_path}"
+    fi
+}
+
+build_skim_output_root() {
+    local base_path="${1%/}"
+    if [[ "${base_path}" == *"/Skim_ROOTfiles/"* ]]; then
+        printf '%s/Skim_ROOTfiles\n' "${base_path%%/Skim_ROOTfiles/*}"
+    elif [[ "${base_path}" == *"/Skim_ROOTfiles" ]]; then
+        printf '%s\n' "${base_path}"
+    else
+        printf '%s\n' "${base_path}"
+    fi
+}
+
+path_is_mss_like() {
+    local candidate="$1"
+    case "${candidate}" in
+        /mss/*|/w/mss/*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+resolve_local_skim_root() {
+    local base_path="$1"
+    local util_skim_root="${UTILPATH%/}/Skim_ROOTfiles"
+    local volatile_skim_root="${VOLATILEPATH%/}/Skim_ROOTfiles"
+    local fallback_root=""
+    local resolved=""
+
+    if [[ -L "${util_skim_root}" || -d "${util_skim_root}" ]]; then
+        resolved="$(resolve_real_path "${util_skim_root}")"
+        if ! path_is_mss_like "${resolved}"; then
+            printf '%s\n' "${resolved}"
+            return 0
+        fi
+    fi
+
+    resolved="$(resolve_real_path "${volatile_skim_root}")"
+    if ! path_is_mss_like "${resolved}"; then
+        printf '%s\n' "${resolved}"
+        return 0
+    fi
+
+    fallback_root="$(build_skim_output_root "${base_path}")"
+    resolved="$(resolve_real_path "${fallback_root}")"
+    printf '%s\n' "${resolved}"
+    return 0
+}
+
+build_skim_output_dir() {
+    local base_path="$1"
+    local skim_root=""
+    skim_root="$(resolve_local_skim_root "${base_path}")"
+    printf '%s\n' "$(normalize_ltsep_dir "${skim_root}")"
+}
+
 build_background_sample_base() {
     local repo_base="${LTANAPATH}/background_samples/OUTPUTS"
     local volatile_base="${VOLATILEPATH}/OUTPUT/Analysis/${ANATYPE}LT/background_samples"
@@ -96,7 +163,7 @@ export_background_sample_paths() {
     done
 }
 
-SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
+SKIM_OUTPUT_DIR="$(build_skim_output_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 mkdir -p "${OUTPATH}"
 
