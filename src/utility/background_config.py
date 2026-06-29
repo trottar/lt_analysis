@@ -242,7 +242,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "k_sigma0_signal": False,
         },
         "windows": {
-            "pi_n": (0.88, 0.95),
+            "pi_n": (0.88, 0.93),
             "pi_delta": (1.18, 1.23),
             #"pi_sidis": ((1.07, 1.10),(1.45, 1.50)),
               "pi_sidis": ((1.05, 1.10), (1.25, 1.30)),
@@ -269,6 +269,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 2.0,
             "k_sigma0_signal": 1.0,
         },
+        '''
         # Kaon-side post-fit scales may be tuned phenomenologically after the
         # raw component fit if the unscaled kaon pion-background model is too
         # large or shape-misaligned relative to the kaon no-sub spectrum.
@@ -284,6 +285,19 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 0.35,
             "k_sigma0_signal": 1.0,
         },
+        '''
+        "postfit_component_scales": {
+            "pi_n": 1.0,
+            "pi_delta": 1.0,
+            "pi_sidis": 1.0,
+            "k_sigma0_signal": 1.0,
+        },
+        "postrefine_component_scales": {
+            "pi_n": 1.0,
+            "pi_delta": 1.0,
+            "pi_sidis": 1.0,
+            "k_sigma0_signal": 1.0,
+        },        
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
         "joint_refinement_amplitude_floor": 1e-3,
@@ -306,7 +320,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "k_sigma0_signal": False,
         },
         "windows": {
-            "pi_n": (0.88, 0.95),
+            "pi_n": (0.88, 0.93),
             "pi_delta": (1.18, 1.23),
             #"pi_sidis": ((1.07, 1.10),(1.45, 1.50)),
               "pi_sidis": ((1.05, 1.10), (1.25, 1.30)),
