@@ -6390,11 +6390,6 @@ def print_particle_subtraction_component_fit_pages(
         ],
         cut_window=cut_window,
     )
-    _print_residual_shift_summary_pages(
-        pdf_name,
-        component_fit_result,
-        title_prefix,
-    )
     _print_residual_shift_template_pages(
         pdf_name,
         component_fit_result,
