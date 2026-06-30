@@ -136,7 +136,7 @@ BG_STAT_SCALE2_FINALIST_COUNT = 2
 # Shared full-spectrum MM histogram and diagnostic-plot controls.
 # These do not change the active MM cut window used elsewhere.
 BG_OPT_MM_PLOT_MIN = 0.7
-BG_OPT_MM_PLOT_MAX = 1.25
+BG_OPT_MM_PLOT_MAX = 1.30
 BG_OPT_MM_PLOT_NBINS = 100
 # window: SIMC scaled to data inside MM cut window
 # proper: SIMC kept at proper archived normalization
@@ -320,7 +320,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 1.0,
             "k_sigma0_signal": 1.0,
         },
-        "residual_component_shifts_enabled": False,
+        "residual_component_shifts_enabled": True,
         "residual_component_shift_components": (
             "pi_delta",
             "pi_sidis",
