@@ -1380,6 +1380,34 @@ def _run_joint_template_refinement(
 ):
     if exclude_windows is None:
         exclude_windows = []
+    fit_names = [str(name) for name in (fit_names or []) if str(name) in (template_hists or {})]
+    if not fit_names:
+        return {
+            "success": False,
+            "status": "failure",
+            "message": "no active templates available for joint refinement",
+            "coefficients": {},
+            "uncertainties": {},
+            "active_bin_count": 0,
+            "excluded_invalid_variance_bin_count": 0,
+            "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
+            "bound_hit_flags": {},
+            "regularization_enabled": False,
+            "regularization_widths": {},
+            "regularization_contribution": 0.0,
+            "data_chi2_contribution": None,
+            "total_objective": None,
+            "chi2_data": None,
+            "ndf": None,
+            "chi2_ndf": None,
+            "fit_p_value": None,
+            "covariance_matrix": {},
+            "correlation_matrix": {},
+            "template_correlation_matrix": {},
+            "weighted_design_condition_number": None,
+            "weighted_design_effective_rank": None,
+            "fit_bin_indices": [],
+        }
 
     fit_inputs = _build_multi_template_fit_inputs(
         target_hist,
@@ -1422,8 +1450,42 @@ def _run_joint_template_refinement(
 
     data_values = np.asarray(fit_inputs["y"], dtype=float)
     sigma_values = np.asarray(fit_inputs["sigma"], dtype=float)
+    design_columns = [
+        np.asarray(fit_inputs["template_columns"].get(name), dtype=float)
+        for name in fit_names
+        if fit_inputs["template_columns"].get(name) is not None
+    ]
+    if not design_columns:
+        return {
+            "success": False,
+            "status": "failure",
+            "message": "no valid template columns available for joint refinement",
+            "coefficients": {name: 0.0 for name in fit_names},
+            "uncertainties": {},
+            "active_bin_count": int(n_fit_bins),
+            "excluded_invalid_variance_bin_count": int(
+                len(fit_inputs.get("excluded_invalid_variance_bins") or [])
+            ),
+            "invalid_bin_rule": fit_inputs.get("invalid_bin_rule"),
+            "bound_hit_flags": {},
+            "regularization_enabled": False,
+            "regularization_widths": {},
+            "regularization_contribution": 0.0,
+            "data_chi2_contribution": None,
+            "total_objective": None,
+            "chi2_data": None,
+            "ndf": None,
+            "chi2_ndf": None,
+            "fit_p_value": None,
+            "covariance_matrix": {},
+            "correlation_matrix": {},
+            "template_correlation_matrix": {},
+            "weighted_design_condition_number": None,
+            "weighted_design_effective_rank": None,
+            "fit_bin_indices": [int(value) for value in fit_inputs.get("fit_bin_indices") or []],
+        }
     design_matrix = np.column_stack(
-        [np.asarray(fit_inputs["template_columns"][name], dtype=float) for name in fit_names]
+        design_columns
     )
     weighted_design = design_matrix / sigma_values[:, None]
     initial_vector = np.asarray(
@@ -1710,13 +1772,17 @@ def _apply_joint_component_refinement(
     if (
         not bool(refinement_result.get("success", False))
         and bool(stage_validation.get("accepted"))
-        and int(refinement_result.get("active_bin_count") or 0) <= 0
+        and (
+            int(refinement_result.get("active_bin_count") or 0) <= 0
+            or "no active templates" in str(refinement_result.get("message") or "").lower()
+            or "no valid template columns" in str(refinement_result.get("message") or "").lower()
+        )
     ):
         skipped_summary = deepcopy(refinement_result)
         skipped_summary["status"] = "skipped_no_valid_bins"
         skipped_summary["success"] = False
-        skipped_summary["message"] = (
-            "joint refinement skipped: no valid full-range fit bins; staged solution retained"
+        skipped_summary["message"] = "joint refinement skipped: {}; staged solution retained".format(
+            refinement_result.get("message") or "no valid full-range fit bins"
         )
         return _retain_staged_solution(
             skipped_summary,
@@ -2009,6 +2075,16 @@ def _solve_joint_template_amplitudes(
 ):
     if exclude_windows is None:
         exclude_windows = []
+    fit_names = [str(name) for name in (fit_names or []) if str(name) in (template_hists or {})]
+    if not fit_names:
+        return {
+            "success": False,
+            "coefficients": {},
+            "uncertainties": {},
+            "prior_sigmas": deepcopy(prior_sigmas),
+            "message": "no active templates available for joint refinement",
+            "n_fit_bins": 0,
+        }
     fit_inputs = _build_multi_template_fit_inputs(
         target_hist,
         template_hists,
@@ -2027,9 +2103,22 @@ def _solve_joint_template_amplitudes(
             "n_fit_bins": 0,
         }
 
-    weighted_design = np.column_stack(
-        [fit_inputs["template_columns"][name] / fit_inputs["sigma"] for name in fit_names]
-    )
+    design_columns = [
+        fit_inputs["template_columns"].get(name) / fit_inputs["sigma"]
+        for name in fit_names
+        if fit_inputs["template_columns"].get(name) is not None
+    ]
+    if not design_columns:
+        return {
+            "success": False,
+            "coefficients": {name: 0.0 for name in fit_names},
+            "uncertainties": {},
+            "prior_sigmas": deepcopy(prior_sigmas),
+            "message": "no valid template columns available for joint refinement",
+            "n_fit_bins": int(len(fit_inputs["x"])),
+        }
+
+    weighted_design = np.column_stack(design_columns)
     weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
     prior_rows = []
     prior_targets = []
