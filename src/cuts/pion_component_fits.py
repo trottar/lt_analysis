@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import math
 from copy import deepcopy
 
@@ -19,9 +20,11 @@ from background_config import (
     resolve_particle_subtraction_component_postfit_scales,
     resolve_particle_subtraction_component_postrefine_scales,
     resolve_particle_subtraction_component_prior_scales,
+    resolve_particle_subtraction_component_residual_shift_settings,
     resolve_particle_subtraction_component_stage_amplitude_modes,
     resolve_particle_subtraction_component_stage_amplitude_windows,
     resolve_particle_subtraction_component_fit_excluded_windows,
+    resolve_particle_subtraction_component_cleanup_validation_mm_max,
     get_particle_subtraction_component_fit_window_config,
     resolve_particle_subtraction_component_fit_windows,
     resolve_particle_subtraction_mode,
@@ -94,46 +97,166 @@ def _clone_hist(template_hist, name, title=None, reset=False):
     return cloned
 
 
+def _hist_integral(hist):
+    if hist is None:
+        return 0.0
+    try:
+        return float(hist.Integral())
+    except Exception:
+        return 0.0
+
+
+def _sample_hist_value_and_variance(hist, x_value, interpolation_mode="linear"):
+    if hist is None or not _is_finite_number(x_value):
+        return 0.0, 0.0
+    mode = str(interpolation_mode or "linear").strip().lower() or "linear"
+    if mode not in ("linear", "nearest"):
+        raise ValueError("Unsupported template interpolation mode '{}'".format(interpolation_mode))
+
+    nbins = int(hist.GetNbinsX())
+    if nbins <= 0:
+        return 0.0, 0.0
+
+    first_center = float(hist.GetBinCenter(1))
+    last_center = float(hist.GetBinCenter(nbins))
+    if x_value < first_center or x_value > last_center:
+        return 0.0, 0.0
+
+    if mode == "nearest":
+        nearest_bin = 1
+        nearest_distance = abs(float(x_value) - first_center)
+        for bin_index in range(2, nbins + 1):
+            candidate_distance = abs(float(x_value) - float(hist.GetBinCenter(bin_index)))
+            if candidate_distance < nearest_distance:
+                nearest_bin = int(bin_index)
+                nearest_distance = candidate_distance
+        error_value = float(hist.GetBinError(nearest_bin))
+        return float(hist.GetBinContent(nearest_bin)), float(error_value ** 2)
+
+    axis = hist.GetXaxis()
+    anchor_bin = int(axis.FindBin(float(x_value)))
+    anchor_bin = max(1, min(anchor_bin, nbins))
+    anchor_center = float(hist.GetBinCenter(anchor_bin))
+    if abs(float(x_value) - anchor_center) <= 1e-12:
+        error_value = float(hist.GetBinError(anchor_bin))
+        return float(hist.GetBinContent(anchor_bin)), float(error_value ** 2)
+
+    if float(x_value) > anchor_center:
+        left_bin = int(anchor_bin)
+        right_bin = int(anchor_bin + 1)
+    else:
+        left_bin = int(anchor_bin - 1)
+        right_bin = int(anchor_bin)
+    if left_bin < 1 or right_bin > nbins:
+        return 0.0, 0.0
+
+    left_center = float(hist.GetBinCenter(left_bin))
+    right_center = float(hist.GetBinCenter(right_bin))
+    if abs(right_center - left_center) <= 1e-12:
+        error_value = float(hist.GetBinError(anchor_bin))
+        return float(hist.GetBinContent(anchor_bin)), float(error_value ** 2)
+
+    blend = (float(x_value) - left_center) / (right_center - left_center)
+    blend = min(max(blend, 0.0), 1.0)
+    left_value = float(hist.GetBinContent(left_bin))
+    right_value = float(hist.GetBinContent(right_bin))
+    left_variance = float(hist.GetBinError(left_bin) ** 2)
+    right_variance = float(hist.GetBinError(right_bin) ** 2)
+    value = ((1.0 - blend) * left_value) + (blend * right_value)
+    variance = (((1.0 - blend) ** 2) * left_variance) + ((blend ** 2) * right_variance)
+    return float(value), float(variance)
+
+
+def build_shifted_template_histogram(
+    source_hist,
+    delta_mm,
+    sign_convention,
+    output_name,
+    interpolation_mode="linear",
+    renormalize=True,
+):
+    if source_hist is None:
+        return None, {}
+
+    resolved_sign = str(sign_convention or "").strip().lower()
+    if resolved_sign != "positive_moves_peak_higher_mm":
+        raise ValueError(
+            "Unsupported residual template shift sign convention '{}'".format(sign_convention)
+        )
+
+    shift_value = float(delta_mm) if _is_finite_number(delta_mm) else 0.0
+    original_integral = _hist_integral(source_hist)
+    shifted_hist = _clone_hist(source_hist, output_name, reset=True)
+    if shifted_hist is None:
+        return None, {}
+
+    if abs(shift_value) <= 1e-12:
+        shifted_hist.Add(source_hist)
+        shifted_integral_before = _hist_integral(shifted_hist)
+        renorm_factor = 1.0
+        shifted_integral_after = shifted_integral_before
+        if renormalize and original_integral > 0.0 and abs(shifted_integral_before - original_integral) > 1e-12:
+            renorm_factor = float(original_integral / shifted_integral_before)
+            shifted_hist.Scale(renorm_factor)
+            shifted_integral_after = _hist_integral(shifted_hist)
+        return shifted_hist, {
+            "delta_mm": shift_value,
+            "sign_convention": resolved_sign,
+            "interpolation_mode": str(interpolation_mode or "linear"),
+            "original_integral": float(original_integral),
+            "shifted_integral_before_renorm": float(shifted_integral_before),
+            "shifted_integral_after_renorm": float(shifted_integral_after),
+            "shift_renormalization_factor": float(renorm_factor),
+            "lost_integral_fraction": 0.0,
+            "shift_bound_hit_flag": False,
+        }
+
+    for bin_index in range(1, shifted_hist.GetNbinsX() + 1):
+        output_center = float(shifted_hist.GetBinCenter(bin_index))
+        sample_x = output_center - shift_value
+        sample_value, sample_variance = _sample_hist_value_and_variance(
+            source_hist,
+            sample_x,
+            interpolation_mode=interpolation_mode,
+        )
+        shifted_hist.SetBinContent(bin_index, float(sample_value))
+        shifted_hist.SetBinError(bin_index, math.sqrt(max(float(sample_variance), 0.0)))
+
+    shifted_integral_before = _hist_integral(shifted_hist)
+    renorm_factor = 1.0
+    if renormalize and original_integral > 0.0 and shifted_integral_before > 0.0:
+        renorm_factor = float(original_integral / shifted_integral_before)
+        shifted_hist.Scale(renorm_factor)
+    shifted_integral_after = _hist_integral(shifted_hist)
+    lost_integral_fraction = 0.0
+    if original_integral > 0.0 and shifted_integral_before < original_integral:
+        lost_integral_fraction = float(
+            max(original_integral - shifted_integral_before, 0.0) / original_integral
+        )
+    return shifted_hist, {
+        "delta_mm": shift_value,
+        "sign_convention": resolved_sign,
+        "interpolation_mode": str(interpolation_mode or "linear"),
+        "original_integral": float(original_integral),
+        "shifted_integral_before_renorm": float(shifted_integral_before),
+        "shifted_integral_after_renorm": float(shifted_integral_after),
+        "shift_renormalization_factor": float(renorm_factor),
+        "lost_integral_fraction": float(lost_integral_fraction),
+        "shift_bound_hit_flag": False,
+    }
+
+
 def _build_mm_shifted_hist(template_hist, shift, name, renormalize=False):
     if template_hist is None:
         return None
-    shift_value = float(shift) if _is_finite_number(shift) else 0.0
-    shifted_hist = _clone_hist(template_hist, name, reset=True)
-    if shifted_hist is None:
-        return None
-    if abs(shift_value) <= 1e-12:
-        shifted_hist.Add(template_hist)
-        return shifted_hist
-
-    x_axis = shifted_hist.GetXaxis()
-    x_min = float(x_axis.GetXmin())
-    x_max = float(x_axis.GetXmax())
-    for bin_index in range(1, template_hist.GetNbinsX() + 1):
-        content = float(template_hist.GetBinContent(bin_index))
-        error = float(template_hist.GetBinError(bin_index))
-        if content == 0.0 and error == 0.0:
-            continue
-
-        shifted_x = float(template_hist.GetBinCenter(bin_index)) + shift_value
-        if shifted_x < x_min or shifted_x >= x_max:
-            continue
-
-        target_bin = int(x_axis.FindBin(shifted_x))
-        shifted_hist.SetBinContent(
-            target_bin,
-            float(shifted_hist.GetBinContent(target_bin)) + content,
-        )
-        shifted_hist.SetBinError(
-            target_bin,
-            math.sqrt(float(shifted_hist.GetBinError(target_bin)) ** 2 + error ** 2),
-        )
-
-    if renormalize:
-        normalize_hist_to_unit_area(
-            shifted_hist,
-            quiet=True,
-            context=name,
-        )
+    shifted_hist, _ = build_shifted_template_histogram(
+        template_hist,
+        shift,
+        "positive_moves_peak_higher_mm",
+        name,
+        interpolation_mode="nearest",
+        renormalize=bool(renormalize),
+    )
     return shifted_hist
 
 
@@ -939,6 +1062,7 @@ def _apply_component_postfit_scales(
         max_oversub_bin_count=validation_options.get("max_oversub_bin_count"),
         max_oversub_bin_fraction=validation_options.get("max_oversub_bin_fraction"),
         max_full_range_chi2_ndf=validation_options.get("max_full_range_chi2_ndf"),
+        cleanup_validation_mm_max=validation_options.get("cleanup_validation_mm_max"),
     )
     diagnostics["validation"] = deepcopy(validation)
     diagnostics["chi2"] = validation.get("chi2")
@@ -968,68 +1092,102 @@ def _evaluate_model_validation(
     max_oversub_bin_count=None,
     max_oversub_bin_fraction=None,
     max_full_range_chi2_ndf=None,
+    cleanup_validation_mm_max=None,
 ):
     if exclude_windows is None:
         exclude_windows = []
-    quality = _compute_fit_quality(
-        target_hist,
-        fit_hist,
-        fit_min,
-        fit_max,
-        exclude_windows=exclude_windows,
-        n_parameters=n_parameters,
-    )
 
-    oversub_bin_centers = []
-    total_bins = 0
-    sigma_tolerance = max(float(oversub_sigma_tolerance or 0.0), 0.0)
-    for bin_index in range(1, target_hist.GetNbinsX() + 1):
-        x_center = float(target_hist.GetBinCenter(bin_index))
-        if x_center < fit_min or x_center > fit_max:
-            continue
-        if any(window_min <= x_center <= window_max for window_min, window_max in exclude_windows):
-            continue
-        total_bins += 1
-        data_value = float(target_hist.GetBinContent(bin_index))
-        fit_value = float(fit_hist.GetBinContent(bin_index))
-        sigma_value = float(target_hist.GetBinError(bin_index))
-        if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
-            sigma_value = max(math.sqrt(abs(data_value)), 1.0)
-        if fit_value > data_value + sigma_tolerance * sigma_value:
-            oversub_bin_centers.append(x_center)
+    def _evaluate_region(region_min, region_max):
+        quality = _compute_fit_quality(
+            target_hist,
+            fit_hist,
+            region_min,
+            region_max,
+            exclude_windows=exclude_windows,
+            n_parameters=n_parameters,
+        )
+        oversub_bin_centers = []
+        total_bins = 0
+        sigma_tolerance = max(float(oversub_sigma_tolerance or 0.0), 0.0)
+        for bin_index in range(1, target_hist.GetNbinsX() + 1):
+            x_center = float(target_hist.GetBinCenter(bin_index))
+            if x_center < region_min or x_center > region_max:
+                continue
+            if any(window_min <= x_center <= window_max for window_min, window_max in exclude_windows):
+                continue
+            total_bins += 1
+            data_value = float(target_hist.GetBinContent(bin_index))
+            fit_value = float(fit_hist.GetBinContent(bin_index))
+            sigma_value = float(target_hist.GetBinError(bin_index))
+            if (not math.isfinite(sigma_value)) or sigma_value <= 0.0:
+                sigma_value = max(math.sqrt(abs(data_value)), 1.0)
+            if fit_value > data_value + sigma_tolerance * sigma_value:
+                oversub_bin_centers.append(x_center)
 
-    oversub_bin_count = int(len(oversub_bin_centers))
-    oversub_bin_fraction = (
-        float(oversub_bin_count) / float(total_bins)
-        if total_bins > 0 else 0.0
+        oversub_bin_count = int(len(oversub_bin_centers))
+        oversub_bin_fraction = (
+            float(oversub_bin_count) / float(total_bins)
+            if total_bins > 0 else 0.0
+        )
+        return {
+            "region_min": float(region_min),
+            "region_max": float(region_max),
+            "oversub_bin_count": oversub_bin_count,
+            "oversub_bin_fraction": oversub_bin_fraction,
+            "oversub_sigma_tolerance": sigma_tolerance,
+            "oversub_mm_range": (
+                [float(min(oversub_bin_centers)), float(max(oversub_bin_centers))]
+                if oversub_bin_centers else []
+            ),
+            **quality,
+        }
+
+    full_range_quality = _evaluate_region(float(fit_min), float(fit_max))
+    cleanup_quality = {}
+    use_cleanup_region = (
+        _is_finite_number(cleanup_validation_mm_max)
+        and float(cleanup_validation_mm_max) > float(fit_min)
     )
+    if use_cleanup_region:
+        cleanup_quality = _evaluate_region(
+            float(fit_min),
+            min(float(cleanup_validation_mm_max), float(fit_max)),
+        )
+    active_quality = cleanup_quality if cleanup_quality else full_range_quality
+
     accepted = True
     rejection_reasons = []
-    if _is_finite_number(max_oversub_bin_count) and oversub_bin_count > int(max_oversub_bin_count):
+    if (
+        _is_finite_number(max_oversub_bin_count)
+        and int(active_quality.get("oversub_bin_count", 0) or 0) > int(max_oversub_bin_count)
+    ):
         accepted = False
         rejection_reasons.append(
-            "oversub_bin_count {} > {}".format(oversub_bin_count, int(max_oversub_bin_count))
+            "oversub_bin_count {} > {}".format(
+                int(active_quality.get("oversub_bin_count", 0) or 0),
+                int(max_oversub_bin_count),
+            )
         )
     if (
         _is_finite_number(max_oversub_bin_fraction)
-        and oversub_bin_fraction > float(max_oversub_bin_fraction)
+        and float(active_quality.get("oversub_bin_fraction", 0.0) or 0.0) > float(max_oversub_bin_fraction)
     ):
         accepted = False
         rejection_reasons.append(
             "oversub_bin_fraction {:.3f} > {:.3f}".format(
-                oversub_bin_fraction,
+                float(active_quality.get("oversub_bin_fraction", 0.0) or 0.0),
                 float(max_oversub_bin_fraction),
             )
         )
     if (
         _is_finite_number(max_full_range_chi2_ndf)
-        and _is_finite_number(quality.get("chi2_ndf"))
-        and float(quality["chi2_ndf"]) > float(max_full_range_chi2_ndf)
+        and _is_finite_number(active_quality.get("chi2_ndf"))
+        and float(active_quality["chi2_ndf"]) > float(max_full_range_chi2_ndf)
     ):
         accepted = False
         rejection_reasons.append(
             "chi2_ndf {:.3f} > {:.3f}".format(
-                float(quality["chi2_ndf"]),
+                float(active_quality["chi2_ndf"]),
                 float(max_full_range_chi2_ndf),
             )
         )
@@ -1037,14 +1195,14 @@ def _evaluate_model_validation(
     return {
         "accepted": bool(accepted),
         "rejection_reasons": rejection_reasons,
-        "oversub_bin_count": oversub_bin_count,
-        "oversub_bin_fraction": oversub_bin_fraction,
-        "oversub_sigma_tolerance": sigma_tolerance,
-        "oversub_mm_range": (
-            [float(min(oversub_bin_centers)), float(max(oversub_bin_centers))]
-            if oversub_bin_centers else []
+        "validation_region": "cleanup" if cleanup_quality else "full_range",
+        "cleanup_validation_mm_max": (
+            float(cleanup_quality.get("region_max"))
+            if cleanup_quality else None
         ),
-        **quality,
+        "full_range": full_range_quality,
+        "cleanup_region": cleanup_quality,
+        **active_quality,
     }
 
 
@@ -1612,6 +1770,7 @@ def _apply_joint_component_refinement(
         max_oversub_bin_count=validation_options.get("max_oversub_bin_count"),
         max_oversub_bin_fraction=validation_options.get("max_oversub_bin_fraction"),
         max_full_range_chi2_ndf=validation_options.get("max_full_range_chi2_ndf"),
+        cleanup_validation_mm_max=validation_options.get("cleanup_validation_mm_max"),
     )
 
     refined_component_amplitudes = {
@@ -2029,6 +2188,367 @@ def _run_coordinate_template_updates(
     }
 
 
+def _format_shift_point_map(shift_map):
+    if not isinstance(shift_map, dict) or not shift_map:
+        return "none"
+    return ", ".join(
+        "{}={:+.4f}".format(str(component_name), float(shift_value or 0.0))
+        for component_name, shift_value in shift_map.items()
+    )
+
+
+def _resolve_cleanup_validation_max(fit_target, mm_offset_data=0.0, inp_dict=None, phi_setting=None):
+    return resolve_particle_subtraction_component_cleanup_validation_mm_max(
+        fit_target,
+        mm_offset_data=mm_offset_data,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+    )
+
+
+def _compute_cleanup_region_metrics(
+    target_hist,
+    fit_hist,
+    fit_min,
+    cleanup_validation_mm_max,
+    n_parameters=0,
+    exclude_windows=None,
+):
+    if target_hist is None or fit_hist is None:
+        return {}
+    if not _is_finite_number(cleanup_validation_mm_max):
+        return {}
+
+    cleanup_max = min(float(cleanup_validation_mm_max), float(fit_hist.GetXaxis().GetXmax()))
+    if cleanup_max <= float(fit_min):
+        return {}
+
+    quality = _compute_fit_quality(
+        target_hist,
+        fit_hist,
+        float(fit_min),
+        cleanup_max,
+        exclude_windows=exclude_windows,
+        n_parameters=n_parameters,
+    )
+    residual_integral = 0.0
+    pull_values = []
+    fit_bin_indices = []
+    for bin_index in range(1, target_hist.GetNbinsX() + 1):
+        x_center = float(target_hist.GetBinCenter(bin_index))
+        if x_center < float(fit_min) or x_center > cleanup_max:
+            continue
+        if any(window_min <= x_center <= window_max for window_min, window_max in (exclude_windows or [])):
+            continue
+        data_value = float(target_hist.GetBinContent(bin_index))
+        fit_value = float(fit_hist.GetBinContent(bin_index))
+        residual_integral += float(data_value - fit_value)
+        sigma_value = float(target_hist.GetBinError(bin_index))
+        if _is_finite_number(sigma_value) and sigma_value > 0.0:
+            pull_value = float((data_value - fit_value) / sigma_value)
+            pull_values.append(pull_value)
+            fit_bin_indices.append(int(bin_index))
+
+    cleanup_pull_rms = None
+    cleanup_max_abs_pull = None
+    if pull_values:
+        cleanup_pull_rms = float(np.sqrt(np.mean(np.square(np.asarray(pull_values, dtype=float)))))
+        cleanup_max_abs_pull = float(max(abs(value) for value in pull_values))
+    return {
+        "mm_min": float(fit_min),
+        "mm_max": float(cleanup_max),
+        "chi2": quality.get("chi2"),
+        "ndf": quality.get("ndf"),
+        "chi2_ndf": quality.get("chi2_ndf"),
+        "fit_p_value": quality.get("fit_p_value"),
+        "n_fit_bins": quality.get("n_fit_bins"),
+        "residual_integral": float(residual_integral),
+        "corrected_yield": float(residual_integral),
+        "pull_rms": cleanup_pull_rms,
+        "max_abs_pull": cleanup_max_abs_pull,
+        "fit_bin_indices": fit_bin_indices,
+    }
+
+
+def _build_shift_candidate_maps(shift_settings, active_component_names):
+    active_names = [str(component_name) for component_name in (active_component_names or []) if str(component_name)]
+    if not active_names:
+        return [{}]
+
+    mode = str((shift_settings or {}).get("mode") or "fixed").strip().lower() or "fixed"
+    configured_values = deepcopy((shift_settings or {}).get("values") or {})
+    configured_grid = deepcopy((shift_settings or {}).get("scan_grid") or {})
+    if mode == "fixed":
+        return [
+            {
+                component_name: float(configured_values.get(component_name, 0.0) or 0.0)
+                for component_name in active_names
+            }
+        ]
+
+    grid_values = []
+    for component_name in active_names:
+        component_grid = list(configured_grid.get(component_name) or [])
+        if not component_grid:
+            component_grid = [float(configured_values.get(component_name, 0.0) or 0.0)]
+        grid_values.append(component_grid)
+
+    candidate_maps = []
+    for grid_point in itertools.product(*grid_values):
+        candidate_maps.append(
+            {
+                component_name: float(shift_value or 0.0)
+                for component_name, shift_value in zip(active_names, grid_point)
+            }
+        )
+    return candidate_maps or [{}]
+
+
+def _apply_residual_shift_candidate_to_templates(
+    template_hists,
+    shift_map,
+    bounds_map=None,
+    lost_integral_warn_fraction=0.01,
+    hist_name_prefix="template_shift",
+):
+    shifted_hists = {}
+    diagnostics = {}
+    warnings = []
+    for template_name, template_hist in (template_hists or {}).items():
+        if template_hist is None:
+            diagnostics[str(template_name)] = {
+                "delta_mm": 0.0,
+                "component_available": False,
+            }
+            shifted_hists[str(template_name)] = None
+            continue
+
+        delta_mm = float((shift_map or {}).get(template_name, 0.0) or 0.0)
+        shifted_hist, shift_diag = build_shifted_template_histogram(
+            template_hist,
+            delta_mm,
+            "positive_moves_peak_higher_mm",
+            "{}_{}_{}".format(hist_name_prefix, str(template_name), template_hist.GetName()),
+            interpolation_mode="linear",
+            renormalize=True,
+        )
+        component_bounds = (bounds_map or {}).get(template_name)
+        if component_bounds is not None:
+            bound_min, bound_max = component_bounds
+            shift_diag["shift_bound_hit_flag"] = bool(
+                abs(delta_mm - float(bound_min)) <= 1e-12
+                or abs(delta_mm - float(bound_max)) <= 1e-12
+            )
+        else:
+            shift_diag["shift_bound_hit_flag"] = False
+        shift_diag["component_available"] = True
+        shifted_hists[str(template_name)] = shifted_hist
+        diagnostics[str(template_name)] = shift_diag
+        if float(shift_diag.get("lost_integral_fraction", 0.0) or 0.0) > float(lost_integral_warn_fraction or 0.0):
+            warnings.append(
+                "{} lost_integral_fraction={:.4f}".format(
+                    str(template_name),
+                    float(shift_diag.get("lost_integral_fraction") or 0.0),
+                )
+            )
+    return shifted_hists, diagnostics, warnings
+
+
+def _score_residual_shift_candidate(selection_metric, fit_result, cleanup_metrics):
+    metric_name = str(selection_metric or "chi2_data").strip().lower() or "chi2_data"
+    diagnostics = (fit_result or {}).get("diagnostics") or {}
+    validation = diagnostics.get("validation") or {}
+
+    if metric_name == "cleanup_region_chi2":
+        value = (cleanup_metrics or {}).get("chi2")
+        return float(value) if _is_finite_number(value) else float("inf")
+    if metric_name == "cleanup_region_yield_stability":
+        value = (cleanup_metrics or {}).get("corrected_yield")
+        return abs(float(value)) if _is_finite_number(value) else float("inf")
+
+    value = diagnostics.get("chi2")
+    if not _is_finite_number(value):
+        value = validation.get("chi2")
+    return float(value) if _is_finite_number(value) else float("inf")
+
+
+def _annotate_fit_result_with_residual_shift_payload(
+    fit_result,
+    fit_target,
+    shift_settings,
+    shift_payload,
+):
+    if not isinstance(fit_result, dict):
+        return fit_result
+    if not isinstance(shift_payload, dict):
+        return fit_result
+
+    diagnostics = deepcopy(fit_result.get("diagnostics") or {})
+    diagnostics["residual_component_shift"] = deepcopy(shift_payload.get("summary") or {})
+    fit_result["diagnostics"] = diagnostics
+    fit_result["template_shift_payload"] = shift_payload
+    resolved_config_summary = deepcopy(fit_result.get("resolved_config_summary") or {})
+    resolved_config_summary["residual_component_shift"] = deepcopy(shift_payload.get("summary") or {})
+    fit_result["resolved_config_summary"] = resolved_config_summary
+    return fit_result
+
+
+def _run_component_residual_shift_selection(
+    fit_target,
+    target_hist,
+    base_component_hists,
+    base_extra_template_hists,
+    shift_settings,
+    fit_callback,
+    fit_min,
+    cleanup_validation_mm_max=None,
+    exclude_windows=None,
+    context="",
+):
+    if not bool((shift_settings or {}).get("enabled", False)):
+        return None
+
+    available_component_names = [
+        component_name
+        for component_name in (shift_settings.get("components") or [])
+        if (base_component_hists or {}).get(component_name) is not None
+        or (base_extra_template_hists or {}).get(component_name) is not None
+    ]
+    if not available_component_names:
+        return {
+            "fit_result": fit_callback(base_component_hists, base_extra_template_hists),
+            "summary": {
+                "enabled": False,
+                "mode": str(shift_settings.get("mode") or "fixed"),
+                "units": str(shift_settings.get("units") or "GeV"),
+                "selection_metric": str(shift_settings.get("selection_metric") or "chi2_data"),
+                "requested_components": list(shift_settings.get("components") or []),
+                "active_components": [],
+                "selected_shift_point": {},
+                "selected_shift_reason": "no available templates for configured residual shifts",
+                "candidate_count": 1,
+                "candidate_summaries": [],
+            },
+            "original_template_hists": dict(base_component_hists or {}),
+            "selected_template_hists": dict(base_component_hists or {}),
+            "selected_extra_template_hists": dict(base_extra_template_hists or {}),
+            "selected_component_diagnostics": {},
+        }
+
+    original_template_hists = {}
+    original_template_hists.update(base_component_hists or {})
+    original_template_hists.update(base_extra_template_hists or {})
+    candidate_shift_maps = _build_shift_candidate_maps(shift_settings, available_component_names)
+    candidate_summaries = []
+    best_candidate = None
+    best_key = None
+    selected_reason = "best selection metric"
+
+    for candidate_index, candidate_shift_map in enumerate(candidate_shift_maps, start=1):
+        combined_template_hists = {}
+        combined_template_hists.update(base_component_hists or {})
+        combined_template_hists.update(base_extra_template_hists or {})
+        shifted_template_hists, shifted_diags, shift_warnings = _apply_residual_shift_candidate_to_templates(
+            combined_template_hists,
+            candidate_shift_map,
+            bounds_map=shift_settings.get("bounds") or {},
+            lost_integral_warn_fraction=shift_settings.get("lost_integral_warn_fraction", 0.01),
+            hist_name_prefix="{}_{}".format(fit_target, context or "scope"),
+        )
+        shifted_component_hists = {
+            template_name: shifted_template_hists.get(template_name)
+            for template_name in (base_component_hists or {}).keys()
+        }
+        shifted_extra_template_hists = {
+            template_name: shifted_template_hists.get(template_name)
+            for template_name in (base_extra_template_hists or {}).keys()
+        }
+        fit_result = fit_callback(shifted_component_hists, shifted_extra_template_hists)
+        diagnostics = (fit_result or {}).get("diagnostics") or {}
+        validation = diagnostics.get("validation") or {}
+        model_hist = (
+            fit_result.get("refined_fit_hist")
+            or fit_result.get("fit_hist")
+            or fit_result.get("refined_pion_bg_fit_hist")
+            or fit_result.get("pion_bg_fit_hist")
+        )
+        cleanup_metrics = _compute_cleanup_region_metrics(
+            target_hist,
+            model_hist,
+            fit_min,
+            cleanup_validation_mm_max,
+            n_parameters=len((fit_result.get("template_hists") or {}).keys()),
+            exclude_windows=exclude_windows,
+        )
+        score_value = _score_residual_shift_candidate(
+            shift_settings.get("selection_metric"),
+            fit_result,
+            cleanup_metrics,
+        )
+        candidate_summary = {
+            "candidate_index": int(candidate_index),
+            "shift_point": deepcopy(candidate_shift_map),
+            "score": float(score_value) if _is_finite_number(score_value) else None,
+            "fit_status": fit_result.get("fit_status"),
+            "accepted": bool(validation.get("accepted")),
+            "chi2": diagnostics.get("chi2"),
+            "chi2_ndf": diagnostics.get("chi2_ndf"),
+            "cleanup_metrics": deepcopy(cleanup_metrics),
+            "warnings": list(shift_warnings),
+        }
+        candidate_summaries.append(candidate_summary)
+        candidate_key = (
+            0 if bool(validation.get("accepted")) else 1,
+            float(score_value) if _is_finite_number(score_value) else float("inf"),
+            int(candidate_index),
+        )
+        if best_candidate is None or candidate_key < best_key:
+            best_candidate = {
+                "fit_result": fit_result,
+                "shift_point": deepcopy(candidate_shift_map),
+                "shifted_template_hists": shifted_template_hists,
+                "shifted_component_hists": shifted_component_hists,
+                "shifted_extra_template_hists": shifted_extra_template_hists,
+                "shifted_component_diagnostics": deepcopy(shifted_diags),
+                "cleanup_metrics": deepcopy(cleanup_metrics),
+                "warnings": list(shift_warnings),
+                "accepted": bool(validation.get("accepted")),
+            }
+            best_key = candidate_key
+
+    if best_candidate is None:
+        return None
+    if not bool(best_candidate.get("accepted")):
+        selected_reason = "no accepted residual-shift candidate; retained best-scoring candidate"
+
+    summary = {
+        "enabled": True,
+        "mode": str(shift_settings.get("mode") or "fixed"),
+        "units": str(shift_settings.get("units") or "GeV"),
+        "selection_metric": str(shift_settings.get("selection_metric") or "chi2_data"),
+        "requested_components": list(shift_settings.get("components") or []),
+        "active_components": list(available_component_names),
+        "configured_shift_values": deepcopy(shift_settings.get("values") or {}),
+        "shift_bounds": deepcopy(shift_settings.get("bounds") or {}),
+        "shift_grid": deepcopy(shift_settings.get("scan_grid") or {}),
+        "selected_shift_point": deepcopy(best_candidate.get("shift_point") or {}),
+        "selected_shift_reason": selected_reason,
+        "candidate_count": int(len(candidate_summaries)),
+        "candidate_summaries": candidate_summaries,
+        "per_component": deepcopy(best_candidate.get("shifted_component_diagnostics") or {}),
+        "cleanup_metrics": deepcopy(best_candidate.get("cleanup_metrics") or {}),
+        "warnings": list(best_candidate.get("warnings") or []),
+    }
+    return {
+        "fit_result": best_candidate.get("fit_result"),
+        "summary": summary,
+        "original_template_hists": original_template_hists,
+        "selected_template_hists": dict(best_candidate.get("shifted_component_hists") or {}),
+        "selected_extra_template_hists": dict(best_candidate.get("shifted_extra_template_hists") or {}),
+        "selected_component_diagnostics": deepcopy(best_candidate.get("shifted_component_diagnostics") or {}),
+    }
+
+
 def _fit_staged_anchor_templates(
     target_hist,
     component_hists,
@@ -2143,6 +2663,7 @@ def _fit_staged_anchor_templates(
         "max_oversub_bin_count": validation_options.get("max_oversub_bin_count"),
         "max_oversub_bin_fraction": validation_options.get("max_oversub_bin_fraction"),
         "max_full_range_chi2_ndf": validation_options.get("max_full_range_chi2_ndf"),
+        "cleanup_validation_mm_max": validation_options.get("cleanup_validation_mm_max"),
     }
 
     staged_template_hists = {name: template_hists[name] for name in fitted_names}
@@ -2533,6 +3054,7 @@ def fit_pion_control_with_simc_shapes(
     mm_offset_data=0.0,
     phi_setting=None,
     context="",
+    _skip_residual_shift=False,
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
@@ -2579,6 +3101,11 @@ def fit_pion_control_with_simc_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    residual_shift_settings = resolve_particle_subtraction_component_residual_shift_settings(
+        "pion_control",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "pion_control",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
@@ -2600,9 +3127,52 @@ def fit_pion_control_with_simc_shapes(
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
         "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
         "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
+        "cleanup_validation_mm_max": _resolve_cleanup_validation_max(
+            "pion_control",
+            mm_offset_data=mm_offset_data,
+            inp_dict=inpDict,
+            phi_setting=phi_setting,
+        ),
     }
     amplitude_floor = float(fit_config.get("joint_refinement_amplitude_floor", 1e-3) or 1e-3)
     template_corr_warn = float(fit_config.get("template_corr_warn", 0.95) or 0.95)
+    if not _skip_residual_shift:
+        shift_selection = _run_component_residual_shift_selection(
+            "pion_control",
+            h_pion_control,
+            {
+                "pi_n": h_pi_n_shape,
+                "pi_delta": h_pi_delta_shape,
+                "pi_sidis": h_pi_sidis_shape,
+            },
+            {
+                KAON_SIGMA0_TEMPLATE_NAME: h_kaon_sigma0_shape,
+            },
+            residual_shift_settings,
+            fit_callback=lambda shifted_components, shifted_extra_templates: fit_pion_control_with_simc_shapes(
+                h_pion_control,
+                shifted_components.get("pi_n"),
+                shifted_components.get("pi_delta"),
+                shifted_components.get("pi_sidis"),
+                shifted_extra_templates.get(KAON_SIGMA0_TEMPLATE_NAME),
+                inpDict,
+                mm_offset_data=mm_offset_data,
+                phi_setting=phi_setting,
+                context=context,
+                _skip_residual_shift=True,
+            ),
+            fit_min=fit_min,
+            cleanup_validation_mm_max=validation_options.get("cleanup_validation_mm_max"),
+            exclude_windows=excluded_windows,
+            context="{}_pion_control".format(context or "scope"),
+        )
+        if shift_selection is not None:
+            return _annotate_fit_result_with_residual_shift_payload(
+                shift_selection.get("fit_result"),
+                "pion_control",
+                residual_shift_settings,
+                shift_selection,
+            )
     result = _fit_staged_anchor_templates(
         h_pion_control,
         {
@@ -2657,7 +3227,7 @@ def fit_pion_control_with_simc_shapes(
     sigma0_scaled_hist = (result.get("extra_scaled_hists") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
     sigma0_amplitude = (result.get("extra_component_amplitudes") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
     refined_scaled_hist_map = result.get("refined_scaled_hist_map") or {}
-    return {
+    return_payload = {
         "B_n": result["B_n"],
         "B_delta": result["B_delta"],
         "B_sidis": result["B_sidis"],
@@ -2700,8 +3270,52 @@ def fit_pion_control_with_simc_shapes(
             "fit_mode": fit_mode,
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
+            "cleanup_validation_mm_max": validation_options.get("cleanup_validation_mm_max"),
         },
     }
+    if _skip_residual_shift:
+        return return_payload
+
+    return _annotate_fit_result_with_residual_shift_payload(
+        return_payload,
+        "pion_control",
+        residual_shift_settings,
+        {
+            "summary": {
+                "enabled": False,
+                "mode": residual_shift_settings.get("mode"),
+                "units": residual_shift_settings.get("units"),
+                "selection_metric": residual_shift_settings.get("selection_metric"),
+                "requested_components": list(residual_shift_settings.get("components") or []),
+                "active_components": [],
+                "configured_shift_values": deepcopy(residual_shift_settings.get("values") or {}),
+                "shift_bounds": deepcopy(residual_shift_settings.get("bounds") or {}),
+                "shift_grid": deepcopy(residual_shift_settings.get("scan_grid") or {}),
+                "selected_shift_point": {},
+                "selected_shift_reason": "residual shifts disabled",
+                "candidate_count": 1,
+                "candidate_summaries": [],
+                "per_component": {},
+                "cleanup_metrics": {},
+                "warnings": [],
+            },
+            "original_template_hists": {
+                "pi_n": h_pi_n_shape,
+                "pi_delta": h_pi_delta_shape,
+                "pi_sidis": h_pi_sidis_shape,
+                KAON_SIGMA0_TEMPLATE_NAME: h_kaon_sigma0_shape,
+            },
+            "selected_template_hists": {
+                "pi_n": h_pi_n_shape,
+                "pi_delta": h_pi_delta_shape,
+                "pi_sidis": h_pi_sidis_shape,
+            },
+            "selected_extra_template_hists": {
+                KAON_SIGMA0_TEMPLATE_NAME: h_kaon_sigma0_shape,
+            },
+            "selected_component_diagnostics": {},
+        },
+    )
 
 
 def fit_kaon_nosub_with_simc_pion_shapes(
@@ -2715,6 +3329,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     mm_offset_data=0.0,
     phi_setting=None,
     context="",
+    _skip_residual_shift=False,
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
@@ -2765,6 +3380,11 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    residual_shift_settings = resolve_particle_subtraction_component_residual_shift_settings(
+        "kaon_nosub",
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "kaon_nosub",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
@@ -2782,6 +3402,12 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "max_oversub_bin_count": fit_config.get("max_oversub_bin_count"),
         "max_oversub_bin_fraction": fit_config.get("max_oversub_bin_fraction"),
         "max_full_range_chi2_ndf": fit_config.get("max_full_range_chi2_ndf"),
+        "cleanup_validation_mm_max": _resolve_cleanup_validation_max(
+            "kaon_nosub",
+            mm_offset_data=mm_offset_data,
+            inp_dict=inpDict,
+            phi_setting=phi_setting,
+        ),
     }
     amplitude_floor = float(fit_config.get("joint_refinement_amplitude_floor", 1e-3) or 1e-3)
     template_corr_warn = float(fit_config.get("template_corr_warn", 0.95) or 0.95)
@@ -2794,6 +3420,45 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             extra_anchor_windows[KAON_SIGNAL_TEMPLATE_NAME] = [(mm_min, signal_window_max)]
     if anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME) and _hist_has_usable_support(h_kaon_sigma0_shape):
         extra_positive_templates[KAON_SIGMA0_TEMPLATE_NAME] = h_kaon_sigma0_shape
+    if not _skip_residual_shift:
+        shift_selection = _run_component_residual_shift_selection(
+            "kaon_nosub",
+            h_kaon_nosub,
+            {
+                "pi_n": h_pi_n_shape,
+                "pi_delta": h_pi_delta_shape,
+                "pi_sidis": h_pi_sidis_shape,
+            },
+            {
+                KAON_SIGNAL_TEMPLATE_NAME: h_kaon_signal_shape,
+                KAON_SIGMA0_TEMPLATE_NAME: h_kaon_sigma0_shape,
+            },
+            residual_shift_settings,
+            fit_callback=lambda shifted_components, shifted_extra_templates: fit_kaon_nosub_with_simc_pion_shapes(
+                h_kaon_nosub,
+                shifted_components.get("pi_n"),
+                shifted_components.get("pi_delta"),
+                shifted_components.get("pi_sidis"),
+                shifted_extra_templates.get(KAON_SIGNAL_TEMPLATE_NAME),
+                shifted_extra_templates.get(KAON_SIGMA0_TEMPLATE_NAME),
+                inpDict,
+                mm_offset_data=mm_offset_data,
+                phi_setting=phi_setting,
+                context=context,
+                _skip_residual_shift=True,
+            ),
+            fit_min=fit_min,
+            cleanup_validation_mm_max=validation_options.get("cleanup_validation_mm_max"),
+            exclude_windows=excluded_windows,
+            context="{}_kaon_nosub".format(context or "scope"),
+        )
+        if shift_selection is not None:
+            return _annotate_fit_result_with_residual_shift_payload(
+                shift_selection.get("fit_result"),
+                "kaon_nosub",
+                residual_shift_settings,
+                shift_selection,
+            )
     result = _fit_staged_anchor_templates(
         h_kaon_nosub,
         {
@@ -2913,6 +3578,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "fit_mode": fit_mode,
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
+            "cleanup_validation_mm_max": validation_options.get("cleanup_validation_mm_max"),
         },
     }
     if excluded_windows:
@@ -2942,7 +3608,51 @@ def fit_kaon_nosub_with_simc_pion_shapes(
                 "{}_masked".format(hist.GetName()),
                 excluded_windows,
             )
-    return return_payload
+    if _skip_residual_shift:
+        return return_payload
+
+    return _annotate_fit_result_with_residual_shift_payload(
+        return_payload,
+        "kaon_nosub",
+        residual_shift_settings,
+        {
+            "summary": {
+                "enabled": False,
+                "mode": residual_shift_settings.get("mode"),
+                "units": residual_shift_settings.get("units"),
+                "selection_metric": residual_shift_settings.get("selection_metric"),
+                "requested_components": list(residual_shift_settings.get("components") or []),
+                "active_components": [],
+                "configured_shift_values": deepcopy(residual_shift_settings.get("values") or {}),
+                "shift_bounds": deepcopy(residual_shift_settings.get("bounds") or {}),
+                "shift_grid": deepcopy(residual_shift_settings.get("scan_grid") or {}),
+                "selected_shift_point": {},
+                "selected_shift_reason": "residual shifts disabled",
+                "candidate_count": 1,
+                "candidate_summaries": [],
+                "per_component": {},
+                "cleanup_metrics": {},
+                "warnings": [],
+            },
+            "original_template_hists": {
+                "pi_n": h_pi_n_shape,
+                "pi_delta": h_pi_delta_shape,
+                "pi_sidis": h_pi_sidis_shape,
+                KAON_SIGNAL_TEMPLATE_NAME: h_kaon_signal_shape,
+                KAON_SIGMA0_TEMPLATE_NAME: h_kaon_sigma0_shape,
+            },
+            "selected_template_hists": {
+                "pi_n": h_pi_n_shape,
+                "pi_delta": h_pi_delta_shape,
+                "pi_sidis": h_pi_sidis_shape,
+            },
+            "selected_extra_template_hists": {
+                KAON_SIGNAL_TEMPLATE_NAME: h_kaon_signal_shape,
+                KAON_SIGMA0_TEMPLATE_NAME: h_kaon_sigma0_shape,
+            },
+            "selected_component_diagnostics": {},
+        },
+    )
 
 
 def _sum_hist_list_to_unit_area(hist_list, hist_name):
@@ -3041,6 +3751,17 @@ def _resolve_single_scope_hist(shape_payload, analysis_scope, t_bin_index=None, 
         return setting_shape_full
 
     return setting_shape_full
+
+
+def _clone_shift_payload_hist(shift_payload, payload_keys, component_name, output_name):
+    if not isinstance(payload_keys, (list, tuple)):
+        payload_keys = [payload_keys]
+    for payload_key in payload_keys:
+        hist_map = ((shift_payload or {}).get(payload_key) or {})
+        hist = hist_map.get(component_name)
+        if hist is not None:
+            return _clone_hist(hist, output_name)
+    return None
 
 
 def resolve_scope_component_shapes(
@@ -3159,6 +3880,12 @@ def build_particle_subtraction_component_result(
         phi_setting=resolved_phi_setting,
         context=context,
     )
+    pion_shift_payload = pion_fit.get("template_shift_payload") or {}
+    kaon_shift_payload = kaon_fit.get("template_shift_payload") or {}
+    residual_shift_summaries = {
+        "pion_control": deepcopy((pion_shift_payload.get("summary") or {})),
+        "kaon_nosub": deepcopy((kaon_shift_payload.get("summary") or {})),
+    }
 
     b_n = float(pion_fit["B_n"])
     b_delta = float(pion_fit["B_delta"])
@@ -3248,6 +3975,31 @@ def build_particle_subtraction_component_result(
         "particle_subtraction_phi_setting": resolved_phi_setting,
         "fallback_used": bool(fallback_reasons),
         "fallback_reason": "; ".join(fallback_reasons),
+        "residual_component_shifts_enabled": bool(
+            (residual_shift_summaries.get("pion_control") or {}).get("enabled")
+            or (residual_shift_summaries.get("kaon_nosub") or {}).get("enabled")
+        ),
+        "residual_component_shift_modes": {
+            "pion_control": (residual_shift_summaries.get("pion_control") or {}).get("mode"),
+            "kaon_nosub": (residual_shift_summaries.get("kaon_nosub") or {}).get("mode"),
+        },
+        "residual_component_shift_selection_metrics": {
+            "pion_control": (residual_shift_summaries.get("pion_control") or {}).get("selection_metric"),
+            "kaon_nosub": (residual_shift_summaries.get("kaon_nosub") or {}).get("selection_metric"),
+        },
+        "residual_component_shift_units": {
+            "pion_control": (residual_shift_summaries.get("pion_control") or {}).get("units"),
+            "kaon_nosub": (residual_shift_summaries.get("kaon_nosub") or {}).get("units"),
+        },
+        "residual_component_shift_values": {
+            "pion_control": deepcopy(
+                (residual_shift_summaries.get("pion_control") or {}).get("selected_shift_point") or {}
+            ),
+            "kaon_nosub": deepcopy(
+                (residual_shift_summaries.get("kaon_nosub") or {}).get("selected_shift_point") or {}
+            ),
+        },
+        "residual_component_shift_summaries": residual_shift_summaries,
         "staged_amplitudes_raw": staged_amplitudes_raw,
         "staged_amplitudes_scaled": staged_amplitudes_scaled,
         "refined_amplitudes": refined_amplitudes,
@@ -3282,6 +4034,114 @@ def build_particle_subtraction_component_result(
         "H_simc_shape_k_sigma0": _clone_hist(
             aligned_kaon_sigma0_shape,
             "H_simc_shape_k_sigma0_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_original_pi_n": _clone_shift_payload_hist(
+            pion_shift_payload,
+            "original_template_hists",
+            "pi_n",
+            "H_pion_shift_original_pi_n_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_selected_pi_n": _clone_shift_payload_hist(
+            pion_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            "pi_n",
+            "H_pion_shift_selected_pi_n_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_original_pi_delta": _clone_shift_payload_hist(
+            pion_shift_payload,
+            "original_template_hists",
+            "pi_delta",
+            "H_pion_shift_original_pi_delta_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_selected_pi_delta": _clone_shift_payload_hist(
+            pion_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            "pi_delta",
+            "H_pion_shift_selected_pi_delta_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_original_pi_sidis": _clone_shift_payload_hist(
+            pion_shift_payload,
+            "original_template_hists",
+            "pi_sidis",
+            "H_pion_shift_original_pi_sidis_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_selected_pi_sidis": _clone_shift_payload_hist(
+            pion_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            "pi_sidis",
+            "H_pion_shift_selected_pi_sidis_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_original_k_sigma0": _clone_shift_payload_hist(
+            pion_shift_payload,
+            "original_template_hists",
+            KAON_SIGMA0_TEMPLATE_NAME,
+            "H_pion_shift_original_k_sigma0_{}".format(context or analysis_scope),
+        ),
+        "H_pion_shift_selected_k_sigma0": _clone_shift_payload_hist(
+            pion_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            KAON_SIGMA0_TEMPLATE_NAME,
+            "H_pion_shift_selected_k_sigma0_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_original_pi_n": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            "original_template_hists",
+            "pi_n",
+            "H_kaon_shift_original_pi_n_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_selected_pi_n": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            "pi_n",
+            "H_kaon_shift_selected_pi_n_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_original_pi_delta": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            "original_template_hists",
+            "pi_delta",
+            "H_kaon_shift_original_pi_delta_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_selected_pi_delta": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            "pi_delta",
+            "H_kaon_shift_selected_pi_delta_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_original_pi_sidis": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            "original_template_hists",
+            "pi_sidis",
+            "H_kaon_shift_original_pi_sidis_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_selected_pi_sidis": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            "pi_sidis",
+            "H_kaon_shift_selected_pi_sidis_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_original_k_lambda": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            "original_template_hists",
+            KAON_SIGNAL_TEMPLATE_NAME,
+            "H_kaon_shift_original_k_lambda_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_selected_k_lambda": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            KAON_SIGNAL_TEMPLATE_NAME,
+            "H_kaon_shift_selected_k_lambda_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_original_k_sigma0": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            "original_template_hists",
+            KAON_SIGMA0_TEMPLATE_NAME,
+            "H_kaon_shift_original_k_sigma0_{}".format(context or analysis_scope),
+        ),
+        "H_kaon_shift_selected_k_sigma0": _clone_shift_payload_hist(
+            kaon_shift_payload,
+            ("selected_template_hists", "selected_extra_template_hists"),
+            KAON_SIGMA0_TEMPLATE_NAME,
+            "H_kaon_shift_selected_k_sigma0_{}".format(context or analysis_scope),
         ),
         "H_pion_fit_pi_n_scaled": pion_fit["pi_n_scaled_hist"],
         "H_pion_fit_pi_delta_scaled": pion_fit["pi_delta_scaled_hist"],
@@ -3373,6 +4233,14 @@ def _component_plot_label(component_name):
 
 def _component_plot_color(component_name):
     return (COMPONENT_PLOT_STYLE.get(component_name) or {}).get("color", ROOT.kBlack)
+
+
+def _component_hist_suffix(component_name):
+    if component_name == KAON_SIGNAL_TEMPLATE_NAME:
+        return "k_lambda"
+    if component_name == KAON_SIGMA0_TEMPLATE_NAME:
+        return "k_sigma0"
+    return str(component_name)
 
 
 def _format_fit_strategy(diagnostics):
@@ -4564,6 +5432,289 @@ def _print_component_amplitude_pages(
         canvas.Close()
 
 
+def _residual_shift_summary_has_content(summary):
+    if not isinstance(summary, dict) or not summary:
+        return False
+    if bool(summary.get("enabled")):
+        return True
+    selected_shift_point = summary.get("selected_shift_point") or {}
+    if any(abs(float(delta_mm or 0.0)) > 1e-12 for delta_mm in selected_shift_point.values()):
+        return True
+    return int(summary.get("candidate_count", 0) or 0) > 1
+
+
+def _print_residual_shift_template_pages(
+    pdf_name,
+    component_fit_result,
+    title_prefix="",
+):
+    shift_summaries = (component_fit_result or {}).get("residual_component_shift_summaries") or {}
+    target_specs = (
+        ("pion_control", "pion", "pion-control"),
+        ("kaon_nosub", "kaon", "kaon no-sub"),
+    )
+    for summary_key, hist_prefix, sample_label in target_specs:
+        summary = shift_summaries.get(summary_key) or {}
+        if not _residual_shift_summary_has_content(summary):
+            continue
+        active_components = list(summary.get("active_components") or [])
+        if not active_components:
+            active_components = list((summary.get("selected_shift_point") or {}).keys())
+        if not active_components:
+            continue
+        per_component = summary.get("per_component") or {}
+        for component_name in active_components:
+            suffix = _component_hist_suffix(component_name)
+            original_hist = component_fit_result.get(
+                "H_{}_shift_original_{}".format(hist_prefix, suffix)
+            )
+            shifted_hist = component_fit_result.get(
+                "H_{}_shift_selected_{}".format(hist_prefix, suffix)
+            )
+            if original_hist is None or shifted_hist is None:
+                continue
+
+            component_label = _component_plot_label(component_name)
+            component_color = _component_plot_color(component_name)
+            shift_diag = per_component.get(component_name) or {}
+            selected_delta = (summary.get("selected_shift_point") or {}).get(component_name)
+
+            canvas = ROOT.TCanvas(
+                "c_shift_{}_{}".format(hist_prefix, suffix),
+                "",
+                900,
+                900,
+            )
+            canvas.Divide(1, 2)
+
+            top_pad = canvas.cd(1)
+            top_pad.SetBottomMargin(0.12)
+            original_clone = _clone_hist(original_hist, "{}_orig".format(original_hist.GetName()))
+            shifted_clone = _clone_hist(shifted_hist, "{}_shift".format(shifted_hist.GetName()))
+            original_clone.SetTitle(
+                "{}{} residual-shift template: {}".format(
+                    title_prefix,
+                    sample_label,
+                    component_label,
+                )
+            )
+            _style_overlay_hist(original_clone, ROOT.kBlue + 1, line_style=2)
+            _style_overlay_hist(shifted_clone, component_color, line_style=1)
+            top_y_max = max(original_clone.GetMaximum(), shifted_clone.GetMaximum(), 0.0)
+            if top_y_max <= 0.0:
+                top_y_max = 1.0
+            original_clone.SetMaximum(1.20 * top_y_max)
+            original_clone.SetMinimum(0.0)
+            original_clone.Draw("hist")
+            shifted_clone.Draw("hist same")
+
+            top_legend = ROOT.TLegend(0.58, 0.70, 0.88, 0.88)
+            top_legend.SetBorderSize(0)
+            top_legend.SetFillStyle(0)
+            top_legend.AddEntry(original_clone, "original aligned template", "l")
+            top_legend.AddEntry(shifted_clone, "selected shifted template", "l")
+            top_legend.Draw()
+
+            stats_box = ROOT.TPaveText(0.14, 0.56, 0.52, 0.88, "NDC")
+            stats_box.SetBorderSize(0)
+            stats_box.SetFillStyle(0)
+            stats_box.SetTextAlign(12)
+            stats_box.SetTextSize(0.026)
+            stats_box.AddText("fit target: {}".format(summary_key))
+            stats_box.AddText("component: {}".format(component_label))
+            stats_box.AddText(
+                "selected delta={} {}".format(
+                    _format_fit_number(selected_delta),
+                    str(summary.get("units") or "GeV"),
+                )
+            )
+            stats_box.AddText("selection metric: {}".format(summary.get("selection_metric") or "n/a"))
+            stats_box.AddText(
+                "renorm factor={}".format(
+                    _format_fit_number(shift_diag.get("shift_renormalization_factor"))
+                )
+            )
+            stats_box.AddText(
+                "lost frac={}".format(
+                    _format_fit_metric(shift_diag.get("lost_integral_fraction"))
+                )
+            )
+            stats_box.AddText(
+                "bound hit={}".format(
+                    "yes" if bool(shift_diag.get("shift_bound_hit_flag")) else "no"
+                )
+            )
+            stats_box.Draw()
+
+            bottom_pad = canvas.cd(2)
+            bottom_pad.SetTopMargin(0.08)
+            bottom_pad.SetBottomMargin(0.12)
+            diff_hist = _clone_hist(shifted_hist, "{}_diff".format(shifted_hist.GetName()))
+            diff_hist.Add(original_hist, -1.0)
+            diff_hist.SetTitle("Shifted - original template")
+            _style_overlay_hist(diff_hist, component_color, line_style=1)
+            diff_y_max = max(abs(diff_hist.GetMaximum()), abs(diff_hist.GetMinimum()), 0.0)
+            if diff_y_max <= 0.0:
+                diff_y_max = 1.0
+            diff_hist.SetMaximum(1.20 * diff_y_max)
+            diff_hist.SetMinimum(-1.20 * diff_y_max)
+            diff_hist.Draw("hist")
+            zero_line = ROOT.TLine(
+                float(diff_hist.GetXaxis().GetXmin()),
+                0.0,
+                float(diff_hist.GetXaxis().GetXmax()),
+                0.0,
+            )
+            zero_line.SetLineColor(ROOT.kGray + 2)
+            zero_line.SetLineStyle(2)
+            zero_line.SetLineWidth(2)
+            zero_line.Draw("same")
+
+            bottom_legend = ROOT.TLegend(0.58, 0.78, 0.88, 0.88)
+            bottom_legend.SetBorderSize(0)
+            bottom_legend.SetFillStyle(0)
+            bottom_legend.AddEntry(diff_hist, "shifted - original", "l")
+            bottom_legend.Draw()
+
+            canvas.Print(pdf_name)
+            canvas.Close()
+
+
+def _print_residual_shift_summary_pages(
+    pdf_name,
+    component_fit_result,
+    title_prefix="",
+):
+    shift_summaries = (component_fit_result or {}).get("residual_component_shift_summaries") or {}
+    target_specs = (
+        ("pion_control", "pion-control"),
+        ("kaon_nosub", "kaon no-sub"),
+    )
+    for summary_key, sample_label in target_specs:
+        summary = shift_summaries.get(summary_key) or {}
+        if not _residual_shift_summary_has_content(summary):
+            continue
+        candidate_summaries = list(summary.get("candidate_summaries") or [])
+        body_lines = [
+            "enabled={}".format(bool(summary.get("enabled"))),
+            "mode={}".format(summary.get("mode") or "n/a"),
+            "units={}".format(summary.get("units") or "n/a"),
+            "selection_metric={}".format(summary.get("selection_metric") or "n/a"),
+            "requested_components={}".format(", ".join(summary.get("requested_components") or []) or "none"),
+            "active_components={}".format(", ".join(summary.get("active_components") or []) or "none"),
+            "selected_shift_point={}".format(_format_shift_point_map(summary.get("selected_shift_point") or {})),
+            "selected_reason={}".format(summary.get("selected_shift_reason") or "n/a"),
+            "candidate_count={}".format(int(summary.get("candidate_count", 0) or 0)),
+            "cleanup_chi2_ndf={}".format(
+                _format_fit_metric(((summary.get("cleanup_metrics") or {}).get("chi2_ndf")))
+            ),
+            "cleanup_residual_integral={}".format(
+                _format_fit_number(((summary.get("cleanup_metrics") or {}).get("residual_integral")))
+            ),
+            "cleanup_pull_rms={}".format(
+                _format_fit_metric(((summary.get("cleanup_metrics") or {}).get("pull_rms")))
+            ),
+            "warnings={}".format(", ".join(summary.get("warnings") or []) or "none"),
+        ]
+        for candidate in candidate_summaries[:10]:
+            cleanup_metrics = candidate.get("cleanup_metrics") or {}
+            body_lines.append(
+                "cand {}: shifts={} score={} acc={} cleanup chi2/ndf={} yield={}".format(
+                    int(candidate.get("candidate_index", 0) or 0),
+                    _format_shift_point_map(candidate.get("shift_point") or {}),
+                    _format_fit_metric(candidate.get("score")),
+                    "yes" if bool(candidate.get("accepted")) else "no",
+                    _format_fit_metric(cleanup_metrics.get("chi2_ndf")),
+                    _format_fit_number(cleanup_metrics.get("corrected_yield")),
+                )
+            )
+        _print_component_text_page(
+            pdf_name,
+            "{}{} residual-shift summary".format(title_prefix, sample_label),
+            [
+                "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+                "fit target: {}".format(summary_key),
+            ],
+            body_lines,
+        )
+
+
+def _print_residual_shift_scan_pages(
+    pdf_name,
+    component_fit_result,
+    title_prefix="",
+):
+    shift_summaries = (component_fit_result or {}).get("residual_component_shift_summaries") or {}
+    target_specs = (
+        ("pion_control", "pion-control"),
+        ("kaon_nosub", "kaon no-sub"),
+    )
+    for summary_key, sample_label in target_specs:
+        summary = shift_summaries.get(summary_key) or {}
+        candidate_summaries = list(summary.get("candidate_summaries") or [])
+        active_components = list(summary.get("active_components") or [])
+        if len(active_components) != 1 or len(candidate_summaries) <= 1:
+            continue
+        component_name = active_components[0]
+        graph_points = []
+        yield_points = []
+        for candidate in candidate_summaries:
+            shift_value = (candidate.get("shift_point") or {}).get(component_name)
+            score_value = candidate.get("score")
+            corrected_yield = ((candidate.get("cleanup_metrics") or {}).get("corrected_yield"))
+            if _is_finite_number(shift_value) and _is_finite_number(score_value):
+                graph_points.append((float(shift_value), float(score_value)))
+            if _is_finite_number(shift_value) and _is_finite_number(corrected_yield):
+                yield_points.append((float(shift_value), float(corrected_yield)))
+        if len(graph_points) <= 1:
+            continue
+
+        graph_points.sort(key=lambda item: item[0])
+        yield_points.sort(key=lambda item: item[0])
+        objective_graph = ROOT.TGraph(len(graph_points))
+        for idx, (x_value, y_value) in enumerate(graph_points):
+            objective_graph.SetPoint(idx, x_value, y_value)
+        objective_graph.SetLineColor(ROOT.kBlue + 1)
+        objective_graph.SetLineWidth(2)
+        objective_graph.SetMarkerColor(ROOT.kBlue + 1)
+        objective_graph.SetMarkerStyle(20)
+
+        yield_graph = ROOT.TGraph(len(yield_points))
+        for idx, (x_value, y_value) in enumerate(yield_points):
+            yield_graph.SetPoint(idx, x_value, y_value)
+        yield_graph.SetLineColor(ROOT.kMagenta + 2)
+        yield_graph.SetLineWidth(2)
+        yield_graph.SetMarkerColor(ROOT.kMagenta + 2)
+        yield_graph.SetMarkerStyle(21)
+
+        canvas = ROOT.TCanvas("c_shift_scan_{}".format(summary_key), "", 900, 900)
+        canvas.Divide(1, 2)
+
+        top_pad = canvas.cd(1)
+        top_pad.SetBottomMargin(0.12)
+        objective_graph.SetTitle(
+            "{}{} residual-shift scan: {}".format(
+                title_prefix,
+                sample_label,
+                _component_plot_label(component_name),
+            )
+        )
+        objective_graph.GetXaxis().SetTitle("delta MM [{}]".format(summary.get("units") or "GeV"))
+        objective_graph.GetYaxis().SetTitle(str(summary.get("selection_metric") or "score"))
+        objective_graph.Draw("ALP")
+
+        bottom_pad = canvas.cd(2)
+        bottom_pad.SetTopMargin(0.08)
+        bottom_pad.SetBottomMargin(0.12)
+        yield_graph.SetTitle("Cleanup-region corrected-yield proxy vs shift")
+        yield_graph.GetXaxis().SetTitle("delta MM [{}]".format(summary.get("units") or "GeV"))
+        yield_graph.GetYaxis().SetTitle("cleanup residual integral")
+        yield_graph.Draw("ALP")
+
+        canvas.Print(pdf_name)
+        canvas.Close()
+
+
 def print_particle_subtraction_component_template_pages(
     pdf_name,
     component_shape_payload,
@@ -5238,6 +6389,21 @@ def print_particle_subtraction_component_fit_pages(
             ),
         ],
         cut_window=cut_window,
+    )
+    _print_residual_shift_summary_pages(
+        pdf_name,
+        component_fit_result,
+        title_prefix,
+    )
+    _print_residual_shift_template_pages(
+        pdf_name,
+        component_fit_result,
+        title_prefix,
+    )
+    _print_residual_shift_scan_pages(
+        pdf_name,
+        component_fit_result,
+        title_prefix,
     )
 
     if component_fit_result.get("analysis_scope") == "setting-wide":

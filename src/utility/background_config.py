@@ -223,6 +223,28 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_sidis": 1.0,
             "k_sigma0_signal": 1.0,
         },
+        "residual_component_shifts_enabled": False,
+        "residual_component_shift_components": (
+            "pi_delta",
+            "pi_sidis",
+        ),
+        "residual_component_shift_mode": "fixed",
+        "residual_component_shift_values": {
+            "pi_delta": 0.0,
+            "pi_sidis": 0.0,
+        },
+        "residual_component_shift_scan_grid": {
+            "pi_delta": (-0.020, -0.010, 0.0, 0.010, 0.020),
+            "pi_sidis": (-0.020, -0.010, 0.0, 0.010, 0.020),
+        },
+        "residual_component_shift_bounds": {
+            "pi_delta": (-0.020, 0.020),
+            "pi_sidis": (-0.020, 0.020),
+        },
+        "residual_component_shift_units": "GeV",
+        "residual_component_shift_selection_metric": "chi2_data",
+        "residual_shift_lost_integral_warn_fraction": 0.01,
+        "cleanup_validation_mm_max": None,
         "joint_refinement_enabled": True,
         "joint_refinement_amplitude_floor": 1e-3,
         "template_corr_warn": 0.95,
@@ -297,7 +319,29 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "pi_delta": 1.0,
             "pi_sidis": 1.0,
             "k_sigma0_signal": 1.0,
-        },        
+        },
+        "residual_component_shifts_enabled": False,
+        "residual_component_shift_components": (
+            "pi_delta",
+            "pi_sidis",
+        ),
+        "residual_component_shift_mode": "fixed",
+        "residual_component_shift_values": {
+            "pi_delta": 0.0,
+            "pi_sidis": 0.0,
+        },
+        "residual_component_shift_scan_grid": {
+            "pi_delta": (-0.020, -0.010, 0.0, 0.010, 0.020),
+            "pi_sidis": (-0.020, -0.010, 0.0, 0.010, 0.020),
+        },
+        "residual_component_shift_bounds": {
+            "pi_delta": (-0.020, 0.020),
+            "pi_sidis": (-0.020, 0.020),
+        },
+        "residual_component_shift_units": "GeV",
+        "residual_component_shift_selection_metric": "chi2_data",
+        "residual_shift_lost_integral_warn_fraction": 0.01,
+        "cleanup_validation_mm_max": None,
         "include_kaon_signal_template": False,
         "joint_refinement_enabled": True,
         "joint_refinement_amplitude_floor": 1e-3,
@@ -351,6 +395,9 @@ PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS = frozenset(
         "prior_scales",
         "postfit_component_scales",
         "postrefine_component_scales",
+        "residual_component_shift_values",
+        "residual_component_shift_scan_grid",
+        "residual_component_shift_bounds",
     }
 )
 
@@ -372,6 +419,29 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_VALUES = frozenset(
         PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_ONLY,
         PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_JOINT,
         PARTICLE_SUBTRACTION_COMPONENT_FIT_MODE_STAGED_PLUS_REGULARIZED_JOINT,
+    }
+)
+PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFT_MODES = frozenset(
+    {
+        "fixed",
+        "scan",
+        "profile",
+    }
+)
+PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFT_SELECTION_METRICS = frozenset(
+    {
+        "chi2_data",
+        "cleanup_region_chi2",
+        "cleanup_region_yield_stability",
+    }
+)
+PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFTABLE_NAMES = frozenset(
+    {
+        "pi_n",
+        "pi_delta",
+        "pi_sidis",
+        "k_lambda_signal",
+        "k_sigma0_signal",
     }
 )
 
@@ -2042,6 +2112,223 @@ def resolve_particle_subtraction_component_postrefine_scales(
             )
         resolved[component_name] = scale_value
     return resolved
+
+
+def resolve_particle_subtraction_component_residual_shift_settings(
+    fit_target,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    if not config:
+        return {
+            "enabled": False,
+            "mode": "fixed",
+            "components": [],
+            "values": {},
+            "scan_grid": {},
+            "bounds": {},
+            "units": "GeV",
+            "selection_metric": "chi2_data",
+            "lost_integral_warn_fraction": 0.01,
+        }
+
+    enabled = bool(config.get("residual_component_shifts_enabled", False))
+    mode = str(config.get("residual_component_shift_mode") or "fixed").strip().lower() or "fixed"
+    if mode not in PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFT_MODES:
+        raise ValueError(
+            "Particle subtraction residual shift mode '{}' for '{}' must be one of {}".format(
+                mode,
+                fit_target,
+                sorted(PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFT_MODES),
+            )
+        )
+
+    selection_metric = str(
+        config.get("residual_component_shift_selection_metric") or "chi2_data"
+    ).strip().lower() or "chi2_data"
+    if selection_metric not in PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFT_SELECTION_METRICS:
+        raise ValueError(
+            "Particle subtraction residual shift selection metric '{}' for '{}' must be one of {}".format(
+                selection_metric,
+                fit_target,
+                sorted(PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFT_SELECTION_METRICS),
+            )
+        )
+
+    configured_components = config.get("residual_component_shift_components")
+    if configured_components is None:
+        configured_components = []
+        for mapping_name in (
+            "residual_component_shift_values",
+            "residual_component_shift_scan_grid",
+            "residual_component_shift_bounds",
+        ):
+            for component_name in (config.get(mapping_name) or {}).keys():
+                component_name = str(component_name)
+                if component_name not in configured_components:
+                    configured_components.append(component_name)
+    components = [str(component_name) for component_name in configured_components if str(component_name)]
+
+    invalid_components = [
+        component_name
+        for component_name in components
+        if component_name not in PARTICLE_SUBTRACTION_COMPONENT_RESIDUAL_SHIFTABLE_NAMES
+    ]
+    if invalid_components:
+        raise ValueError(
+            "Particle subtraction residual shift components for '{}' contain unsupported names: {}".format(
+                fit_target,
+                ", ".join(sorted(invalid_components)),
+            )
+        )
+
+    configured_values = config.get("residual_component_shift_values") or {}
+    configured_scan_grid = config.get("residual_component_shift_scan_grid") or {}
+    configured_bounds = config.get("residual_component_shift_bounds") or {}
+
+    values = {}
+    bounds = {}
+    scan_grid = {}
+    for component_name in components:
+        shift_value = float(configured_values.get(component_name, 0.0) or 0.0)
+        if shift_value != shift_value:
+            raise ValueError(
+                "Particle subtraction residual shift value '{}' for '{}' must be finite".format(
+                    component_name,
+                    fit_target,
+                )
+            )
+        values[component_name] = shift_value
+
+        raw_bounds = configured_bounds.get(component_name)
+        if raw_bounds is None:
+            bounds[component_name] = None
+        else:
+            if not _is_particle_subtraction_numeric_pair(raw_bounds):
+                raise ValueError(
+                    "Particle subtraction residual shift bounds '{}' for '{}' must be numeric pairs".format(
+                        component_name,
+                        fit_target,
+                    )
+                )
+            bound_min = float(raw_bounds[0])
+            bound_max = float(raw_bounds[1])
+            if bound_min > bound_max:
+                raise ValueError(
+                    "Particle subtraction residual shift bounds '{}' for '{}' must satisfy min <= max".format(
+                        component_name,
+                        fit_target,
+                    )
+                )
+            bounds[component_name] = (bound_min, bound_max)
+            if shift_value < bound_min or shift_value > bound_max:
+                raise ValueError(
+                    "Particle subtraction residual shift value '{}' for '{}' must lie within configured bounds".format(
+                        component_name,
+                        fit_target,
+                    )
+                )
+
+        raw_grid = configured_scan_grid.get(component_name)
+        if raw_grid is None:
+            scan_grid[component_name] = [shift_value]
+        else:
+            if not isinstance(raw_grid, (list, tuple)):
+                raise ValueError(
+                    "Particle subtraction residual shift grid '{}' for '{}' must be a list/tuple of numeric values".format(
+                        component_name,
+                        fit_target,
+                    )
+                )
+            resolved_grid = []
+            for grid_value in raw_grid:
+                grid_value = float(grid_value)
+                if grid_value != grid_value:
+                    raise ValueError(
+                        "Particle subtraction residual shift grid '{}' for '{}' must contain only finite values".format(
+                            component_name,
+                            fit_target,
+                        )
+                    )
+                resolved_grid.append(grid_value)
+            resolved_grid = sorted(set(resolved_grid))
+            if not resolved_grid:
+                raise ValueError(
+                    "Particle subtraction residual shift grid '{}' for '{}' must not be empty".format(
+                        component_name,
+                        fit_target,
+                    )
+                )
+            if bounds.get(component_name) is not None:
+                bound_min, bound_max = bounds[component_name]
+                if any(grid_value < bound_min or grid_value > bound_max for grid_value in resolved_grid):
+                    raise ValueError(
+                        "Particle subtraction residual shift grid '{}' for '{}' must lie within configured bounds".format(
+                            component_name,
+                            fit_target,
+                        )
+                    )
+            scan_grid[component_name] = resolved_grid
+
+    lost_integral_warn_fraction = float(
+        config.get("residual_shift_lost_integral_warn_fraction", 0.01) or 0.0
+    )
+    if lost_integral_warn_fraction != lost_integral_warn_fraction or lost_integral_warn_fraction < 0.0:
+        raise ValueError(
+            "Particle subtraction residual shift lost-integral warning fraction for '{}' must be finite and non-negative".format(
+                fit_target,
+            )
+        )
+
+    return {
+        "enabled": enabled,
+        "mode": mode,
+        "components": components,
+        "values": values,
+        "scan_grid": scan_grid,
+        "bounds": bounds,
+        "units": str(config.get("residual_component_shift_units") or "GeV"),
+        "selection_metric": selection_metric,
+        "lost_integral_warn_fraction": lost_integral_warn_fraction,
+    }
+
+
+def resolve_particle_subtraction_component_cleanup_validation_mm_max(
+    fit_target,
+    mm_offset_data=0.0,
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_particle_subtraction_component_fit_window_config(
+        fit_target,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    if not config:
+        return None
+
+    cleanup_mm_max = config.get("cleanup_validation_mm_max")
+    if cleanup_mm_max is None:
+        return None
+    cleanup_mm_max = float(cleanup_mm_max)
+    if cleanup_mm_max != cleanup_mm_max:
+        raise ValueError(
+            "Particle subtraction cleanup_validation_mm_max for '{}' must be finite when configured".format(
+                fit_target,
+            )
+        )
+    if bool(config.get("apply_mm_offset_data", False)):
+        cleanup_mm_max += float(mm_offset_data)
+    return cleanup_mm_max
 
 
 def build_bin_count_candidates(requested_t_bins, requested_phi_bins):

@@ -142,6 +142,21 @@ def _clone_hist_for_plot(hist):
     return cloned_hist
 
 
+def _open_root_pdf_page_stream(canvas, pdf_name, opened):
+    if not opened:
+        canvas.Print(pdf_name + "[")
+        return True
+    return opened
+
+
+def _close_root_pdf_page_stream(pdf_name, opened, canvas_name):
+    if not opened:
+        return
+    close_canvas = ROOT.TCanvas(canvas_name, "Canvas", 10, 10)
+    close_canvas.Print(pdf_name + "]")
+    close_canvas.Close()
+
+
 def _clone_processed_entry(entry):
     cloned = {}
     for key, val in entry.items():
@@ -2005,9 +2020,9 @@ def process_hist_data(
             support_hist_dict["hsyptar"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_hsyptar_DATA_{}_{}".format(j, k)])
             support_hist_dict["t_vs_tmin"][j][k] = _clone_hist_for_plot(hist_bin_dict["H_t_vs_tmin_DATA_{}_{}".format(j, k)])
 
-    # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
-    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_DATA_{}_{}".format(j, k), "H_t_DATA_{}_{}".format(j, k), "H_MM_DUMMY_{}_{}".format(j, k), "H_t_DUMMY_{}_{}".format(j, k)]))-1 # '-1' to remove t-phi bin edges
+    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
+    pdf_opened = False
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -2082,10 +2097,6 @@ def process_hist_data(
             plot_entry = processed_dict["t_bin{}phi_bin{}".format(j+1,k+1)]
             for i, (key,val) in enumerate(plot_entry.items()):
 
-                # Track the absolute first and last plots across all iterations
-                is_absolute_first = (canvas_iter == 0)
-                is_absolute_last = (canvas_iter == total_plots)
-
                 #print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
 
                 if is_hist(val):
@@ -2110,17 +2121,8 @@ def process_hist_data(
                             mm_sub_plot.Draw("same, E1")
                         mm_nosub_plot.SetTitle(mm_nosub_plot.GetName())
                         
-                        # Ensure correct PDF opening and closing
-                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
-
-                        if is_absolute_first:
-                            print("(")
-                            canvas2.Print(pdf_name + '(')
-                        elif is_absolute_last:
-                            print(")")
-                            canvas2.Print(pdf_name + ')')
-                        else:
-                            canvas2.Print(pdf_name)
+                        pdf_opened = _open_root_pdf_page_stream(canvas2, pdf_name, pdf_opened)
+                        canvas2.Print(pdf_name)
                             
                         # Close the canvas2 to free up memory
                         canvas2.Close()
@@ -2139,17 +2141,8 @@ def process_hist_data(
                             fit_plot.Draw("same")
                         mm_pisub_plot.SetTitle(mm_pisub_plot.GetName())
                         
-                        # Ensure correct PDF opening and closing
-                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
-
-                        if is_absolute_first:
-                            print("(")
-                            canvas3.Print(pdf_name + '(')
-                        elif is_absolute_last:
-                            print(")")
-                            canvas3.Print(pdf_name + ')')
-                        else:
-                            canvas3.Print(pdf_name)
+                        pdf_opened = _open_root_pdf_page_stream(canvas3, pdf_name, pdf_opened)
+                        canvas3.Print(pdf_name)
                             
                         # Close the canvas2 to free up memory
                         canvas3.Close()      
@@ -2168,17 +2161,8 @@ def process_hist_data(
                             fit_plot.Draw("same")
                         mm_fit1sub_plot.SetTitle(mm_fit1sub_plot.GetName())
                         
-                        # Ensure correct PDF opening and closing
-                        pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
-
-                        if is_absolute_first:
-                            print("(")
-                            canvas4.Print(pdf_name + '(')
-                        elif is_absolute_last:
-                            print(")")
-                            canvas4.Print(pdf_name + ')')
-                        else:
-                            canvas4.Print(pdf_name)
+                        pdf_opened = _open_root_pdf_page_stream(canvas4, pdf_name, pdf_opened)
+                        canvas4.Print(pdf_name)
                             
                         # Close the canvas2 to free up memory
                         canvas4.Close()                                          
@@ -2216,23 +2200,21 @@ def process_hist_data(
                         # Add the number of mesons to the plot
                         text.DrawLatex(0.7, 0.65, "{} Yield: {:.3e}".format(ParticleType.capitalize(), plot_hist.Integral()))
                     
-                    # Ensure correct PDF opening and closing
-                    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
-
-                    if is_absolute_first:
-                        print("(")
-                        canvas.Print(pdf_name + '(')
-                    elif is_absolute_last:
-                        print(")")
-                        canvas.Print(pdf_name + ')')
-                    else:
-                        canvas.Print(pdf_name)
+                    pdf_opened = _open_root_pdf_page_stream(canvas, pdf_name, pdf_opened)
+                    canvas.Print(pdf_name)
 
                     # Close the canvas to free up memory
                     canvas.Close()
                         
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
+
+    if emit_plots:
+        _close_root_pdf_page_stream(
+            pdf_name,
+            pdf_opened,
+            "yield_data_close_{}".format(phi_setting),
+        )
             
     return processed_dict, support_hist_dict, _freeze_ave_event_cache(ave_event_cache), sub_event_cache
 
@@ -2922,9 +2904,9 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         progress_bar,
     )
 
-    # Checks for first plots and calls +'(' to Print
     canvas_iter = 0
-    total_plots = (len(t_bins)-1) * (len(phi_bins)-1) * len(list(["H_MM_SIMC", "H_t_SIMC"]))-1 # '-1' to remove t-phi bin edges and NumEvts_bin_MM_SIMC_unweighted
+    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))
+    pdf_opened = False
 
     # Loop through bins in t_simc and identify events in specified bins
     for j in range(len(t_bins)-1):
@@ -2982,10 +2964,6 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                 # Create a new canvas for each plot
                 canvas = ROOT.TCanvas("canvas_{}".format(canvas_iter), "Canvas", 800, 600)
 
-                # Track the absolute first and last plots across all iterations
-                is_absolute_first = (canvas_iter == 0)
-                is_absolute_last = (canvas_iter == total_plots)
-
                 #print("Processing plot: {}, Canvas iter: {}".format(key, canvas_iter))
 
                 if is_hist(val):
@@ -3011,23 +2989,21 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
                         plot_hist.Draw()
                         plot_hist.SetTitle(plot_hist.GetName())
 
-                    # Ensure correct PDF opening and closing
-                    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_simc_".format(phi_setting, ParticleType))
-
-                    if is_absolute_first:
-                        print("(")
-                        canvas.Print(pdf_name + '(')
-                    elif is_absolute_last:
-                        print(")")
-                        canvas.Print(pdf_name + ')')
-                    else:
-                        canvas.Print(pdf_name)
+                    pdf_opened = _open_root_pdf_page_stream(canvas, pdf_name, pdf_opened)
+                    canvas.Print(pdf_name)
 
                     # Increment canvas iterator AFTER printing
                     canvas_iter += 1
 
                     # Close the canvas to free up memory
                     canvas.Close()
+
+    if emit_plots:
+        _close_root_pdf_page_stream(
+            pdf_name,
+            pdf_opened,
+            "yield_simc_close_{}".format(phi_setting),
+        )
                 
     return processed_dict, support_hist_dict, _freeze_ave_simc_event_cache(ave_simc_event_cache)
 
