@@ -4331,15 +4331,15 @@ def build_particle_subtraction_component_result(
             "kaon": deepcopy(kaon_diagnostics),
         },
         "H_simc_shape_pi_n": _clone_hist(
-            (pion_fit.get("template_hists") or {}).get("pi_n"),
+            aligned_component_shapes.get("pi_n"),
             "H_simc_shape_pi_n_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_pi_delta": _clone_hist(
-            (pion_fit.get("template_hists") or {}).get("pi_delta"),
+            aligned_component_shapes.get("pi_delta"),
             "H_simc_shape_pi_delta_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_pi_sidis": _clone_hist(
-            (pion_fit.get("template_hists") or {}).get("pi_sidis"),
+            aligned_component_shapes.get("pi_sidis"),
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_k_lambda": _clone_hist(
