@@ -2229,6 +2229,10 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
     base_inp["yield_emit_plots"] = False
     base_inp["yield_show_progress"] = False
     base_inp["suppress_bg_opt_warnings"] = True
+    # Step-4 candidate scans should not abort on a single bad component-template
+    # bin. Fall back to the legacy scalar subtraction inside the optimizer
+    # prepass and keep the stricter runtime policy for the normal analysis path.
+    base_inp["particle_subtraction_fallback_mode"] = "single_scale"
     base_inp["bg_stat_scale1"] = 0.0
     base_inp["bg_stat_scale1_by_setting"] = {
         get_bg_scale_setting_key(base_inp["EPSSET"], hist["phi_setting"]): 0.0
