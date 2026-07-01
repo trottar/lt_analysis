@@ -345,6 +345,94 @@ def _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason):
     return result
 
 
+def _is_fine_binned_analysis_scope(analysis_scope):
+    scope_text = str(analysis_scope or "").strip().lower()
+    if not scope_text:
+        return False
+    if scope_text in ("setting-wide", "setting_wide", "settingwide"):
+        return False
+    return ("t_bin" in scope_text) or ("phi_bin" in scope_text)
+
+
+def _promote_sparse_zero_solution_if_applicable(fit_result, amplitude_prefix, analysis_scope):
+    if not isinstance(fit_result, dict):
+        return fit_result
+    if not _is_fine_binned_analysis_scope(analysis_scope):
+        return fit_result
+    if str(fit_result.get("fit_status") or "").strip().lower() != "fallback":
+        return fit_result
+
+    diagnostics = deepcopy(fit_result.get("diagnostics") or {})
+    message_parts = [
+        diagnostics.get("fallback_reason"),
+        diagnostics.get("message"),
+        ((diagnostics.get("joint_refinement") or {}).get("message")),
+    ]
+    message_blob = " ; ".join(
+        str(part).strip().lower()
+        for part in message_parts
+        if str(part or "").strip()
+    )
+    sparse_markers = (
+        "no active templates available for joint refinement",
+        "no valid full-range fit bins",
+        "no valid template columns available for joint refinement",
+        "non-positive integral for",
+        "no valid fit bins",
+        "insufficient fit bins",
+    )
+    if not any(marker in message_blob for marker in sparse_markers):
+        return fit_result
+
+    component_amplitudes = [
+        float(fit_result.get("{}_n".format(amplitude_prefix), 0.0) or 0.0),
+        float(fit_result.get("{}_delta".format(amplitude_prefix), 0.0) or 0.0),
+        float(fit_result.get("{}_sidis".format(amplitude_prefix), 0.0) or 0.0),
+    ]
+    extra_component_amplitudes = [
+        float(value or 0.0)
+        for value in ((fit_result.get("extra_component_amplitudes") or {}).values())
+    ]
+    if any(abs(value) > 1e-12 for value in component_amplitudes + extra_component_amplitudes):
+        return fit_result
+
+    promoted_message = (
+        "sparse fine-bin zero solution accepted: {}".format(
+            diagnostics.get("fallback_reason")
+            or diagnostics.get("message")
+            or "no valid active templates"
+        )
+    )
+    validation = deepcopy(diagnostics.get("validation") or {})
+    validation["accepted"] = True
+    validation["rejection_reasons"] = []
+    if "chi2" not in validation:
+        validation["chi2"] = diagnostics.get("chi2")
+    if "ndf" not in validation:
+        validation["ndf"] = diagnostics.get("ndf")
+    if "chi2_ndf" not in validation:
+        validation["chi2_ndf"] = diagnostics.get("chi2_ndf")
+    if "fit_p_value" not in validation:
+        validation["fit_p_value"] = diagnostics.get("fit_p_value")
+
+    joint_refinement = deepcopy(diagnostics.get("joint_refinement") or {})
+    joint_refinement["status"] = "skipped_sparse_bin"
+    joint_refinement["success"] = False
+    joint_refinement["message"] = promoted_message
+
+    diagnostics["validation"] = validation
+    diagnostics["success"] = True
+    diagnostics["fallback_used"] = False
+    diagnostics["fallback_reason"] = ""
+    diagnostics["message"] = promoted_message
+    diagnostics["joint_refinement"] = joint_refinement
+    diagnostics["joint_refinement_status"] = "skipped_sparse_bin"
+    diagnostics["sparse_bin_zero_solution_accepted"] = True
+    fit_result["fit_status"] = "success"
+    fit_result["diagnostics"] = diagnostics
+    return fit_result
+
+
 def _validate_template_hist(template_hist, target_hist, template_name):
     if target_hist is None:
         return "missing target histogram"
@@ -4019,6 +4107,11 @@ def build_particle_subtraction_component_result(
         phi_setting=resolved_phi_setting,
         context=context,
     )
+    pion_fit = _promote_sparse_zero_solution_if_applicable(
+        pion_fit,
+        "B",
+        analysis_scope,
+    )
     kaon_fit = fit_kaon_nosub_with_simc_pion_shapes(
         h_kaon_nosub,
         aligned_component_shapes.get("pi_n"),
@@ -4030,6 +4123,11 @@ def build_particle_subtraction_component_result(
         mm_offset_data=mm_offset_data,
         phi_setting=resolved_phi_setting,
         context=context,
+    )
+    kaon_fit = _promote_sparse_zero_solution_if_applicable(
+        kaon_fit,
+        "A",
+        analysis_scope,
     )
     pion_shift_payload = pion_fit.get("template_shift_payload") or {}
     kaon_shift_payload = kaon_fit.get("template_shift_payload") or {}

@@ -262,7 +262,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "windows": {
             "pi_n": (0.88, 0.94),
-            "pi_delta": ((1.12, 1.16), (1.24, 1.28)),
+            "pi_delta": ((1.16, 1.18), (1.24, 1.26)),
             #"pi_sidis": ((1.07, 1.10),(1.45, 1.50)),
             "pi_sidis": (1.05, 1.10),
             #"pi_sidis": ((1.05, 1.10), (1.25, 1.30), (1.45, 1.50)),
@@ -360,7 +360,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         },
         "windows": {
             "pi_n": (0.88, 0.94),
-            "pi_delta": ((1.12, 1.16), (1.24, 1.28)),
+            "pi_delta": ((1.16, 1.18), (1.24, 1.26)),
             #"pi_sidis": ((1.07, 1.10),(1.45, 1.50)),
             "pi_sidis": (1.05, 1.10),
             #"pi_sidis": ((1.05, 1.10), (1.25, 1.30), (1.45, 1.50)),
