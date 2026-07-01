@@ -273,7 +273,7 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "apply_mm_offset_data": True,
         "pion_component_fit_mode": "staged_plus_regularized_joint",
         "staged_fit_passes": 1,
-        "fit_order": ("pi_n", "pi_sidis", "pi_delta", "k_sigma0_signal"),
+        "fit_order": ("pi_n", "pi_sidis", "k_sigma0_signal", "pi_delta"),
         "stage_amplitude_windows": {
             "k_sigma0_signal": (1.17, 1.23),
         },
