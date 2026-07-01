@@ -285,7 +285,25 @@ def _set_hist_values(hist, values):
         hist.SetBinError(index, 0.0)
 
 
-def _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason):
+def _merge_template_hist_maps(*template_maps):
+    merged = {}
+    for template_map in template_maps:
+        if not isinstance(template_map, dict):
+            continue
+        for template_name, template_hist in template_map.items():
+            if template_hist is None:
+                continue
+            merged[str(template_name)] = template_hist
+    return merged
+
+
+def _zero_fit_result(
+    target_hist,
+    amplitude_prefix,
+    context,
+    fallback_reason,
+    template_hists=None,
+):
     fit_hist = _clone_hist(
         target_hist,
         "{}_fit_hist_{}".format(amplitude_prefix, context),
@@ -318,6 +336,7 @@ def _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason):
         },
         "fit_hist": fit_hist,
         "residual_hist": residual_hist,
+        "template_hists": _merge_template_hist_maps(template_hists),
         "pi_n_scaled_hist": _clone_hist(
             target_hist,
             "{}_pi_n_scaled_{}".format(amplitude_prefix, context),
@@ -1788,6 +1807,20 @@ def _apply_joint_component_refinement(
     staged_scaled_hist_map.update(deepcopy(result.get("extra_scaled_hists") or {}))
 
     def _retain_staged_solution(joint_refinement_summary, message_override=None):
+        retained_stage_validation = deepcopy(stage_validation)
+        original_fallback_reason = str(diagnostics.get("fallback_reason") or "").strip()
+        original_message = str(diagnostics.get("message") or "").strip()
+        stage_failure_reason = (
+            original_fallback_reason
+            or original_message
+            or str(message_override or "").strip()
+            or str((joint_refinement_summary or {}).get("message") or "").strip()
+        )
+        if not retained_stage_validation and stage_failure_reason:
+            retained_stage_validation = {
+                "accepted": False,
+                "rejection_reasons": [stage_failure_reason],
+            }
         diagnostics["joint_refinement"] = deepcopy(joint_refinement_summary or {})
         diagnostics["joint_refinement_status"] = str(
             (joint_refinement_summary or {}).get("status") or "not_requested"
@@ -1802,25 +1835,29 @@ def _apply_joint_component_refinement(
             template_name: 0.0
             for template_name in fit_names
         }
-        diagnostics["validation"] = deepcopy(stage_validation)
-        diagnostics["success"] = bool(stage_validation.get("accepted"))
+        diagnostics["validation"] = deepcopy(retained_stage_validation)
+        diagnostics["success"] = bool(retained_stage_validation.get("accepted"))
         diagnostics["message"] = str(
-            message_override
-            or (joint_refinement_summary or {}).get("message")
-            or ""
+            stage_failure_reason
+            if not bool(diagnostics["success"]) else (
+                message_override
+                or (joint_refinement_summary or {}).get("message")
+                or original_message
+                or ""
+            )
         )
-        diagnostics["chi2"] = stage_validation.get("chi2")
-        diagnostics["ndf"] = stage_validation.get("ndf")
-        diagnostics["chi2_ndf"] = stage_validation.get("chi2_ndf")
-        diagnostics["fit_p_value"] = stage_validation.get("fit_p_value")
+        diagnostics["chi2"] = retained_stage_validation.get("chi2")
+        diagnostics["ndf"] = retained_stage_validation.get("ndf")
+        diagnostics["chi2_ndf"] = retained_stage_validation.get("chi2_ndf")
+        diagnostics["fit_p_value"] = retained_stage_validation.get("fit_p_value")
         diagnostics["n_fit_bins"] = (joint_refinement_summary or {}).get("active_bin_count", 0)
         diagnostics["fallback_used"] = not bool(diagnostics["success"])
         diagnostics["fallback_reason"] = (
             ""
             if bool(diagnostics["success"]) else (
-                message_override
+                stage_failure_reason
                 or "staged validation rejected: {}".format(
-                    "; ".join(stage_validation.get("rejection_reasons") or ["unknown"])
+                    "; ".join(retained_stage_validation.get("rejection_reasons") or ["unknown"])
                 )
             )
         )
@@ -2835,6 +2872,7 @@ def _fit_staged_anchor_templates(
             amplitude_prefix,
             context,
             "no component anchor windows configured",
+            template_hists=template_hists,
         )
 
     fallback_reason = _validate_component_shapes(
@@ -2843,11 +2881,23 @@ def _fit_staged_anchor_templates(
         component_names=fitted_names,
     )
     if fallback_reason:
-        return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+        return _zero_fit_result(
+            target_hist,
+            amplitude_prefix,
+            context,
+            fallback_reason,
+            template_hists=template_hists,
+        )
     for template_name, template_hist in extra_positive_templates.items():
         fallback_reason = _validate_template_hist(template_hist, target_hist, template_name)
         if fallback_reason:
-            return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+            return _zero_fit_result(
+                target_hist,
+                amplitude_prefix,
+                context,
+                fallback_reason,
+                template_hists=template_hists,
+            )
 
     stage_amplitudes = {template_name: 0.0 for template_name in template_hists}
     stage_uncertainties = {template_name: None for template_name in template_hists}
@@ -3059,11 +3109,23 @@ def _run_component_fit(
         extra_positive_templates = {}
     fallback_reason = _validate_component_shapes(component_hists, target_hist)
     if fallback_reason:
-        return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+        return _zero_fit_result(
+            target_hist,
+            amplitude_prefix,
+            context,
+            fallback_reason,
+            template_hists=_merge_template_hist_maps(component_hists, extra_positive_templates),
+        )
     for template_name, template_hist in extra_positive_templates.items():
         fallback_reason = _validate_template_hist(template_hist, target_hist, template_name)
         if fallback_reason:
-            return _zero_fit_result(target_hist, amplitude_prefix, context, fallback_reason)
+            return _zero_fit_result(
+                target_hist,
+                amplitude_prefix,
+                context,
+                fallback_reason,
+                template_hists=_merge_template_hist_maps(component_hists, extra_positive_templates),
+            )
 
     fit_inputs = _build_fit_inputs(
         target_hist,
@@ -3083,6 +3145,7 @@ def _run_component_fit(
             amplitude_prefix,
             context,
             "no valid fit bins",
+            template_hists=_merge_template_hist_maps(component_hists, extra_positive_templates),
         )
 
     column_names = list(COMPONENT_NAMES)
@@ -3110,6 +3173,7 @@ def _run_component_fit(
             amplitude_prefix,
             context,
             "insufficient fit bins",
+            template_hists=_merge_template_hist_maps(component_hists, extra_positive_templates),
         )
 
     try:
@@ -3125,6 +3189,7 @@ def _run_component_fit(
             amplitude_prefix,
             context,
             "fit solver exception: {}".format(exc),
+            template_hists=_merge_template_hist_maps(component_hists, extra_positive_templates),
         )
 
     if not getattr(fit_result, "success", False):
@@ -3133,6 +3198,7 @@ def _run_component_fit(
             amplitude_prefix,
             context,
             "fit solver failed: {}".format(getattr(fit_result, "message", "unknown")),
+            template_hists=_merge_template_hist_maps(component_hists, extra_positive_templates),
         )
 
     parameter_map = {
