@@ -44,6 +44,13 @@ COMPONENT_PLOT_STYLE = {
 }
 
 
+def _is_root_object(obj):
+    try:
+        return bool(obj is not None and obj.InheritsFrom("TObject"))
+    except Exception:
+        return False
+
+
 def _is_root_hist(obj):
     try:
         return bool(obj is not None and obj.InheritsFrom("TH1"))
@@ -55,8 +62,10 @@ _JSON_SKIP = object()
 
 
 def _json_ready_particle_subtraction_value(value):
-    if _is_root_hist(value):
+    if _is_root_object(value):
         return _JSON_SKIP
+    if isinstance(value, np.generic):
+        return value.item()
     if isinstance(value, np.ndarray):
         return value.tolist()
     if isinstance(value, dict):
@@ -68,6 +77,14 @@ def _json_ready_particle_subtraction_value(value):
             cleaned[key] = child
         return cleaned
     if isinstance(value, (list, tuple)):
+        cleaned = []
+        for child_value in value:
+            child = _json_ready_particle_subtraction_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned.append(child)
+        return cleaned
+    if isinstance(value, set):
         cleaned = []
         for child_value in value:
             child = _json_ready_particle_subtraction_value(child_value)
@@ -1797,6 +1814,12 @@ def _apply_joint_component_refinement(
         refined_coefficients_raw,
         scale_map=postrefine_scale_map,
     )
+    refined_fit_hist_pre_postrefine = _build_model_hist(
+        target_hist,
+        template_hists,
+        refined_coefficients_raw,
+        "{}_fit_hist_refined_pre_postrefine_{}".format(amplitude_prefix, context or "scope"),
+    )
     refined_fit_hist = _build_model_hist(
         target_hist,
         template_hists,
@@ -1815,6 +1838,21 @@ def _apply_joint_component_refinement(
         amplitude_prefix,
         "{}_refined".format(context or "scope"),
     )
+    refined_scaled_hist_map_pre_postrefine = _build_scaled_hist_map(
+        template_hists,
+        refined_coefficients_raw,
+        amplitude_prefix,
+        "{}_refined_pre_postrefine".format(context or "scope"),
+    )
+    refined_pion_bg_fit_hist_pre_postrefine = _build_model_hist(
+        target_hist,
+        {
+            component_name: template_hists.get(component_name)
+            for component_name in COMPONENT_NAMES
+        },
+        refined_coefficients_raw,
+        "{}_pion_bg_fit_refined_pre_postrefine_{}".format(amplitude_prefix, context or "scope"),
+    ) if amplitude_prefix == "A" else None
     refined_pion_bg_fit_hist = _build_model_hist(
         target_hist,
         {
@@ -1851,6 +1889,8 @@ def _apply_joint_component_refinement(
     refined_full_map = dict(refined_extra_component_amplitudes)
     refined_full_map.update(refined_component_amplitudes)
     diagnostics["refined_amplitudes_pre_postrefine_scale"] = deepcopy(refined_coefficients_raw)
+    diagnostics["refined_amplitudes_postrefine_scaled"] = deepcopy(refined_full_map)
+    diagnostics["staged_amplitudes_postfit_scaled"] = deepcopy(staged_scaled_amplitudes)
     diagnostics["refined_amplitudes"] = deepcopy(refined_full_map)
     diagnostics["amplitude_shifts"] = {
         template_name: float(refined_full_map.get(template_name, 0.0) - staged_scaled_amplitudes.get(template_name, 0.0))
@@ -1918,10 +1958,13 @@ def _apply_joint_component_refinement(
     result["{}_sidis".format(amplitude_prefix)] = float(refined_component_amplitudes.get("pi_sidis", 0.0) or 0.0)
     result["extra_component_amplitudes"] = deepcopy(refined_extra_component_amplitudes)
     result["refined_fit_hist"] = refined_fit_hist
+    result["refined_fit_hist_pre_postrefine"] = refined_fit_hist_pre_postrefine
     result["refined_residual_hist"] = refined_residual_hist
     result["refined_scaled_hist_map"] = refined_scaled_hist_map
+    result["refined_scaled_hist_map_pre_postrefine"] = refined_scaled_hist_map_pre_postrefine
     if amplitude_prefix == "A":
         result["refined_pion_bg_fit_hist"] = refined_pion_bg_fit_hist
+        result["refined_pion_bg_fit_hist_pre_postrefine"] = refined_pion_bg_fit_hist_pre_postrefine
     return result
 
 
@@ -3637,15 +3680,26 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "k_lambda_scaled_hist": signal_scaled_hist,
         "k_sigma0_scaled_hist": sigma0_scaled_hist,
         "refined_fit_hist": result.get("refined_fit_hist") or result["fit_hist"],
+        "refined_fit_hist_pre_postrefine": result.get("refined_fit_hist_pre_postrefine"),
         "refined_pion_bg_fit_hist": result.get("refined_pion_bg_fit_hist") or result["pion_bg_fit_hist"],
+        "refined_pion_bg_fit_hist_pre_postrefine": result.get("refined_pion_bg_fit_hist_pre_postrefine"),
         "refined_residual_hist": result.get("refined_residual_hist") or result["residual_hist"],
         "refined_pi_n_scaled_hist": refined_scaled_hist_map.get("pi_n") or result["pi_n_scaled_hist"],
         "refined_pi_delta_scaled_hist": refined_scaled_hist_map.get("pi_delta") or result["pi_delta_scaled_hist"],
         "refined_pi_sidis_scaled_hist": refined_scaled_hist_map.get("pi_sidis") or result["pi_sidis_scaled_hist"],
         "refined_k_lambda_scaled_hist": refined_scaled_hist_map.get(KAON_SIGNAL_TEMPLATE_NAME) or signal_scaled_hist,
         "refined_k_sigma0_scaled_hist": refined_scaled_hist_map.get(KAON_SIGMA0_TEMPLATE_NAME) or sigma0_scaled_hist,
+        "refined_k_sigma0_scaled_hist_pre_postrefine": (
+            (result.get("refined_scaled_hist_map_pre_postrefine") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
+            or sigma0_scaled_hist
+        ),
         "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
+        "sigma0_requested": bool(anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME)),
+        "sigma0_active": bool(
+            sigma0_scaled_hist is not None
+            or (refined_scaled_hist_map.get(KAON_SIGMA0_TEMPLATE_NAME) is not None)
+        ),
         "resolved_config_summary": {
             "fit_target": "kaon_nosub",
             "particle_subtraction_setting_key": fit_config.get("particle_subtraction_setting_key"),
@@ -3665,6 +3719,11 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "postfit_component_scales": deepcopy(postfit_scale_map),
             "postrefine_component_scales": deepcopy(postrefine_scale_map),
             "fit_mode": fit_mode,
+            "sigma0_requested": bool(anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME)),
+            "sigma0_active": bool(
+                sigma0_scaled_hist is not None
+                or (refined_scaled_hist_map.get(KAON_SIGMA0_TEMPLATE_NAME) is not None)
+            ),
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
             "cleanup_validation_mm_max": validation_options.get("cleanup_validation_mm_max"),
@@ -3682,12 +3741,15 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "k_sigma0_scaled_hist",
             "refined_fit_hist",
             "refined_pion_bg_fit_hist",
+            "refined_pion_bg_fit_hist_pre_postrefine",
             "refined_residual_hist",
             "refined_pi_n_scaled_hist",
             "refined_pi_delta_scaled_hist",
             "refined_pi_sidis_scaled_hist",
             "refined_k_lambda_scaled_hist",
             "refined_k_sigma0_scaled_hist",
+            "refined_k_sigma0_scaled_hist_pre_postrefine",
+            "refined_fit_hist_pre_postrefine",
         ):
             hist = return_payload.get(key)
             if hist is None:
@@ -4256,8 +4318,11 @@ def build_particle_subtraction_component_result(
         "H_kaon_fit_pi_sidis_scaled_refined": kaon_fit.get("refined_pi_sidis_scaled_hist"),
         "H_kaon_fit_k_lambda_scaled_refined": kaon_fit.get("refined_k_lambda_scaled_hist"),
         "H_kaon_fit_k_sigma0_scaled_refined": kaon_fit.get("refined_k_sigma0_scaled_hist"),
+        "H_kaon_fit_k_sigma0_scaled_refined_pre_postrefine": kaon_fit.get("refined_k_sigma0_scaled_hist_pre_postrefine"),
         "H_kaon_fit_total_refined": kaon_fit.get("refined_fit_hist"),
+        "H_kaon_fit_total_refined_pre_postrefine": kaon_fit.get("refined_fit_hist_pre_postrefine"),
         "H_kaon_pion_bg_fit_total_refined": kaon_fit.get("refined_pion_bg_fit_hist"),
+        "H_kaon_pion_bg_fit_total_refined_pre_postrefine": kaon_fit.get("refined_pion_bg_fit_hist_pre_postrefine"),
         "H_kaon_fit_step_overlays": kaon_fit.get("step_overlays") or [],
         "H_fit_residual_pion": pion_fit["residual_hist"],
         "H_fit_residual_kaon": kaon_fit["residual_hist"],
@@ -4276,6 +4341,9 @@ def build_particle_subtraction_component_result(
     result["diagnostics"]["pion"]["template_mm_shift_applied"] = bool(abs(template_mm_offset_data) > 1e-12)
     result["diagnostics"]["kaon"]["template_mm_offset_data"] = template_mm_offset_data
     result["diagnostics"]["kaon"]["template_mm_shift_applied"] = bool(abs(template_mm_offset_data) > 1e-12)
+    result["diagnostics"]["kaon"]["sigma0_requested"] = bool(kaon_fit.get("sigma0_requested"))
+    result["diagnostics"]["kaon"]["sigma0_active"] = bool(kaon_fit.get("sigma0_active"))
+    result["sigma0_active_kaon"] = bool(kaon_fit.get("sigma0_active"))
     if result["fallback_used"]:
         print(
             "WARNING: pion component fit fallback used\n"
@@ -4947,6 +5015,189 @@ def _print_joint_refinement_overlay_page(
     pull_legend.AddEntry(stage_pull, "staged pull", "l")
     pull_legend.AddEntry(refined_pull, "refined pull", "l")
     pull_legend.Draw()
+    canvas.Print(pdf_name)
+    canvas.Close()
+
+
+def _print_kaon_pion_bg_comparison_page(
+    pdf_name,
+    data_hist,
+    staged_pion_bg_hist,
+    refined_pion_bg_hist,
+    final_pion_bg_hist,
+    sigma0_hist,
+    title,
+    stats_lines,
+    cut_window=None,
+):
+    if data_hist is None or staged_pion_bg_hist is None or final_pion_bg_hist is None:
+        return
+
+    canvas = ROOT.TCanvas(
+        "c_kaon_pion_bg_compare_{}".format(data_hist.GetName()),
+        "",
+        1000,
+        900,
+    )
+    canvas.Divide(1, 2)
+
+    top_pad = canvas.cd(1)
+    top_pad.SetBottomMargin(0.10)
+    top_pad.SetLeftMargin(0.10)
+    top_pad.SetRightMargin(0.04)
+    top_pad.SetTopMargin(0.08)
+
+    data_clone = _clone_hist(data_hist, "{}_kaon_compare_data".format(data_hist.GetName()))
+    staged_clone = _clone_hist(staged_pion_bg_hist, "{}_kaon_compare_stage".format(staged_pion_bg_hist.GetName()))
+    refined_clone = _clone_hist(
+        refined_pion_bg_hist,
+        "{}_kaon_compare_refined".format(refined_pion_bg_hist.GetName()),
+    ) if refined_pion_bg_hist is not None else None
+    final_clone = _clone_hist(final_pion_bg_hist, "{}_kaon_compare_final".format(final_pion_bg_hist.GetName()))
+    sigma0_clone = _clone_hist(
+        sigma0_hist,
+        "{}_kaon_compare_sigma0".format(sigma0_hist.GetName()),
+    ) if sigma0_hist is not None else None
+
+    data_clone.SetTitle(title)
+    data_clone.SetLineColor(ROOT.kBlack)
+    data_clone.SetLineWidth(2)
+    data_clone.SetFillStyle(3001)
+    data_clone.SetFillColor(ROOT.kGray + 1)
+    data_clone.SetMarkerStyle(20)
+    data_clone.SetMarkerSize(0.7)
+    _style_overlay_hist(staged_clone, ROOT.kOrange + 7, line_style=2)
+    if refined_clone is not None:
+        _style_overlay_hist(refined_clone, ROOT.kBlue + 1, line_style=3)
+    _style_overlay_hist(final_clone, ROOT.kGreen + 2, line_style=1)
+    if sigma0_clone is not None:
+        _style_overlay_hist(sigma0_clone, ROOT.kCyan + 2, line_style=1)
+
+    y_max = max(
+        data_clone.GetMaximum(),
+        staged_clone.GetMaximum(),
+        final_clone.GetMaximum(),
+        refined_clone.GetMaximum() if refined_clone is not None else 0.0,
+        sigma0_clone.GetMaximum() if sigma0_clone is not None else 0.0,
+        0.0,
+    )
+    if y_max <= 0.0:
+        y_max = 1.0
+    data_clone.SetMaximum(1.20 * y_max)
+    data_clone.SetMinimum(0.0)
+    data_clone.Draw("hist")
+    staged_clone.Draw("hist same")
+    if refined_clone is not None:
+        refined_clone.Draw("hist same")
+    final_clone.Draw("hist same")
+    if sigma0_clone is not None:
+        sigma0_clone.Draw("hist same")
+    if cut_window is not None:
+        _draw_vertical_window_lines(cut_window[0], cut_window[1], 0.0, 1.20 * y_max)
+
+    top_legend = ROOT.TLegend(0.54, 0.60, 0.96, 0.89)
+    top_legend.SetBorderSize(0)
+    top_legend.SetFillStyle(0)
+    top_legend.SetTextSize(0.024)
+    top_legend.AddEntry(data_clone, "kaon data", "lf")
+    top_legend.AddEntry(staged_clone, "staged pion-bg sum", "l")
+    if refined_clone is not None:
+        top_legend.AddEntry(refined_clone, "refined pion-bg sum", "l")
+    top_legend.AddEntry(final_clone, "final postrefine pion-bg sum", "l")
+    if sigma0_clone is not None:
+        top_legend.AddEntry(sigma0_clone, "K-Sigma0 contribution", "l")
+    top_legend.Draw()
+
+    if stats_lines:
+        stats_box = ROOT.TPaveText(0.12, 0.60, 0.46, 0.89, "NDC")
+        stats_box.SetBorderSize(0)
+        stats_box.SetFillStyle(0)
+        stats_box.SetTextAlign(12)
+        stats_box.SetTextSize(0.022)
+        for line in stats_lines:
+            stats_box.AddText(str(line))
+        stats_box.Draw()
+
+    bottom_pad = canvas.cd(2)
+    bottom_pad.SetTopMargin(0.08)
+    bottom_pad.SetBottomMargin(0.12)
+    bottom_pad.SetLeftMargin(0.10)
+    bottom_pad.SetRightMargin(0.04)
+
+    stage_resid = _build_difference_hist(
+        data_hist,
+        staged_pion_bg_hist,
+        "{}_kaon_compare_stage_resid".format(data_hist.GetName()),
+        divide_by_sigma=False,
+    )
+    refined_resid = _build_difference_hist(
+        data_hist,
+        refined_pion_bg_hist,
+        "{}_kaon_compare_refined_resid".format(data_hist.GetName()),
+        divide_by_sigma=False,
+    ) if refined_pion_bg_hist is not None else None
+    final_resid = _build_difference_hist(
+        data_hist,
+        final_pion_bg_hist,
+        "{}_kaon_compare_final_resid".format(data_hist.GetName()),
+        divide_by_sigma=False,
+    )
+
+    stage_resid.SetTitle("Residuals to kaon data: data - pion-bg model")
+    stage_resid.SetLineColor(ROOT.kOrange + 7)
+    stage_resid.SetLineWidth(2)
+    if refined_resid is not None:
+        refined_resid.SetLineColor(ROOT.kBlue + 1)
+        refined_resid.SetLineWidth(2)
+    final_resid.SetLineColor(ROOT.kGreen + 2)
+    final_resid.SetLineWidth(2)
+
+    resid_y_min = min(
+        stage_resid.GetMinimum(),
+        refined_resid.GetMinimum() if refined_resid is not None else 0.0,
+        final_resid.GetMinimum(),
+        0.0,
+    )
+    resid_y_max = max(
+        stage_resid.GetMaximum(),
+        refined_resid.GetMaximum() if refined_resid is not None else 0.0,
+        final_resid.GetMaximum(),
+        0.0,
+    )
+    resid_span = max(resid_y_max - resid_y_min, 1e-3)
+    stage_resid.SetMaximum(resid_y_max + 0.20 * resid_span)
+    stage_resid.SetMinimum(resid_y_min - 0.20 * resid_span)
+    stage_resid.Draw("hist")
+    if refined_resid is not None:
+        refined_resid.Draw("hist same")
+    final_resid.Draw("hist same")
+    zero_line = ROOT.TLine(
+        float(data_hist.GetXaxis().GetXmin()),
+        0.0,
+        float(data_hist.GetXaxis().GetXmax()),
+        0.0,
+    )
+    zero_line.SetLineColor(ROOT.kBlack)
+    zero_line.SetLineStyle(3)
+    zero_line.Draw("same")
+    if cut_window is not None:
+        _draw_vertical_window_lines(
+            cut_window[0],
+            cut_window[1],
+            stage_resid.GetMinimum(),
+            stage_resid.GetMaximum(),
+        )
+
+    bottom_legend = ROOT.TLegend(0.58, 0.70, 0.95, 0.88)
+    bottom_legend.SetBorderSize(0)
+    bottom_legend.SetFillStyle(0)
+    bottom_legend.SetTextSize(0.024)
+    bottom_legend.AddEntry(stage_resid, "data - staged pion-bg", "l")
+    if refined_resid is not None:
+        bottom_legend.AddEntry(refined_resid, "data - refined pion-bg", "l")
+    bottom_legend.AddEntry(final_resid, "data - final postrefine pion-bg", "l")
+    bottom_legend.Draw()
+
     canvas.Print(pdf_name)
     canvas.Close()
 
@@ -5906,11 +6157,6 @@ def print_particle_subtraction_component_application_pages(
     if not isinstance(component_payload, dict):
         return
     if not bool(component_payload.get("accepted")):
-        _print_component_application_status_page(
-            pdf_name,
-            component_payload,
-            title_prefix=title_prefix,
-        )
         return
 
     title_prefix = (title_prefix or "").strip()
@@ -6226,6 +6472,11 @@ def print_particle_subtraction_component_fit_pages(
     kaon_postrefine_scales = kaon_diagnostics.get("postrefine_component_scales") or {}
     pion_manual_scaling_active = _component_scale_map_has_nonunity(pion_postfit_scales) or _component_scale_map_has_nonunity(pion_postrefine_scales)
     kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
+    kaon_sigma0_active = bool(
+        kaon_diagnostics.get("sigma0_active")
+        or component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None
+        or component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined") is not None
+    )
 
     _print_component_overlay_page(
         pdf_name,
@@ -6335,6 +6586,7 @@ def print_particle_subtraction_component_fit_pages(
             "manual kaon-side scaling active: {}".format(
                 "yes" if kaon_manual_scaling_active else "no"
             ),
+            "sigma0 active: {}".format("yes" if kaon_sigma0_active else "no"),
             "A_n={}  A_delta={}  A_sidis={}".format(
                 _format_fit_number(kaon_stage_amplitudes.get("pi_n")),
                 _format_fit_number(kaon_stage_amplitudes.get("pi_delta")),
@@ -6443,6 +6695,7 @@ def print_particle_subtraction_component_fit_pages(
             "manual kaon-side scaling active: {}".format(
                 "yes" if kaon_manual_scaling_active else "no"
             ),
+            "sigma0 active: {}".format("yes" if kaon_sigma0_active else "no"),
             "post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
             "post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
             "staged chi2/ndf={}  refined chi2/ndf={}".format(
@@ -6476,6 +6729,35 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_number(kaon_stage_amplitudes.get("pi_sidis")),
                 _format_fit_number(component_fit_result.get("A_sidis")),
             ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_kaon_pion_bg_comparison_page(
+        pdf_name,
+        component_fit_result.get("H_kaon_nosub_input"),
+        component_fit_result.get("H_kaon_pion_bg_fit_total"),
+        component_fit_result.get("H_kaon_pion_bg_fit_total_refined_pre_postrefine"),
+        component_fit_result.get("H_kaon_pion_bg_fit_total_refined"),
+        component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined"),
+        "{}kaon no-sub pion-background comparison with sigma0 stabilizer".format(title_prefix),
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            "sigma0 active: {}".format("yes" if kaon_sigma0_active else "no"),
+            "staged pion-bg integral={}".format(
+                _format_fit_number(_hist_integral(component_fit_result.get("H_kaon_pion_bg_fit_total")))
+            ),
+            "refined pion-bg integral={}".format(
+                _format_fit_number(_hist_integral(component_fit_result.get("H_kaon_pion_bg_fit_total_refined_pre_postrefine")))
+            ),
+            "final postrefine pion-bg integral={}".format(
+                _format_fit_number(_hist_integral(component_fit_result.get("H_kaon_pion_bg_fit_total_refined")))
+            ),
+            "K-Sigma0 integral={}".format(
+                _format_fit_number(_hist_integral(component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined")))
+            ),
+            "post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
+            "post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
         ],
         cut_window=cut_window,
     )

@@ -17,6 +17,13 @@ from mm_background_subtraction import mm_background_weight_from_value
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
 
 
+def _is_root_object(obj):
+    try:
+        return bool(obj is not None and obj.InheritsFrom("TObject"))
+    except Exception:
+        return False
+
+
 def _is_root_hist(obj):
     try:
         return bool(obj is not None and obj.InheritsFrom("TH1"))
@@ -28,8 +35,10 @@ _JSON_SKIP = object()
 
 
 def _json_ready_particle_subtraction_value(value):
-    if _is_root_hist(value):
+    if _is_root_object(value):
         return _JSON_SKIP
+    if isinstance(value, np.generic):
+        return value.item()
     if isinstance(value, np.ndarray):
         return value.tolist()
     if isinstance(value, dict):
@@ -41,6 +50,14 @@ def _json_ready_particle_subtraction_value(value):
             cleaned[key] = child
         return cleaned
     if isinstance(value, (list, tuple)):
+        cleaned = []
+        for child_value in value:
+            child = _json_ready_particle_subtraction_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned.append(child)
+        return cleaned
+    if isinstance(value, set):
         cleaned = []
         for child_value in value:
             child = _json_ready_particle_subtraction_value(child_value)
