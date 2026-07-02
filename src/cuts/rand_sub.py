@@ -752,6 +752,10 @@ def _apply_component_pion_subtraction_setting(
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_full_after_final_model,
             "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
             "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
+            "H_kaon_fit_k_lambda_reference": component_fit_result.get("H_kaon_fit_k_lambda_reference").Clone(
+                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_reference").GetName())
+            ) if component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None else None,
+            "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
                 "weight_diagnostics_stage": dict(stage_weight_payload.get("diagnostics") or {}),
