@@ -6590,6 +6590,34 @@ def print_particle_subtraction_component_application_pages(
         cut_window=cut_window,
     )
 
+    if component_payload.get("H_kaon_fit_k_lambda_reference") is not None:
+        _print_component_overlay_page(
+            pdf_name,
+            component_payload.get("H_MM_nosub_after_pion_subtraction"),
+            "after pion subtraction",
+            "{}Part 3 after pion subtraction vs normalized K-Lambda gauge".format(title_prefix),
+            [
+                (component_payload.get("H_kaon_fit_k_lambda_reference"), "normalized K-Lambda gauge", ROOT.kBlue + 1, 2),
+            ],
+            [
+                "scope: {}".format(scope_label),
+                "after full integral={}".format(
+                    _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
+                ),
+                "K-Lambda gauge full integral={}".format(
+                    _format_fit_number(_hist_integral(component_payload.get("H_kaon_fit_k_lambda_reference")))
+                ),
+                "K-Lambda gauge scale={}".format(
+                    _format_fit_number(component_payload.get("S_lambda_reference_scale"))
+                ),
+                "fit validation pion/kaon={}/{}".format(
+                    "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
+                    "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail",
+                ),
+            ],
+            cut_window=cut_window,
+        )
+
 
 def print_particle_subtraction_component_fit_pages(
     pdf_name,
