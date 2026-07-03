@@ -6348,6 +6348,26 @@ def print_particle_subtraction_component_application_pages(
     pion_postrefine_scales = pion_diag.get("postrefine_component_scales") or {}
     kaon_postrefine_scales = kaon_diag.get("postrefine_component_scales") or {}
     kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
+    lambda_reference_hist = component_payload.get("H_kaon_fit_k_lambda_reference")
+    lambda_reference_scale = component_payload.get("S_lambda_reference_scale")
+    if (
+        lambda_reference_hist is None
+        and component_payload.get("H_simc_shape_k_lambda") is not None
+        and component_payload.get("H_MM_nosub_before_pion_subtraction") is not None
+        and isinstance(cut_window, (list, tuple))
+        and len(cut_window) == 2
+        and _is_finite_number(cut_window[0])
+        and _is_finite_number(cut_window[1])
+    ):
+        lambda_reference_hist, lambda_reference_scale = _build_scaled_reference_hist(
+            component_payload.get("H_MM_nosub_before_pion_subtraction"),
+            component_payload.get("H_simc_shape_k_lambda"),
+            float(cut_window[0]),
+            float(cut_window[1]),
+            "H_k_lambda_reference_application_{}".format(
+                str(scope_label).replace(" ", "_")
+            ),
+        )
 
     _print_single_hist_page(
         pdf_name,
@@ -6590,14 +6610,14 @@ def print_particle_subtraction_component_application_pages(
         cut_window=cut_window,
     )
 
-    if component_payload.get("H_kaon_fit_k_lambda_reference") is not None:
+    if lambda_reference_hist is not None:
         _print_component_overlay_page(
             pdf_name,
             component_payload.get("H_MM_nosub_after_pion_subtraction"),
             "after pion subtraction",
             "{}Part 3 after pion subtraction vs normalized K-Lambda gauge".format(title_prefix),
             [
-                (component_payload.get("H_kaon_fit_k_lambda_reference"), "normalized K-Lambda gauge", ROOT.kBlue + 1, 2),
+                (lambda_reference_hist, "normalized K-Lambda gauge", ROOT.kBlue + 1, 2),
             ],
             [
                 "scope: {}".format(scope_label),
@@ -6605,10 +6625,10 @@ def print_particle_subtraction_component_application_pages(
                     _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
                 ),
                 "K-Lambda gauge full integral={}".format(
-                    _format_fit_number(_hist_integral(component_payload.get("H_kaon_fit_k_lambda_reference")))
+                    _format_fit_number(_hist_integral(lambda_reference_hist))
                 ),
                 "K-Lambda gauge scale={}".format(
-                    _format_fit_number(component_payload.get("S_lambda_reference_scale"))
+                    _format_fit_number(lambda_reference_scale)
                 ),
                 "fit validation pion/kaon={}/{}".format(
                     "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",

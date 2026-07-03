@@ -909,6 +909,9 @@ def _apply_component_pion_subtraction_for_bin(
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
             "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
             "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
+            "H_simc_shape_k_lambda": _clone_hist_for_plot(
+                component_fit_result.get("H_simc_shape_k_lambda")
+            ),
             "H_kaon_fit_k_lambda_reference": _clone_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_lambda_reference")
             ),
