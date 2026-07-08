@@ -97,6 +97,13 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
+from proton_contamination_weights import (
+    apply_kaon_proton_cleaning_to_targets,
+    build_kaon_proton_cleaning_result,
+    print_kaon_proton_cleaning_pages,
+    serialize_kaon_proton_cleaning_result,
+    summarize_kaon_proton_cleaning_result,
+)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -341,6 +348,16 @@ def _hist_integral(hist):
         return 0.0
 
 
+def _clone_hist_detached(hist, name=None):
+    if hist is None:
+        return None
+    clone_name = str(name) if name else "{}_clone".format(hist.GetName())
+    cloned = hist.Clone(clone_name)
+    if hasattr(cloned, "SetDirectory"):
+        cloned.SetDirectory(0)
+    return cloned
+
+
 def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_particle, data_filename, dummy_filename, epsset):
     sub_data_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{data_filename}.root"
     sub_dummy_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{dummy_filename}.root"
@@ -377,6 +394,86 @@ def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_parti
     _debug_tree_status("sub_data_rand", bundle["rand_tree"])
     _debug_tree_status("sub_dummy_prompt", bundle["dummy_prompt_tree"])
     _debug_tree_status("sub_dummy_rand", bundle["dummy_rand_tree"])
+    return bundle
+
+
+def _open_kaon_proton_cleaning_tree_bundle(
+    infile_data,
+    infile_dummy,
+    particle_type,
+    epsset,
+    phi_setting,
+    norm_factor_data,
+    norm_factor_dummy,
+    n_windows,
+):
+    no_rf_prompt_name = get_prompt_tree_name(particle_type, epsset, rf_state="noRF")
+    no_rf_rand_name = get_rand_tree_name(particle_type, epsset, rf_state="noRF")
+    rf_prompt_name = get_prompt_tree_name(particle_type, epsset, rf_state="RF")
+    rf_rand_name = get_rand_tree_name(particle_type, epsset, rf_state="RF")
+    bundle = {
+        "sources": {
+            "prompt": {
+                "tree_name": no_rf_prompt_name,
+                "tree": infile_data.Get(no_rf_prompt_name) if infile_data is not None else None,
+                "coefficient": float(norm_factor_data),
+            },
+            "rand": {
+                "tree_name": no_rf_rand_name,
+                "tree": infile_data.Get(no_rf_rand_name) if infile_data is not None else None,
+                "coefficient": -float(norm_factor_data) / float(n_windows),
+            },
+            "dummy_prompt": {
+                "tree_name": no_rf_prompt_name,
+                "tree": infile_dummy.Get(no_rf_prompt_name) if infile_dummy is not None else None,
+                "coefficient": -float(norm_factor_dummy),
+            },
+            "dummy_rand": {
+                "tree_name": no_rf_rand_name,
+                "tree": infile_dummy.Get(no_rf_rand_name) if infile_dummy is not None else None,
+                "coefficient": float(norm_factor_dummy) / float(n_windows),
+            },
+        },
+        "rf_sources": {
+            "prompt": {
+                "tree_name": rf_prompt_name,
+                "tree": infile_data.Get(rf_prompt_name) if infile_data is not None else None,
+            },
+            "rand": {
+                "tree_name": rf_rand_name,
+                "tree": infile_data.Get(rf_rand_name) if infile_data is not None else None,
+            },
+            "dummy_prompt": {
+                "tree_name": rf_prompt_name,
+                "tree": infile_dummy.Get(rf_prompt_name) if infile_dummy is not None else None,
+            },
+            "dummy_rand": {
+                "tree_name": rf_rand_name,
+                "tree": infile_dummy.Get(rf_rand_name) if infile_dummy is not None else None,
+            },
+        },
+        "phi_setting": phi_setting,
+        "epsset": epsset,
+        "particle_type": particle_type,
+    }
+    _print_rand_debug(
+        "resolved proton-cleaning tree names",
+        particle_type=particle_type,
+        phi_setting=phi_setting,
+        epsset=epsset,
+        prompt_noRF=no_rf_prompt_name,
+        rand_noRF=no_rf_rand_name,
+        prompt_RF=rf_prompt_name,
+        rand_RF=rf_rand_name,
+    )
+    _debug_tree_status("kaon_clean_prompt_noRF", bundle["sources"]["prompt"]["tree"])
+    _debug_tree_status("kaon_clean_rand_noRF", bundle["sources"]["rand"]["tree"])
+    _debug_tree_status("kaon_clean_dummy_prompt_noRF", bundle["sources"]["dummy_prompt"]["tree"])
+    _debug_tree_status("kaon_clean_dummy_rand_noRF", bundle["sources"]["dummy_rand"]["tree"])
+    _debug_tree_status("kaon_clean_prompt_RF", bundle["rf_sources"]["prompt"]["tree"])
+    _debug_tree_status("kaon_clean_rand_RF", bundle["rf_sources"]["rand"]["tree"])
+    _debug_tree_status("kaon_clean_dummy_prompt_RF", bundle["rf_sources"]["dummy_prompt"]["tree"])
+    _debug_tree_status("kaon_clean_dummy_rand_RF", bundle["rf_sources"]["dummy_rand"]["tree"])
     return bundle
 
 
@@ -2468,6 +2565,8 @@ def rand_sub(
     component_fit_result = None
     component_subtraction_payload = None
     sub_tree_bundle = None
+    proton_cleaning_result = None
+    proton_cleaning_application = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -2478,6 +2577,28 @@ def rand_sub(
         particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
 
         if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
+            proton_cleaning_tree_bundle = _open_kaon_proton_cleaning_tree_bundle(
+                InFile_DATA,
+                InFile_DUMMY,
+                ParticleType,
+                EPSSET,
+                phi_setting,
+                norm_factor_data,
+                norm_factor_dummy,
+                nWindows,
+            )
+            proton_cleaning_result = build_kaon_proton_cleaning_result(
+                inpDict,
+                phi_setting,
+                proton_cleaning_tree_bundle,
+                evaluate_data_event,
+                get_shifted_mm,
+                hole_contains,
+                mm_min,
+                mm_max,
+                analysis_scope="setting-wide",
+                context="{}_{}_setting".format(phi_setting, EPSSET),
+            )
             scope_payload = component_payload
             if scope_payload is None:
                 scope_payload = load_setting_pion_component_shapes(
@@ -2489,24 +2610,6 @@ def rand_sub(
             scope_shapes = resolve_scope_component_shapes(
                 scope_payload,
                 analysis_scope="setting-wide",
-            )
-            component_fit_result = build_particle_subtraction_component_result(
-                subDict["H_MM_nosub_SUB_DATA"],
-                H_MM_nosub_DATA,
-                scope_shapes,
-                inpDict,
-                analysis_scope="setting-wide",
-                kaon_signal_shape=resolve_scope_single_shape(
-                    kaon_signal_shape_payload,
-                    analysis_scope="setting-wide",
-                ),
-                kaon_sigma0_shape=resolve_scope_single_shape(
-                    kaon_sigma0_shape_payload,
-                    analysis_scope="setting-wide",
-                ),
-                mm_offset_data=MM_offset_DATA,
-                phi_setting=phi_setting,
-                context="{}_{}_setting".format(phi_setting, EPSSET),
             )
             sub_tree_bundle = _open_subtracted_particle_tree_bundle(
                 OUTPATH,
@@ -2571,6 +2674,120 @@ def rand_sub(
                 "h_pmy": H_pmy_DATA,
                 "h_pmz": H_pmz_DATA,
             }
+            active_component_targets = component_targets
+            component_fit_kaon_input = H_MM_nosub_DATA
+
+            if isinstance(proton_cleaning_result, dict):
+                if bool(proton_cleaning_result.get("accepted")):
+                    proton_cleaning_application = apply_kaon_proton_cleaning_to_targets(
+                        proton_cleaning_result,
+                        proton_cleaning_tree_bundle,
+                        component_targets,
+                        evaluate_data_event,
+                        get_shifted_mm,
+                        get_shifted_t,
+                        hole_contains,
+                        mm_min,
+                        mm_max,
+                    )
+                    if bool((proton_cleaning_application or {}).get("accepted")):
+                        for key, clone_name in (
+                            ("H_MM_before_proton_cleaning", "H_MM_before_proton_cleaning_DATA"),
+                            ("H_MM_estimated_proton", "H_MM_estimated_proton_DATA"),
+                            ("H_MM_after_proton_cleaning", "H_MM_nosub_proton_cleaned_DATA"),
+                            ("H_proton_fraction_vs_MM", "H_proton_fraction_vs_MM_DATA"),
+                            ("H_proton_weight_vs_delta", "H_proton_weight_vs_delta_DATA"),
+                            ("H_proton_weight_vs_delta_aero", "H_proton_weight_vs_delta_aero_DATA"),
+                        ):
+                            proton_cleaning_application[key] = _clone_hist_detached(
+                                proton_cleaning_application.get(key),
+                                clone_name,
+                            )
+                            histDict[clone_name] = proton_cleaning_application.get(key)
+
+                        active_component_targets = proton_cleaning_application.get("final_targets") or component_targets
+                        component_fit_kaon_input = active_component_targets.get("h_mm_nosub") or H_MM_nosub_DATA
+
+                        P_hgcer_xAtCer_vs_yAtCer_DATA = active_component_targets.get("hgcer_xy")
+                        P_hgcer_nohole_xAtCer_vs_yAtCer_DATA = active_component_targets.get("hgcer_xy_nohole")
+                        P_hgcer_xAtCer_vs_MM_DATA = active_component_targets.get("hgcer_x_mm")
+                        P_hgcer_nohole_xAtCer_vs_MM_DATA = active_component_targets.get("hgcer_x_mm_nohole")
+                        P_hgcer_yAtCer_vs_MM_DATA = active_component_targets.get("hgcer_y_mm")
+                        P_hgcer_nohole_yAtCer_vs_MM_DATA = active_component_targets.get("hgcer_y_mm_nohole")
+                        MM_vs_CoinTime_DATA = active_component_targets.get("mm_ct")
+                        CoinTime_vs_beta_DATA = active_component_targets.get("ct_beta")
+                        MM_vs_beta_DATA = active_component_targets.get("mm_beta")
+                        MM_vs_H_cer_DATA = active_component_targets.get("mm_h_cer")
+                        MM_vs_H_cal_DATA = active_component_targets.get("mm_h_cal")
+                        MM_vs_P_cal_DATA = active_component_targets.get("mm_p_cal")
+                        MM_vs_P_hgcer_DATA = active_component_targets.get("mm_p_hgcer")
+                        MM_vs_P_aero_DATA = active_component_targets.get("mm_p_aero")
+                        phiq_vs_t_DATA = active_component_targets.get("phiq_t")
+                        Q2_vs_W_DATA = active_component_targets.get("q2_w")
+                        Q2_vs_t_DATA = active_component_targets.get("q2_t")
+                        W_vs_t_DATA = active_component_targets.get("w_t")
+                        EPS_vs_t_DATA = active_component_targets.get("eps_t")
+                        MM_vs_t_DATA = active_component_targets.get("mm_t")
+                        H_ct_DATA = active_component_targets.get("h_ct")
+                        H_ssxfp_DATA = active_component_targets.get("h_ssxfp")
+                        H_ssyfp_DATA = active_component_targets.get("h_ssyfp")
+                        H_ssxpfp_DATA = active_component_targets.get("h_ssxpfp")
+                        H_ssypfp_DATA = active_component_targets.get("h_ssypfp")
+                        H_hsxfp_DATA = active_component_targets.get("h_hsxfp")
+                        H_hsyfp_DATA = active_component_targets.get("h_hsyfp")
+                        H_hsxpfp_DATA = active_component_targets.get("h_hsxpfp")
+                        H_hsypfp_DATA = active_component_targets.get("h_hsypfp")
+                        H_ssxptar_DATA = active_component_targets.get("h_ssxptar")
+                        H_ssyptar_DATA = active_component_targets.get("h_ssyptar")
+                        H_hsxptar_DATA = active_component_targets.get("h_hsxptar")
+                        H_hsyptar_DATA = active_component_targets.get("h_hsyptar")
+                        H_ssdelta_DATA = active_component_targets.get("h_ssdelta")
+                        H_hsdelta_DATA = active_component_targets.get("h_hsdelta")
+                        H_ph_q_DATA = active_component_targets.get("h_ph_q")
+                        H_th_q_DATA = active_component_targets.get("h_th_q")
+                        H_ph_recoil_DATA = active_component_targets.get("h_ph_recoil")
+                        H_th_recoil_DATA = active_component_targets.get("h_th_recoil")
+                        H_Q2_DATA = active_component_targets.get("h_q2")
+                        H_t_DATA = active_component_targets.get("h_t")
+                        H_W_DATA = active_component_targets.get("h_w")
+                        H_epsilon_DATA = active_component_targets.get("h_epsilon")
+                        H_MM_DATA = active_component_targets.get("h_mm")
+                        H_MM_nosub_DATA = active_component_targets.get("h_mm_nosub")
+                        H_MM_fit2sub_DATA = active_component_targets.get("h_mm_fit2sub")
+                        H_MM_fit1sub_DATA = active_component_targets.get("h_mm_fit1sub")
+                        H_MM_pisub_DATA = active_component_targets.get("h_mm_pisub")
+                        H_MM_full_DATA = active_component_targets.get("h_mm_full")
+                        H_pmiss_DATA = active_component_targets.get("h_pmiss")
+                        H_emiss_DATA = active_component_targets.get("h_emiss")
+                        H_pmx_DATA = active_component_targets.get("h_pmx")
+                        H_pmy_DATA = active_component_targets.get("h_pmy")
+                        H_pmz_DATA = active_component_targets.get("h_pmz")
+
+                histDict["proton_contamination_cleaning_result_setting"] = (
+                    serialize_kaon_proton_cleaning_result(proton_cleaning_result)
+                )
+                histDict["proton_contamination_cleaning_setting"] = (
+                    summarize_kaon_proton_cleaning_result(proton_cleaning_result)
+                )
+
+            component_fit_result = build_particle_subtraction_component_result(
+                subDict["H_MM_nosub_SUB_DATA"],
+                component_fit_kaon_input,
+                scope_shapes,
+                inpDict,
+                analysis_scope="setting-wide",
+                kaon_signal_shape=resolve_scope_single_shape(
+                    kaon_signal_shape_payload,
+                    analysis_scope="setting-wide",
+                ),
+                kaon_sigma0_shape=resolve_scope_single_shape(
+                    kaon_sigma0_shape_payload,
+                    analysis_scope="setting-wide",
+                ),
+                mm_offset_data=MM_offset_DATA,
+                phi_setting=phi_setting,
+                context="{}_{}_setting".format(phi_setting, EPSSET),
+            )
             component_subtraction_payload = _apply_component_pion_subtraction_setting(
                 component_fit_result,
                 sub_tree_bundle,
@@ -2586,7 +2803,7 @@ def rand_sub(
                 norm_factor_data,
                 norm_factor_dummy,
                 nWindows,
-                component_targets,
+                active_component_targets,
             )
             histDict["_particle_subtraction_component_fit_setting"] = component_fit_result
             histDict["particle_subtraction_component_fit_setting"] = (
@@ -3716,6 +3933,13 @@ def rand_sub(
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
 
     CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+
+    if isinstance(proton_cleaning_result, dict) and bool(proton_cleaning_result.get("accepted")):
+        print_kaon_proton_cleaning_pages(
+            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            proton_cleaning_result,
+            title_prefix="{} {}".format(phi_setting, ParticleType),
+        )
 
     if component_payload is not None:
         print_particle_subtraction_component_template_pages(

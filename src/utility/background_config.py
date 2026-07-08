@@ -377,6 +377,89 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
     },
 }
 
+PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED = "disabled"
+PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT = (
+    "ctime_aero_event_weight"
+)
+PROTON_CONTAMINATION_CLEANING_METHODS = frozenset(
+    {
+        PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
+        PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
+    }
+)
+PROTON_CONTAMINATION_CLEANING_TREE_POLICIES = frozenset(
+    {
+        "explicit_norf_required",
+        "allow_missing_norf_bypass",
+    }
+)
+PROTON_CONTAMINATION_CLEANING_RF_POLICIES = frozenset(
+    {
+        "epsset_default_after_cleaning",
+        "skip_rf_after_cleaning",
+    }
+)
+
+PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
+    "enabled": False,
+    "method": PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
+    "tree_policy": "explicit_norf_required",
+    "rf_policy": "epsset_default_after_cleaning",
+    "strict_mode": True,
+    "failure_policy": "bypass",
+    "allow_missing_norf_trees": False,
+    "allow_missing_rf_reference": False,
+    "apply_only_low_epsilon_rf": True,
+    "signature_round_digits": 9,
+    "rf_signature_fields": (
+        "CTime_ROC1",
+        "ssdelta",
+        "MM",
+        "Q2",
+        "W",
+        "ph_q",
+    ),
+    "aero_slice_edges": (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
+    "aero_hist_range": (0.0, 25.0),
+    "ctime_hist_range": (-1.50, 1.25),
+    "delta_hist_range": (-10.0, 20.0),
+    "delta_bins": 10,
+    "mm_validation_range": (0.70, 1.50),
+    "global_fit": {
+        "kaon_mean_range": (-0.45, 0.20),
+        "proton_mean_range": (0.20, 0.95),
+        "sigma_range": (0.03, 0.45),
+        "minimum_separation": 0.75,
+        "minimum_amplitude_significance": 2.0,
+        "maximum_chi2_ndf": 5.0,
+        "bound_fraction_tolerance": 0.02,
+        "minimum_entries": 200,
+    },
+    "slice_fit": {
+        "maximum_chi2_ndf": 5.0,
+        "minimum_model_data_ratio": 0.50,
+        "maximum_model_data_ratio": 1.50,
+        "minimum_entries": 30,
+    },
+    "support_thresholds": {
+        "minimum_supported_slices": 2,
+        "minimum_marginal_slices": 1,
+        "minimum_supported_coverage": 0.35,
+        "minimum_marginal_coverage": 0.15,
+        "minimum_modeled_yield": 5.0,
+    },
+    "weighting": {
+        "denominator_floor": 1.0e-12,
+    },
+    "validation_windows": {
+        "low_mm": (0.80, 0.90),
+        "lambda_peak": (1.105, 1.125),
+    },
+}
+
+PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES = {}
+PROTON_CONTAMINATION_CLEANING_CONFIG_OVERRIDES = {}
+
 PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES = {}
 
 PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES = {}
@@ -395,6 +478,16 @@ PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS = frozenset(
         "residual_component_shift_values",
         "residual_component_shift_scan_grid",
         "residual_component_shift_bounds",
+    }
+)
+
+PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
+    {
+        "global_fit",
+        "slice_fit",
+        "support_thresholds",
+        "weighting",
+        "validation_windows",
     }
 )
 
@@ -1584,7 +1677,16 @@ def _get_casefold_mapping_entry(mapping, key):
     return None
 
 
-def _deep_merge_particle_subtraction_config(base_config, override_config):
+def _deep_merge_particle_subtraction_config(
+    base_config,
+    override_config,
+    merge_keys=None,
+):
+    merge_keys = (
+        PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS
+        if merge_keys is None
+        else frozenset(merge_keys)
+    )
     if base_config is None:
         merged = {}
     else:
@@ -1594,7 +1696,7 @@ def _deep_merge_particle_subtraction_config(base_config, override_config):
     for raw_key, raw_value in override_config.items():
         key = str(raw_key)
         if (
-            key in PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS
+            key in merge_keys
             and isinstance(merged.get(key), dict)
             and isinstance(raw_value, dict)
         ):
@@ -1675,6 +1777,153 @@ def _attach_particle_subtraction_resolution_metadata(
     metadata_ready["particle_subtraction_override_layers"] = list(override_layers or [])
     metadata_ready["particle_subtraction_override_applied"] = bool(override_layers)
     return metadata_ready
+
+
+def _attach_proton_contamination_cleaning_resolution_metadata(
+    config,
+    setting_key=None,
+    phi_setting=None,
+    override_layers=None,
+):
+    if config is None:
+        return None
+    metadata_ready = deepcopy(config)
+    metadata_ready["proton_contamination_setting_key"] = setting_key
+    metadata_ready["proton_contamination_phi_setting"] = phi_setting
+    metadata_ready["proton_contamination_override_layers"] = list(override_layers or [])
+    metadata_ready["proton_contamination_override_applied"] = bool(override_layers)
+    metadata_ready["proton_contamination_strict_mode"] = bool(
+        metadata_ready.get("strict_mode", False)
+    )
+    metadata_ready["proton_contamination_failure_policy"] = str(
+        metadata_ready.get("failure_policy", "bypass")
+    ).strip().lower()
+    return metadata_ready
+
+
+def get_proton_contamination_cleaning_config(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = _deep_merge_particle_subtraction_config(
+        PROTON_CONTAMINATION_CLEANING_DEFAULTS,
+        PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES,
+        merge_keys=PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS,
+    )
+
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PROTON_CONTAMINATION_CLEANING_CONFIG_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+    for override_layer in override_layers:
+        layer_payload = override_layer.get("payload")
+        if isinstance(layer_payload, dict):
+            config = _deep_merge_particle_subtraction_config(
+                config,
+                layer_payload,
+                merge_keys=PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS,
+            )
+
+    return _attach_proton_contamination_cleaning_resolution_metadata(
+        config,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+        override_layers=["runtime_global"] + [layer.get("path") for layer in override_layers],
+    )
+
+
+def _resolve_proton_contamination_cleaning_method(value):
+    method = str(value or "").strip().lower()
+    if not method:
+        method = PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED
+    if method not in PROTON_CONTAMINATION_CLEANING_METHODS:
+        raise ValueError(
+            "Unsupported proton-contamination cleaning method '{}'. Allowed values are {}.".format(
+                value,
+                ", ".join(sorted(PROTON_CONTAMINATION_CLEANING_METHODS)),
+            )
+        )
+    return method
+
+
+def resolve_proton_contamination_cleaning_enabled(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_proton_contamination_cleaning_config(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    method = _resolve_proton_contamination_cleaning_method(config.get("method"))
+    if method == PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED:
+        return False
+    return bool(config.get("enabled", False))
+
+
+def resolve_proton_contamination_cleaning_method(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_proton_contamination_cleaning_config(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    if not bool(config.get("enabled", False)):
+        return PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED
+    return _resolve_proton_contamination_cleaning_method(config.get("method"))
+
+
+def resolve_proton_contamination_cleaning_tree_policy(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_proton_contamination_cleaning_config(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    policy = str(config.get("tree_policy") or "explicit_norf_required").strip().lower()
+    if policy not in PROTON_CONTAMINATION_CLEANING_TREE_POLICIES:
+        raise ValueError(
+            "Unsupported proton-contamination tree policy '{}'. Allowed values are {}.".format(
+                policy,
+                ", ".join(sorted(PROTON_CONTAMINATION_CLEANING_TREE_POLICIES)),
+            )
+        )
+    return policy
+
+
+def resolve_proton_contamination_cleaning_rf_policy(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    config = get_proton_contamination_cleaning_config(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    policy = str(config.get("rf_policy") or "epsset_default_after_cleaning").strip().lower()
+    if policy not in PROTON_CONTAMINATION_CLEANING_RF_POLICIES:
+        raise ValueError(
+            "Unsupported proton-contamination RF policy '{}'. Allowed values are {}.".format(
+                policy,
+                ", ".join(sorted(PROTON_CONTAMINATION_CLEANING_RF_POLICIES)),
+            )
+        )
+    return policy
 
 
 def get_particle_subtraction_window_config(
