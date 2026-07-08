@@ -401,7 +401,7 @@ PROTON_CONTAMINATION_CLEANING_RF_POLICIES = frozenset(
 )
 
 PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
-    "enabled": False,
+    "enabled": True,
     "method": PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
     "tree_policy": "explicit_norf_required",
     "rf_policy": "epsset_default_after_cleaning",
