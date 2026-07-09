@@ -1828,7 +1828,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.11";
+  const char *macroVersion = "check_slow_protons.12";
 
   std::cout
     << "Running "
@@ -2132,7 +2132,8 @@ void check_slow_protons(
   bool rfTimingAttempted = false;
   bool rfTimingSelected = false;
   bool ctTimingEvaluated = false;
-  bool ctFallbackUsed = false;  // retained as compatibility metadata; v10 does not use fallback selection
+  bool ctFallbackUsed = false;  // compatibility metadata; RF and CT are compared directly
+  bool timingFitUsedPreDiamondFallback = false;
   int rfProbeValidShapes = 0;
   int ctProbeValidShapes = 0;
   std::string timingSelectionReason;
@@ -2310,6 +2311,14 @@ void check_slow_protons(
   const std::string acceptanceCut =
     "(" + baseAcceptanceCut + ") && (" +
     phaseSpaceCutName + ")";
+
+  // Timing shapes are normally determined using the same Q2-W diamond
+  // selection as the final event sample.  If, and only if, both RF and CT
+  // produce zero validated global shapes inside the diamond, retry the
+  // timing-shape determination with the base spectrometer acceptance.  The
+  // diamond remains mandatory for the final event-level sample and missing-
+  // mass subtraction.
+  std::string timingFitAcceptanceCut = acceptanceCut;
 
   // ------------------------------------------------------------------
   // Q2-W "diamond" diagnostics.  These are produced whenever the
@@ -2762,7 +2771,7 @@ void check_slow_protons(
       ).Data();
 
     const std::string candidatePreselectionCut =
-      "(" + acceptanceCut + ") && (" +
+      "(" + timingFitAcceptanceCut + ") && (" +
       candidateBaseCut + ")";
 
     const auto candidateDisplayRange =
@@ -2892,7 +2901,7 @@ void check_slow_protons(
       ).Data();
 
     const std::string candidateAnalysisCut =
-      "(" + acceptanceCut + ") && (" +
+      "(" + timingFitAcceptanceCut + ") && (" +
       candidateRangeCut + ")";
 
     gROOT->cd();
@@ -3133,7 +3142,7 @@ void check_slow_protons(
       ).Data();
 
     const std::string ctAnalysisCut =
-      "(" + acceptanceCut + ") && (" +
+      "(" + timingFitAcceptanceCut + ") && (" +
       ctRangeCut + ")";
 
     gROOT->cd();
@@ -3362,6 +3371,124 @@ void check_slow_protons(
     << ctProbe.meanPoissonDevianceNdf
     << std::endl;
 
+  int initialBestRFValidShapes = 0;
+
+  for (const TimingBranchProbe &probe : rfProbes) {
+    initialBestRFValidShapes = std::max(
+      initialBestRFValidShapes,
+      probe.validShapes
+    );
+  }
+
+  if (
+    phaseSpacePolygon.valid &&
+    initialBestRFValidShapes == 0 &&
+    ctProbe.validShapes == 0
+  ) {
+    timingFitUsedPreDiamondFallback = true;
+    timingFitAcceptanceCut = baseAcceptanceCut;
+
+    std::cout
+      << "Both RF and CT timing probes produced zero validated shapes "
+      << "inside the Q2-W diamond. Retrying timing-shape fits with the "
+      << "base spectrometer acceptance only. The diamond cut remains "
+      << "enabled for final event selection."
+      << std::endl;
+
+    rfProbes.clear();
+    rfProbeValidShapes = 0;
+
+    for (const std::string &candidate : rfBranchCandidates) {
+      if (
+        candidate.empty() ||
+        !tree->GetBranch(candidate.c_str())
+      ) {
+        continue;
+      }
+
+      TimingBranchProbe probe;
+
+      std::cout
+        << "Fallback RF timing probe using branch "
+        << candidate
+        << " from tree "
+        << treeName
+        << std::endl;
+
+      const int validShapes =
+        countValidGlobalShapesForBranch(
+          candidate,
+          probe
+        );
+
+      std::cout
+        << "  fallback valid global shapes: "
+        << validShapes
+        << " / "
+        << nAeroSlices
+        << "; range ["
+        << probe.displayMin
+        << ", "
+        << probe.displayMax
+        << "]; fit ["
+        << probe.fitMin
+        << ", "
+        << probe.fitMax
+        << "]; bins "
+        << probe.histogramBins
+        << "; mean separation "
+        << probe.meanSeparation
+        << "; mean D/ndf "
+        << probe.meanPoissonDevianceNdf
+        << "; peak seeds "
+        << (
+          probe.peakPairFound
+            ? TString::Format(
+                "p=%.4g, K=%.4g",
+                probe.protonSeedMean,
+                probe.kaonSeedMean
+              ).Data()
+            : "not resolved"
+        )
+        << std::endl;
+
+      rfProbes.push_back(probe);
+    }
+
+    ctProbe = TimingBranchProbe();
+
+    std::cout
+      << "Fallback CT timing probe using branch "
+      << ctTimeBranch
+      << " from tree "
+      << treeName
+      << std::endl;
+
+    ctProbeValidShapes =
+      countValidGlobalShapesForCT(ctProbe);
+
+    std::cout
+      << "  fallback valid global shapes: "
+      << ctProbe.validShapes
+      << " / "
+      << nAeroSlices
+      << "; range ["
+      << ctProbe.displayMin
+      << ", "
+      << ctProbe.displayMax
+      << "]; fit ["
+      << ctProbe.fitMin
+      << ", "
+      << ctProbe.fitMax
+      << "]; bins "
+      << ctProbe.histogramBins
+      << "; mean separation "
+      << ctProbe.meanSeparation
+      << "; mean D/ndf "
+      << ctProbe.meanPoissonDevianceNdf
+      << std::endl;
+  }
+
   const TimingBranchProbe *bestRFProbe = nullptr;
 
   if (!rfProbes.empty()) {
@@ -3547,6 +3674,11 @@ void check_slow_protons(
     }
   }
 
+  if (timingFitUsedPreDiamondFallback) {
+    timingSelectionReason =
+      "pre_diamond_fit_fallback_" + timingSelectionReason;
+  }
+
   // RF: proton is the left/lower-time peak.
   // CTime_ROC1: proton is the right/higher-time peak.
   const bool protonPeakIsLower = rfTimingSelected;
@@ -3594,6 +3726,18 @@ void check_slow_protons(
     "(" + acceptanceCut + ") && (" +
     pidRangeCut + ")";
 
+  const std::string timingFitAnalysisCut =
+    "(" + timingFitAcceptanceCut + ") && (" +
+    pidRangeCut + ")";
+
+  if (timingFitUsedPreDiamondFallback) {
+    std::cout
+      << "Timing-fit histograms use the pre-diamond base acceptance; "
+      << "event extraction and proton subtraction still require the "
+      << "Q2-W polygon."
+      << std::endl;
+  }
+
   // ------------------------------------------------------------------
   // Global PID histogram.
   // ------------------------------------------------------------------
@@ -3603,9 +3747,12 @@ void check_slow_protons(
   auto *hGlobalPID = new TH2D(
     "h_global_pid",
     TString::Format(
-      "Global %s vs P_aero_npeSum;"
+      "Global %s vs P_aero_npeSum%s;"
       "P_aero_npeSum;%s;Counts",
       timeBranch.c_str(),
+      timingFitUsedPreDiamondFallback
+        ? " (pre-diamond fit fallback)"
+        : "",
       timingAxisTitle.c_str()
     ),
     nAeroHistogramBins,
@@ -3625,7 +3772,7 @@ void check_slow_protons(
       aeroBranch.c_str(),
       hGlobalPID->GetName()
     ),
-    analysisCut.c_str(),
+    timingFitAnalysisCut.c_str(),
     "goff"
   );
 
@@ -3712,8 +3859,11 @@ void check_slow_protons(
 
     projection->SetTitle(
       TString::Format(
-        "Global timing fit: %.1f #leq aero < %.1f;"
+        "Global timing fit%s: %.1f #leq aero < %.1f;"
         "%s;Counts",
+        timingFitUsedPreDiamondFallback
+          ? " (pre-diamond fallback)"
+          : "",
         aeroLow,
         aeroHigh,
         timingAxisTitle.c_str()
@@ -3949,7 +4099,7 @@ void check_slow_protons(
         ).Data();
 
       const std::string fullDeltaCut =
-        "(" + analysisCut + ") && (" +
+        "(" + timingFitAnalysisCut + ") && (" +
         deltaCut + ")";
 
       gROOT->cd();
@@ -4334,6 +4484,23 @@ void check_slow_protons(
     ).Write();
 
     TParameter<int>(
+      "timing_fit_pre_diamond_fallback_used",
+      timingFitUsedPreDiamondFallback ? 1 : 0
+    ).Write();
+
+    TNamed diagnosticTimingFitAcceptanceCut(
+      "timing_fit_acceptance_cut",
+      timingFitAcceptanceCut.c_str()
+    );
+    diagnosticTimingFitAcceptanceCut.Write();
+
+    TNamed diagnosticEventAcceptanceCut(
+      "event_acceptance_cut",
+      acceptanceCut.c_str()
+    );
+    diagnosticEventAcceptanceCut.Write();
+
+    TParameter<int>(
       "ct_timing_evaluated",
       ctTimingEvaluated ? 1 : 0
     ).Write();
@@ -4562,7 +4729,7 @@ void check_slow_protons(
       );
 
     const std::string fullCut =
-      "(" + analysisCut + ") && (" +
+      "(" + timingFitAnalysisCut + ") && (" +
       deltaCut + ")";
 
     gROOT->cd();
@@ -5121,6 +5288,7 @@ void check_slow_protons(
   // V8 = single-period RF window selection and corrected RF component ordering
   // V9 = probe RF and CT on every run and select the better validated timing variable
   // V11 = add always-on Q2-vs-W diamond diagnostic pages when the polygon is enabled
+  // V12 = fit-only pre-diamond fallback when both RF and CT fail inside the polygon
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -6458,6 +6626,23 @@ void check_slow_protons(
   ).Write();
 
   TParameter<int>(
+    "timing_fit_pre_diamond_fallback_used",
+    timingFitUsedPreDiamondFallback ? 1 : 0
+  ).Write();
+
+  TNamed timingFitAcceptanceCutTag(
+    "timing_fit_acceptance_cut",
+    timingFitAcceptanceCut.c_str()
+  );
+  timingFitAcceptanceCutTag.Write();
+
+  TNamed eventAcceptanceCutTag(
+    "event_acceptance_cut",
+    acceptanceCut.c_str()
+  );
+  eventAcceptanceCutTag.Write();
+
+  TParameter<int>(
     "ct_timing_evaluated",
     ctTimingEvaluated ? 1 : 0
   ).Write();
@@ -6625,6 +6810,8 @@ void check_slow_protons(
     << " ("
     << timingSelectionReason
     << ")"
+    << "\nTiming-fit pre-diamond fallback: "
+    << (timingFitUsedPreDiamondFallback ? "yes" : "no")
     << "\nGlobal PID entries: "
     << hGlobalPID->Integral()
     << "\nIdentifiable global aerogel slices: "
