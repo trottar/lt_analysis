@@ -55,7 +55,10 @@ struct TimingShape {
   double separation = 0.0;
   double kaonSignificance = 0.0;
   double protonSignificance = 0.0;
-  double chi2Ndf = 0.0;
+  double poissonDeviance = 0.0;
+  int goodnessNdf = 0;
+  double poissonDevianceNdf = 0.0;
+  double poissonDeviancePerEntry = 0.0;
 
   TF1 *fitFunction = nullptr;
 };
@@ -83,9 +86,22 @@ struct SliceFitResult {
   double modelYield = 0.0;
 
   double modelDataRatio = 0.0;
-  double chi2Ndf = 0.0;
+  double poissonDeviance = 0.0;
+  int goodnessNdf = 0;
+  double poissonDevianceNdf = 0.0;
+  double poissonDeviancePerEntry = 0.0;
 
   TF1 *fitFunction = nullptr;
+};
+
+
+struct PoissonGoodnessOfFit {
+  double deviance = std::numeric_limits<double>::infinity();
+  int ndf = 0;
+  int fittedBins = 0;
+  double fittedEntries = 0.0;
+  double devianceNdf = std::numeric_limits<double>::infinity();
+  double deviancePerEntry = std::numeric_limits<double>::infinity();
 };
 
 
@@ -285,6 +301,100 @@ std::pair<double, double> findCentralQuantileRange(
 }
 
 
+PoissonGoodnessOfFit computePoissonGoodnessOfFit(
+  const TH1D *histogram,
+  const TF1 *fitFunction,
+  double fitMin,
+  double fitMax,
+  int numberOfFreeParameters
+) {
+  PoissonGoodnessOfFit result;
+
+  if (
+    !histogram ||
+    !fitFunction ||
+    fitMax <= fitMin ||
+    numberOfFreeParameters < 0
+  ) {
+    return result;
+  }
+
+  double deviance = 0.0;
+  double fittedEntries = 0.0;
+  int fittedBins = 0;
+
+  for (
+    int bin = 1;
+    bin <= histogram->GetNbinsX();
+    ++bin
+  ) {
+    const double binCenter =
+      histogram->GetXaxis()->GetBinCenter(bin);
+
+    if (
+      binCenter < fitMin ||
+      binCenter > fitMax
+    ) {
+      continue;
+    }
+
+    const double binLow =
+      histogram->GetXaxis()->GetBinLowEdge(bin);
+
+    const double binHigh =
+      histogram->GetXaxis()->GetBinUpEdge(bin);
+
+    const double binWidth = binHigh - binLow;
+
+    if (!(binWidth > 0.0)) {
+      continue;
+    }
+
+    const double observed = std::max(
+      histogram->GetBinContent(bin),
+      0.0
+    );
+
+    // The fit uses option I, so ROOT compares the bin content with the
+    // bin-averaged function value rather than only the bin center.
+    const double expected = std::max(
+      fitFunction->Integral(binLow, binHigh) / binWidth,
+      1.0e-12
+    );
+
+    if (observed > 0.0) {
+      deviance += 2.0 * (
+        expected -
+        observed +
+        observed * std::log(observed / expected)
+      );
+    } else {
+      deviance += 2.0 * expected;
+    }
+
+    fittedEntries += observed;
+    ++fittedBins;
+  }
+
+  result.deviance = deviance;
+  result.fittedBins = fittedBins;
+  result.fittedEntries = fittedEntries;
+  result.ndf = fittedBins - numberOfFreeParameters;
+
+  if (result.ndf > 0) {
+    result.devianceNdf =
+      result.deviance / result.ndf;
+  }
+
+  if (result.fittedEntries > 0.0) {
+    result.deviancePerEntry =
+      result.deviance / result.fittedEntries;
+  }
+
+  return result;
+}
+
+
 double evaluateGaussian(
   double x,
   double amplitude,
@@ -478,7 +588,9 @@ TimingShape fitGlobalTimingShape(
   double initialSigma,
   double minimumSeparation,
   double minimumAmplitudeSignificance,
-  double maximumChi2Ndf,
+  bool useDeviancePerEntryValidation,
+  double maximumPoissonDevianceNdf,
+  double maximumPoissonDeviancePerEntry,
   double boundFractionTolerance,
   int minimumEntries
 ) {
@@ -617,7 +729,7 @@ TimingShape fitGlobalTimingShape(
   TFitResultPtr fitResult =
     histogram->Fit(
       fitFunction,
-      "SRLQ0"
+      "SRLIQ0"
     );
 
   result.fitStatus =
@@ -657,14 +769,20 @@ TimingShape fitGlobalTimingShape(
   result.otherAmplitude =
     fitFunction->GetParameter(6);
 
-  if (fitFunction->GetNDF() > 0) {
-    result.chi2Ndf =
-      fitFunction->GetChisquare() /
-      fitFunction->GetNDF();
-  } else {
-    result.chi2Ndf =
-      std::numeric_limits<double>::infinity();
-  }
+  const PoissonGoodnessOfFit goodness =
+    computePoissonGoodnessOfFit(
+      histogram,
+      fitFunction,
+      fitMin,
+      fitMax,
+      7
+    );
+
+  result.poissonDeviance = goodness.deviance;
+  result.goodnessNdf = goodness.ndf;
+  result.poissonDevianceNdf = goodness.devianceNdf;
+  result.poissonDeviancePerEntry =
+    goodness.deviancePerEntry;
 
   const double separationDenominator =
     std::sqrt(
@@ -727,7 +845,8 @@ TimingShape fitGlobalTimingShape(
     std::isfinite(result.protonMean) &&
     std::isfinite(result.kaonSigma) &&
     std::isfinite(result.protonSigma) &&
-    std::isfinite(result.chi2Ndf) &&
+    std::isfinite(result.poissonDevianceNdf) &&
+    std::isfinite(result.poissonDeviancePerEntry) &&
     result.kaonAmplitude > 0.0 &&
     result.protonAmplitude > 0.0 &&
     result.kaonSigma > 0.0 &&
@@ -738,7 +857,13 @@ TimingShape fitGlobalTimingShape(
       minimumAmplitudeSignificance &&
     result.protonSignificance >=
       minimumAmplitudeSignificance &&
-    result.chi2Ndf <= maximumChi2Ndf;
+    (
+      useDeviancePerEntryValidation
+        ? result.poissonDeviancePerEntry <=
+            maximumPoissonDeviancePerEntry
+        : result.poissonDevianceNdf <=
+            maximumPoissonDevianceNdf
+    );
 
   return result;
 }
@@ -750,7 +875,9 @@ SliceFitResult fitDeltaTimingSlice(
   const std::string &functionName,
   double fitMin,
   double fitMax,
-  double maximumChi2Ndf,
+  bool useDeviancePerEntryValidation,
+  double maximumPoissonDevianceNdf,
+  double maximumPoissonDeviancePerEntry,
   double minimumModelDataRatio,
   double maximumModelDataRatio,
   int minimumEntries
@@ -871,7 +998,7 @@ SliceFitResult fitDeltaTimingSlice(
   TFitResultPtr fitResult =
     histogram->Fit(
       fitFunction,
-      "SRLQ0"
+      "SRLIQ0"
     );
 
   result.fitStatus =
@@ -964,14 +1091,20 @@ SliceFitResult fitDeltaTimingSlice(
       result.dataYield;
   }
 
-  if (fitFunction->GetNDF() > 0) {
-    result.chi2Ndf =
-      fitFunction->GetChisquare() /
-      fitFunction->GetNDF();
-  } else {
-    result.chi2Ndf =
-      std::numeric_limits<double>::infinity();
-  }
+  const PoissonGoodnessOfFit goodness =
+    computePoissonGoodnessOfFit(
+      histogram,
+      fitFunction,
+      fitMin,
+      fitMax,
+      3
+    );
+
+  result.poissonDeviance = goodness.deviance;
+  result.goodnessNdf = goodness.ndf;
+  result.poissonDevianceNdf = goodness.devianceNdf;
+  result.poissonDeviancePerEntry =
+    goodness.deviancePerEntry;
 
   result.valid =
     result.fitStatus == 0 &&
@@ -982,7 +1115,8 @@ SliceFitResult fitDeltaTimingSlice(
     std::isfinite(result.protonYield) &&
     std::isfinite(result.otherYield) &&
     std::isfinite(result.modelDataRatio) &&
-    std::isfinite(result.chi2Ndf) &&
+    std::isfinite(result.poissonDevianceNdf) &&
+    std::isfinite(result.poissonDeviancePerEntry) &&
     result.kaonAmplitude >= 0.0 &&
     result.protonAmplitude >= 0.0 &&
     result.otherAmplitude >= 0.0 &&
@@ -991,7 +1125,13 @@ SliceFitResult fitDeltaTimingSlice(
       minimumModelDataRatio &&
     result.modelDataRatio <=
       maximumModelDataRatio &&
-    result.chi2Ndf <= maximumChi2Ndf;
+    (
+      useDeviancePerEntryValidation
+        ? result.poissonDeviancePerEntry <=
+            maximumPoissonDeviancePerEntry
+        : result.poissonDevianceNdf <=
+            maximumPoissonDevianceNdf
+    );
 
   return result;
 }
@@ -1119,7 +1259,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.1";
+  const char *macroVersion = "check_slow_protons.2";
 
   std::cout
     << "Running "
@@ -1328,12 +1468,19 @@ void check_slow_protons(
   const double minimumGlobalSeparation = 0.75;
   const double minimumGlobalAmplitudeSignificance = 2.0;
 
-  const double maximumGlobalChi2Ndf =
-    isHighEpsilon ? 12.0 : 5.0;
+  // A Poisson likelihood is used for all fits.  For low epsilon, retain
+  // the previous reduced-deviance validation.  At high epsilon the very
+  // large sample sizes make D/ndf dominated by small model imperfections,
+  // so validation uses the less sample-size-sensitive D/N diagnostic.
+  const bool useDeviancePerEntryValidation =
+    isHighEpsilon;
+
+  const double maximumGlobalPoissonDevianceNdf = 5.0;
+  const double maximumGlobalPoissonDeviancePerEntry = 0.85;
   const double globalBoundFractionTolerance = 0.02;
 
-  const double maximumSliceChi2Ndf =
-    isHighEpsilon ? 12.0 : 5.0;
+  const double maximumSlicePoissonDevianceNdf = 5.0;
+  const double maximumSlicePoissonDeviancePerEntry = 1.00;
   const double minimumSliceModelDataRatio = 0.50;
   const double maximumSliceModelDataRatio = 1.50;
 
@@ -1606,7 +1753,9 @@ void check_slow_protons(
         timingSigmaInitial,
         minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
-        maximumGlobalChi2Ndf,
+        useDeviancePerEntryValidation,
+        maximumGlobalPoissonDevianceNdf,
+        maximumGlobalPoissonDeviancePerEntry,
         globalBoundFractionTolerance,
         minimumGlobalSliceEntries
       );
@@ -1626,7 +1775,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v1 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v2 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -1756,8 +1905,15 @@ void check_slow_protons(
       );
       fitStatusText->AddText(
         TString::Format(
-          "#chi^{2}/ndf: %.2f",
-          shape.chi2Ndf
+          "Poisson D/ndf: %.2f (%d)",
+          shape.poissonDevianceNdf,
+          shape.goodnessNdf
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "D/N: %.3f",
+          shape.poissonDeviancePerEntry
         )
       );
       fitStatusText->Draw();
@@ -2132,6 +2288,30 @@ void check_slow_protons(
     );
     diagnosticTimingBranch.Write();
 
+    TNamed diagnosticFitStatistic(
+      "fit_statistic",
+      "Baker-Cousins Poisson deviance; bin-integrated likelihood"
+    );
+    diagnosticFitStatistic.Write();
+
+    TNamed diagnosticValidationStatistic(
+      "fit_validation_statistic",
+      useDeviancePerEntryValidation
+        ? "poisson_deviance_per_entry"
+        : "poisson_deviance_per_ndf"
+    );
+    diagnosticValidationStatistic.Write();
+
+    TParameter<double>(
+      "maximum_global_poisson_deviance_per_ndf",
+      maximumGlobalPoissonDevianceNdf
+    ).Write();
+
+    TParameter<double>(
+      "maximum_global_poisson_deviance_per_entry",
+      maximumGlobalPoissonDeviancePerEntry
+    ).Write();
+
     TParameter<int>(
       "rf_correction_used",
       0
@@ -2225,7 +2405,7 @@ void check_slow_protons(
     0.0
   );
 
-  std::vector<double> chi2NdfByDelta(
+  std::vector<double> poissonDevianceNdfByDelta(
     nDeltaBins,
     0.0
   );
@@ -2317,8 +2497,8 @@ void check_slow_protons(
     dataYieldByDelta.at(deltaBin) =
       hPID->Integral();
 
-    double chi2WeightedSum = 0.0;
-    double chi2Weight = 0.0;
+    double devianceWeightedSum = 0.0;
+    double devianceWeight = 0.0;
 
     for (
       int aeroSlice = 0;
@@ -2403,7 +2583,9 @@ void check_slow_protons(
           ).Data(),
           timingFitMin,
           timingFitMax,
-          maximumSliceChi2Ndf,
+          useDeviancePerEntryValidation,
+          maximumSlicePoissonDevianceNdf,
+          maximumSlicePoissonDeviancePerEntry,
           minimumSliceModelDataRatio,
           maximumSliceModelDataRatio,
           minimumDeltaSliceEntries
@@ -2435,18 +2617,18 @@ void check_slow_protons(
 
       ++validSlicesByDelta.at(deltaBin);
 
-      chi2WeightedSum +=
-        sliceFit.chi2Ndf *
+      devianceWeightedSum +=
+        sliceFit.poissonDevianceNdf *
         sliceFit.dataYield;
 
-      chi2Weight +=
+      devianceWeight +=
         sliceFit.dataYield;
     }
 
-    if (chi2Weight > 0.0) {
-      chi2NdfByDelta.at(deltaBin) =
-        chi2WeightedSum /
-        chi2Weight;
+    if (devianceWeight > 0.0) {
+      poissonDevianceNdfByDelta.at(deltaBin) =
+        devianceWeightedSum /
+        devianceWeight;
     }
 
     if (dataYieldByDelta.at(deltaBin) > 0.0) {
@@ -2532,7 +2714,7 @@ void check_slow_protons(
     "h_fit_chi2_delta",
     "Average timing-fit quality;"
     "SHMS #delta [%];"
-    "Weighted average #chi^{2}/ndf",
+    "Weighted average Poisson D/ndf",
     nDeltaBins,
     deltaMin,
     deltaMax
@@ -2626,7 +2808,7 @@ void check_slow_protons(
 
     hFitChi2->SetBinContent(
       rootBin,
-      chi2NdfByDelta.at(deltaBin)
+      poissonDevianceNdfByDelta.at(deltaBin)
     );
 
     hFitCoverage->SetBinContent(
@@ -3310,8 +3492,16 @@ void check_slow_protons(
 
     label->AddText(
       TString::Format(
-        "#chi^{2}/ndf: %.2f",
-        shape.chi2Ndf
+        "Poisson D/ndf: %.2f (%d)",
+        shape.poissonDevianceNdf,
+        shape.goodnessNdf
+      )
+    );
+
+    label->AddText(
+      TString::Format(
+        "D/N: %.3f",
+        shape.poissonDeviancePerEntry
       )
     );
 
@@ -3868,8 +4058,15 @@ void check_slow_protons(
 
       fitText->AddText(
         TString::Format(
-          "#chi^{2}/ndf: %.2f",
-          sliceFit.chi2Ndf
+          "Poisson D/ndf: %.2f",
+          sliceFit.poissonDevianceNdf
+        )
+      );
+
+      fitText->AddText(
+        TString::Format(
+          "D/N: %.3f",
+          sliceFit.poissonDeviancePerEntry
         )
       );
 
@@ -4092,6 +4289,40 @@ void check_slow_protons(
     timeBranch.c_str()
   );
   timingBranchTag.Write();
+
+  TNamed fitStatisticTag(
+    "fit_statistic",
+    "Baker-Cousins Poisson deviance; bin-integrated likelihood"
+  );
+  fitStatisticTag.Write();
+
+  TNamed fitValidationStatisticTag(
+    "fit_validation_statistic",
+    useDeviancePerEntryValidation
+      ? "poisson_deviance_per_entry"
+      : "poisson_deviance_per_ndf"
+  );
+  fitValidationStatisticTag.Write();
+
+  TParameter<double>(
+    "maximum_global_poisson_deviance_per_ndf",
+    maximumGlobalPoissonDevianceNdf
+  ).Write();
+
+  TParameter<double>(
+    "maximum_global_poisson_deviance_per_entry",
+    maximumGlobalPoissonDeviancePerEntry
+  ).Write();
+
+  TParameter<double>(
+    "maximum_slice_poisson_deviance_per_ndf",
+    maximumSlicePoissonDevianceNdf
+  ).Write();
+
+  TParameter<double>(
+    "maximum_slice_poisson_deviance_per_entry",
+    maximumSlicePoissonDeviancePerEntry
+  ).Write();
 
   TParameter<int>(
     "rf_correction_used",
