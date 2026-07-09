@@ -1,8 +1,8 @@
 #include <TBranch.h>
 #include <TCanvas.h>
+#include <TBox.h>
 #include <TCutG.h>
 #include <TDirectory.h>
-#include <TEllipse.h>
 #include <TFile.h>
 #include <TF1.h>
 #include <TFitResult.h>
@@ -12,7 +12,6 @@
 #include <TLegend.h>
 #include <TList.h>
 #include <TLine.h>
-#include <TMarker.h>
 #include <TNamed.h>
 #include <TObjArray.h>
 #include <TPad.h>
@@ -127,27 +126,6 @@ struct PeakPairSeed {
   double upperMean = 0.0;
   double lowerHeight = 0.0;
   double upperHeight = 0.0;
-};
-
-
-struct TimingAeroBlob {
-  bool valid = false;
-  double weight = 0.0;
-  double aeroMean = 0.0;
-  double timeMean = 0.0;
-  double aeroSigma = 0.0;
-  double timeSigma = 0.0;
-  double covariance = 0.0;
-};
-
-
-struct TimingAeroBlobModel {
-  bool valid = false;
-  bool orderingConsistent = false;
-  bool protonPeakIsLower = false;
-  double splitTime = 0.0;
-  TimingAeroBlob kaon;
-  TimingAeroBlob proton;
 };
 
 
@@ -721,240 +699,6 @@ PeakPairSeed findProminentOffsetPeakPair(
   }
 
   return result;
-}
-
-
-TimingAeroBlobModel fitTimingAeroBlobModel(
-  TH2D *histogram,
-  bool protonPeakIsLower,
-  double beamBunchSpacingNs
-) {
-  TimingAeroBlobModel model;
-  model.protonPeakIsLower = protonPeakIsLower;
-
-  if (
-    !histogram ||
-    histogram->Integral() <= 0.0 ||
-    histogram->GetNbinsX() < 2 ||
-    histogram->GetNbinsY() < 4
-  ) {
-    return model;
-  }
-
-  auto *timeProjection = histogram->ProjectionY(
-    TString::Format(
-      "%s_blob_time_projection_tmp",
-      histogram->GetName()
-    ),
-    1,
-    histogram->GetNbinsX(),
-    "e"
-  );
-
-  timeProjection->SetDirectory(nullptr);
-
-  const double timeMin = histogram->GetYaxis()->GetXmin();
-  const double timeMax = histogram->GetYaxis()->GetXmax();
-
-  const double minimumSeparation = std::max(
-    0.16,
-    0.08 * beamBunchSpacingNs
-  );
-
-  const double maximumSeparation = std::min(
-    1.45,
-    0.80 * beamBunchSpacingNs
-  );
-
-  PeakPairSeed peakPair = findProminentOffsetPeakPair(
-    timeProjection,
-    timeMin,
-    timeMax,
-    minimumSeparation,
-    maximumSeparation
-  );
-
-  if (!peakPair.valid) {
-    peakPair = findSeparatedPeakPair(
-      timeProjection,
-      timeMin,
-      timeMax,
-      minimumSeparation,
-      maximumSeparation
-    );
-  }
-
-  delete timeProjection;
-
-  if (!peakPair.valid) {
-    return model;
-  }
-
-  const double seedSeparation =
-    peakPair.upperMean - peakPair.lowerMean;
-
-  model.splitTime = 0.5 * (
-    peakPair.lowerMean + peakPair.upperMean
-  );
-
-  const double assignmentHalfWidth = std::clamp(
-    1.10 * seedSeparation,
-    0.28,
-    0.85
-  );
-
-  auto measureBlob = [
-    histogram,
-    assignmentHalfWidth
-  ](
-    double targetMean,
-    double otherMean
-  ) -> TimingAeroBlob {
-    TimingAeroBlob blob;
-
-    double sumWeight = 0.0;
-    double sumAero = 0.0;
-    double sumTime = 0.0;
-    double sumAero2 = 0.0;
-    double sumTime2 = 0.0;
-    double sumAeroTime = 0.0;
-
-    for (int xBin = 1; xBin <= histogram->GetNbinsX(); ++xBin) {
-      const double aero =
-        histogram->GetXaxis()->GetBinCenter(xBin);
-
-      for (int yBin = 1; yBin <= histogram->GetNbinsY(); ++yBin) {
-        const double weight = std::max(
-          histogram->GetBinContent(xBin, yBin),
-          0.0
-        );
-
-        if (!(weight > 0.0)) {
-          continue;
-        }
-
-        const double time =
-          histogram->GetYaxis()->GetBinCenter(yBin);
-
-        const double targetDistance =
-          std::abs(time - targetMean);
-
-        if (
-          targetDistance > assignmentHalfWidth ||
-          targetDistance > std::abs(time - otherMean)
-        ) {
-          continue;
-        }
-
-        sumWeight += weight;
-        sumAero += weight * aero;
-        sumTime += weight * time;
-        sumAero2 += weight * aero * aero;
-        sumTime2 += weight * time * time;
-        sumAeroTime += weight * aero * time;
-      }
-    }
-
-    if (!(sumWeight > 0.0)) {
-      return blob;
-    }
-
-    blob.weight = sumWeight;
-    blob.aeroMean = sumAero / sumWeight;
-    blob.timeMean = sumTime / sumWeight;
-
-    const double aeroVariance = std::max(
-      sumAero2 / sumWeight - blob.aeroMean * blob.aeroMean,
-      0.0
-    );
-
-    const double timeVariance = std::max(
-      sumTime2 / sumWeight - blob.timeMean * blob.timeMean,
-      0.0
-    );
-
-    blob.aeroSigma = std::sqrt(aeroVariance);
-    blob.timeSigma = std::sqrt(timeVariance);
-    blob.covariance =
-      sumAeroTime / sumWeight - blob.aeroMean * blob.timeMean;
-
-    blob.valid =
-      std::isfinite(blob.aeroMean) &&
-      std::isfinite(blob.timeMean) &&
-      std::isfinite(blob.aeroSigma) &&
-      std::isfinite(blob.timeSigma) &&
-      blob.aeroSigma > 0.0 &&
-      blob.timeSigma > 0.0;
-
-    return blob;
-  };
-
-  TimingAeroBlob lowerBlob = measureBlob(
-    peakPair.lowerMean,
-    peakPair.upperMean
-  );
-
-  TimingAeroBlob upperBlob = measureBlob(
-    peakPair.upperMean,
-    peakPair.lowerMean
-  );
-
-  if (!lowerBlob.valid || !upperBlob.valid) {
-    return model;
-  }
-
-  // The aerogel response supplies the species label: kaons form the
-  // higher-aerogel blob, while protons form the lower-aerogel blob.
-  // The branch-specific timing ordering is then used as a consistency
-  // check rather than as the sole source of identification.
-  if (lowerBlob.aeroMean > upperBlob.aeroMean) {
-    model.kaon = lowerBlob;
-    model.proton = upperBlob;
-  } else {
-    model.kaon = upperBlob;
-    model.proton = lowerBlob;
-  }
-
-  model.orderingConsistent = protonPeakIsLower
-    ? model.proton.timeMean < model.kaon.timeMean
-    : model.kaon.timeMean < model.proton.timeMean;
-
-  model.valid =
-    model.kaon.valid &&
-    model.proton.valid &&
-    model.orderingConsistent &&
-    model.kaon.aeroMean > model.proton.aeroMean;
-
-  return model;
-}
-
-
-TEllipse *makeTimingAeroBlobEllipse(
-  const TimingAeroBlob &blob,
-  const char *name,
-  int lineColor,
-  double nSigma = 2.0
-) {
-  if (!blob.valid) {
-    return nullptr;
-  }
-
-  auto *ellipse = new TEllipse(
-    blob.aeroMean,
-    blob.timeMean,
-    nSigma * blob.aeroSigma,
-    nSigma * blob.timeSigma
-  );
-
-  // ROOT 6.24 TEllipse inherits from TObject rather than TNamed, so it
-  // does not provide SetName(). The requested key name is retained only
-  // for call-site readability; the ellipse is owned by the canvas.
-  (void)name;
-  ellipse->SetFillStyle(0);
-  ellipse->SetLineColor(lineColor);
-  ellipse->SetLineWidth(4);
-  ellipse->SetLineStyle(1);
-  return ellipse;
 }
 
 
@@ -2784,7 +2528,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.23";
+  const char *macroVersion = "check_slow_protons.24";
 
   std::cout
     << "Running "
@@ -3710,7 +3454,6 @@ void check_slow_protons(
     double meanPoissonDeviancePerEntry =
       std::numeric_limits<double>::infinity();
     bool localPeakRescue = false;
-    TimingAeroBlobModel blobModel;
   };
 
   // This remains false during the normal diamond and pre-diamond probes.
@@ -3948,21 +3691,11 @@ void check_slow_protons(
       0.80 * beamBunchSpacingNs
     );
 
-    probe.blobModel = fitTimingAeroBlobModel(
-      probePID,
-      true,
-      beamBunchSpacingNs
-    );
-
     double lowerSeedMean = 0.0;
     double upperSeedMean = 0.0;
     bool seedPairValid = false;
 
-    if (probe.blobModel.valid) {
-      lowerSeedMean = probe.blobModel.proton.timeMean;
-      upperSeedMean = probe.blobModel.kaon.timeMean;
-      seedPairValid = lowerSeedMean < upperSeedMean;
-    } else if (fittedPeakPair.valid) {
+    if (fittedPeakPair.valid) {
       lowerSeedMean = fittedPeakPair.lowerMean;
       upperSeedMean = fittedPeakPair.upperMean;
       seedPairValid = true;
@@ -3980,9 +3713,8 @@ void check_slow_protons(
     delete allAeroTiming;
 
     // RF timing: proton is the lower-time peak (near 1 ns) and kaon is
-    // the higher-time peak (near 2 ns).  The 2D timing-vs-aerogel blob
-    // model confirms the labels because the kaon blob has the larger
-    // aerogel response.
+    // the higher-time peak (near 2 ns). Species labels come from the
+    // branch-specific timing ordering used by the actual per-aerogel fits.
     probe.localPeakRescue = localPeakRescueMode;
 
     if (localPeakRescueMode && seedPairValid) {
@@ -4236,18 +3968,6 @@ void check_slow_protons(
 
     probePID->SetDirectory(nullptr);
 
-    probe.blobModel = fitTimingAeroBlobModel(
-      probePID,
-      false,
-      beamBunchSpacingNs
-    );
-
-    if (probe.blobModel.valid) {
-      probe.peakPairFound = true;
-      probe.kaonSeedMean = probe.blobModel.kaon.timeMean;
-      probe.protonSeedMean = probe.blobModel.proton.timeMean;
-    }
-
     probe.localPeakRescue = localPeakRescueMode;
 
     if (localPeakRescueMode && probePID->Integral() > 0.0) {
@@ -4281,11 +4001,7 @@ void check_slow_protons(
       double upperSeedMean = 0.0;
       bool seedPairValid = false;
 
-      if (probe.blobModel.valid) {
-        lowerSeedMean = probe.blobModel.kaon.timeMean;
-        upperSeedMean = probe.blobModel.proton.timeMean;
-        seedPairValid = lowerSeedMean < upperSeedMean;
-      } else if (peakPair.valid) {
+      if (peakPair.valid) {
         lowerSeedMean = peakPair.lowerMean;
         upperSeedMean = peakPair.upperMean;
         seedPairValid = true;
@@ -5078,10 +4794,9 @@ void check_slow_protons(
   }
 
   // RF: proton is the left/lower-time peak (near 1 ns) and kaon is the
-  // right/higher-time peak (near 2 ns).  CTime_ROC1 is flipped: kaon is
-  // lower in time and proton is higher.  The timing-vs-aerogel blob model
-  // independently confirms the labels because kaons have the larger
-  // aerogel response.
+  // right/higher-time peak (near 2 ns). CTime_ROC1 is flipped: kaon is
+  // lower in time and proton is higher. These labels are carried by the
+  // fitted Gaussian components in every aerogel bin.
   const bool protonPeakIsLower = rfTimingSelected;
 
   const bool activeUseDeviancePerEntryValidation =
@@ -5223,222 +4938,16 @@ void check_slow_protons(
     return;
   }
 
-  const TimingAeroBlobModel selectedBlobModel =
-    fitTimingAeroBlobModel(
-      hGlobalPID,
-      protonPeakIsLower,
-      beamBunchSpacingNs
-    );
-
-  auto *hBlobTimingProjection = hGlobalPID->ProjectionY(
-    "h_blob_model_timing_projection",
-    1,
-    hGlobalPID->GetNbinsX(),
-    "e"
-  );
-  hBlobTimingProjection->SetDirectory(nullptr);
-  hBlobTimingProjection->SetTitle(
-    TString::Format(
-      "Timing projection used by the 2D blob model;%s;Counts",
-      timingAxisTitle.c_str()
-    )
-  );
-
-  auto *blobCanvas = new TCanvas(
-    "canvas_timing_aero_blob_model",
-    "Timing-aerogel blob model",
-    1900,
-    850
-  );
-  blobCanvas->Divide(2, 1);
-
-  blobCanvas->cd(1);
-  gPad->SetRightMargin(0.16);
-  gPad->SetLogz();
-  hGlobalPID->SetTitle(
-    TString::Format(
-      "%s vs P_aero_npeSum with blob model and aerogel bins;"
-      "P_aero_npeSum;%s;Counts",
-      timeBranch.c_str(),
-      timingAxisTitle.c_str()
-    )
-  );
-  hGlobalPID->Draw("COLZ");
-
-  std::vector<TLine *> blobAeroBinLines;
-  for (size_t edgeIndex = 1; edgeIndex + 1 < aeroEdges.size(); ++edgeIndex) {
-    auto *edgeLine = new TLine(
-      aeroEdges.at(edgeIndex),
-      timeMin,
-      aeroEdges.at(edgeIndex),
-      timeMax
-    );
-    edgeLine->SetLineColor(kGray + 2);
-    edgeLine->SetLineStyle(2);
-    edgeLine->SetLineWidth(2);
-    edgeLine->Draw();
-    blobAeroBinLines.push_back(edgeLine);
-  }
-
-  TEllipse *kaonBlobEllipse = nullptr;
-  TEllipse *protonBlobEllipse = nullptr;
-  TMarker *kaonBlobMarker = nullptr;
-  TMarker *protonBlobMarker = nullptr;
-
-  if (selectedBlobModel.kaon.valid) {
-    kaonBlobEllipse = makeTimingAeroBlobEllipse(
-      selectedBlobModel.kaon,
-      "ellipse_kaon_timing_aero_blob",
-      kMagenta + 1,
-      2.0
-    );
-    if (kaonBlobEllipse) kaonBlobEllipse->Draw();
-
-    kaonBlobMarker = new TMarker(
-      selectedBlobModel.kaon.aeroMean,
-      selectedBlobModel.kaon.timeMean,
-      29
-    );
-    kaonBlobMarker->SetMarkerColor(kMagenta + 1);
-    kaonBlobMarker->SetMarkerSize(2.0);
-    kaonBlobMarker->Draw();
-  }
-
-  if (selectedBlobModel.proton.valid) {
-    protonBlobEllipse = makeTimingAeroBlobEllipse(
-      selectedBlobModel.proton,
-      "ellipse_proton_timing_aero_blob",
-      kBlue + 1,
-      2.0
-    );
-    if (protonBlobEllipse) protonBlobEllipse->Draw();
-
-    protonBlobMarker = new TMarker(
-      selectedBlobModel.proton.aeroMean,
-      selectedBlobModel.proton.timeMean,
-      29
-    );
-    protonBlobMarker->SetMarkerColor(kBlue + 1);
-    protonBlobMarker->SetMarkerSize(2.0);
-    protonBlobMarker->Draw();
-  }
-
-  auto *blobLegend = new TLegend(0.60, 0.73, 0.88, 0.88);
-  blobLegend->SetFillColor(kWhite);
-  blobLegend->SetBorderSize(1);
-  if (kaonBlobEllipse) {
-    blobLegend->AddEntry(
-      kaonBlobEllipse,
-      "kaon blob (higher aero)",
-      "l"
-    );
-  }
-  if (protonBlobEllipse) {
-    blobLegend->AddEntry(
-      protonBlobEllipse,
-      "proton blob (lower aero)",
-      "l"
-    );
-  }
-  if (!blobAeroBinLines.empty()) {
-    blobLegend->AddEntry(
-      blobAeroBinLines.front(),
-      "aerogel-bin edges",
-      "l"
-    );
-  }
-  blobLegend->Draw();
-
-  blobCanvas->cd(2);
-  hBlobTimingProjection->SetLineColor(kBlack);
-  hBlobTimingProjection->SetLineWidth(2);
-  hBlobTimingProjection->Draw("HIST");
-
-  TLine *kaonBlobTimeLine = nullptr;
-  TLine *protonBlobTimeLine = nullptr;
-
-  if (selectedBlobModel.kaon.valid) {
-    kaonBlobTimeLine = new TLine(
-      selectedBlobModel.kaon.timeMean,
-      0.0,
-      selectedBlobModel.kaon.timeMean,
-      1.03 * hBlobTimingProjection->GetMaximum()
-    );
-    kaonBlobTimeLine->SetLineColor(kMagenta + 1);
-    kaonBlobTimeLine->SetLineStyle(2);
-    kaonBlobTimeLine->SetLineWidth(3);
-    kaonBlobTimeLine->Draw();
-  }
-
-  if (selectedBlobModel.proton.valid) {
-    protonBlobTimeLine = new TLine(
-      selectedBlobModel.proton.timeMean,
-      0.0,
-      selectedBlobModel.proton.timeMean,
-      1.03 * hBlobTimingProjection->GetMaximum()
-    );
-    protonBlobTimeLine->SetLineColor(kBlue + 1);
-    protonBlobTimeLine->SetLineStyle(2);
-    protonBlobTimeLine->SetLineWidth(3);
-    protonBlobTimeLine->Draw();
-  }
-
-  auto *blobText = new TPaveText(0.53, 0.55, 0.89, 0.88, "NDC");
-  blobText->SetFillColor(kWhite);
-  blobText->SetFillStyle(1001);
-  blobText->SetBorderSize(1);
-  blobText->SetTextAlign(12);
-  blobText->AddText(
-    TString::Format(
-      "blob model valid: %s",
-      selectedBlobModel.valid ? "yes" : "no"
-    )
-  );
-  blobText->AddText(
-    TString::Format(
-      "ordering: RF p<K, CT K<p; selected %s",
-      protonPeakIsLower ? "p<K" : "K<p"
-    )
-  );
-  blobText->AddText(
-    TString::Format(
-      "K: time %.3f #pm %.3f ns, aero %.2f #pm %.2f",
-      selectedBlobModel.kaon.timeMean,
-      selectedBlobModel.kaon.timeSigma,
-      selectedBlobModel.kaon.aeroMean,
-      selectedBlobModel.kaon.aeroSigma
-    )
-  );
-  blobText->AddText(
-    TString::Format(
-      "p: time %.3f #pm %.3f ns, aero %.2f #pm %.2f",
-      selectedBlobModel.proton.timeMean,
-      selectedBlobModel.proton.timeSigma,
-      selectedBlobModel.proton.aeroMean,
-      selectedBlobModel.proton.aeroSigma
-    )
-  );
-  blobText->AddText(
-    "Species labels use the higher-aerogel blob as kaon."
-  );
-  blobText->Draw();
-
-  blobCanvas->Modified();
-  blobCanvas->Update();
-
-  std::cout
-    << "Timing-aerogel blob model: valid="
-    << (selectedBlobModel.valid ? "yes" : "no")
-    << ", K(time,aero)=("
-    << selectedBlobModel.kaon.timeMean
-    << ", "
-    << selectedBlobModel.kaon.aeroMean
-    << "), p(time,aero)=("
-    << selectedBlobModel.proton.timeMean
-    << ", "
-    << selectedBlobModel.proton.aeroMean
-    << ")"
-    << std::endl;
+  TCanvas *fitDerivedPIDCanvas = nullptr;
+  TH1D *hFitDerivedKaonYieldVsAero = nullptr;
+  TH1D *hFitDerivedProtonYieldVsAero = nullptr;
+  std::vector<TBox *> fitDerivedKaonBands;
+  std::vector<TBox *> fitDerivedProtonBands;
+  double fitDerivedKaonAeroCentroid =
+    std::numeric_limits<double>::quiet_NaN();
+  double fitDerivedProtonAeroCentroid =
+    std::numeric_limits<double>::quiet_NaN();
+  bool fitDerivedAeroOrderingConsistent = false;
 
   std::cout
     << "Timing fit range: ["
@@ -5623,12 +5132,8 @@ void check_slow_protons(
           timeMax,
           protonPeakIsLower,
           beamBunchSpacingNs,
-          selectedBlobModel.valid
-            ? selectedBlobModel.kaon.timeMean
-            : 0.5 * (kaonMeanMin + kaonMeanMax),
-          selectedBlobModel.valid
-            ? selectedBlobModel.proton.timeMean
-            : 0.5 * (protonMeanMin + protonMeanMax),
+          0.5 * (kaonMeanMin + kaonMeanMax),
+          0.5 * (protonMeanMin + protonMeanMax),
           timingSigmaMin,
           minimumGlobalAmplitudeSignificance,
           minimumGlobalSliceEntries
@@ -5685,10 +5190,345 @@ void check_slow_protons(
       << std::endl;
   }
 
+  // ------------------------------------------------------------------
+  // Fit-derived timing-versus-aerogel diagnostic.
+  //
+  // This page does not run a second, independent 2D clustering model.
+  // It visualizes the kaon and proton Gaussian components that were
+  // already fitted in each aerogel bin and are used by the analysis.
+  // ------------------------------------------------------------------
+
+  fitDerivedPIDCanvas = new TCanvas(
+    "canvas_fit_derived_timing_aero_bands",
+    "Fit-derived timing-aerogel species bands",
+    1900,
+    850
+  );
+  fitDerivedPIDCanvas->Divide(2, 1);
+
+  fitDerivedPIDCanvas->cd(1);
+  gPad->SetRightMargin(0.16);
+  gPad->SetLogz();
+  hGlobalPID->SetTitle(
+    TString::Format(
+      "%s vs P_aero_npeSum with fitted species bands;"
+      "P_aero_npeSum;%s;Counts",
+      timeBranch.c_str(),
+      timingAxisTitle.c_str()
+    )
+  );
+  hGlobalPID->Draw("COLZ");
+
+  std::vector<TLine *> fitDerivedAeroBinLines;
+  std::vector<TLine *> fitDerivedKaonMeanLines;
+  std::vector<TLine *> fitDerivedProtonMeanLines;
+
+  for (
+    size_t edgeIndex = 1;
+    edgeIndex + 1 < aeroEdges.size();
+    ++edgeIndex
+  ) {
+    auto *edgeLine = new TLine(
+      aeroEdges.at(edgeIndex),
+      timeMin,
+      aeroEdges.at(edgeIndex),
+      timeMax
+    );
+    edgeLine->SetLineColor(kGray + 2);
+    edgeLine->SetLineStyle(2);
+    edgeLine->SetLineWidth(2);
+    edgeLine->Draw();
+    fitDerivedAeroBinLines.push_back(edgeLine);
+  }
+
+  hFitDerivedKaonYieldVsAero = new TH1D(
+    "h_fit_derived_kaon_yield_vs_aero",
+    "Fitted timing-component yields by aerogel bin;"
+    "P_aero_npeSum;Fitted component yield",
+    nAeroSlices,
+    aeroEdges.data()
+  );
+  hFitDerivedKaonYieldVsAero->SetDirectory(nullptr);
+
+  hFitDerivedProtonYieldVsAero = new TH1D(
+    "h_fit_derived_proton_yield_vs_aero",
+    "Fitted timing-component yields by aerogel bin;"
+    "P_aero_npeSum;Fitted component yield",
+    nAeroSlices,
+    aeroEdges.data()
+  );
+  hFitDerivedProtonYieldVsAero->SetDirectory(nullptr);
+
+  int fitDerivedValidBins = 0;
+  double fitDerivedKaonYieldSum = 0.0;
+  double fitDerivedProtonYieldSum = 0.0;
+  double fitDerivedKaonAeroWeightedSum = 0.0;
+  double fitDerivedProtonAeroWeightedSum = 0.0;
+
+  for (
+    int aeroSlice = 0;
+    aeroSlice < nAeroSlices;
+    ++aeroSlice
+  ) {
+    const TimingShape &shape = globalShapes.at(aeroSlice);
+    TH1D *projection = globalTimingProjections.at(aeroSlice);
+
+    if (!shape.valid || !projection) {
+      continue;
+    }
+
+    ++fitDerivedValidBins;
+
+    const double aeroLow = aeroEdges.at(aeroSlice);
+    const double aeroHigh = aeroEdges.at(aeroSlice + 1);
+
+    const double kaonBandLow = std::max(
+      timeMin,
+      shape.kaonMean - 2.0 * shape.kaonSigma
+    );
+    const double kaonBandHigh = std::min(
+      timeMax,
+      shape.kaonMean + 2.0 * shape.kaonSigma
+    );
+
+    const double protonBandLow = std::max(
+      timeMin,
+      shape.protonMean - 2.0 * shape.protonSigma
+    );
+    const double protonBandHigh = std::min(
+      timeMax,
+      shape.protonMean + 2.0 * shape.protonSigma
+    );
+
+    auto *kaonBand = new TBox(
+      aeroLow,
+      kaonBandLow,
+      aeroHigh,
+      kaonBandHigh
+    );
+    kaonBand->SetFillStyle(0);
+    kaonBand->SetLineColor(kMagenta + 1);
+    kaonBand->SetLineWidth(3);
+    kaonBand->Draw();
+    fitDerivedKaonBands.push_back(kaonBand);
+
+    auto *protonBand = new TBox(
+      aeroLow,
+      protonBandLow,
+      aeroHigh,
+      protonBandHigh
+    );
+    protonBand->SetFillStyle(0);
+    protonBand->SetLineColor(kBlue + 1);
+    protonBand->SetLineWidth(3);
+    protonBand->Draw();
+    fitDerivedProtonBands.push_back(protonBand);
+
+    auto *kaonMeanLine = new TLine(
+      aeroLow,
+      shape.kaonMean,
+      aeroHigh,
+      shape.kaonMean
+    );
+    kaonMeanLine->SetLineColor(kMagenta + 1);
+    kaonMeanLine->SetLineWidth(4);
+    kaonMeanLine->Draw();
+    fitDerivedKaonMeanLines.push_back(kaonMeanLine);
+
+    auto *protonMeanLine = new TLine(
+      aeroLow,
+      shape.protonMean,
+      aeroHigh,
+      shape.protonMean
+    );
+    protonMeanLine->SetLineColor(kBlue + 1);
+    protonMeanLine->SetLineWidth(4);
+    protonMeanLine->Draw();
+    fitDerivedProtonMeanLines.push_back(protonMeanLine);
+
+    const double kaonYield = sumGaussianOverBins(
+      projection,
+      shape.kaonAmplitude,
+      shape.kaonMean,
+      shape.kaonSigma,
+      shape.fitMin,
+      shape.fitMax
+    );
+
+    const double protonYield = sumGaussianOverBins(
+      projection,
+      shape.protonAmplitude,
+      shape.protonMean,
+      shape.protonSigma,
+      shape.fitMin,
+      shape.fitMax
+    );
+
+    hFitDerivedKaonYieldVsAero->SetBinContent(
+      aeroSlice + 1,
+      kaonYield
+    );
+    hFitDerivedProtonYieldVsAero->SetBinContent(
+      aeroSlice + 1,
+      protonYield
+    );
+
+    const double aeroCenter = 0.5 * (aeroLow + aeroHigh);
+    fitDerivedKaonYieldSum += kaonYield;
+    fitDerivedProtonYieldSum += protonYield;
+    fitDerivedKaonAeroWeightedSum += kaonYield * aeroCenter;
+    fitDerivedProtonAeroWeightedSum += protonYield * aeroCenter;
+  }
+
+  if (fitDerivedKaonYieldSum > 0.0) {
+    fitDerivedKaonAeroCentroid =
+      fitDerivedKaonAeroWeightedSum / fitDerivedKaonYieldSum;
+  }
+
+  if (fitDerivedProtonYieldSum > 0.0) {
+    fitDerivedProtonAeroCentroid =
+      fitDerivedProtonAeroWeightedSum / fitDerivedProtonYieldSum;
+  }
+
+  fitDerivedAeroOrderingConsistent =
+    std::isfinite(fitDerivedKaonAeroCentroid) &&
+    std::isfinite(fitDerivedProtonAeroCentroid) &&
+    fitDerivedKaonAeroCentroid > fitDerivedProtonAeroCentroid;
+
+  auto *fitDerivedLegend = new TLegend(0.56, 0.72, 0.88, 0.88);
+  fitDerivedLegend->SetFillColor(kWhite);
+  fitDerivedLegend->SetBorderSize(1);
+  if (!fitDerivedKaonBands.empty()) {
+    fitDerivedLegend->AddEntry(
+      fitDerivedKaonBands.front(),
+      "kaon fit: #mu_{K} #pm 2#sigma_{K}",
+      "l"
+    );
+  }
+  if (!fitDerivedProtonBands.empty()) {
+    fitDerivedLegend->AddEntry(
+      fitDerivedProtonBands.front(),
+      "proton fit: #mu_{p} #pm 2#sigma_{p}",
+      "l"
+    );
+  }
+  if (!fitDerivedAeroBinLines.empty()) {
+    fitDerivedLegend->AddEntry(
+      fitDerivedAeroBinLines.front(),
+      "aerogel-bin edges",
+      "l"
+    );
+  }
+  fitDerivedLegend->Draw();
+
+  auto *fitDerivedRuleText = new TPaveText(
+    0.12,
+    0.12,
+    0.55,
+    0.24,
+    "NDC"
+  );
+  fitDerivedRuleText->SetFillColor(kWhite);
+  fitDerivedRuleText->SetFillStyle(1001);
+  fitDerivedRuleText->SetBorderSize(1);
+  fitDerivedRuleText->SetTextAlign(12);
+  fitDerivedRuleText->AddText(
+    rfTimingSelected
+      ? "RF labels: p = lower-time peak; K = higher-time peak"
+      : "CT labels: K = lower-time peak; p = higher-time peak"
+  );
+  fitDerivedRuleText->AddText(
+    TString::Format(
+      "Bands come from %d validated per-aerogel fits",
+      fitDerivedValidBins
+    )
+  );
+  fitDerivedRuleText->Draw();
+
+  fitDerivedPIDCanvas->cd(2);
+  hFitDerivedKaonYieldVsAero->SetLineColor(kMagenta + 1);
+  hFitDerivedKaonYieldVsAero->SetLineWidth(3);
+  hFitDerivedKaonYieldVsAero->SetMarkerColor(kMagenta + 1);
+  hFitDerivedKaonYieldVsAero->SetMarkerStyle(20);
+
+  hFitDerivedProtonYieldVsAero->SetLineColor(kBlue + 1);
+  hFitDerivedProtonYieldVsAero->SetLineWidth(3);
+  hFitDerivedProtonYieldVsAero->SetMarkerColor(kBlue + 1);
+  hFitDerivedProtonYieldVsAero->SetMarkerStyle(21);
+
+  const double maximumFitDerivedYield = std::max(
+    hFitDerivedKaonYieldVsAero->GetMaximum(),
+    hFitDerivedProtonYieldVsAero->GetMaximum()
+  );
+  hFitDerivedKaonYieldVsAero->SetMaximum(
+    maximumFitDerivedYield > 0.0
+      ? 1.18 * maximumFitDerivedYield
+      : 1.0
+  );
+  hFitDerivedKaonYieldVsAero->SetMinimum(0.0);
+  hFitDerivedKaonYieldVsAero->Draw("HIST P");
+  hFitDerivedProtonYieldVsAero->Draw("HIST P SAME");
+
+  auto *fitDerivedYieldLegend = new TLegend(0.60, 0.74, 0.88, 0.88);
+  fitDerivedYieldLegend->SetFillColor(kWhite);
+  fitDerivedYieldLegend->SetBorderSize(1);
+  fitDerivedYieldLegend->AddEntry(
+    hFitDerivedKaonYieldVsAero,
+    "kaon Gaussian yield",
+    "lp"
+  );
+  fitDerivedYieldLegend->AddEntry(
+    hFitDerivedProtonYieldVsAero,
+    "proton Gaussian yield",
+    "lp"
+  );
+  fitDerivedYieldLegend->Draw();
+
+  auto *fitDerivedYieldText = new TPaveText(
+    0.12,
+    0.72,
+    0.55,
+    0.88,
+    "NDC"
+  );
+  fitDerivedYieldText->SetFillColor(kWhite);
+  fitDerivedYieldText->SetFillStyle(1001);
+  fitDerivedYieldText->SetBorderSize(1);
+  fitDerivedYieldText->SetTextAlign(12);
+  fitDerivedYieldText->AddText(
+    "These are the same fitted components used for PID weighting."
+  );
+  fitDerivedYieldText->AddText(
+    TString::Format(
+      "yield-weighted aero centroid: K %.2f, p %.2f",
+      fitDerivedKaonAeroCentroid,
+      fitDerivedProtonAeroCentroid
+    )
+  );
+  fitDerivedYieldText->AddText(
+    TString::Format(
+      "K higher in aero than p: %s",
+      fitDerivedAeroOrderingConsistent ? "yes" : "no"
+    )
+  );
+  fitDerivedYieldText->AddText(
+    "No independent 2D blob clustering is performed."
+  );
+  fitDerivedYieldText->Draw();
+
+  fitDerivedPIDCanvas->Modified();
+  fitDerivedPIDCanvas->Update();
+
+  std::cout
+    << "Fit-derived timing-aerogel diagnostic: "
+    << fitDerivedValidBins
+    << " validated aerogel-bin fits overlaid."
+    << std::endl;
+
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v23 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v24 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -6072,8 +5912,8 @@ void check_slow_protons(
       diamondCanvas->Print(outputPDF.c_str());
     }
 
-    if (blobCanvas) {
-      blobCanvas->Print(outputPDF.c_str());
+    if (fitDerivedPIDCanvas) {
+      fitDerivedPIDCanvas->Print(outputPDF.c_str());
     }
 
     diagnosticGlobalCanvas->Print(
@@ -6131,33 +5971,18 @@ void check_slow_protons(
       diagnosticOutputFile.cd();
     }
 
-    if (blobCanvas) {
-      TDirectory *diagnosticBlobDirectory =
-        diagnosticOutputFile.mkdir("timing_aero_blob_model");
+    if (fitDerivedPIDCanvas) {
+      TDirectory *diagnosticFitDerivedDirectory =
+        diagnosticOutputFile.mkdir("fit_derived_timing_aero");
 
-      diagnosticBlobDirectory->cd();
-      if (hBlobTimingProjection) hBlobTimingProjection->Write();
-      blobCanvas->Write();
-      TParameter<int>(
-        "blob_model_valid",
-        selectedBlobModel.valid ? 1 : 0
-      ).Write();
-      TParameter<double>(
-        "blob_kaon_time_mean",
-        selectedBlobModel.kaon.timeMean
-      ).Write();
-      TParameter<double>(
-        "blob_proton_time_mean",
-        selectedBlobModel.proton.timeMean
-      ).Write();
-      TParameter<double>(
-        "blob_kaon_aero_mean",
-        selectedBlobModel.kaon.aeroMean
-      ).Write();
-      TParameter<double>(
-        "blob_proton_aero_mean",
-        selectedBlobModel.proton.aeroMean
-      ).Write();
+      diagnosticFitDerivedDirectory->cd();
+      if (hFitDerivedKaonYieldVsAero) {
+        hFitDerivedKaonYieldVsAero->Write();
+      }
+      if (hFitDerivedProtonYieldVsAero) {
+        hFitDerivedProtonYieldVsAero->Write();
+      }
+      fitDerivedPIDCanvas->Write();
 
       diagnosticOutputFile.cd();
     }
@@ -6288,13 +6113,25 @@ void check_slow_protons(
     ).Write();
 
     TParameter<int>(
-      "timing_aero_blob_model_valid",
-      selectedBlobModel.valid ? 1 : 0
+      "fit_derived_timing_aero_plot_written",
+      fitDerivedPIDCanvas ? 1 : 0
+    ).Write();
+    TParameter<int>(
+      "fit_derived_aero_ordering_consistent",
+      fitDerivedAeroOrderingConsistent ? 1 : 0
+    ).Write();
+    TParameter<double>(
+      "fit_derived_kaon_aero_centroid",
+      fitDerivedKaonAeroCentroid
+    ).Write();
+    TParameter<double>(
+      "fit_derived_proton_aero_centroid",
+      fitDerivedProtonAeroCentroid
     ).Write();
 
     TNamed(
       "species_identification_rule",
-      "kaon=higher-aerogel blob; RF proton lower-time/kaon higher-time; CT kaon lower-time/proton higher-time"
+      "species labels come from fitted timing components: RF proton lower-time/kaon higher-time; CT kaon lower-time/proton higher-time"
     ).Write();
 
     TParameter<int>(
@@ -8246,8 +8083,8 @@ void check_slow_protons(
     diamondCanvas->Print(outputPDF.c_str());
   }
 
-  if (blobCanvas) {
-    blobCanvas->Print(outputPDF.c_str());
+  if (fitDerivedPIDCanvas) {
+    fitDerivedPIDCanvas->Print(outputPDF.c_str());
   }
 
   globalCanvas->Print(
@@ -8316,37 +8153,18 @@ void check_slow_protons(
     outputFile.cd();
   }
 
-  if (blobCanvas) {
-    TDirectory *blobDirectory =
-      outputFile.mkdir("timing_aero_blob_model");
+  if (fitDerivedPIDCanvas) {
+    TDirectory *fitDerivedDirectory =
+      outputFile.mkdir("fit_derived_timing_aero");
 
-    blobDirectory->cd();
-    if (hBlobTimingProjection) hBlobTimingProjection->Write();
-    blobCanvas->Write();
-    TParameter<int>(
-      "blob_model_valid",
-      selectedBlobModel.valid ? 1 : 0
-    ).Write();
-    TParameter<int>(
-      "blob_ordering_consistent",
-      selectedBlobModel.orderingConsistent ? 1 : 0
-    ).Write();
-    TParameter<double>(
-      "blob_kaon_time_mean",
-      selectedBlobModel.kaon.timeMean
-    ).Write();
-    TParameter<double>(
-      "blob_proton_time_mean",
-      selectedBlobModel.proton.timeMean
-    ).Write();
-    TParameter<double>(
-      "blob_kaon_aero_mean",
-      selectedBlobModel.kaon.aeroMean
-    ).Write();
-    TParameter<double>(
-      "blob_proton_aero_mean",
-      selectedBlobModel.proton.aeroMean
-    ).Write();
+    fitDerivedDirectory->cd();
+    if (hFitDerivedKaonYieldVsAero) {
+      hFitDerivedKaonYieldVsAero->Write();
+    }
+    if (hFitDerivedProtonYieldVsAero) {
+      hFitDerivedProtonYieldVsAero->Write();
+    }
+    fitDerivedPIDCanvas->Write();
 
     outputFile.cd();
   }
@@ -8525,13 +8343,25 @@ void check_slow_protons(
   ).Write();
 
   TParameter<int>(
-    "timing_aero_blob_model_valid",
-    selectedBlobModel.valid ? 1 : 0
+    "fit_derived_timing_aero_plot_written",
+    fitDerivedPIDCanvas ? 1 : 0
+  ).Write();
+  TParameter<int>(
+    "fit_derived_aero_ordering_consistent",
+    fitDerivedAeroOrderingConsistent ? 1 : 0
+  ).Write();
+  TParameter<double>(
+    "fit_derived_kaon_aero_centroid",
+    fitDerivedKaonAeroCentroid
+  ).Write();
+  TParameter<double>(
+    "fit_derived_proton_aero_centroid",
+    fitDerivedProtonAeroCentroid
   ).Write();
 
   TNamed(
     "species_identification_rule",
-    "kaon=higher-aerogel blob; RF proton lower-time/kaon higher-time; CT kaon lower-time/proton higher-time"
+    "species labels come from fitted timing components: RF proton lower-time/kaon higher-time; CT kaon lower-time/proton higher-time"
   ).Write();
 
   TParameter<int>(
