@@ -14,7 +14,7 @@ W="$3"
 eps_setting="$4"
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-macro="${script_dir}/check_slow_protons.C"
+macro="${script_dir}/check_slow_protons.C+"
 
 if [[ ! -f "$macro" ]]; then
     echo "Error: v4 ROOT macro not found: $macro" >&2
