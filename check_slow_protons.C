@@ -1020,7 +1020,7 @@ TF1 *makeConstantComponent(
 }
 
 
-void check_slow_protons_v2(
+void check_slow_protons(
   const char *phi_setting = "Left",
   const char *Q2 = "3p0",
   const char *W = "3p14",
@@ -1029,7 +1029,7 @@ void check_slow_protons_v2(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons_v2.0";
+  const char *macroVersion = "check_slow_protons.0";
 
   std::cout
     << "Running "
@@ -1055,7 +1055,7 @@ void check_slow_protons_v2(
     epsSetting.IsNull()
   ) {
     std::cerr
-      << "Usage: check_slow_protons_v2("
+      << "Usage: check_slow_protons("
       << "\"<phi>\", \"<Q2>\", "
       << "\"<W>\", \"<eps>\")"
       << std::endl;

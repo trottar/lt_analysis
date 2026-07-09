@@ -14,13 +14,13 @@ W="$3"
 eps_setting="$4"
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-macro="${script_dir}/check_slow_protons_v2.C"
+macro="${script_dir}/check_slow_protons.C"
 
 if [[ ! -f "$macro" ]]; then
     echo "Error: v2 ROOT macro not found: $macro" >&2
     exit 2
 fi
 
-echo "Running check_slow_protons_v2.C"
+echo "Running check_slow_protons.C"
 root -l -b -q \
     "${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
