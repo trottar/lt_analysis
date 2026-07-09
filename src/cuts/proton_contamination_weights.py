@@ -1286,6 +1286,83 @@ def summarize_kaon_proton_cleaning_result(cleaning_result):
     return _json_ready_value(summary)
 
 
+def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None):
+    if not isinstance(cleaning_result, dict):
+        return
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    application = cleaning_result.get("application") or {}
+    source_stats = diagnostics.get("source_stats") or {}
+    valid_global_shape_count = int(diagnostics.get("valid_global_shape_count", 0) or 0)
+    n_aero_slices = max(len(cleaning_result.get("aero_edges") or []) - 1, 0)
+    supported_delta_bins = int(diagnostics.get("supported_delta_bins", 0) or 0)
+    marginal_delta_bins = int(diagnostics.get("marginal_delta_bins", 0) or 0)
+    support_by_delta = cleaning_result.get("support_by_delta") or []
+    unsupported_delta_bins = int(
+        sum(1 for label in support_by_delta if str(label) == SUPPORT_UNSUPPORTED)
+    )
+    lines = [
+        "\n===== Event-level proton-cleaning =====",
+        "Scope: {}".format(cleaning_result.get("analysis_scope", "unknown")),
+        "Context: {}".format(cleaning_result.get("context", "")),
+        "Method: {}".format(cleaning_result.get("method", "unknown")),
+        "Input tree state: {}".format(diagnostics.get("input_tree_state", "unknown")),
+        "Particle selection: {}".format(diagnostics.get("input_tree_particle_selection", "unknown")),
+        "Tree policy: {}".format(diagnostics.get("tree_policy", "unknown")),
+        "RF policy: {}".format(diagnostics.get("rf_policy", "unknown")),
+        "Global PID source usage:",
+    ]
+    for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
+        source_payload = source_stats.get(source_name) or {}
+        lines.append(
+            "  {}: seen={} used={} tree={}".format(
+                source_name,
+                int(source_payload.get("entries_seen", 0) or 0),
+                int(source_payload.get("entries_used", 0) or 0),
+                source_payload.get("tree_name", "missing"),
+            )
+        )
+    lines.extend(
+        [
+            "Identifiable global aerogel slices: {} / {}".format(
+                valid_global_shape_count,
+                n_aero_slices,
+            ),
+            "Supported delta bins: {}".format(supported_delta_bins),
+            "Marginal delta bins: {}".format(marginal_delta_bins),
+            "Unsupported delta bins: {}".format(unsupported_delta_bins),
+        ]
+    )
+    if bool(cleaning_result.get("accepted")):
+        lines.append("Proton-cleaning fit status: accepted")
+    else:
+        lines.append("Proton-cleaning fit status: rejected")
+        lines.append("Failure reason: {}".format(cleaning_result.get("fallback_reason", "unknown")))
+        if output_pdf:
+            lines.append("Writing diagnostic proton-cleaning plots to: {}".format(output_pdf))
+    if isinstance(application, dict) and bool(application.get("accepted")):
+        app_diag = application.get("diagnostics") or {}
+        rf_counts = app_diag.get("rf_counts") or application.get("rf_counts") or {}
+        support_counts = app_diag.get("support_counts") or application.get("support_counts") or {}
+        lines.extend(
+            [
+                "Events in supported delta bins: {}".format(int(support_counts.get(SUPPORT_SUPPORTED, 0) or 0)),
+                "Events in marginal delta bins: {}".format(int(support_counts.get(SUPPORT_MARGINAL, 0) or 0)),
+                "Events in unsupported delta bins: {}".format(int(support_counts.get(SUPPORT_UNSUPPORTED, 0) or 0)),
+                "RF accepted/rejected after cleaning: {}/{}".format(
+                    int(rf_counts.get("accepted", 0) or 0),
+                    int(rf_counts.get("rejected", 0) or 0),
+                ),
+                "Raw MM integral: {:.3e}".format(float(app_diag.get("raw_mm_integral", 0.0) or 0.0)),
+                "Estimated proton MM integral: {:.3e}".format(float(app_diag.get("estimated_proton_mm_integral", 0.0) or 0.0)),
+                "Proton-cleaned MM integral: {:.3e}".format(float(app_diag.get("cleaned_mm_integral", 0.0) or 0.0)),
+            ]
+        )
+    if output_pdf and bool(cleaning_result.get("accepted")):
+        lines.append("Diagnostic proton-cleaning plots: {}".format(output_pdf))
+    lines.append("========================================")
+    print("\n".join(lines))
+
+
 def _draw_hist_overlay(canvas_name, title, histograms, legend_entries, output_pdf):
     canvas = TCanvas(canvas_name, title, 1000, 700)
     canvas.SetGrid()

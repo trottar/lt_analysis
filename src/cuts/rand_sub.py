@@ -100,6 +100,7 @@ from pion_component_subtraction import (
 from proton_contamination_weights import (
     apply_kaon_proton_cleaning_to_targets,
     build_kaon_proton_cleaning_result,
+    print_kaon_proton_cleaning_terminal_summary,
     print_kaon_proton_cleaning_pages,
     serialize_kaon_proton_cleaning_result,
     summarize_kaon_proton_cleaning_result,
@@ -2577,6 +2578,16 @@ def rand_sub(
         particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
 
         if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
+            proton_cleaning_output_pdf = outputpdf.replace(
+                "{}_FullAnalysis_".format(ParticleType),
+                "{}_{}_rand_sub_".format(phi_setting, ParticleType),
+            )
+            print(
+                "\nRunning integrated proton-cleaning diagnostics for {} {}...".format(
+                    phi_setting,
+                    ParticleType,
+                )
+            )
             proton_cleaning_tree_bundle = _open_kaon_proton_cleaning_tree_bundle(
                 InFile_DATA,
                 InFile_DUMMY,
@@ -2768,6 +2779,10 @@ def rand_sub(
                 )
                 histDict["proton_contamination_cleaning_setting"] = (
                     summarize_kaon_proton_cleaning_result(proton_cleaning_result)
+                )
+                print_kaon_proton_cleaning_terminal_summary(
+                    proton_cleaning_result,
+                    output_pdf=proton_cleaning_output_pdf,
                 )
 
             component_fit_result = build_particle_subtraction_component_result(
