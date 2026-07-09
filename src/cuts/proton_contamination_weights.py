@@ -622,7 +622,7 @@ def _build_signed_pid_histograms(
 
     h_global_pid = ROOT.TH2D(
         "H_proton_cleaning_global_pid",
-        "Global CTime_ROC1 vs P_{aero} NPE;P_{aero} NPE;CTime_ROC1 [ns];Signed yield",
+        "Global CTime_ROC1 vs P_aero NPE;P_aero NPE;CTime_ROC1 [ns];Signed yield",
         75,
         aero_min,
         aero_max,
@@ -651,7 +651,7 @@ def _build_signed_pid_histograms(
     for delta_index in range(delta_bins):
         pid_hist = ROOT.TH2D(
             "H_proton_cleaning_pid_delta_{}".format(delta_index),
-            "PID slice {} ;P_{aero} NPE;CTime_ROC1 [ns];Signed yield".format(delta_index + 1),
+            "PID slice {} ;P_aero NPE;CTime_ROC1 [ns];Signed yield".format(delta_index + 1),
             75,
             aero_min,
             aero_max,
@@ -1071,7 +1071,7 @@ def apply_kaon_proton_cleaning_to_targets(
 
     h_weight_sum_delta_aero = ROOT.TH2D(
         "H_proton_weight_sum_delta_aero",
-        "Average proton weight vs #delta and aero;SHMS #delta [%];P_{aero} NPE",
+        "Average proton weight vs #delta and aero;SHMS #delta [%];P_aero NPE",
         len(delta_edges) - 1,
         float(delta_edges[0]),
         float(delta_edges[-1]),
