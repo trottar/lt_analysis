@@ -68,6 +68,10 @@ struct TimingShape {
   double poissonDevianceNdf = 0.0;
   double poissonDeviancePerEntry = 0.0;
 
+  double fitMin = 0.0;
+  double fitMax = 0.0;
+  bool perAeroFallback = false;
+
   TF1 *fitFunction = nullptr;
 };
 
@@ -970,6 +974,8 @@ TimingShape fitGlobalTimingShape(
   int minimumEntries
 ) {
   TimingShape result;
+  result.fitMin = fitMin;
+  result.fitMax = fitMax;
 
   if (
     !histogram ||
@@ -1255,6 +1261,193 @@ TimingShape fitGlobalTimingShape(
         : result.poissonDevianceNdf <=
             maximumPoissonDevianceNdf
     );
+
+  return result;
+}
+
+
+TimingShape fitPerAeroFallbackTimingShape(
+  TH1D *histogram,
+  const std::string &functionName,
+  double displayMin,
+  double displayMax,
+  bool protonPeakIsLower,
+  double beamBunchSpacingNs,
+  double sigmaMin,
+  double minimumAmplitudeSignificance,
+  int minimumEntries
+) {
+  TimingShape result;
+
+  if (
+    !histogram ||
+    histogram->Integral() < minimumEntries ||
+    displayMax <= displayMin
+  ) {
+    return result;
+  }
+
+  const auto centralRange = findCentralQuantileRange(
+    histogram,
+    displayMin,
+    displayMax,
+    2.0e-4,
+    2.0e-4,
+    2
+  );
+
+  // The aggregate RF distribution can select a shoulder of the dominant
+  // kaon peak and miss a strong lower-time proton peak.  This last-resort
+  // pass therefore derives the pair separately in every aerogel slice.
+  PeakPairSeed peakPair = findSeparatedPeakPair(
+    histogram,
+    centralRange.first,
+    centralRange.second,
+    std::max(0.24, 0.06 * beamBunchSpacingNs),
+    std::min(1.60, 0.70 * beamBunchSpacingNs)
+  );
+
+  if (!peakPair.valid) {
+    peakPair = findSeparatedPeakPair(
+      histogram,
+      centralRange.first,
+      centralRange.second,
+      0.18,
+      std::min(1.80, 0.80 * beamBunchSpacingNs)
+    );
+  }
+
+  if (!peakPair.valid) {
+    return result;
+  }
+
+  const double seedSeparation =
+    peakPair.upperMean - peakPair.lowerMean;
+
+  if (!(seedSeparation > 0.0)) {
+    return result;
+  }
+
+  const double localFitMin = std::max(
+    displayMin,
+    peakPair.lowerMean - std::clamp(
+      0.65 * seedSeparation,
+      0.28,
+      0.50
+    )
+  );
+
+  const double localFitMax = std::min(
+    displayMax,
+    peakPair.upperMean + std::clamp(
+      0.55 * seedSeparation,
+      0.24,
+      0.45
+    )
+  );
+
+  if (localFitMax <= localFitMin) {
+    return result;
+  }
+
+  const double split = 0.5 * (
+    peakPair.lowerMean + peakPair.upperMean
+  );
+
+  const double meanHalfWidth = std::clamp(
+    0.32 * seedSeparation,
+    0.10,
+    0.22
+  );
+
+  const double orderingGap = std::max(
+    0.008,
+    0.02 * seedSeparation
+  );
+
+  const double lowerMeanMin = std::max(
+    localFitMin,
+    peakPair.lowerMean - meanHalfWidth
+  );
+
+  const double lowerMeanMax = std::min(
+    split - orderingGap,
+    peakPair.lowerMean + meanHalfWidth
+  );
+
+  const double upperMeanMin = std::max(
+    split + orderingGap,
+    peakPair.upperMean - meanHalfWidth
+  );
+
+  const double upperMeanMax = std::min(
+    localFitMax,
+    peakPair.upperMean + meanHalfWidth
+  );
+
+  if (
+    lowerMeanMax <= lowerMeanMin ||
+    upperMeanMax <= upperMeanMin
+  ) {
+    return result;
+  }
+
+  // These width limits are intentionally smaller than the normal 0.45 ns
+  // cap and are used only after all previous fitting procedures fail.
+  const double localSigmaMax = std::clamp(
+    0.36 * seedSeparation,
+    0.13,
+    0.26
+  );
+
+  const double localSigmaInitial = std::clamp(
+    0.20 * seedSeparation,
+    0.075,
+    0.13
+  );
+
+  double kaonMeanMin = 0.0;
+  double kaonMeanMax = 0.0;
+  double protonMeanMin = 0.0;
+  double protonMeanMax = 0.0;
+
+  if (protonPeakIsLower) {
+    protonMeanMin = lowerMeanMin;
+    protonMeanMax = lowerMeanMax;
+    kaonMeanMin = upperMeanMin;
+    kaonMeanMax = upperMeanMax;
+  } else {
+    kaonMeanMin = lowerMeanMin;
+    kaonMeanMax = lowerMeanMax;
+    protonMeanMin = upperMeanMin;
+    protonMeanMax = upperMeanMax;
+  }
+
+  result = fitGlobalTimingShape(
+    histogram,
+    functionName,
+    localFitMin,
+    localFitMax,
+    kaonMeanMin,
+    kaonMeanMax,
+    protonMeanMin,
+    protonMeanMax,
+    protonPeakIsLower,
+    sigmaMin,
+    localSigmaMax,
+    localSigmaInitial,
+    0.55,
+    std::max(1.5, 0.75 * minimumAmplitudeSignificance),
+    true,
+    1.0e9,
+    0.35,
+    0.001,
+    minimumEntries
+  );
+
+  result.fitMin = localFitMin;
+  result.fitMax = localFitMax;
+  result.perAeroFallback = true;
 
   return result;
 }
@@ -1840,7 +2033,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.14";
+  const char *macroVersion = "check_slow_protons.15";
 
   std::cout
     << "Running "
@@ -2147,6 +2340,7 @@ void check_slow_protons(
   bool ctFallbackUsed = false;  // compatibility metadata; RF and CT are compared directly
   bool timingFitUsedPreDiamondFallback = false;
   bool timingFitUsedLocalPeakRescue = false;
+  bool timingFitUsedPerAeroFallback = false;
   int rfProbeValidShapes = 0;
   int ctProbeValidShapes = 0;
   std::string timingSelectionReason;
@@ -4360,10 +4554,121 @@ void check_slow_protons(
     }
   }
 
+  // Leave all settings that already succeed untouched.  This final pass is
+  // entered only after the diamond, pre-diamond, and aggregate local-peak
+  // procedures have all returned zero valid global shapes.
+  if (
+    validGlobalShapes == 0 &&
+    timingFitUsedLocalPeakRescue
+  ) {
+    std::cout
+      << "Aggregate local-peak rescue produced zero valid shapes. "
+      << "Trying independent peak seeds in each aerogel slice."
+      << std::endl;
+
+    timingFitUsedPerAeroFallback = true;
+    timingSelectionReason =
+      "per_aerogel_fit_fallback_" + timingSelectionReason;
+
+    for (
+      int aeroSlice = 0;
+      aeroSlice < nAeroSlices;
+      ++aeroSlice
+    ) {
+      TimingShape &oldShape =
+        globalShapes.at(aeroSlice);
+
+      if (oldShape.fitFunction) {
+        delete oldShape.fitFunction;
+        oldShape.fitFunction = nullptr;
+      }
+
+      TH1D *projection =
+        globalTimingProjections.at(aeroSlice);
+
+      if (!projection) {
+        continue;
+      }
+
+      projection->SetTitle(
+        TString::Format(
+          "Global timing fit (per-aerogel fallback): %.1f #leq aero < %.1f;"
+          "%s;Counts",
+          aeroEdges.at(aeroSlice),
+          aeroEdges.at(aeroSlice + 1),
+          timingAxisTitle.c_str()
+        )
+      );
+
+      globalShapes.at(aeroSlice) =
+        fitPerAeroFallbackTimingShape(
+          projection,
+          TString::Format(
+            "f_global_time_per_aero_fallback_%d",
+            aeroSlice
+          ).Data(),
+          timeMin,
+          timeMax,
+          protonPeakIsLower,
+          beamBunchSpacingNs,
+          timingSigmaMin,
+          minimumGlobalAmplitudeSignificance,
+          minimumGlobalSliceEntries
+        );
+
+      const TimingShape &fallbackShape =
+        globalShapes.at(aeroSlice);
+
+      std::cout
+        << "  aero ["
+        << aeroEdges.at(aeroSlice)
+        << ", "
+        << aeroEdges.at(aeroSlice + 1)
+        << "): valid="
+        << (fallbackShape.valid ? "yes" : "no")
+        << ", fit=["
+        << fallbackShape.fitMin
+        << ", "
+        << fallbackShape.fitMax
+        << "]"
+        << ", p mu/sigma="
+        << fallbackShape.protonMean
+        << "/"
+        << fallbackShape.protonSigma
+        << ", K mu/sigma="
+        << fallbackShape.kaonMean
+        << "/"
+        << fallbackShape.kaonSigma
+        << ", separation="
+        << fallbackShape.separation
+        << ", D/N="
+        << fallbackShape.poissonDeviancePerEntry
+        << std::endl;
+    }
+
+    validGlobalShapes = 0;
+
+    for (
+      const TimingShape &shape :
+      globalShapes
+    ) {
+      if (shape.valid) {
+        ++validGlobalShapes;
+      }
+    }
+
+    std::cout
+      << "Per-aerogel fallback valid global shapes: "
+      << validGlobalShapes
+      << " / "
+      << nAeroSlices
+      << std::endl;
+  }
+
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v14 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v15 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -4942,6 +5247,11 @@ void check_slow_protons(
       timingFitUsedLocalPeakRescue ? 1 : 0
     ).Write();
 
+    TParameter<int>(
+      "timing_fit_per_aerogel_fallback_used",
+      timingFitUsedPerAeroFallback ? 1 : 0
+    ).Write();
+
     TNamed diagnosticTimingFitAcceptanceCut(
       "timing_fit_acceptance_cut",
       timingFitAcceptanceCut.c_str()
@@ -5305,17 +5615,30 @@ void check_slow_protons(
         continue;
       }
 
+      const TimingShape &globalShape =
+        globalShapes.at(aeroSlice);
+
+      const double sliceTimingFitMin =
+        globalShape.fitMax > globalShape.fitMin
+          ? globalShape.fitMin
+          : timingFitMin;
+
+      const double sliceTimingFitMax =
+        globalShape.fitMax > globalShape.fitMin
+          ? globalShape.fitMax
+          : timingFitMax;
+
       const SliceFitResult sliceFit =
         fitDeltaTimingSlice(
           projection,
-          globalShapes.at(aeroSlice),
+          globalShape,
           TString::Format(
             "f_time_delta_%d_aero_%d",
             deltaBin,
             aeroSlice
           ).Data(),
-          timingFitMin,
-          timingFitMax,
+          sliceTimingFitMin,
+          sliceTimingFitMax,
           activeUseSliceDeviancePerEntryValidation,
           maximumSlicePoissonDevianceNdf,
           maximumSlicePoissonDeviancePerEntry,
@@ -6096,6 +6419,16 @@ void check_slow_protons(
     const TimingShape &shape =
       globalShapes.at(aeroSlice);
 
+    const double shapeFitMin =
+      shape.fitMax > shape.fitMin
+        ? shape.fitMin
+        : timingFitMin;
+
+    const double shapeFitMax =
+      shape.fitMax > shape.fitMin
+        ? shape.fitMax
+        : timingFitMax;
+
     if (shape.fitFunction) {
       shape.fitFunction->SetLineColor(
         shape.valid
@@ -6115,8 +6448,8 @@ void check_slow_protons(
           shape.kaonAmplitude,
           shape.kaonMean,
           shape.kaonSigma,
-          timingFitMin,
-          timingFitMax,
+          shapeFitMin,
+          shapeFitMax,
           kMagenta + 1
         );
 
@@ -6129,8 +6462,8 @@ void check_slow_protons(
           shape.protonAmplitude,
           shape.protonMean,
           shape.protonSigma,
-          timingFitMin,
-          timingFitMax,
+          shapeFitMin,
+          shapeFitMax,
           kBlue + 1
         );
 
@@ -6141,8 +6474,8 @@ void check_slow_protons(
             aeroSlice
           ).Data(),
           shape.otherAmplitude,
-          timingFitMin,
-          timingFitMax,
+          shapeFitMin,
+          shapeFitMax,
           kGray + 2
         );
 
@@ -6662,6 +6995,16 @@ void check_slow_protons(
       const TimingShape &shape =
         globalShapes.at(aeroSlice);
 
+      const double shapeFitMin =
+        shape.fitMax > shape.fitMin
+          ? shape.fitMin
+          : timingFitMin;
+
+      const double shapeFitMax =
+        shape.fitMax > shape.fitMin
+          ? shape.fitMax
+          : timingFitMax;
+
       if (sliceFit.fitFunction) {
         sliceFit.fitFunction->SetLineColor(
           sliceFit.valid
@@ -6682,8 +7025,8 @@ void check_slow_protons(
             sliceFit.kaonAmplitude,
             shape.kaonMean,
             shape.kaonSigma,
-            timingFitMin,
-            timingFitMax,
+            shapeFitMin,
+            shapeFitMax,
             kMagenta + 1
           );
 
@@ -6697,8 +7040,8 @@ void check_slow_protons(
             sliceFit.protonAmplitude,
             shape.protonMean,
             shape.protonSigma,
-            timingFitMin,
-            timingFitMax,
+            shapeFitMin,
+            shapeFitMax,
             kBlue + 1
           );
 
@@ -6710,8 +7053,8 @@ void check_slow_protons(
               aeroSlice
             ).Data(),
             sliceFit.otherAmplitude,
-            timingFitMin,
-            timingFitMax,
+            shapeFitMin,
+            shapeFitMax,
             kGray + 2
           );
 
@@ -7087,6 +7430,11 @@ void check_slow_protons(
   TParameter<int>(
     "timing_fit_local_peak_rescue_used",
     timingFitUsedLocalPeakRescue ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "timing_fit_per_aerogel_fallback_used",
+    timingFitUsedPerAeroFallback ? 1 : 0
   ).Write();
 
   TNamed timingFitAcceptanceCutTag(
