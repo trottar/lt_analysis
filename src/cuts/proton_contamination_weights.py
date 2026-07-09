@@ -1315,17 +1315,89 @@ def _draw_hist_overlay(canvas_name, title, histograms, legend_entries, output_pd
     canvas.Print(output_pdf)
 
 
+def _draw_status_pave(cleaning_result, extra_lines=None, x1=0.12, y1=0.74, x2=0.52, y2=0.90):
+    pave = TPaveText(x1, y1, x2, y2, "NDC")
+    pave.SetBorderSize(1)
+    pave.SetFillStyle(0)
+    pave.SetTextAlign(12)
+    pave.SetTextSize(0.028)
+    accepted = bool((cleaning_result or {}).get("accepted"))
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    fit_status = "accepted" if accepted else "rejected"
+    pave.AddText("status: {}".format(fit_status))
+    analysis_scope = str((cleaning_result or {}).get("analysis_scope") or diagnostics.get("analysis_scope") or "unknown")
+    pave.AddText("scope: {}".format(analysis_scope))
+    fallback_reason = str((cleaning_result or {}).get("fallback_reason") or "").strip()
+    if fallback_reason:
+        pave.AddText("reason: {}".format(fallback_reason[:120]))
+    for line in extra_lines or ():
+        if line:
+            pave.AddText(str(line)[:140])
+    pave.Draw()
+    return pave
+
+
+def _build_timing_shape_overlays(hist, global_shape, slice_fit):
+    if hist is None or not global_shape or not slice_fit:
+        return None
+    if not global_shape.get("valid") or not slice_fit.get("valid"):
+        return None
+    x_values = np.asarray(
+        [hist.GetXaxis().GetBinCenter(bin_index) for bin_index in range(1, hist.GetNbinsX() + 1)],
+        dtype=float,
+    )
+    kaon_hist = _clone_hist(hist, "{}_k_overlay".format(hist.GetName()), reset=True)
+    proton_hist = _clone_hist(hist, "{}_p_overlay".format(hist.GetName()), reset=True)
+    total_hist = _clone_hist(hist, "{}_tot_overlay".format(hist.GetName()), reset=True)
+    if kaon_hist is None or proton_hist is None or total_hist is None:
+        return None
+    for bin_index, x_value in enumerate(x_values, start=1):
+        kaon_value = float(
+            _gaussian(
+                np.asarray([x_value]),
+                slice_fit["kaon_amplitude"],
+                global_shape["kaon_mean"],
+                global_shape["kaon_sigma"],
+            )[0]
+        )
+        proton_value = float(
+            _gaussian(
+                np.asarray([x_value]),
+                slice_fit["proton_amplitude"],
+                global_shape["proton_mean"],
+                global_shape["proton_sigma"],
+            )[0]
+        )
+        total_value = kaon_value + proton_value + float(slice_fit.get("other_amplitude", 0.0) or 0.0)
+        kaon_hist.SetBinContent(bin_index, kaon_value)
+        proton_hist.SetBinContent(bin_index, proton_value)
+        total_hist.SetBinContent(bin_index, total_value)
+    kaon_hist.SetLineColor(kBlue)
+    proton_hist.SetLineColor(kRed)
+    total_hist.SetLineColor(kGreen + 2)
+    return {
+        "kaon": kaon_hist,
+        "proton": proton_hist,
+        "total": total_hist,
+    }
+
+
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):
-    if not isinstance(cleaning_result, dict) or not bool(cleaning_result.get("accepted")):
+    if not isinstance(cleaning_result, dict):
+        return
+    if not bool(cleaning_result.get("enabled")):
         return
     gStyle.SetOptStat(0)
     prefix = str(title_prefix).strip() or "Kaon"
     application = cleaning_result.get("application") or {}
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    support_by_delta = cleaning_result.get("support_by_delta") or []
 
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:
         canvas = TCanvas("C_proton_cleaning_global_pid", "{} proton-cleaning global PID".format(prefix), 1000, 700)
         h_global_pid.Draw("colz")
+        _draw_status_pave(cleaning_result)
         canvas.Print(output_pdf)
 
     global_slice_hists = cleaning_result.get("H_global_timing_slices") or []
@@ -1339,39 +1411,42 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
             hist.Draw("hist")
             if index < len(global_shapes):
                 shape = global_shapes[index]
-                if shape.get("valid"):
-                    x_values = np.asarray(
-                        [hist.GetXaxis().GetBinCenter(bin_index) for bin_index in range(1, hist.GetNbinsX() + 1)],
-                        dtype=float,
-                    )
-                    kaon_hist = _clone_hist(hist, "{}_k_overlay".format(hist.GetName()), reset=True)
-                    proton_hist = _clone_hist(hist, "{}_p_overlay".format(hist.GetName()), reset=True)
-                    total_hist = _clone_hist(hist, "{}_tot_overlay".format(hist.GetName()), reset=True)
-                    for bin_index, x_value in enumerate(x_values, start=1):
-                        kaon_value = float(_gaussian(np.asarray([x_value]), shape["kaon_amplitude"], shape["kaon_mean"], shape["kaon_sigma"])[0])
-                        proton_value = float(_gaussian(np.asarray([x_value]), shape["proton_amplitude"], shape["proton_mean"], shape["proton_sigma"])[0])
-                        total_value = kaon_value + proton_value + float(shape.get("other_amplitude", 0.0) or 0.0)
-                        kaon_hist.SetBinContent(bin_index, kaon_value)
-                        proton_hist.SetBinContent(bin_index, proton_value)
-                        total_hist.SetBinContent(bin_index, total_value)
-                    kaon_hist.SetLineColor(kBlue)
-                    proton_hist.SetLineColor(kRed)
-                    total_hist.SetLineColor(kGreen + 2)
-                    kaon_hist.Draw("hist same")
-                    proton_hist.Draw("hist same")
-                    total_hist.Draw("hist same")
+                overlays = _build_timing_shape_overlays(
+                    hist,
+                    shape,
+                    {
+                        "valid": shape.get("valid"),
+                        "kaon_amplitude": shape.get("kaon_amplitude", 0.0),
+                        "proton_amplitude": shape.get("proton_amplitude", 0.0),
+                        "other_amplitude": shape.get("other_amplitude", 0.0),
+                    },
+                )
+                if overlays is not None:
+                    overlays["kaon"].Draw("hist same")
+                    overlays["proton"].Draw("hist same")
+                    overlays["total"].Draw("hist same")
+                _draw_status_pave(
+                    cleaning_result,
+                    extra_lines=(
+                        "slice {} valid={}".format(index + 1, bool(shape.get("valid"))),
+                    ),
+                    x1=0.14,
+                    y1=0.74,
+                    x2=0.58,
+                    y2=0.88,
+                )
         canvas.Print(output_pdf)
 
     h_support = ROOT.TH1D(
         "H_proton_cleaning_support_class",
         "{} delta support summary;SHMS #delta bin;support class".format(prefix),
-        max(len(cleaning_result.get("support_by_delta") or []), 1),
+        max(len(support_by_delta), 1),
         0.0,
-        float(max(len(cleaning_result.get("support_by_delta") or []), 1)),
+        float(max(len(support_by_delta), 1)),
     )
     h_support.SetDirectory(0)
     h_support.Sumw2()
-    for bin_index, label in enumerate(cleaning_result.get("support_by_delta") or [], start=1):
+    for bin_index, label in enumerate(support_by_delta, start=1):
         h_support.SetBinContent(bin_index, SUPPORT_CLASS_TO_CODE.get(str(label), 0.0))
 
     h_proton = ROOT.TH1D(
@@ -1418,7 +1493,80 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     canvas.cd(4)
     if application.get("H_proton_weight_vs_delta_aero") is not None:
         application["H_proton_weight_vs_delta_aero"].Draw("colz")
+    else:
+        first_delta_pid = next((hist for hist in (cleaning_result.get("H_delta_pid") or []) if hist is not None), None)
+        if first_delta_pid is not None:
+            first_delta_pid.Draw("colz")
+    canvas.cd(1)
+    _draw_status_pave(
+        cleaning_result,
+        extra_lines=(
+            "supported={} marginal={}".format(
+                diagnostics.get("supported_delta_bins", 0),
+                diagnostics.get("marginal_delta_bins", 0),
+            ),
+        ),
+        x1=0.14,
+        y1=0.74,
+        x2=0.54,
+        y2=0.88,
+    )
     canvas.Print(output_pdf)
+
+    delta_pid_hists = cleaning_result.get("H_delta_pid") or []
+    delta_slice_hists = cleaning_result.get("H_delta_timing_slices") or []
+    delta_slice_fits = cleaning_result.get("delta_slice_fits") or []
+    global_shapes = cleaning_result.get("global_shapes") or []
+    for delta_index, pid_hist in enumerate(delta_pid_hists):
+        slice_collection = delta_slice_hists[delta_index] if delta_index < len(delta_slice_hists) else []
+        slice_fit_collection = delta_slice_fits[delta_index] if delta_index < len(delta_slice_fits) else []
+        canvas = TCanvas(
+            "C_proton_cleaning_delta_{}".format(delta_index),
+            "{} proton-cleaning delta bin {}".format(prefix, delta_index + 1),
+            1400,
+            900,
+        )
+        canvas.Divide(3, 2)
+        canvas.cd(1)
+        if pid_hist is not None:
+            pid_hist.Draw("colz")
+        support_label = support_by_delta[delta_index] if delta_index < len(support_by_delta) else "unknown"
+        _draw_status_pave(
+            cleaning_result,
+            extra_lines=(
+                "delta bin {}".format(delta_index + 1),
+                "support={}".format(support_label),
+            ),
+            x1=0.14,
+            y1=0.72,
+            x2=0.54,
+            y2=0.88,
+        )
+        for slice_index, hist in enumerate(slice_collection[:5], start=2):
+            canvas.cd(slice_index)
+            if hist is None:
+                continue
+            hist.SetLineColor(kBlack)
+            hist.Draw("hist")
+            global_shape = global_shapes[slice_index - 2] if (slice_index - 2) < len(global_shapes) else {}
+            slice_fit = slice_fit_collection[slice_index - 2] if (slice_index - 2) < len(slice_fit_collection) else {}
+            overlays = _build_timing_shape_overlays(hist, global_shape, slice_fit)
+            if overlays is not None:
+                overlays["kaon"].Draw("hist same")
+                overlays["proton"].Draw("hist same")
+                overlays["total"].Draw("hist same")
+            _draw_status_pave(
+                cleaning_result,
+                extra_lines=(
+                    "aero slice {}".format(slice_index - 1),
+                    "valid={}".format(bool(slice_fit.get("valid"))),
+                ),
+                x1=0.16,
+                y1=0.74,
+                x2=0.56,
+                y2=0.88,
+            )
+        canvas.Print(output_pdf)
 
     h_mm_before = application.get("H_MM_before_proton_cleaning")
     h_mm_proton = application.get("H_MM_estimated_proton")
