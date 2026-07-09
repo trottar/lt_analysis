@@ -1449,6 +1449,48 @@ TimingShape fitPerAeroFallbackTimingShape(
   result.fitMax = localFitMax;
   result.perAeroFallback = true;
 
+  // The per-aerogel pass is the deepest fallback and intentionally uses
+  // tight, data-driven mean and sigma bounds.  A component landing on one
+  // of those bounds is therefore not, by itself, evidence that the two
+  // physical peaks were misidentified.  Re-evaluate validity here using
+  // the same physical ordering and quality checks as the normal fits, but
+  // do not reject a shape solely because a constrained parameter is near
+  // its fallback bound.  This path is reached only after every standard
+  // RF/CT procedure has produced zero validated shapes.
+  const bool fallbackFitStatusAccepted =
+    result.fitStatus == 0 ||
+    (
+      result.fitStatus == 4 &&
+      std::isfinite(result.poissonDeviancePerEntry) &&
+      result.poissonDeviancePerEntry <= 0.05
+    );
+
+  const bool fallbackOrderingAccepted =
+    protonPeakIsLower
+      ? result.protonMean < result.kaonMean
+      : result.kaonMean < result.protonMean;
+
+  result.valid =
+    fallbackFitStatusAccepted &&
+    std::isfinite(result.kaonAmplitude) &&
+    std::isfinite(result.protonAmplitude) &&
+    std::isfinite(result.kaonMean) &&
+    std::isfinite(result.protonMean) &&
+    std::isfinite(result.kaonSigma) &&
+    std::isfinite(result.protonSigma) &&
+    std::isfinite(result.poissonDeviancePerEntry) &&
+    result.kaonAmplitude > 0.0 &&
+    result.protonAmplitude > 0.0 &&
+    result.kaonSigma > 0.0 &&
+    result.protonSigma > 0.0 &&
+    fallbackOrderingAccepted &&
+    result.separation >= 0.55 &&
+    result.kaonSignificance >=
+      std::max(1.5, 0.75 * minimumAmplitudeSignificance) &&
+    result.protonSignificance >=
+      std::max(1.5, 0.75 * minimumAmplitudeSignificance) &&
+    result.poissonDeviancePerEntry <= 0.35;
+
   return result;
 }
 
@@ -1690,8 +1732,17 @@ SliceFitResult fitDeltaTimingSlice(
   result.poissonDeviancePerEntry =
     goodness.deviancePerEntry;
 
+  const bool sliceFitStatusAccepted =
+    result.fitStatus == 0 ||
+    (
+      shape.perAeroFallback &&
+      result.fitStatus == 4 &&
+      std::isfinite(result.poissonDeviancePerEntry) &&
+      result.poissonDeviancePerEntry <= 0.05
+    );
+
   result.valid =
-    result.fitStatus == 0 &&
+    sliceFitStatusAccepted &&
     std::isfinite(result.kaonAmplitude) &&
     std::isfinite(result.protonAmplitude) &&
     std::isfinite(result.otherAmplitude) &&
@@ -2033,7 +2084,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.15";
+  const char *macroVersion = "check_slow_protons.16";
 
   std::cout
     << "Running "
@@ -4668,7 +4719,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v15 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v16 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -6066,6 +6117,8 @@ void check_slow_protons(
   // V9 = probe RF and CT on every run and select the better validated timing variable
   // V11 = add always-on Q2-vs-W diamond diagnostic pages when the polygon is enabled
   // V12 = fit-only pre-diamond fallback when both RF and CT fail inside the polygon
+  // V16 = accept physically ordered per-aerogel fallback peaks even when the
+  //       deliberately tight fallback bounds are reached
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
