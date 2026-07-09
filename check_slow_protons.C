@@ -1632,7 +1632,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.8";
+  const char *macroVersion = "check_slow_protons.9";
 
   std::cout
     << "Running "
@@ -1762,7 +1762,11 @@ void check_slow_protons(
   std::string rfTimeBranch;
   bool rfTimingAttempted = false;
   bool rfTimingSelected = false;
-  bool ctFallbackUsed = false;
+  bool ctTimingEvaluated = false;
+  bool ctFallbackUsed = false;  // retained as compatibility metadata; v9 does not use fallback selection
+  int rfProbeValidShapes = 0;
+  int ctProbeValidShapes = 0;
+  std::string timingSelectionReason;
 
   const std::string deltaBranch =
     "ssdelta";
@@ -1810,26 +1814,36 @@ void check_slow_protons(
       TString::kIgnoreCase
     );
 
-  // The input tree remains the uncut *_noRF tree.  The analysis first
-  // tries an RF timing branch.  If no RF branch is available, or if no
-  // RF global timing shape passes validation, the full analysis falls
-  // back to CTime_ROC1.  No RF phase correction or wrapping is applied.
+  // The input tree remains the uncut *_noRF tree.  Every normal run
+  // evaluates both the best available RF timing branch and CTime_ROC1,
+  // then chooses the timing variable with the stronger validated global
+  // proton-kaon discrimination.  No RF phase correction or wrapping is
+  // applied.
   const double beamBunchSpacingNs =
     isHighEpsilon ? 4.0 : 2.0;
 
-  // Keep the wider high-epsilon display window implied by the 4 ns
-  // bunch spacing, but use exactly the same CT fit procedure, constraints,
-  // seeds, and validation as low epsilon.  RF probing remains data-driven.
-  double timeMin = -beamBunchSpacingNs;
-  double timeMax = beamBunchSpacingNs;
+  // CT uses the same procedure for low and high epsilon.  High epsilon
+  // only retains the wider display range implied by the 4 ns bunch spacing.
+  const double ctTimeMin = -beamBunchSpacingNs;
+  const double ctTimeMax = beamBunchSpacingNs;
+  const double ctTimingFitMin = ctTimeMin;
+  const double ctTimingFitMax = ctTimeMax;
 
-  double timingFitMin = timeMin;
-  double timingFitMax = timeMax;
+  const double ctKaonMeanMin = -0.45;
+  const double ctKaonMeanMax = 0.20;
+  const double ctProtonMeanMin = 0.20;
+  const double ctProtonMeanMax = 0.95;
 
-  double kaonMeanMin = -0.45;
-  double kaonMeanMax = 0.20;
-  double protonMeanMin = 0.20;
-  double protonMeanMax = 0.95;
+  double timeMin = ctTimeMin;
+  double timeMax = ctTimeMax;
+
+  double timingFitMin = ctTimingFitMin;
+  double timingFitMax = ctTimingFitMax;
+
+  double kaonMeanMin = ctKaonMeanMin;
+  double kaonMeanMax = ctKaonMeanMax;
+  double protonMeanMin = ctProtonMeanMin;
+  double protonMeanMax = ctProtonMeanMax;
 
   const double timingSigmaMin = 0.03;
   double timingSigmaMax = 0.45;
@@ -1864,8 +1878,11 @@ void check_slow_protons(
   const int nAeroHistogramBins = 75;
   // Preserve approximately the original 0.0305 ns timing-bin width.
   // Eight ns gives 262 bins; four ns gives 131 bins.
-  int nTimeHistogramBins =
+  const int ctTimeHistogramBins =
     isHighEpsilon ? 262 : 131;
+
+  int nTimeHistogramBins =
+    ctTimeHistogramBins;
 
   const std::vector<double> aeroEdges = {
     0.0,
@@ -1908,7 +1925,7 @@ void check_slow_protons(
     nDeltaBins;
 
   // ------------------------------------------------------------------
-  // Analysis cuts and RF-first timing selection.
+  // Analysis cuts and RF/CT timing comparison.
   // ------------------------------------------------------------------
 
   const std::string acceptanceCut =
@@ -1974,7 +1991,7 @@ void check_slow_protons(
     }
   }
 
-  struct RFBranchProbe {
+  struct TimingBranchProbe {
     std::string branch;
     int validShapes = 0;
     double displayMin = 0.0;
@@ -1991,13 +2008,16 @@ void check_slow_protons(
     bool peakPairFound = false;
     double protonSeedMean = 0.0;
     double kaonSeedMean = 0.0;
+    double meanSeparation = 0.0;
+    double meanPoissonDevianceNdf =
+      std::numeric_limits<double>::infinity();
   };
 
   auto countValidGlobalShapesForBranch = [
     &
   ](
     const std::string &candidateBranch,
-    RFBranchProbe &probe
+    TimingBranchProbe &probe
   ) -> int {
     if (
       candidateBranch.empty() ||
@@ -2156,7 +2176,7 @@ void check_slow_protons(
         "h_rf_first_probe_pid_%s",
         candidateBranch.c_str()
       ),
-      "RF-first global timing probe",
+      "RF global timing probe",
       nAeroHistogramBins,
       aeroMin,
       aeroMax,
@@ -2250,6 +2270,8 @@ void check_slow_protons(
     probe.sigmaInitial = timingSigmaInitial;
 
     int validShapes = 0;
+    double validSeparationSum = 0.0;
+    double validDevianceNdfSum = 0.0;
 
     for (
       int aeroSlice = 0;
@@ -2327,6 +2349,8 @@ void check_slow_protons(
 
       if (shape.valid) {
         ++validShapes;
+        validSeparationSum += shape.separation;
+        validDevianceNdfSum += shape.poissonDevianceNdf;
       }
 
       if (shape.fitFunction) {
@@ -2339,10 +2363,185 @@ void check_slow_protons(
 
     delete probePID;
     probe.validShapes = validShapes;
+
+    if (validShapes > 0) {
+      probe.meanSeparation =
+        validSeparationSum / validShapes;
+      probe.meanPoissonDevianceNdf =
+        validDevianceNdfSum / validShapes;
+    }
+
     return validShapes;
   };
 
-  std::vector<RFBranchProbe> rfProbes;
+  auto countValidGlobalShapesForCT = [
+    &
+  ](
+    TimingBranchProbe &probe
+  ) -> int {
+    probe.branch = ctTimeBranch;
+    probe.displayMin = ctTimeMin;
+    probe.displayMax = ctTimeMax;
+    probe.fitMin = ctTimingFitMin;
+    probe.fitMax = ctTimingFitMax;
+    probe.kaonMeanMin = ctKaonMeanMin;
+    probe.kaonMeanMax = ctKaonMeanMax;
+    probe.protonMeanMin = ctProtonMeanMin;
+    probe.protonMeanMax = ctProtonMeanMax;
+    probe.sigmaMax = timingSigmaMax;
+    probe.sigmaInitial = timingSigmaInitial;
+    probe.histogramBins = ctTimeHistogramBins;
+
+    const std::string ctRangeCut =
+      TString::Format(
+        "%s >= %.17g && %s <= %.17g && "
+        "%s >= %.17g && %s <= %.17g",
+        aeroBranch.c_str(),
+        aeroMin,
+        aeroBranch.c_str(),
+        aeroMax,
+        ctTimeBranch.c_str(),
+        probe.displayMin,
+        ctTimeBranch.c_str(),
+        probe.displayMax
+      ).Data();
+
+    const std::string ctAnalysisCut =
+      "(" + acceptanceCut + ") && (" +
+      ctRangeCut + ")";
+
+    gROOT->cd();
+
+    auto *probePID = new TH2D(
+      "h_ct_timing_probe_pid",
+      "CT global timing probe",
+      nAeroHistogramBins,
+      aeroMin,
+      aeroMax,
+      probe.histogramBins,
+      probe.displayMin,
+      probe.displayMax
+    );
+
+    probePID->Sumw2();
+
+    tree->Draw(
+      TString::Format(
+        "%s:%s>>%s",
+        ctTimeBranch.c_str(),
+        aeroBranch.c_str(),
+        probePID->GetName()
+      ),
+      ctAnalysisCut.c_str(),
+      "goff"
+    );
+
+    probePID->SetDirectory(nullptr);
+
+    int validShapes = 0;
+    double validSeparationSum = 0.0;
+    double validDevianceNdfSum = 0.0;
+
+    for (
+      int aeroSlice = 0;
+      aeroSlice < nAeroSlices;
+      ++aeroSlice
+    ) {
+      const double aeroLow =
+        aeroEdges.at(aeroSlice);
+
+      const double aeroHigh =
+        aeroEdges.at(aeroSlice + 1);
+
+      const int firstXBin = std::max(
+        1,
+        probePID
+          ->GetXaxis()
+          ->FindFixBin(
+            std::nextafter(
+              aeroLow,
+              aeroHigh
+            )
+          )
+      );
+
+      const int lastXBin = std::min(
+        probePID->GetNbinsX(),
+        probePID
+          ->GetXaxis()
+          ->FindFixBin(
+            std::nextafter(
+              aeroHigh,
+              aeroLow
+            )
+          )
+      );
+
+      auto *projection = probePID->ProjectionY(
+        TString::Format(
+          "h_ct_timing_probe_aero_%d",
+          aeroSlice
+        ),
+        firstXBin,
+        lastXBin,
+        "e"
+      );
+
+      projection->SetDirectory(nullptr);
+
+      TimingShape shape = fitGlobalTimingShape(
+        projection,
+        TString::Format(
+          "f_ct_timing_probe_aero_%d",
+          aeroSlice
+        ).Data(),
+        probe.fitMin,
+        probe.fitMax,
+        probe.kaonMeanMin,
+        probe.kaonMeanMax,
+        probe.protonMeanMin,
+        probe.protonMeanMax,
+        false,
+        timingSigmaMin,
+        probe.sigmaMax,
+        probe.sigmaInitial,
+        minimumGlobalSeparation,
+        minimumGlobalAmplitudeSignificance,
+        useDeviancePerEntryValidation,
+        maximumGlobalPoissonDevianceNdf,
+        maximumGlobalPoissonDeviancePerEntry,
+        globalBoundFractionTolerance,
+        minimumGlobalSliceEntries
+      );
+
+      if (shape.valid) {
+        ++validShapes;
+        validSeparationSum += shape.separation;
+        validDevianceNdfSum += shape.poissonDevianceNdf;
+      }
+
+      if (shape.fitFunction) {
+        delete shape.fitFunction;
+        shape.fitFunction = nullptr;
+      }
+
+      delete projection;
+    }
+
+    delete probePID;
+    probe.validShapes = validShapes;
+
+    if (validShapes > 0) {
+      probe.meanSeparation =
+        validSeparationSum / validShapes;
+      probe.meanPoissonDevianceNdf =
+        validDevianceNdfSum / validShapes;
+    }
+
+    return validShapes;
+  };
+
+  std::vector<TimingBranchProbe> rfProbes;
 
   for (const std::string &candidate : rfBranchCandidates) {
     if (
@@ -2354,10 +2553,10 @@ void check_slow_protons(
 
     rfTimingAttempted = true;
 
-    RFBranchProbe probe;
+    TimingBranchProbe probe;
 
     std::cout
-      << "RF-first timing probe using branch "
+      << "RF timing probe using branch "
       << candidate
       << " from tree "
       << treeName
@@ -2384,6 +2583,10 @@ void check_slow_protons(
       << probe.fitMax
       << "]; bins "
       << probe.histogramBins
+      << "; mean separation "
+      << probe.meanSeparation
+      << "; mean D/ndf "
+      << probe.meanPoissonDevianceNdf
       << "; peak seeds "
       << (
         probe.peakPairFound
@@ -2399,71 +2602,221 @@ void check_slow_protons(
     rfProbes.push_back(probe);
   }
 
+  TimingBranchProbe ctProbe;
+  ctTimingEvaluated = true;
+
+  std::cout
+    << "CT timing probe using branch "
+    << ctTimeBranch
+    << " from tree "
+    << treeName
+    << std::endl;
+
+  ctProbeValidShapes =
+    countValidGlobalShapesForCT(ctProbe);
+
+  std::cout
+    << "  valid global shapes: "
+    << ctProbe.validShapes
+    << " / "
+    << nAeroSlices
+    << "; range ["
+    << ctProbe.displayMin
+    << ", "
+    << ctProbe.displayMax
+    << "]; fit ["
+    << ctProbe.fitMin
+    << ", "
+    << ctProbe.fitMax
+    << "]; bins "
+    << ctProbe.histogramBins
+    << "; mean separation "
+    << ctProbe.meanSeparation
+    << "; mean D/ndf "
+    << ctProbe.meanPoissonDevianceNdf
+    << std::endl;
+
+  const TimingBranchProbe *bestRFProbe = nullptr;
+
   if (!rfProbes.empty()) {
     const auto bestProbeIter = std::max_element(
       rfProbes.begin(),
       rfProbes.end(),
       [](
-        const RFBranchProbe &left,
-        const RFBranchProbe &right
+        const TimingBranchProbe &left,
+        const TimingBranchProbe &right
       ) {
-        return left.validShapes < right.validShapes;
+        if (left.validShapes != right.validShapes) {
+          return left.validShapes < right.validShapes;
+        }
+
+        if (
+          std::abs(
+            left.meanSeparation -
+            right.meanSeparation
+          ) > 1.0e-9
+        ) {
+          return left.meanSeparation < right.meanSeparation;
+        }
+
+        return
+          left.meanPoissonDevianceNdf >
+          right.meanPoissonDevianceNdf;
       }
     );
 
-    if (
-      bestProbeIter != rfProbes.end() &&
-      bestProbeIter->validShapes > 0
-    ) {
-      rfTimeBranch = bestProbeIter->branch;
-      timeBranch = rfTimeBranch;
-      rfTimingSelected = true;
-
-      timeMin = bestProbeIter->displayMin;
-      timeMax = bestProbeIter->displayMax;
-      timingFitMin = bestProbeIter->fitMin;
-      timingFitMax = bestProbeIter->fitMax;
-
-      kaonMeanMin = bestProbeIter->kaonMeanMin;
-      kaonMeanMax = bestProbeIter->kaonMeanMax;
-      protonMeanMin = bestProbeIter->protonMeanMin;
-      protonMeanMax = bestProbeIter->protonMeanMax;
-      timingSigmaMax = bestProbeIter->sigmaMax;
-      timingSigmaInitial = bestProbeIter->sigmaInitial;
-      nTimeHistogramBins = bestProbeIter->histogramBins;
-
-      std::cout
-        << "Selected RF timing branch: "
-        << rfTimeBranch
-        << " with "
-        << bestProbeIter->validShapes
-        << " valid global shapes"
-        << std::endl;
-    } else {
-      timeBranch = ctTimeBranch;
-      ctFallbackUsed = true;
-
-      std::cerr
-        << "RF-first probes found no validated global shapes; falling back to "
-        << ctTimeBranch
-        << std::endl;
+    if (bestProbeIter != rfProbes.end()) {
+      bestRFProbe = &(*bestProbeIter);
+      rfProbeValidShapes = bestRFProbe->validShapes;
     }
+  }
+
+  auto compareTimingProbes = [](
+    const TimingBranchProbe &left,
+    const TimingBranchProbe &right
+  ) -> int {
+    if (left.validShapes != right.validShapes) {
+      return left.validShapes > right.validShapes ? 1 : -1;
+    }
+
+    if (
+      std::abs(
+        left.meanSeparation -
+        right.meanSeparation
+      ) > 1.0e-9
+    ) {
+      return left.meanSeparation > right.meanSeparation ? 1 : -1;
+    }
+
+    const bool leftFinite =
+      std::isfinite(left.meanPoissonDevianceNdf);
+
+    const bool rightFinite =
+      std::isfinite(right.meanPoissonDevianceNdf);
+
+    if (leftFinite != rightFinite) {
+      return leftFinite ? 1 : -1;
+    }
+
+    if (
+      leftFinite &&
+      std::abs(
+        left.meanPoissonDevianceNdf -
+        right.meanPoissonDevianceNdf
+      ) > 1.0e-9
+    ) {
+      return
+        left.meanPoissonDevianceNdf <
+        right.meanPoissonDevianceNdf
+          ? 1
+          : -1;
+    }
+
+    return 0;
+  };
+
+  const bool selectRF =
+    bestRFProbe &&
+    bestRFProbe->validShapes > 0 &&
+    compareTimingProbes(*bestRFProbe, ctProbe) >= 0;
+
+  if (selectRF) {
+    rfTimeBranch = bestRFProbe->branch;
+    timeBranch = rfTimeBranch;
+    rfTimingSelected = true;
+
+    timeMin = bestRFProbe->displayMin;
+    timeMax = bestRFProbe->displayMax;
+    timingFitMin = bestRFProbe->fitMin;
+    timingFitMax = bestRFProbe->fitMax;
+
+    kaonMeanMin = bestRFProbe->kaonMeanMin;
+    kaonMeanMax = bestRFProbe->kaonMeanMax;
+    protonMeanMin = bestRFProbe->protonMeanMin;
+    protonMeanMax = bestRFProbe->protonMeanMax;
+    timingSigmaMax = bestRFProbe->sigmaMax;
+    timingSigmaInitial = bestRFProbe->sigmaInitial;
+    nTimeHistogramBins = bestRFProbe->histogramBins;
+
+    timingSelectionReason =
+      compareTimingProbes(*bestRFProbe, ctProbe) > 0
+        ? "rf_probe_ranked_better_than_ct"
+        : "rf_won_exact_probe_tie";
+
+    std::cout
+      << "Selected RF timing branch: "
+      << rfTimeBranch
+      << " (RF valid="
+      << bestRFProbe->validShapes
+      << ", mean separation="
+      << bestRFProbe->meanSeparation
+      << ", mean D/ndf="
+      << bestRFProbe->meanPoissonDevianceNdf
+      << "; CT valid="
+      << ctProbe.validShapes
+      << ", mean separation="
+      << ctProbe.meanSeparation
+      << ", mean D/ndf="
+      << ctProbe.meanPoissonDevianceNdf
+      << ")"
+      << std::endl;
   } else {
     timeBranch = ctTimeBranch;
-    ctFallbackUsed = true;
+    rfTimingSelected = false;
+    ctFallbackUsed = false;
 
-    if (disableRFTiming) {
-      std::cerr
-        << "RF timing disabled for final-fit fallback; using "
-        << ctTimeBranch
-        << std::endl;
+    timeMin = ctProbe.displayMin;
+    timeMax = ctProbe.displayMax;
+    timingFitMin = ctProbe.fitMin;
+    timingFitMax = ctProbe.fitMax;
+
+    kaonMeanMin = ctProbe.kaonMeanMin;
+    kaonMeanMax = ctProbe.kaonMeanMax;
+    protonMeanMin = ctProbe.protonMeanMin;
+    protonMeanMax = ctProbe.protonMeanMax;
+    timingSigmaMax = ctProbe.sigmaMax;
+    timingSigmaInitial = ctProbe.sigmaInitial;
+    nTimeHistogramBins = ctProbe.histogramBins;
+
+    if (!bestRFProbe) {
+      timingSelectionReason = disableRFTiming
+        ? "rf_disabled_ct_selected"
+        : "no_rf_branch_ct_selected";
+    } else if (ctProbe.validShapes == 0 && bestRFProbe->validShapes == 0) {
+      timingSelectionReason =
+        "no_valid_rf_or_ct_shapes_ct_selected_for_diagnostics";
     } else {
-      std::cerr
-        << "No configured RF timing branch was found; falling back to "
-        << ctTimeBranch
-        << ". Set PROTON_CHECKER_RF_BRANCH to force another branch name."
-        << std::endl;
+      timingSelectionReason =
+        "ct_probe_ranked_better_than_rf";
+    }
 
+    std::cout
+      << "Selected CT timing branch: "
+      << ctTimeBranch
+      << " (CT valid="
+      << ctProbe.validShapes
+      << ", mean separation="
+      << ctProbe.meanSeparation
+      << ", mean D/ndf="
+      << ctProbe.meanPoissonDevianceNdf;
+
+    if (bestRFProbe) {
+      std::cout
+        << "; best RF "
+        << bestRFProbe->branch
+        << " valid="
+        << bestRFProbe->validShapes
+        << ", mean separation="
+        << bestRFProbe->meanSeparation
+        << ", mean D/ndf="
+        << bestRFProbe->meanPoissonDevianceNdf;
+    }
+
+    std::cout
+      << ")"
+      << std::endl;
+
+    if (!bestRFProbe && !disableRFTiming) {
       printRFLikeBranches(tree);
     }
   }
@@ -2682,63 +3035,10 @@ void check_slow_protons(
     }
   }
 
-  if (validGlobalShapes == 0 && rfTimingSelected) {
-    std::cerr
-      << "The selected RF branch passed the probe but failed the final "
-      << "global fits; retrying the complete analysis with "
-      << ctTimeBranch
-      << "."
-      << std::endl;
-
-    for (TimingShape &shape : globalShapes) {
-      if (shape.fitFunction) {
-        delete shape.fitFunction;
-        shape.fitFunction = nullptr;
-      }
-    }
-
-    for (TH1D *projection : globalTimingProjections) {
-      delete projection;
-    }
-
-    delete hGlobalPID;
-    inputFile->Close();
-    delete inputFile;
-
-    const char *previousDisableRF =
-      gSystem->Getenv("PROTON_CHECKER_DISABLE_RF");
-
-    const std::string previousDisableRFValue =
-      previousDisableRF ? previousDisableRF : "";
-
-    const bool hadPreviousDisableRF =
-      previousDisableRF != nullptr;
-
-    gSystem->Setenv("PROTON_CHECKER_DISABLE_RF", "1");
-
-    check_slow_protons(
-      phi_setting,
-      Q2,
-      W,
-      eps_setting
-    );
-
-    if (hadPreviousDisableRF) {
-      gSystem->Setenv(
-        "PROTON_CHECKER_DISABLE_RF",
-        previousDisableRFValue.c_str()
-      );
-    } else {
-      gSystem->Unsetenv("PROTON_CHECKER_DISABLE_RF");
-    }
-
-    return;
-  }
-
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v8 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v9 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -3278,6 +3578,27 @@ void check_slow_protons(
       "ct_fallback_used",
       ctFallbackUsed ? 1 : 0
     ).Write();
+
+    TParameter<int>(
+      "ct_timing_evaluated",
+      ctTimingEvaluated ? 1 : 0
+    ).Write();
+
+    TParameter<int>(
+      "rf_probe_valid_global_shapes",
+      rfProbeValidShapes
+    ).Write();
+
+    TParameter<int>(
+      "ct_probe_valid_global_shapes",
+      ctProbeValidShapes
+    ).Write();
+
+    TNamed diagnosticSelectionReason(
+      "timing_selection_reason",
+      timingSelectionReason.c_str()
+    );
+    diagnosticSelectionReason.Write();
 
     TNamed diagnosticFitStatistic(
       "fit_statistic",
@@ -3996,6 +4317,8 @@ void check_slow_protons(
   // V2 = ssdelta
   // V3 = P_aero_npeSum
   // V5 = RF-first branch scan with data-driven RF timing ranges, CTime_ROC1 fallback
+  // V8 = single-period RF window selection and corrected RF component ordering
+  // V9 = probe RF and CT on every run and select the better validated timing variable
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -5306,6 +5629,27 @@ void check_slow_protons(
     ctFallbackUsed ? 1 : 0
   ).Write();
 
+  TParameter<int>(
+    "ct_timing_evaluated",
+    ctTimingEvaluated ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "rf_probe_valid_global_shapes",
+    rfProbeValidShapes
+  ).Write();
+
+  TParameter<int>(
+    "ct_probe_valid_global_shapes",
+    ctProbeValidShapes
+  ).Write();
+
+  TNamed timingSelectionReasonTag(
+    "timing_selection_reason",
+    timingSelectionReason.c_str()
+  );
+  timingSelectionReasonTag.Write();
+
   TNamed fitStatisticTag(
     "fit_statistic",
     "Baker-Cousins Poisson deviance; bin-integrated likelihood"
@@ -5401,6 +5745,11 @@ void check_slow_protons(
     << filename
     << "\nTree: "
     << treeName
+    << "\nTiming selection: "
+    << timeBranch
+    << " ("
+    << timingSelectionReason
+    << ")"
     << "\nGlobal PID entries: "
     << hGlobalPID->Integral()
     << "\nIdentifiable global aerogel slices: "
