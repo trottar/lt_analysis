@@ -1020,20 +1020,84 @@ TF1 *makeConstantComponent(
 }
 
 
-void check_slow_protons() {
+void check_slow_protons(
+  const char *phi_setting = "Left",
+  const char *Q2 = "3p0",
+  const char *W = "3p14",
+  const char *eps_setting = "low"
+) {
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
+  const TString phiSetting =
+    phi_setting ? phi_setting : "";
+
+  const TString q2Setting =
+    Q2 ? Q2 : "";
+
+  const TString wSetting =
+    W ? W : "";
+
+  const TString epsSetting =
+    eps_setting ? eps_setting : "";
+
+  if (
+    phiSetting.IsNull() ||
+    q2Setting.IsNull() ||
+    wSetting.IsNull() ||
+    epsSetting.IsNull()
+  ) {
+    std::cerr
+      << "Usage: check_slow_protons("
+      << "\"<phi>\", \"<Q2>\", "
+      << "\"<W>\", \"<eps>\")"
+      << std::endl;
+
+    return;
+  }
+
+  const TString kinematicSetting =
+    TString::Format(
+      "Q%sW%s",
+      q2Setting.Data(),
+      wSetting.Data()
+    );
+
+  const TString inputFileName =
+    TString::Format(
+      "%s_kaon_Analysed_Data_Q%sW%s_%se.root",
+      phiSetting.Data(),
+      q2Setting.Data(),
+      wSetting.Data(),
+      epsSetting.Data()
+    );
+
+  const TString inputDirectory =
+    TString::Format(
+      "$cache_transfer/%s/Trial_49/"
+      "2026June29_H00M23S53/root",
+      kinematicSetting.Data()
+    );
+
   TString filename = gSystem->ExpandPathName(
-    "$cache_transfer/Q3p0W3p14/Trial_49/2026June29_H00M23S53/root/"
-    "Left_kaon_Analysed_Data_Q3p0W3p14_lowe.root"
+    TString::Format(
+      "%s/%s",
+      inputDirectory.Data(),
+      inputFileName.Data()
+    )
   );
 
   const std::string treeName =
     "Cut_Kaon_Events_prompt_noRF";
 
   const std::string outputBase =
-    "Left_kaon_proton_cleaning_poc";
+    TString::Format(
+      "%s_kaon_proton_cleaning_Q%sW%s_%se",
+      phiSetting.Data(),
+      q2Setting.Data(),
+      wSetting.Data(),
+      epsSetting.Data()
+    ).Data();
 
   const std::string outputPDF =
     outputBase + ".pdf";
