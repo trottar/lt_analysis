@@ -1020,7 +1020,7 @@ TF1 *makeConstantComponent(
 }
 
 
-void check_slow_protons_v4(
+void check_slow_protons(
   const char *phi_setting = "Left",
   const char *Q2 = "3p0",
   const char *W = "3p14",
@@ -1029,7 +1029,7 @@ void check_slow_protons_v4(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons_v4.0";
+  const char *macroVersion = "check_slow_protons_v5.0";
 
   std::cout
     << "Running "
@@ -1055,7 +1055,7 @@ void check_slow_protons_v4(
     epsSetting.IsNull()
   ) {
     std::cerr
-      << "Usage: check_slow_protons_v4("
+      << "Usage: check_slow_protons("
       << "\"<phi>\", \"<Q2>\", "
       << "\"<W>\", \"<eps>\")"
       << std::endl;
@@ -1099,7 +1099,7 @@ void check_slow_protons_v4(
 
   const std::string outputBase =
     TString::Format(
-      "%s_kaon_proton_cleaning_Q%sW%s_%se_v4",
+      "%s_kaon_proton_cleaning_Q%sW%s_%se_v5",
       phiSetting.Data(),
       q2Setting.Data(),
       wSetting.Data(),
@@ -3988,3 +3988,24 @@ void check_slow_protons_v4(
     << "\n==========================================="
     << std::endl;
 }
+
+// Versioned ROOT entry point.
+// This wrapper allows direct execution as:
+//   root -l -b -q 'check_slow_protons_v5.C("Center","3p0","3p14","high")'
+// The unversioned check_slow_protons(...) entry point above also allows this
+// same file to be renamed to check_slow_protons.C without breaking ROOT's
+// automatic macro-function lookup.
+void check_slow_protons_v5(
+  const char *phi_setting = "Left",
+  const char *Q2 = "3p0",
+  const char *W = "3p14",
+  const char *eps_setting = "low"
+) {
+  check_slow_protons(
+    phi_setting,
+    Q2,
+    W,
+    eps_setting
+  );
+}
+
