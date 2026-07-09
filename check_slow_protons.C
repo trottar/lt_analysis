@@ -107,6 +107,15 @@ struct PoissonGoodnessOfFit {
 };
 
 
+struct PeakPairSeed {
+  bool valid = false;
+  double lowerMean = 0.0;
+  double upperMean = 0.0;
+  double lowerHeight = 0.0;
+  double upperHeight = 0.0;
+};
+
+
 std::string findAvailableBranch(
   TTree *tree,
   const std::vector<std::string> &candidates
@@ -273,6 +282,190 @@ std::pair<double, double> findPeakSeed(
     maximum,
     maximumCenter
   };
+}
+
+
+PeakPairSeed findSeparatedPeakPair(
+  const TH1D *histogram,
+  double xMin,
+  double xMax,
+  double minimumSeparation,
+  double maximumSeparation
+) {
+  PeakPairSeed result;
+
+  if (
+    !histogram ||
+    xMax <= xMin ||
+    minimumSeparation <= 0.0 ||
+    maximumSeparation <= minimumSeparation
+  ) {
+    return result;
+  }
+
+  const int firstBin = std::max(
+    1,
+    histogram->GetXaxis()->FindFixBin(xMin)
+  );
+
+  const int lastBin = std::min(
+    histogram->GetNbinsX(),
+    histogram->GetXaxis()->FindFixBin(
+      std::nextafter(xMax, xMin)
+    )
+  );
+
+  if (lastBin - firstBin < 4) {
+    return result;
+  }
+
+  std::vector<double> smoothed(
+    histogram->GetNbinsX() + 1,
+    0.0
+  );
+
+  const int smoothingRadius = 2;
+
+  for (int bin = firstBin; bin <= lastBin; ++bin) {
+    double weightedSum = 0.0;
+    double weightSum = 0.0;
+
+    for (
+      int offset = -smoothingRadius;
+      offset <= smoothingRadius;
+      ++offset
+    ) {
+      const int neighbor = bin + offset;
+
+      if (neighbor < firstBin || neighbor > lastBin) {
+        continue;
+      }
+
+      const double weight =
+        static_cast<double>(smoothingRadius + 1 - std::abs(offset));
+
+      weightedSum += weight * std::max(
+        histogram->GetBinContent(neighbor),
+        0.0
+      );
+
+      weightSum += weight;
+    }
+
+    if (weightSum > 0.0) {
+      smoothed.at(bin) = weightedSum / weightSum;
+    }
+  }
+
+  std::vector<int> peakBins;
+
+  for (int bin = firstBin + 1; bin < lastBin; ++bin) {
+    const double value = smoothed.at(bin);
+
+    if (
+      value > 0.0 &&
+      value >= smoothed.at(bin - 1) &&
+      value > smoothed.at(bin + 1)
+    ) {
+      peakBins.push_back(bin);
+    }
+  }
+
+  // A very smooth or edge-truncated distribution can leave fewer than two
+  // strict local maxima.  Add the strongest bins as fallback candidates;
+  // the pair-separation requirement below still prevents one peak from
+  // being counted twice.
+  if (peakBins.size() < 2) {
+    std::vector<int> allBins;
+
+    for (int bin = firstBin; bin <= lastBin; ++bin) {
+      allBins.push_back(bin);
+    }
+
+    std::sort(
+      allBins.begin(),
+      allBins.end(),
+      [&smoothed](int left, int right) {
+        return smoothed.at(left) > smoothed.at(right);
+      }
+    );
+
+    const size_t maximumFallbackBins = std::min<size_t>(
+      allBins.size(),
+      24
+    );
+
+    for (size_t index = 0; index < maximumFallbackBins; ++index) {
+      if (
+        std::find(
+          peakBins.begin(),
+          peakBins.end(),
+          allBins.at(index)
+        ) == peakBins.end()
+      ) {
+        peakBins.push_back(allBins.at(index));
+      }
+    }
+  }
+
+  double bestScore = -1.0;
+
+  for (size_t first = 0; first < peakBins.size(); ++first) {
+    for (size_t second = first + 1; second < peakBins.size(); ++second) {
+      const int firstPeakBin = peakBins.at(first);
+      const int secondPeakBin = peakBins.at(second);
+
+      const double firstMean =
+        histogram->GetXaxis()->GetBinCenter(firstPeakBin);
+
+      const double secondMean =
+        histogram->GetXaxis()->GetBinCenter(secondPeakBin);
+
+      const double separation = std::abs(secondMean - firstMean);
+
+      if (
+        separation < minimumSeparation ||
+        separation > maximumSeparation
+      ) {
+        continue;
+      }
+
+      const double firstHeight = smoothed.at(firstPeakBin);
+      const double secondHeight = smoothed.at(secondPeakBin);
+
+      if (firstHeight <= 0.0 || secondHeight <= 0.0) {
+        continue;
+      }
+
+      // Favor pairs for which both peaks are populated.  This suppresses
+      // pairing a real peak with a small statistical ripple or with the
+      // same particle peak in an adjacent RF period.
+      const double score =
+        std::min(firstHeight, secondHeight) *
+        std::sqrt(firstHeight * secondHeight);
+
+      if (score <= bestScore) {
+        continue;
+      }
+
+      bestScore = score;
+      result.valid = true;
+
+      if (firstMean < secondMean) {
+        result.lowerMean = firstMean;
+        result.upperMean = secondMean;
+        result.lowerHeight = firstHeight;
+        result.upperHeight = secondHeight;
+      } else {
+        result.lowerMean = secondMean;
+        result.upperMean = firstMean;
+        result.lowerHeight = secondHeight;
+        result.upperHeight = firstHeight;
+      }
+    }
+  }
+
+  return result;
 }
 
 
@@ -1439,7 +1632,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.7";
+  const char *macroVersion = "check_slow_protons.8";
 
   std::cout
     << "Running "
@@ -1671,7 +1864,7 @@ void check_slow_protons(
   const int nAeroHistogramBins = 75;
   // Preserve approximately the original 0.0305 ns timing-bin width.
   // Eight ns gives 262 bins; four ns gives 131 bins.
-  const int nTimeHistogramBins =
+  int nTimeHistogramBins =
     isHighEpsilon ? 262 : 131;
 
   const std::vector<double> aeroEdges = {
@@ -1726,12 +1919,20 @@ void check_slow_protons(
     "hsxptar >= -0.08 && hsxptar <= 0.08 && "
     "hsyptar >= -0.045 && hsyptar <= 0.045";
 
+  const char *disableRFEnvironment =
+    gSystem->Getenv("PROTON_CHECKER_DISABLE_RF");
+
+  const bool disableRFTiming =
+    disableRFEnvironment &&
+    std::string(disableRFEnvironment) == "1";
+
   std::vector<std::string> rfBranchCandidates;
 
   const char *forcedRFBranch =
     gSystem->Getenv("PROTON_CHECKER_RF_BRANCH");
 
   if (
+    !disableRFTiming &&
     forcedRFBranch &&
     forcedRFBranch[0] != '\0'
   ) {
@@ -1759,6 +1960,9 @@ void check_slow_protons(
     const std::string &candidate :
     defaultRFBranchCandidates
   ) {
+    if (disableRFTiming) {
+      break;
+    }
     if (
       std::find(
         rfBranchCandidates.begin(),
@@ -1783,6 +1987,10 @@ void check_slow_protons(
     double protonMeanMax = 0.0;
     double sigmaMax = 0.0;
     double sigmaInitial = 0.0;
+    int histogramBins = 0;
+    bool peakPairFound = false;
+    double protonSeedMean = 0.0;
+    double kaonSeedMean = 0.0;
   };
 
   auto countValidGlobalShapesForBranch = [
@@ -1830,6 +2038,85 @@ void check_slow_protons(
       return 0;
     }
 
+    // Search the unmodified RF variable for a proton-kaon peak pair.  For
+    // low epsilon, P_RF_Dist can span roughly two 2-ns RF periods.  Fitting
+    // the entire 4-ns span duplicates the particle peaks and makes the
+    // two-Gaussian model ill-defined.  Select one contiguous bunch-period
+    // window around the strongest two-peak structure; no RF value is
+    // shifted, corrected, or wrapped.
+    const double rawDisplayMin = probe.displayMin;
+    const double rawDisplayMax = probe.displayMax;
+    const double rawDisplayWidth = rawDisplayMax - rawDisplayMin;
+
+    const int searchBins = std::max(
+      160,
+      static_cast<int>(
+        std::round(rawDisplayWidth / 0.015)
+      )
+    );
+
+    gROOT->cd();
+
+    auto *rfWindowSearch = new TH1D(
+      TString::Format(
+        "h_rf_window_search_%s",
+        candidateBranch.c_str()
+      ),
+      "RF window search",
+      searchBins,
+      rawDisplayMin,
+      rawDisplayMax
+    );
+
+    rfWindowSearch->Sumw2();
+
+    tree->Draw(
+      TString::Format(
+        "%s>>%s",
+        candidateBranch.c_str(),
+        rfWindowSearch->GetName()
+      ),
+      candidatePreselectionCut.c_str(),
+      "goff"
+    );
+
+    rfWindowSearch->SetDirectory(nullptr);
+
+    const PeakPairSeed rawPeakPair = findSeparatedPeakPair(
+      rfWindowSearch,
+      rawDisplayMin,
+      rawDisplayMax,
+      std::max(0.18, 0.10 * beamBunchSpacingNs),
+      0.80 * beamBunchSpacingNs
+    );
+
+    if (
+      rawPeakPair.valid &&
+      rawDisplayWidth > 1.15 * beamBunchSpacingNs
+    ) {
+      const double pairCenter =
+        0.5 * (rawPeakPair.lowerMean + rawPeakPair.upperMean);
+
+      const double selectedWidth = beamBunchSpacingNs;
+      double selectedMin = pairCenter - 0.5 * selectedWidth;
+      double selectedMax = pairCenter + 0.5 * selectedWidth;
+
+      if (selectedMin < rawDisplayMin) {
+        selectedMax += rawDisplayMin - selectedMin;
+        selectedMin = rawDisplayMin;
+      }
+
+      if (selectedMax > rawDisplayMax) {
+        selectedMin -= selectedMax - rawDisplayMax;
+        selectedMax = rawDisplayMax;
+      }
+
+      probe.displayMin = std::max(selectedMin, rawDisplayMin);
+      probe.displayMax = std::min(selectedMax, rawDisplayMax);
+    }
+
+    delete rfWindowSearch;
+
     const double candidateWidth =
       probe.displayMax - probe.displayMin;
 
@@ -1841,6 +2128,8 @@ void check_slow_protons(
         )
       )
     );
+
+    probe.histogramBins = candidateBins;
 
     const std::string candidateRangeCut =
       TString::Format(
@@ -1920,36 +2209,45 @@ void check_slow_protons(
     probe.fitMin = centralFitRange.first;
     probe.fitMax = centralFitRange.second;
 
-    delete allAeroTiming;
-
     if (probe.fitMax <= probe.fitMin) {
+      delete allAeroTiming;
       delete probePID;
       return 0;
     }
 
-    const double fitWidth = probe.fitMax - probe.fitMin;
-    const double split = 0.5 * (probe.fitMin + probe.fitMax);
+    const PeakPairSeed fittedPeakPair = findSeparatedPeakPair(
+      allAeroTiming,
+      probe.fitMin,
+      probe.fitMax,
+      std::max(0.18, 0.10 * beamBunchSpacingNs),
+      0.80 * beamBunchSpacingNs
+    );
+
+    double split = 0.5 * (probe.fitMin + probe.fitMax);
+
+    if (fittedPeakPair.valid) {
+      split = 0.5 * (
+        fittedPeakPair.lowerMean +
+        fittedPeakPair.upperMean
+      );
+
+      probe.peakPairFound = true;
+      probe.protonSeedMean = fittedPeakPair.lowerMean;
+      probe.kaonSeedMean = fittedPeakPair.upperMean;
+    }
+
+    delete allAeroTiming;
 
     // RF timing has the proton peak on the lower-time side and the kaon
-    // peak on the upper-time side.  CTime_ROC1 uses the opposite ordering:
-    // kaon on the left and proton on the right.  Keep the fitted component
-    // labels tied to particle identity rather than to increasing time.
+    // peak on the upper-time side.  Split the allowed means between the
+    // two data-driven peak seeds rather than at the center of the raw RF
+    // range.  Use the same sigma constraints and seeds as the CT fit.
     probe.protonMeanMin = probe.fitMin;
     probe.protonMeanMax = split;
     probe.kaonMeanMin = split;
     probe.kaonMeanMax = probe.fitMax;
-    probe.sigmaMax = std::max(
-      timingSigmaMax,
-      0.35 * fitWidth
-    );
-    probe.sigmaInitial = std::clamp(
-      std::max(
-        timingSigmaInitial,
-        0.08 * fitWidth
-      ),
-      timingSigmaMin,
-      probe.sigmaMax
-    );
+    probe.sigmaMax = timingSigmaMax;
+    probe.sigmaInitial = timingSigmaInitial;
 
     int validShapes = 0;
 
@@ -2031,6 +2329,11 @@ void check_slow_protons(
         ++validShapes;
       }
 
+      if (shape.fitFunction) {
+        delete shape.fitFunction;
+        shape.fitFunction = nullptr;
+      }
+
       delete projection;
     }
 
@@ -2079,7 +2382,18 @@ void check_slow_protons(
       << probe.fitMin
       << ", "
       << probe.fitMax
-      << "]"
+      << "]; bins "
+      << probe.histogramBins
+      << "; peak seeds "
+      << (
+        probe.peakPairFound
+          ? TString::Format(
+              "p=%.4g, K=%.4g",
+              probe.protonSeedMean,
+              probe.kaonSeedMean
+            ).Data()
+          : "not resolved"
+      )
       << std::endl;
 
     rfProbes.push_back(probe);
@@ -2116,6 +2430,7 @@ void check_slow_protons(
       protonMeanMax = bestProbeIter->protonMeanMax;
       timingSigmaMax = bestProbeIter->sigmaMax;
       timingSigmaInitial = bestProbeIter->sigmaInitial;
+      nTimeHistogramBins = bestProbeIter->histogramBins;
 
       std::cout
         << "Selected RF timing branch: "
@@ -2137,13 +2452,20 @@ void check_slow_protons(
     timeBranch = ctTimeBranch;
     ctFallbackUsed = true;
 
-    std::cerr
-      << "No configured RF timing branch was found; falling back to "
-      << ctTimeBranch
-      << ". Set PROTON_CHECKER_RF_BRANCH to force another branch name."
-      << std::endl;
+    if (disableRFTiming) {
+      std::cerr
+        << "RF timing disabled for final-fit fallback; using "
+        << ctTimeBranch
+        << std::endl;
+    } else {
+      std::cerr
+        << "No configured RF timing branch was found; falling back to "
+        << ctTimeBranch
+        << ". Set PROTON_CHECKER_RF_BRANCH to force another branch name."
+        << std::endl;
 
-    printRFLikeBranches(tree);
+      printRFLikeBranches(tree);
+    }
   }
 
   // RF: proton is the left/lower-time peak.
@@ -2360,10 +2682,63 @@ void check_slow_protons(
     }
   }
 
+  if (validGlobalShapes == 0 && rfTimingSelected) {
+    std::cerr
+      << "The selected RF branch passed the probe but failed the final "
+      << "global fits; retrying the complete analysis with "
+      << ctTimeBranch
+      << "."
+      << std::endl;
+
+    for (TimingShape &shape : globalShapes) {
+      if (shape.fitFunction) {
+        delete shape.fitFunction;
+        shape.fitFunction = nullptr;
+      }
+    }
+
+    for (TH1D *projection : globalTimingProjections) {
+      delete projection;
+    }
+
+    delete hGlobalPID;
+    inputFile->Close();
+    delete inputFile;
+
+    const char *previousDisableRF =
+      gSystem->Getenv("PROTON_CHECKER_DISABLE_RF");
+
+    const std::string previousDisableRFValue =
+      previousDisableRF ? previousDisableRF : "";
+
+    const bool hadPreviousDisableRF =
+      previousDisableRF != nullptr;
+
+    gSystem->Setenv("PROTON_CHECKER_DISABLE_RF", "1");
+
+    check_slow_protons(
+      phi_setting,
+      Q2,
+      W,
+      eps_setting
+    );
+
+    if (hadPreviousDisableRF) {
+      gSystem->Setenv(
+        "PROTON_CHECKER_DISABLE_RF",
+        previousDisableRFValue.c_str()
+      );
+    } else {
+      gSystem->Unsetenv("PROTON_CHECKER_DISABLE_RF");
+    }
+
+    return;
+  }
+
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v4 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v8 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
