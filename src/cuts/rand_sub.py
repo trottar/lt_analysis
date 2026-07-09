@@ -3949,7 +3949,7 @@ def rand_sub(
 
     CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
-    if isinstance(proton_cleaning_result, dict) and bool(proton_cleaning_result.get("accepted")):
+    if isinstance(proton_cleaning_result, dict):
         print_kaon_proton_cleaning_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             proton_cleaning_result,
