@@ -17,10 +17,10 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 macro="${script_dir}/check_slow_protons.C+"
 
 if [[ ! -f "$macro" ]]; then
-    echo "Error: v4 ROOT macro not found: $macro" >&2
+    echo "Error: ROOT macro not found: $macro" >&2
     exit 2
 fi
 
 echo "Running check_slow_protons.C"
 root -l -b -q \
-    "${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
+    ".L ${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
