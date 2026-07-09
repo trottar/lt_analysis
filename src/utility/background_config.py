@@ -402,7 +402,7 @@ PROTON_CONTAMINATION_CLEANING_RF_POLICIES = frozenset(
 
 PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     "enabled": True,
-    "method": PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
+    "method": PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
     "tree_policy": "explicit_norf_required",
     "rf_policy": "epsset_default_after_cleaning",
     "strict_mode": True,
