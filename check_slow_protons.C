@@ -1840,7 +1840,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.13";
+  const char *macroVersion = "check_slow_protons.14";
 
   std::cout
     << "Running "
@@ -3018,7 +3018,8 @@ void check_slow_protons(
     // peak on the upper-time side.  The normal pass keeps the established
     // full-window procedure.  The local-peak rescue is entered only after
     // both normal passes fail; it narrows the fit to the resolved peak pair
-    // and gives the widths enough room to move away from the 0.45-ns bound.
+    // and caps the Gaussian widths below the normal 0.45-ns limit so the
+    // fallback cannot absorb the broad non-Gaussian timing continuum.
     probe.localPeakRescue = localPeakRescueMode;
 
     if (localPeakRescueMode && fittedPeakPair.valid) {
@@ -3028,8 +3029,8 @@ void check_slow_protons(
       );
 
       const double fitPadding = std::max(
-        0.30,
-        0.65 * seedSeparation
+        0.22,
+        0.50 * seedSeparation
       );
 
       probe.fitMin = std::max(
@@ -3048,8 +3049,8 @@ void check_slow_protons(
       );
 
       const double meanHalfWidth = std::max(
-        0.14,
-        0.35 * seedSeparation
+        0.12,
+        0.30 * seedSeparation
       );
 
       const double orderingGap = std::max(
@@ -3075,14 +3076,14 @@ void check_slow_protons(
       );
 
       probe.sigmaMax = std::clamp(
-        0.75 * seedSeparation,
-        0.45,
-        0.90
+        0.60 * seedSeparation,
+        0.20,
+        0.30
       );
       probe.sigmaInitial = std::clamp(
-        0.25 * seedSeparation,
-        0.12,
-        0.35
+        0.32 * seedSeparation,
+        0.10,
+        0.16
       );
     } else {
       probe.protonMeanMin = probe.fitMin;
@@ -3164,7 +3165,7 @@ void check_slow_protons(
         probe.sigmaMax,
         probe.sigmaInitial,
         localPeakRescueMode
-          ? 0.60
+          ? 0.90
           : minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
         localPeakRescueMode
@@ -3172,7 +3173,7 @@ void check_slow_protons(
           : useDeviancePerEntryValidation,
         maximumGlobalPoissonDevianceNdf,
         localPeakRescueMode
-          ? 0.85
+          ? 0.60
           : maximumGlobalPoissonDeviancePerEntry,
         localPeakRescueMode
           ? 0.005
@@ -3315,8 +3316,8 @@ void check_slow_protons(
         );
 
         const double fitPadding = std::max(
-          0.30,
-          0.65 * seedSeparation
+          0.22,
+          0.50 * seedSeparation
         );
 
         probe.fitMin = std::max(
@@ -3333,8 +3334,8 @@ void check_slow_protons(
         );
 
         const double meanHalfWidth = std::max(
-          0.14,
-          0.35 * seedSeparation
+          0.12,
+          0.30 * seedSeparation
         );
 
         const double orderingGap = std::max(
@@ -3360,14 +3361,14 @@ void check_slow_protons(
         );
 
         probe.sigmaMax = std::clamp(
-          0.75 * seedSeparation,
-          0.45,
-          0.90
+          0.60 * seedSeparation,
+          0.20,
+          0.30
         );
         probe.sigmaInitial = std::clamp(
-          0.25 * seedSeparation,
-          0.12,
-          0.35
+          0.32 * seedSeparation,
+          0.10,
+          0.16
         );
       }
 
@@ -3443,7 +3444,7 @@ void check_slow_protons(
         probe.sigmaMax,
         probe.sigmaInitial,
         localPeakRescueMode
-          ? 0.60
+          ? 0.90
           : minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
         localPeakRescueMode
@@ -3451,7 +3452,7 @@ void check_slow_protons(
           : useDeviancePerEntryValidation,
         maximumGlobalPoissonDevianceNdf,
         localPeakRescueMode
-          ? 0.85
+          ? 0.60
           : maximumGlobalPoissonDeviancePerEntry,
         localPeakRescueMode
           ? 0.005
@@ -3731,7 +3732,7 @@ void check_slow_protons(
 
   // If both the in-diamond and pre-diamond standard fits fail, perform one
   // final rescue pass.  This changes only the timing-shape determination:
-  // it uses data-driven local peak windows, wider sigma limits, and D/N
+  // it uses data-driven local peak windows, narrower sigma limits, and D/N
   // validation.  Event selection still requires the Q2-W diamond.
   int fallbackBestRFValidShapes = 0;
   for (const TimingBranchProbe &probe : rfProbes) {
@@ -3875,6 +3876,10 @@ void check_slow_protons(
           return left.validShapes < right.validShapes;
         }
 
+        if (left.peakPairFound != right.peakPairFound) {
+          return !left.peakPairFound;
+        }
+
         if (
           std::abs(
             left.meanSeparation -
@@ -3910,6 +3915,10 @@ void check_slow_protons(
   ) -> int {
     if (left.validShapes != right.validShapes) {
       return left.validShapes > right.validShapes ? 1 : -1;
+    }
+
+    if (left.peakPairFound != right.peakPairFound) {
+      return left.peakPairFound ? 1 : -1;
     }
 
     if (
@@ -3948,10 +3957,23 @@ void check_slow_protons(
     return 0;
   };
 
+  const bool rescueRFPeakPairTieBreak =
+    timingFitUsedLocalPeakRescue &&
+    bestRFProbe &&
+    bestRFProbe->validShapes == 0 &&
+    ctProbe.validShapes == 0 &&
+    bestRFProbe->peakPairFound &&
+    !ctProbe.peakPairFound;
+
   const bool selectRF =
     bestRFProbe &&
-    bestRFProbe->validShapes > 0 &&
-    compareTimingProbes(*bestRFProbe, ctProbe) >= 0;
+    (
+      (
+        bestRFProbe->validShapes > 0 &&
+        compareTimingProbes(*bestRFProbe, ctProbe) >= 0
+      ) ||
+      rescueRFPeakPairTieBreak
+    );
 
   if (selectRF) {
     rfTimeBranch = bestRFProbe->branch;
@@ -3971,10 +3993,15 @@ void check_slow_protons(
     timingSigmaInitial = bestRFProbe->sigmaInitial;
     nTimeHistogramBins = bestRFProbe->histogramBins;
 
-    timingSelectionReason =
-      compareTimingProbes(*bestRFProbe, ctProbe) > 0
-        ? "rf_probe_ranked_better_than_ct"
-        : "rf_won_exact_probe_tie";
+    if (rescueRFPeakPairTieBreak) {
+      timingSelectionReason =
+        "rf_resolved_peak_pair_used_after_all_fit_validation_failed";
+    } else {
+      timingSelectionReason =
+        compareTimingProbes(*bestRFProbe, ctProbe) > 0
+          ? "rf_probe_ranked_better_than_ct"
+          : "rf_won_exact_probe_tie";
+    }
 
     std::cout
       << "Selected RF timing branch: "
@@ -4075,7 +4102,7 @@ void check_slow_protons(
 
   const double activeMaximumGlobalPoissonDeviancePerEntry =
     timingFitUsedLocalPeakRescue
-      ? 0.85
+      ? 0.60
       : maximumGlobalPoissonDeviancePerEntry;
 
   const double activeGlobalBoundFractionTolerance =
@@ -4085,7 +4112,7 @@ void check_slow_protons(
 
   const double activeMinimumGlobalSeparation =
     timingFitUsedLocalPeakRescue
-      ? 0.60
+      ? 0.90
       : minimumGlobalSeparation;
 
   const bool activeUseSliceDeviancePerEntryValidation =
@@ -4150,8 +4177,8 @@ void check_slow_protons(
 
   if (timingFitUsedLocalPeakRescue) {
     std::cout
-      << "Local-peak rescue is active: data-driven mean windows, wider "
-      << "sigma limits, and Poisson D/N validation are used for timing "
+      << "Local-peak rescue is active: data-driven mean windows, narrow "
+      << "sigma caps, and Poisson D/N validation are used for timing "
       << "shapes only."
       << std::endl;
   }
@@ -4336,7 +4363,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v13 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v14 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
