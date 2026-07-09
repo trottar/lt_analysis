@@ -281,18 +281,15 @@ def _resolve_rf_probe_display_range(
         160,
         int(round(raw_display_width / 0.015)),
     )
-    rf_window_search = _build_signed_timing_projection(
-        source_bundle,
-        evaluate_event,
-        hole_contains,
-        mm_min,
-        mm_max,
-        timing_branch,
+    rf_window_search = ROOT.TH1D(
         "H_proton_cleaning_rf_window_search_{}".format(str(timing_branch).replace(" ", "_")),
-        (raw_display_min, raw_display_max),
-        search_bins,
+        "RF window search",
+        int(search_bins),
+        float(raw_display_min),
+        float(raw_display_max),
     )
-    rf_window_search.Reset()
+    rf_window_search.SetDirectory(0)
+    rf_window_search.Sumw2()
     for value in branch_values:
         timing_value = float(value)
         if (not math.isfinite(timing_value)) or timing_value < raw_display_min or timing_value > raw_display_max:
