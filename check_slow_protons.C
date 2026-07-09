@@ -1,3 +1,4 @@
+#include <TBranch.h>
 #include <TCanvas.h>
 #include <TDirectory.h>
 #include <TFile.h>
@@ -9,6 +10,7 @@
 #include <TLegend.h>
 #include <TLine.h>
 #include <TNamed.h>
+#include <TObjArray.h>
 #include <TPad.h>
 #include <TParameter.h>
 #include <TPaveText.h>
@@ -103,6 +105,68 @@ struct PoissonGoodnessOfFit {
   double devianceNdf = std::numeric_limits<double>::infinity();
   double deviancePerEntry = std::numeric_limits<double>::infinity();
 };
+
+
+std::string findAvailableBranch(
+  TTree *tree,
+  const std::vector<std::string> &candidates
+) {
+  if (!tree) {
+    return "";
+  }
+
+  for (const std::string &candidate : candidates) {
+    if (
+      !candidate.empty() &&
+      tree->GetBranch(candidate.c_str())
+    ) {
+      return candidate;
+    }
+  }
+
+  return "";
+}
+
+
+void printRFLikeBranches(
+  TTree *tree
+) {
+  if (!tree || !tree->GetListOfBranches()) {
+    return;
+  }
+
+  bool printedHeader = false;
+
+  TObjArray *branches = tree->GetListOfBranches();
+
+  for (int index = 0; index < branches->GetEntries(); ++index) {
+    auto *branch = dynamic_cast<TBranch *>(branches->At(index));
+
+    if (!branch) {
+      continue;
+    }
+
+    TString branchName = branch->GetName();
+    TString lowerName = branchName;
+    lowerName.ToLower();
+
+    if (!lowerName.Contains("rf")) {
+      continue;
+    }
+
+    if (!printedHeader) {
+      std::cerr
+        << "RF-like branches found in the tree:"
+        << std::endl;
+      printedHeader = true;
+    }
+
+    std::cerr
+      << "  "
+      << branchName
+      << std::endl;
+  }
+}
 
 
 const char *supportClassLabel(
@@ -1259,7 +1323,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.3";
+  const char *macroVersion = "check_slow_protons.4";
 
   std::cout
     << "Running "
@@ -1380,8 +1444,16 @@ void check_slow_protons(
   const std::string aeroBranch =
     "P_aero_npeSum";
 
-  const std::string timeBranch =
+  const std::string ctTimeBranch =
     "CTime_ROC1";
+
+  std::string timeBranch =
+    ctTimeBranch;
+
+  std::string rfTimeBranch;
+  bool rfTimingAttempted = false;
+  bool rfTimingSelected = false;
+  bool ctFallbackUsed = false;
 
   const std::string deltaBranch =
     "ssdelta";
@@ -1391,7 +1463,7 @@ void check_slow_protons(
 
   const std::vector<std::string> requiredBranches = {
     aeroBranch,
-    timeBranch,
+    ctTimeBranch,
     deltaBranch,
     mmBranch,
     "ssxptar",
@@ -1429,21 +1501,23 @@ void check_slow_protons(
       TString::kIgnoreCase
     );
 
-  // Raw coincidence time only. No RF branch, RF phase correction, or
-  // RF wrapping is used anywhere in this analysis.
+  // The input tree remains the uncut *_noRF tree.  The analysis first
+  // tries an RF timing branch.  If no RF branch is available, or if no
+  // RF global timing shape passes validation, the full analysis falls
+  // back to CTime_ROC1.  No RF phase correction or wrapping is applied.
   const double beamBunchSpacingNs =
     isHighEpsilon ? 4.0 : 2.0;
 
   // Preserve the existing diagnostic/display ranges. For high epsilon,
-  // the fit range is later restricted to the populated no-RF prompt-time
-  // support so empty bins outside that support do not pull the likelihood.
+  // the fit range is later restricted to the populated timing support so
+  // empty bins outside that support do not pull the likelihood.
   const double timeMin = -beamBunchSpacingNs;
   const double timeMax = beamBunchSpacingNs;
 
   double timingFitMin = timeMin;
   double timingFitMax = timeMax;
 
-  // Retain the low-epsilon constraints. The high-epsilon no-RF timing
+  // Retain the low-epsilon constraints. The high-epsilon timing
   // distributions are broader, requiring wider mean/sigma bounds and seed.
   const double kaonMeanMin =
     isHighEpsilon ? -1.50 : -0.45;
@@ -1540,22 +1614,8 @@ void check_slow_protons(
     (deltaMax - deltaMin) /
     nDeltaBins;
 
-  std::cout
-    << "Raw CTime_ROC1 range for "
-    << epsSetting
-    << " epsilon: ["
-    << timeMin
-    << ", "
-    << timeMax
-    << "] ns with "
-    << nTimeHistogramBins
-    << " bins; beam-bunch spacing = "
-    << beamBunchSpacingNs
-    << " ns; RF correction = disabled"
-    << std::endl;
-
   // ------------------------------------------------------------------
-  // Analysis cuts.
+  // Analysis cuts and RF-first timing selection.
   // ------------------------------------------------------------------
 
   const std::string acceptanceCut =
@@ -1565,6 +1625,296 @@ void check_slow_protons(
     "hsdelta >= -8.0 && hsdelta <= 8.0 && "
     "hsxptar >= -0.08 && hsxptar <= 0.08 && "
     "hsyptar >= -0.045 && hsyptar <= 0.045";
+
+  std::vector<std::string> rfBranchCandidates;
+
+  const char *forcedRFBranch =
+    gSystem->Getenv("PROTON_CHECKER_RF_BRANCH");
+
+  if (
+    forcedRFBranch &&
+    forcedRFBranch[0] != '\0'
+  ) {
+    rfBranchCandidates.emplace_back(forcedRFBranch);
+  }
+
+  const std::vector<std::string> defaultRFBranchCandidates = {
+    "RF",
+    "RFTime",
+    "RF_time",
+    "RFTime_ROC1",
+    "P_RFTime",
+    "P_RF_tdcTime",
+    "P_RF_adcTime",
+    "RF_Dist",
+    "RF_Distance",
+    "P_RF_Dist",
+    "P_RF_Distance",
+    "P_RF_Dist_Track",
+    "H_RFTime",
+    "H_RF_tdcTime"
+  };
+
+  for (
+    const std::string &candidate :
+    defaultRFBranchCandidates
+  ) {
+    if (
+      std::find(
+        rfBranchCandidates.begin(),
+        rfBranchCandidates.end(),
+        candidate
+      ) == rfBranchCandidates.end()
+    ) {
+      rfBranchCandidates.push_back(candidate);
+    }
+  }
+
+  rfTimeBranch = findAvailableBranch(
+    tree,
+    rfBranchCandidates
+  );
+
+  auto countValidGlobalShapesForBranch = [
+    &
+  ](
+    const std::string &candidateBranch
+  ) -> int {
+    if (
+      candidateBranch.empty() ||
+      !tree->GetBranch(candidateBranch.c_str())
+    ) {
+      return 0;
+    }
+
+    const std::string candidateRangeCut =
+      TString::Format(
+        "%s >= %.17g && %s <= %.17g && "
+        "%s >= %.17g && %s <= %.17g",
+        aeroBranch.c_str(),
+        aeroMin,
+        aeroBranch.c_str(),
+        aeroMax,
+        candidateBranch.c_str(),
+        timeMin,
+        candidateBranch.c_str(),
+        timeMax
+      ).Data();
+
+    const std::string candidateAnalysisCut =
+      "(" + acceptanceCut + ") && (" +
+      candidateRangeCut + ")";
+
+    gROOT->cd();
+
+    auto *probePID = new TH2D(
+      "h_rf_first_probe_pid",
+      "RF-first global timing probe",
+      nAeroHistogramBins,
+      aeroMin,
+      aeroMax,
+      nTimeHistogramBins,
+      timeMin,
+      timeMax
+    );
+
+    probePID->Sumw2();
+
+    tree->Draw(
+      TString::Format(
+        "%s:%s>>%s",
+        candidateBranch.c_str(),
+        aeroBranch.c_str(),
+        probePID->GetName()
+      ),
+      candidateAnalysisCut.c_str(),
+      "goff"
+    );
+
+    probePID->SetDirectory(nullptr);
+
+    if (probePID->Integral() <= 0.0) {
+      delete probePID;
+      return 0;
+    }
+
+    double probeFitMin = timeMin;
+    double probeFitMax = timeMax;
+
+    if (isHighEpsilon) {
+      auto *allAeroTiming = probePID->ProjectionY(
+        "h_rf_first_probe_all_aero",
+        1,
+        probePID->GetNbinsX(),
+        "e"
+      );
+
+      allAeroTiming->SetDirectory(nullptr);
+
+      const auto centralFitRange = findCentralQuantileRange(
+        allAeroTiming,
+        timeMin,
+        timeMax,
+        5.0e-4,
+        5.0e-4,
+        2
+      );
+
+      probeFitMin = centralFitRange.first;
+      probeFitMax = centralFitRange.second;
+
+      delete allAeroTiming;
+    }
+
+    int validShapes = 0;
+
+    for (
+      int aeroSlice = 0;
+      aeroSlice < nAeroSlices;
+      ++aeroSlice
+    ) {
+      const double aeroLow =
+        aeroEdges.at(aeroSlice);
+
+      const double aeroHigh =
+        aeroEdges.at(aeroSlice + 1);
+
+      const int firstXBin = std::max(
+        1,
+        probePID
+          ->GetXaxis()
+          ->FindFixBin(
+            std::nextafter(
+              aeroLow,
+              aeroHigh
+            )
+          )
+      );
+
+      const int lastXBin = std::min(
+        probePID->GetNbinsX(),
+        probePID
+          ->GetXaxis()
+          ->FindFixBin(
+            std::nextafter(
+              aeroHigh,
+              aeroLow
+            )
+          )
+      );
+
+      auto *projection = probePID->ProjectionY(
+        TString::Format(
+          "h_rf_first_probe_aero_%d",
+          aeroSlice
+        ),
+        firstXBin,
+        lastXBin,
+        "e"
+      );
+
+      projection->SetDirectory(nullptr);
+
+      TimingShape shape = fitGlobalTimingShape(
+        projection,
+        TString::Format(
+          "f_rf_first_probe_aero_%d",
+          aeroSlice
+        ).Data(),
+        probeFitMin,
+        probeFitMax,
+        kaonMeanMin,
+        kaonMeanMax,
+        protonMeanMin,
+        protonMeanMax,
+        timingSigmaMin,
+        timingSigmaMax,
+        timingSigmaInitial,
+        minimumGlobalSeparation,
+        minimumGlobalAmplitudeSignificance,
+        useDeviancePerEntryValidation,
+        maximumGlobalPoissonDevianceNdf,
+        maximumGlobalPoissonDeviancePerEntry,
+        globalBoundFractionTolerance,
+        minimumGlobalSliceEntries
+      );
+
+      if (shape.valid) {
+        ++validShapes;
+      }
+
+      delete projection;
+    }
+
+    delete probePID;
+    return validShapes;
+  };
+
+  if (!rfTimeBranch.empty()) {
+    rfTimingAttempted = true;
+
+    std::cout
+      << "RF-first timing attempt using branch "
+      << rfTimeBranch
+      << " from tree "
+      << treeName
+      << std::endl;
+
+    const int validRFShapes =
+      countValidGlobalShapesForBranch(
+        rfTimeBranch
+      );
+
+    std::cout
+      << "RF-first probe valid global shapes: "
+      << validRFShapes
+      << " / "
+      << nAeroSlices
+      << std::endl;
+
+    if (validRFShapes > 0) {
+      timeBranch = rfTimeBranch;
+      rfTimingSelected = true;
+    } else {
+      timeBranch = ctTimeBranch;
+      ctFallbackUsed = true;
+
+      std::cerr
+        << "RF-first fit failed validation; falling back to "
+        << ctTimeBranch
+        << std::endl;
+    }
+  } else {
+    timeBranch = ctTimeBranch;
+    ctFallbackUsed = true;
+
+    std::cerr
+      << "No configured RF timing branch was found; falling back to "
+      << ctTimeBranch
+      << ". Set PROTON_CHECKER_RF_BRANCH to force another branch name."
+      << std::endl;
+
+    printRFLikeBranches(tree);
+  }
+
+  const std::string timingAxisTitle =
+    timeBranch + " [ns]";
+
+  std::cout
+    << "Selected timing branch: "
+    << timeBranch
+    << " for "
+    << epsSetting
+    << " epsilon; display range ["
+    << timeMin
+    << ", "
+    << timeMax
+    << "] ns with "
+    << nTimeHistogramBins
+    << " bins; beam-bunch spacing = "
+    << beamBunchSpacingNs
+    << " ns; RF phase correction/wrapping = disabled"
+    << std::endl;
 
   const std::string pidRangeCut =
     TString::Format(
@@ -1592,10 +1942,12 @@ void check_slow_protons(
 
   auto *hGlobalPID = new TH2D(
     "h_global_pid",
-    "Global CTime_ROC1 vs P_aero_npeSum;"
-    "P_aero_npeSum;"
-    "CTime_ROC1 [ns];"
-    "Counts",
+    TString::Format(
+      "Global %s vs P_aero_npeSum;"
+      "P_aero_npeSum;%s;Counts",
+      timeBranch.c_str(),
+      timingAxisTitle.c_str()
+    ),
     nAeroHistogramBins,
     aeroMin,
     aeroMax,
@@ -1658,7 +2010,8 @@ void check_slow_protons(
     << timingFitMin
     << ", "
     << timingFitMax
-    << "] ns using raw CTime_ROC1 only"
+    << "] ns using "
+    << timeBranch
     << std::endl;
 
   // ------------------------------------------------------------------
@@ -1725,10 +2078,10 @@ void check_slow_protons(
     projection->SetTitle(
       TString::Format(
         "Global timing fit: %.1f #leq aero < %.1f;"
-        "CTime_ROC1 [ns];"
-        "Counts",
+        "%s;Counts",
         aeroLow,
-        aeroHigh
+        aeroHigh,
+        timingAxisTitle.c_str()
       )
     );
 
@@ -1775,7 +2128,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v2 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v4 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -1972,10 +2325,11 @@ void check_slow_protons(
         ),
         TString::Format(
           "Raw PID diagnostic: %.1f #leq #delta %s %.1f;"
-          "P_aero_npeSum;CTime_ROC1 [ns];Counts",
+          "P_aero_npeSum;%s;Counts",
           deltaLow,
           deltaBin == nDeltaBins - 1 ? "#leq" : "<",
-          deltaHigh
+          deltaHigh,
+          timingAxisTitle.c_str()
         ),
         nAeroHistogramBins,
         aeroMin,
@@ -2101,12 +2455,13 @@ void check_slow_protons(
           TString::Format(
             "%.1f #leq #delta %s %.1f, "
             "%.1f #leq aero < %.1f;"
-            "CTime_ROC1 [ns];Counts",
+            "%s;Counts",
             deltaLow,
             deltaBin == nDeltaBins - 1 ? "#leq" : "<",
             deltaHigh,
             aeroLow,
-            aeroHigh
+            aeroHigh,
+            timingAxisTitle.c_str()
           )
         );
         projection->SetLineColor(kBlack);
@@ -2288,6 +2643,27 @@ void check_slow_protons(
     );
     diagnosticTimingBranch.Write();
 
+    TNamed diagnosticRequestedRFBranch(
+      "rf_timing_branch",
+      rfTimeBranch.c_str()
+    );
+    diagnosticRequestedRFBranch.Write();
+
+    TParameter<int>(
+      "rf_timing_attempted",
+      rfTimingAttempted ? 1 : 0
+    ).Write();
+
+    TParameter<int>(
+      "rf_timing_selected",
+      rfTimingSelected ? 1 : 0
+    ).Write();
+
+    TParameter<int>(
+      "ct_fallback_used",
+      ctFallbackUsed ? 1 : 0
+    ).Write();
+
     TNamed diagnosticFitStatistic(
       "fit_statistic",
       "Baker-Cousins Poisson deviance; bin-integrated likelihood"
@@ -2461,12 +2837,11 @@ void check_slow_protons(
       ),
       TString::Format(
         "PID plane: %.1f #leq #delta %s %.1f;"
-        "P_aero_npeSum;"
-        "CTime_ROC1 [ns];"
-        "Counts",
+        "P_aero_npeSum;%s;Counts",
         deltaLow,
         includeUpperEdge ? "#leq" : "<",
-        deltaHigh
+        deltaHigh,
+        timingAxisTitle.c_str()
       ),
       nAeroHistogramBins,
       aeroMin,
@@ -2553,13 +2928,13 @@ void check_slow_protons(
         TString::Format(
           "%.1f #leq #delta %s %.1f, "
           "%.1f #leq aero < %.1f;"
-          "CTime_ROC1 [ns];"
-          "Counts",
+          "%s;Counts",
           deltaLow,
           includeUpperEdge ? "#leq" : "<",
           deltaHigh,
           aeroLow,
-          aeroHigh
+          aeroHigh,
+          timingAxisTitle.c_str()
         )
       );
 
@@ -3005,7 +3380,7 @@ void check_slow_protons(
   // V1 = MM
   // V2 = ssdelta
   // V3 = P_aero_npeSum
-  // V4 = CTime_ROC1
+  // V4 = selected timing branch (RF first, CTime_ROC1 fallback)
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -4289,6 +4664,27 @@ void check_slow_protons(
     timeBranch.c_str()
   );
   timingBranchTag.Write();
+
+  TNamed rfTimingBranchTag(
+    "rf_timing_branch",
+    rfTimeBranch.c_str()
+  );
+  rfTimingBranchTag.Write();
+
+  TParameter<int>(
+    "rf_timing_attempted",
+    rfTimingAttempted ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "rf_timing_selected",
+    rfTimingSelected ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "ct_fallback_used",
+    ctFallbackUsed ? 1 : 0
+  ).Write();
 
   TNamed fitStatisticTag(
     "fit_statistic",
