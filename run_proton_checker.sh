@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-runner_version="5"
+runner_version="17"
 
 if [[ $# -ne 4 ]]; then
     echo "Usage: $0 <phi_setting> <Q2> <W> <eps_setting>" >&2
@@ -23,6 +23,6 @@ if [[ ! -f "$macro" ]]; then
     exit 2
 fi
 
-echo "Running check_slow_protons.C (runner version ${runner_version}; RF/CT comparison with narrow fit-only diamond fallback)"
+echo "Running check_slow_protons.C (runner version ${runner_version}; RF/CT comparison with failed-bin other-background fallback)"
 root -l -b -q \
     "${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
