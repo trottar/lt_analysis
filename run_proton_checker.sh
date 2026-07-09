@@ -2,13 +2,9 @@
 
 set -euo pipefail
 
-usage() {
-    echo "Usage: $0 <phi_setting> <Q2> <W> <eps_setting>" >&2
-    echo "Example: $0 Left 3p0 3p14 low" >&2
-}
-
 if [[ $# -ne 4 ]]; then
-    usage
+    echo "Usage: $0 <phi_setting> <Q2> <W> <eps_setting>" >&2
+    echo "Example: $0 Center 3p0 3p14 high" >&2
     exit 1
 fi
 
@@ -18,12 +14,13 @@ W="$3"
 eps_setting="$4"
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-macro="${script_dir}/check_slow_protons.C"
+macro="${script_dir}/check_slow_protons_v2.C"
 
 if [[ ! -f "$macro" ]]; then
-    echo "Error: ROOT macro not found: $macro" >&2
+    echo "Error: v2 ROOT macro not found: $macro" >&2
     exit 2
 fi
 
+echo "Running check_slow_protons_v2.C"
 root -l -b -q \
     "${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"

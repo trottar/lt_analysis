@@ -1020,7 +1020,7 @@ TF1 *makeConstantComponent(
 }
 
 
-void check_slow_protons(
+void check_slow_protons_v2(
   const char *phi_setting = "Left",
   const char *Q2 = "3p0",
   const char *W = "3p14",
@@ -1028,6 +1028,13 @@ void check_slow_protons(
 ) {
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
+
+  const char *macroVersion = "check_slow_protons_v2.0";
+
+  std::cout
+    << "Running "
+    << macroVersion
+    << std::endl;
 
   const TString phiSetting =
     phi_setting ? phi_setting : "";
@@ -1048,7 +1055,7 @@ void check_slow_protons(
     epsSetting.IsNull()
   ) {
     std::cerr
-      << "Usage: check_slow_protons("
+      << "Usage: check_slow_protons_v2("
       << "\"<phi>\", \"<Q2>\", "
       << "\"<W>\", \"<eps>\")"
       << std::endl;
@@ -1092,7 +1099,7 @@ void check_slow_protons(
 
   const std::string outputBase =
     TString::Format(
-      "%s_kaon_proton_cleaning_Q%sW%s_%se",
+      "%s_kaon_proton_cleaning_Q%sW%s_%se_v2",
       phiSetting.Data(),
       q2Setting.Data(),
       wSetting.Data(),
@@ -1444,7 +1451,518 @@ void check_slow_protons(
 
   if (validGlobalShapes == 0) {
     std::cerr
-      << "No identifiable proton-kaon timing shapes were found."
+      << "No identifiable proton-kaon timing shapes were found. "
+      << "[v2 diagnostic mode] Writing raw diagnostic plots to "
+      << outputPDF
+      << " and "
+      << outputROOT
+      << "."
+      << std::endl;
+
+    // --------------------------------------------------------------
+    // Diagnostic-only output.  Do not attempt proton subtraction when
+    // none of the global timing fits passes the shape-quality cuts.
+    // Still save the raw global and per-delta PID distributions so the
+    // failed fits and underlying timing structure can be inspected.
+    // --------------------------------------------------------------
+
+    auto *diagnosticGlobalCanvas = new TCanvas(
+      "canvas_global_timing_diagnostics",
+      "Global timing diagnostics",
+      2100,
+      1300
+    );
+
+    diagnosticGlobalCanvas->Divide(3, 2);
+    diagnosticGlobalCanvas->cd(1);
+    gPad->SetRightMargin(0.16);
+    gPad->SetLogz();
+    hGlobalPID->Draw("COLZ");
+
+    auto *globalWarning = new TPaveText(
+      0.12,
+      0.78,
+      0.82,
+      0.90,
+      "NDC"
+    );
+
+    globalWarning->SetFillColor(kWhite);
+    globalWarning->SetFillStyle(1001);
+    globalWarning->SetBorderSize(1);
+    globalWarning->SetTextColor(kRed + 1);
+    globalWarning->SetTextAlign(12);
+    globalWarning->AddText(
+      "Diagnostic only: no global timing shape passed validation"
+    );
+    globalWarning->Draw();
+
+    for (
+      int aeroSlice = 0;
+      aeroSlice < nAeroSlices;
+      ++aeroSlice
+    ) {
+      diagnosticGlobalCanvas->cd(aeroSlice + 2);
+
+      TH1D *projection =
+        globalTimingProjections.at(aeroSlice);
+
+      if (!projection) {
+        continue;
+      }
+
+      projection->SetLineColor(kBlack);
+      projection->SetLineWidth(2);
+      projection->Draw("E");
+
+      const TimingShape &shape =
+        globalShapes.at(aeroSlice);
+
+      if (shape.fitFunction) {
+        shape.fitFunction->SetLineColor(kOrange + 7);
+        shape.fitFunction->SetLineWidth(2);
+        shape.fitFunction->Draw("SAME");
+      }
+
+      auto *fitStatusText = new TPaveText(
+        0.49,
+        0.51,
+        0.89,
+        0.89,
+        "NDC"
+      );
+
+      fitStatusText->SetFillStyle(0);
+      fitStatusText->SetBorderSize(0);
+      fitStatusText->SetTextAlign(12);
+      fitStatusText->AddText(
+        TString::Format(
+          "entries: %.0f",
+          projection->GetEntries()
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "fit status: %d",
+          shape.fitStatus
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "bound hit: %s",
+          shape.boundHit ? "yes" : "no"
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "K #mu/#sigma: %.3f / %.3f",
+          shape.kaonMean,
+          shape.kaonSigma
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "p #mu/#sigma: %.3f / %.3f",
+          shape.protonMean,
+          shape.protonSigma
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "separation: %.2f",
+          shape.separation
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "K/p significance: %.1f / %.1f",
+          shape.kaonSignificance,
+          shape.protonSignificance
+        )
+      );
+      fitStatusText->AddText(
+        TString::Format(
+          "#chi^{2}/ndf: %.2f",
+          shape.chi2Ndf
+        )
+      );
+      fitStatusText->Draw();
+    }
+
+    std::vector<TH2D *> diagnosticDeltaPIDHistograms(
+      nDeltaBins,
+      nullptr
+    );
+
+    std::vector<std::vector<TH1D *>>
+      diagnosticDeltaTimingProjections(
+        nDeltaBins,
+        std::vector<TH1D *>(
+          nAeroSlices,
+          nullptr
+        )
+      );
+
+    std::vector<TCanvas *> diagnosticDeltaCanvases(
+      nDeltaBins,
+      nullptr
+    );
+
+    for (
+      int deltaBin = 0;
+      deltaBin < nDeltaBins;
+      ++deltaBin
+    ) {
+      const double deltaLow =
+        deltaMin + deltaBin * deltaBinWidth;
+
+      const double deltaHigh =
+        deltaLow + deltaBinWidth;
+
+      const std::string deltaCut =
+        TString::Format(
+          "%s >= %.17g && %s %s %.17g",
+          deltaBranch.c_str(),
+          deltaLow,
+          deltaBranch.c_str(),
+          deltaBin == nDeltaBins - 1 ? "<=" : "<",
+          deltaHigh
+        ).Data();
+
+      const std::string fullDeltaCut =
+        "(" + analysisCut + ") && (" +
+        deltaCut + ")";
+
+      gROOT->cd();
+
+      auto *deltaPID = new TH2D(
+        TString::Format(
+          "h_diagnostic_pid_delta_bin_%d",
+          deltaBin
+        ),
+        TString::Format(
+          "Raw PID diagnostic: %.1f #leq #delta %s %.1f;"
+          "P_aero_npeSum;CTime_ROC1 [ns];Counts",
+          deltaLow,
+          deltaBin == nDeltaBins - 1 ? "#leq" : "<",
+          deltaHigh
+        ),
+        nAeroHistogramBins,
+        aeroMin,
+        aeroMax,
+        nTimeHistogramBins,
+        timeMin,
+        timeMax
+      );
+
+      deltaPID->Sumw2();
+
+      tree->Draw(
+        TString::Format(
+          "%s:%s>>%s",
+          timeBranch.c_str(),
+          aeroBranch.c_str(),
+          deltaPID->GetName()
+        ),
+        fullDeltaCut.c_str(),
+        "goff"
+      );
+
+      deltaPID->SetDirectory(nullptr);
+      diagnosticDeltaPIDHistograms.at(deltaBin) =
+        deltaPID;
+
+      auto *deltaCanvas = new TCanvas(
+        TString::Format(
+          "canvas_raw_delta_diagnostic_%d",
+          deltaBin
+        ),
+        TString::Format(
+          "Raw delta diagnostic %.1f to %.1f",
+          deltaLow,
+          deltaHigh
+        ),
+        2100,
+        1300
+      );
+
+      deltaCanvas->Divide(3, 2);
+      deltaCanvas->cd(1);
+      gPad->SetRightMargin(0.16);
+
+      if (deltaPID->Integral() > 0.0) {
+        gPad->SetLogz();
+      }
+
+      deltaPID->Draw("COLZ");
+
+      auto *deltaLabel = new TPaveText(
+        0.12,
+        0.78,
+        0.75,
+        0.90,
+        "NDC"
+      );
+
+      deltaLabel->SetFillColor(kWhite);
+      deltaLabel->SetFillStyle(1001);
+      deltaLabel->SetBorderSize(1);
+      deltaLabel->SetTextAlign(12);
+      deltaLabel->AddText(
+        TString::Format(
+          "raw entries: %.0f",
+          deltaPID->GetEntries()
+        )
+      );
+      deltaLabel->AddText(
+        "No proton-cleaning weights applied"
+      );
+      deltaLabel->Draw();
+
+      for (
+        int aeroSlice = 0;
+        aeroSlice < nAeroSlices;
+        ++aeroSlice
+      ) {
+        const double aeroLow =
+          aeroEdges.at(aeroSlice);
+
+        const double aeroHigh =
+          aeroEdges.at(aeroSlice + 1);
+
+        const int firstXBin = std::max(
+          1,
+          deltaPID
+            ->GetXaxis()
+            ->FindFixBin(
+              std::nextafter(
+                aeroLow,
+                aeroHigh
+              )
+            )
+        );
+
+        const int lastXBin = std::min(
+          deltaPID->GetNbinsX(),
+          deltaPID
+            ->GetXaxis()
+            ->FindFixBin(
+              std::nextafter(
+                aeroHigh,
+                aeroLow
+              )
+            )
+        );
+
+        auto *projection =
+          deltaPID->ProjectionY(
+            TString::Format(
+              "h_diagnostic_time_delta_%d_aero_%d",
+              deltaBin,
+              aeroSlice
+            ),
+            firstXBin,
+            lastXBin,
+            "e"
+          );
+
+        projection->SetDirectory(nullptr);
+        projection->SetTitle(
+          TString::Format(
+            "%.1f #leq #delta %s %.1f, "
+            "%.1f #leq aero < %.1f;"
+            "CTime_ROC1 [ns];Counts",
+            deltaLow,
+            deltaBin == nDeltaBins - 1 ? "#leq" : "<",
+            deltaHigh,
+            aeroLow,
+            aeroHigh
+          )
+        );
+        projection->SetLineColor(kBlack);
+        projection->SetLineWidth(2);
+
+        diagnosticDeltaTimingProjections
+          .at(deltaBin)
+          .at(aeroSlice) = projection;
+
+        deltaCanvas->cd(aeroSlice + 2);
+        projection->Draw("E");
+
+        auto *entryLabel = new TPaveText(
+          0.58,
+          0.78,
+          0.88,
+          0.88,
+          "NDC"
+        );
+
+        entryLabel->SetFillStyle(0);
+        entryLabel->SetBorderSize(0);
+        entryLabel->SetTextAlign(12);
+        entryLabel->AddText(
+          TString::Format(
+            "entries: %.0f",
+            projection->GetEntries()
+          )
+        );
+        entryLabel->Draw();
+      }
+
+      diagnosticDeltaCanvases.at(deltaBin) =
+        deltaCanvas;
+    }
+
+    diagnosticGlobalCanvas->Modified();
+    diagnosticGlobalCanvas->Update();
+    diagnosticGlobalCanvas->Print(
+      (outputPDF + "[").c_str()
+    );
+    diagnosticGlobalCanvas->Print(
+      outputPDF.c_str()
+    );
+
+    for (
+      TCanvas *canvas :
+      diagnosticDeltaCanvases
+    ) {
+      if (!canvas) {
+        continue;
+      }
+
+      canvas->Modified();
+      canvas->Update();
+      canvas->Print(outputPDF.c_str());
+    }
+
+    diagnosticGlobalCanvas->Print(
+      (outputPDF + "]").c_str()
+    );
+
+    TFile diagnosticOutputFile(
+      outputROOT.c_str(),
+      "RECREATE"
+    );
+
+    if (diagnosticOutputFile.IsZombie()) {
+      std::cerr
+        << "Unable to create diagnostic output file: "
+        << outputROOT
+        << std::endl;
+
+      inputFile->Close();
+      return;
+    }
+
+    TDirectory *diagnosticGlobalDirectory =
+      diagnosticOutputFile.mkdir("global_diagnostics");
+
+    diagnosticGlobalDirectory->cd();
+    hGlobalPID->Write();
+    diagnosticGlobalCanvas->Write();
+
+    for (
+      int aeroSlice = 0;
+      aeroSlice < nAeroSlices;
+      ++aeroSlice
+    ) {
+      if (globalTimingProjections.at(aeroSlice)) {
+        globalTimingProjections
+          .at(aeroSlice)
+          ->Write();
+      }
+
+      if (globalShapes.at(aeroSlice).fitFunction) {
+        globalShapes
+          .at(aeroSlice)
+          .fitFunction
+          ->Write();
+      }
+    }
+
+    diagnosticOutputFile.cd();
+
+    TDirectory *diagnosticDeltaDirectory =
+      diagnosticOutputFile.mkdir("delta_diagnostics");
+
+    for (
+      int deltaBin = 0;
+      deltaBin < nDeltaBins;
+      ++deltaBin
+    ) {
+      diagnosticDeltaDirectory->cd();
+
+      TDirectory *deltaDirectory =
+        diagnosticDeltaDirectory->mkdir(
+          TString::Format(
+            "delta_bin_%02d",
+            deltaBin
+          )
+        );
+
+      deltaDirectory->cd();
+
+      if (diagnosticDeltaPIDHistograms.at(deltaBin)) {
+        diagnosticDeltaPIDHistograms
+          .at(deltaBin)
+          ->Write();
+      }
+
+      for (
+        int aeroSlice = 0;
+        aeroSlice < nAeroSlices;
+        ++aeroSlice
+      ) {
+        if (
+          diagnosticDeltaTimingProjections
+            .at(deltaBin)
+            .at(aeroSlice)
+        ) {
+          diagnosticDeltaTimingProjections
+            .at(deltaBin)
+            .at(aeroSlice)
+            ->Write();
+        }
+      }
+
+      if (diagnosticDeltaCanvases.at(deltaBin)) {
+        diagnosticDeltaCanvases
+          .at(deltaBin)
+          ->Write();
+      }
+    }
+
+    diagnosticOutputFile.cd();
+
+    TNamed diagnosticMacroVersion(
+      "macro_version",
+      macroVersion
+    );
+    diagnosticMacroVersion.Write();
+
+    TNamed diagnosticMode(
+      "analysis_mode",
+      "diagnostic_only_no_valid_global_timing_shapes"
+    );
+    diagnosticMode.Write();
+
+    TParameter<int> numberOfValidGlobalShapes(
+      "valid_global_timing_shapes",
+      validGlobalShapes
+    );
+    numberOfValidGlobalShapes.Write();
+
+    diagnosticOutputFile.Write();
+    diagnosticOutputFile.Close();
+
+    std::cout
+      << "Diagnostic PDF written to: "
+      << outputPDF
+      << std::endl;
+
+    std::cout
+      << "Diagnostic ROOT file written to: "
+      << outputROOT
       << std::endl;
 
     inputFile->Close();
@@ -3362,6 +3880,12 @@ void check_slow_protons(
     outputFile.mkdir("metadata");
 
   metadataDirectory->cd();
+
+  TNamed macroVersionTag(
+    "macro_version",
+    macroVersion
+  );
+  macroVersionTag.Write();
 
   TParameter<Long64_t>(
     "selected_events",
