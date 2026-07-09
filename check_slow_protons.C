@@ -1106,6 +1106,62 @@ double sumConstantOverBins(
 }
 
 
+void swapTimingShapeSpecies(
+  TimingShape &shape
+) {
+  std::swap(
+    shape.kaonAmplitude,
+    shape.protonAmplitude
+  );
+  std::swap(
+    shape.kaonAmplitudeError,
+    shape.protonAmplitudeError
+  );
+  std::swap(
+    shape.kaonMean,
+    shape.protonMean
+  );
+  std::swap(
+    shape.kaonSigma,
+    shape.protonSigma
+  );
+  std::swap(
+    shape.kaonSignificance,
+    shape.protonSignificance
+  );
+
+  // The total two-Gaussian model is unchanged by exchanging the two
+  // components. Keep the TF1 parameter labels consistent with the
+  // TimingShape fields used by all later PID and subtraction steps.
+  if (
+    shape.fitFunction &&
+    shape.fitFunction->GetNpar() >= 6
+  ) {
+    const double kaonAmplitude =
+      shape.fitFunction->GetParameter(0);
+    const double kaonMean =
+      shape.fitFunction->GetParameter(1);
+    const double kaonSigma =
+      shape.fitFunction->GetParameter(2);
+
+    const double protonAmplitude =
+      shape.fitFunction->GetParameter(3);
+    const double protonMean =
+      shape.fitFunction->GetParameter(4);
+    const double protonSigma =
+      shape.fitFunction->GetParameter(5);
+
+    shape.fitFunction->SetParameter(0, protonAmplitude);
+    shape.fitFunction->SetParameter(1, protonMean);
+    shape.fitFunction->SetParameter(2, protonSigma);
+
+    shape.fitFunction->SetParameter(3, kaonAmplitude);
+    shape.fitFunction->SetParameter(4, kaonMean);
+    shape.fitFunction->SetParameter(5, kaonSigma);
+  }
+}
+
+
 int findEdgeBin(
   double value,
   const std::vector<double> &edges
@@ -2528,7 +2584,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.25";
+  const char *macroVersion = "check_slow_protons.26";
 
   std::cout
     << "Running "
@@ -4978,7 +5034,7 @@ void check_slow_protons(
   // right/higher-time peak (near 2 ns). CTime_ROC1 is flipped: kaon is
   // lower in time and proton is higher. These labels are carried by the
   // fitted Gaussian components in every aerogel bin.
-  const bool protonPeakIsLower = rfTimingSelected;
+  bool protonPeakIsLower = rfTimingSelected;
 
   const bool activeUseDeviancePerEntryValidation =
     timingFitUsedLocalPeakRescue
@@ -5144,6 +5200,9 @@ void check_slow_protons(
   double fitDerivedProtonAeroCentroid =
     std::numeric_limits<double>::quiet_NaN();
   bool fitDerivedAeroOrderingConsistent = false;
+  bool speciesLabelsSwappedByBlobSize = false;
+  double preSwapKaonBlobYield = 0.0;
+  double preSwapProtonBlobYield = 0.0;
 
   std::cout
     << "Timing fit range: ["
@@ -5306,6 +5365,79 @@ void check_slow_protons(
         << defaultShape.poissonDeviancePerEntry
         << std::endl;
     }
+  }
+
+  // First species sanity check: the kaon population is expected to be
+  // the larger fitted blob. If the components were labeled in the reverse
+  // sense, exchange K and p consistently before any delta-bin fitting,
+  // event weighting, subtraction, or fit-derived diagnostic is produced.
+  for (
+    int aeroSlice = 0;
+    aeroSlice < nAeroSlices;
+    ++aeroSlice
+  ) {
+    const TimingShape &shape = globalShapes.at(aeroSlice);
+    TH1D *projection = globalTimingProjections.at(aeroSlice);
+
+    if (!shape.valid || !projection) {
+      continue;
+    }
+
+    preSwapKaonBlobYield += sumGaussianOverBins(
+      projection,
+      shape.kaonAmplitude,
+      shape.kaonMean,
+      shape.kaonSigma,
+      shape.fitMin,
+      shape.fitMax
+    );
+
+    preSwapProtonBlobYield += sumGaussianOverBins(
+      projection,
+      shape.protonAmplitude,
+      shape.protonMean,
+      shape.protonSigma,
+      shape.fitMin,
+      shape.fitMax
+    );
+  }
+
+  if (
+    preSwapKaonBlobYield > 0.0 &&
+    preSwapProtonBlobYield > preSwapKaonBlobYield
+  ) {
+    speciesLabelsSwappedByBlobSize = true;
+
+    for (TimingShape &shape : globalShapes) {
+      if (
+        !std::isfinite(shape.kaonAmplitude) ||
+        !std::isfinite(shape.protonAmplitude) ||
+        shape.kaonAmplitude <= 0.0 ||
+        shape.protonAmplitude <= 0.0
+      ) {
+        continue;
+      }
+
+      swapTimingShapeSpecies(shape);
+    }
+
+    protonPeakIsLower = !protonPeakIsLower;
+
+    std::cout
+      << "Species sanity check: fitted proton blob yield ("
+      << preSwapProtonBlobYield
+      << ") exceeded fitted kaon blob yield ("
+      << preSwapKaonBlobYield
+      << "). Swapped K and p labels before PID weighting."
+      << std::endl;
+  } else {
+    std::cout
+      << "Species sanity check: fitted kaon blob yield = "
+      << preSwapKaonBlobYield
+      << ", fitted proton blob yield = "
+      << preSwapProtonBlobYield
+      << "; no label swap required."
+      << std::endl;
   }
 
   int validGlobalShapes = 0;
@@ -5556,9 +5688,9 @@ void check_slow_protons(
 
   auto *fitDerivedRuleText = new TPaveText(
     0.12,
-    0.12,
-    0.55,
-    0.24,
+    0.10,
+    0.62,
+    0.26,
     "NDC"
   );
   fitDerivedRuleText->SetFillColor(kWhite);
@@ -5566,9 +5698,14 @@ void check_slow_protons(
   fitDerivedRuleText->SetBorderSize(1);
   fitDerivedRuleText->SetTextAlign(12);
   fitDerivedRuleText->AddText(
-    rfTimingSelected
-      ? "RF labels: p = lower-time peak; K = higher-time peak"
-      : "CT labels: K = lower-time peak; p = higher-time peak"
+    protonPeakIsLower
+      ? "effective labels: p = lower-time peak; K = higher-time peak"
+      : "effective labels: K = lower-time peak; p = higher-time peak"
+  );
+  fitDerivedRuleText->AddText(
+    speciesLabelsSwappedByBlobSize
+      ? "K/p labels swapped because fitted p blob was larger than K"
+      : "blob-size sanity check: no K/p swap"
   );
   fitDerivedRuleText->AddText(
     TString::Format(
@@ -5661,7 +5798,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v25 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v26 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -6246,6 +6383,19 @@ void check_slow_protons(
     ).Write();
 
     TParameter<int>(
+      "species_labels_swapped_by_blob_size",
+      speciesLabelsSwappedByBlobSize ? 1 : 0
+    ).Write();
+    TParameter<double>(
+      "pre_swap_kaon_blob_yield",
+      preSwapKaonBlobYield
+    ).Write();
+    TParameter<double>(
+      "pre_swap_proton_blob_yield",
+      preSwapProtonBlobYield
+    ).Write();
+
+    TParameter<int>(
       "fit_derived_timing_aero_plot_written",
       fitDerivedPIDCanvas ? 1 : 0
     ).Write();
@@ -6264,7 +6414,7 @@ void check_slow_protons(
 
     TNamed(
       "species_identification_rule",
-      "species labels come from fitted timing components: RF proton lower-time/kaon higher-time; CT kaon lower-time/proton higher-time"
+      "species labels come from fitted timing components, followed by a global blob-yield sanity check that swaps K and p when the fitted proton blob is larger"
     ).Write();
 
     TParameter<int>(
@@ -7116,6 +7266,8 @@ void check_slow_protons(
   // V20 = multi-start per-aerogel fallback selected by common-range deviance
   // V25 = make per-aerogel multistart the default; shift the former default
   //       and all later recovery procedures down by one fallback stage
+  // V26 = first post-fit species sanity check: if the integrated fitted
+  //       proton blob is larger than the kaon blob, swap K/p everywhere
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -8488,6 +8640,19 @@ void check_slow_protons(
   ).Write();
 
   TParameter<int>(
+    "species_labels_swapped_by_blob_size",
+    speciesLabelsSwappedByBlobSize ? 1 : 0
+  ).Write();
+  TParameter<double>(
+    "pre_swap_kaon_blob_yield",
+    preSwapKaonBlobYield
+  ).Write();
+  TParameter<double>(
+    "pre_swap_proton_blob_yield",
+    preSwapProtonBlobYield
+  ).Write();
+
+  TParameter<int>(
     "fit_derived_timing_aero_plot_written",
     fitDerivedPIDCanvas ? 1 : 0
   ).Write();
@@ -8506,7 +8671,7 @@ void check_slow_protons(
 
   TNamed(
     "species_identification_rule",
-    "species labels come from fitted timing components: RF proton lower-time/kaon higher-time; CT kaon lower-time/proton higher-time"
+    "species labels come from fitted timing components, followed by a global blob-yield sanity check that swaps K and p when the fitted proton blob is larger"
   ).Write();
 
   TParameter<int>(
