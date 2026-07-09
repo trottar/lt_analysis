@@ -1032,9 +1032,15 @@ TimingShape fitGlobalTimingShape(
     100.0 * histogramMaximum
   );
 
+  const double kaonMeanSeed = std::clamp(
+    kaonSeed.second,
+    std::nextafter(kaonMeanMin, kaonMeanMax),
+    std::nextafter(kaonMeanMax, kaonMeanMin)
+  );
+
   fitFunction->SetParameter(
     1,
-    kaonSeed.second
+    kaonMeanSeed
   );
 
   fitFunction->SetParLimits(
@@ -1068,9 +1074,15 @@ TimingShape fitGlobalTimingShape(
     100.0 * histogramMaximum
   );
 
+  const double protonMeanSeed = std::clamp(
+    protonSeed.second,
+    std::nextafter(protonMeanMin, protonMeanMax),
+    std::nextafter(protonMeanMax, protonMeanMin)
+  );
+
   fitFunction->SetParameter(
     4,
-    protonSeed.second
+    protonMeanSeed
   );
 
   fitFunction->SetParLimits(
@@ -1828,7 +1840,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.12";
+  const char *macroVersion = "check_slow_protons.13";
 
   std::cout
     << "Running "
@@ -2134,6 +2146,7 @@ void check_slow_protons(
   bool ctTimingEvaluated = false;
   bool ctFallbackUsed = false;  // compatibility metadata; RF and CT are compared directly
   bool timingFitUsedPreDiamondFallback = false;
+  bool timingFitUsedLocalPeakRescue = false;
   int rfProbeValidShapes = 0;
   int ctProbeValidShapes = 0;
   std::string timingSelectionReason;
@@ -2746,7 +2759,15 @@ void check_slow_protons(
     double meanSeparation = 0.0;
     double meanPoissonDevianceNdf =
       std::numeric_limits<double>::infinity();
+    double meanPoissonDeviancePerEntry =
+      std::numeric_limits<double>::infinity();
+    bool localPeakRescue = false;
   };
+
+  // This remains false during the normal diamond and pre-diamond probes.
+  // It is enabled only after both of those passes return zero validated
+  // RF and CT shapes.
+  bool localPeakRescueMode = false;
 
   auto countValidGlobalShapesForBranch = [
     &
@@ -2994,19 +3015,88 @@ void check_slow_protons(
     delete allAeroTiming;
 
     // RF timing has the proton peak on the lower-time side and the kaon
-    // peak on the upper-time side.  Split the allowed means between the
-    // two data-driven peak seeds rather than at the center of the raw RF
-    // range.  Use the same sigma constraints and seeds as the CT fit.
-    probe.protonMeanMin = probe.fitMin;
-    probe.protonMeanMax = split;
-    probe.kaonMeanMin = split;
-    probe.kaonMeanMax = probe.fitMax;
-    probe.sigmaMax = timingSigmaMax;
-    probe.sigmaInitial = timingSigmaInitial;
+    // peak on the upper-time side.  The normal pass keeps the established
+    // full-window procedure.  The local-peak rescue is entered only after
+    // both normal passes fail; it narrows the fit to the resolved peak pair
+    // and gives the widths enough room to move away from the 0.45-ns bound.
+    probe.localPeakRescue = localPeakRescueMode;
+
+    if (localPeakRescueMode && fittedPeakPair.valid) {
+      const double seedSeparation = std::max(
+        fittedPeakPair.upperMean - fittedPeakPair.lowerMean,
+        0.18
+      );
+
+      const double fitPadding = std::max(
+        0.30,
+        0.65 * seedSeparation
+      );
+
+      probe.fitMin = std::max(
+        probe.displayMin,
+        fittedPeakPair.lowerMean - fitPadding
+      );
+
+      probe.fitMax = std::min(
+        probe.displayMax,
+        fittedPeakPair.upperMean + fitPadding
+      );
+
+      split = 0.5 * (
+        fittedPeakPair.lowerMean +
+        fittedPeakPair.upperMean
+      );
+
+      const double meanHalfWidth = std::max(
+        0.14,
+        0.35 * seedSeparation
+      );
+
+      const double orderingGap = std::max(
+        0.01,
+        0.03 * seedSeparation
+      );
+
+      probe.protonMeanMin = std::max(
+        probe.fitMin,
+        fittedPeakPair.lowerMean - meanHalfWidth
+      );
+      probe.protonMeanMax = std::min(
+        split - orderingGap,
+        fittedPeakPair.lowerMean + meanHalfWidth
+      );
+      probe.kaonMeanMin = std::max(
+        split + orderingGap,
+        fittedPeakPair.upperMean - meanHalfWidth
+      );
+      probe.kaonMeanMax = std::min(
+        probe.fitMax,
+        fittedPeakPair.upperMean + meanHalfWidth
+      );
+
+      probe.sigmaMax = std::clamp(
+        0.75 * seedSeparation,
+        0.45,
+        0.90
+      );
+      probe.sigmaInitial = std::clamp(
+        0.25 * seedSeparation,
+        0.12,
+        0.35
+      );
+    } else {
+      probe.protonMeanMin = probe.fitMin;
+      probe.protonMeanMax = split;
+      probe.kaonMeanMin = split;
+      probe.kaonMeanMax = probe.fitMax;
+      probe.sigmaMax = timingSigmaMax;
+      probe.sigmaInitial = timingSigmaInitial;
+    }
 
     int validShapes = 0;
     double validSeparationSum = 0.0;
     double validDevianceNdfSum = 0.0;
+    double validDeviancePerEntrySum = 0.0;
 
     for (
       int aeroSlice = 0;
@@ -3073,12 +3163,20 @@ void check_slow_protons(
         timingSigmaMin,
         probe.sigmaMax,
         probe.sigmaInitial,
-        minimumGlobalSeparation,
+        localPeakRescueMode
+          ? 0.60
+          : minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
-        useDeviancePerEntryValidation,
+        localPeakRescueMode
+          ? true
+          : useDeviancePerEntryValidation,
         maximumGlobalPoissonDevianceNdf,
-        maximumGlobalPoissonDeviancePerEntry,
-        globalBoundFractionTolerance,
+        localPeakRescueMode
+          ? 0.85
+          : maximumGlobalPoissonDeviancePerEntry,
+        localPeakRescueMode
+          ? 0.005
+          : globalBoundFractionTolerance,
         minimumGlobalSliceEntries
       );
 
@@ -3086,6 +3184,8 @@ void check_slow_protons(
         ++validShapes;
         validSeparationSum += shape.separation;
         validDevianceNdfSum += shape.poissonDevianceNdf;
+        validDeviancePerEntrySum +=
+          shape.poissonDeviancePerEntry;
       }
 
       if (shape.fitFunction) {
@@ -3104,6 +3204,8 @@ void check_slow_protons(
         validSeparationSum / validShapes;
       probe.meanPoissonDevianceNdf =
         validDevianceNdfSum / validShapes;
+      probe.meanPoissonDeviancePerEntry =
+        validDeviancePerEntrySum / validShapes;
     }
 
     return validShapes;
@@ -3173,9 +3275,109 @@ void check_slow_protons(
 
     probePID->SetDirectory(nullptr);
 
+    probe.localPeakRescue = localPeakRescueMode;
+
+    if (localPeakRescueMode && probePID->Integral() > 0.0) {
+      auto *allAeroTiming = probePID->ProjectionY(
+        "h_ct_rescue_all_aero",
+        1,
+        probePID->GetNbinsX(),
+        "e"
+      );
+
+      allAeroTiming->SetDirectory(nullptr);
+
+      const auto centralFitRange = findCentralQuantileRange(
+        allAeroTiming,
+        probe.displayMin,
+        probe.displayMax,
+        5.0e-4,
+        5.0e-4,
+        2
+      );
+
+      const PeakPairSeed peakPair = findSeparatedPeakPair(
+        allAeroTiming,
+        centralFitRange.first,
+        centralFitRange.second,
+        std::max(0.18, 0.10 * beamBunchSpacingNs),
+        0.80 * beamBunchSpacingNs
+      );
+
+      if (peakPair.valid) {
+        probe.peakPairFound = true;
+        probe.kaonSeedMean = peakPair.lowerMean;
+        probe.protonSeedMean = peakPair.upperMean;
+
+        const double seedSeparation = std::max(
+          peakPair.upperMean - peakPair.lowerMean,
+          0.18
+        );
+
+        const double fitPadding = std::max(
+          0.30,
+          0.65 * seedSeparation
+        );
+
+        probe.fitMin = std::max(
+          probe.displayMin,
+          peakPair.lowerMean - fitPadding
+        );
+        probe.fitMax = std::min(
+          probe.displayMax,
+          peakPair.upperMean + fitPadding
+        );
+
+        const double split = 0.5 * (
+          peakPair.lowerMean + peakPair.upperMean
+        );
+
+        const double meanHalfWidth = std::max(
+          0.14,
+          0.35 * seedSeparation
+        );
+
+        const double orderingGap = std::max(
+          0.01,
+          0.03 * seedSeparation
+        );
+
+        probe.kaonMeanMin = std::max(
+          probe.fitMin,
+          peakPair.lowerMean - meanHalfWidth
+        );
+        probe.kaonMeanMax = std::min(
+          split - orderingGap,
+          peakPair.lowerMean + meanHalfWidth
+        );
+        probe.protonMeanMin = std::max(
+          split + orderingGap,
+          peakPair.upperMean - meanHalfWidth
+        );
+        probe.protonMeanMax = std::min(
+          probe.fitMax,
+          peakPair.upperMean + meanHalfWidth
+        );
+
+        probe.sigmaMax = std::clamp(
+          0.75 * seedSeparation,
+          0.45,
+          0.90
+        );
+        probe.sigmaInitial = std::clamp(
+          0.25 * seedSeparation,
+          0.12,
+          0.35
+        );
+      }
+
+      delete allAeroTiming;
+    }
+
     int validShapes = 0;
     double validSeparationSum = 0.0;
     double validDevianceNdfSum = 0.0;
+    double validDeviancePerEntrySum = 0.0;
 
     for (
       int aeroSlice = 0;
@@ -3240,12 +3442,20 @@ void check_slow_protons(
         timingSigmaMin,
         probe.sigmaMax,
         probe.sigmaInitial,
-        minimumGlobalSeparation,
+        localPeakRescueMode
+          ? 0.60
+          : minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
-        useDeviancePerEntryValidation,
+        localPeakRescueMode
+          ? true
+          : useDeviancePerEntryValidation,
         maximumGlobalPoissonDevianceNdf,
-        maximumGlobalPoissonDeviancePerEntry,
-        globalBoundFractionTolerance,
+        localPeakRescueMode
+          ? 0.85
+          : maximumGlobalPoissonDeviancePerEntry,
+        localPeakRescueMode
+          ? 0.005
+          : globalBoundFractionTolerance,
         minimumGlobalSliceEntries
       );
 
@@ -3253,6 +3463,8 @@ void check_slow_protons(
         ++validShapes;
         validSeparationSum += shape.separation;
         validDevianceNdfSum += shape.poissonDevianceNdf;
+        validDeviancePerEntrySum +=
+          shape.poissonDeviancePerEntry;
       }
 
       if (shape.fitFunction) {
@@ -3271,6 +3483,8 @@ void check_slow_protons(
         validSeparationSum / validShapes;
       probe.meanPoissonDevianceNdf =
         validDevianceNdfSum / validShapes;
+      probe.meanPoissonDeviancePerEntry =
+        validDeviancePerEntrySum / validShapes;
     }
 
     return validShapes;
@@ -3322,6 +3536,8 @@ void check_slow_protons(
       << probe.meanSeparation
       << "; mean D/ndf "
       << probe.meanPoissonDevianceNdf
+      << "; mean D/N "
+      << probe.meanPoissonDeviancePerEntry
       << "; peak seeds "
       << (
         probe.peakPairFound
@@ -3369,6 +3585,18 @@ void check_slow_protons(
     << ctProbe.meanSeparation
     << "; mean D/ndf "
     << ctProbe.meanPoissonDevianceNdf
+    << "; mean D/N "
+    << ctProbe.meanPoissonDeviancePerEntry
+    << "; peak seeds "
+    << (
+      ctProbe.peakPairFound
+        ? TString::Format(
+            "K=%.4g, p=%.4g",
+            ctProbe.kaonSeedMean,
+            ctProbe.protonSeedMean
+          ).Data()
+        : "not resolved"
+    )
     << std::endl;
 
   int initialBestRFValidShapes = 0;
@@ -3486,6 +3714,150 @@ void check_slow_protons(
       << ctProbe.meanSeparation
       << "; mean D/ndf "
       << ctProbe.meanPoissonDevianceNdf
+      << "; mean D/N "
+      << ctProbe.meanPoissonDeviancePerEntry
+      << "; peak seeds "
+      << (
+        ctProbe.peakPairFound
+          ? TString::Format(
+              "K=%.4g, p=%.4g",
+              ctProbe.kaonSeedMean,
+              ctProbe.protonSeedMean
+            ).Data()
+          : "not resolved"
+      )
+      << std::endl;
+  }
+
+  // If both the in-diamond and pre-diamond standard fits fail, perform one
+  // final rescue pass.  This changes only the timing-shape determination:
+  // it uses data-driven local peak windows, wider sigma limits, and D/N
+  // validation.  Event selection still requires the Q2-W diamond.
+  int fallbackBestRFValidShapes = 0;
+  for (const TimingBranchProbe &probe : rfProbes) {
+    fallbackBestRFValidShapes = std::max(
+      fallbackBestRFValidShapes,
+      probe.validShapes
+    );
+  }
+
+  if (
+    timingFitUsedPreDiamondFallback &&
+    fallbackBestRFValidShapes == 0 &&
+    ctProbe.validShapes == 0
+  ) {
+    timingFitUsedLocalPeakRescue = true;
+    localPeakRescueMode = true;
+
+    std::cout
+      << "Standard pre-diamond timing fits also produced zero validated "
+      << "shapes. Activating the local-peak rescue fit only for this "
+      << "failure case."
+      << std::endl;
+
+    rfProbes.clear();
+    rfProbeValidShapes = 0;
+
+    for (const std::string &candidate : rfBranchCandidates) {
+      if (
+        candidate.empty() ||
+        !tree->GetBranch(candidate.c_str())
+      ) {
+        continue;
+      }
+
+      TimingBranchProbe probe;
+
+      std::cout
+        << "Rescue RF timing probe using branch "
+        << candidate
+        << " from tree "
+        << treeName
+        << std::endl;
+
+      const int validShapes =
+        countValidGlobalShapesForBranch(
+          candidate,
+          probe
+        );
+
+      std::cout
+        << "  rescue valid global shapes: "
+        << validShapes
+        << " / "
+        << nAeroSlices
+        << "; range ["
+        << probe.displayMin
+        << ", "
+        << probe.displayMax
+        << "]; fit ["
+        << probe.fitMin
+        << ", "
+        << probe.fitMax
+        << "]; sigma max "
+        << probe.sigmaMax
+        << "; mean separation "
+        << probe.meanSeparation
+        << "; mean D/ndf "
+        << probe.meanPoissonDevianceNdf
+        << "; peak seeds "
+        << (
+          probe.peakPairFound
+            ? TString::Format(
+                "p=%.4g, K=%.4g",
+                probe.protonSeedMean,
+                probe.kaonSeedMean
+              ).Data()
+            : "not resolved"
+        )
+        << std::endl;
+
+      rfProbes.push_back(probe);
+    }
+
+    ctProbe = TimingBranchProbe();
+
+    std::cout
+      << "Rescue CT timing probe using branch "
+      << ctTimeBranch
+      << " from tree "
+      << treeName
+      << std::endl;
+
+    ctProbeValidShapes =
+      countValidGlobalShapesForCT(ctProbe);
+
+    std::cout
+      << "  rescue valid global shapes: "
+      << ctProbe.validShapes
+      << " / "
+      << nAeroSlices
+      << "; range ["
+      << ctProbe.displayMin
+      << ", "
+      << ctProbe.displayMax
+      << "]; fit ["
+      << ctProbe.fitMin
+      << ", "
+      << ctProbe.fitMax
+      << "]; sigma max "
+      << ctProbe.sigmaMax
+      << "; mean separation "
+      << ctProbe.meanSeparation
+      << "; mean D/ndf "
+      << ctProbe.meanPoissonDevianceNdf
+      << "; mean D/N "
+      << ctProbe.meanPoissonDeviancePerEntry
+      << "; peak seeds "
+      << (
+        ctProbe.peakPairFound
+          ? TString::Format(
+              "K=%.4g, p=%.4g",
+              ctProbe.kaonSeedMean,
+              ctProbe.protonSeedMean
+            ).Data()
+          : "not resolved"
+      )
       << std::endl;
   }
 
@@ -3512,9 +3884,17 @@ void check_slow_protons(
           return left.meanSeparation < right.meanSeparation;
         }
 
-        return
-          left.meanPoissonDevianceNdf >
-          right.meanPoissonDevianceNdf;
+        const double leftGoodness =
+          left.localPeakRescue
+            ? left.meanPoissonDeviancePerEntry
+            : left.meanPoissonDevianceNdf;
+
+        const double rightGoodness =
+          right.localPeakRescue
+            ? right.meanPoissonDeviancePerEntry
+            : right.meanPoissonDevianceNdf;
+
+        return leftGoodness > rightGoodness;
       }
     );
 
@@ -3541,11 +3921,18 @@ void check_slow_protons(
       return left.meanSeparation > right.meanSeparation ? 1 : -1;
     }
 
-    const bool leftFinite =
-      std::isfinite(left.meanPoissonDevianceNdf);
+    const double leftGoodness =
+      left.localPeakRescue
+        ? left.meanPoissonDeviancePerEntry
+        : left.meanPoissonDevianceNdf;
 
-    const bool rightFinite =
-      std::isfinite(right.meanPoissonDevianceNdf);
+    const double rightGoodness =
+      right.localPeakRescue
+        ? right.meanPoissonDeviancePerEntry
+        : right.meanPoissonDevianceNdf;
+
+    const bool leftFinite = std::isfinite(leftGoodness);
+    const bool rightFinite = std::isfinite(rightGoodness);
 
     if (leftFinite != rightFinite) {
       return leftFinite ? 1 : -1;
@@ -3553,16 +3940,9 @@ void check_slow_protons(
 
     if (
       leftFinite &&
-      std::abs(
-        left.meanPoissonDevianceNdf -
-        right.meanPoissonDevianceNdf
-      ) > 1.0e-9
+      std::abs(leftGoodness - rightGoodness) > 1.0e-9
     ) {
-      return
-        left.meanPoissonDevianceNdf <
-        right.meanPoissonDevianceNdf
-          ? 1
-          : -1;
+      return leftGoodness < rightGoodness ? 1 : -1;
     }
 
     return 0;
@@ -3679,9 +4059,39 @@ void check_slow_protons(
       "pre_diamond_fit_fallback_" + timingSelectionReason;
   }
 
+  if (timingFitUsedLocalPeakRescue) {
+    timingSelectionReason =
+      "local_peak_rescue_" + timingSelectionReason;
+  }
+
   // RF: proton is the left/lower-time peak.
   // CTime_ROC1: proton is the right/higher-time peak.
   const bool protonPeakIsLower = rfTimingSelected;
+
+  const bool activeUseDeviancePerEntryValidation =
+    timingFitUsedLocalPeakRescue
+      ? true
+      : useDeviancePerEntryValidation;
+
+  const double activeMaximumGlobalPoissonDeviancePerEntry =
+    timingFitUsedLocalPeakRescue
+      ? 0.85
+      : maximumGlobalPoissonDeviancePerEntry;
+
+  const double activeGlobalBoundFractionTolerance =
+    timingFitUsedLocalPeakRescue
+      ? 0.005
+      : globalBoundFractionTolerance;
+
+  const double activeMinimumGlobalSeparation =
+    timingFitUsedLocalPeakRescue
+      ? 0.60
+      : minimumGlobalSeparation;
+
+  const bool activeUseSliceDeviancePerEntryValidation =
+    timingFitUsedLocalPeakRescue
+      ? true
+      : useDeviancePerEntryValidation;
 
   const std::string timingAxisTitle =
     timeBranch + " [ns]";
@@ -3738,6 +4148,14 @@ void check_slow_protons(
       << std::endl;
   }
 
+  if (timingFitUsedLocalPeakRescue) {
+    std::cout
+      << "Local-peak rescue is active: data-driven mean windows, wider "
+      << "sigma limits, and Poisson D/N validation are used for timing "
+      << "shapes only."
+      << std::endl;
+  }
+
   // ------------------------------------------------------------------
   // Global PID histogram.
   // ------------------------------------------------------------------
@@ -3750,9 +4168,11 @@ void check_slow_protons(
       "Global %s vs P_aero_npeSum%s;"
       "P_aero_npeSum;%s;Counts",
       timeBranch.c_str(),
-      timingFitUsedPreDiamondFallback
-        ? " (pre-diamond fit fallback)"
-        : "",
+      timingFitUsedLocalPeakRescue
+        ? " (local-peak rescue)"
+        : (timingFitUsedPreDiamondFallback
+            ? " (pre-diamond fit fallback)"
+            : ""),
       timingAxisTitle.c_str()
     ),
     nAeroHistogramBins,
@@ -3861,9 +4281,11 @@ void check_slow_protons(
       TString::Format(
         "Global timing fit%s: %.1f #leq aero < %.1f;"
         "%s;Counts",
-        timingFitUsedPreDiamondFallback
-          ? " (pre-diamond fallback)"
-          : "",
+        timingFitUsedLocalPeakRescue
+          ? " (local-peak rescue)"
+          : (timingFitUsedPreDiamondFallback
+              ? " (pre-diamond fallback)"
+              : ""),
         aeroLow,
         aeroHigh,
         timingAxisTitle.c_str()
@@ -3890,12 +4312,12 @@ void check_slow_protons(
         timingSigmaMin,
         timingSigmaMax,
         timingSigmaInitial,
-        minimumGlobalSeparation,
+        activeMinimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
-        useDeviancePerEntryValidation,
+        activeUseDeviancePerEntryValidation,
         maximumGlobalPoissonDevianceNdf,
-        maximumGlobalPoissonDeviancePerEntry,
-        globalBoundFractionTolerance,
+        activeMaximumGlobalPoissonDeviancePerEntry,
+        activeGlobalBoundFractionTolerance,
         minimumGlobalSliceEntries
       );
   }
@@ -3914,7 +4336,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v11 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v13 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -4488,6 +4910,11 @@ void check_slow_protons(
       timingFitUsedPreDiamondFallback ? 1 : 0
     ).Write();
 
+    TParameter<int>(
+      "timing_fit_local_peak_rescue_used",
+      timingFitUsedLocalPeakRescue ? 1 : 0
+    ).Write();
+
     TNamed diagnosticTimingFitAcceptanceCut(
       "timing_fit_acceptance_cut",
       timingFitAcceptanceCut.c_str()
@@ -4862,7 +5289,7 @@ void check_slow_protons(
           ).Data(),
           timingFitMin,
           timingFitMax,
-          useDeviancePerEntryValidation,
+          activeUseSliceDeviancePerEntryValidation,
           maximumSlicePoissonDevianceNdf,
           maximumSlicePoissonDeviancePerEntry,
           minimumSliceModelDataRatio,
@@ -6628,6 +7055,11 @@ void check_slow_protons(
   TParameter<int>(
     "timing_fit_pre_diamond_fallback_used",
     timingFitUsedPreDiamondFallback ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "timing_fit_local_peak_rescue_used",
+    timingFitUsedLocalPeakRescue ? 1 : 0
   ).Write();
 
   TNamed timingFitAcceptanceCutTag(
