@@ -946,7 +946,10 @@ TEllipse *makeTimingAeroBlobEllipse(
     nSigma * blob.timeSigma
   );
 
-  ellipse->SetName(name);
+  // ROOT 6.24 TEllipse inherits from TObject rather than TNamed, so it
+  // does not provide SetName(). The requested key name is retained only
+  // for call-site readability; the ellipse is owned by the canvas.
+  (void)name;
   ellipse->SetFillStyle(0);
   ellipse->SetLineColor(lineColor);
   ellipse->SetLineWidth(4);
@@ -2781,7 +2784,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.22";
+  const char *macroVersion = "check_slow_protons.23";
 
   std::cout
     << "Running "
@@ -5685,7 +5688,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v22 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v23 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
