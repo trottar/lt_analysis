@@ -481,6 +481,226 @@ PeakPairSeed findSeparatedPeakPair(
 }
 
 
+PeakPairSeed findProminentOffsetPeakPair(
+  const TH1D *histogram,
+  double xMin,
+  double xMax,
+  double minimumSeparation,
+  double maximumSeparation
+) {
+  PeakPairSeed result;
+
+  if (
+    !histogram ||
+    xMax <= xMin ||
+    minimumSeparation <= 0.0 ||
+    maximumSeparation <= minimumSeparation
+  ) {
+    return result;
+  }
+
+  const int firstBin = std::max(
+    1,
+    histogram->GetXaxis()->FindFixBin(xMin)
+  );
+
+  const int lastBin = std::min(
+    histogram->GetNbinsX(),
+    histogram->GetXaxis()->FindFixBin(
+      std::nextafter(xMax, xMin)
+    )
+  );
+
+  if (lastBin - firstBin < 6) {
+    return result;
+  }
+
+  std::vector<double> smoothed(
+    histogram->GetNbinsX() + 1,
+    0.0
+  );
+
+  const int smoothingRadius = 2;
+  double globalMaximum = 0.0;
+
+  for (int bin = firstBin; bin <= lastBin; ++bin) {
+    double weightedSum = 0.0;
+    double weightSum = 0.0;
+
+    for (
+      int offset = -smoothingRadius;
+      offset <= smoothingRadius;
+      ++offset
+    ) {
+      const int neighbor = bin + offset;
+
+      if (neighbor < firstBin || neighbor > lastBin) {
+        continue;
+      }
+
+      const double weight =
+        static_cast<double>(smoothingRadius + 1 - std::abs(offset));
+
+      weightedSum += weight * std::max(
+        histogram->GetBinContent(neighbor),
+        0.0
+      );
+      weightSum += weight;
+    }
+
+    if (weightSum > 0.0) {
+      smoothed.at(bin) = weightedSum / weightSum;
+      globalMaximum = std::max(globalMaximum, smoothed.at(bin));
+    }
+  }
+
+  if (!(globalMaximum > 0.0)) {
+    return result;
+  }
+
+  std::vector<int> candidateBins;
+
+  for (int bin = firstBin + 1; bin < lastBin; ++bin) {
+    const double value = smoothed.at(bin);
+
+    if (
+      value > 0.0 &&
+      value >= smoothed.at(bin - 1) &&
+      value > smoothed.at(bin + 1)
+    ) {
+      candidateBins.push_back(bin);
+    }
+  }
+
+  // Add a small set of high-population bins even when strict maxima exist.
+  // This allows a broad shoulder to participate without letting adjacent
+  // bins from the same peak win: the valley-prominence score below rejects
+  // pairs that do not contain a real dip between them.
+  std::vector<int> rankedBins;
+  for (int bin = firstBin; bin <= lastBin; ++bin) {
+    rankedBins.push_back(bin);
+  }
+
+  std::sort(
+    rankedBins.begin(),
+    rankedBins.end(),
+    [&smoothed](int left, int right) {
+      return smoothed.at(left) > smoothed.at(right);
+    }
+  );
+
+  const int exclusionBins = 2;
+  const size_t maximumAddedBins = std::min<size_t>(
+    rankedBins.size(),
+    32
+  );
+
+  for (size_t index = 0; index < maximumAddedBins; ++index) {
+    const int candidate = rankedBins.at(index);
+    bool tooClose = false;
+
+    for (const int existing : candidateBins) {
+      if (std::abs(candidate - existing) <= exclusionBins) {
+        tooClose = true;
+        break;
+      }
+    }
+
+    if (!tooClose) {
+      candidateBins.push_back(candidate);
+    }
+  }
+
+  double bestScore = -1.0;
+
+  for (size_t first = 0; first < candidateBins.size(); ++first) {
+    for (size_t second = first + 1; second < candidateBins.size(); ++second) {
+      int lowerBin = candidateBins.at(first);
+      int upperBin = candidateBins.at(second);
+
+      if (lowerBin > upperBin) {
+        std::swap(lowerBin, upperBin);
+      }
+
+      const double lowerMean =
+        histogram->GetXaxis()->GetBinCenter(lowerBin);
+      const double upperMean =
+        histogram->GetXaxis()->GetBinCenter(upperBin);
+      const double separation = upperMean - lowerMean;
+
+      if (
+        separation < minimumSeparation ||
+        separation > maximumSeparation ||
+        upperBin - lowerBin < 3
+      ) {
+        continue;
+      }
+
+      const double lowerHeight = smoothed.at(lowerBin);
+      const double upperHeight = smoothed.at(upperBin);
+
+      if (
+        lowerHeight < 0.025 * globalMaximum ||
+        upperHeight < 0.025 * globalMaximum
+      ) {
+        continue;
+      }
+
+      double valley = std::numeric_limits<double>::infinity();
+
+      for (int bin = lowerBin + 1; bin < upperBin; ++bin) {
+        valley = std::min(valley, smoothed.at(bin));
+      }
+
+      if (!std::isfinite(valley)) {
+        continue;
+      }
+
+      const double lowerProminence = lowerHeight - valley;
+      const double upperProminence = upperHeight - valley;
+      const double minimumProminence = std::max(
+        0.012 * globalMaximum,
+        0.025 * std::min(lowerHeight, upperHeight)
+      );
+
+      if (
+        lowerProminence < minimumProminence ||
+        upperProminence < minimumProminence
+      ) {
+        continue;
+      }
+
+      const double lowerFraction =
+        lowerProminence / std::max(lowerHeight, 1.0e-12);
+      const double upperFraction =
+        upperProminence / std::max(upperHeight, 1.0e-12);
+
+      // The score rewards a populated pair and, more importantly, a real
+      // valley between the peaks.  Nearby ripples on the dominant peak have
+      // almost zero prominence and therefore cannot displace a shifted
+      // kaon-proton pair.
+      const double score =
+        std::sqrt(lowerHeight * upperHeight) *
+        std::sqrt(lowerFraction * upperFraction) *
+        std::sqrt(std::max(lowerProminence * upperProminence, 0.0));
+
+      if (score <= bestScore) {
+        continue;
+      }
+
+      bestScore = score;
+      result.valid = true;
+      result.lowerMean = lowerMean;
+      result.upperMean = upperMean;
+      result.lowerHeight = lowerHeight;
+      result.upperHeight = upperHeight;
+    }
+  }
+
+  return result;
+}
+
+
 std::pair<double, double> findCentralQuantileRange(
   const TH1D *histogram,
   double requestedMin,
@@ -1303,13 +1523,23 @@ TimingShape fitPerAeroFallbackTimingShape(
   // The aggregate timing distribution can select a shoulder of the
   // dominant peak and miss the second physical peak.  This last-resort
   // pass therefore derives the pair separately in every aerogel slice.
-  PeakPairSeed peakPair = findSeparatedPeakPair(
+  PeakPairSeed peakPair = findProminentOffsetPeakPair(
     histogram,
     centralRange.first,
     centralRange.second,
     std::max(0.24, 0.06 * beamBunchSpacingNs),
     std::min(1.60, 0.70 * beamBunchSpacingNs)
   );
+
+  if (!peakPair.valid) {
+    peakPair = findProminentOffsetPeakPair(
+      histogram,
+      centralRange.first,
+      centralRange.second,
+      0.18,
+      std::min(1.80, 0.80 * beamBunchSpacingNs)
+    );
+  }
 
   if (!peakPair.valid) {
     peakPair = findSeparatedPeakPair(
@@ -1332,9 +1562,12 @@ TimingShape fitPerAeroFallbackTimingShape(
     return result;
   }
 
-  // The last-resort fit is allowed to translate the established K/p pair
-  // together when a setting has a timing offset.  Only a common offset is
-  // applied, so the physical ordering and nominal K-p separation are kept.
+  // Treat the two peaks resolved in this aerogel slice as the physical
+  // pair.  Their midpoint may be shifted relative to the nominal/global
+  // means, so center the fallback windows on the local pair and record the
+  // common timing offset.  Do not preserve a nominal separation when both
+  // local peaks visibly move together; doing so can place one component on
+  // an empty tail even though the shifted kaon and proton peaks are clear.
   // RF and CT both use K on the lower-time side and p on the higher-time
   // side in this version.
   const double localMidpoint = 0.5 * (
@@ -1356,25 +1589,8 @@ TimingShape fitPerAeroFallbackTimingShape(
       referenceKaonMean + referenceProtonMean
     );
 
-    const double referenceSeparation =
-      referenceProtonMean - referenceKaonMean;
-
-    // Use a translated reference pair when its separation remains
-    // compatible with the two peaks resolved in this aerogel slice.
-    if (
-      referenceSeparation >= 0.55 * seedSeparation &&
-      referenceSeparation <= 1.80 * seedSeparation
-    ) {
-      appliedMeanOffset =
-        localMidpoint - referenceMidpoint;
-      offsetAdjusted =
-        std::abs(appliedMeanOffset) > 1.0e-6;
-
-      targetKaonMean =
-        referenceKaonMean + appliedMeanOffset;
-      targetProtonMean =
-        referenceProtonMean + appliedMeanOffset;
-    }
+    appliedMeanOffset = localMidpoint - referenceMidpoint;
+    offsetAdjusted = std::abs(appliedMeanOffset) > 1.0e-6;
   }
 
   // Never permit an offset to reverse the physical RF/CT assignment.
@@ -2156,7 +2372,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.18";
+  const char *macroVersion = "check_slow_protons.19";
 
   std::cout
     << "Running "
@@ -4688,7 +4904,7 @@ void check_slow_protons(
   ) {
     std::cout
       << "Aggregate local-peak rescue produced zero valid shapes. "
-      << "Trying offset-adjusted peak seeds in each aerogel slice."
+      << "Trying shifted local kaon-proton peak pairs in each aerogel slice."
       << std::endl;
 
     timingFitUsedPerAeroFallback = true;
@@ -4797,7 +5013,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v18 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v19 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
