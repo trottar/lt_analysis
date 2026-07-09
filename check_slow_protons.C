@@ -196,6 +196,95 @@ std::pair<double, double> findPeakSeed(
 }
 
 
+std::pair<double, double> findCentralQuantileRange(
+  const TH1D *histogram,
+  double requestedMin,
+  double requestedMax,
+  double lowerTailFraction,
+  double upperTailFraction,
+  int paddingBins
+) {
+  if (
+    !histogram ||
+    requestedMax <= requestedMin ||
+    lowerTailFraction < 0.0 ||
+    upperTailFraction < 0.0 ||
+    lowerTailFraction + upperTailFraction >= 1.0
+  ) {
+    return {requestedMin, requestedMax};
+  }
+
+  const int firstRequestedBin = std::max(
+    1,
+    histogram->GetXaxis()->FindFixBin(requestedMin)
+  );
+
+  const int lastRequestedBin = std::min(
+    histogram->GetNbinsX(),
+    histogram->GetXaxis()->FindFixBin(
+      std::nextafter(requestedMax, requestedMin)
+    )
+  );
+
+  const double total = histogram->Integral(
+    firstRequestedBin,
+    lastRequestedBin
+  );
+
+  if (total <= 0.0) {
+    return {requestedMin, requestedMax};
+  }
+
+  const double lowerTarget = lowerTailFraction * total;
+  const double upperTarget = (1.0 - upperTailFraction) * total;
+
+  double cumulative = 0.0;
+  int firstCentralBin = firstRequestedBin;
+  int lastCentralBin = lastRequestedBin;
+  bool foundLower = false;
+
+  for (int bin = firstRequestedBin; bin <= lastRequestedBin; ++bin) {
+    cumulative += std::max(histogram->GetBinContent(bin), 0.0);
+
+    if (!foundLower && cumulative >= lowerTarget) {
+      firstCentralBin = bin;
+      foundLower = true;
+    }
+
+    if (cumulative >= upperTarget) {
+      lastCentralBin = bin;
+      break;
+    }
+  }
+
+  firstCentralBin = std::max(
+    firstRequestedBin,
+    firstCentralBin - std::max(paddingBins, 0)
+  );
+
+  lastCentralBin = std::min(
+    lastRequestedBin,
+    lastCentralBin + std::max(paddingBins, 0)
+  );
+
+  const double rangeMin = std::max(
+    requestedMin,
+    histogram->GetXaxis()->GetBinLowEdge(firstCentralBin)
+  );
+
+  const double rangeMax = std::min(
+    requestedMax,
+    histogram->GetXaxis()->GetBinUpEdge(lastCentralBin)
+  );
+
+  if (rangeMax <= rangeMin) {
+    return {requestedMin, requestedMax};
+  }
+
+  return {rangeMin, rangeMax};
+}
+
+
 double evaluateGaussian(
   double x,
   double amplitude,
@@ -386,6 +475,7 @@ TimingShape fitGlobalTimingShape(
   double protonMeanMax,
   double sigmaMin,
   double sigmaMax,
+  double initialSigma,
   double minimumSeparation,
   double minimumAmplitudeSignificance,
   double maximumChi2Ndf,
@@ -468,7 +558,7 @@ TimingShape fitGlobalTimingShape(
 
   fitFunction->SetParameter(
     2,
-    0.15
+    std::clamp(initialSigma, sigmaMin, sigmaMax)
   );
 
   fitFunction->SetParLimits(
@@ -504,7 +594,7 @@ TimingShape fitGlobalTimingShape(
 
   fitFunction->SetParameter(
     5,
-    0.15
+    std::clamp(initialSigma, sigmaMin, sigmaMax)
   );
 
   fitFunction->SetParLimits(
@@ -1029,7 +1119,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.0";
+  const char *macroVersion = "check_slow_protons.1";
 
   std::cout
     << "Running "
@@ -1199,29 +1289,51 @@ void check_slow_protons(
       TString::kIgnoreCase
     );
 
-  // Use a symmetric coincidence-time window for both epsilon settings.
-  // High epsilon: +/-4 ns. Low epsilon: +/-2 ns.
-  const double timeMin =
-    isHighEpsilon ? -4.0 : -2.0;
-
-  const double timeMax =
+  // Raw coincidence time only. No RF branch, RF phase correction, or
+  // RF wrapping is used anywhere in this analysis.
+  const double beamBunchSpacingNs =
     isHighEpsilon ? 4.0 : 2.0;
 
-  const double kaonMeanMin = -0.45;
-  const double kaonMeanMax = 0.20;
+  // Preserve the existing diagnostic/display ranges. For high epsilon,
+  // the fit range is later restricted to the populated no-RF prompt-time
+  // support so empty bins outside that support do not pull the likelihood.
+  const double timeMin = -beamBunchSpacingNs;
+  const double timeMax = beamBunchSpacingNs;
 
-  const double protonMeanMin = 0.20;
-  const double protonMeanMax = 0.95;
+  double timingFitMin = timeMin;
+  double timingFitMax = timeMax;
+
+  // Retain the low-epsilon constraints. The high-epsilon no-RF timing
+  // distributions are broader, requiring wider mean/sigma bounds and seed.
+  const double kaonMeanMin =
+    isHighEpsilon ? -1.50 : -0.45;
+
+  const double kaonMeanMax =
+    isHighEpsilon ? 0.25 : 0.20;
+
+  const double protonMeanMin =
+    isHighEpsilon ? 0.25 : 0.20;
+
+  const double protonMeanMax =
+    isHighEpsilon ? 1.80 : 0.95;
 
   const double timingSigmaMin = 0.03;
-  const double timingSigmaMax = 0.45;
+
+  const double timingSigmaMax =
+    isHighEpsilon ? 1.20 : 0.45;
+
+  const double timingSigmaInitial =
+    isHighEpsilon ? 0.65 : 0.15;
 
   const double minimumGlobalSeparation = 0.75;
   const double minimumGlobalAmplitudeSignificance = 2.0;
-  const double maximumGlobalChi2Ndf = 5.0;
+
+  const double maximumGlobalChi2Ndf =
+    isHighEpsilon ? 12.0 : 5.0;
   const double globalBoundFractionTolerance = 0.02;
 
-  const double maximumSliceChi2Ndf = 5.0;
+  const double maximumSliceChi2Ndf =
+    isHighEpsilon ? 12.0 : 5.0;
   const double minimumSliceModelDataRatio = 0.50;
   const double maximumSliceModelDataRatio = 1.50;
 
@@ -1282,7 +1394,7 @@ void check_slow_protons(
     nDeltaBins;
 
   std::cout
-    << "CTime_ROC1 range for "
+    << "Raw CTime_ROC1 range for "
     << epsSetting
     << " epsilon: ["
     << timeMin
@@ -1290,7 +1402,9 @@ void check_slow_protons(
     << timeMax
     << "] ns with "
     << nTimeHistogramBins
-    << " bins"
+    << " bins; beam-bunch spacing = "
+    << beamBunchSpacingNs
+    << " ns; RF correction = disabled"
     << std::endl;
 
   // ------------------------------------------------------------------
@@ -1366,6 +1480,39 @@ void check_slow_protons(
     inputFile->Close();
     return;
   }
+
+  if (isHighEpsilon) {
+    auto *allAeroTiming = hGlobalPID->ProjectionY(
+      "h_global_time_all_aero_for_fit_range",
+      1,
+      hGlobalPID->GetNbinsX(),
+      "e"
+    );
+
+    allAeroTiming->SetDirectory(nullptr);
+
+    const auto centralFitRange = findCentralQuantileRange(
+      allAeroTiming,
+      timeMin,
+      timeMax,
+      5.0e-4,
+      5.0e-4,
+      2
+    );
+
+    timingFitMin = centralFitRange.first;
+    timingFitMax = centralFitRange.second;
+
+    delete allAeroTiming;
+  }
+
+  std::cout
+    << "Timing fit range: ["
+    << timingFitMin
+    << ", "
+    << timingFitMax
+    << "] ns using raw CTime_ROC1 only"
+    << std::endl;
 
   // ------------------------------------------------------------------
   // Global timing fits.
@@ -1448,14 +1595,15 @@ void check_slow_protons(
           "f_global_time_aero_slice_%d",
           aeroSlice
         ).Data(),
-        timeMin,
-        timeMax,
+        timingFitMin,
+        timingFitMax,
         kaonMeanMin,
         kaonMeanMax,
         protonMeanMin,
         protonMeanMax,
         timingSigmaMin,
         timingSigmaMax,
+        timingSigmaInitial,
         minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
         maximumGlobalChi2Ndf,
@@ -1478,7 +1626,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v2 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v1 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -1978,6 +2126,32 @@ void check_slow_protons(
     );
     numberOfValidGlobalShapes.Write();
 
+    TNamed diagnosticTimingBranch(
+      "timing_branch",
+      timeBranch.c_str()
+    );
+    diagnosticTimingBranch.Write();
+
+    TParameter<int>(
+      "rf_correction_used",
+      0
+    ).Write();
+
+    TParameter<double>(
+      "beam_bunch_spacing_ns",
+      beamBunchSpacingNs
+    ).Write();
+
+    TParameter<double>(
+      "timing_fit_min_ns",
+      timingFitMin
+    ).Write();
+
+    TParameter<double>(
+      "timing_fit_max_ns",
+      timingFitMax
+    ).Write();
+
     diagnosticOutputFile.Write();
     diagnosticOutputFile.Close();
 
@@ -2227,8 +2401,8 @@ void check_slow_protons(
             deltaBin,
             aeroSlice
           ).Data(),
-          timeMin,
-          timeMax,
+          timingFitMin,
+          timingFitMax,
           maximumSliceChi2Ndf,
           minimumSliceModelDataRatio,
           maximumSliceModelDataRatio,
@@ -3022,8 +3196,8 @@ void check_slow_protons(
           shape.kaonAmplitude,
           shape.kaonMean,
           shape.kaonSigma,
-          timeMin,
-          timeMax,
+          timingFitMin,
+          timingFitMax,
           kMagenta + 1
         );
 
@@ -3036,8 +3210,8 @@ void check_slow_protons(
           shape.protonAmplitude,
           shape.protonMean,
           shape.protonSigma,
-          timeMin,
-          timeMax,
+          timingFitMin,
+          timingFitMax,
           kBlue + 1
         );
 
@@ -3048,8 +3222,8 @@ void check_slow_protons(
             aeroSlice
           ).Data(),
           shape.otherAmplitude,
-          timeMin,
-          timeMax,
+          timingFitMin,
+          timingFitMax,
           kGray + 2
         );
 
@@ -3581,8 +3755,8 @@ void check_slow_protons(
             sliceFit.kaonAmplitude,
             shape.kaonMean,
             shape.kaonSigma,
-            timeMin,
-            timeMax,
+            timingFitMin,
+            timingFitMax,
             kMagenta + 1
           );
 
@@ -3596,8 +3770,8 @@ void check_slow_protons(
             sliceFit.protonAmplitude,
             shape.protonMean,
             shape.protonSigma,
-            timeMin,
-            timeMax,
+            timingFitMin,
+            timingFitMax,
             kBlue + 1
           );
 
@@ -3609,8 +3783,8 @@ void check_slow_protons(
               aeroSlice
             ).Data(),
             sliceFit.otherAmplitude,
-            timeMin,
-            timeMax,
+            timingFitMin,
+            timingFitMax,
             kGray + 2
           );
 
@@ -3912,6 +4086,32 @@ void check_slow_protons(
     macroVersion
   );
   macroVersionTag.Write();
+
+  TNamed timingBranchTag(
+    "timing_branch",
+    timeBranch.c_str()
+  );
+  timingBranchTag.Write();
+
+  TParameter<int>(
+    "rf_correction_used",
+    0
+  ).Write();
+
+  TParameter<double>(
+    "beam_bunch_spacing_ns",
+    beamBunchSpacingNs
+  ).Write();
+
+  TParameter<double>(
+    "timing_fit_min_ns",
+    timingFitMin
+  ).Write();
+
+  TParameter<double>(
+    "timing_fit_max_ns",
+    timingFitMax
+  ).Write();
 
   TParameter<Long64_t>(
     "selected_events",

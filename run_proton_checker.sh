@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+runner_version="1"
+
 if [[ $# -ne 4 ]]; then
     echo "Usage: $0 <phi_setting> <Q2> <W> <eps_setting>" >&2
     echo "Example: $0 Center 3p0 3p14 high" >&2
@@ -21,6 +23,6 @@ if [[ ! -f "$macro" ]]; then
     exit 2
 fi
 
-echo "Running check_slow_protons.C"
+echo "Running check_slow_protons.C (runner version ${runner_version}; raw CTime_ROC1, no RF correction)"
 root -l -b -q \
     "${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
