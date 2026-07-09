@@ -23,4 +23,4 @@ fi
 
 echo "Running check_slow_protons.C"
 root -l -b -q \
-    ".L ${macro}(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
+    ".L ${macro}+(\"${phi_setting}\",\"${Q2}\",\"${W}\",\"${eps_setting}\")"
