@@ -622,7 +622,7 @@ def _build_signed_pid_histograms(
 
     h_global_pid = ROOT.TH2D(
         "H_proton_cleaning_global_pid",
-        "Global CTime_{ROC1} vs P_{aero} NPE;P_{aero} NPE;CTime_{ROC1} [ns];Signed yield",
+        "Global CTime_ROC1 vs P_{aero} NPE;P_{aero} NPE;CTime_ROC1 [ns];Signed yield",
         75,
         aero_min,
         aero_max,
@@ -637,7 +637,7 @@ def _build_signed_pid_histograms(
     for aero_index in range(len(aero_edges) - 1):
         hist = ROOT.TH1D(
             "H_proton_cleaning_global_time_slice_{}".format(aero_index),
-            "Global timing slice {};CTime_{ROC1} [ns];Signed yield".format(aero_index + 1),
+            "Global timing slice {};CTime_ROC1 [ns];Signed yield".format(aero_index + 1),
             90,
             time_min,
             time_max,
@@ -651,7 +651,7 @@ def _build_signed_pid_histograms(
     for delta_index in range(delta_bins):
         pid_hist = ROOT.TH2D(
             "H_proton_cleaning_pid_delta_{}".format(delta_index),
-            "PID slice {} ;P_{aero} NPE;CTime_{ROC1} [ns];Signed yield".format(delta_index + 1),
+            "PID slice {} ;P_{aero} NPE;CTime_ROC1 [ns];Signed yield".format(delta_index + 1),
             75,
             aero_min,
             aero_max,
@@ -667,7 +667,7 @@ def _build_signed_pid_histograms(
         for aero_index in range(len(aero_edges) - 1):
             hist = ROOT.TH1D(
                 "H_proton_cleaning_time_delta_{}_aero_{}".format(delta_index, aero_index),
-                "Timing slice d{} a{};CTime_{ROC1} [ns];Signed yield".format(delta_index + 1, aero_index + 1),
+                "Timing slice d{} a{};CTime_ROC1 [ns];Signed yield".format(delta_index + 1, aero_index + 1),
                 90,
                 time_min,
                 time_max,
