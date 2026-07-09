@@ -1020,7 +1020,7 @@ TF1 *makeConstantComponent(
 }
 
 
-void check_slow_protons(
+void check_slow_protons_v4(
   const char *phi_setting = "Left",
   const char *Q2 = "3p0",
   const char *W = "3p14",
@@ -1029,7 +1029,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.0";
+  const char *macroVersion = "check_slow_protons_v4.0";
 
   std::cout
     << "Running "
@@ -1055,7 +1055,7 @@ void check_slow_protons(
     epsSetting.IsNull()
   ) {
     std::cerr
-      << "Usage: check_slow_protons("
+      << "Usage: check_slow_protons_v4("
       << "\"<phi>\", \"<Q2>\", "
       << "\"<W>\", \"<eps>\")"
       << std::endl;
@@ -1099,7 +1099,7 @@ void check_slow_protons(
 
   const std::string outputBase =
     TString::Format(
-      "%s_kaon_proton_cleaning_Q%sW%s_%se_v2",
+      "%s_kaon_proton_cleaning_Q%sW%s_%se_v4",
       phiSetting.Data(),
       q2Setting.Data(),
       wSetting.Data(),
@@ -1193,8 +1193,19 @@ void check_slow_protons(
   const double aeroMin = 0.0;
   const double aeroMax = 25.0;
 
-  const double timeMin = -1.50;
-  const double timeMax = 1.25;
+  const bool isHighEpsilon =
+    epsSetting.EqualTo(
+      "high",
+      TString::kIgnoreCase
+    );
+
+  // Use a symmetric coincidence-time window for both epsilon settings.
+  // High epsilon: +/-4 ns. Low epsilon: +/-2 ns.
+  const double timeMin =
+    isHighEpsilon ? -4.0 : -2.0;
+
+  const double timeMax =
+    isHighEpsilon ? 4.0 : 2.0;
 
   const double kaonMeanMin = -0.45;
   const double kaonMeanMax = 0.20;
@@ -1225,7 +1236,10 @@ void check_slow_protons(
   const int nMMBins = 160;
 
   const int nAeroHistogramBins = 75;
-  const int nTimeHistogramBins = 90;
+  // Preserve approximately the original 0.0305 ns timing-bin width.
+  // Eight ns gives 262 bins; four ns gives 131 bins.
+  const int nTimeHistogramBins =
+    isHighEpsilon ? 262 : 131;
 
   const std::vector<double> aeroEdges = {
     0.0,
@@ -1266,6 +1280,18 @@ void check_slow_protons(
   const double deltaBinWidth =
     (deltaMax - deltaMin) /
     nDeltaBins;
+
+  std::cout
+    << "CTime_ROC1 range for "
+    << epsSetting
+    << " epsilon: ["
+    << timeMin
+    << ", "
+    << timeMax
+    << "] ns with "
+    << nTimeHistogramBins
+    << " bins"
+    << std::endl;
 
   // ------------------------------------------------------------------
   // Analysis cuts.

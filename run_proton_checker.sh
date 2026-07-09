@@ -4,7 +4,7 @@ set -euo pipefail
 
 if [[ $# -ne 4 ]]; then
     echo "Usage: $0 <phi_setting> <Q2> <W> <eps_setting>" >&2
-    echo "Example: $0 Center 3p0 3p14 high" >&2
+    echo "Example: $0 Center 3p0 3p14 low" >&2
     exit 1
 fi
 
@@ -17,7 +17,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 macro="${script_dir}/check_slow_protons.C"
 
 if [[ ! -f "$macro" ]]; then
-    echo "Error: v2 ROOT macro not found: $macro" >&2
+    echo "Error: v4 ROOT macro not found: $macro" >&2
     exit 2
 fi
 
