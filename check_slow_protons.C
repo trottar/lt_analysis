@@ -1,5 +1,6 @@
 #include <TBranch.h>
 #include <TCanvas.h>
+#include <TCutG.h>
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TF1.h>
@@ -8,6 +9,7 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TLegend.h>
+#include <TList.h>
 #include <TLine.h>
 #include <TNamed.h>
 #include <TObjArray.h>
@@ -21,8 +23,12 @@
 #include <TTree.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <fstream>
 #include <iostream>
+#include <regex>
+#include <sstream>
 #include <limits>
 #include <string>
 #include <utility>
@@ -1623,6 +1629,196 @@ TF1 *makeConstantComponent(
 }
 
 
+struct PolygonCutDefinition {
+  bool valid = false;
+  std::string cutMode;
+  int declaredVertices = 0;
+  std::vector<std::pair<double, double>> vertices;
+};
+
+
+std::string trimWhitespace(
+  const std::string &text
+) {
+  const std::string whitespace = " \t\r\n";
+  const size_t first = text.find_first_not_of(whitespace);
+
+  if (first == std::string::npos) {
+    return "";
+  }
+
+  const size_t last = text.find_last_not_of(whitespace);
+  return text.substr(first, last - first + 1);
+}
+
+
+PolygonCutDefinition readQ2WPolygonFromSummary(
+  const std::string &summaryFileName,
+  const std::string &phiSection
+) {
+  PolygonCutDefinition result;
+
+  std::ifstream input(summaryFileName);
+
+  if (!input) {
+    return result;
+  }
+
+  const std::regex cutModePattern(
+    R"(^\s*cut_mode\s*=\s*([^\s]+)\s*$)",
+    std::regex::icase
+  );
+
+  const std::regex vertexCountPattern(
+    R"(^\s*vertices\s*=\s*([0-9]+)\s*$)",
+    std::regex::icase
+  );
+
+  const std::regex vertexPattern(
+    R"(^\s*v([0-9]+)\s*=\s*\(\s*([-+0-9.eE]+)\s*,\s*([-+0-9.eE]+)\s*\)\s*$)",
+    std::regex::icase
+  );
+
+  bool inRequestedPhiSection = false;
+  bool inPolygonSection = false;
+  std::vector<std::pair<int, std::pair<double, double>>> indexedVertices;
+
+  std::string line;
+
+  while (std::getline(input, line)) {
+    const std::string trimmed = trimWhitespace(line);
+
+    if (!inRequestedPhiSection) {
+      if (trimmed == phiSection) {
+        inRequestedPhiSection = true;
+      }
+      continue;
+    }
+
+    if (!inPolygonSection) {
+      if (trimmed == "Cut Polygon Parameters") {
+        inPolygonSection = true;
+      }
+      continue;
+    }
+
+    std::smatch match;
+
+    if (std::regex_match(line, match, cutModePattern)) {
+      result.cutMode = match[1].str();
+      continue;
+    }
+
+    if (std::regex_match(line, match, vertexCountPattern)) {
+      result.declaredVertices = std::stoi(match[1].str());
+      continue;
+    }
+
+    if (std::regex_match(line, match, vertexPattern)) {
+      const int index = std::stoi(match[1].str());
+      const double q2 = std::stod(match[2].str());
+      const double w = std::stod(match[3].str());
+
+      indexedVertices.push_back({index, {q2, w}});
+
+      if (
+        result.declaredVertices > 0 &&
+        static_cast<int>(indexedVertices.size()) >= result.declaredVertices
+      ) {
+        break;
+      }
+    }
+  }
+
+  if (
+    result.declaredVertices < 3 ||
+    static_cast<int>(indexedVertices.size()) < result.declaredVertices
+  ) {
+    return result;
+  }
+
+  std::sort(
+    indexedVertices.begin(),
+    indexedVertices.end(),
+    [](
+      const auto &left,
+      const auto &right
+    ) {
+      return left.first < right.first;
+    }
+  );
+
+  result.vertices.reserve(result.declaredVertices);
+
+  for (int expected = 1; expected <= result.declaredVertices; ++expected) {
+    const auto iterator = std::find_if(
+      indexedVertices.begin(),
+      indexedVertices.end(),
+      [expected](const auto &entry) {
+        return entry.first == expected;
+      }
+    );
+
+    if (iterator == indexedVertices.end()) {
+      result.vertices.clear();
+      return result;
+    }
+
+    result.vertices.push_back(iterator->second);
+  }
+
+  std::string normalizedMode = result.cutMode;
+  std::transform(
+    normalizedMode.begin(),
+    normalizedMode.end(),
+    normalizedMode.begin(),
+    [](unsigned char character) {
+      return static_cast<char>(std::tolower(character));
+    }
+  );
+
+  result.valid =
+    normalizedMode == "poly" &&
+    static_cast<int>(result.vertices.size()) == result.declaredVertices;
+
+  return result;
+}
+
+
+void printQ2WLikeBranches(
+  TTree *tree
+) {
+  if (!tree || !tree->GetListOfBranches()) {
+    return;
+  }
+
+  std::cerr << "Q2/W-like branches found in the tree:" << std::endl;
+
+  TObjArray *branches = tree->GetListOfBranches();
+
+  for (int index = 0; index < branches->GetEntries(); ++index) {
+    auto *branch = dynamic_cast<TBranch *>(branches->At(index));
+
+    if (!branch) {
+      continue;
+    }
+
+    TString name = branch->GetName();
+    TString lower = name;
+    lower.ToLower();
+
+    if (
+      lower.Contains("q2") ||
+      lower == "w" ||
+      lower.BeginsWith("w_") ||
+      lower.EndsWith("_w")
+    ) {
+      std::cerr << "  " << name << std::endl;
+    }
+  }
+}
+
+
 void check_slow_protons(
   const char *phi_setting = "Left",
   const char *Q2 = "3p0",
@@ -1632,7 +1828,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.9";
+  const char *macroVersion = "check_slow_protons.10";
 
   std::cout
     << "Running "
@@ -1682,11 +1878,17 @@ void check_slow_protons(
       epsSetting.Data()
     );
 
-  const TString inputDirectory =
+  const TString analysisDirectory =
     TString::Format(
       "$cache_transfer/%s/Trial_49/"
-      "2026June29_H00M23S53/root",
+      "2026June29_H00M23S53",
       kinematicSetting.Data()
+    );
+
+  const TString inputDirectory =
+    TString::Format(
+      "%s/root",
+      analysisDirectory.Data()
     );
 
   TString filename = gSystem->ExpandPathName(
@@ -1696,6 +1898,31 @@ void check_slow_protons(
       inputFileName.Data()
     )
   );
+
+  const char *summaryOverrideEnvironment =
+    gSystem->Getenv("PROTON_CHECKER_SUMMARY_FILE");
+
+  TString summaryFileName;
+
+  if (
+    summaryOverrideEnvironment &&
+    summaryOverrideEnvironment[0] != '\0'
+  ) {
+    summaryFileName = gSystem->ExpandPathName(
+      summaryOverrideEnvironment
+    );
+  } else {
+    summaryFileName = gSystem->ExpandPathName(
+      TString::Format(
+        "%s/kaon_FullAnalysis_Q%sW%s_%se_summary_"
+        "2026June29_H00M23S53.txt",
+        analysisDirectory.Data(),
+        q2Setting.Data(),
+        wSetting.Data(),
+        epsSetting.Data()
+      )
+    );
+  }
 
   const std::string treeName =
     "Cut_Kaon_Events_prompt_noRF";
@@ -1750,6 +1977,148 @@ void check_slow_protons(
     return;
   }
 
+  const PolygonCutDefinition phaseSpacePolygon =
+    readQ2WPolygonFromSummary(
+      summaryFileName.Data(),
+      phiSetting.Data()
+    );
+
+  if (!phaseSpacePolygon.valid) {
+    std::cerr
+      << "Unable to read a complete poly Cut Polygon Parameters section for "
+      << phiSetting
+      << " from summary file: "
+      << summaryFileName
+      << std::endl;
+
+    inputFile->Close();
+    return;
+  }
+
+  std::vector<std::string> q2BranchCandidates;
+  std::vector<std::string> wBranchCandidates;
+
+  const char *forcedQ2Branch =
+    gSystem->Getenv("PROTON_CHECKER_Q2_BRANCH");
+
+  const char *forcedWBranch =
+    gSystem->Getenv("PROTON_CHECKER_W_BRANCH");
+
+  if (forcedQ2Branch && forcedQ2Branch[0] != '\0') {
+    q2BranchCandidates.emplace_back(forcedQ2Branch);
+  }
+
+  if (forcedWBranch && forcedWBranch[0] != '\0') {
+    wBranchCandidates.emplace_back(forcedWBranch);
+  }
+
+  const std::vector<std::string> defaultQ2BranchCandidates = {
+    "Q2",
+    "Q2_calc",
+    "Q2_recon",
+    "Q2rec",
+    "kin_Q2",
+    "P_kin_Q2",
+    "H_kin_Q2"
+  };
+
+  const std::vector<std::string> defaultWBranchCandidates = {
+    "W",
+    "W_calc",
+    "W_recon",
+    "Wrec",
+    "kin_W",
+    "P_kin_W",
+    "H_kin_W"
+  };
+
+  q2BranchCandidates.insert(
+    q2BranchCandidates.end(),
+    defaultQ2BranchCandidates.begin(),
+    defaultQ2BranchCandidates.end()
+  );
+
+  wBranchCandidates.insert(
+    wBranchCandidates.end(),
+    defaultWBranchCandidates.begin(),
+    defaultWBranchCandidates.end()
+  );
+
+  const std::string q2PhaseSpaceBranch =
+    findAvailableBranch(tree, q2BranchCandidates);
+
+  const std::string wPhaseSpaceBranch =
+    findAvailableBranch(tree, wBranchCandidates);
+
+  if (
+    q2PhaseSpaceBranch.empty() ||
+    wPhaseSpaceBranch.empty()
+  ) {
+    std::cerr
+      << "Unable to locate the Q2 and W branches required by the summary polygon."
+      << std::endl;
+
+    printQ2WLikeBranches(tree);
+    inputFile->Close();
+    return;
+  }
+
+  const std::string phaseSpaceCutName =
+    TString::Format(
+      "proton_checker_q2_w_polygon_%s_Q%sW%s_%se",
+      phiSetting.Data(),
+      q2Setting.Data(),
+      wSetting.Data(),
+      epsSetting.Data()
+    ).Data();
+
+  auto *phaseSpaceCut = new TCutG(
+    phaseSpaceCutName.c_str(),
+    phaseSpacePolygon.declaredVertices
+  );
+
+  phaseSpaceCut->SetVarX(q2PhaseSpaceBranch.c_str());
+  phaseSpaceCut->SetVarY(wPhaseSpaceBranch.c_str());
+  phaseSpaceCut->SetTitle(
+    TString::Format(
+      "%s Q^{2}-W summary polygon;Q^{2} [GeV^{2}];W [GeV]",
+      phiSetting.Data()
+    )
+  );
+
+  for (
+    int vertex = 0;
+    vertex < phaseSpacePolygon.declaredVertices;
+    ++vertex
+  ) {
+    phaseSpaceCut->SetPoint(
+      vertex,
+      phaseSpacePolygon.vertices.at(vertex).first,
+      phaseSpacePolygon.vertices.at(vertex).second
+    );
+  }
+
+  if (
+    !gROOT->GetListOfSpecials()->FindObject(
+      phaseSpaceCutName.c_str()
+    )
+  ) {
+    gROOT->GetListOfSpecials()->Add(phaseSpaceCut);
+  }
+
+  std::cout
+    << "Loaded Q2-W polygon from "
+    << summaryFileName
+    << " for section "
+    << phiSetting
+    << ": "
+    << phaseSpacePolygon.declaredVertices
+    << " vertices; x="
+    << q2PhaseSpaceBranch
+    << ", y="
+    << wPhaseSpaceBranch
+    << std::endl;
+
   const std::string aeroBranch =
     "P_aero_npeSum";
 
@@ -1763,7 +2132,7 @@ void check_slow_protons(
   bool rfTimingAttempted = false;
   bool rfTimingSelected = false;
   bool ctTimingEvaluated = false;
-  bool ctFallbackUsed = false;  // retained as compatibility metadata; v9 does not use fallback selection
+  bool ctFallbackUsed = false;  // retained as compatibility metadata; v10 does not use fallback selection
   int rfProbeValidShapes = 0;
   int ctProbeValidShapes = 0;
   std::string timingSelectionReason;
@@ -1783,7 +2152,9 @@ void check_slow_protons(
     "ssyptar",
     "hsdelta",
     "hsxptar",
-    "hsyptar"
+    "hsyptar",
+    q2PhaseSpaceBranch,
+    wPhaseSpaceBranch
   };
 
   for (
@@ -1928,13 +2299,17 @@ void check_slow_protons(
   // Analysis cuts and RF/CT timing comparison.
   // ------------------------------------------------------------------
 
-  const std::string acceptanceCut =
+  const std::string baseAcceptanceCut =
     "ssdelta >= -10.0 && ssdelta <= 20.0 && "
     "ssxptar >= -0.06 && ssxptar <= 0.06 && "
     "ssyptar >= -0.04 && ssyptar <= 0.04 && "
     "hsdelta >= -8.0 && hsdelta <= 8.0 && "
     "hsxptar >= -0.08 && hsxptar <= 0.08 && "
     "hsyptar >= -0.045 && hsyptar <= 0.045";
+
+  const std::string acceptanceCut =
+    "(" + baseAcceptanceCut + ") && (" +
+    phaseSpaceCutName + ")";
 
   const char *disableRFEnvironment =
     gSystem->Getenv("PROTON_CHECKER_DISABLE_RF");
@@ -3038,7 +3413,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v9 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v10 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -3643,6 +4018,33 @@ void check_slow_protons(
       "timing_fit_max_ns",
       timingFitMax
     ).Write();
+
+    TNamed(
+      "q2_w_polygon_summary_file",
+      summaryFileName.Data()
+    ).Write();
+
+    TNamed(
+      "q2_w_polygon_phi_section",
+      phiSetting.Data()
+    ).Write();
+
+    TNamed(
+      "q2_w_polygon_q2_branch",
+      q2PhaseSpaceBranch.c_str()
+    ).Write();
+
+    TNamed(
+      "q2_w_polygon_w_branch",
+      wPhaseSpaceBranch.c_str()
+    ).Write();
+
+    TParameter<int>(
+      "q2_w_polygon_vertices",
+      phaseSpacePolygon.declaredVertices
+    ).Write();
+
+    phaseSpaceCut->Write("q2_w_polygon_cut");
 
     diagnosticOutputFile.Write();
     diagnosticOutputFile.Close();
@@ -4319,6 +4721,7 @@ void check_slow_protons(
   // V5 = RF-first branch scan with data-driven RF timing ranges, CTime_ROC1 fallback
   // V8 = single-period RF window selection and corrected RF component ordering
   // V9 = probe RF and CT on every run and select the better validated timing variable
+  // V10 = apply the summary-file Q2-vs-W polygon to every probe, fit, and event
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -5703,6 +6106,33 @@ void check_slow_protons(
     "timing_fit_max_ns",
     timingFitMax
   ).Write();
+
+  TNamed(
+    "q2_w_polygon_summary_file",
+    summaryFileName.Data()
+  ).Write();
+
+  TNamed(
+    "q2_w_polygon_phi_section",
+    phiSetting.Data()
+  ).Write();
+
+  TNamed(
+    "q2_w_polygon_q2_branch",
+    q2PhaseSpaceBranch.c_str()
+  ).Write();
+
+  TNamed(
+    "q2_w_polygon_w_branch",
+    wPhaseSpaceBranch.c_str()
+  ).Write();
+
+  TParameter<int>(
+    "q2_w_polygon_vertices",
+    phaseSpacePolygon.declaredVertices
+  ).Write();
+
+  phaseSpaceCut->Write("q2_w_polygon_cut");
 
   TParameter<Long64_t>(
     "selected_events",
