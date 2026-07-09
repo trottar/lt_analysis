@@ -212,7 +212,7 @@ def _resolve_beam_bunch_spacing_ns(source_bundle):
     return 4.0 if epsset == "high" else 2.0
 
 
-def _build_signed_timing_projection(
+def _build_unweighted_timing_projection(
     source_bundle,
     evaluate_event,
     hole_contains,
@@ -235,14 +235,7 @@ def _build_signed_timing_projection(
     projection.Sumw2()
     for source_spec in ((source_bundle or {}).get("sources") or {}).values():
         tree = (source_spec or {}).get("tree")
-        coefficient = float(
-            (source_spec or {}).get(
-                "fit_coefficient",
-                (source_spec or {}).get("coefficient", 0.0),
-            )
-            or 0.0
-        )
-        if tree is None or coefficient == 0.0 or not _tree_has_branch(tree, branch_name):
+        if tree is None or not _tree_has_branch(tree, branch_name):
             continue
         for evt in tree:
             if not _preselection_passes(evt, evaluate_event, hole_contains, mm_min, mm_max):
@@ -253,7 +246,7 @@ def _build_signed_timing_projection(
                 continue
             if (not math.isfinite(timing_value)) or timing_value < time_min or timing_value > time_max:
                 continue
-            projection.Fill(timing_value, coefficient)
+            projection.Fill(timing_value)
     return projection
 
 
@@ -267,29 +260,18 @@ def _resolve_rf_probe_display_range(
 ):
     beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
     fallback_range = (-float(beam_bunch_spacing_ns), float(beam_bunch_spacing_ns))
-    provisional_width = float(fallback_range[1] - fallback_range[0])
-    provisional_bins = max(
-        160,
-        int(round(provisional_width / 0.015)),
-    )
-    provisional_hist = _build_signed_timing_projection(
+    branch_values = _collect_branch_values(
         source_bundle,
         evaluate_event,
         hole_contains,
         mm_min,
         mm_max,
         timing_branch,
-        "H_proton_cleaning_rf_probe_raw_{}".format(str(timing_branch).replace(" ", "_")),
-        fallback_range,
-        provisional_bins,
     )
-    raw_display_range = _find_central_quantile_range(
-        provisional_hist,
+    raw_display_range = _estimate_value_central_range(
+        branch_values,
         fallback_range[0],
         fallback_range[1],
-        5.0e-4,
-        5.0e-4,
-        2,
     )
     raw_display_min, raw_display_max = [float(value) for value in raw_display_range]
     if raw_display_max <= raw_display_min:
@@ -310,6 +292,12 @@ def _resolve_rf_probe_display_range(
         (raw_display_min, raw_display_max),
         search_bins,
     )
+    rf_window_search.Reset()
+    for value in branch_values:
+        timing_value = float(value)
+        if (not math.isfinite(timing_value)) or timing_value < raw_display_min or timing_value > raw_display_max:
+            continue
+        rf_window_search.Fill(timing_value)
     raw_peak_pair = _find_separated_peak_pair(
         rf_window_search,
         raw_display_min,
