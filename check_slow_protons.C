@@ -1020,7 +1020,7 @@ TF1 *makeConstantComponent(
 }
 
 
-void test() {
+void check_slow_protons() {
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
