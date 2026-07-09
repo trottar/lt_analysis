@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-runner_version="2"
+runner_version="3"
 
 if [[ $# -ne 4 ]]; then
     echo "Usage: $0 <phi_setting> <Q2> <W> <eps_setting>" >&2

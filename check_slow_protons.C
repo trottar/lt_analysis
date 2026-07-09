@@ -1434,7 +1434,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.5";
+  const char *macroVersion = "check_slow_protons.6";
 
   std::cout
     << "Running "
@@ -1619,46 +1619,30 @@ void check_slow_protons(
   const double beamBunchSpacingNs =
     isHighEpsilon ? 4.0 : 2.0;
 
-  // Preserve the existing diagnostic/display ranges. For high epsilon,
-  // the fit range is later restricted to the populated timing support so
-  // empty bins outside that support do not pull the likelihood.
+  // Keep the wider high-epsilon display window implied by the 4 ns
+  // bunch spacing, but use exactly the same CT fit procedure, constraints,
+  // seeds, and validation as low epsilon.  RF probing remains data-driven.
   double timeMin = -beamBunchSpacingNs;
   double timeMax = beamBunchSpacingNs;
 
   double timingFitMin = timeMin;
   double timingFitMax = timeMax;
 
-  // Retain the low-epsilon constraints. The high-epsilon timing
-  // distributions are broader, requiring wider mean/sigma bounds and seed.
-  double kaonMeanMin =
-    isHighEpsilon ? -1.50 : -0.45;
-
-  double kaonMeanMax =
-    isHighEpsilon ? 0.25 : 0.20;
-
-  double protonMeanMin =
-    isHighEpsilon ? 0.25 : 0.20;
-
-  double protonMeanMax =
-    isHighEpsilon ? 1.80 : 0.95;
+  double kaonMeanMin = -0.45;
+  double kaonMeanMax = 0.20;
+  double protonMeanMin = 0.20;
+  double protonMeanMax = 0.95;
 
   const double timingSigmaMin = 0.03;
-
-  double timingSigmaMax =
-    isHighEpsilon ? 1.20 : 0.45;
-
-  double timingSigmaInitial =
-    isHighEpsilon ? 0.65 : 0.15;
+  double timingSigmaMax = 0.45;
+  double timingSigmaInitial = 0.15;
 
   const double minimumGlobalSeparation = 0.75;
   const double minimumGlobalAmplitudeSignificance = 2.0;
 
-  // A Poisson likelihood is used for all fits.  For low epsilon, retain
-  // the previous reduced-deviance validation.  At high epsilon the very
-  // large sample sizes make D/ndf dominated by small model imperfections,
-  // so validation uses the less sample-size-sensitive D/N diagnostic.
-  const bool useDeviancePerEntryValidation =
-    isHighEpsilon;
+  // Use the same reduced Poisson-deviance validation for both epsilon
+  // settings.
+  const bool useDeviancePerEntryValidation = false;
 
   const double maximumGlobalPoissonDevianceNdf = 5.0;
   const double maximumGlobalPoissonDeviancePerEntry = 0.85;
@@ -2238,31 +2222,6 @@ void check_slow_protons(
 
     inputFile->Close();
     return;
-  }
-
-  if (isHighEpsilon) {
-    auto *allAeroTiming = hGlobalPID->ProjectionY(
-      "h_global_time_all_aero_for_fit_range",
-      1,
-      hGlobalPID->GetNbinsX(),
-      "e"
-    );
-
-    allAeroTiming->SetDirectory(nullptr);
-
-    const auto centralFitRange = findCentralQuantileRange(
-      allAeroTiming,
-      timeMin,
-      timeMax,
-      5.0e-4,
-      5.0e-4,
-      2
-    );
-
-    timingFitMin = centralFitRange.first;
-    timingFitMax = centralFitRange.second;
-
-    delete allAeroTiming;
   }
 
   std::cout
