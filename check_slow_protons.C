@@ -44,8 +44,6 @@ enum class SupportClass {
 
 struct TimingShape {
   bool valid = false;
-  bool failedBin = false;
-  bool hasOtherPeak = false;
   bool boundHit = false;
 
   int fitStatus = -999;
@@ -60,17 +58,7 @@ struct TimingShape {
   double protonMean = 0.0;
   double protonSigma = 0.0;
 
-  // Constant pedestal used by the ordinary two-Gaussian fit.
   double otherAmplitude = 0.0;
-
-  // A resolved peak on the side opposite the expected proton peak.  This
-  // is populated only for a failed-bin background model; it is not called
-  // a proton and is removed together with the proton contamination.
-  double otherPeakAmplitude = 0.0;
-  double otherPeakAmplitudeError = 0.0;
-  double otherPeakMean = 0.0;
-  double otherPeakSigma = 0.0;
-  double otherPeakSignificance = 0.0;
 
   double separation = 0.0;
   double kaonSignificance = 0.0;
@@ -82,6 +70,8 @@ struct TimingShape {
 
   double fitMin = 0.0;
   double fitMax = 0.0;
+  double appliedMeanOffset = 0.0;
+  bool offsetAdjusted = false;
   bool perAeroFallback = false;
 
   TF1 *fitFunction = nullptr;
@@ -90,8 +80,6 @@ struct TimingShape {
 
 struct SliceFitResult {
   bool valid = false;
-  bool failedBin = false;
-  bool hasOtherPeak = false;
 
   int fitStatus = -999;
 
@@ -101,18 +89,12 @@ struct SliceFitResult {
   double protonAmplitude = 0.0;
   double protonAmplitudeError = 0.0;
 
-  // For ordinary bins this is the constant pedestal.  For failed bins it
-  // is the resolved opposite-side Gaussian background peak.
   double otherAmplitude = 0.0;
   double otherAmplitudeError = 0.0;
-
-  double pedestalAmplitude = 0.0;
-  double pedestalAmplitudeError = 0.0;
 
   double kaonYield = 0.0;
   double protonYield = 0.0;
   double otherYield = 0.0;
-  double pedestalYield = 0.0;
 
   double dataYield = 0.0;
   double modelYield = 0.0;
@@ -124,13 +106,6 @@ struct SliceFitResult {
   double poissonDeviancePerEntry = 0.0;
 
   TF1 *fitFunction = nullptr;
-};
-
-
-struct EventBackgroundProbability {
-  double proton = 0.0;
-  double other = 0.0;
-  double total = 0.0;
 };
 
 
@@ -1300,6 +1275,8 @@ TimingShape fitPerAeroFallbackTimingShape(
   double displayMax,
   bool protonPeakIsLower,
   double beamBunchSpacingNs,
+  double referenceKaonMean,
+  double referenceProtonMean,
   double sigmaMin,
   double minimumAmplitudeSignificance,
   int minimumEntries
@@ -1323,8 +1300,8 @@ TimingShape fitPerAeroFallbackTimingShape(
     2
   );
 
-  // The aggregate RF distribution can select a shoulder of the dominant
-  // kaon peak and miss a strong lower-time proton peak.  This last-resort
+  // The aggregate timing distribution can select a shoulder of the
+  // dominant peak and miss the second physical peak.  This last-resort
   // pass therefore derives the pair separately in every aerogel slice.
   PeakPairSeed peakPair = findSeparatedPeakPair(
     histogram,
@@ -1355,21 +1332,77 @@ TimingShape fitPerAeroFallbackTimingShape(
     return result;
   }
 
+  // The last-resort fit is allowed to translate the established K/p pair
+  // together when a setting has a timing offset.  Only a common offset is
+  // applied, so the physical ordering and nominal K-p separation are kept.
+  // RF and CT both use K on the lower-time side and p on the higher-time
+  // side in this version.
+  const double localMidpoint = 0.5 * (
+    peakPair.lowerMean + peakPair.upperMean
+  );
+
+  const bool referencePairValid =
+    std::isfinite(referenceKaonMean) &&
+    std::isfinite(referenceProtonMean) &&
+    referenceProtonMean > referenceKaonMean;
+
+  double targetKaonMean = peakPair.lowerMean;
+  double targetProtonMean = peakPair.upperMean;
+  double appliedMeanOffset = 0.0;
+  bool offsetAdjusted = false;
+
+  if (referencePairValid) {
+    const double referenceMidpoint = 0.5 * (
+      referenceKaonMean + referenceProtonMean
+    );
+
+    const double referenceSeparation =
+      referenceProtonMean - referenceKaonMean;
+
+    // Use a translated reference pair when its separation remains
+    // compatible with the two peaks resolved in this aerogel slice.
+    if (
+      referenceSeparation >= 0.55 * seedSeparation &&
+      referenceSeparation <= 1.80 * seedSeparation
+    ) {
+      appliedMeanOffset =
+        localMidpoint - referenceMidpoint;
+      offsetAdjusted =
+        std::abs(appliedMeanOffset) > 1.0e-6;
+
+      targetKaonMean =
+        referenceKaonMean + appliedMeanOffset;
+      targetProtonMean =
+        referenceProtonMean + appliedMeanOffset;
+    }
+  }
+
+  // Never permit an offset to reverse the physical RF/CT assignment.
+  if (!(targetProtonMean > targetKaonMean)) {
+    targetKaonMean = peakPair.lowerMean;
+    targetProtonMean = peakPair.upperMean;
+    appliedMeanOffset = 0.0;
+    offsetAdjusted = false;
+  }
+
+  const double targetSeparation =
+    targetProtonMean - targetKaonMean;
+
   const double localFitMin = std::max(
     displayMin,
-    peakPair.lowerMean - std::clamp(
-      0.65 * seedSeparation,
+    std::min(peakPair.lowerMean, targetKaonMean) - std::clamp(
+      0.65 * std::max(seedSeparation, targetSeparation),
       0.28,
-      0.50
+      0.55
     )
   );
 
   const double localFitMax = std::min(
     displayMax,
-    peakPair.upperMean + std::clamp(
-      0.55 * seedSeparation,
+    std::max(peakPair.upperMean, targetProtonMean) + std::clamp(
+      0.55 * std::max(seedSeparation, targetSeparation),
       0.24,
-      0.45
+      0.50
     )
   );
 
@@ -1378,38 +1411,48 @@ TimingShape fitPerAeroFallbackTimingShape(
   }
 
   const double split = 0.5 * (
-    peakPair.lowerMean + peakPair.upperMean
+    targetKaonMean + targetProtonMean
   );
 
-  const double meanHalfWidth = std::clamp(
-    0.32 * seedSeparation,
+  const double baseMeanHalfWidth = std::clamp(
+    0.32 * std::max(seedSeparation, targetSeparation),
     0.10,
     0.22
   );
 
+  // Ensure the detected local maxima remain inside the translated windows.
+  const double meanHalfWidth = std::min(
+    0.32,
+    std::max({
+      baseMeanHalfWidth,
+      std::abs(targetKaonMean - peakPair.lowerMean) + 0.04,
+      std::abs(targetProtonMean - peakPair.upperMean) + 0.04
+    })
+  );
+
   const double orderingGap = std::max(
     0.008,
-    0.02 * seedSeparation
+    0.02 * std::min(seedSeparation, targetSeparation)
   );
 
   const double lowerMeanMin = std::max(
     localFitMin,
-    peakPair.lowerMean - meanHalfWidth
+    targetKaonMean - meanHalfWidth
   );
 
   const double lowerMeanMax = std::min(
     split - orderingGap,
-    peakPair.lowerMean + meanHalfWidth
+    targetKaonMean + meanHalfWidth
   );
 
   const double upperMeanMin = std::max(
     split + orderingGap,
-    peakPair.upperMean - meanHalfWidth
+    targetProtonMean - meanHalfWidth
   );
 
   const double upperMeanMax = std::min(
     localFitMax,
-    peakPair.upperMean + meanHalfWidth
+    targetProtonMean + meanHalfWidth
   );
 
   if (
@@ -1474,101 +1517,19 @@ TimingShape fitPerAeroFallbackTimingShape(
 
   result.fitMin = localFitMin;
   result.fitMax = localFitMax;
+  result.appliedMeanOffset = appliedMeanOffset;
+  result.offsetAdjusted = offsetAdjusted;
   result.perAeroFallback = true;
 
-  // Keep the ordinary physical validation unchanged.  A constrained or
-  // otherwise failed proton-kaon assignment is not promoted to a valid
-  // proton bin here.  The caller may classify it explicitly as a failed
-  // bin and test the opposite side as an independent "other" background.
-
-  return result;
-}
-
-
-bool timingShapeUsable(
-  const TimingShape &shape
-) {
-  return shape.valid || (
-    shape.failedBin &&
-    shape.hasOtherPeak
-  );
-}
-
-
-bool acceptPhysicalPerAeroFallback(
-  const TimingShape &shape,
-  bool protonPeakIsLower,
-  double minimumAmplitudeSignificance
-) {
-  const bool fitStatusAccepted =
-    shape.fitStatus == 0 ||
-    (
-      shape.fitStatus == 4 &&
-      std::isfinite(shape.poissonDeviancePerEntry) &&
-      shape.poissonDeviancePerEntry <= 0.05
-    );
-
-  const bool orderingAccepted =
-    protonPeakIsLower
-      ? shape.protonMean < shape.kaonMean
-      : shape.kaonMean < shape.protonMean;
-
-  const double minimumSignificance =
-    std::max(
-      1.5,
-      0.75 * minimumAmplitudeSignificance
-    );
-
-  return
-    fitStatusAccepted &&
-    std::isfinite(shape.kaonAmplitude) &&
-    std::isfinite(shape.protonAmplitude) &&
-    std::isfinite(shape.kaonMean) &&
-    std::isfinite(shape.protonMean) &&
-    std::isfinite(shape.kaonSigma) &&
-    std::isfinite(shape.protonSigma) &&
-    std::isfinite(shape.poissonDeviancePerEntry) &&
-    shape.kaonAmplitude > 0.0 &&
-    shape.protonAmplitude > 0.0 &&
-    shape.kaonSigma > 0.0 &&
-    shape.protonSigma > 0.0 &&
-    orderingAccepted &&
-    shape.separation >= 0.55 &&
-    shape.kaonSignificance >= minimumSignificance &&
-    shape.protonSignificance >= minimumSignificance &&
-    shape.poissonDeviancePerEntry <= 0.35;
-}
-
-
-TimingShape fitFailedBinOtherShape(
-  TH1D *histogram,
-  const std::string &functionName,
-  double displayMin,
-  double displayMax,
-  bool expectedProtonPeakIsLower,
-  double beamBunchSpacingNs,
-  double sigmaMin,
-  double minimumAmplitudeSignificance,
-  int minimumEntries
-) {
-  // Test the side opposite the expected proton location.  The second
-  // component is deliberately classified as "other", not as a proton.
-  TimingShape result = fitPerAeroFallbackTimingShape(
-    histogram,
-    functionName,
-    displayMin,
-    displayMax,
-    !expectedProtonPeakIsLower,
-    beamBunchSpacingNs,
-    sigmaMin,
-    minimumAmplitudeSignificance,
-    minimumEntries
-  );
-
-  const bool alternatePeakIsLower =
-    !expectedProtonPeakIsLower;
-
-  const bool fitStatusAccepted =
+  // The per-aerogel pass is the deepest fallback and intentionally uses
+  // tight, data-driven mean and sigma bounds.  A component landing on one
+  // of those bounds is therefore not, by itself, evidence that the two
+  // physical peaks were misidentified.  Re-evaluate validity here using
+  // the same physical ordering and quality checks as the normal fits, but
+  // do not reject a shape solely because a constrained parameter is near
+  // its fallback bound.  This path is reached only after every standard
+  // RF/CT procedure has produced zero validated shapes.
+  const bool fallbackFitStatusAccepted =
     result.fitStatus == 0 ||
     (
       result.fitStatus == 4 &&
@@ -1576,19 +1537,13 @@ TimingShape fitFailedBinOtherShape(
       result.poissonDeviancePerEntry <= 0.05
     );
 
-  const bool orderingAccepted =
-    alternatePeakIsLower
+  const bool fallbackOrderingAccepted =
+    protonPeakIsLower
       ? result.protonMean < result.kaonMean
       : result.kaonMean < result.protonMean;
 
-  const double minimumSignificance =
-    std::max(
-      1.5,
-      0.75 * minimumAmplitudeSignificance
-    );
-
-  const bool alternateBackgroundAccepted =
-    fitStatusAccepted &&
+  result.valid =
+    fallbackFitStatusAccepted &&
     std::isfinite(result.kaonAmplitude) &&
     std::isfinite(result.protonAmplitude) &&
     std::isfinite(result.kaonMean) &&
@@ -1600,61 +1555,13 @@ TimingShape fitFailedBinOtherShape(
     result.protonAmplitude > 0.0 &&
     result.kaonSigma > 0.0 &&
     result.protonSigma > 0.0 &&
-    orderingAccepted &&
+    fallbackOrderingAccepted &&
     result.separation >= 0.55 &&
-    result.kaonSignificance >= minimumSignificance &&
-    result.protonSignificance >= minimumSignificance &&
+    result.kaonSignificance >=
+      std::max(1.5, 0.75 * minimumAmplitudeSignificance) &&
+    result.protonSignificance >=
+      std::max(1.5, 0.75 * minimumAmplitudeSignificance) &&
     result.poissonDeviancePerEntry <= 0.35;
-
-  if (!alternateBackgroundAccepted) {
-    result.valid = false;
-    result.failedBin = false;
-    result.hasOtherPeak = false;
-    return result;
-  }
-
-  result.valid = false;
-  result.failedBin = true;
-  result.hasOtherPeak = true;
-
-  result.otherPeakAmplitude =
-    result.protonAmplitude;
-  result.otherPeakAmplitudeError =
-    result.protonAmplitudeError;
-  result.otherPeakMean =
-    result.protonMean;
-  result.otherPeakSigma =
-    result.protonSigma;
-  result.otherPeakSignificance =
-    result.protonSignificance;
-
-  // A failed-bin model has no identified proton component.  The resolved
-  // opposite-side peak is carried separately as "other" and contributes
-  // to the removable background probability downstream.
-  result.protonAmplitude = 0.0;
-  result.protonAmplitudeError = 0.0;
-  result.protonMean = 0.0;
-  result.protonSigma = 0.0;
-  result.protonSignificance = 0.0;
-
-  if (result.fitFunction) {
-    result.fitFunction->SetParName(
-      3,
-      "other amplitude"
-    );
-    result.fitFunction->SetParName(
-      4,
-      "other mean"
-    );
-    result.fitFunction->SetParName(
-      5,
-      "other sigma"
-    );
-    result.fitFunction->SetParName(
-      6,
-      "pedestal"
-    );
-  }
 
   return result;
 }
@@ -1674,12 +1581,10 @@ SliceFitResult fitDeltaTimingSlice(
   int minimumEntries
 ) {
   SliceFitResult result;
-  result.failedBin = shape.failedBin;
-  result.hasOtherPeak = shape.hasOtherPeak;
 
   if (
     !histogram ||
-    !timingShapeUsable(shape) ||
+    !shape.valid ||
     histogram->Integral() < minimumEntries
   ) {
     return result;
@@ -1700,21 +1605,13 @@ SliceFitResult fitDeltaTimingSlice(
         2.0 * shape.kaonSigma
     );
 
-  const double secondMean =
-    shape.failedBin
-      ? shape.otherPeakMean
-      : shape.protonMean;
-
-  const double secondSigma =
-    shape.failedBin
-      ? shape.otherPeakSigma
-      : shape.protonSigma;
-
-  const auto secondSeed =
+  const auto protonSeed =
     findPeakSeed(
       histogram,
-      secondMean - 2.0 * secondSigma,
-      secondMean + 2.0 * secondSigma
+      shape.protonMean -
+        2.0 * shape.protonSigma,
+      shape.protonMean +
+        2.0 * shape.protonSigma
     );
 
   auto *fitFunction = new TF1(
@@ -1731,31 +1628,11 @@ SliceFitResult fitDeltaTimingSlice(
   fitFunction->SetParName(1, "K mean");
   fitFunction->SetParName(2, "K sigma");
 
-  fitFunction->SetParName(
-    3,
-    shape.failedBin
-      ? "other amplitude"
-      : "p amplitude"
-  );
-  fitFunction->SetParName(
-    4,
-    shape.failedBin
-      ? "other mean"
-      : "p mean"
-  );
-  fitFunction->SetParName(
-    5,
-    shape.failedBin
-      ? "other sigma"
-      : "p sigma"
-  );
+  fitFunction->SetParName(3, "p amplitude");
+  fitFunction->SetParName(4, "p mean");
+  fitFunction->SetParName(5, "p sigma");
 
-  fitFunction->SetParName(
-    6,
-    shape.failedBin
-      ? "pedestal"
-      : "other constant"
-  );
+  fitFunction->SetParName(6, "other constant");
 
   fitFunction->SetParameter(
     0,
@@ -1784,7 +1661,7 @@ SliceFitResult fitDeltaTimingSlice(
   fitFunction->SetParameter(
     3,
     std::max(
-      secondSeed.first,
+      protonSeed.first,
       0.05 * histogramMaximum
     )
   );
@@ -1797,12 +1674,12 @@ SliceFitResult fitDeltaTimingSlice(
 
   fitFunction->FixParameter(
     4,
-    secondMean
+    shape.protonMean
   );
 
   fitFunction->FixParameter(
     5,
-    secondSigma
+    shape.protonSigma
   );
 
   fitFunction->SetParameter(
@@ -1834,16 +1711,16 @@ SliceFitResult fitDeltaTimingSlice(
   result.kaonAmplitudeError =
     fitFunction->GetParError(0);
 
-  const double secondAmplitude =
+  result.protonAmplitude =
     fitFunction->GetParameter(3);
 
-  const double secondAmplitudeError =
+  result.protonAmplitudeError =
     fitFunction->GetParError(3);
 
-  const double constantAmplitude =
+  result.otherAmplitude =
     fitFunction->GetParameter(6);
 
-  const double constantAmplitudeError =
+  result.otherAmplitudeError =
     fitFunction->GetParError(6);
 
   result.kaonYield =
@@ -1856,63 +1733,23 @@ SliceFitResult fitDeltaTimingSlice(
       fitMax
     );
 
-  if (shape.failedBin) {
-    result.protonAmplitude = 0.0;
-    result.protonAmplitudeError = 0.0;
-    result.protonYield = 0.0;
+  result.protonYield =
+    sumGaussianOverBins(
+      histogram,
+      result.protonAmplitude,
+      shape.protonMean,
+      shape.protonSigma,
+      fitMin,
+      fitMax
+    );
 
-    result.otherAmplitude =
-      secondAmplitude;
-    result.otherAmplitudeError =
-      secondAmplitudeError;
-    result.otherYield =
-      sumGaussianOverBins(
-        histogram,
-        result.otherAmplitude,
-        shape.otherPeakMean,
-        shape.otherPeakSigma,
-        fitMin,
-        fitMax
-      );
-
-    result.pedestalAmplitude =
-      constantAmplitude;
-    result.pedestalAmplitudeError =
-      constantAmplitudeError;
-    result.pedestalYield =
-      sumConstantOverBins(
-        histogram,
-        result.pedestalAmplitude,
-        fitMin,
-        fitMax
-      );
-  } else {
-    result.protonAmplitude =
-      secondAmplitude;
-    result.protonAmplitudeError =
-      secondAmplitudeError;
-    result.protonYield =
-      sumGaussianOverBins(
-        histogram,
-        result.protonAmplitude,
-        shape.protonMean,
-        shape.protonSigma,
-        fitMin,
-        fitMax
-      );
-
-    result.otherAmplitude =
-      constantAmplitude;
-    result.otherAmplitudeError =
-      constantAmplitudeError;
-    result.otherYield =
-      sumConstantOverBins(
-        histogram,
-        result.otherAmplitude,
-        fitMin,
-        fitMax
-      );
-  }
+  result.otherYield =
+    sumConstantOverBins(
+      histogram,
+      result.otherAmplitude,
+      fitMin,
+      fitMax
+    );
 
   const int firstFitBin =
     std::max(
@@ -1944,8 +1781,7 @@ SliceFitResult fitDeltaTimingSlice(
   result.modelYield =
     result.kaonYield +
     result.protonYield +
-    result.otherYield +
-    result.pedestalYield;
+    result.otherYield;
 
   if (result.dataYield > 0.0) {
     result.modelDataRatio =
@@ -1982,18 +1818,15 @@ SliceFitResult fitDeltaTimingSlice(
     std::isfinite(result.kaonAmplitude) &&
     std::isfinite(result.protonAmplitude) &&
     std::isfinite(result.otherAmplitude) &&
-    std::isfinite(result.pedestalAmplitude) &&
     std::isfinite(result.kaonYield) &&
     std::isfinite(result.protonYield) &&
     std::isfinite(result.otherYield) &&
-    std::isfinite(result.pedestalYield) &&
     std::isfinite(result.modelDataRatio) &&
     std::isfinite(result.poissonDevianceNdf) &&
     std::isfinite(result.poissonDeviancePerEntry) &&
     result.kaonAmplitude >= 0.0 &&
     result.protonAmplitude >= 0.0 &&
     result.otherAmplitude >= 0.0 &&
-    result.pedestalAmplitude >= 0.0 &&
     result.modelYield > 0.0 &&
     result.modelDataRatio >=
       minimumModelDataRatio &&
@@ -2011,20 +1844,26 @@ SliceFitResult fitDeltaTimingSlice(
 }
 
 
-EventBackgroundProbability evaluateEventBackgroundProbability(
+double evaluateEventProtonProbability(
   double timing,
   const TimingShape &shape,
   const SliceFitResult &fitResult,
   double denominatorFloor
 ) {
-  EventBackgroundProbability result;
-
   if (
-    !timingShapeUsable(shape) ||
+    !shape.valid ||
     !fitResult.valid
   ) {
-    return result;
+    return 0.0;
   }
+
+  const double protonValue =
+    evaluateGaussian(
+      timing,
+      fitResult.protonAmplitude,
+      shape.protonMean,
+      shape.protonSigma
+    );
 
   const double kaonValue =
     evaluateGaussian(
@@ -2034,72 +1873,29 @@ EventBackgroundProbability evaluateEventBackgroundProbability(
       shape.kaonSigma
     );
 
-  double protonValue = 0.0;
-  double otherPeakValue = 0.0;
-  double pedestalValue = 0.0;
-
-  if (shape.failedBin && shape.hasOtherPeak) {
-    otherPeakValue =
-      evaluateGaussian(
-        timing,
-        fitResult.otherAmplitude,
-        shape.otherPeakMean,
-        shape.otherPeakSigma
-      );
-
-    pedestalValue =
-      std::max(
-        fitResult.pedestalAmplitude,
-        0.0
-      );
-  } else {
-    protonValue =
-      evaluateGaussian(
-        timing,
-        fitResult.protonAmplitude,
-        shape.protonMean,
-        shape.protonSigma
-      );
-
-    pedestalValue =
-      std::max(
-        fitResult.otherAmplitude,
-        0.0
-      );
-  }
+  const double otherValue =
+    std::max(
+      fitResult.otherAmplitude,
+      0.0
+    );
 
   const double denominator =
     protonValue +
-    otherPeakValue +
     kaonValue +
-    pedestalValue;
+    otherValue;
 
   if (
     !std::isfinite(denominator) ||
     denominator <= denominatorFloor
   ) {
-    return result;
+    return 0.0;
   }
 
-  result.proton = std::clamp(
+  return std::clamp(
     protonValue / denominator,
     0.0,
     1.0
   );
-
-  result.other = std::clamp(
-    otherPeakValue / denominator,
-    0.0,
-    1.0
-  );
-
-  result.total = std::clamp(
-    result.proton + result.other,
-    0.0,
-    1.0
-  );
-
-  return result;
 }
 
 
@@ -2360,7 +2156,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.17";
+  const char *macroVersion = "check_slow_protons.18";
 
   std::cout
     << "Running "
@@ -2724,7 +2520,8 @@ void check_slow_protons(
   // evaluates both the best available RF timing branch and CTime_ROC1,
   // then chooses the timing variable with the stronger validated global
   // proton-kaon discrimination.  No RF phase correction or wrapping is
-  // applied.
+  // applied.  The proton component is always constrained to the
+  // higher-time side of the kaon component.
   const double beamBunchSpacingNs =
     isHighEpsilon ? 4.0 : 2.0;
 
@@ -3529,13 +3326,13 @@ void check_slow_protons(
       );
 
       probe.peakPairFound = true;
-      probe.protonSeedMean = fittedPeakPair.lowerMean;
-      probe.kaonSeedMean = fittedPeakPair.upperMean;
+      probe.kaonSeedMean = fittedPeakPair.lowerMean;
+      probe.protonSeedMean = fittedPeakPair.upperMean;
     }
 
     delete allAeroTiming;
 
-    // RF timing has the proton peak on the lower-time side and the kaon
+    // RF timing has the kaon peak on the lower-time side and the proton
     // peak on the upper-time side.  The normal pass keeps the established
     // full-window procedure.  The local-peak rescue is entered only after
     // both normal passes fail; it narrows the fit to the resolved peak pair
@@ -3579,19 +3376,19 @@ void check_slow_protons(
         0.03 * seedSeparation
       );
 
-      probe.protonMeanMin = std::max(
+      probe.kaonMeanMin = std::max(
         probe.fitMin,
         fittedPeakPair.lowerMean - meanHalfWidth
       );
-      probe.protonMeanMax = std::min(
+      probe.kaonMeanMax = std::min(
         split - orderingGap,
         fittedPeakPair.lowerMean + meanHalfWidth
       );
-      probe.kaonMeanMin = std::max(
+      probe.protonMeanMin = std::max(
         split + orderingGap,
         fittedPeakPair.upperMean - meanHalfWidth
       );
-      probe.kaonMeanMax = std::min(
+      probe.protonMeanMax = std::min(
         probe.fitMax,
         fittedPeakPair.upperMean + meanHalfWidth
       );
@@ -3607,10 +3404,10 @@ void check_slow_protons(
         0.16
       );
     } else {
-      probe.protonMeanMin = probe.fitMin;
-      probe.protonMeanMax = split;
-      probe.kaonMeanMin = split;
-      probe.kaonMeanMax = probe.fitMax;
+      probe.kaonMeanMin = probe.fitMin;
+      probe.kaonMeanMax = split;
+      probe.protonMeanMin = split;
+      probe.protonMeanMax = probe.fitMax;
       probe.sigmaMax = timingSigmaMax;
       probe.sigmaInitial = timingSigmaInitial;
     }
@@ -3681,7 +3478,7 @@ void check_slow_protons(
         probe.kaonMeanMax,
         probe.protonMeanMin,
         probe.protonMeanMax,
-        true,
+        false,
         timingSigmaMin,
         probe.sigmaMax,
         probe.sigmaInitial,
@@ -4612,9 +4409,10 @@ void check_slow_protons(
       "local_peak_rescue_" + timingSelectionReason;
   }
 
-  // RF: proton is the left/lower-time peak.
-  // CTime_ROC1: proton is the right/higher-time peak.
-  const bool protonPeakIsLower = rfTimingSelected;
+  // Both RF and CTime_ROC1 use the physical assignment K on the
+  // left/lower-time side and p on the right/higher-time side.  Any fallback
+  // timing offset translates the pair without changing this ordering.
+  const bool protonPeakIsLower = false;
 
   const bool activeUseDeviancePerEntryValidation =
     timingFitUsedLocalPeakRescue
@@ -4885,14 +4683,12 @@ void check_slow_protons(
   // entered only after the diamond, pre-diamond, and aggregate local-peak
   // procedures have all returned zero valid global shapes.
   if (
-    validGlobalShapes < nAeroSlices &&
+    validGlobalShapes == 0 &&
     timingFitUsedLocalPeakRescue
   ) {
     std::cout
-      << "Aggregate local-peak rescue left "
-      << (nAeroSlices - validGlobalShapes)
-      << " unresolved aerogel bins. Trying independent peak seeds and "
-      << "failed-bin other classification only in those bins."
+      << "Aggregate local-peak rescue produced zero valid shapes. "
+      << "Trying offset-adjusted peak seeds in each aerogel slice."
       << std::endl;
 
     timingFitUsedPerAeroFallback = true;
@@ -4906,10 +4702,6 @@ void check_slow_protons(
     ) {
       TimingShape &oldShape =
         globalShapes.at(aeroSlice);
-
-      if (oldShape.valid) {
-        continue;
-      }
 
       if (oldShape.fitFunction) {
         delete oldShape.fitFunction;
@@ -4933,7 +4725,7 @@ void check_slow_protons(
         )
       );
 
-      TimingShape physicalShape =
+      globalShapes.at(aeroSlice) =
         fitPerAeroFallbackTimingShape(
           projection,
           TString::Format(
@@ -4944,123 +4736,38 @@ void check_slow_protons(
           timeMax,
           protonPeakIsLower,
           beamBunchSpacingNs,
+          0.5 * (kaonMeanMin + kaonMeanMax),
+          0.5 * (protonMeanMin + protonMeanMax),
           timingSigmaMin,
           minimumGlobalAmplitudeSignificance,
           minimumGlobalSliceEntries
         );
 
-      if (
-        !physicalShape.valid &&
-        acceptPhysicalPerAeroFallback(
-          physicalShape,
-          protonPeakIsLower,
-          minimumGlobalAmplitudeSignificance
-        )
-      ) {
-        physicalShape.valid = true;
-      }
-
-      if (physicalShape.valid) {
-        globalShapes.at(aeroSlice) =
-          physicalShape;
-      } else {
-        TimingShape failedBinShape =
-          fitFailedBinOtherShape(
-            projection,
-            TString::Format(
-              "f_global_time_failed_bin_other_%d",
-              aeroSlice
-            ).Data(),
-            timeMin,
-            timeMax,
-            protonPeakIsLower,
-            beamBunchSpacingNs,
-            timingSigmaMin,
-            minimumGlobalAmplitudeSignificance,
-            minimumGlobalSliceEntries
-          );
-
-        if (
-          failedBinShape.failedBin &&
-          failedBinShape.hasOtherPeak
-        ) {
-          if (physicalShape.fitFunction) {
-            delete physicalShape.fitFunction;
-            physicalShape.fitFunction = nullptr;
-          }
-
-          globalShapes.at(aeroSlice) =
-            failedBinShape;
-        } else {
-          if (failedBinShape.fitFunction) {
-            delete failedBinShape.fitFunction;
-            failedBinShape.fitFunction = nullptr;
-          }
-
-          globalShapes.at(aeroSlice) =
-            physicalShape;
-        }
-      }
-
       const TimingShape &fallbackShape =
         globalShapes.at(aeroSlice);
-
-      const char *classification =
-        fallbackShape.valid
-          ? "proton-kaon"
-          : (
-              fallbackShape.failedBin &&
-              fallbackShape.hasOtherPeak
-                ? "failed-bin other"
-                : "unusable"
-            );
-
-      projection->SetTitle(
-        TString::Format(
-          "Global timing fit (%s): %.1f #leq aero < %.1f;"
-          "%s;Counts",
-          classification,
-          aeroEdges.at(aeroSlice),
-          aeroEdges.at(aeroSlice + 1),
-          timingAxisTitle.c_str()
-        )
-      );
 
       std::cout
         << "  aero ["
         << aeroEdges.at(aeroSlice)
         << ", "
         << aeroEdges.at(aeroSlice + 1)
-        << "): classification="
-        << classification
+        << "): valid="
+        << (fallbackShape.valid ? "yes" : "no")
         << ", fit=["
         << fallbackShape.fitMin
         << ", "
         << fallbackShape.fitMax
         << "]"
+        << ", p mu/sigma="
+        << fallbackShape.protonMean
+        << "/"
+        << fallbackShape.protonSigma
         << ", K mu/sigma="
         << fallbackShape.kaonMean
         << "/"
-        << fallbackShape.kaonSigma;
-
-      if (fallbackShape.valid) {
-        std::cout
-          << ", p mu/sigma="
-          << fallbackShape.protonMean
-          << "/"
-          << fallbackShape.protonSigma;
-      } else if (
-        fallbackShape.failedBin &&
-        fallbackShape.hasOtherPeak
-      ) {
-        std::cout
-          << ", other mu/sigma="
-          << fallbackShape.otherPeakMean
-          << "/"
-          << fallbackShape.otherPeakSigma;
-      }
-
-      std::cout
+        << fallbackShape.kaonSigma
+        << ", common offset="
+        << fallbackShape.appliedMeanOffset
         << ", separation="
         << fallbackShape.separation
         << ", D/N="
@@ -5070,87 +4777,27 @@ void check_slow_protons(
 
     validGlobalShapes = 0;
 
-    int failedBackgroundBins = 0;
-
     for (
       const TimingShape &shape :
       globalShapes
     ) {
       if (shape.valid) {
         ++validGlobalShapes;
-      } else if (
-        shape.failedBin &&
-        shape.hasOtherPeak
-      ) {
-        ++failedBackgroundBins;
       }
     }
 
     std::cout
-      << "Per-aerogel fallback classifications: "
+      << "Per-aerogel fallback valid global shapes: "
       << validGlobalShapes
-      << " proton-kaon, "
-      << failedBackgroundBins
-      << " failed-bin other, "
-      << (nAeroSlices - validGlobalShapes - failedBackgroundBins)
-      << " unusable"
+      << " / "
+      << nAeroSlices
       << std::endl;
   }
 
-  int failedGlobalBins = 0;
-  int usableGlobalShapes = 0;
-
-  for (
-    const TimingShape &shape :
-    globalShapes
-  ) {
-    if (timingShapeUsable(shape)) {
-      ++usableGlobalShapes;
-    }
-
-    if (
-      shape.failedBin &&
-      shape.hasOtherPeak
-    ) {
-      ++failedGlobalBins;
-    }
-  }
-
-  auto *hGlobalBinClassification = new TH1D(
-    "h_global_aero_bin_classification",
-    "Global aerogel-bin timing classification;"
-    "P_aero_npeSum;"
-    "classification (0 unusable, 1 p/K, 2 failed-bin other)",
-    nAeroSlices,
-    aeroEdges.data()
-  );
-
-  hGlobalBinClassification->SetDirectory(nullptr);
-
-  for (
-    int aeroSlice = 0;
-    aeroSlice < nAeroSlices;
-    ++aeroSlice
-  ) {
-    const TimingShape &shape =
-      globalShapes.at(aeroSlice);
-
-    hGlobalBinClassification->SetBinContent(
-      aeroSlice + 1,
-      shape.valid
-        ? 1.0
-        : (
-            shape.failedBin && shape.hasOtherPeak
-              ? 2.0
-              : 0.0
-          )
-    );
-  }
-
-  if (usableGlobalShapes == 0) {
+  if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v17 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v18 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -5594,7 +5241,6 @@ void check_slow_protons(
 
     diagnosticGlobalDirectory->cd();
     hGlobalPID->Write();
-    hGlobalBinClassification->Write();
     diagnosticGlobalCanvas->Write();
 
     for (
@@ -5687,16 +5333,6 @@ void check_slow_protons(
       validGlobalShapes
     );
     numberOfValidGlobalShapes.Write();
-
-    TParameter<int>(
-      "failed_bin_other_global_shapes",
-      failedGlobalBins
-    ).Write();
-
-    TParameter<int>(
-      "usable_global_timing_shapes",
-      usableGlobalShapes
-    ).Write();
 
     TNamed diagnosticTimingBranch(
       "timing_branch",
@@ -5927,16 +5563,6 @@ void check_slow_protons(
     0.0
   );
 
-  std::vector<double> removableOtherYieldByDelta(
-    nDeltaBins,
-    0.0
-  );
-
-  std::vector<int> failedSlicesByDelta(
-    nDeltaBins,
-    0
-  );
-
   std::vector<double> dataYieldByDelta(
     nDeltaBins,
     0.0
@@ -6114,7 +5740,7 @@ void check_slow_protons(
         .at(aeroSlice) =
           projection;
 
-      if (!timingShapeUsable(globalShapes.at(aeroSlice))) {
+      if (!globalShapes.at(aeroSlice).valid) {
         continue;
       }
 
@@ -6168,15 +5794,6 @@ void check_slow_protons(
       otherYieldByDelta.at(deltaBin) +=
         sliceFit.otherYield;
 
-      if (
-        sliceFit.failedBin &&
-        sliceFit.hasOtherPeak
-      ) {
-        removableOtherYieldByDelta.at(deltaBin) +=
-          sliceFit.otherYield;
-        ++failedSlicesByDelta.at(deltaBin);
-      }
-
       fittedDataYieldByDelta.at(deltaBin) +=
         sliceFit.dataYield;
 
@@ -6206,7 +5823,9 @@ void check_slow_protons(
     }
 
     const double totalModeledYield =
-      modelYieldByDelta.at(deltaBin);
+      protonYieldByDelta.at(deltaBin) +
+      kaonYieldByDelta.at(deltaBin) +
+      otherYieldByDelta.at(deltaBin);
 
     if (
       validSlicesByDelta.at(deltaBin) >=
@@ -6266,21 +5885,11 @@ void check_slow_protons(
     deltaMax
   );
 
-  auto *hRemovableOtherYield = new TH1D(
-    "h_failed_bin_other_yield_delta",
-    "Resolved failed-bin other yield versus SHMS #delta;"
-    "SHMS #delta [%];"
-    "Fitted removable other yield",
-    nDeltaBins,
-    deltaMin,
-    deltaMax
-  );
-
   auto *hFitProtonWeightDelta = new TH1D(
     "h_fit_proton_weight_delta",
-    "Integrated fitted removable-background fraction;"
+    "Integrated fitted proton fraction;"
     "SHMS #delta [%];"
-    "w_{p+other}^{fit}(#delta)",
+    "w_{p}^{fit}(#delta)",
     nDeltaBins,
     deltaMin,
     deltaMax
@@ -6308,19 +5917,9 @@ void check_slow_protons(
 
   auto *hValidSlices = new TH1D(
     "h_valid_slices_delta",
-    "Usable aerogel slices per #delta bin;"
+    "Valid aerogel slices per #delta bin;"
     "SHMS #delta [%];"
-    "Usable slices",
-    nDeltaBins,
-    deltaMin,
-    deltaMax
-  );
-
-  auto *hFailedSlices = new TH1D(
-    "h_failed_other_slices_delta",
-    "Failed aerogel bins modeled as other background;"
-    "SHMS #delta [%];"
-    "Failed-bin other slices",
+    "Valid slices",
     nDeltaBins,
     deltaMin,
     deltaMax
@@ -6340,12 +5939,10 @@ void check_slow_protons(
     hProtonYield,
     hKaonYield,
     hOtherYield,
-    hRemovableOtherYield,
     hFitProtonWeightDelta,
     hFitChi2,
     hFitCoverage,
     hValidSlices,
-    hFailedSlices,
     hSupportClass
   };
 
@@ -6374,15 +5971,10 @@ void check_slow_protons(
     const double otherYield =
       otherYieldByDelta.at(deltaBin);
 
-    const double removableOtherYield =
-      removableOtherYieldByDelta.at(deltaBin);
-
     const double totalYield =
-      modelYieldByDelta.at(deltaBin);
-
-    const double removableBackgroundYield =
       protonYield +
-      removableOtherYield;
+      kaonYield +
+      otherYield;
 
     hProtonYield->SetBinContent(
       rootBin,
@@ -6399,11 +5991,6 @@ void check_slow_protons(
       otherYield
     );
 
-    hRemovableOtherYield->SetBinContent(
-      rootBin,
-      removableOtherYield
-    );
-
     hFitChi2->SetBinContent(
       rootBin,
       poissonDevianceNdfByDelta.at(deltaBin)
@@ -6417,11 +6004,6 @@ void check_slow_protons(
     hValidSlices->SetBinContent(
       rootBin,
       validSlicesByDelta.at(deltaBin)
-    );
-
-    hFailedSlices->SetBinContent(
-      rootBin,
-      failedSlicesByDelta.at(deltaBin)
     );
 
     hSupportClass->SetBinContent(
@@ -6440,7 +6022,7 @@ void check_slow_protons(
       totalYield >= minimumModeledYield
     ) {
       protonWeight =
-        removableBackgroundYield /
+        protonYield /
         totalYield;
 
       protonWeightError =
@@ -6501,29 +6083,9 @@ void check_slow_protons(
     mmMax
   );
 
-  auto *hOtherMM = new TH1D(
-    "h_mm_estimated_other",
-    "Estimated failed-bin other background;"
-    "MM [GeV];"
-    "Weighted counts",
-    nMMBins,
-    mmMin,
-    mmMax
-  );
-
-  auto *hBackgroundMM = new TH1D(
-    "h_mm_estimated_removable_background",
-    "Estimated proton plus failed-bin other background;"
-    "MM [GeV];"
-    "Weighted counts",
-    nMMBins,
-    mmMin,
-    mmMax
-  );
-
   auto *hCleanedMM = new TH1D(
     "h_mm_proton_cleaned",
-    "Proton/other-background-cleaned kaon MM;"
+    "Proton-cleaned kaon MM;"
     "MM [GeV];"
     "Weighted counts",
     nMMBins,
@@ -6533,7 +6095,7 @@ void check_slow_protons(
 
   auto *hAppliedWeightSumDelta = new TH1D(
     "h_applied_weight_sum_delta",
-    "Applied removable-background weight sum;"
+    "Applied proton-weight sum;"
     "SHMS #delta [%];"
     "Sum of weights",
     nDeltaBins,
@@ -6543,7 +6105,7 @@ void check_slow_protons(
 
   auto *hAppliedWeightCountDelta = new TH1D(
     "h_applied_weight_count_delta",
-    "Applied removable-background event count;"
+    "Applied proton-weight event count;"
     "SHMS #delta [%];"
     "Events",
     nDeltaBins,
@@ -6553,9 +6115,9 @@ void check_slow_protons(
 
   auto *hAppliedWeightDelta = new TH1D(
     "h_applied_weight_delta",
-    "Mean applied event-level removable-background weight;"
+    "Mean applied event-level proton weight;"
     "SHMS #delta [%];"
-    "#LTw_{p+other}^{event}#GT",
+    "#LTw_{p}^{event}#GT",
     nDeltaBins,
     deltaMin,
     deltaMax
@@ -6563,7 +6125,7 @@ void check_slow_protons(
 
   auto *hAppliedWeightSumMap = new TH2D(
     "h_applied_weight_sum_map",
-    "Applied removable-background weight sum;"
+    "Applied proton-weight sum;"
     "SHMS #delta [%];"
     "P_aero_npeSum;"
     "Sum of weights",
@@ -6576,7 +6138,7 @@ void check_slow_protons(
 
   auto *hAppliedWeightCountMap = new TH2D(
     "h_applied_weight_count_map",
-    "Applied removable-background event count;"
+    "Applied proton-weight event count;"
     "SHMS #delta [%];"
     "P_aero_npeSum;"
     "Events",
@@ -6589,10 +6151,10 @@ void check_slow_protons(
 
   auto *hAppliedWeightMap = new TH2D(
     "h_applied_weight_map",
-    "Mean applied removable-background probability;"
+    "Mean applied proton probability;"
     "SHMS #delta [%];"
     "P_aero_npeSum;"
-    "#LTw_{p+other}^{event}#GT",
+    "#LTw_{p}^{event}#GT",
     nDeltaBins,
     deltaMin,
     deltaMax,
@@ -6603,8 +6165,6 @@ void check_slow_protons(
   const std::vector<TH1 *> eventHistograms = {
     hRawMM,
     hProtonMM,
-    hOtherMM,
-    hBackgroundMM,
     hCleanedMM,
     hAppliedWeightSumDelta,
     hAppliedWeightCountDelta,
@@ -6635,8 +6195,8 @@ void check_slow_protons(
   // V9 = probe RF and CT on every run and select the better validated timing variable
   // V11 = add always-on Q2-vs-W diamond diagnostic pages when the polygon is enabled
   // V12 = fit-only pre-diamond fallback when both RF and CT fail inside the polygon
-  // V17 = classify unresolved physical assignments as failed bins; test the
-  //       opposite-side peak as an independent removable "other" background
+  // V16 = accept physically ordered per-aerogel fallback peaks even when the
+  //       deliberately tight fallback bounds are reached
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -6707,8 +6267,6 @@ void check_slow_protons(
   }
 
   Long64_t weightedEvents = 0;
-  Long64_t protonWeightedEvents = 0;
-  Long64_t otherWeightedEvents = 0;
   Long64_t unsupportedEvents = 0;
   Long64_t invalidSliceEvents = 0;
 
@@ -6769,7 +6327,7 @@ void check_slow_protons(
         aeroEdges
       );
 
-    EventBackgroundProbability backgroundProbability;
+    double protonWeight = 0.0;
 
     if (
       supportByDelta.at(deltaBin) ==
@@ -6779,7 +6337,7 @@ void check_slow_protons(
     } else if (
       aeroSlice < 0 ||
       aeroSlice >= nAeroSlices ||
-      !timingShapeUsable(globalShapes.at(aeroSlice)) ||
+      !globalShapes.at(aeroSlice).valid ||
       !deltaSliceFits
          .at(deltaBin)
          .at(aeroSlice)
@@ -6787,8 +6345,8 @@ void check_slow_protons(
     ) {
       ++invalidSliceEvents;
     } else {
-      backgroundProbability =
-        evaluateEventBackgroundProbability(
+      protonWeight =
+        evaluateEventProtonProbability(
           timing,
           globalShapes.at(aeroSlice),
           deltaSliceFits
@@ -6797,63 +6355,31 @@ void check_slow_protons(
           eventProbabilityDenominatorFloor
         );
 
-      if (backgroundProbability.proton > 0.0) {
-        ++protonWeightedEvents;
-      }
-
-      if (backgroundProbability.other > 0.0) {
-        ++otherWeightedEvents;
-      }
-
-      if (backgroundProbability.total > 0.0) {
+      if (protonWeight > 0.0) {
         ++weightedEvents;
       }
     }
 
-    backgroundProbability.proton =
+    protonWeight =
       std::clamp(
-        backgroundProbability.proton,
-        0.0,
-        1.0
-      );
-
-    backgroundProbability.other =
-      std::clamp(
-        backgroundProbability.other,
-        0.0,
-        1.0
-      );
-
-    backgroundProbability.total =
-      std::clamp(
-        backgroundProbability.total,
+        protonWeight,
         0.0,
         1.0
       );
 
     hProtonMM->Fill(
       mm,
-      backgroundProbability.proton
-    );
-
-    hOtherMM->Fill(
-      mm,
-      backgroundProbability.other
-    );
-
-    hBackgroundMM->Fill(
-      mm,
-      backgroundProbability.total
+      protonWeight
     );
 
     hCleanedMM->Fill(
       mm,
-      1.0 - backgroundProbability.total
+      1.0 - protonWeight
     );
 
     hAppliedWeightSumDelta->Fill(
       delta,
-      backgroundProbability.total
+      protonWeight
     );
 
     hAppliedWeightCountDelta->Fill(
@@ -6864,7 +6390,7 @@ void check_slow_protons(
     hAppliedWeightSumMap->Fill(
       delta,
       aero,
-      backgroundProbability.total
+      protonWeight
     );
 
     hAppliedWeightCountMap->Fill(
@@ -6890,7 +6416,7 @@ void check_slow_protons(
 
   auto *hProtonFractionMM =
     static_cast<TH1D *>(
-      hBackgroundMM->Clone(
+      hProtonMM->Clone(
         "h_mm_proton_fraction"
       )
     );
@@ -6898,9 +6424,9 @@ void check_slow_protons(
   hProtonFractionMM->SetDirectory(nullptr);
 
   hProtonFractionMM->SetTitle(
-    "Estimated removable-background fraction versus MM;"
+    "Estimated proton fraction versus MM;"
     "MM [GeV];"
-    "Estimated (proton + other) / raw"
+    "Estimated proton / raw"
   );
 
   hProtonFractionMM->Divide(hRawMM);
@@ -7058,42 +6584,24 @@ void check_slow_protons(
           kMagenta + 1
         );
 
-      TF1 *secondPeakComponent = nullptr;
+      auto *protonComponent =
+        makeGaussianComponent(
+          TString::Format(
+            "f_global_proton_component_%d",
+            aeroSlice
+          ).Data(),
+          shape.protonAmplitude,
+          shape.protonMean,
+          shape.protonSigma,
+          shapeFitMin,
+          shapeFitMax,
+          kBlue + 1
+        );
 
-      if (shape.failedBin && shape.hasOtherPeak) {
-        secondPeakComponent =
-          makeGaussianComponent(
-            TString::Format(
-              "f_global_other_peak_component_%d",
-              aeroSlice
-            ).Data(),
-            shape.otherPeakAmplitude,
-            shape.otherPeakMean,
-            shape.otherPeakSigma,
-            shapeFitMin,
-            shapeFitMax,
-            kBlue + 1
-          );
-      } else {
-        secondPeakComponent =
-          makeGaussianComponent(
-            TString::Format(
-              "f_global_proton_component_%d",
-              aeroSlice
-            ).Data(),
-            shape.protonAmplitude,
-            shape.protonMean,
-            shape.protonSigma,
-            shapeFitMin,
-            shapeFitMax,
-            kBlue + 1
-          );
-      }
-
-      auto *pedestalComponent =
+      auto *otherComponent =
         makeConstantComponent(
           TString::Format(
-            "f_global_pedestal_component_%d",
+            "f_global_other_component_%d",
             aeroSlice
           ).Data(),
           shape.otherAmplitude,
@@ -7103,19 +6611,19 @@ void check_slow_protons(
         );
 
       kaonComponent->Draw("SAME");
-      secondPeakComponent->Draw("SAME");
-      pedestalComponent->Draw("SAME");
+      protonComponent->Draw("SAME");
+      otherComponent->Draw("SAME");
 
       componentFunctions.push_back(
         kaonComponent
       );
 
       componentFunctions.push_back(
-        secondPeakComponent
+        protonComponent
       );
 
       componentFunctions.push_back(
-        pedestalComponent
+        otherComponent
       );
     }
 
@@ -7133,14 +6641,8 @@ void check_slow_protons(
 
     label->AddText(
       TString::Format(
-        "classification: %s",
-        shape.valid
-          ? "proton-kaon"
-          : (
-              shape.failedBin && shape.hasOtherPeak
-                ? "failed-bin other"
-                : "unusable"
-            )
+        "valid: %s",
+        shape.valid ? "yes" : "no"
       )
     );
 
@@ -7166,23 +6668,13 @@ void check_slow_protons(
       )
     );
 
-    if (shape.failedBin && shape.hasOtherPeak) {
-      label->AddText(
-        TString::Format(
-          "other #mu/#sigma: %.3f / %.3f",
-          shape.otherPeakMean,
-          shape.otherPeakSigma
-        )
-      );
-    } else {
-      label->AddText(
-        TString::Format(
-          "p #mu/#sigma: %.3f / %.3f",
-          shape.protonMean,
-          shape.protonSigma
-        )
-      );
-    }
+    label->AddText(
+      TString::Format(
+        "p #mu/#sigma: %.3f / %.3f",
+        shape.protonMean,
+        shape.protonSigma
+      )
+    );
 
     label->AddText(
       TString::Format(
@@ -7193,13 +6685,9 @@ void check_slow_protons(
 
     label->AddText(
       TString::Format(
-        shape.failedBin && shape.hasOtherPeak
-          ? "K/other significance: %.1f / %.1f"
-          : "K/p significance: %.1f / %.1f",
+        "K/p significance: %.1f / %.1f",
         shape.kaonSignificance,
-        shape.failedBin && shape.hasOtherPeak
-          ? shape.otherPeakSignificance
-          : shape.protonSignificance
+        shape.protonSignificance
       )
     );
 
@@ -7272,13 +6760,13 @@ void check_slow_protons(
 
   weightLegend->AddEntry(
     hFitProtonWeightDelta,
-    "integrated proton + other fraction",
+    "integrated fitted fraction",
     "lep"
   );
 
   weightLegend->AddEntry(
     hAppliedWeightDelta,
-    "mean applied proton + other weight",
+    "mean applied event weight",
     "lep"
   );
 
@@ -7292,15 +6780,15 @@ void check_slow_protons(
   hKaonYield->SetLineColor(kMagenta + 1);
   hKaonYield->SetLineWidth(3);
 
-  hRemovableOtherYield->SetLineColor(kBlue + 1);
-  hRemovableOtherYield->SetLineWidth(3);
+  hOtherYield->SetLineColor(kBlue + 1);
+  hOtherYield->SetLineWidth(3);
 
   const double maximumYield =
     std::max(
       {
         hProtonYield->GetMaximum(),
         hKaonYield->GetMaximum(),
-        hRemovableOtherYield->GetMaximum()
+        hOtherYield->GetMaximum()
       }
     );
 
@@ -7310,7 +6798,7 @@ void check_slow_protons(
 
   hProtonYield->Draw("HIST");
   hKaonYield->Draw("HIST SAME");
-  hRemovableOtherYield->Draw("HIST SAME");
+  hOtherYield->Draw("HIST SAME");
 
   auto *yieldLegend = new TLegend(
     0.57,
@@ -7332,8 +6820,8 @@ void check_slow_protons(
   );
 
   yieldLegend->AddEntry(
-    hRemovableOtherYield,
-    "failed-bin other",
+    hOtherYield,
+    "other",
     "l"
   );
 
@@ -7392,15 +6880,7 @@ void check_slow_protons(
   hRawMM->SetLineWidth(3);
 
   hProtonMM->SetLineColor(kRed + 1);
-  hProtonMM->SetLineStyle(2);
-  hProtonMM->SetLineWidth(2);
-
-  hOtherMM->SetLineColor(kBlue + 1);
-  hOtherMM->SetLineStyle(2);
-  hOtherMM->SetLineWidth(2);
-
-  hBackgroundMM->SetLineColor(kOrange + 7);
-  hBackgroundMM->SetLineWidth(3);
+  hProtonMM->SetLineWidth(3);
 
   hCleanedMM->SetLineColor(kGreen + 2);
   hCleanedMM->SetLineWidth(3);
@@ -7409,7 +6889,7 @@ void check_slow_protons(
     std::max(
       {
         hRawMM->GetMaximum(),
-        hBackgroundMM->GetMaximum(),
+        hProtonMM->GetMaximum(),
         hCleanedMM->GetMaximum()
       }
     );
@@ -7420,13 +6900,11 @@ void check_slow_protons(
 
   hRawMM->Draw("HIST");
   hProtonMM->Draw("HIST SAME");
-  hOtherMM->Draw("HIST SAME");
-  hBackgroundMM->Draw("HIST SAME");
   hCleanedMM->Draw("HIST SAME");
 
   auto *mmLegend = new TLegend(
-    0.43,
-    0.62,
+    0.47,
+    0.68,
     0.88,
     0.88
   );
@@ -7439,25 +6917,13 @@ void check_slow_protons(
 
   mmLegend->AddEntry(
     hProtonMM,
-    "identified proton",
-    "l"
-  );
-
-  mmLegend->AddEntry(
-    hOtherMM,
-    "failed-bin other",
-    "l"
-  );
-
-  mmLegend->AddEntry(
-    hBackgroundMM,
-    "proton + other removed",
+    "estimated proton contamination",
     "l"
   );
 
   mmLegend->AddEntry(
     hCleanedMM,
-    "background-cleaned kaon MM",
+    "proton-cleaned kaon MM",
     "l"
   );
 
@@ -7494,7 +6960,7 @@ void check_slow_protons(
 
   summaryCanvas->cd(6);
 
-  hProtonFractionMM->SetLineColor(kOrange + 7);
+  hProtonFractionMM->SetLineColor(kRed + 1);
   hProtonFractionMM->SetLineWidth(3);
   hProtonFractionMM->SetMinimum(0.0);
   hProtonFractionMM->SetMaximum(1.05);
@@ -7600,8 +7066,8 @@ void check_slow_protons(
 
     summaryText->AddText(
       TString::Format(
-        "N_{other,removable} = %.1f",
-        removableOtherYieldByDelta.at(deltaBin)
+        "N_{other} = %.1f",
+        otherYieldByDelta.at(deltaBin)
       )
     );
 
@@ -7614,16 +7080,15 @@ void check_slow_protons(
 
     summaryText->AddText(
       TString::Format(
-        "usable slices = %d/%d (failed other: %d)",
+        "valid slices = %d/%d",
         validSlicesByDelta.at(deltaBin),
-        nAeroSlices,
-        failedSlicesByDelta.at(deltaBin)
+        nAeroSlices
       )
     );
 
     summaryText->AddText(
       TString::Format(
-        "fit-integrated w_{p+other} = %.3f",
+        "fit-integrated w_{p} = %.3f",
         hFitProtonWeightDelta
           ->GetBinContent(deltaBin + 1)
       )
@@ -7696,69 +7161,48 @@ void check_slow_protons(
             kMagenta + 1
           );
 
-        TF1 *secondPeakComponent = nullptr;
-
-        if (shape.failedBin && shape.hasOtherPeak) {
-          secondPeakComponent =
-            makeGaussianComponent(
-              TString::Format(
-                "f_delta_%d_aero_%d_other_peak",
-                deltaBin,
-                aeroSlice
-              ).Data(),
-              sliceFit.otherAmplitude,
-              shape.otherPeakMean,
-              shape.otherPeakSigma,
-              shapeFitMin,
-              shapeFitMax,
-              kBlue + 1
-            );
-        } else {
-          secondPeakComponent =
-            makeGaussianComponent(
-              TString::Format(
-                "f_delta_%d_aero_%d_proton",
-                deltaBin,
-                aeroSlice
-              ).Data(),
-              sliceFit.protonAmplitude,
-              shape.protonMean,
-              shape.protonSigma,
-              shapeFitMin,
-              shapeFitMax,
-              kBlue + 1
-            );
-        }
-
-        auto *pedestalComponent =
-          makeConstantComponent(
+        auto *protonComponent =
+          makeGaussianComponent(
             TString::Format(
-              "f_delta_%d_aero_%d_pedestal",
+              "f_delta_%d_aero_%d_proton",
               deltaBin,
               aeroSlice
             ).Data(),
-            shape.failedBin
-              ? sliceFit.pedestalAmplitude
-              : sliceFit.otherAmplitude,
+            sliceFit.protonAmplitude,
+            shape.protonMean,
+            shape.protonSigma,
+            shapeFitMin,
+            shapeFitMax,
+            kBlue + 1
+          );
+
+        auto *otherComponent =
+          makeConstantComponent(
+            TString::Format(
+              "f_delta_%d_aero_%d_other",
+              deltaBin,
+              aeroSlice
+            ).Data(),
+            sliceFit.otherAmplitude,
             shapeFitMin,
             shapeFitMax,
             kGray + 2
           );
 
         kaonComponent->Draw("SAME");
-        secondPeakComponent->Draw("SAME");
-        pedestalComponent->Draw("SAME");
+        protonComponent->Draw("SAME");
+        otherComponent->Draw("SAME");
 
         componentFunctions.push_back(
           kaonComponent
         );
 
         componentFunctions.push_back(
-          secondPeakComponent
+          protonComponent
         );
 
         componentFunctions.push_back(
-          pedestalComponent
+          otherComponent
         );
       }
 
@@ -7776,14 +7220,8 @@ void check_slow_protons(
 
       fitText->AddText(
         TString::Format(
-          "global classification: %s",
-          shape.valid
-            ? "proton-kaon"
-            : (
-                shape.failedBin && shape.hasOtherPeak
-                  ? "failed-bin other"
-                  : "unusable"
-              )
+          "global shape valid: %s",
+          shape.valid ? "yes" : "no"
         )
       );
 
@@ -7943,7 +7381,6 @@ void check_slow_protons(
   globalDirectory->cd();
 
   hGlobalPID->Write();
-  hGlobalBinClassification->Write();
 
   for (
     int aeroSlice = 0;
@@ -7976,7 +7413,6 @@ void check_slow_protons(
   hProtonYield->Write();
   hKaonYield->Write();
   hOtherYield->Write();
-  hRemovableOtherYield->Write();
 
   hFitProtonWeightDelta->Write();
   hAppliedWeightDelta->Write();
@@ -7985,13 +7421,10 @@ void check_slow_protons(
   hFitChi2->Write();
   hFitCoverage->Write();
   hValidSlices->Write();
-  hFailedSlices->Write();
   hSupportClass->Write();
 
   hRawMM->Write();
   hProtonMM->Write();
-  hOtherMM->Write();
-  hBackgroundMM->Write();
   hCleanedMM->Write();
   hProtonFractionMM->Write();
 
@@ -8036,16 +7469,6 @@ void check_slow_protons(
     );
 
     supportLabel.Write();
-
-    TParameter<int>(
-      "failed_bin_other_slices",
-      failedSlicesByDelta.at(deltaBin)
-    ).Write();
-
-    TParameter<double>(
-      "failed_bin_other_yield",
-      removableOtherYieldByDelta.at(deltaBin)
-    ).Write();
 
     if (deltaPIDHistograms.at(deltaBin)) {
       deltaPIDHistograms
@@ -8143,21 +7566,6 @@ void check_slow_protons(
   TParameter<int>(
     "timing_fit_per_aerogel_fallback_used",
     timingFitUsedPerAeroFallback ? 1 : 0
-  ).Write();
-
-  TParameter<int>(
-    "valid_global_proton_kaon_bins",
-    validGlobalShapes
-  ).Write();
-
-  TParameter<int>(
-    "failed_bin_other_global_shapes",
-    failedGlobalBins
-  ).Write();
-
-  TParameter<int>(
-    "usable_global_timing_shapes",
-    usableGlobalShapes
   ).Write();
 
   TNamed timingFitAcceptanceCutTag(
@@ -8305,16 +7713,6 @@ void check_slow_protons(
   ).Write();
 
   TParameter<Long64_t>(
-    "proton_weighted_events",
-    protonWeightedEvents
-  ).Write();
-
-  TParameter<Long64_t>(
-    "other_weighted_events",
-    otherWeightedEvents
-  ).Write();
-
-  TParameter<Long64_t>(
     "unsupported_delta_events",
     unsupportedEvents
   ).Write();
@@ -8354,26 +7752,14 @@ void check_slow_protons(
     << (timingFitUsedPreDiamondFallback ? "yes" : "no")
     << "\nGlobal PID entries: "
     << hGlobalPID->Integral()
-    << "\nGlobal proton-kaon bins: "
+    << "\nIdentifiable global aerogel slices: "
     << validGlobalShapes
-    << " / "
-    << nAeroSlices
-    << "\nFailed bins modeled as other: "
-    << failedGlobalBins
-    << " / "
-    << nAeroSlices
-    << "\nUsable global aerogel bins: "
-    << usableGlobalShapes
     << " / "
     << nAeroSlices
     << "\nSelected events: "
     << selectedRows
-    << "\nEvents receiving nonzero removable-background weight: "
+    << "\nEvents receiving nonzero proton weight: "
     << weightedEvents
-    << "\nEvents receiving proton weight: "
-    << protonWeightedEvents
-    << "\nEvents receiving failed-bin other weight: "
-    << otherWeightedEvents
     << "\nEvents in unsupported delta bins: "
     << unsupportedEvents
     << "\nEvents in invalid PID slices: "
@@ -8382,11 +7768,7 @@ void check_slow_protons(
     << hRawMM->Integral()
     << "\nEstimated proton MM integral: "
     << hProtonMM->Integral()
-    << "\nEstimated failed-bin other MM integral: "
-    << hOtherMM->Integral()
-    << "\nEstimated total removable-background MM integral: "
-    << hBackgroundMM->Integral()
-    << "\nBackground-cleaned MM integral: "
+    << "\nProton-cleaned MM integral: "
     << hCleanedMM->Integral()
     << "\nLow-MM removed fraction: "
     << 100.0 * lowMMRemovedFraction
