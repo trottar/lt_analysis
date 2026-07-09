@@ -365,6 +365,117 @@ std::pair<double, double> findCentralQuantileRange(
 }
 
 
+std::pair<double, double> estimateTreeBranchCentralRange(
+  TTree *tree,
+  const std::string &branchName,
+  const std::string &selectionCut,
+  double fallbackMin,
+  double fallbackMax
+) {
+  if (
+    !tree ||
+    branchName.empty() ||
+    !tree->GetBranch(branchName.c_str()) ||
+    fallbackMax <= fallbackMin
+  ) {
+    return {fallbackMin, fallbackMax};
+  }
+
+  tree->SetEstimate(
+    std::max<Long64_t>(
+      tree->GetEntries() + 1,
+      1000000
+    )
+  );
+
+  const Long64_t selectedRows = tree->Draw(
+    branchName.c_str(),
+    selectionCut.c_str(),
+    "goff"
+  );
+
+  if (selectedRows < 25) {
+    return {fallbackMin, fallbackMax};
+  }
+
+  const double *values = tree->GetV1();
+
+  if (!values) {
+    return {fallbackMin, fallbackMax};
+  }
+
+  std::vector<double> finiteValues;
+  finiteValues.reserve(
+    static_cast<size_t>(selectedRows)
+  );
+
+  for (Long64_t row = 0; row < selectedRows; ++row) {
+    const double value = values[row];
+
+    if (std::isfinite(value)) {
+      finiteValues.push_back(value);
+    }
+  }
+
+  if (finiteValues.size() < 25) {
+    return {fallbackMin, fallbackMax};
+  }
+
+  std::sort(
+    finiteValues.begin(),
+    finiteValues.end()
+  );
+
+  auto quantileValue = [
+    &finiteValues
+  ](
+    double quantile
+  ) -> double {
+    const double clampedQuantile = std::clamp(
+      quantile,
+      0.0,
+      1.0
+    );
+
+    const size_t index = static_cast<size_t>(
+      std::round(
+        clampedQuantile *
+        static_cast<double>(finiteValues.size() - 1)
+      )
+    );
+
+    return finiteValues.at(
+      std::min(
+        index,
+        finiteValues.size() - 1
+      )
+    );
+  };
+
+  double centralLow = quantileValue(0.001);
+  double centralHigh = quantileValue(0.999);
+
+  if (
+    !std::isfinite(centralLow) ||
+    !std::isfinite(centralHigh) ||
+    centralHigh <= centralLow
+  ) {
+    return {fallbackMin, fallbackMax};
+  }
+
+  const double centralWidth = centralHigh - centralLow;
+  const double padding = std::max(
+    0.05 * centralWidth,
+    1.0e-6
+  );
+
+  return {
+    centralLow - padding,
+    centralHigh + padding
+  };
+}
+
+
 PoissonGoodnessOfFit computePoissonGoodnessOfFit(
   const TH1D *histogram,
   TF1 *fitFunction,
@@ -1323,7 +1434,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.4";
+  const char *macroVersion = "check_slow_protons.5";
 
   std::cout
     << "Running "
@@ -1511,32 +1622,32 @@ void check_slow_protons(
   // Preserve the existing diagnostic/display ranges. For high epsilon,
   // the fit range is later restricted to the populated timing support so
   // empty bins outside that support do not pull the likelihood.
-  const double timeMin = -beamBunchSpacingNs;
-  const double timeMax = beamBunchSpacingNs;
+  double timeMin = -beamBunchSpacingNs;
+  double timeMax = beamBunchSpacingNs;
 
   double timingFitMin = timeMin;
   double timingFitMax = timeMax;
 
   // Retain the low-epsilon constraints. The high-epsilon timing
   // distributions are broader, requiring wider mean/sigma bounds and seed.
-  const double kaonMeanMin =
+  double kaonMeanMin =
     isHighEpsilon ? -1.50 : -0.45;
 
-  const double kaonMeanMax =
+  double kaonMeanMax =
     isHighEpsilon ? 0.25 : 0.20;
 
-  const double protonMeanMin =
+  double protonMeanMin =
     isHighEpsilon ? 0.25 : 0.20;
 
-  const double protonMeanMax =
+  double protonMeanMax =
     isHighEpsilon ? 1.80 : 0.95;
 
   const double timingSigmaMin = 0.03;
 
-  const double timingSigmaMax =
+  double timingSigmaMax =
     isHighEpsilon ? 1.20 : 0.45;
 
-  const double timingSigmaInitial =
+  double timingSigmaInitial =
     isHighEpsilon ? 0.65 : 0.15;
 
   const double minimumGlobalSeparation = 0.75;
@@ -1670,15 +1781,26 @@ void check_slow_protons(
     }
   }
 
-  rfTimeBranch = findAvailableBranch(
-    tree,
-    rfBranchCandidates
-  );
+  struct RFBranchProbe {
+    std::string branch;
+    int validShapes = 0;
+    double displayMin = 0.0;
+    double displayMax = 0.0;
+    double fitMin = 0.0;
+    double fitMax = 0.0;
+    double kaonMeanMin = 0.0;
+    double kaonMeanMax = 0.0;
+    double protonMeanMin = 0.0;
+    double protonMeanMax = 0.0;
+    double sigmaMax = 0.0;
+    double sigmaInitial = 0.0;
+  };
 
   auto countValidGlobalShapesForBranch = [
     &
   ](
-    const std::string &candidateBranch
+    const std::string &candidateBranch,
+    RFBranchProbe &probe
   ) -> int {
     if (
       candidateBranch.empty() ||
@@ -1686,6 +1808,50 @@ void check_slow_protons(
     ) {
       return 0;
     }
+
+    const std::string candidateBaseCut =
+      TString::Format(
+        "%s >= %.17g && %s <= %.17g",
+        aeroBranch.c_str(),
+        aeroMin,
+        aeroBranch.c_str(),
+        aeroMax
+      ).Data();
+
+    const std::string candidatePreselectionCut =
+      "(" + acceptanceCut + ") && (" +
+      candidateBaseCut + ")";
+
+    const auto candidateDisplayRange =
+      estimateTreeBranchCentralRange(
+        tree,
+        candidateBranch,
+        candidatePreselectionCut,
+        -beamBunchSpacingNs,
+        beamBunchSpacingNs
+      );
+
+    probe.branch = candidateBranch;
+    probe.displayMin = candidateDisplayRange.first;
+    probe.displayMax = candidateDisplayRange.second;
+    probe.fitMin = probe.displayMin;
+    probe.fitMax = probe.displayMax;
+
+    if (probe.displayMax <= probe.displayMin) {
+      return 0;
+    }
+
+    const double candidateWidth =
+      probe.displayMax - probe.displayMin;
+
+    const int candidateBins = std::max(
+      80,
+      static_cast<int>(
+        std::round(
+          candidateWidth / 0.0305
+        )
+      )
+    );
 
     const std::string candidateRangeCut =
       TString::Format(
@@ -1696,9 +1862,9 @@ void check_slow_protons(
         aeroBranch.c_str(),
         aeroMax,
         candidateBranch.c_str(),
-        timeMin,
+        probe.displayMin,
         candidateBranch.c_str(),
-        timeMax
+        probe.displayMax
       ).Data();
 
     const std::string candidateAnalysisCut =
@@ -1708,14 +1874,17 @@ void check_slow_protons(
     gROOT->cd();
 
     auto *probePID = new TH2D(
-      "h_rf_first_probe_pid",
+      TString::Format(
+        "h_rf_first_probe_pid_%s",
+        candidateBranch.c_str()
+      ),
       "RF-first global timing probe",
       nAeroHistogramBins,
       aeroMin,
       aeroMax,
-      nTimeHistogramBins,
-      timeMin,
-      timeMax
+      candidateBins,
+      probe.displayMin,
+      probe.displayMax
     );
 
     probePID->Sumw2();
@@ -1738,33 +1907,61 @@ void check_slow_protons(
       return 0;
     }
 
-    double probeFitMin = timeMin;
-    double probeFitMax = timeMax;
+    auto *allAeroTiming = probePID->ProjectionY(
+      TString::Format(
+        "h_rf_first_probe_all_aero_%s",
+        candidateBranch.c_str()
+      ),
+      1,
+      probePID->GetNbinsX(),
+      "e"
+    );
 
-    if (isHighEpsilon) {
-      auto *allAeroTiming = probePID->ProjectionY(
-        "h_rf_first_probe_all_aero",
-        1,
-        probePID->GetNbinsX(),
-        "e"
-      );
+    allAeroTiming->SetDirectory(nullptr);
 
-      allAeroTiming->SetDirectory(nullptr);
+    const auto centralFitRange = findCentralQuantileRange(
+      allAeroTiming,
+      probe.displayMin,
+      probe.displayMax,
+      5.0e-4,
+      5.0e-4,
+      2
+    );
 
-      const auto centralFitRange = findCentralQuantileRange(
-        allAeroTiming,
-        timeMin,
-        timeMax,
-        5.0e-4,
-        5.0e-4,
-        2
-      );
+    probe.fitMin = centralFitRange.first;
+    probe.fitMax = centralFitRange.second;
 
-      probeFitMin = centralFitRange.first;
-      probeFitMax = centralFitRange.second;
+    delete allAeroTiming;
 
-      delete allAeroTiming;
+    if (probe.fitMax <= probe.fitMin) {
+      delete probePID;
+      return 0;
     }
+
+    const double fitWidth = probe.fitMax - probe.fitMin;
+    const double split = 0.5 * (probe.fitMin + probe.fitMax);
+
+    // RF branches are not guaranteed to be centered or to use the same
+    // sign convention as CTime_ROC1.  Probe them with data-driven bounds:
+    // the lower RF component is treated as K-like and the upper component
+    // as p-like.  This tests RF discrimination itself rather than whether
+    // the branch happens to live in the CTime_ROC1 windows.
+    probe.kaonMeanMin = probe.fitMin;
+    probe.kaonMeanMax = split;
+    probe.protonMeanMin = split;
+    probe.protonMeanMax = probe.fitMax;
+    probe.sigmaMax = std::max(
+      timingSigmaMax,
+      0.35 * fitWidth
+    );
+    probe.sigmaInitial = std::clamp(
+      std::max(
+        timingSigmaInitial,
+        0.08 * fitWidth
+      ),
+      timingSigmaMin,
+      probe.sigmaMax
+    );
 
     int validShapes = 0;
 
@@ -1805,7 +2002,8 @@ void check_slow_protons(
 
       auto *projection = probePID->ProjectionY(
         TString::Format(
-          "h_rf_first_probe_aero_%d",
+          "h_rf_first_probe_aero_%s_%d",
+          candidateBranch.c_str(),
           aeroSlice
         ),
         firstXBin,
@@ -1818,18 +2016,19 @@ void check_slow_protons(
       TimingShape shape = fitGlobalTimingShape(
         projection,
         TString::Format(
-          "f_rf_first_probe_aero_%d",
+          "f_rf_first_probe_aero_%s_%d",
+          candidateBranch.c_str(),
           aeroSlice
         ).Data(),
-        probeFitMin,
-        probeFitMax,
-        kaonMeanMin,
-        kaonMeanMax,
-        protonMeanMin,
-        protonMeanMax,
+        probe.fitMin,
+        probe.fitMax,
+        probe.kaonMeanMin,
+        probe.kaonMeanMax,
+        probe.protonMeanMin,
+        probe.protonMeanMax,
         timingSigmaMin,
-        timingSigmaMax,
-        timingSigmaInitial,
+        probe.sigmaMax,
+        probe.sigmaInitial,
         minimumGlobalSeparation,
         minimumGlobalAmplitudeSignificance,
         useDeviancePerEntryValidation,
@@ -1847,40 +2046,101 @@ void check_slow_protons(
     }
 
     delete probePID;
+    probe.validShapes = validShapes;
     return validShapes;
   };
 
-  if (!rfTimeBranch.empty()) {
+  std::vector<RFBranchProbe> rfProbes;
+
+  for (const std::string &candidate : rfBranchCandidates) {
+    if (
+      candidate.empty() ||
+      !tree->GetBranch(candidate.c_str())
+    ) {
+      continue;
+    }
+
     rfTimingAttempted = true;
 
+    RFBranchProbe probe;
+
     std::cout
-      << "RF-first timing attempt using branch "
-      << rfTimeBranch
+      << "RF-first timing probe using branch "
+      << candidate
       << " from tree "
       << treeName
       << std::endl;
 
-    const int validRFShapes =
+    const int validShapes =
       countValidGlobalShapesForBranch(
-        rfTimeBranch
+        candidate,
+        probe
       );
 
     std::cout
-      << "RF-first probe valid global shapes: "
-      << validRFShapes
+      << "  valid global shapes: "
+      << validShapes
       << " / "
       << nAeroSlices
+      << "; range ["
+      << probe.displayMin
+      << ", "
+      << probe.displayMax
+      << "]; fit ["
+      << probe.fitMin
+      << ", "
+      << probe.fitMax
+      << "]"
       << std::endl;
 
-    if (validRFShapes > 0) {
+    rfProbes.push_back(probe);
+  }
+
+  if (!rfProbes.empty()) {
+    const auto bestProbeIter = std::max_element(
+      rfProbes.begin(),
+      rfProbes.end(),
+      [](
+        const RFBranchProbe &left,
+        const RFBranchProbe &right
+      ) {
+        return left.validShapes < right.validShapes;
+      }
+    );
+
+    if (
+      bestProbeIter != rfProbes.end() &&
+      bestProbeIter->validShapes > 0
+    ) {
+      rfTimeBranch = bestProbeIter->branch;
       timeBranch = rfTimeBranch;
       rfTimingSelected = true;
+
+      timeMin = bestProbeIter->displayMin;
+      timeMax = bestProbeIter->displayMax;
+      timingFitMin = bestProbeIter->fitMin;
+      timingFitMax = bestProbeIter->fitMax;
+
+      kaonMeanMin = bestProbeIter->kaonMeanMin;
+      kaonMeanMax = bestProbeIter->kaonMeanMax;
+      protonMeanMin = bestProbeIter->protonMeanMin;
+      protonMeanMax = bestProbeIter->protonMeanMax;
+      timingSigmaMax = bestProbeIter->sigmaMax;
+      timingSigmaInitial = bestProbeIter->sigmaInitial;
+
+      std::cout
+        << "Selected RF timing branch: "
+        << rfTimeBranch
+        << " with "
+        << bestProbeIter->validShapes
+        << " valid global shapes"
+        << std::endl;
     } else {
       timeBranch = ctTimeBranch;
       ctFallbackUsed = true;
 
       std::cerr
-        << "RF-first fit failed validation; falling back to "
+        << "RF-first probes found no validated global shapes; falling back to "
         << ctTimeBranch
         << std::endl;
     }
@@ -3380,7 +3640,7 @@ void check_slow_protons(
   // V1 = MM
   // V2 = ssdelta
   // V3 = P_aero_npeSum
-  // V4 = selected timing branch (RF first, CTime_ROC1 fallback)
+  // V5 = RF-first branch scan with data-driven RF timing ranges, CTime_ROC1 fallback
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
