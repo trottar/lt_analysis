@@ -1,3 +1,4 @@
 {
-    "chatgpt.composerEnterBehavior": "cmdIfMultiline"
+    "chatgpt.composerEnterBehavior": "cmdIfMultiline",
+    "C_Cpp.default.compilerPath": ""
 }

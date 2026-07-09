@@ -418,21 +418,25 @@ def _open_kaon_proton_cleaning_tree_bundle(
                 "tree_name": no_rf_prompt_name,
                 "tree": infile_data.Get(no_rf_prompt_name) if infile_data is not None else None,
                 "coefficient": float(norm_factor_data),
+                "fit_coefficient": 1.0,
             },
             "rand": {
                 "tree_name": no_rf_rand_name,
                 "tree": infile_data.Get(no_rf_rand_name) if infile_data is not None else None,
                 "coefficient": -float(norm_factor_data) / float(n_windows),
+                "fit_coefficient": -1.0 / float(n_windows),
             },
             "dummy_prompt": {
                 "tree_name": no_rf_prompt_name,
                 "tree": infile_dummy.Get(no_rf_prompt_name) if infile_dummy is not None else None,
                 "coefficient": -float(norm_factor_dummy),
+                "fit_coefficient": -1.0,
             },
             "dummy_rand": {
                 "tree_name": no_rf_rand_name,
                 "tree": infile_dummy.Get(no_rf_rand_name) if infile_dummy is not None else None,
                 "coefficient": float(norm_factor_dummy) / float(n_windows),
+                "fit_coefficient": 1.0 / float(n_windows),
             },
         },
         "rf_sources": {

@@ -25,8 +25,6 @@ from ROOT import (
     kRed,
     kViolet,
 )
-from scipy.optimize import least_squares, lsq_linear
-
 sys.path.append("utility")
 from background_config import (  # noqa: E402
     PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
@@ -207,6 +205,137 @@ def _collect_branch_values(source_bundle, evaluate_event, hole_contains, mm_min,
             if math.isfinite(value):
                 values.append(value)
     return values
+
+
+def _resolve_beam_bunch_spacing_ns(source_bundle):
+    epsset = normalize_epsset((source_bundle or {}).get("epsset"))
+    return 4.0 if epsset == "high" else 2.0
+
+
+def _build_signed_timing_projection(
+    source_bundle,
+    evaluate_event,
+    hole_contains,
+    mm_min,
+    mm_max,
+    branch_name,
+    histogram_name,
+    histogram_range,
+    histogram_bins,
+):
+    time_min, time_max = [float(value) for value in histogram_range]
+    projection = ROOT.TH1D(
+        str(histogram_name),
+        str(histogram_name),
+        int(histogram_bins),
+        time_min,
+        time_max,
+    )
+    projection.SetDirectory(0)
+    projection.Sumw2()
+    for source_spec in ((source_bundle or {}).get("sources") or {}).values():
+        tree = (source_spec or {}).get("tree")
+        coefficient = float(
+            (source_spec or {}).get(
+                "fit_coefficient",
+                (source_spec or {}).get("coefficient", 0.0),
+            )
+            or 0.0
+        )
+        if tree is None or coefficient == 0.0 or not _tree_has_branch(tree, branch_name):
+            continue
+        for evt in tree:
+            if not _preselection_passes(evt, evaluate_event, hole_contains, mm_min, mm_max):
+                continue
+            try:
+                timing_value = float(getattr(evt, str(branch_name)))
+            except Exception:
+                continue
+            if (not math.isfinite(timing_value)) or timing_value < time_min or timing_value > time_max:
+                continue
+            projection.Fill(timing_value, coefficient)
+    return projection
+
+
+def _resolve_rf_probe_display_range(
+    source_bundle,
+    evaluate_event,
+    hole_contains,
+    mm_min,
+    mm_max,
+    timing_branch,
+):
+    beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
+    fallback_range = (-float(beam_bunch_spacing_ns), float(beam_bunch_spacing_ns))
+    provisional_width = float(fallback_range[1] - fallback_range[0])
+    provisional_bins = max(
+        160,
+        int(round(provisional_width / 0.015)),
+    )
+    provisional_hist = _build_signed_timing_projection(
+        source_bundle,
+        evaluate_event,
+        hole_contains,
+        mm_min,
+        mm_max,
+        timing_branch,
+        "H_proton_cleaning_rf_probe_raw_{}".format(str(timing_branch).replace(" ", "_")),
+        fallback_range,
+        provisional_bins,
+    )
+    raw_display_range = _find_central_quantile_range(
+        provisional_hist,
+        fallback_range[0],
+        fallback_range[1],
+        5.0e-4,
+        5.0e-4,
+        2,
+    )
+    raw_display_min, raw_display_max = [float(value) for value in raw_display_range]
+    if raw_display_max <= raw_display_min:
+        return fallback_range
+    raw_display_width = float(raw_display_max - raw_display_min)
+    search_bins = max(
+        160,
+        int(round(raw_display_width / 0.015)),
+    )
+    rf_window_search = _build_signed_timing_projection(
+        source_bundle,
+        evaluate_event,
+        hole_contains,
+        mm_min,
+        mm_max,
+        timing_branch,
+        "H_proton_cleaning_rf_window_search_{}".format(str(timing_branch).replace(" ", "_")),
+        (raw_display_min, raw_display_max),
+        search_bins,
+    )
+    raw_peak_pair = _find_separated_peak_pair(
+        rf_window_search,
+        raw_display_min,
+        raw_display_max,
+        max(0.18, 0.10 * beam_bunch_spacing_ns),
+        0.80 * beam_bunch_spacing_ns,
+    )
+    if bool(raw_peak_pair.get("valid")) and raw_display_width > 1.15 * beam_bunch_spacing_ns:
+        pair_center = 0.5 * (
+            float(raw_peak_pair["lower_mean"]) +
+            float(raw_peak_pair["upper_mean"])
+        )
+        selected_width = float(beam_bunch_spacing_ns)
+        selected_min = float(pair_center - (0.5 * selected_width))
+        selected_max = float(pair_center + (0.5 * selected_width))
+        if selected_min < raw_display_min:
+            selected_max += raw_display_min - selected_min
+            selected_min = raw_display_min
+        if selected_max > raw_display_max:
+            selected_min -= selected_max - raw_display_max
+            selected_max = raw_display_max
+        return (
+            max(float(selected_min), raw_display_min),
+            min(float(selected_max), raw_display_max),
+        )
+    return raw_display_min, raw_display_max
 
 
 def _build_rf_membership_lookup(rf_source_bundle, signature_fields, round_digits):
@@ -524,6 +653,156 @@ def _gaussian(x_values, amplitude, mean, sigma):
     return float(amplitude) * np.exp(-0.5 * np.square(z_values))
 
 
+def _evaluate_gaussian_scalar(x_value, amplitude, mean, sigma):
+    if (
+        (not math.isfinite(float(x_value)))
+        or (not math.isfinite(float(amplitude)))
+        or (not math.isfinite(float(mean)))
+        or (not math.isfinite(float(sigma)))
+        or float(amplitude) <= 0.0
+        or float(sigma) <= 0.0
+    ):
+        return 0.0
+    z_value = (float(x_value) - float(mean)) / float(sigma)
+    return float(amplitude) * math.exp(-0.5 * z_value * z_value)
+
+
+def _sum_gaussian_over_bins(histogram, amplitude, mean, sigma, fit_min, fit_max):
+    if histogram is None or float(amplitude) <= 0.0 or float(sigma) <= 0.0:
+        return 0.0
+    total = 0.0
+    for bin_index in range(1, histogram.GetNbinsX() + 1):
+        x_value = float(histogram.GetXaxis().GetBinCenter(bin_index))
+        if x_value < float(fit_min) or x_value > float(fit_max):
+            continue
+        total += _evaluate_gaussian_scalar(
+            x_value,
+            amplitude,
+            mean,
+            sigma,
+        )
+    return float(total)
+
+
+def _sum_constant_over_bins(histogram, amplitude, fit_min, fit_max):
+    if histogram is None or float(amplitude) <= 0.0:
+        return 0.0
+    total = 0.0
+    for bin_index in range(1, histogram.GetNbinsX() + 1):
+        x_value = float(histogram.GetXaxis().GetBinCenter(bin_index))
+        if x_value < float(fit_min) or x_value > float(fit_max):
+            continue
+        total += float(amplitude)
+    return float(total)
+
+
+def _compute_poisson_goodness_of_fit(
+    histogram,
+    fit_function,
+    fit_min,
+    fit_max,
+    number_of_free_parameters,
+):
+    result = {
+        "deviance": 0.0,
+        "fitted_bins": 0,
+        "fitted_entries": 0.0,
+        "ndf": 0,
+        "deviance_ndf": None,
+        "deviance_per_entry": None,
+    }
+    if (
+        histogram is None
+        or fit_function is None
+        or float(fit_max) <= float(fit_min)
+        or int(number_of_free_parameters) < 0
+    ):
+        return result
+    deviance = 0.0
+    fitted_entries = 0.0
+    fitted_bins = 0
+    for bin_index in range(1, histogram.GetNbinsX() + 1):
+        bin_center = float(histogram.GetXaxis().GetBinCenter(bin_index))
+        if bin_center < float(fit_min) or bin_center > float(fit_max):
+            continue
+        bin_low = float(histogram.GetXaxis().GetBinLowEdge(bin_index))
+        bin_high = float(histogram.GetXaxis().GetBinUpEdge(bin_index))
+        bin_width = float(bin_high - bin_low)
+        if not (bin_width > 0.0):
+            continue
+        observed = max(float(histogram.GetBinContent(bin_index)), 0.0)
+        expected = max(float(fit_function.Integral(bin_low, bin_high)) / bin_width, 1.0e-12)
+        if observed > 0.0:
+            deviance += 2.0 * (
+                expected
+                - observed
+                + observed * math.log(observed / expected)
+            )
+        else:
+            deviance += 2.0 * expected
+        fitted_entries += observed
+        fitted_bins += 1
+    ndf = int(fitted_bins - int(number_of_free_parameters))
+    result["deviance"] = float(deviance)
+    result["fitted_bins"] = int(fitted_bins)
+    result["fitted_entries"] = float(fitted_entries)
+    result["ndf"] = int(ndf)
+    if ndf > 0:
+        result["deviance_ndf"] = float(deviance / float(ndf))
+    if fitted_entries > 0.0:
+        result["deviance_per_entry"] = float(deviance / float(fitted_entries))
+    return result
+
+
+def _is_near_bound(value, lower, upper, bound_fraction_tolerance):
+    tolerance = float(bound_fraction_tolerance) * float(upper - lower)
+    return (
+        float(value) <= float(lower) + tolerance
+        or float(value) >= float(upper) - tolerance
+    )
+
+
+def _extract_root_fit_matrices(fit_result, parameter_names):
+    covariance_matrix = {}
+    correlation_matrix = {}
+    uncertainties = {}
+    if fit_result is None:
+        return covariance_matrix, correlation_matrix, uncertainties
+    try:
+        covariance = fit_result.GetCovarianceMatrix()
+    except Exception:
+        covariance = None
+    try:
+        correlation = fit_result.GetCorrelationMatrix()
+    except Exception:
+        correlation = None
+    for index, parameter_name in enumerate(parameter_names):
+        try:
+            uncertainties[str(parameter_name)] = float(fit_result.ParError(index))
+        except Exception:
+            uncertainties[str(parameter_name)] = 0.0
+        covariance_row = {}
+        correlation_row = {}
+        for other_index, other_name in enumerate(parameter_names):
+            covariance_value = None
+            correlation_value = None
+            if covariance is not None:
+                try:
+                    covariance_value = float(covariance[index][other_index])
+                except Exception:
+                    covariance_value = None
+            if correlation is not None:
+                try:
+                    correlation_value = float(correlation[index][other_index])
+                except Exception:
+                    correlation_value = None
+            covariance_row[str(other_name)] = covariance_value
+            correlation_row[str(other_name)] = correlation_value
+        covariance_matrix[str(parameter_name)] = covariance_row
+        correlation_matrix[str(parameter_name)] = correlation_row
+    return covariance_matrix, correlation_matrix, uncertainties
+
+
 def _compute_parameter_covariance(weighted_design, parameter_names):
     covariance_matrix = {}
     correlation_matrix = {}
@@ -571,71 +850,91 @@ def _fit_global_timing_shape_with_bounds(
     maximum_chi2_ndf,
     bound_fraction_tolerance,
     minimum_entries,
+    use_deviance_per_entry_validation=False,
+    maximum_poisson_deviance_per_entry=None,
 ):
-    inputs = _extract_weighted_hist_fit_inputs(histogram, fit_min, fit_max)
-    x_values = inputs["x"]
-    y_values = inputs["y"]
-    sigma_values = inputs["sigma"]
-    if x_values.size == 0 or np.sum(np.abs(y_values)) < float(minimum_entries):
+    if histogram is None or float(histogram.Integral()) < float(minimum_entries):
         return {
             "valid": False,
             "fit_status": "insufficient_support",
-            "excluded_invalid_variance_bins": inputs["excluded_invalid_variance_bins"],
-            "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
+            "fit_status_code": None,
+            "excluded_invalid_variance_bins": 0,
+            "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
             "function_name": str(function_name),
             "fit_min": float(fit_min),
             "fit_max": float(fit_max),
             "per_aero_fallback": False,
         }
-    histogram_maximum = max(float(np.max(y_values)), 1.0)
+    histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
     kaon_seed = _find_peak_seed(histogram, kaon_mean_min, kaon_mean_max)
     proton_seed = _find_peak_seed(histogram, proton_mean_min, proton_mean_max)
-    initial = np.asarray(
-        [
-            max(float(kaon_seed[0]), 0.20 * histogram_maximum),
-            float(np.clip(kaon_seed[1], float(kaon_mean_min), float(kaon_mean_max))),
-            float(initial_sigma),
-            max(float(proton_seed[0]), 0.10 * histogram_maximum),
-            float(np.clip(proton_seed[1], float(proton_mean_min), float(proton_mean_max))),
-            float(initial_sigma),
-            0.02 * histogram_maximum,
-        ],
-        dtype=float,
+    fit_function = ROOT.TF1(
+        str(function_name),
+        "[0] * exp(-0.5 * pow((x - [1]) / [2], 2))"
+        " + "
+        "[3] * exp(-0.5 * pow((x - [4]) / [5], 2))"
+        " + [6]",
+        float(fit_min),
+        float(fit_max),
     )
-    lower_bounds = np.asarray(
-        [0.0, float(kaon_mean_min), float(sigma_min), 0.0, float(proton_mean_min), float(sigma_min), 0.0],
-        dtype=float,
+    fit_function.SetParName(0, "K amplitude")
+    fit_function.SetParName(1, "K mean")
+    fit_function.SetParName(2, "K sigma")
+    fit_function.SetParName(3, "p amplitude")
+    fit_function.SetParName(4, "p mean")
+    fit_function.SetParName(5, "p sigma")
+    fit_function.SetParName(6, "other constant")
+    fit_function.SetParameter(
+        0,
+        max(float(kaon_seed[0]), 0.20 * histogram_maximum),
     )
-    upper_bounds = np.asarray(
-        [
-            100.0 * histogram_maximum,
-            float(kaon_mean_max),
-            float(sigma_max),
-            100.0 * histogram_maximum,
-            float(proton_mean_max),
-            float(sigma_max),
-            10.0 * histogram_maximum,
-        ],
-        dtype=float,
+    fit_function.SetParLimits(
+        0,
+        0.0,
+        100.0 * histogram_maximum,
     )
-
-    def residuals(parameters):
-        kaon_model = _gaussian(x_values, parameters[0], parameters[1], parameters[2])
-        proton_model = _gaussian(x_values, parameters[3], parameters[4], parameters[5])
-        return (y_values - (kaon_model + proton_model + float(parameters[6]))) / sigma_values
-
-    fit_result = least_squares(
-        residuals,
-        initial,
-        bounds=(lower_bounds, upper_bounds),
-        method="trf",
-        loss="linear",
+    fit_function.SetParameter(
+        1,
+        float(np.clip(kaon_seed[1], np.nextafter(float(kaon_mean_min), float(kaon_mean_max)), np.nextafter(float(kaon_mean_max), float(kaon_mean_min)))),
     )
-    parameter_vector = np.asarray(fit_result.x, dtype=float)
-    jacobian = getattr(fit_result, "jac", None)
-    weighted_design = np.asarray(jacobian, dtype=float) if jacobian is not None else None
-    covariance_matrix, correlation_matrix, uncertainties = _compute_parameter_covariance(
-        weighted_design,
+    fit_function.SetParLimits(1, float(kaon_mean_min), float(kaon_mean_max))
+    fit_function.SetParameter(
+        2,
+        float(np.clip(initial_sigma, float(sigma_min), float(sigma_max))),
+    )
+    fit_function.SetParLimits(2, float(sigma_min), float(sigma_max))
+    fit_function.SetParameter(
+        3,
+        max(float(proton_seed[0]), 0.10 * histogram_maximum),
+    )
+    fit_function.SetParLimits(
+        3,
+        0.0,
+        100.0 * histogram_maximum,
+    )
+    fit_function.SetParameter(
+        4,
+        float(np.clip(proton_seed[1], np.nextafter(float(proton_mean_min), float(proton_mean_max)), np.nextafter(float(proton_mean_max), float(proton_mean_min)))),
+    )
+    fit_function.SetParLimits(4, float(proton_mean_min), float(proton_mean_max))
+    fit_function.SetParameter(
+        5,
+        float(np.clip(initial_sigma, float(sigma_min), float(sigma_max))),
+    )
+    fit_function.SetParLimits(5, float(sigma_min), float(sigma_max))
+    fit_function.SetParameter(
+        6,
+        0.02 * histogram_maximum,
+    )
+    fit_function.SetParLimits(
+        6,
+        0.0,
+        10.0 * histogram_maximum,
+    )
+    fit_result = histogram.Fit(fit_function, "SRLIQ0")
+    fit_status_code = int(fit_result)
+    covariance_matrix, correlation_matrix, uncertainties = _extract_root_fit_matrices(
+        fit_result,
         (
             "kaon_amplitude",
             "kaon_mean",
@@ -646,78 +945,108 @@ def _fit_global_timing_shape_with_bounds(
             "other_amplitude",
         ),
     )
-    residual_vector = residuals(parameter_vector)
-    active_bin_count = int(x_values.size)
-    ndf = max(active_bin_count - 7, 1)
-    chi2_data = float(np.sum(np.square(residual_vector)))
-    chi2_ndf = float(chi2_data / float(ndf)) if ndf > 0 else float("inf")
-    abs_entry_sum = float(np.sum(np.abs(y_values)))
-    chi2_per_abs_entry = float(chi2_data / abs_entry_sum) if abs_entry_sum > 0.0 else float("inf")
-    kaon_amp_err = float(uncertainties.get("kaon_amplitude", 0.0))
-    proton_amp_err = float(uncertainties.get("proton_amplitude", 0.0))
-    kaon_sigma = abs(float(parameter_vector[2]))
-    proton_sigma = abs(float(parameter_vector[5]))
+    kaon_amplitude = float(fit_function.GetParameter(0))
+    kaon_mean = float(fit_function.GetParameter(1))
+    kaon_sigma = abs(float(fit_function.GetParameter(2)))
+    proton_amplitude = float(fit_function.GetParameter(3))
+    proton_mean = float(fit_function.GetParameter(4))
+    proton_sigma = abs(float(fit_function.GetParameter(5)))
+    other_amplitude = float(fit_function.GetParameter(6))
+    goodness = _compute_poisson_goodness_of_fit(
+        histogram,
+        fit_function,
+        fit_min,
+        fit_max,
+        7,
+    )
+    chi2_data = float(goodness.get("deviance", 0.0) or 0.0)
+    chi2_ndf = goodness.get("deviance_ndf")
+    chi2_per_abs_entry = goodness.get("deviance_per_entry")
+    active_bin_count = int(goodness.get("fitted_bins", 0) or 0)
+    kaon_amp_err = float(fit_function.GetParError(0))
+    proton_amp_err = float(fit_function.GetParError(3))
     separation_denominator = math.sqrt(max((kaon_sigma ** 2) + (proton_sigma ** 2), 0.0))
     separation = (
-        abs(float(parameter_vector[4]) - float(parameter_vector[1])) / separation_denominator
+        abs(float(proton_mean) - float(kaon_mean)) / separation_denominator
         if separation_denominator > 0.0
         else 0.0
     )
-
-    def near_bound(value, lower, upper):
-        tolerance = float(bound_fraction_tolerance) * float(upper - lower)
-        return (value <= float(lower) + tolerance) or (value >= float(upper) - tolerance)
-
     bound_hit = (
-        near_bound(parameter_vector[1], kaon_mean_min, kaon_mean_max)
-        or near_bound(parameter_vector[4], proton_mean_min, proton_mean_max)
-        or near_bound(kaon_sigma, sigma_min, sigma_max)
-        or near_bound(proton_sigma, sigma_min, sigma_max)
+        _is_near_bound(kaon_mean, kaon_mean_min, kaon_mean_max, bound_fraction_tolerance)
+        or _is_near_bound(proton_mean, proton_mean_min, proton_mean_max, bound_fraction_tolerance)
+        or _is_near_bound(kaon_sigma, sigma_min, sigma_max, bound_fraction_tolerance)
+        or _is_near_bound(proton_sigma, sigma_min, sigma_max, bound_fraction_tolerance)
     )
     ordering_valid = (
-        float(parameter_vector[4]) < float(parameter_vector[1])
+        float(proton_mean) < float(kaon_mean)
         if bool(proton_peak_is_lower)
-        else float(parameter_vector[1]) < float(parameter_vector[4])
+        else float(kaon_mean) < float(proton_mean)
     )
-    kaon_significance = float(parameter_vector[0] / kaon_amp_err) if kaon_amp_err > 0.0 else 0.0
-    proton_significance = float(parameter_vector[3] / proton_amp_err) if proton_amp_err > 0.0 else 0.0
+    kaon_significance = float(kaon_amplitude / kaon_amp_err) if kaon_amp_err > 0.0 else 0.0
+    proton_significance = float(proton_amplitude / proton_amp_err) if proton_amp_err > 0.0 else 0.0
+    maximum_poisson_deviance_per_entry = (
+        float(maximum_poisson_deviance_per_entry)
+        if maximum_poisson_deviance_per_entry is not None
+        else float("inf")
+    )
+    chi2_ndf_valid = bool(chi2_ndf is not None and math.isfinite(float(chi2_ndf)))
+    chi2_per_entry_valid = bool(
+        chi2_per_abs_entry is not None and math.isfinite(float(chi2_per_abs_entry))
+    )
     valid = (
-        bool(getattr(fit_result, "success", False))
+        fit_status_code == 0
         and not bound_hit
         and ordering_valid
-        and math.isfinite(chi2_ndf)
-        and float(parameter_vector[0]) > 0.0
-        and float(parameter_vector[3]) > 0.0
+        and math.isfinite(float(kaon_amplitude))
+        and math.isfinite(float(proton_amplitude))
+        and math.isfinite(float(kaon_mean))
+        and math.isfinite(float(proton_mean))
+        and math.isfinite(float(kaon_sigma))
+        and math.isfinite(float(proton_sigma))
+        and chi2_ndf_valid
+        and chi2_per_entry_valid
+        and float(kaon_amplitude) > 0.0
+        and float(proton_amplitude) > 0.0
         and kaon_sigma > 0.0
         and proton_sigma > 0.0
         and separation >= float(minimum_separation)
         and kaon_significance >= float(minimum_amplitude_significance)
         and proton_significance >= float(minimum_amplitude_significance)
-        and chi2_ndf <= float(maximum_chi2_ndf)
+        and (
+            float(chi2_per_abs_entry) <= maximum_poisson_deviance_per_entry
+            if bool(use_deviance_per_entry_validation)
+            else float(chi2_ndf) <= float(maximum_chi2_ndf)
+        )
     )
     return {
         "valid": bool(valid),
-        "fit_status": "success" if bool(getattr(fit_result, "success", False)) else "failure",
-        "message": str(getattr(fit_result, "message", "")),
+        "fit_status": "success" if fit_status_code == 0 else "failure",
+        "fit_status_code": int(fit_status_code),
+        "message": "",
         "function_name": str(function_name),
-        "kaon_amplitude": float(parameter_vector[0]),
+        "kaon_amplitude": float(kaon_amplitude),
         "kaon_amplitude_error": kaon_amp_err,
-        "kaon_mean": float(parameter_vector[1]),
+        "kaon_mean": float(kaon_mean),
         "kaon_sigma": float(kaon_sigma),
-        "proton_amplitude": float(parameter_vector[3]),
+        "proton_amplitude": float(proton_amplitude),
         "proton_amplitude_error": proton_amp_err,
-        "proton_mean": float(parameter_vector[4]),
+        "proton_mean": float(proton_mean),
         "proton_sigma": float(proton_sigma),
-        "other_amplitude": float(parameter_vector[6]),
+        "other_amplitude": float(other_amplitude),
         "separation": float(separation),
         "kaon_significance": float(kaon_significance),
         "proton_significance": float(proton_significance),
         "chi2_data": chi2_data,
-        "chi2_ndf": chi2_ndf,
-        "chi2_per_abs_entry": chi2_per_abs_entry,
+        "chi2_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
+        "chi2_per_abs_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
+        "poisson_deviance": chi2_data,
+        "poisson_deviance_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
+        "poisson_deviance_per_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
+        "goodness_ndf": int(goodness.get("ndf", 0) or 0),
+        "fitted_entries": float(goodness.get("fitted_entries", 0.0) or 0.0),
         "active_bin_count": active_bin_count,
-        "excluded_invalid_variance_bins": inputs["excluded_invalid_variance_bins"],
-        "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
+        "excluded_invalid_variance_bins": 0,
+        "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
         "bound_hit": bool(bound_hit),
         "ordering_valid": bool(ordering_valid),
         "covariance_matrix": covariance_matrix,
@@ -882,12 +1211,22 @@ def _fit_per_aero_fallback_timing_shape(
             1.0e9,
             0.001,
             minimum_entries,
+            use_deviance_per_entry_validation=True,
+            maximum_poisson_deviance_per_entry=1.0e9,
         )
         attempt["fit_min"] = float(central_min)
         attempt["fit_max"] = float(central_max)
         attempt["per_aero_fallback"] = True
         attempt["peak_pair_found"] = True
-        fit_status_accepted = bool(attempt.get("fit_status") == "success")
+        fit_status_code = attempt.get("fit_status_code")
+        fit_status_accepted = bool(
+            fit_status_code == 0
+            or (
+                fit_status_code == 4
+                and math.isfinite(float(attempt.get("poisson_deviance_per_entry", float("inf"))))
+                and float(attempt.get("poisson_deviance_per_entry", float("inf"))) <= 0.08
+            )
+        )
         ordering_accepted = (
             float(attempt.get("proton_mean", 0.0)) < float(attempt.get("kaon_mean", 0.0))
             if bool(proton_peak_is_lower)
@@ -907,7 +1246,7 @@ def _fit_per_aero_fallback_timing_shape(
             and math.isfinite(float(attempt.get("proton_mean", 0.0)))
             and math.isfinite(float(attempt.get("kaon_sigma", 0.0)))
             and math.isfinite(float(attempt.get("proton_sigma", 0.0)))
-            and math.isfinite(float(attempt.get("chi2_per_abs_entry", float("inf"))))
+            and math.isfinite(float(attempt.get("poisson_deviance_per_entry", float("inf"))))
             and float(attempt.get("kaon_amplitude", 0.0)) > 0.0
             and float(attempt.get("proton_amplitude", 0.0)) > 0.0
             and float(attempt.get("kaon_sigma", 0.0)) > 0.0
@@ -916,10 +1255,10 @@ def _fit_per_aero_fallback_timing_shape(
             and float(attempt.get("kaon_significance", 0.0)) >= required_significance
             and float(attempt.get("proton_significance", 0.0)) >= required_significance
             and smaller_amplitude_fraction >= 0.020
-            and float(attempt.get("chi2_per_abs_entry", float("inf"))) <= 0.35
+            and float(attempt.get("poisson_deviance_per_entry", float("inf"))) <= 0.35
         )
         population_penalty = 0.20 * (0.08 - smaller_amplitude_fraction) if smaller_amplitude_fraction < 0.08 else 0.0
-        diagnostic_score = float(attempt.get("chi2_per_abs_entry", float("inf"))) + population_penalty
+        diagnostic_score = float(attempt.get("poisson_deviance_per_entry", float("inf"))) + population_penalty
         attempts.append(attempt)
         stored_index = len(attempts) - 1
         if math.isfinite(diagnostic_score) and diagnostic_score < best_diagnostic_score:
@@ -963,14 +1302,21 @@ def _fit_per_aero_fallback_timing_shape(
     )
     result["valid"] = bool(
         best_accepted_index >= 0
-        and result.get("fit_status") == "success"
+        and (
+            result.get("fit_status_code") == 0
+            or (
+                result.get("fit_status_code") == 4
+                and math.isfinite(float(result.get("poisson_deviance_per_entry", float("inf"))))
+                and float(result.get("poisson_deviance_per_entry", float("inf"))) <= 0.08
+            )
+        )
         and final_ordering_accepted
         and float(result.get("separation", 0.0)) >= 0.55
         and float(result.get("kaon_significance", 0.0)) >= final_required_significance
         and float(result.get("proton_significance", 0.0)) >= final_required_significance
         and final_smaller_amplitude_fraction >= 0.020
-        and math.isfinite(float(result.get("chi2_per_abs_entry", float("inf"))))
-        and float(result.get("chi2_per_abs_entry", float("inf"))) <= 0.35
+        and math.isfinite(float(result.get("poisson_deviance_per_entry", float("inf"))))
+        and float(result.get("poisson_deviance_per_entry", float("inf"))) <= 0.35
     )
     result["per_aero_fallback"] = True
     return result
@@ -996,108 +1342,164 @@ def _fit_delta_timing_slice(
 ):
     fit_min = float(global_shape.get("fit_min", (config.get("ctime_hist_range") or (-1.50, 1.25))[0]))
     fit_max = float(global_shape.get("fit_max", (config.get("ctime_hist_range") or (-1.50, 1.25))[1]))
-    inputs = _extract_weighted_hist_fit_inputs(histogram, fit_min, fit_max)
-    x_values = inputs["x"]
-    y_values = inputs["y"]
-    sigma_values = inputs["sigma"]
     minimum_entries = int((config.get("slice_fit") or {}).get("minimum_entries", 30))
-    if (not global_shape.get("valid")) or x_values.size == 0 or np.sum(np.abs(y_values)) < float(minimum_entries):
+    if (
+        histogram is None
+        or (not global_shape.get("valid"))
+        or float(histogram.Integral()) < float(minimum_entries)
+    ):
         return {
             "valid": False,
             "fit_status": "insufficient_support",
+            "fit_status_code": None,
             "function_name": str(function_name),
-            "excluded_invalid_variance_bins": inputs["excluded_invalid_variance_bins"],
-            "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
+            "excluded_invalid_variance_bins": 0,
+            "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
         }
-
-    kaon_component = _gaussian(
-        x_values,
-        1.0,
-        global_shape["kaon_mean"],
-        global_shape["kaon_sigma"],
+    histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
+    kaon_seed = _find_peak_seed(
+        histogram,
+        global_shape["kaon_mean"] - (2.0 * global_shape["kaon_sigma"]),
+        global_shape["kaon_mean"] + (2.0 * global_shape["kaon_sigma"]),
     )
-    proton_component = _gaussian(
-        x_values,
-        1.0,
-        global_shape["proton_mean"],
-        global_shape["proton_sigma"],
+    proton_seed = _find_peak_seed(
+        histogram,
+        global_shape["proton_mean"] - (2.0 * global_shape["proton_sigma"]),
+        global_shape["proton_mean"] + (2.0 * global_shape["proton_sigma"]),
     )
-    weighted_design = np.column_stack(
-        [
-            kaon_component / sigma_values,
-            proton_component / sigma_values,
-            np.ones_like(x_values) / sigma_values,
-        ]
+    fit_function = ROOT.TF1(
+        str(function_name),
+        "[0] * exp(-0.5 * pow((x - [1]) / [2], 2))"
+        " + "
+        "[3] * exp(-0.5 * pow((x - [4]) / [5], 2))"
+        " + [6]",
+        float(fit_min),
+        float(fit_max),
     )
-    weighted_target = y_values / sigma_values
-    fit_result = lsq_linear(
-        weighted_design,
-        weighted_target,
-        bounds=(0.0, np.inf),
-    )
-    amplitudes = np.asarray(fit_result.x, dtype=float)
-    model_values = (
-        amplitudes[0] * kaon_component
-        + amplitudes[1] * proton_component
-        + amplitudes[2]
-    )
-    residual_values = (y_values - model_values) / sigma_values
-    chi2_data = float(np.sum(np.square(residual_values)))
-    active_bin_count = int(x_values.size)
-    ndf = max(active_bin_count - 3, 1)
-    chi2_ndf = float(chi2_data / float(ndf)) if ndf > 0 else float("inf")
-    covariance_matrix, correlation_matrix, uncertainties = _compute_parameter_covariance(
-        weighted_design,
+    fit_function.SetParName(0, "K amplitude")
+    fit_function.SetParName(1, "K mean")
+    fit_function.SetParName(2, "K sigma")
+    fit_function.SetParName(3, "p amplitude")
+    fit_function.SetParName(4, "p mean")
+    fit_function.SetParName(5, "p sigma")
+    fit_function.SetParName(6, "other constant")
+    fit_function.SetParameter(0, max(float(kaon_seed[0]), 0.10 * histogram_maximum))
+    fit_function.SetParLimits(0, 0.0, 100.0 * histogram_maximum)
+    fit_function.FixParameter(1, float(global_shape["kaon_mean"]))
+    fit_function.FixParameter(2, float(global_shape["kaon_sigma"]))
+    fit_function.SetParameter(3, max(float(proton_seed[0]), 0.05 * histogram_maximum))
+    fit_function.SetParLimits(3, 0.0, 100.0 * histogram_maximum)
+    fit_function.FixParameter(4, float(global_shape["proton_mean"]))
+    fit_function.FixParameter(5, float(global_shape["proton_sigma"]))
+    fit_function.SetParameter(6, 0.02 * histogram_maximum)
+    fit_function.SetParLimits(6, 0.0, 10.0 * histogram_maximum)
+    fit_result = histogram.Fit(fit_function, "SRLIQ0")
+    fit_status_code = int(fit_result)
+    covariance_matrix, correlation_matrix, uncertainties = _extract_root_fit_matrices(
+        fit_result,
         ("kaon_amplitude", "proton_amplitude", "other_amplitude"),
     )
-    full_kaon = _gaussian(
-        np.asarray(
-            [histogram.GetXaxis().GetBinCenter(bin_index) for bin_index in range(1, histogram.GetNbinsX() + 1)],
-            dtype=float,
-        ),
-        amplitudes[0],
+    kaon_amplitude = float(fit_function.GetParameter(0))
+    proton_amplitude = float(fit_function.GetParameter(3))
+    other_amplitude = float(fit_function.GetParameter(6))
+    kaon_amplitude_error = float(fit_function.GetParError(0))
+    proton_amplitude_error = float(fit_function.GetParError(3))
+    other_amplitude_error = float(fit_function.GetParError(6))
+    kaon_yield = _sum_gaussian_over_bins(
+        histogram,
+        kaon_amplitude,
         global_shape["kaon_mean"],
         global_shape["kaon_sigma"],
+        fit_min,
+        fit_max,
     )
-    full_proton = _gaussian(
-        np.asarray(
-            [histogram.GetXaxis().GetBinCenter(bin_index) for bin_index in range(1, histogram.GetNbinsX() + 1)],
-            dtype=float,
-        ),
-        amplitudes[1],
+    proton_yield = _sum_gaussian_over_bins(
+        histogram,
+        proton_amplitude,
         global_shape["proton_mean"],
         global_shape["proton_sigma"],
+        fit_min,
+        fit_max,
     )
-    full_other = np.full(histogram.GetNbinsX(), float(amplitudes[2]), dtype=float)
-    kaon_yield = _sum_component_over_bins(histogram, full_kaon, fit_min, fit_max)
-    proton_yield = _sum_component_over_bins(histogram, full_proton, fit_min, fit_max)
-    other_yield = _sum_component_over_bins(histogram, full_other, fit_min, fit_max)
-    data_yield = float(np.sum(y_values))
+    other_yield = _sum_constant_over_bins(
+        histogram,
+        other_amplitude,
+        fit_min,
+        fit_max,
+    )
+    first_fit_bin = max(1, histogram.GetXaxis().FindFixBin(float(fit_min)))
+    last_fit_bin = min(
+        histogram.GetNbinsX(),
+        histogram.GetXaxis().FindFixBin(np.nextafter(float(fit_max), float(fit_min))),
+    )
+    data_yield = float(histogram.Integral(first_fit_bin, last_fit_bin))
     model_yield = float(kaon_yield + proton_yield + other_yield)
     model_data_ratio = float(model_yield / data_yield) if data_yield > 0.0 else None
+    goodness = _compute_poisson_goodness_of_fit(
+        histogram,
+        fit_function,
+        fit_min,
+        fit_max,
+        3,
+    )
+    chi2_data = float(goodness.get("deviance", 0.0) or 0.0)
+    chi2_ndf = goodness.get("deviance_ndf")
+    chi2_per_abs_entry = goodness.get("deviance_per_entry")
+    active_bin_count = int(goodness.get("fitted_bins", 0) or 0)
+    slice_cfg = config.get("slice_fit") or {}
+    use_deviance_per_entry_validation = bool(global_shape.get("per_aero_fallback"))
+    maximum_poisson_deviance_per_entry = float(
+        slice_cfg.get("maximum_poisson_deviance_per_entry", 0.05)
+        or 0.05
+    )
+    slice_fit_status_accepted = bool(
+        fit_status_code == 0
+        or (
+            bool(global_shape.get("per_aero_fallback"))
+            and fit_status_code == 4
+            and chi2_per_abs_entry is not None
+            and math.isfinite(float(chi2_per_abs_entry))
+            and float(chi2_per_abs_entry) <= 0.05
+        )
+    )
     valid = (
-        bool(getattr(fit_result, "success", False))
-        and math.isfinite(chi2_ndf)
-        and float(amplitudes[0]) >= 0.0
-        and float(amplitudes[1]) >= 0.0
-        and float(amplitudes[2]) >= 0.0
-        and model_yield > 0.0
+        slice_fit_status_accepted
+        and math.isfinite(float(kaon_amplitude))
+        and math.isfinite(float(proton_amplitude))
+        and math.isfinite(float(other_amplitude))
+        and math.isfinite(float(kaon_yield))
+        and math.isfinite(float(proton_yield))
+        and math.isfinite(float(other_yield))
         and model_data_ratio is not None
-        and model_data_ratio >= float((config.get("slice_fit") or {}).get("minimum_model_data_ratio", 0.50))
-        and model_data_ratio <= float((config.get("slice_fit") or {}).get("maximum_model_data_ratio", 1.50))
-        and chi2_ndf <= float((config.get("slice_fit") or {}).get("maximum_chi2_ndf", 5.0))
+        and math.isfinite(float(model_data_ratio))
+        and chi2_ndf is not None
+        and math.isfinite(float(chi2_ndf))
+        and chi2_per_abs_entry is not None
+        and math.isfinite(float(chi2_per_abs_entry))
+        and float(kaon_amplitude) >= 0.0
+        and float(proton_amplitude) >= 0.0
+        and float(other_amplitude) >= 0.0
+        and model_yield > 0.0
+        and float(model_data_ratio) >= float(slice_cfg.get("minimum_model_data_ratio", 0.50))
+        and float(model_data_ratio) <= float(slice_cfg.get("maximum_model_data_ratio", 1.50))
+        and (
+            float(chi2_per_abs_entry) <= maximum_poisson_deviance_per_entry
+            if use_deviance_per_entry_validation
+            else float(chi2_ndf) <= float(slice_cfg.get("maximum_chi2_ndf", 5.0))
+        )
     )
     return {
         "valid": bool(valid),
-        "fit_status": "success" if bool(getattr(fit_result, "success", False)) else "failure",
-        "message": str(getattr(fit_result, "message", "")),
+        "fit_status": "success" if fit_status_code == 0 else "failure",
+        "fit_status_code": int(fit_status_code),
+        "message": "",
         "function_name": str(function_name),
-        "kaon_amplitude": float(amplitudes[0]),
-        "kaon_amplitude_error": float(uncertainties.get("kaon_amplitude", 0.0)),
-        "proton_amplitude": float(amplitudes[1]),
-        "proton_amplitude_error": float(uncertainties.get("proton_amplitude", 0.0)),
-        "other_amplitude": float(amplitudes[2]),
-        "other_amplitude_error": float(uncertainties.get("other_amplitude", 0.0)),
+        "kaon_amplitude": float(kaon_amplitude),
+        "kaon_amplitude_error": float(kaon_amplitude_error),
+        "proton_amplitude": float(proton_amplitude),
+        "proton_amplitude_error": float(proton_amplitude_error),
+        "other_amplitude": float(other_amplitude),
+        "other_amplitude_error": float(other_amplitude_error),
         "kaon_yield": float(kaon_yield),
         "proton_yield": float(proton_yield),
         "other_yield": float(other_yield),
@@ -1105,10 +1507,16 @@ def _fit_delta_timing_slice(
         "model_yield": float(model_yield),
         "model_data_ratio": float(model_data_ratio) if model_data_ratio is not None else None,
         "chi2_data": chi2_data,
-        "chi2_ndf": chi2_ndf,
+        "chi2_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
+        "chi2_per_abs_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
+        "poisson_deviance": chi2_data,
+        "poisson_deviance_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
+        "poisson_deviance_per_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
+        "goodness_ndf": int(goodness.get("ndf", 0) or 0),
+        "fitted_entries": float(goodness.get("fitted_entries", 0.0) or 0.0),
         "active_bin_count": active_bin_count,
-        "excluded_invalid_variance_bins": inputs["excluded_invalid_variance_bins"],
-        "invalid_bin_rule": "exclude non-finite or non-positive Sumw2 variance bins",
+        "excluded_invalid_variance_bins": 0,
+        "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
         "covariance_matrix": covariance_matrix,
         "correlation_matrix": correlation_matrix,
         "uncertainties": uncertainties,
@@ -1261,6 +1669,8 @@ def _fit_global_timing_shape(
         float(global_cfg.get("maximum_chi2_ndf", 5.0) or 5.0),
         float(global_cfg.get("bound_fraction_tolerance", 0.02) or 0.02),
         minimum_entries,
+        use_deviance_per_entry_validation=bool(global_cfg.get("use_deviance_per_entry_validation", False)),
+        maximum_poisson_deviance_per_entry=global_cfg.get("maximum_poisson_deviance_per_entry"),
     )
     shape["peak_pair_found"] = bool(bounds.get("peak_pair_found", False))
     return shape
@@ -1357,9 +1767,14 @@ def _run_timing_probe(
     probe_kind,
     fit_mode,
 ):
+    beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
+    probe_config = deepcopy(config)
+    global_cfg = dict(probe_config.get("global_fit") or {})
+    global_cfg["beam_bunch_spacing_ns"] = float(beam_bunch_spacing_ns)
+    probe_config["global_fit"] = global_cfg
     display_range = None
     if str(probe_kind) == "rf":
-        branch_values = _collect_branch_values(
+        display_range = _resolve_rf_probe_display_range(
             source_bundle,
             evaluate_event,
             hole_contains,
@@ -1367,12 +1782,16 @@ def _run_timing_probe(
             mm_max,
             timing_branch,
         )
-        display_range = _estimate_value_central_range(
-            branch_values,
-            *(config.get("ctime_hist_range") or (-1.50, 1.25))
-        )
     else:
-        display_range = tuple(float(value) for value in (config.get("ctime_hist_range") or (-1.50, 1.25)))
+        display_range = (
+            -float(beam_bunch_spacing_ns),
+            float(beam_bunch_spacing_ns),
+        )
+    time_hist_bins = _resolve_probe_time_histogram_bins(
+        source_bundle,
+        probe_kind,
+        display_range,
+    )
     pid_payload = _build_signed_pid_histograms(
         source_bundle,
         config,
@@ -1383,13 +1802,13 @@ def _run_timing_probe(
         mm_max,
         timing_branch=str(timing_branch),
         time_hist_range=display_range,
-        time_hist_bins=90,
+        time_hist_bins=time_hist_bins,
     )
     global_shapes = []
     for aero_index, slice_hist in enumerate(pid_payload["global_slice_hists"]):
         shape = _fit_global_timing_shape(
             slice_hist,
-            config,
+            probe_config,
             "f_proton_cleaning_global_{}_aero_{}".format(
                 str(timing_branch).replace(" ", "_"),
                 aero_index,
@@ -1537,7 +1956,13 @@ def _build_signed_pid_histograms(
     source_stats = {}
     for source_name, source_spec in (source_bundle.get("sources") or {}).items():
         tree = source_spec.get("tree")
-        coefficient = float(source_spec.get("coefficient", 0.0) or 0.0)
+        coefficient = float(
+            source_spec.get(
+                "fit_coefficient",
+                source_spec.get("coefficient", 0.0),
+            )
+            or 0.0
+        )
         source_stats[source_name] = {
             "tree_name": source_spec.get("tree_name"),
             "entries_seen": 0,
@@ -1583,6 +2008,18 @@ def _build_signed_pid_histograms(
         "time_hist_range": (float(time_min), float(time_max)),
         "time_hist_bins": int(n_time_bins),
     }
+
+
+def _resolve_probe_time_histogram_bins(source_bundle, probe_kind, display_range):
+    if str(probe_kind) == "rf":
+        display_min, display_max = [float(value) for value in display_range]
+        candidate_width = max(float(display_max) - float(display_min), 0.0)
+        return max(
+            80,
+            int(round(candidate_width / 0.0305)),
+        )
+    epsset = normalize_epsset((source_bundle or {}).get("epsset"))
+    return 262 if epsset == "high" else 131
 
 
 def build_kaon_proton_cleaning_result(
@@ -1637,12 +2074,14 @@ def build_kaon_proton_cleaning_result(
             "input_tree_particle_selection": "Cut_Kaon_Events_*_noRF",
             "fit_sample_definition": (
                 "signed noRF prompt/random/dummy bundle with evaluate_data_event "
-                "nommcuts and HGCer-hole rejection"
+                "nommcuts and HGCer-hole rejection, using raw signed event-count "
+                "coefficients for the timing-fit histograms"
             ),
             "fit_sample_signed_combination": (
                 "prompt - rand/nWindows - dummy + dummy_rand/nWindows"
             ),
             "fit_sample_uses_signed_random_dummy_subtraction": True,
+            "fit_sample_uses_normalized_coefficients": False,
             "fit_sample_requires_nommcuts": True,
             "fit_sample_requires_hgcer_hole_rejection": True,
         },
@@ -1668,6 +2107,16 @@ def build_kaon_proton_cleaning_result(
 
     result["diagnostics"]["source_coefficients"] = {
         str(source_name): float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+        for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
+    }
+    result["diagnostics"]["fit_source_coefficients"] = {
+        str(source_name): float(
+            (source_spec or {}).get(
+                "fit_coefficient",
+                (source_spec or {}).get("coefficient", 0.0),
+            )
+            or 0.0
+        )
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
     }
     ct_time_branch = str(config.get("ct_timing_branch", "CTime_ROC1") or "CTime_ROC1")
@@ -1730,78 +2179,6 @@ def build_kaon_proton_cleaning_result(
     best_rf_probe = _best_rf_probe_or_none(rf_probes)
     best_rf_valid_shapes = max((int(probe.get("validShapes", 0) or 0) for probe in rf_probes), default=0)
 
-    if best_rf_valid_shapes == 0 and int(ct_probe.get("validShapes", 0) or 0) == 0:
-        current_fit_mode = "standard"
-        result["diagnostics"]["timingFitUsedPerAeroDefault"] = False
-        result["diagnostics"]["timingFitUsedStandardFallback"] = True
-        rf_probes = [
-            _run_timing_probe(
-                source_bundle,
-                config,
-                evaluate_event,
-                shifted_mm_getter,
-                hole_contains,
-                mm_min,
-                mm_max,
-                timing_branch=candidate,
-                proton_peak_is_lower=True,
-                probe_kind="rf",
-                fit_mode=current_fit_mode,
-            )
-            for candidate in rf_candidate_branches
-        ]
-        ct_probe = _run_timing_probe(
-            source_bundle,
-            config,
-            evaluate_event,
-            shifted_mm_getter,
-            hole_contains,
-            mm_min,
-            mm_max,
-            timing_branch=ct_time_branch,
-            proton_peak_is_lower=False,
-            probe_kind="ct",
-            fit_mode=current_fit_mode,
-        )
-        best_rf_probe = _best_rf_probe_or_none(rf_probes)
-        best_rf_valid_shapes = max((int(probe.get("validShapes", 0) or 0) for probe in rf_probes), default=0)
-
-    if best_rf_valid_shapes == 0 and int(ct_probe.get("validShapes", 0) or 0) == 0:
-        current_fit_mode = "local_peak_rescue"
-        result["diagnostics"]["timingFitUsedStandardFallback"] = False
-        result["diagnostics"]["timingFitUsedLocalPeakRescue"] = True
-        rf_probes = [
-            _run_timing_probe(
-                source_bundle,
-                config,
-                evaluate_event,
-                shifted_mm_getter,
-                hole_contains,
-                mm_min,
-                mm_max,
-                timing_branch=candidate,
-                proton_peak_is_lower=True,
-                probe_kind="rf",
-                fit_mode=current_fit_mode,
-            )
-            for candidate in rf_candidate_branches
-        ]
-        ct_probe = _run_timing_probe(
-            source_bundle,
-            config,
-            evaluate_event,
-            shifted_mm_getter,
-            hole_contains,
-            mm_min,
-            mm_max,
-            timing_branch=ct_time_branch,
-            proton_peak_is_lower=False,
-            probe_kind="ct",
-            fit_mode=current_fit_mode,
-        )
-        best_rf_probe = _best_rf_probe_or_none(rf_probes)
-        best_rf_valid_shapes = max((int(probe.get("validShapes", 0) or 0) for probe in rf_probes), default=0)
-
     selected_probe = ct_probe
     timing_selection_reason = "ct_probe_ranked_better_than_rf"
     if best_rf_probe is None:
@@ -1822,12 +2199,7 @@ def build_kaon_proton_cleaning_result(
             selected_probe = best_rf_probe
             timing_selection_reason = "rf_resolved_peak_pair_used_after_all_fit_validation_failed"
 
-    if current_fit_mode == "per_aero_multistart":
-        timing_selection_reason = "per_aerogel_multistart_default_{}".format(timing_selection_reason)
-    elif current_fit_mode == "standard":
-        timing_selection_reason = "standard_fit_fallback_{}".format(timing_selection_reason)
-    elif current_fit_mode == "local_peak_rescue":
-        timing_selection_reason = "local_peak_rescue_{}".format(timing_selection_reason)
+    timing_selection_reason = "per_aerogel_multistart_default_{}".format(timing_selection_reason)
 
     pid_payload = selected_probe.get("pid_payload") or {}
     global_shapes = selected_probe.get("global_shapes") or []
