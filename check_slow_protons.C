@@ -1828,7 +1828,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.10";
+  const char *macroVersion = "check_slow_protons.11";
 
   std::cout
     << "Running "
@@ -2310,6 +2310,357 @@ void check_slow_protons(
   const std::string acceptanceCut =
     "(" + baseAcceptanceCut + ") && (" +
     phaseSpaceCutName + ")";
+
+  // ------------------------------------------------------------------
+  // Q2-W "diamond" diagnostics.  These are produced whenever the
+  // summary-file polygon is active, independent of whether the timing
+  // fits later pass validation.
+  // ------------------------------------------------------------------
+
+  const bool diamondPlotsEnabled = phaseSpacePolygon.valid;
+
+  TH2D *hDiamondAll = nullptr;
+  TH2D *hDiamondInside = nullptr;
+  TH2D *hDiamondOutside = nullptr;
+  TH2D *hDiamondEfficiency = nullptr;
+
+  TH1D *hDiamondQ2All = nullptr;
+  TH1D *hDiamondQ2Inside = nullptr;
+  TH1D *hDiamondWAll = nullptr;
+  TH1D *hDiamondWInside = nullptr;
+
+  TCanvas *diamondCanvas = nullptr;
+
+  Long64_t diamondPreCutEntries = 0;
+  Long64_t diamondAcceptedEntries = 0;
+  Long64_t diamondRejectedEntries = 0;
+
+  if (diamondPlotsEnabled) {
+    double polygonQ2Min = std::numeric_limits<double>::infinity();
+    double polygonQ2Max = -std::numeric_limits<double>::infinity();
+    double polygonWMin = std::numeric_limits<double>::infinity();
+    double polygonWMax = -std::numeric_limits<double>::infinity();
+
+    for (const auto &vertex : phaseSpacePolygon.vertices) {
+      polygonQ2Min = std::min(polygonQ2Min, vertex.first);
+      polygonQ2Max = std::max(polygonQ2Max, vertex.first);
+      polygonWMin = std::min(polygonWMin, vertex.second);
+      polygonWMax = std::max(polygonWMax, vertex.second);
+    }
+
+    const double polygonQ2Span = std::max(polygonQ2Max - polygonQ2Min, 0.05);
+    const double polygonWSpan = std::max(polygonWMax - polygonWMin, 0.02);
+
+    const double diamondQ2Min = polygonQ2Min - 0.20 * polygonQ2Span;
+    const double diamondQ2Max = polygonQ2Max + 0.20 * polygonQ2Span;
+    const double diamondWMin = polygonWMin - 0.25 * polygonWSpan;
+    const double diamondWMax = polygonWMax + 0.25 * polygonWSpan;
+
+    const int diamondQ2Bins = 180;
+    const int diamondWBins = 180;
+
+    gROOT->cd();
+
+    hDiamondAll = new TH2D(
+      "h_q2_w_before_diamond",
+      TString::Format(
+        "%s: Q^{2} vs W before diamond cut;Q^{2} [GeV^{2}];W [GeV]",
+        phiSetting.Data()
+      ),
+      diamondQ2Bins,
+      diamondQ2Min,
+      diamondQ2Max,
+      diamondWBins,
+      diamondWMin,
+      diamondWMax
+    );
+
+    hDiamondInside = new TH2D(
+      "h_q2_w_inside_diamond",
+      TString::Format(
+        "%s: Q^{2} vs W inside diamond cut;Q^{2} [GeV^{2}];W [GeV]",
+        phiSetting.Data()
+      ),
+      diamondQ2Bins,
+      diamondQ2Min,
+      diamondQ2Max,
+      diamondWBins,
+      diamondWMin,
+      diamondWMax
+    );
+
+    hDiamondOutside = new TH2D(
+      "h_q2_w_outside_diamond",
+      TString::Format(
+        "%s: Q^{2} vs W rejected by diamond cut;Q^{2} [GeV^{2}];W [GeV]",
+        phiSetting.Data()
+      ),
+      diamondQ2Bins,
+      diamondQ2Min,
+      diamondQ2Max,
+      diamondWBins,
+      diamondWMin,
+      diamondWMax
+    );
+
+    hDiamondQ2All = new TH1D(
+      "h_q2_before_diamond",
+      "Q^{2} projection;Q^{2} [GeV^{2}];Counts",
+      diamondQ2Bins,
+      diamondQ2Min,
+      diamondQ2Max
+    );
+
+    hDiamondQ2Inside = new TH1D(
+      "h_q2_inside_diamond",
+      "Q^{2} projection inside diamond;Q^{2} [GeV^{2}];Counts",
+      diamondQ2Bins,
+      diamondQ2Min,
+      diamondQ2Max
+    );
+
+    hDiamondWAll = new TH1D(
+      "h_w_before_diamond",
+      "W projection;W [GeV];Counts",
+      diamondWBins,
+      diamondWMin,
+      diamondWMax
+    );
+
+    hDiamondWInside = new TH1D(
+      "h_w_inside_diamond",
+      "W projection inside diamond;W [GeV];Counts",
+      diamondWBins,
+      diamondWMin,
+      diamondWMax
+    );
+
+    const std::string outsideDiamondCut =
+      "(" + baseAcceptanceCut + ") && !(" +
+      phaseSpaceCutName + ")";
+
+    diamondPreCutEntries = tree->Draw(
+      TString::Format(
+        "%s:%s>>%s",
+        wPhaseSpaceBranch.c_str(),
+        q2PhaseSpaceBranch.c_str(),
+        hDiamondAll->GetName()
+      ),
+      baseAcceptanceCut.c_str(),
+      "goff"
+    );
+
+    diamondAcceptedEntries = tree->Draw(
+      TString::Format(
+        "%s:%s>>%s",
+        wPhaseSpaceBranch.c_str(),
+        q2PhaseSpaceBranch.c_str(),
+        hDiamondInside->GetName()
+      ),
+      acceptanceCut.c_str(),
+      "goff"
+    );
+
+    diamondRejectedEntries = tree->Draw(
+      TString::Format(
+        "%s:%s>>%s",
+        wPhaseSpaceBranch.c_str(),
+        q2PhaseSpaceBranch.c_str(),
+        hDiamondOutside->GetName()
+      ),
+      outsideDiamondCut.c_str(),
+      "goff"
+    );
+
+    tree->Draw(
+      TString::Format(
+        "%s>>%s",
+        q2PhaseSpaceBranch.c_str(),
+        hDiamondQ2All->GetName()
+      ),
+      baseAcceptanceCut.c_str(),
+      "goff"
+    );
+
+    tree->Draw(
+      TString::Format(
+        "%s>>%s",
+        q2PhaseSpaceBranch.c_str(),
+        hDiamondQ2Inside->GetName()
+      ),
+      acceptanceCut.c_str(),
+      "goff"
+    );
+
+    tree->Draw(
+      TString::Format(
+        "%s>>%s",
+        wPhaseSpaceBranch.c_str(),
+        hDiamondWAll->GetName()
+      ),
+      baseAcceptanceCut.c_str(),
+      "goff"
+    );
+
+    tree->Draw(
+      TString::Format(
+        "%s>>%s",
+        wPhaseSpaceBranch.c_str(),
+        hDiamondWInside->GetName()
+      ),
+      acceptanceCut.c_str(),
+      "goff"
+    );
+
+    hDiamondAll->SetDirectory(nullptr);
+    hDiamondInside->SetDirectory(nullptr);
+    hDiamondOutside->SetDirectory(nullptr);
+    hDiamondQ2All->SetDirectory(nullptr);
+    hDiamondQ2Inside->SetDirectory(nullptr);
+    hDiamondWAll->SetDirectory(nullptr);
+    hDiamondWInside->SetDirectory(nullptr);
+
+    hDiamondEfficiency = dynamic_cast<TH2D *>(
+      hDiamondInside->Clone("h_q2_w_diamond_acceptance")
+    );
+
+    if (hDiamondEfficiency) {
+      hDiamondEfficiency->SetDirectory(nullptr);
+      hDiamondEfficiency->SetTitle(
+        "Diamond acceptance by Q^{2}-W bin;Q^{2} [GeV^{2}];W [GeV]"
+      );
+      hDiamondEfficiency->Divide(
+        hDiamondInside,
+        hDiamondAll,
+        1.0,
+        1.0,
+        "B"
+      );
+      hDiamondEfficiency->SetMinimum(0.0);
+      hDiamondEfficiency->SetMaximum(1.0);
+    }
+
+    diamondCanvas = new TCanvas(
+      "canvas_q2_w_diamond_diagnostics",
+      "Q2-W diamond diagnostics",
+      2100,
+      1300
+    );
+
+    diamondCanvas->Divide(3, 2);
+
+    diamondCanvas->cd(1);
+    gPad->SetRightMargin(0.16);
+    if (hDiamondAll->Integral() > 0.0) {
+      gPad->SetLogz();
+    }
+    hDiamondAll->Draw("COLZ");
+    phaseSpaceCut->SetLineColor(kRed + 1);
+    phaseSpaceCut->SetLineWidth(3);
+    phaseSpaceCut->SetFillStyle(0);
+    phaseSpaceCut->DrawClone("L SAME");
+
+    diamondCanvas->cd(2);
+    gPad->SetRightMargin(0.16);
+    if (hDiamondInside->Integral() > 0.0) {
+      gPad->SetLogz();
+    }
+    hDiamondInside->Draw("COLZ");
+    phaseSpaceCut->DrawClone("L SAME");
+
+    diamondCanvas->cd(3);
+    gPad->SetRightMargin(0.16);
+    if (hDiamondOutside->Integral() > 0.0) {
+      gPad->SetLogz();
+    }
+    hDiamondOutside->Draw("COLZ");
+    phaseSpaceCut->DrawClone("L SAME");
+
+    diamondCanvas->cd(4);
+    hDiamondQ2All->SetLineColor(kBlack);
+    hDiamondQ2All->SetLineWidth(3);
+    hDiamondQ2Inside->SetLineColor(kRed + 1);
+    hDiamondQ2Inside->SetLineWidth(3);
+    hDiamondQ2All->Draw("HIST");
+    hDiamondQ2Inside->Draw("HIST SAME");
+
+    auto *diamondQ2Legend = new TLegend(0.57, 0.72, 0.88, 0.88);
+    diamondQ2Legend->AddEntry(hDiamondQ2All, "before diamond", "l");
+    diamondQ2Legend->AddEntry(hDiamondQ2Inside, "inside diamond", "l");
+    diamondQ2Legend->Draw();
+
+    diamondCanvas->cd(5);
+    hDiamondWAll->SetLineColor(kBlack);
+    hDiamondWAll->SetLineWidth(3);
+    hDiamondWInside->SetLineColor(kRed + 1);
+    hDiamondWInside->SetLineWidth(3);
+    hDiamondWAll->Draw("HIST");
+    hDiamondWInside->Draw("HIST SAME");
+
+    auto *diamondWLegend = new TLegend(0.57, 0.72, 0.88, 0.88);
+    diamondWLegend->AddEntry(hDiamondWAll, "before diamond", "l");
+    diamondWLegend->AddEntry(hDiamondWInside, "inside diamond", "l");
+    diamondWLegend->Draw();
+
+    diamondCanvas->cd(6);
+    gPad->SetRightMargin(0.16);
+    if (hDiamondEfficiency) {
+      hDiamondEfficiency->Draw("COLZ");
+    }
+    phaseSpaceCut->DrawClone("L SAME");
+
+    auto *diamondText = new TPaveText(
+      0.12,
+      0.68,
+      0.52,
+      0.88,
+      "NDC"
+    );
+
+    diamondText->SetFillColor(kWhite);
+    diamondText->SetFillStyle(1001);
+    diamondText->SetBorderSize(1);
+    diamondText->SetTextAlign(12);
+    diamondText->AddText(
+      TString::Format(
+        "before diamond: %lld",
+        static_cast<long long>(diamondPreCutEntries)
+      )
+    );
+    diamondText->AddText(
+      TString::Format(
+        "inside diamond: %lld",
+        static_cast<long long>(diamondAcceptedEntries)
+      )
+    );
+    diamondText->AddText(
+      TString::Format(
+        "rejected: %lld",
+        static_cast<long long>(diamondRejectedEntries)
+      )
+    );
+    diamondText->AddText(
+      TString::Format(
+        "accepted fraction: %.2f%%",
+        diamondPreCutEntries > 0
+          ? 100.0 * static_cast<double>(diamondAcceptedEntries) /
+            static_cast<double>(diamondPreCutEntries)
+          : 0.0
+      )
+    );
+    diamondText->Draw();
+
+    diamondCanvas->Modified();
+    diamondCanvas->Update();
+
+    std::cout
+      << "Diamond diagnostics: "
+      << diamondAcceptedEntries
+      << " / "
+      << diamondPreCutEntries
+      << " base-acceptance events are inside the Q2-W polygon."
+      << std::endl;
+  }
 
   const char *disableRFEnvironment =
     gSystem->Getenv("PROTON_CHECKER_DISABLE_RF");
@@ -3413,7 +3764,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v10 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v11 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -3785,9 +4136,18 @@ void check_slow_protons(
 
     diagnosticGlobalCanvas->Modified();
     diagnosticGlobalCanvas->Update();
-    diagnosticGlobalCanvas->Print(
+
+    TCanvas *diagnosticOpeningCanvas =
+      diamondCanvas ? diamondCanvas : diagnosticGlobalCanvas;
+
+    diagnosticOpeningCanvas->Print(
       (outputPDF + "[").c_str()
     );
+
+    if (diamondCanvas) {
+      diamondCanvas->Print(outputPDF.c_str());
+    }
+
     diagnosticGlobalCanvas->Print(
       outputPDF.c_str()
     );
@@ -3805,7 +4165,7 @@ void check_slow_protons(
       canvas->Print(outputPDF.c_str());
     }
 
-    diagnosticGlobalCanvas->Print(
+    diagnosticOpeningCanvas->Print(
       (outputPDF + "]").c_str()
     );
 
@@ -3822,6 +4182,25 @@ void check_slow_protons(
 
       inputFile->Close();
       return;
+    }
+
+    if (diamondCanvas) {
+      TDirectory *diagnosticDiamondDirectory =
+        diagnosticOutputFile.mkdir("diamond");
+
+      diagnosticDiamondDirectory->cd();
+
+      if (hDiamondAll) hDiamondAll->Write();
+      if (hDiamondInside) hDiamondInside->Write();
+      if (hDiamondOutside) hDiamondOutside->Write();
+      if (hDiamondEfficiency) hDiamondEfficiency->Write();
+      if (hDiamondQ2All) hDiamondQ2All->Write();
+      if (hDiamondQ2Inside) hDiamondQ2Inside->Write();
+      if (hDiamondWAll) hDiamondWAll->Write();
+      if (hDiamondWInside) hDiamondWInside->Write();
+      diamondCanvas->Write();
+
+      diagnosticOutputFile.cd();
     }
 
     TDirectory *diagnosticGlobalDirectory =
@@ -4045,6 +4424,26 @@ void check_slow_protons(
     ).Write();
 
     phaseSpaceCut->Write("q2_w_polygon_cut");
+
+    TParameter<int>(
+      "diamond_plots_enabled",
+      diamondPlotsEnabled ? 1 : 0
+    ).Write();
+
+    TParameter<Long64_t>(
+      "diamond_pre_cut_entries",
+      diamondPreCutEntries
+    ).Write();
+
+    TParameter<Long64_t>(
+      "diamond_accepted_entries",
+      diamondAcceptedEntries
+    ).Write();
+
+    TParameter<Long64_t>(
+      "diamond_rejected_entries",
+      diamondRejectedEntries
+    ).Write();
 
     diagnosticOutputFile.Write();
     diagnosticOutputFile.Close();
@@ -4721,7 +5120,7 @@ void check_slow_protons(
   // V5 = RF-first branch scan with data-driven RF timing ranges, CTime_ROC1 fallback
   // V8 = single-period RF window selection and corrected RF component ordering
   // V9 = probe RF and CT on every run and select the better validated timing variable
-  // V10 = apply the summary-file Q2-vs-W polygon to every probe, fit, and event
+  // V11 = add always-on Q2-vs-W diamond diagnostic pages when the polygon is enabled
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -5803,9 +6202,16 @@ void check_slow_protons(
   summaryCanvas->Modified();
   summaryCanvas->Update();
 
-  globalCanvas->Print(
+  TCanvas *openingCanvas =
+    diamondCanvas ? diamondCanvas : globalCanvas;
+
+  openingCanvas->Print(
     (outputPDF + "[").c_str()
   );
+
+  if (diamondCanvas) {
+    diamondCanvas->Print(outputPDF.c_str());
+  }
 
   globalCanvas->Print(
     outputPDF.c_str()
@@ -5831,7 +6237,7 @@ void check_slow_protons(
     );
   }
 
-  summaryCanvas->Print(
+  openingCanvas->Print(
     (outputPDF + "]").c_str()
   );
 
@@ -5852,6 +6258,25 @@ void check_slow_protons(
 
     inputFile->Close();
     return;
+  }
+
+  if (diamondCanvas) {
+    TDirectory *diamondDirectory =
+      outputFile.mkdir("diamond");
+
+    diamondDirectory->cd();
+
+    if (hDiamondAll) hDiamondAll->Write();
+    if (hDiamondInside) hDiamondInside->Write();
+    if (hDiamondOutside) hDiamondOutside->Write();
+    if (hDiamondEfficiency) hDiamondEfficiency->Write();
+    if (hDiamondQ2All) hDiamondQ2All->Write();
+    if (hDiamondQ2Inside) hDiamondQ2Inside->Write();
+    if (hDiamondWAll) hDiamondWAll->Write();
+    if (hDiamondWInside) hDiamondWInside->Write();
+    diamondCanvas->Write();
+
+    outputFile.cd();
   }
 
   TDirectory *globalDirectory =
@@ -6133,6 +6558,26 @@ void check_slow_protons(
   ).Write();
 
   phaseSpaceCut->Write("q2_w_polygon_cut");
+
+  TParameter<int>(
+    "diamond_plots_enabled",
+    diamondPlotsEnabled ? 1 : 0
+  ).Write();
+
+  TParameter<Long64_t>(
+    "diamond_pre_cut_entries",
+    diamondPreCutEntries
+  ).Write();
+
+  TParameter<Long64_t>(
+    "diamond_accepted_entries",
+    diamondAcceptedEntries
+  ).Write();
+
+  TParameter<Long64_t>(
+    "diamond_rejected_entries",
+    diamondRejectedEntries
+  ).Write();
 
   TParameter<Long64_t>(
     "selected_events",
