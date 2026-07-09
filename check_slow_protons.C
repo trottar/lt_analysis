@@ -1520,268 +1520,423 @@ TimingShape fitPerAeroFallbackTimingShape(
     2
   );
 
-  // The aggregate timing distribution can select a shoulder of the
-  // dominant peak and miss the second physical peak.  This last-resort
-  // pass therefore derives the pair separately in every aerogel slice.
-  PeakPairSeed peakPair = findProminentOffsetPeakPair(
+  if (centralRange.second <= centralRange.first) {
+    return result;
+  }
+
+  // This is the final fallback only.  Do not trust one peak-pair finder:
+  // a dominant RF peak plus a shoulder can make a tail fluctuation look
+  // like the second peak.  Instead, fit a small ensemble of physically
+  // ordered, commonly shifted K-p candidates and choose the model that
+  // describes the same full central timing range best.
+  std::vector<PeakPairSeed> candidatePairs;
+
+  const auto addCandidatePair = [&candidatePairs, &centralRange](
+    double lowerMean,
+    double upperMean,
+    double lowerHeight,
+    double upperHeight
+  ) {
+    if (
+      !std::isfinite(lowerMean) ||
+      !std::isfinite(upperMean) ||
+      upperMean <= lowerMean ||
+      lowerMean < centralRange.first ||
+      upperMean > centralRange.second
+    ) {
+      return;
+    }
+
+    const double separation = upperMean - lowerMean;
+
+    if (separation < 0.16 || separation > 1.35) {
+      return;
+    }
+
+    for (const PeakPairSeed &existing : candidatePairs) {
+      if (
+        std::abs(existing.lowerMean - lowerMean) < 0.035 &&
+        std::abs(existing.upperMean - upperMean) < 0.035
+      ) {
+        return;
+      }
+    }
+
+    PeakPairSeed candidate;
+    candidate.valid = true;
+    candidate.lowerMean = lowerMean;
+    candidate.upperMean = upperMean;
+    candidate.lowerHeight = lowerHeight;
+    candidate.upperHeight = upperHeight;
+    candidatePairs.push_back(candidate);
+  };
+
+  PeakPairSeed prominentPair = findProminentOffsetPeakPair(
     histogram,
     centralRange.first,
     centralRange.second,
-    std::max(0.24, 0.06 * beamBunchSpacingNs),
-    std::min(1.60, 0.70 * beamBunchSpacingNs)
+    std::max(0.18, 0.045 * beamBunchSpacingNs),
+    std::min(1.35, 0.70 * beamBunchSpacingNs)
   );
 
-  if (!peakPair.valid) {
-    peakPair = findProminentOffsetPeakPair(
-      histogram,
-      centralRange.first,
-      centralRange.second,
-      0.18,
-      std::min(1.80, 0.80 * beamBunchSpacingNs)
+  if (prominentPair.valid) {
+    addCandidatePair(
+      prominentPair.lowerMean,
+      prominentPair.upperMean,
+      prominentPair.lowerHeight,
+      prominentPair.upperHeight
     );
   }
 
-  if (!peakPair.valid) {
-    peakPair = findSeparatedPeakPair(
-      histogram,
-      centralRange.first,
-      centralRange.second,
-      0.18,
-      std::min(1.80, 0.80 * beamBunchSpacingNs)
+  PeakPairSeed separatedPair = findSeparatedPeakPair(
+    histogram,
+    centralRange.first,
+    centralRange.second,
+    0.16,
+    std::min(1.35, 0.70 * beamBunchSpacingNs)
+  );
+
+  if (separatedPair.valid) {
+    addCandidatePair(
+      separatedPair.lowerMean,
+      separatedPair.upperMean,
+      separatedPair.lowerHeight,
+      separatedPair.upperHeight
     );
   }
 
-  if (!peakPair.valid) {
-    return result;
-  }
-
-  const double seedSeparation =
-    peakPair.upperMean - peakPair.lowerMean;
-
-  if (!(seedSeparation > 0.0)) {
-    return result;
-  }
-
-  // Treat the two peaks resolved in this aerogel slice as the physical
-  // pair.  Their midpoint may be shifted relative to the nominal/global
-  // means, so center the fallback windows on the local pair and record the
-  // common timing offset.  Do not preserve a nominal separation when both
-  // local peaks visibly move together; doing so can place one component on
-  // an empty tail even though the shifted kaon and proton peaks are clear.
-  // RF and CT both use K on the lower-time side and p on the higher-time
-  // side in this version.
-  const double localMidpoint = 0.5 * (
-    peakPair.lowerMean + peakPair.upperMean
+  const auto dominantPeak = findPeakSeed(
+    histogram,
+    centralRange.first,
+    centralRange.second
   );
+
+  const double dominantHeight = dominantPeak.first;
+  const double dominantMean = dominantPeak.second;
+
+  // Test the dominant peak as either member of the physical pair.  The
+  // important case here is a shifted left shoulder plus a dominant right
+  // peak; the symmetric trials also cover the reverse morphology.
+  const std::vector<double> trialSeparations = {
+    0.20,
+    0.28,
+    0.38,
+    0.50,
+    0.64,
+    0.78,
+    0.95,
+    1.15
+  };
+
+  for (const double separation : trialSeparations) {
+    addCandidatePair(
+      dominantMean - separation,
+      dominantMean,
+      0.25 * dominantHeight,
+      dominantHeight
+    );
+
+    addCandidatePair(
+      dominantMean,
+      dominantMean + separation,
+      dominantHeight,
+      0.25 * dominantHeight
+    );
+  }
+
+  if (candidatePairs.empty()) {
+    return result;
+  }
+
+  std::vector<TimingShape> attempts;
+  attempts.reserve(candidatePairs.size());
+
+  const double histogramMaximum = std::max(
+    histogram->GetMaximum(),
+    1.0
+  );
+
+  int bestAcceptedIndex = -1;
+  int bestDiagnosticIndex = -1;
+  double bestAcceptedScore = std::numeric_limits<double>::infinity();
+  double bestDiagnosticScore = std::numeric_limits<double>::infinity();
+
+  for (size_t candidateIndex = 0;
+       candidateIndex < candidatePairs.size();
+       ++candidateIndex) {
+    const PeakPairSeed &candidate = candidatePairs.at(candidateIndex);
+    const double seedSeparation =
+      candidate.upperMean - candidate.lowerMean;
+
+    const double split = 0.5 * (
+      candidate.lowerMean + candidate.upperMean
+    );
+
+    const double meanHalfWidth = std::clamp(
+      0.24 * seedSeparation,
+      0.075,
+      0.18
+    );
+
+    const double orderingGap = std::max(
+      0.006,
+      0.018 * seedSeparation
+    );
+
+    const double lowerMeanMin = std::max(
+      centralRange.first,
+      candidate.lowerMean - meanHalfWidth
+    );
+
+    const double lowerMeanMax = std::min(
+      split - orderingGap,
+      candidate.lowerMean + meanHalfWidth
+    );
+
+    const double upperMeanMin = std::max(
+      split + orderingGap,
+      candidate.upperMean - meanHalfWidth
+    );
+
+    const double upperMeanMax = std::min(
+      centralRange.second,
+      candidate.upperMean + meanHalfWidth
+    );
+
+    if (
+      lowerMeanMax <= lowerMeanMin ||
+      upperMeanMax <= upperMeanMin
+    ) {
+      continue;
+    }
+
+    const double localSigmaMax = std::clamp(
+      0.44 * seedSeparation,
+      0.13,
+      0.32
+    );
+
+    const double localSigmaInitial = std::clamp(
+      0.21 * seedSeparation,
+      0.075,
+      0.15
+    );
+
+    double kaonMeanMin = lowerMeanMin;
+    double kaonMeanMax = lowerMeanMax;
+    double protonMeanMin = upperMeanMin;
+    double protonMeanMax = upperMeanMax;
+
+    if (protonPeakIsLower) {
+      protonMeanMin = lowerMeanMin;
+      protonMeanMax = lowerMeanMax;
+      kaonMeanMin = upperMeanMin;
+      kaonMeanMax = upperMeanMax;
+    }
+
+    TimingShape attempt = fitGlobalTimingShape(
+      histogram,
+      functionName + "_try_" + std::to_string(candidateIndex),
+      centralRange.first,
+      centralRange.second,
+      kaonMeanMin,
+      kaonMeanMax,
+      protonMeanMin,
+      protonMeanMax,
+      protonPeakIsLower,
+      sigmaMin,
+      localSigmaMax,
+      localSigmaInitial,
+      0.45,
+      std::max(1.5, 0.60 * minimumAmplitudeSignificance),
+      true,
+      1.0e9,
+      1.0e9,
+      0.001,
+      minimumEntries
+    );
+
+    // Every candidate is compared over the identical central timing range;
+    // this prevents a main-peak-plus-tail fit from winning merely because
+    // its local window excludes the visible shoulder.
+    if (attempt.fitFunction) {
+      const PoissonGoodnessOfFit commonGoodness =
+        computePoissonGoodnessOfFit(
+          histogram,
+          attempt.fitFunction,
+          centralRange.first,
+          centralRange.second,
+          7
+        );
+
+      attempt.poissonDeviance = commonGoodness.deviance;
+      attempt.goodnessNdf = commonGoodness.ndf;
+      attempt.poissonDevianceNdf = commonGoodness.devianceNdf;
+      attempt.poissonDeviancePerEntry =
+        commonGoodness.deviancePerEntry;
+    }
+
+    attempt.fitMin = centralRange.first;
+    attempt.fitMax = centralRange.second;
+    attempt.perAeroFallback = true;
+
+    const bool fitStatusAccepted =
+      attempt.fitStatus == 0 ||
+      (
+        attempt.fitStatus == 4 &&
+        std::isfinite(attempt.poissonDeviancePerEntry) &&
+        attempt.poissonDeviancePerEntry <= 0.08
+      );
+
+    const bool orderingAccepted =
+      protonPeakIsLower
+        ? attempt.protonMean < attempt.kaonMean
+        : attempt.kaonMean < attempt.protonMean;
+
+    const double smallerAmplitudeFraction = std::min(
+      attempt.kaonAmplitude,
+      attempt.protonAmplitude
+    ) / histogramMaximum;
+
+    const double requiredSignificance = std::max(
+      1.5,
+      0.60 * minimumAmplitudeSignificance
+    );
+
+    const bool physicallyAccepted =
+      fitStatusAccepted &&
+      orderingAccepted &&
+      std::isfinite(attempt.kaonAmplitude) &&
+      std::isfinite(attempt.protonAmplitude) &&
+      std::isfinite(attempt.kaonMean) &&
+      std::isfinite(attempt.protonMean) &&
+      std::isfinite(attempt.kaonSigma) &&
+      std::isfinite(attempt.protonSigma) &&
+      std::isfinite(attempt.poissonDeviancePerEntry) &&
+      attempt.kaonAmplitude > 0.0 &&
+      attempt.protonAmplitude > 0.0 &&
+      attempt.kaonSigma > 0.0 &&
+      attempt.protonSigma > 0.0 &&
+      attempt.separation >= 0.55 &&
+      attempt.kaonSignificance >= requiredSignificance &&
+      attempt.protonSignificance >= requiredSignificance &&
+      smallerAmplitudeFraction >= 0.020 &&
+      attempt.poissonDeviancePerEntry <= 0.35;
+
+    // A tiny component on the far tail is the observed failure mode.  The
+    // score therefore uses the common-range deviance and adds a modest
+    // penalty only when one component carries less than 8% of the peak
+    // height.  Clear asymmetric K-p pairs remain allowed.
+    const double populationPenalty =
+      smallerAmplitudeFraction < 0.08
+        ? 0.20 * (0.08 - smallerAmplitudeFraction)
+        : 0.0;
+
+    const double diagnosticScore =
+      attempt.poissonDeviancePerEntry + populationPenalty;
+
+    attempts.push_back(attempt);
+    const int storedIndex = static_cast<int>(attempts.size()) - 1;
+
+    if (
+      std::isfinite(diagnosticScore) &&
+      diagnosticScore < bestDiagnosticScore
+    ) {
+      bestDiagnosticScore = diagnosticScore;
+      bestDiagnosticIndex = storedIndex;
+    }
+
+    if (
+      physicallyAccepted &&
+      diagnosticScore < bestAcceptedScore
+    ) {
+      bestAcceptedScore = diagnosticScore;
+      bestAcceptedIndex = storedIndex;
+    }
+  }
+
+  const int selectedIndex =
+    bestAcceptedIndex >= 0
+      ? bestAcceptedIndex
+      : bestDiagnosticIndex;
+
+  if (selectedIndex < 0) {
+    for (TimingShape &attempt : attempts) {
+      delete attempt.fitFunction;
+      attempt.fitFunction = nullptr;
+    }
+    return result;
+  }
+
+  result = attempts.at(selectedIndex);
+  attempts.at(selectedIndex).fitFunction = nullptr;
+
+  for (TimingShape &attempt : attempts) {
+    delete attempt.fitFunction;
+    attempt.fitFunction = nullptr;
+  }
 
   const bool referencePairValid =
     std::isfinite(referenceKaonMean) &&
     std::isfinite(referenceProtonMean) &&
-    referenceProtonMean > referenceKaonMean;
-
-  double targetKaonMean = peakPair.lowerMean;
-  double targetProtonMean = peakPair.upperMean;
-  double appliedMeanOffset = 0.0;
-  bool offsetAdjusted = false;
+    (
+      protonPeakIsLower
+        ? referenceProtonMean < referenceKaonMean
+        : referenceKaonMean < referenceProtonMean
+    );
 
   if (referencePairValid) {
+    const double fittedMidpoint = 0.5 * (
+      result.kaonMean + result.protonMean
+    );
+
     const double referenceMidpoint = 0.5 * (
       referenceKaonMean + referenceProtonMean
     );
 
-    appliedMeanOffset = localMidpoint - referenceMidpoint;
-    offsetAdjusted = std::abs(appliedMeanOffset) > 1.0e-6;
+    result.appliedMeanOffset =
+      fittedMidpoint - referenceMidpoint;
+    result.offsetAdjusted =
+      std::abs(result.appliedMeanOffset) > 1.0e-6;
   }
 
-  // Never permit an offset to reverse the physical RF/CT assignment.
-  if (!(targetProtonMean > targetKaonMean)) {
-    targetKaonMean = peakPair.lowerMean;
-    targetProtonMean = peakPair.upperMean;
-    appliedMeanOffset = 0.0;
-    offsetAdjusted = false;
-  }
-
-  const double targetSeparation =
-    targetProtonMean - targetKaonMean;
-
-  const double localFitMin = std::max(
-    displayMin,
-    std::min(peakPair.lowerMean, targetKaonMean) - std::clamp(
-      0.65 * std::max(seedSeparation, targetSeparation),
-      0.28,
-      0.55
-    )
-  );
-
-  const double localFitMax = std::min(
-    displayMax,
-    std::max(peakPair.upperMean, targetProtonMean) + std::clamp(
-      0.55 * std::max(seedSeparation, targetSeparation),
-      0.24,
-      0.50
-    )
-  );
-
-  if (localFitMax <= localFitMin) {
-    return result;
-  }
-
-  const double split = 0.5 * (
-    targetKaonMean + targetProtonMean
-  );
-
-  const double baseMeanHalfWidth = std::clamp(
-    0.32 * std::max(seedSeparation, targetSeparation),
-    0.10,
-    0.22
-  );
-
-  // Ensure the detected local maxima remain inside the translated windows.
-  const double meanHalfWidth = std::min(
-    0.32,
-    std::max({
-      baseMeanHalfWidth,
-      std::abs(targetKaonMean - peakPair.lowerMean) + 0.04,
-      std::abs(targetProtonMean - peakPair.upperMean) + 0.04
-    })
-  );
-
-  const double orderingGap = std::max(
-    0.008,
-    0.02 * std::min(seedSeparation, targetSeparation)
-  );
-
-  const double lowerMeanMin = std::max(
-    localFitMin,
-    targetKaonMean - meanHalfWidth
-  );
-
-  const double lowerMeanMax = std::min(
-    split - orderingGap,
-    targetKaonMean + meanHalfWidth
-  );
-
-  const double upperMeanMin = std::max(
-    split + orderingGap,
-    targetProtonMean - meanHalfWidth
-  );
-
-  const double upperMeanMax = std::min(
-    localFitMax,
-    targetProtonMean + meanHalfWidth
-  );
-
-  if (
-    lowerMeanMax <= lowerMeanMin ||
-    upperMeanMax <= upperMeanMin
-  ) {
-    return result;
-  }
-
-  // These width limits are intentionally smaller than the normal 0.45 ns
-  // cap and are used only after all previous fitting procedures fail.
-  const double localSigmaMax = std::clamp(
-    0.36 * seedSeparation,
-    0.13,
-    0.26
-  );
-
-  const double localSigmaInitial = std::clamp(
-    0.20 * seedSeparation,
-    0.075,
-    0.13
-  );
-
-  double kaonMeanMin = 0.0;
-  double kaonMeanMax = 0.0;
-  double protonMeanMin = 0.0;
-  double protonMeanMax = 0.0;
-
-  if (protonPeakIsLower) {
-    protonMeanMin = lowerMeanMin;
-    protonMeanMax = lowerMeanMax;
-    kaonMeanMin = upperMeanMin;
-    kaonMeanMax = upperMeanMax;
-  } else {
-    kaonMeanMin = lowerMeanMin;
-    kaonMeanMax = lowerMeanMax;
-    protonMeanMin = upperMeanMin;
-    protonMeanMax = upperMeanMax;
-  }
-
-  result = fitGlobalTimingShape(
-    histogram,
-    functionName,
-    localFitMin,
-    localFitMax,
-    kaonMeanMin,
-    kaonMeanMax,
-    protonMeanMin,
-    protonMeanMax,
-    protonPeakIsLower,
-    sigmaMin,
-    localSigmaMax,
-    localSigmaInitial,
-    0.55,
-    std::max(1.5, 0.75 * minimumAmplitudeSignificance),
-    true,
-    1.0e9,
-    0.35,
-    0.001,
-    minimumEntries
-  );
-
-  result.fitMin = localFitMin;
-  result.fitMax = localFitMax;
-  result.appliedMeanOffset = appliedMeanOffset;
-  result.offsetAdjusted = offsetAdjusted;
-  result.perAeroFallback = true;
-
-  // The per-aerogel pass is the deepest fallback and intentionally uses
-  // tight, data-driven mean and sigma bounds.  A component landing on one
-  // of those bounds is therefore not, by itself, evidence that the two
-  // physical peaks were misidentified.  Re-evaluate validity here using
-  // the same physical ordering and quality checks as the normal fits, but
-  // do not reject a shape solely because a constrained parameter is near
-  // its fallback bound.  This path is reached only after every standard
-  // RF/CT procedure has produced zero validated shapes.
-  const bool fallbackFitStatusAccepted =
+  const bool finalStatusAccepted =
     result.fitStatus == 0 ||
     (
       result.fitStatus == 4 &&
       std::isfinite(result.poissonDeviancePerEntry) &&
-      result.poissonDeviancePerEntry <= 0.05
+      result.poissonDeviancePerEntry <= 0.08
     );
 
-  const bool fallbackOrderingAccepted =
+  const bool finalOrderingAccepted =
     protonPeakIsLower
       ? result.protonMean < result.kaonMean
       : result.kaonMean < result.protonMean;
 
+  const double finalSmallerAmplitudeFraction = std::min(
+    result.kaonAmplitude,
+    result.protonAmplitude
+  ) / histogramMaximum;
+
+  const double finalRequiredSignificance = std::max(
+    1.5,
+    0.60 * minimumAmplitudeSignificance
+  );
+
   result.valid =
-    fallbackFitStatusAccepted &&
-    std::isfinite(result.kaonAmplitude) &&
-    std::isfinite(result.protonAmplitude) &&
-    std::isfinite(result.kaonMean) &&
-    std::isfinite(result.protonMean) &&
-    std::isfinite(result.kaonSigma) &&
-    std::isfinite(result.protonSigma) &&
-    std::isfinite(result.poissonDeviancePerEntry) &&
-    result.kaonAmplitude > 0.0 &&
-    result.protonAmplitude > 0.0 &&
-    result.kaonSigma > 0.0 &&
-    result.protonSigma > 0.0 &&
-    fallbackOrderingAccepted &&
+    bestAcceptedIndex >= 0 &&
+    finalStatusAccepted &&
+    finalOrderingAccepted &&
     result.separation >= 0.55 &&
-    result.kaonSignificance >=
-      std::max(1.5, 0.75 * minimumAmplitudeSignificance) &&
-    result.protonSignificance >=
-      std::max(1.5, 0.75 * minimumAmplitudeSignificance) &&
+    result.kaonSignificance >= finalRequiredSignificance &&
+    result.protonSignificance >= finalRequiredSignificance &&
+    finalSmallerAmplitudeFraction >= 0.020 &&
+    std::isfinite(result.poissonDeviancePerEntry) &&
     result.poissonDeviancePerEntry <= 0.35;
 
+  result.perAeroFallback = true;
   return result;
 }
-
 
 SliceFitResult fitDeltaTimingSlice(
   TH1D *histogram,
@@ -2372,7 +2527,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.19";
+  const char *macroVersion = "check_slow_protons.21";
 
   std::cout
     << "Running "
@@ -2736,8 +2891,8 @@ void check_slow_protons(
   // evaluates both the best available RF timing branch and CTime_ROC1,
   // then chooses the timing variable with the stronger validated global
   // proton-kaon discrimination.  No RF phase correction or wrapping is
-  // applied.  The proton component is always constrained to the
-  // higher-time side of the kaon component.
+  // applied.  RF uses K on the lower-time side and p on the higher-time
+  // side; CTime_ROC1 uses the opposite physical ordering.
   const double beamBunchSpacingNs =
     isHighEpsilon ? 4.0 : 2.0;
 
@@ -2748,10 +2903,12 @@ void check_slow_protons(
   const double ctTimingFitMin = ctTimeMin;
   const double ctTimingFitMax = ctTimeMax;
 
-  const double ctKaonMeanMin = -0.45;
-  const double ctKaonMeanMax = 0.20;
-  const double ctProtonMeanMin = 0.20;
-  const double ctProtonMeanMax = 0.95;
+  // CTime_ROC1 ordering is opposite to RF: proton is the lower-time peak
+  // and kaon is the higher-time peak.
+  const double ctProtonMeanMin = -0.45;
+  const double ctProtonMeanMax = 0.20;
+  const double ctKaonMeanMin = 0.20;
+  const double ctKaonMeanMax = 0.95;
 
   double timeMin = ctTimeMin;
   double timeMax = ctTimeMax;
@@ -3841,8 +3998,8 @@ void check_slow_protons(
 
       if (peakPair.valid) {
         probe.peakPairFound = true;
-        probe.kaonSeedMean = peakPair.lowerMean;
-        probe.protonSeedMean = peakPair.upperMean;
+        probe.protonSeedMean = peakPair.lowerMean;
+        probe.kaonSeedMean = peakPair.upperMean;
 
         const double seedSeparation = std::max(
           peakPair.upperMean - peakPair.lowerMean,
@@ -3877,19 +4034,19 @@ void check_slow_protons(
           0.03 * seedSeparation
         );
 
-        probe.kaonMeanMin = std::max(
+        probe.protonMeanMin = std::max(
           probe.fitMin,
           peakPair.lowerMean - meanHalfWidth
         );
-        probe.kaonMeanMax = std::min(
+        probe.protonMeanMax = std::min(
           split - orderingGap,
           peakPair.lowerMean + meanHalfWidth
         );
-        probe.protonMeanMin = std::max(
+        probe.kaonMeanMin = std::max(
           split + orderingGap,
           peakPair.upperMean - meanHalfWidth
         );
-        probe.protonMeanMax = std::min(
+        probe.kaonMeanMax = std::min(
           probe.fitMax,
           peakPair.upperMean + meanHalfWidth
         );
@@ -3973,7 +4130,7 @@ void check_slow_protons(
         probe.kaonMeanMax,
         probe.protonMeanMin,
         probe.protonMeanMax,
-        false,
+        true,
         timingSigmaMin,
         probe.sigmaMax,
         probe.sigmaInitial,
@@ -4625,10 +4782,11 @@ void check_slow_protons(
       "local_peak_rescue_" + timingSelectionReason;
   }
 
-  // Both RF and CTime_ROC1 use the physical assignment K on the
-  // left/lower-time side and p on the right/higher-time side.  Any fallback
-  // timing offset translates the pair without changing this ordering.
-  const bool protonPeakIsLower = false;
+  // RF: K is the left/lower-time peak and p is the right/higher-time peak.
+  // CTime_ROC1 is flipped: p is the left/lower-time peak and K is the
+  // right/higher-time peak.  Fallback offsets translate both components
+  // without changing the branch-specific ordering.
+  const bool protonPeakIsLower = !rfTimingSelected;
 
   const bool activeUseDeviancePerEntryValidation =
     timingFitUsedLocalPeakRescue
@@ -4904,7 +5062,7 @@ void check_slow_protons(
   ) {
     std::cout
       << "Aggregate local-peak rescue produced zero valid shapes. "
-      << "Trying shifted local kaon-proton peak pairs in each aerogel slice."
+      << "Trying multi-start shifted kaon-proton peak pairs in each aerogel slice."
       << std::endl;
 
     timingFitUsedPerAeroFallback = true;
@@ -4933,7 +5091,7 @@ void check_slow_protons(
 
       projection->SetTitle(
         TString::Format(
-          "Global timing fit (per-aerogel fallback): %.1f #leq aero < %.1f;"
+          "Global timing fit (per-aerogel multistart fallback): %.1f #leq aero < %.1f;"
           "%s;Counts",
           aeroEdges.at(aeroSlice),
           aeroEdges.at(aeroSlice + 1),
@@ -5013,7 +5171,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v19 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v21 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -6413,6 +6571,7 @@ void check_slow_protons(
   // V12 = fit-only pre-diamond fallback when both RF and CT fail inside the polygon
   // V16 = accept physically ordered per-aerogel fallback peaks even when the
   //       deliberately tight fallback bounds are reached
+  // V20 = multi-start per-aerogel fallback selected by common-range deviance
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
