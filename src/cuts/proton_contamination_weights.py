@@ -770,6 +770,18 @@ def build_kaon_proton_cleaning_result(
             "failure_policy": str(config.get("failure_policy", "bypass")),
             "tree_policy": str(tree_policy),
             "rf_policy": str(config.get("rf_policy", "epsset_default_after_cleaning")),
+            "input_tree_state": "explicit_noRF",
+            "input_tree_particle_selection": "Cut_Kaon_Events_*_noRF",
+            "fit_sample_definition": (
+                "signed noRF prompt/random/dummy bundle with evaluate_data_event "
+                "nommcuts and HGCer-hole rejection"
+            ),
+            "fit_sample_signed_combination": (
+                "prompt - rand/nWindows - dummy + dummy_rand/nWindows"
+            ),
+            "fit_sample_uses_signed_random_dummy_subtraction": True,
+            "fit_sample_requires_nommcuts": True,
+            "fit_sample_requires_hgcer_hole_rejection": True,
         },
         "fallback_reason": "",
     }
@@ -801,6 +813,10 @@ def build_kaon_proton_cleaning_result(
         mm_max,
     )
     result["diagnostics"]["source_stats"] = pid_payload["source_stats"]
+    result["diagnostics"]["source_coefficients"] = {
+        str(source_name): float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+        for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
+    }
     result["H_global_pid"] = pid_payload["H_global_pid"]
     result["H_global_timing_slices"] = pid_payload["global_slice_hists"]
     result["H_delta_pid"] = pid_payload["delta_pid_hists"]
@@ -1233,6 +1249,10 @@ def apply_kaon_proton_cleaning_to_targets(
             "raw_mm_integral": _hist_integral(h_mm_raw),
             "estimated_proton_mm_integral": _hist_integral(h_mm_proton),
             "cleaned_mm_integral": _hist_integral(h_mm_cleaned),
+            "target_sample_definition": (
+                "signed noRF kaon target bundle after proton cleaning, with RF "
+                "membership optionally applied only after event-level proton weights"
+            ),
         },
     }
     cleaning_result["application"] = application
