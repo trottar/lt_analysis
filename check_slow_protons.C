@@ -758,6 +758,7 @@ TimingShape fitGlobalTimingShape(
   double kaonMeanMax,
   double protonMeanMin,
   double protonMeanMax,
+  bool protonPeakIsLower,
   double sigmaMin,
   double sigmaMax,
   double initialSigma,
@@ -1026,7 +1027,11 @@ TimingShape fitGlobalTimingShape(
     result.protonAmplitude > 0.0 &&
     result.kaonSigma > 0.0 &&
     result.protonSigma > 0.0 &&
-    result.kaonMean < result.protonMean &&
+    (
+      protonPeakIsLower
+        ? result.protonMean < result.kaonMean
+        : result.kaonMean < result.protonMean
+    ) &&
     result.separation >= minimumSeparation &&
     result.kaonSignificance >=
       minimumAmplitudeSignificance &&
@@ -1434,7 +1439,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.6";
+  const char *macroVersion = "check_slow_protons.7";
 
   std::cout
     << "Running "
@@ -1925,15 +1930,14 @@ void check_slow_protons(
     const double fitWidth = probe.fitMax - probe.fitMin;
     const double split = 0.5 * (probe.fitMin + probe.fitMax);
 
-    // RF branches are not guaranteed to be centered or to use the same
-    // sign convention as CTime_ROC1.  Probe them with data-driven bounds:
-    // the lower RF component is treated as K-like and the upper component
-    // as p-like.  This tests RF discrimination itself rather than whether
-    // the branch happens to live in the CTime_ROC1 windows.
-    probe.kaonMeanMin = probe.fitMin;
-    probe.kaonMeanMax = split;
-    probe.protonMeanMin = split;
-    probe.protonMeanMax = probe.fitMax;
+    // RF timing has the proton peak on the lower-time side and the kaon
+    // peak on the upper-time side.  CTime_ROC1 uses the opposite ordering:
+    // kaon on the left and proton on the right.  Keep the fitted component
+    // labels tied to particle identity rather than to increasing time.
+    probe.protonMeanMin = probe.fitMin;
+    probe.protonMeanMax = split;
+    probe.kaonMeanMin = split;
+    probe.kaonMeanMax = probe.fitMax;
     probe.sigmaMax = std::max(
       timingSigmaMax,
       0.35 * fitWidth
@@ -2010,6 +2014,7 @@ void check_slow_protons(
         probe.kaonMeanMax,
         probe.protonMeanMin,
         probe.protonMeanMax,
+        true,
         timingSigmaMin,
         probe.sigmaMax,
         probe.sigmaInitial,
@@ -2141,6 +2146,10 @@ void check_slow_protons(
     printRFLikeBranches(tree);
   }
 
+  // RF: proton is the left/lower-time peak.
+  // CTime_ROC1: proton is the right/higher-time peak.
+  const bool protonPeakIsLower = rfTimingSelected;
+
   const std::string timingAxisTitle =
     timeBranch + " [ns]";
 
@@ -2157,7 +2166,13 @@ void check_slow_protons(
     << nTimeHistogramBins
     << " bins; beam-bunch spacing = "
     << beamBunchSpacingNs
-    << " ns; RF phase correction/wrapping = disabled"
+    << " ns; proton peak expected on the "
+    << (
+      protonPeakIsLower
+        ? "left/lower-time side"
+        : "right/higher-time side"
+    )
+    << "; RF phase correction/wrapping = disabled"
     << std::endl;
 
   const std::string pidRangeCut =
@@ -2320,6 +2335,7 @@ void check_slow_protons(
         kaonMeanMax,
         protonMeanMin,
         protonMeanMax,
+        protonPeakIsLower,
         timingSigmaMin,
         timingSigmaMax,
         timingSigmaInitial,
@@ -2876,6 +2892,11 @@ void check_slow_protons(
     TParameter<int>(
       "rf_timing_selected",
       rfTimingSelected ? 1 : 0
+    ).Write();
+
+    TParameter<int>(
+      "proton_peak_is_lower",
+      protonPeakIsLower ? 1 : 0
     ).Write();
 
     TParameter<int>(
@@ -4898,6 +4919,11 @@ void check_slow_protons(
   TParameter<int>(
     "rf_timing_selected",
     rfTimingSelected ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "proton_peak_is_lower",
+    protonPeakIsLower ? 1 : 0
   ).Write();
 
   TParameter<int>(
