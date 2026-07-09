@@ -1525,7 +1525,7 @@ TimingShape fitPerAeroFallbackTimingShape(
     return result;
   }
 
-  // This is the final fallback only.  Do not trust one peak-pair finder:
+  // This is the default per-aerogel fitter. Do not trust one peak-pair finder:
   // a dominant RF peak plus a shoulder can make a tail fluctuation look
   // like the second peak.  Instead, fit a small ensemble of physically
   // ordered, commonly shifted K-p candidates and choose the model that
@@ -2528,7 +2528,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.24";
+  const char *macroVersion = "check_slow_protons.25";
 
   std::cout
     << "Running "
@@ -2833,9 +2833,10 @@ void check_slow_protons(
   bool rfTimingSelected = false;
   bool ctTimingEvaluated = false;
   bool ctFallbackUsed = false;  // compatibility metadata; RF and CT are compared directly
+  bool timingFitUsedPerAeroDefault = true;
+  bool timingFitUsedStandardFallback = false;
   bool timingFitUsedPreDiamondFallback = false;
   bool timingFitUsedLocalPeakRescue = false;
-  bool timingFitUsedPerAeroFallback = false;
   int rfProbeValidShapes = 0;
   int ctProbeValidShapes = 0;
   std::string timingSelectionReason;
@@ -3454,9 +3455,16 @@ void check_slow_protons(
     double meanPoissonDeviancePerEntry =
       std::numeric_limits<double>::infinity();
     bool localPeakRescue = false;
+    bool perAeroMultistart = false;
   };
 
-  // This remains false during the normal diamond and pre-diamond probes.
+  // The former deepest per-aerogel multistart fit is now the default.
+  // If it produces no valid RF or CT shapes, the previous default fit is
+  // tried next, followed by the pre-diamond and local-peak rescue stages.
+  bool perAeroMultistartMode = true;
+
+  // This remains false during the default multistart, standard diamond,
+  // and pre-diamond probes.
   // It is enabled only after both of those passes return zero validated
   // RF and CT shapes.
   bool localPeakRescueMode = false;
@@ -3716,6 +3724,7 @@ void check_slow_protons(
     // the higher-time peak (near 2 ns). Species labels come from the
     // branch-specific timing ordering used by the actual per-aerogel fits.
     probe.localPeakRescue = localPeakRescueMode;
+    probe.perAeroMultistart = perAeroMultistartMode;
 
     if (localPeakRescueMode && seedPairValid) {
       const double seedSeparation = std::max(
@@ -3839,39 +3848,65 @@ void check_slow_protons(
 
       projection->SetDirectory(nullptr);
 
-      TimingShape shape = fitGlobalTimingShape(
-        projection,
-        TString::Format(
-          "f_rf_first_probe_aero_%s_%d",
-          candidateBranch.c_str(),
-          aeroSlice
-        ).Data(),
-        probe.fitMin,
-        probe.fitMax,
-        probe.kaonMeanMin,
-        probe.kaonMeanMax,
-        probe.protonMeanMin,
-        probe.protonMeanMax,
-        true,
-        timingSigmaMin,
-        probe.sigmaMax,
-        probe.sigmaInitial,
-        localPeakRescueMode
-          ? 0.90
-          : minimumGlobalSeparation,
-        minimumGlobalAmplitudeSignificance,
-        localPeakRescueMode
-          ? true
-          : useDeviancePerEntryValidation,
-        maximumGlobalPoissonDevianceNdf,
-        localPeakRescueMode
-          ? 0.60
-          : maximumGlobalPoissonDeviancePerEntry,
-        localPeakRescueMode
-          ? 0.005
-          : globalBoundFractionTolerance,
-        minimumGlobalSliceEntries
-      );
+      TimingShape shape;
+
+      if (perAeroMultistartMode) {
+        shape = fitPerAeroFallbackTimingShape(
+          projection,
+          TString::Format(
+            "f_rf_default_multistart_probe_aero_%s_%d",
+            candidateBranch.c_str(),
+            aeroSlice
+          ).Data(),
+          probe.displayMin,
+          probe.displayMax,
+          true,
+          beamBunchSpacingNs,
+          probe.peakPairFound
+            ? probe.kaonSeedMean
+            : 0.5 * (probe.kaonMeanMin + probe.kaonMeanMax),
+          probe.peakPairFound
+            ? probe.protonSeedMean
+            : 0.5 * (probe.protonMeanMin + probe.protonMeanMax),
+          timingSigmaMin,
+          minimumGlobalAmplitudeSignificance,
+          minimumGlobalSliceEntries
+        );
+      } else {
+        shape = fitGlobalTimingShape(
+          projection,
+          TString::Format(
+            "f_rf_standard_probe_aero_%s_%d",
+            candidateBranch.c_str(),
+            aeroSlice
+          ).Data(),
+          probe.fitMin,
+          probe.fitMax,
+          probe.kaonMeanMin,
+          probe.kaonMeanMax,
+          probe.protonMeanMin,
+          probe.protonMeanMax,
+          true,
+          timingSigmaMin,
+          probe.sigmaMax,
+          probe.sigmaInitial,
+          localPeakRescueMode
+            ? 0.90
+            : minimumGlobalSeparation,
+          minimumGlobalAmplitudeSignificance,
+          localPeakRescueMode
+            ? true
+            : useDeviancePerEntryValidation,
+          maximumGlobalPoissonDevianceNdf,
+          localPeakRescueMode
+            ? 0.60
+            : maximumGlobalPoissonDeviancePerEntry,
+          localPeakRescueMode
+            ? 0.005
+            : globalBoundFractionTolerance,
+          minimumGlobalSliceEntries
+        );
+      }
 
       if (shape.valid) {
         ++validShapes;
@@ -3969,6 +4004,7 @@ void check_slow_protons(
     probePID->SetDirectory(nullptr);
 
     probe.localPeakRescue = localPeakRescueMode;
+    probe.perAeroMultistart = perAeroMultistartMode;
 
     if (localPeakRescueMode && probePID->Integral() > 0.0) {
       auto *allAeroTiming = probePID->ProjectionY(
@@ -4129,38 +4165,63 @@ void check_slow_protons(
 
       projection->SetDirectory(nullptr);
 
-      TimingShape shape = fitGlobalTimingShape(
-        projection,
-        TString::Format(
-          "f_ct_timing_probe_aero_%d",
-          aeroSlice
-        ).Data(),
-        probe.fitMin,
-        probe.fitMax,
-        probe.kaonMeanMin,
-        probe.kaonMeanMax,
-        probe.protonMeanMin,
-        probe.protonMeanMax,
-        false,
-        timingSigmaMin,
-        probe.sigmaMax,
-        probe.sigmaInitial,
-        localPeakRescueMode
-          ? 0.90
-          : minimumGlobalSeparation,
-        minimumGlobalAmplitudeSignificance,
-        localPeakRescueMode
-          ? true
-          : useDeviancePerEntryValidation,
-        maximumGlobalPoissonDevianceNdf,
-        localPeakRescueMode
-          ? 0.60
-          : maximumGlobalPoissonDeviancePerEntry,
-        localPeakRescueMode
-          ? 0.005
-          : globalBoundFractionTolerance,
-        minimumGlobalSliceEntries
-      );
+      TimingShape shape;
+
+      if (perAeroMultistartMode) {
+        shape = fitPerAeroFallbackTimingShape(
+          projection,
+          TString::Format(
+            "f_ct_default_multistart_probe_aero_%d",
+            aeroSlice
+          ).Data(),
+          probe.displayMin,
+          probe.displayMax,
+          false,
+          beamBunchSpacingNs,
+          probe.peakPairFound
+            ? probe.kaonSeedMean
+            : 0.5 * (probe.kaonMeanMin + probe.kaonMeanMax),
+          probe.peakPairFound
+            ? probe.protonSeedMean
+            : 0.5 * (probe.protonMeanMin + probe.protonMeanMax),
+          timingSigmaMin,
+          minimumGlobalAmplitudeSignificance,
+          minimumGlobalSliceEntries
+        );
+      } else {
+        shape = fitGlobalTimingShape(
+          projection,
+          TString::Format(
+            "f_ct_standard_probe_aero_%d",
+            aeroSlice
+          ).Data(),
+          probe.fitMin,
+          probe.fitMax,
+          probe.kaonMeanMin,
+          probe.kaonMeanMax,
+          probe.protonMeanMin,
+          probe.protonMeanMax,
+          false,
+          timingSigmaMin,
+          probe.sigmaMax,
+          probe.sigmaInitial,
+          localPeakRescueMode
+            ? 0.90
+            : minimumGlobalSeparation,
+          minimumGlobalAmplitudeSignificance,
+          localPeakRescueMode
+            ? true
+            : useDeviancePerEntryValidation,
+          maximumGlobalPoissonDevianceNdf,
+          localPeakRescueMode
+            ? 0.60
+            : maximumGlobalPoissonDeviancePerEntry,
+          localPeakRescueMode
+            ? 0.005
+            : globalBoundFractionTolerance,
+          minimumGlobalSliceEntries
+        );
+      }
 
       if (shape.valid) {
         ++validShapes;
@@ -4208,7 +4269,7 @@ void check_slow_protons(
     TimingBranchProbe probe;
 
     std::cout
-      << "RF timing probe using branch "
+      << "Default per-aerogel multistart RF timing probe using branch "
       << candidate
       << " from tree "
       << treeName
@@ -4260,7 +4321,7 @@ void check_slow_protons(
   ctTimingEvaluated = true;
 
   std::cout
-    << "CT timing probe using branch "
+    << "Default per-aerogel multistart CT timing probe using branch "
     << ctTimeBranch
     << " from tree "
     << treeName
@@ -4302,6 +4363,117 @@ void check_slow_protons(
     )
     << std::endl;
 
+  int defaultBestRFValidShapes = 0;
+
+  for (const TimingBranchProbe &probe : rfProbes) {
+    defaultBestRFValidShapes = std::max(
+      defaultBestRFValidShapes,
+      probe.validShapes
+    );
+  }
+
+  if (
+    defaultBestRFValidShapes == 0 &&
+    ctProbe.validShapes == 0
+  ) {
+    timingFitUsedPerAeroDefault = false;
+    timingFitUsedStandardFallback = true;
+    perAeroMultistartMode = false;
+
+    std::cout
+      << "Default per-aerogel multistart fits produced zero validated "
+      << "RF and CT shapes. Retrying with the previous standard "
+      << "two-Gaussian procedure inside the Q2-W diamond."
+      << std::endl;
+
+    rfProbes.clear();
+    rfProbeValidShapes = 0;
+
+    for (const std::string &candidate : rfBranchCandidates) {
+      if (
+        candidate.empty() ||
+        !tree->GetBranch(candidate.c_str())
+      ) {
+        continue;
+      }
+
+      TimingBranchProbe probe;
+
+      std::cout
+        << "Standard-fallback RF timing probe using branch "
+        << candidate
+        << " from tree "
+        << treeName
+        << std::endl;
+
+      const int validShapes =
+        countValidGlobalShapesForBranch(
+          candidate,
+          probe
+        );
+
+      std::cout
+        << "  standard-fallback valid global shapes: "
+        << validShapes
+        << " / "
+        << nAeroSlices
+        << "; range ["
+        << probe.displayMin
+        << ", "
+        << probe.displayMax
+        << "]; fit ["
+        << probe.fitMin
+        << ", "
+        << probe.fitMax
+        << "]; bins "
+        << probe.histogramBins
+        << "; mean separation "
+        << probe.meanSeparation
+        << "; mean D/ndf "
+        << probe.meanPoissonDevianceNdf
+        << "; mean D/N "
+        << probe.meanPoissonDeviancePerEntry
+        << std::endl;
+
+      rfProbes.push_back(probe);
+    }
+
+    ctProbe = TimingBranchProbe();
+
+    std::cout
+      << "Standard-fallback CT timing probe using branch "
+      << ctTimeBranch
+      << " from tree "
+      << treeName
+      << std::endl;
+
+    ctProbeValidShapes =
+      countValidGlobalShapesForCT(ctProbe);
+
+    std::cout
+      << "  standard-fallback valid global shapes: "
+      << ctProbe.validShapes
+      << " / "
+      << nAeroSlices
+      << "; range ["
+      << ctProbe.displayMin
+      << ", "
+      << ctProbe.displayMax
+      << "]; fit ["
+      << ctProbe.fitMin
+      << ", "
+      << ctProbe.fitMax
+      << "]; bins "
+      << ctProbe.histogramBins
+      << "; mean separation "
+      << ctProbe.meanSeparation
+      << "; mean D/ndf "
+      << ctProbe.meanPoissonDevianceNdf
+      << "; mean D/N "
+      << ctProbe.meanPoissonDeviancePerEntry
+      << std::endl;
+  }
+
   int initialBestRFValidShapes = 0;
 
   for (const TimingBranchProbe &probe : rfProbes) {
@@ -4316,6 +4488,7 @@ void check_slow_protons(
     initialBestRFValidShapes == 0 &&
     ctProbe.validShapes == 0
   ) {
+    timingFitUsedStandardFallback = false;
     timingFitUsedPreDiamondFallback = true;
     timingFitAcceptanceCut = baseAcceptanceCut;
 
@@ -4592,12 +4765,12 @@ void check_slow_protons(
         }
 
         const double leftGoodness =
-          left.localPeakRescue
+          (left.localPeakRescue || left.perAeroMultistart)
             ? left.meanPoissonDeviancePerEntry
             : left.meanPoissonDevianceNdf;
 
         const double rightGoodness =
-          right.localPeakRescue
+          (right.localPeakRescue || right.perAeroMultistart)
             ? right.meanPoissonDeviancePerEntry
             : right.meanPoissonDevianceNdf;
 
@@ -4633,12 +4806,12 @@ void check_slow_protons(
     }
 
     const double leftGoodness =
-      left.localPeakRescue
+      (left.localPeakRescue || left.perAeroMultistart)
         ? left.meanPoissonDeviancePerEntry
         : left.meanPoissonDevianceNdf;
 
     const double rightGoodness =
-      right.localPeakRescue
+      (right.localPeakRescue || right.perAeroMultistart)
         ? right.meanPoissonDeviancePerEntry
         : right.meanPoissonDevianceNdf;
 
@@ -4783,6 +4956,14 @@ void check_slow_protons(
     }
   }
 
+  if (timingFitUsedPerAeroDefault) {
+    timingSelectionReason =
+      "per_aerogel_multistart_default_" + timingSelectionReason;
+  } else if (timingFitUsedStandardFallback) {
+    timingSelectionReason =
+      "standard_fit_fallback_" + timingSelectionReason;
+  }
+
   if (timingFitUsedPreDiamondFallback) {
     timingSelectionReason =
       "pre_diamond_fit_fallback_" + timingSelectionReason;
@@ -4871,6 +5052,17 @@ void check_slow_protons(
     "(" + timingFitAcceptanceCut + ") && (" +
     pidRangeCut + ")";
 
+  if (timingFitUsedPerAeroDefault) {
+    std::cout
+      << "Per-aerogel multistart timing fits are the default fit procedure."
+      << std::endl;
+  } else if (timingFitUsedStandardFallback) {
+    std::cout
+      << "The default per-aerogel multistart fit failed; using the "
+      << "previous standard two-Gaussian fit as fallback 1."
+      << std::endl;
+  }
+
   if (timingFitUsedPreDiamondFallback) {
     std::cout
       << "Timing-fit histograms use the pre-diamond base acceptance; "
@@ -4899,11 +5091,15 @@ void check_slow_protons(
       "Global %s vs P_aero_npeSum%s;"
       "P_aero_npeSum;%s;Counts",
       timeBranch.c_str(),
-      timingFitUsedLocalPeakRescue
-        ? " (local-peak rescue)"
-        : (timingFitUsedPreDiamondFallback
-            ? " (pre-diamond fit fallback)"
-            : ""),
+      timingFitUsedPerAeroDefault
+        ? " (per-aerogel multistart default)"
+        : (timingFitUsedLocalPeakRescue
+            ? " (local-peak rescue)"
+            : (timingFitUsedPreDiamondFallback
+                ? " (pre-diamond fit fallback)"
+                : (timingFitUsedStandardFallback
+                    ? " (standard-fit fallback)"
+                    : ""))),
       timingAxisTitle.c_str()
     ),
     nAeroHistogramBins,
@@ -5023,11 +5219,15 @@ void check_slow_protons(
       TString::Format(
         "Global timing fit%s: %.1f #leq aero < %.1f;"
         "%s;Counts",
-        timingFitUsedLocalPeakRescue
-          ? " (local-peak rescue)"
-          : (timingFitUsedPreDiamondFallback
-              ? " (pre-diamond fallback)"
-              : ""),
+        timingFitUsedPerAeroDefault
+          ? " (per-aerogel multistart default)"
+          : (timingFitUsedLocalPeakRescue
+              ? " (local-peak rescue)"
+              : (timingFitUsedPreDiamondFallback
+                  ? " (pre-diamond fallback)"
+                  : (timingFitUsedStandardFallback
+                      ? " (standard-fit fallback)"
+                      : ""))),
         aeroLow,
         aeroHigh,
         timingAxisTitle.c_str()
@@ -5037,31 +5237,75 @@ void check_slow_protons(
     globalTimingProjections.at(aeroSlice) =
       projection;
 
-    globalShapes.at(aeroSlice) =
-      fitGlobalTimingShape(
-        projection,
-        TString::Format(
-          "f_global_time_aero_slice_%d",
-          aeroSlice
-        ).Data(),
-        timingFitMin,
-        timingFitMax,
-        kaonMeanMin,
-        kaonMeanMax,
-        protonMeanMin,
-        protonMeanMax,
-        protonPeakIsLower,
-        timingSigmaMin,
-        timingSigmaMax,
-        timingSigmaInitial,
-        activeMinimumGlobalSeparation,
-        minimumGlobalAmplitudeSignificance,
-        activeUseDeviancePerEntryValidation,
-        maximumGlobalPoissonDevianceNdf,
-        activeMaximumGlobalPoissonDeviancePerEntry,
-        activeGlobalBoundFractionTolerance,
-        minimumGlobalSliceEntries
-      );
+    if (timingFitUsedPerAeroDefault) {
+      globalShapes.at(aeroSlice) =
+        fitPerAeroFallbackTimingShape(
+          projection,
+          TString::Format(
+            "f_global_time_default_multistart_%d",
+            aeroSlice
+          ).Data(),
+          timeMin,
+          timeMax,
+          protonPeakIsLower,
+          beamBunchSpacingNs,
+          0.5 * (kaonMeanMin + kaonMeanMax),
+          0.5 * (protonMeanMin + protonMeanMax),
+          timingSigmaMin,
+          minimumGlobalAmplitudeSignificance,
+          minimumGlobalSliceEntries
+        );
+    } else {
+      globalShapes.at(aeroSlice) =
+        fitGlobalTimingShape(
+          projection,
+          TString::Format(
+            "f_global_time_aero_slice_%d",
+            aeroSlice
+          ).Data(),
+          timingFitMin,
+          timingFitMax,
+          kaonMeanMin,
+          kaonMeanMax,
+          protonMeanMin,
+          protonMeanMax,
+          protonPeakIsLower,
+          timingSigmaMin,
+          timingSigmaMax,
+          timingSigmaInitial,
+          activeMinimumGlobalSeparation,
+          minimumGlobalAmplitudeSignificance,
+          activeUseDeviancePerEntryValidation,
+          maximumGlobalPoissonDevianceNdf,
+          activeMaximumGlobalPoissonDeviancePerEntry,
+          activeGlobalBoundFractionTolerance,
+          minimumGlobalSliceEntries
+        );
+    }
+
+    if (timingFitUsedPerAeroDefault) {
+      const TimingShape &defaultShape = globalShapes.at(aeroSlice);
+      std::cout
+        << "  default multistart aero ["
+        << aeroLow
+        << ", "
+        << aeroHigh
+        << "): valid="
+        << (defaultShape.valid ? "yes" : "no")
+        << ", p mu/sigma="
+        << defaultShape.protonMean
+        << "/"
+        << defaultShape.protonSigma
+        << ", K mu/sigma="
+        << defaultShape.kaonMean
+        << "/"
+        << defaultShape.kaonSigma
+        << ", separation="
+        << defaultShape.separation
+        << ", D/N="
+        << defaultShape.poissonDeviancePerEntry
+        << std::endl;
+    }
   }
 
   int validGlobalShapes = 0;
@@ -5075,120 +5319,9 @@ void check_slow_protons(
     }
   }
 
-  // Leave all settings that already succeed untouched.  This final pass is
-  // entered only after the diamond, pre-diamond, and aggregate local-peak
-  // procedures have all returned zero valid global shapes.
-  if (
-    validGlobalShapes == 0 &&
-    timingFitUsedLocalPeakRescue
-  ) {
-    std::cout
-      << "Aggregate local-peak rescue produced zero valid shapes. "
-      << "Trying multi-start shifted kaon-proton peak pairs in each aerogel slice."
-      << std::endl;
-
-    timingFitUsedPerAeroFallback = true;
-    timingSelectionReason =
-      "per_aerogel_fit_fallback_" + timingSelectionReason;
-
-    for (
-      int aeroSlice = 0;
-      aeroSlice < nAeroSlices;
-      ++aeroSlice
-    ) {
-      TimingShape &oldShape =
-        globalShapes.at(aeroSlice);
-
-      if (oldShape.fitFunction) {
-        delete oldShape.fitFunction;
-        oldShape.fitFunction = nullptr;
-      }
-
-      TH1D *projection =
-        globalTimingProjections.at(aeroSlice);
-
-      if (!projection) {
-        continue;
-      }
-
-      projection->SetTitle(
-        TString::Format(
-          "Global timing fit (per-aerogel multistart fallback): %.1f #leq aero < %.1f;"
-          "%s;Counts",
-          aeroEdges.at(aeroSlice),
-          aeroEdges.at(aeroSlice + 1),
-          timingAxisTitle.c_str()
-        )
-      );
-
-      globalShapes.at(aeroSlice) =
-        fitPerAeroFallbackTimingShape(
-          projection,
-          TString::Format(
-            "f_global_time_per_aero_fallback_%d",
-            aeroSlice
-          ).Data(),
-          timeMin,
-          timeMax,
-          protonPeakIsLower,
-          beamBunchSpacingNs,
-          0.5 * (kaonMeanMin + kaonMeanMax),
-          0.5 * (protonMeanMin + protonMeanMax),
-          timingSigmaMin,
-          minimumGlobalAmplitudeSignificance,
-          minimumGlobalSliceEntries
-        );
-
-      const TimingShape &fallbackShape =
-        globalShapes.at(aeroSlice);
-
-      std::cout
-        << "  aero ["
-        << aeroEdges.at(aeroSlice)
-        << ", "
-        << aeroEdges.at(aeroSlice + 1)
-        << "): valid="
-        << (fallbackShape.valid ? "yes" : "no")
-        << ", fit=["
-        << fallbackShape.fitMin
-        << ", "
-        << fallbackShape.fitMax
-        << "]"
-        << ", p mu/sigma="
-        << fallbackShape.protonMean
-        << "/"
-        << fallbackShape.protonSigma
-        << ", K mu/sigma="
-        << fallbackShape.kaonMean
-        << "/"
-        << fallbackShape.kaonSigma
-        << ", common offset="
-        << fallbackShape.appliedMeanOffset
-        << ", separation="
-        << fallbackShape.separation
-        << ", D/N="
-        << fallbackShape.poissonDeviancePerEntry
-        << std::endl;
-    }
-
-    validGlobalShapes = 0;
-
-    for (
-      const TimingShape &shape :
-      globalShapes
-    ) {
-      if (shape.valid) {
-        ++validGlobalShapes;
-      }
-    }
-
-    std::cout
-      << "Per-aerogel fallback valid global shapes: "
-      << validGlobalShapes
-      << " / "
-      << nAeroSlices
-      << std::endl;
-  }
+  // The per-aerogel multistart procedure is now the default stage.
+  // The previous standard, pre-diamond, and local-peak procedures are
+  // retained only as progressively later fallbacks.
 
   // ------------------------------------------------------------------
   // Fit-derived timing-versus-aerogel diagnostic.
@@ -5528,7 +5661,7 @@ void check_slow_protons(
   if (validGlobalShapes == 0) {
     std::cerr
       << "No identifiable proton-kaon timing shapes were found. "
-      << "[v24 diagnostic mode] Writing raw diagnostic plots to "
+      << "[v25 diagnostic mode] Writing raw diagnostic plots to "
       << outputPDF
       << " and "
       << outputROOT
@@ -6140,6 +6273,16 @@ void check_slow_protons(
     ).Write();
 
     TParameter<int>(
+      "timing_fit_per_aerogel_default_used",
+      timingFitUsedPerAeroDefault ? 1 : 0
+    ).Write();
+
+    TParameter<int>(
+      "timing_fit_standard_fallback_used",
+      timingFitUsedStandardFallback ? 1 : 0
+    ).Write();
+
+    TParameter<int>(
       "timing_fit_pre_diamond_fallback_used",
       timingFitUsedPreDiamondFallback ? 1 : 0
     ).Write();
@@ -6151,7 +6294,7 @@ void check_slow_protons(
 
     TParameter<int>(
       "timing_fit_per_aerogel_fallback_used",
-      timingFitUsedPerAeroFallback ? 1 : 0
+      timingFitUsedPerAeroDefault ? 1 : 0
     ).Write();
 
     TNamed diagnosticTimingFitAcceptanceCut(
@@ -6971,6 +7114,8 @@ void check_slow_protons(
   // V16 = accept physically ordered per-aerogel fallback peaks even when the
   //       deliberately tight fallback bounds are reached
   // V20 = multi-start per-aerogel fallback selected by common-range deviance
+  // V25 = make per-aerogel multistart the default; shift the former default
+  //       and all later recovery procedures down by one fallback stage
   // ------------------------------------------------------------------
 
   const Long64_t treeEntries =
@@ -8370,6 +8515,16 @@ void check_slow_protons(
   ).Write();
 
   TParameter<int>(
+    "timing_fit_per_aerogel_default_used",
+    timingFitUsedPerAeroDefault ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
+    "timing_fit_standard_fallback_used",
+    timingFitUsedStandardFallback ? 1 : 0
+  ).Write();
+
+  TParameter<int>(
     "timing_fit_pre_diamond_fallback_used",
     timingFitUsedPreDiamondFallback ? 1 : 0
   ).Write();
@@ -8381,7 +8536,7 @@ void check_slow_protons(
 
   TParameter<int>(
     "timing_fit_per_aerogel_fallback_used",
-    timingFitUsedPerAeroFallback ? 1 : 0
+    timingFitUsedPerAeroDefault ? 1 : 0
   ).Write();
 
   TNamed timingFitAcceptanceCutTag(
@@ -8564,6 +8719,10 @@ void check_slow_protons(
     << " ("
     << timingSelectionReason
     << ")"
+    << "\nPer-aerogel multistart default used: "
+    << (timingFitUsedPerAeroDefault ? "yes" : "no")
+    << "\nStandard-fit fallback used: "
+    << (timingFitUsedStandardFallback ? "yes" : "no")
     << "\nTiming-fit pre-diamond fallback: "
     << (timingFitUsedPreDiamondFallback ? "yes" : "no")
     << "\nGlobal PID entries: "
