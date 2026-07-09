@@ -303,7 +303,7 @@ std::pair<double, double> findCentralQuantileRange(
 
 PoissonGoodnessOfFit computePoissonGoodnessOfFit(
   const TH1D *histogram,
-  const TF1 *fitFunction,
+  TF1 *fitFunction,
   double fitMin,
   double fitMax,
   int numberOfFreeParameters
@@ -1259,7 +1259,7 @@ void check_slow_protons(
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  const char *macroVersion = "check_slow_protons.2";
+  const char *macroVersion = "check_slow_protons.3";
 
   std::cout
     << "Running "
