@@ -432,11 +432,13 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "minimum_separation": 0.75,
         "minimum_amplitude_significance": 2.0,
         "maximum_chi2_ndf": 5.0,
+        "maximum_poisson_deviance_per_entry": 0.85,
         "bound_fraction_tolerance": 0.02,
         "minimum_entries": 200,
     },
     "slice_fit": {
         "maximum_chi2_ndf": 5.0,
+        "maximum_poisson_deviance_per_entry": 1.00,
         "minimum_model_data_ratio": 0.50,
         "maximum_model_data_ratio": 1.50,
         "minimum_entries": 30,

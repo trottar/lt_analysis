@@ -163,6 +163,9 @@ def _tree_has_branch(tree, branch_name):
 
 
 def _bundle_has_branch(source_bundle, branch_name):
+    prepared_branches = (source_bundle or {}).get("available_timing_branches") or ()
+    if branch_name in prepared_branches:
+        return True
     for source_spec in ((source_bundle or {}).get("sources") or {}).values():
         tree = (source_spec or {}).get("tree")
         if _tree_has_branch(tree, branch_name):
@@ -183,6 +186,103 @@ def _resolve_rf_branch_candidates(source_bundle):
     return [candidate for candidate in candidates if _bundle_has_branch(source_bundle, candidate)]
 
 
+def _get_prepared_sources(source_bundle):
+    return ((source_bundle or {}).get("prepared_sources") or {})
+
+
+def _iter_prepared_records(source_bundle, require_nommcuts=False):
+    for source_name, source_spec in _get_prepared_sources(source_bundle).items():
+        entry_map = (source_spec or {}).get("entries") or {}
+        for entry_index, entry_payload in entry_map.items():
+            if require_nommcuts and not bool((entry_payload or {}).get("nommcuts", False)):
+                continue
+            yield source_name, source_spec, int(entry_index), entry_payload
+
+
+def prepare_kaon_proton_cleaning_source_bundle(
+    source_bundle,
+    evaluate_event,
+    shifted_mm_getter,
+    shifted_t_getter,
+    hole_contains,
+    mm_min,
+    mm_max,
+):
+    prepared_bundle = dict(source_bundle or {})
+    prepared_sources = {}
+    prepared_source_stats = {}
+    available_timing_branches = set()
+    requested_timing_branches = ["CTime_ROC1", *DEFAULT_RF_BRANCH_CANDIDATES]
+
+    for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items():
+        tree = (source_spec or {}).get("tree")
+        entry_payloads = {}
+        entries_seen = 0
+        entries_prepared = 0
+        available_for_source = []
+
+        if tree is not None:
+            available_for_source = [
+                str(branch_name)
+                for branch_name in requested_timing_branches
+                if _tree_has_branch(tree, branch_name)
+            ]
+            available_timing_branches.update(available_for_source)
+
+            for entry_index, evt in enumerate(tree):
+                entries_seen += 1
+                base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+                hole_rejected = (
+                    hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+                    if hole_contains is not None
+                    else False
+                )
+                allcuts = bool(base_all_cuts and (not hole_rejected))
+                nommcuts = bool(base_sub_cuts and (not hole_rejected))
+                noholecuts = bool(base_all_cuts)
+
+                if not (allcuts or nommcuts or noholecuts):
+                    continue
+
+                timing_values = {}
+                for branch_name in available_for_source:
+                    try:
+                        branch_value = float(getattr(evt, branch_name))
+                    except Exception:
+                        continue
+                    if math.isfinite(branch_value):
+                        timing_values[str(branch_name)] = float(branch_value)
+
+                entry_payloads[int(entry_index)] = {
+                    "allcuts": bool(allcuts),
+                    "nommcuts": bool(nommcuts),
+                    "noholecuts": bool(noholecuts),
+                    "adj_mm": float(shifted_mm_getter(evt)),
+                    "adj_t": float(shifted_t_getter(evt)),
+                    "adj_hsdelta": float(adj_hsdelta),
+                    "delta_value": float(getattr(evt, "ssdelta", 0.0)),
+                    "aero_value": float(getattr(evt, "P_aero_npeSum", 0.0)),
+                    "timing_values": timing_values,
+                }
+                entries_prepared += 1
+
+        prepared_sources[str(source_name)] = {
+            **dict(source_spec or {}),
+            "entries": entry_payloads,
+            "available_timing_branches": list(available_for_source),
+        }
+        prepared_source_stats[str(source_name)] = {
+            "tree_name": (source_spec or {}).get("tree_name"),
+            "entries_seen": int(entries_seen),
+            "entries_prepared": int(entries_prepared),
+        }
+
+    prepared_bundle["prepared_sources"] = prepared_sources
+    prepared_bundle["prepared_source_stats"] = prepared_source_stats
+    prepared_bundle["available_timing_branches"] = sorted(available_timing_branches)
+    return prepared_bundle
+
+
 def _preselection_passes(evt, evaluate_event, hole_contains, mm_min, mm_max):
     _, nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
     hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) if hole_contains is not None else False
@@ -190,6 +290,16 @@ def _preselection_passes(evt, evaluate_event, hole_contains, mm_min, mm_max):
 
 
 def _collect_branch_values(source_bundle, evaluate_event, hole_contains, mm_min, mm_max, branch_name):
+    if _get_prepared_sources(source_bundle):
+        values = []
+        for _, _, _, entry_payload in _iter_prepared_records(source_bundle, require_nommcuts=True):
+            timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(branch_name))
+            if timing_value is None:
+                continue
+            timing_value = float(timing_value)
+            if math.isfinite(timing_value):
+                values.append(timing_value)
+        return values
     values = []
     for source_spec in ((source_bundle or {}).get("sources") or {}).values():
         tree = (source_spec or {}).get("tree")
@@ -233,6 +343,16 @@ def _build_unweighted_timing_projection(
     )
     projection.SetDirectory(0)
     projection.Sumw2()
+    if _get_prepared_sources(source_bundle):
+        for _, _, _, entry_payload in _iter_prepared_records(source_bundle, require_nommcuts=True):
+            timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(branch_name))
+            if timing_value is None:
+                continue
+            timing_value = float(timing_value)
+            if (not math.isfinite(timing_value)) or timing_value < time_min or timing_value > time_max:
+                continue
+            projection.Fill(timing_value)
+        return projection
     for source_spec in ((source_bundle or {}).get("sources") or {}).values():
         tree = (source_spec or {}).get("tree")
         if tree is None or not _tree_has_branch(tree, branch_name):
@@ -1324,6 +1444,8 @@ def _fit_delta_timing_slice(
     global_shape,
     config,
     function_name,
+    use_deviance_per_entry_validation=False,
+    maximum_poisson_deviance_per_entry=None,
 ):
     fit_min = float(global_shape.get("fit_min", (config.get("ctime_hist_range") or (-1.50, 1.25))[0]))
     fit_max = float(global_shape.get("fit_max", (config.get("ctime_hist_range") or (-1.50, 1.25))[1]))
@@ -1432,10 +1554,14 @@ def _fit_delta_timing_slice(
     chi2_per_abs_entry = goodness.get("deviance_per_entry")
     active_bin_count = int(goodness.get("fitted_bins", 0) or 0)
     slice_cfg = config.get("slice_fit") or {}
-    use_deviance_per_entry_validation = bool(global_shape.get("per_aero_fallback"))
-    maximum_poisson_deviance_per_entry = float(
-        slice_cfg.get("maximum_poisson_deviance_per_entry", 0.05)
-        or 0.05
+    use_deviance_per_entry_validation = bool(use_deviance_per_entry_validation)
+    maximum_poisson_deviance_per_entry = (
+        float(maximum_poisson_deviance_per_entry)
+        if maximum_poisson_deviance_per_entry is not None
+        else float(
+            slice_cfg.get("maximum_poisson_deviance_per_entry", 1.00)
+            or 1.00
+        )
     )
     slice_fit_status_accepted = bool(
         fit_status_code == 0
@@ -1938,48 +2064,77 @@ def _build_signed_pid_histograms(
             slice_hists.append(hist)
         delta_slice_hists.append(slice_hists)
 
+    delta_edges = [delta_min + (((delta_max - delta_min) / float(delta_bins)) * i) for i in range(delta_bins + 1)]
     source_stats = {}
-    for source_name, source_spec in (source_bundle.get("sources") or {}).items():
-        tree = source_spec.get("tree")
-        coefficient = float(
-            source_spec.get(
-                "fit_coefficient",
-                source_spec.get("coefficient", 0.0),
-            )
-            or 0.0
-        )
-        source_stats[source_name] = {
-            "tree_name": source_spec.get("tree_name"),
-            "entries_seen": 0,
-            "entries_used": 0,
-        }
-        if tree is None or coefficient == 0.0:
-            continue
-        for evt in tree:
-            source_stats[source_name]["entries_seen"] += 1
-            allcuts, nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) if hole_contains is not None else False
-            if not (nommcuts and not hole_rejected):
+    prepared_sources = _get_prepared_sources(source_bundle)
+    if prepared_sources:
+        prepared_source_stats = (source_bundle.get("prepared_source_stats") or {})
+        for source_name, source_spec in prepared_sources.items():
+            coefficient = float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+            prepared_stats = prepared_source_stats.get(source_name) or {}
+            source_stats[source_name] = {
+                "tree_name": (source_spec or {}).get("tree_name"),
+                "entries_seen": int(prepared_stats.get("entries_seen", 0) or 0),
+                "entries_used": 0,
+            }
+            if coefficient == 0.0:
                 continue
-            aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
-            try:
-                timing_value = float(getattr(evt, str(timing_branch)))
-            except Exception:
+            for entry_payload in (((source_spec or {}).get("entries") or {}).values()):
+                if not bool((entry_payload or {}).get("nommcuts", False)):
+                    continue
+                aero_value = float((entry_payload or {}).get("aero_value", 0.0) or 0.0)
+                timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(timing_branch))
+                if timing_value is None:
+                    continue
+                timing_value = float(timing_value)
+                delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
+                if (aero_value < aero_min) or (aero_value > aero_max) or (timing_value < time_min) or (timing_value > time_max):
+                    continue
+                source_stats[source_name]["entries_used"] += 1
+                h_global_pid.Fill(aero_value, timing_value, coefficient)
+                aero_index = _find_collection_bin(aero_value, aero_edges)
+                delta_index = _find_collection_bin(delta_value, delta_edges)
+                if 0 <= aero_index < len(global_slice_hists):
+                    global_slice_hists[aero_index].Fill(timing_value, coefficient)
+                if 0 <= delta_index < delta_bins:
+                    delta_pid_hists[delta_index].Fill(aero_value, timing_value, coefficient)
+                    if 0 <= aero_index < len(delta_slice_hists[delta_index]):
+                        delta_slice_hists[delta_index][aero_index].Fill(timing_value, coefficient)
+    else:
+        for source_name, source_spec in (source_bundle.get("sources") or {}).items():
+            tree = source_spec.get("tree")
+            coefficient = float(source_spec.get("coefficient", 0.0) or 0.0)
+            source_stats[source_name] = {
+                "tree_name": source_spec.get("tree_name"),
+                "entries_seen": 0,
+                "entries_used": 0,
+            }
+            if tree is None or coefficient == 0.0:
                 continue
-            delta_value = float(getattr(evt, "ssdelta", 0.0))
-            if (aero_value < aero_min) or (aero_value > aero_max) or (timing_value < time_min) or (timing_value > time_max):
-                continue
-            source_stats[source_name]["entries_used"] += 1
-            h_global_pid.Fill(aero_value, timing_value, coefficient)
-            aero_index = _find_collection_bin(aero_value, aero_edges)
-            delta_width = (delta_max - delta_min) / float(delta_bins)
-            delta_index = _find_collection_bin(delta_value, [delta_min + (delta_width * i) for i in range(delta_bins + 1)])
-            if 0 <= aero_index < len(global_slice_hists):
-                global_slice_hists[aero_index].Fill(timing_value, coefficient)
-            if 0 <= delta_index < delta_bins:
-                delta_pid_hists[delta_index].Fill(aero_value, timing_value, coefficient)
-                if 0 <= aero_index < len(delta_slice_hists[delta_index]):
-                    delta_slice_hists[delta_index][aero_index].Fill(timing_value, coefficient)
+            for evt in tree:
+                source_stats[source_name]["entries_seen"] += 1
+                allcuts, nommcuts, _ = evaluate_event(evt, mm_min, mm_max)
+                hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) if hole_contains is not None else False
+                if not (nommcuts and not hole_rejected):
+                    continue
+                aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
+                try:
+                    timing_value = float(getattr(evt, str(timing_branch)))
+                except Exception:
+                    continue
+                delta_value = float(getattr(evt, "ssdelta", 0.0))
+                if (aero_value < aero_min) or (aero_value > aero_max) or (timing_value < time_min) or (timing_value > time_max):
+                    continue
+                source_stats[source_name]["entries_used"] += 1
+                h_global_pid.Fill(aero_value, timing_value, coefficient)
+                aero_index = _find_collection_bin(aero_value, aero_edges)
+                delta_index = _find_collection_bin(delta_value, delta_edges)
+                if 0 <= aero_index < len(global_slice_hists):
+                    global_slice_hists[aero_index].Fill(timing_value, coefficient)
+                if 0 <= delta_index < delta_bins:
+                    delta_pid_hists[delta_index].Fill(aero_value, timing_value, coefficient)
+                    if 0 <= aero_index < len(delta_slice_hists[delta_index]):
+                        delta_slice_hists[delta_index][aero_index].Fill(timing_value, coefficient)
 
     return {
         "H_global_pid": h_global_pid,
@@ -1988,7 +2143,7 @@ def _build_signed_pid_histograms(
         "delta_slice_hists": delta_slice_hists,
         "source_stats": source_stats,
         "aero_edges": aero_edges,
-        "delta_edges": [delta_min + (((delta_max - delta_min) / float(delta_bins)) * i) for i in range(delta_bins + 1)],
+        "delta_edges": delta_edges,
         "timing_branch": str(timing_branch),
         "time_hist_range": (float(time_min), float(time_max)),
         "time_hist_bins": int(n_time_bins),
@@ -2058,15 +2213,16 @@ def build_kaon_proton_cleaning_result(
             "input_tree_state": "explicit_noRF",
             "input_tree_particle_selection": "Cut_Kaon_Events_*_noRF",
             "fit_sample_definition": (
-                "signed noRF prompt/random/dummy bundle with evaluate_data_event "
-                "nommcuts and HGCer-hole rejection, using raw signed event-count "
-                "coefficients for the timing-fit histograms"
+                "prepared signed noRF prompt/random/dummy bundle from the upstream "
+                "kaon sample immediately before pion subtraction, using the exact "
+                "prepared signed coefficients for the timing-fit histograms"
             ),
             "fit_sample_signed_combination": (
-                "prompt - rand/nWindows - dummy + dummy_rand/nWindows"
+                "norm_data*prompt - norm_data*rand/nWindows - norm_dummy*dummy + "
+                "norm_dummy*dummy_rand/nWindows"
             ),
             "fit_sample_uses_signed_random_dummy_subtraction": True,
-            "fit_sample_uses_normalized_coefficients": False,
+            "fit_sample_uses_normalized_coefficients": True,
             "fit_sample_requires_nommcuts": True,
             "fit_sample_requires_hgcer_hole_rejection": True,
         },
@@ -2096,11 +2252,7 @@ def build_kaon_proton_cleaning_result(
     }
     result["diagnostics"]["fit_source_coefficients"] = {
         str(source_name): float(
-            (source_spec or {}).get(
-                "fit_coefficient",
-                (source_spec or {}).get("coefficient", 0.0),
-            )
-            or 0.0
+            (source_spec or {}).get("coefficient", 0.0) or 0.0
         )
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
     }
@@ -2162,7 +2314,7 @@ def build_kaon_proton_cleaning_result(
         fit_mode=current_fit_mode,
     )
     best_rf_probe = _best_rf_probe_or_none(rf_probes)
-    best_rf_valid_shapes = max((int(probe.get("validShapes", 0) or 0) for probe in rf_probes), default=0)
+    rescue_rf_peak_pair_tiebreak = False
 
     selected_probe = ct_probe
     timing_selection_reason = "ct_probe_ranked_better_than_rf"
@@ -2180,7 +2332,13 @@ def build_kaon_proton_cleaning_result(
                 if _compare_timing_probes(best_rf_probe, ct_probe) > 0
                 else "rf_won_exact_probe_tie"
             )
-        elif int(best_rf_probe.get("validShapes", 0) or 0) == 0 and int(ct_probe.get("validShapes", 0) or 0) == 0 and bool(best_rf_probe.get("peakPairFound", False)) and not bool(ct_probe.get("peakPairFound", False)):
+        elif (
+            rescue_rf_peak_pair_tiebreak
+            and int(best_rf_probe.get("validShapes", 0) or 0) == 0
+            and int(ct_probe.get("validShapes", 0) or 0) == 0
+            and bool(best_rf_probe.get("peakPairFound", False))
+            and not bool(ct_probe.get("peakPairFound", False))
+        ):
             selected_probe = best_rf_probe
             timing_selection_reason = "rf_resolved_peak_pair_used_after_all_fit_validation_failed"
 
@@ -2195,6 +2353,9 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["selected_timing_branch"] = str(selected_probe.get("timing_branch", ct_time_branch))
     result["diagnostics"]["selected_probe_kind"] = str(selected_probe.get("probe_kind", "ct"))
     result["diagnostics"]["selected_probe_fit_mode"] = str(current_fit_mode)
+    result["diagnostics"]["selected_probe_local_peak_rescue"] = bool(
+        selected_probe.get("localPeakRescue", False)
+    )
     result["diagnostics"]["rf_timing_selected"] = bool(selected_probe.get("probe_kind") == "rf")
     result["diagnostics"]["timingSelectionReason"] = str(timing_selection_reason)
     result["diagnostics"]["valid_global_shape_count"] = int(valid_global_shape_count)
@@ -2209,6 +2370,20 @@ def build_kaon_proton_cleaning_result(
     result["delta_edges"] = pid_payload.get("delta_edges") or []
     result["diagnostics"]["selected_time_hist_range"] = list(pid_payload.get("time_hist_range") or ())
     result["diagnostics"]["selected_time_hist_bins"] = int(pid_payload.get("time_hist_bins", 90) or 90)
+    slice_fit_cfg = config.get("slice_fit") or {}
+    active_use_slice_deviance_per_entry_validation = bool(
+        selected_probe.get("localPeakRescue", False)
+    )
+    active_maximum_slice_poisson_deviance_per_entry = float(
+        slice_fit_cfg.get("maximum_poisson_deviance_per_entry", 1.00)
+        or 1.00
+    )
+    result["diagnostics"]["activeUseSliceDeviancePerEntryValidation"] = bool(
+        active_use_slice_deviance_per_entry_validation
+    )
+    result["diagnostics"]["activeMaximumSlicePoissonDeviancePerEntry"] = float(
+        active_maximum_slice_poisson_deviance_per_entry
+    )
 
     if valid_global_shape_count <= 0:
         result["fallback_reason"] = "no identifiable proton-kaon timing shapes"
@@ -2229,7 +2404,9 @@ def build_kaon_proton_cleaning_result(
         proton_total = 0.0
         kaon_total = 0.0
         other_total = 0.0
-        data_total = _hist_abs_integral(pid_payload["delta_pid_hists"][delta_index])
+        data_total = float(
+            (pid_payload["delta_pid_hists"][delta_index]).Integral()
+        )
         fitted_data_total = 0.0
         model_total = 0.0
         valid_slices = 0
@@ -2242,6 +2419,8 @@ def build_kaon_proton_cleaning_result(
                 global_shape,
                 config,
                 "f_proton_cleaning_delta_{}_aero_{}".format(delta_index, aero_index),
+                use_deviance_per_entry_validation=active_use_slice_deviance_per_entry_validation,
+                maximum_poisson_deviance_per_entry=active_maximum_slice_poisson_deviance_per_entry,
             )
             slice_fits.append(slice_fit)
             if not slice_fit.get("valid"):
@@ -2250,10 +2429,13 @@ def build_kaon_proton_cleaning_result(
             proton_total += float(slice_fit.get("proton_yield", 0.0) or 0.0)
             kaon_total += float(slice_fit.get("kaon_yield", 0.0) or 0.0)
             other_total += float(slice_fit.get("other_yield", 0.0) or 0.0)
-            fitted_data_total += abs(float(slice_fit.get("data_yield", 0.0) or 0.0))
+            fitted_data_total += float(slice_fit.get("data_yield", 0.0) or 0.0)
             model_total += float(slice_fit.get("model_yield", 0.0) or 0.0)
-            chi2_weighted_sum += float(slice_fit.get("chi2_ndf", 0.0) or 0.0) * abs(float(slice_fit.get("data_yield", 0.0) or 0.0))
-            chi2_weight += abs(float(slice_fit.get("data_yield", 0.0) or 0.0))
+            chi2_weighted_sum += (
+                float(slice_fit.get("chi2_ndf", 0.0) or 0.0)
+                * float(slice_fit.get("data_yield", 0.0) or 0.0)
+            )
+            chi2_weight += float(slice_fit.get("data_yield", 0.0) or 0.0)
         coverage = float(fitted_data_total / data_total) if data_total > 0.0 else 0.0
         support_thresholds = config.get("support_thresholds") or {}
         if (
@@ -2478,29 +2660,48 @@ def apply_kaon_proton_cleaning_to_targets(
 
     rf_counts = {"accepted": 0, "rejected": 0}
     support_counts = {SUPPORT_SUPPORTED: 0, SUPPORT_MARGINAL: 0, SUPPORT_UNSUPPORTED: 0}
+    prepared_sources = _get_prepared_sources(source_bundle)
 
     for source_name, source_spec in (source_bundle.get("sources") or {}).items():
         tree = source_spec.get("tree")
         coefficient = float(source_spec.get("coefficient", 0.0) or 0.0)
         if tree is None or coefficient == 0.0:
             continue
-        for evt in tree:
-            allcuts, nommcuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-            hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) if hole_contains is not None else False
-            base_allcuts = bool(allcuts)
-            allcuts = bool(allcuts and (not hole_rejected))
-            nommcuts = bool(nommcuts and (not hole_rejected))
-            noholecuts = bool(base_allcuts)
+        prepared_entry_map = (prepared_sources.get(source_name) or {}).get("entries") or {}
+        for entry_index, evt in enumerate(tree):
+            if prepared_sources:
+                entry_payload = prepared_entry_map.get(int(entry_index))
+                if entry_payload is None:
+                    continue
+                allcuts = bool((entry_payload or {}).get("allcuts", False))
+                nommcuts = bool((entry_payload or {}).get("nommcuts", False))
+                noholecuts = bool((entry_payload or {}).get("noholecuts", False))
+                adj_hsdelta = float((entry_payload or {}).get("adj_hsdelta", 0.0) or 0.0)
+                adj_mm = float((entry_payload or {}).get("adj_mm", 0.0) or 0.0)
+                adj_t = float((entry_payload or {}).get("adj_t", 0.0) or 0.0)
+                delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
+                aero_value = float((entry_payload or {}).get("aero_value", 0.0) or 0.0)
+                timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(timing_branch))
+                timing_value = float(timing_value) if timing_value is not None else 0.0
+            else:
+                allcuts, nommcuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
+                hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) if hole_contains is not None else False
+                base_allcuts = bool(allcuts)
+                allcuts = bool(allcuts and (not hole_rejected))
+                nommcuts = bool(nommcuts and (not hole_rejected))
+                noholecuts = bool(base_allcuts)
+                if not (allcuts or nommcuts or noholecuts):
+                    continue
+                adj_mm = float(shifted_mm_getter(evt))
+                adj_t = float(shifted_t_getter(evt))
+                delta_value = float(getattr(evt, "ssdelta", 0.0))
+                aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
+                try:
+                    timing_value = float(getattr(evt, timing_branch))
+                except Exception:
+                    timing_value = 0.0
             if not (allcuts or nommcuts or noholecuts):
                 continue
-            adj_mm = float(shifted_mm_getter(evt))
-            adj_t = float(shifted_t_getter(evt))
-            delta_value = float(getattr(evt, "ssdelta", 0.0))
-            aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
-            try:
-                timing_value = float(getattr(evt, timing_branch))
-            except Exception:
-                timing_value = 0.0
             delta_index = _find_collection_bin(delta_value, delta_edges)
             aero_index = _find_collection_bin(aero_value, aero_edges)
             support_label = SUPPORT_UNSUPPORTED
