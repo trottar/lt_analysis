@@ -139,6 +139,30 @@ def _json_ready_value(value):
     return deepcopy(value)
 
 
+def _proton_debug_enabled(config):
+    return bool((config or {}).get("debug_flares_enabled", False))
+
+
+def _print_proton_debug(stage, **details):
+    print("[DEBUG proton_cleaning] {}".format(stage), flush=True)
+    for key, value in details.items():
+        print("  {} = {}".format(key, value), flush=True)
+
+
+def _format_debug_float(value, digits=4, scientific=False):
+    if value is None:
+        return "n/a"
+    try:
+        numeric = float(value)
+    except Exception:
+        return str(value)
+    if not math.isfinite(numeric):
+        return str(numeric)
+    if scientific:
+        return ("{0:." + str(int(digits)) + "e}").format(numeric)
+    return ("{0:." + str(int(digits)) + "f}").format(numeric)
+
+
 def _make_signature(evt, fields, round_digits):
     signature = []
     for field_name in fields:
@@ -2203,6 +2227,7 @@ def build_kaon_proton_cleaning_result(
             "analysis_scope": str(analysis_scope),
             "context": str(context),
             "method": method,
+            "debug_flares_enabled": bool(_proton_debug_enabled(config)),
             "resolved_setting_key": config.get("proton_contamination_setting_key"),
             "resolved_phi_setting": config.get("proton_contamination_phi_setting"),
             "override_layers": list(config.get("proton_contamination_override_layers") or []),
@@ -2250,6 +2275,12 @@ def build_kaon_proton_cleaning_result(
         str(source_name): float((source_spec or {}).get("coefficient", 0.0) or 0.0)
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
     }
+    result["diagnostics"]["prepared_source_stats"] = _json_ready_value(
+        (source_bundle or {}).get("prepared_source_stats") or {}
+    )
+    result["diagnostics"]["available_timing_branches"] = list(
+        (source_bundle or {}).get("available_timing_branches") or []
+    )
     result["diagnostics"]["fit_source_coefficients"] = {
         str(source_name): float(
             (source_spec or {}).get("coefficient", 0.0) or 0.0
@@ -2347,6 +2378,9 @@ def build_kaon_proton_cleaning_result(
     pid_payload = selected_probe.get("pid_payload") or {}
     global_shapes = selected_probe.get("global_shapes") or []
     valid_global_shape_count = int(selected_probe.get("validShapes", 0) or 0)
+    result["diagnostics"]["beam_bunch_spacing_ns"] = float(
+        _resolve_beam_bunch_spacing_ns(source_bundle)
+    )
 
     result["diagnostics"]["rf_probe_summaries"] = [_probe_summary(probe) for probe in rf_probes]
     result["diagnostics"]["ct_probe_summary"] = _probe_summary(ct_probe)
@@ -2370,6 +2404,32 @@ def build_kaon_proton_cleaning_result(
     result["delta_edges"] = pid_payload.get("delta_edges") or []
     result["diagnostics"]["selected_time_hist_range"] = list(pid_payload.get("time_hist_range") or ())
     result["diagnostics"]["selected_time_hist_bins"] = int(pid_payload.get("time_hist_bins", 90) or 90)
+    global_shape_debug_rows = []
+    for aero_index, shape in enumerate(global_shapes):
+        row = {
+            "aero_index": int(aero_index),
+            "valid": bool((shape or {}).get("valid", False)),
+            "fit_status": (shape or {}).get("fit_status"),
+            "fit_status_code": (shape or {}).get("fit_status_code"),
+            "fitted_entries": float((shape or {}).get("fitted_entries", 0.0) or 0.0),
+            "fit_min": (shape or {}).get("fit_min"),
+            "fit_max": (shape or {}).get("fit_max"),
+            "kaon_mean": (shape or {}).get("kaon_mean"),
+            "proton_mean": (shape or {}).get("proton_mean"),
+            "kaon_sigma": (shape or {}).get("kaon_sigma"),
+            "proton_sigma": (shape or {}).get("proton_sigma"),
+            "separation": (shape or {}).get("separation"),
+            "kaon_significance": (shape or {}).get("kaon_significance"),
+            "proton_significance": (shape or {}).get("proton_significance"),
+            "chi2_ndf": (shape or {}).get("chi2_ndf"),
+            "chi2_per_abs_entry": (shape or {}).get("chi2_per_abs_entry"),
+            "bound_hit": bool((shape or {}).get("bound_hit", False)),
+            "ordering_valid": bool((shape or {}).get("ordering_valid", False)),
+            "per_aero_fallback": bool((shape or {}).get("per_aero_fallback", False)),
+            "peak_pair_found": bool((shape or {}).get("peak_pair_found", False)),
+        }
+        global_shape_debug_rows.append(_json_ready_value(row))
+    result["diagnostics"]["global_shape_debug_rows"] = global_shape_debug_rows
     slice_fit_cfg = config.get("slice_fit") or {}
     active_use_slice_deviance_per_entry_validation = bool(
         selected_probe.get("localPeakRescue", False)
@@ -2399,8 +2459,10 @@ def build_kaon_proton_cleaning_result(
     chi2_ndf_by_delta = []
     valid_slices_by_delta = []
     valid_coverage_by_delta = []
+    delta_support_debug_rows = []
     for delta_index, slice_collection in enumerate(pid_payload["delta_slice_hists"]):
         slice_fits = []
+        slice_debug_rows = []
         proton_total = 0.0
         kaon_total = 0.0
         other_total = 0.0
@@ -2423,6 +2485,27 @@ def build_kaon_proton_cleaning_result(
                 maximum_poisson_deviance_per_entry=active_maximum_slice_poisson_deviance_per_entry,
             )
             slice_fits.append(slice_fit)
+            slice_debug_rows.append(
+                _json_ready_value(
+                    {
+                        "delta_index": int(delta_index),
+                        "aero_index": int(aero_index),
+                        "global_shape_valid": bool((global_shape or {}).get("valid", False)),
+                        "valid": bool((slice_fit or {}).get("valid", False)),
+                        "fit_status": (slice_fit or {}).get("fit_status"),
+                        "fit_status_code": (slice_fit or {}).get("fit_status_code"),
+                        "data_yield": (slice_fit or {}).get("data_yield"),
+                        "model_yield": (slice_fit or {}).get("model_yield"),
+                        "model_data_ratio": (slice_fit or {}).get("model_data_ratio"),
+                        "kaon_yield": (slice_fit or {}).get("kaon_yield"),
+                        "proton_yield": (slice_fit or {}).get("proton_yield"),
+                        "other_yield": (slice_fit or {}).get("other_yield"),
+                        "chi2_ndf": (slice_fit or {}).get("chi2_ndf"),
+                        "chi2_per_abs_entry": (slice_fit or {}).get("chi2_per_abs_entry"),
+                        "active_bin_count": (slice_fit or {}).get("active_bin_count"),
+                    }
+                )
+            )
             if not slice_fit.get("valid"):
                 continue
             valid_slices += 1
@@ -2463,6 +2546,26 @@ def build_kaon_proton_cleaning_result(
         chi2_ndf_by_delta.append(float(chi2_weighted_sum / chi2_weight) if chi2_weight > 0.0 else None)
         valid_slices_by_delta.append(int(valid_slices))
         valid_coverage_by_delta.append(float(coverage))
+        delta_support_debug_rows.append(
+            _json_ready_value(
+                {
+                    "delta_index": int(delta_index),
+                    "support_label": support_label,
+                    "valid_slices": int(valid_slices),
+                    "coverage": float(coverage),
+                    "data_total": float(data_total),
+                    "fitted_data_total": float(fitted_data_total),
+                    "model_total": float(model_total),
+                    "proton_total": float(proton_total),
+                    "kaon_total": float(kaon_total),
+                    "other_total": float(other_total),
+                    "chi2_ndf_weighted": (
+                        float(chi2_weighted_sum / chi2_weight) if chi2_weight > 0.0 else None
+                    ),
+                    "slice_rows": slice_debug_rows,
+                }
+            )
+        )
     result["delta_slice_fits"] = delta_fits
     result["support_by_delta"] = support_by_delta
     result["diagnostics"]["proton_yield_by_delta"] = proton_yield_by_delta
@@ -2473,6 +2576,7 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["valid_slices_by_delta"] = valid_slices_by_delta
     result["diagnostics"]["valid_coverage_by_delta"] = valid_coverage_by_delta
     result["diagnostics"]["chi2_ndf_by_delta"] = chi2_ndf_by_delta
+    result["diagnostics"]["delta_support_debug_rows"] = delta_support_debug_rows
     result["diagnostics"]["supported_delta_bins"] = int(sum(1 for label in support_by_delta if label == SUPPORT_SUPPORTED))
     result["diagnostics"]["marginal_delta_bins"] = int(sum(1 for label in support_by_delta if label == SUPPORT_MARGINAL))
 
@@ -2870,6 +2974,7 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
     diagnostics = cleaning_result.get("diagnostics") or {}
     application = cleaning_result.get("application") or {}
     source_stats = diagnostics.get("source_stats") or {}
+    prepared_source_stats = diagnostics.get("prepared_source_stats") or {}
     valid_global_shape_count = int(diagnostics.get("valid_global_shape_count", 0) or 0)
     n_aero_slices = max(len(cleaning_result.get("aero_edges") or []) - 1, 0)
     supported_delta_bins = int(diagnostics.get("supported_delta_bins", 0) or 0)
@@ -2945,6 +3050,88 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         lines.append("Diagnostic proton-cleaning plots: {}".format(output_pdf))
     lines.append("========================================")
     print("\n".join(lines))
+
+    if not bool(diagnostics.get("debug_flares_enabled", False)):
+        return
+
+    _print_proton_debug(
+        "prepared sample overview",
+        available_timing_branches=", ".join(diagnostics.get("available_timing_branches") or []) or "none",
+        beam_bunch_spacing_ns=_format_debug_float(diagnostics.get("beam_bunch_spacing_ns")),
+        selected_time_hist_range=tuple(diagnostics.get("selected_time_hist_range") or ()),
+        selected_time_hist_bins=diagnostics.get("selected_time_hist_bins"),
+        source_coefficients=_json_ready_value(diagnostics.get("source_coefficients") or {}),
+    )
+    for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
+        prep_stats = prepared_source_stats.get(source_name) or {}
+        pid_stats = source_stats.get(source_name) or {}
+        _print_proton_debug(
+            "prepared source {}".format(source_name),
+            tree_name=prep_stats.get("tree_name") or pid_stats.get("tree_name") or "missing",
+            entries_seen=prep_stats.get("entries_seen", pid_stats.get("entries_seen", 0)),
+            entries_prepared=prep_stats.get("entries_prepared", 0),
+            entries_used_in_pid=pid_stats.get("entries_used", 0),
+        )
+
+    for row in (diagnostics.get("global_shape_debug_rows") or []):
+        _print_proton_debug(
+            "global slice a{}".format(int(row.get("aero_index", 0)) + 1),
+            valid=row.get("valid"),
+            fit_status=row.get("fit_status"),
+            fit_status_code=row.get("fit_status_code"),
+            fitted_entries=_format_debug_float(row.get("fitted_entries"), scientific=True),
+            fit_window="[{}, {}]".format(
+                _format_debug_float(row.get("fit_min")),
+                _format_debug_float(row.get("fit_max")),
+            ),
+            kaon_mean=_format_debug_float(row.get("kaon_mean")),
+            proton_mean=_format_debug_float(row.get("proton_mean")),
+            kaon_sigma=_format_debug_float(row.get("kaon_sigma")),
+            proton_sigma=_format_debug_float(row.get("proton_sigma")),
+            separation=_format_debug_float(row.get("separation")),
+            kaon_sig=_format_debug_float(row.get("kaon_significance")),
+            proton_sig=_format_debug_float(row.get("proton_significance")),
+            chi2_ndf=_format_debug_float(row.get("chi2_ndf")),
+            dev_per_entry=_format_debug_float(row.get("chi2_per_abs_entry")),
+            bound_hit=row.get("bound_hit"),
+            ordering_valid=row.get("ordering_valid"),
+            peak_pair_found=row.get("peak_pair_found"),
+        )
+
+    for row in (diagnostics.get("delta_support_debug_rows") or []):
+        _print_proton_debug(
+            "delta bin d{}".format(int(row.get("delta_index", 0)) + 1),
+            support=row.get("support_label"),
+            valid_slices=row.get("valid_slices"),
+            coverage=_format_debug_float(row.get("coverage")),
+            data_total=_format_debug_float(row.get("data_total"), scientific=True),
+            fitted_data_total=_format_debug_float(row.get("fitted_data_total"), scientific=True),
+            model_total=_format_debug_float(row.get("model_total"), scientific=True),
+            proton_total=_format_debug_float(row.get("proton_total"), scientific=True),
+            kaon_total=_format_debug_float(row.get("kaon_total"), scientific=True),
+            other_total=_format_debug_float(row.get("other_total"), scientific=True),
+            chi2_ndf_weighted=_format_debug_float(row.get("chi2_ndf_weighted")),
+        )
+        for slice_row in (row.get("slice_rows") or []):
+            _print_proton_debug(
+                "delta d{} aero a{}".format(
+                    int(slice_row.get("delta_index", 0)) + 1,
+                    int(slice_row.get("aero_index", 0)) + 1,
+                ),
+                global_shape_valid=slice_row.get("global_shape_valid"),
+                valid=slice_row.get("valid"),
+                fit_status=slice_row.get("fit_status"),
+                fit_status_code=slice_row.get("fit_status_code"),
+                data_yield=_format_debug_float(slice_row.get("data_yield"), scientific=True),
+                model_yield=_format_debug_float(slice_row.get("model_yield"), scientific=True),
+                model_ratio=_format_debug_float(slice_row.get("model_data_ratio")),
+                kaon_yield=_format_debug_float(slice_row.get("kaon_yield"), scientific=True),
+                proton_yield=_format_debug_float(slice_row.get("proton_yield"), scientific=True),
+                other_yield=_format_debug_float(slice_row.get("other_yield"), scientific=True),
+                chi2_ndf=_format_debug_float(slice_row.get("chi2_ndf")),
+                dev_per_entry=_format_debug_float(slice_row.get("chi2_per_abs_entry")),
+                active_bin_count=slice_row.get("active_bin_count"),
+            )
 
 
 def _draw_hist_overlay(canvas_name, title, histograms, legend_entries, output_pdf):
