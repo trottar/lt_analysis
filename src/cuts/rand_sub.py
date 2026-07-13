@@ -2717,6 +2717,7 @@ def rand_sub(
                             ("H_MM_before_proton_cleaning", "H_MM_before_proton_cleaning_DATA"),
                             ("H_MM_estimated_proton", "H_MM_estimated_proton_DATA"),
                             ("H_MM_after_proton_cleaning", "H_MM_nosub_proton_cleaned_DATA"),
+                            ("H_MM_after_proton_cleaning_final_rf", "H_MM_nosub_proton_cleaned_final_RF_DATA"),
                             ("H_proton_fraction_vs_MM", "H_proton_fraction_vs_MM_DATA"),
                             ("H_proton_weight_vs_delta", "H_proton_weight_vs_delta_DATA"),
                             ("H_proton_weight_vs_delta_aero", "H_proton_weight_vs_delta_aero_DATA"),

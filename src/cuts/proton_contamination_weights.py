@@ -3179,7 +3179,8 @@ def apply_kaon_proton_cleaning_to_targets(
 
     h_mm_raw = raw_targets.get("h_mm_nosub")
     h_mm_proton = proton_targets.get("h_mm_nosub")
-    h_mm_cleaned = final_targets.get("h_mm_nosub")
+    h_mm_cleaned = cleaned_targets_pre_rf.get("h_mm_nosub")
+    h_mm_cleaned_final_rf = final_targets.get("h_mm_nosub")
     mm_fill_counters = {
         "events_sent_to_mm_filling": 0,
         "raw_mm_fills": 0,
@@ -3349,6 +3350,7 @@ def apply_kaon_proton_cleaning_to_targets(
         "H_MM_before_proton_cleaning": h_mm_raw,
         "H_MM_estimated_proton": h_mm_proton,
         "H_MM_after_proton_cleaning": h_mm_cleaned,
+        "H_MM_after_proton_cleaning_final_rf": h_mm_cleaned_final_rf,
         "H_proton_fraction_vs_MM": h_proton_fraction_vs_mm,
         "H_proton_weight_vs_delta": h_weight_avg_delta,
         "H_proton_weight_vs_delta_aero": h_weight_avg_delta_aero,
@@ -3361,6 +3363,7 @@ def apply_kaon_proton_cleaning_to_targets(
             "raw_mm_integral": _hist_integral(h_mm_raw),
             "estimated_proton_mm_integral": _hist_integral(h_mm_proton),
             "cleaned_mm_integral": _hist_integral(h_mm_cleaned),
+            "cleaned_final_rf_mm_integral": _hist_integral(h_mm_cleaned_final_rf),
             "mm_fill_counters": dict(mm_fill_counters),
             "raw_mm_key_present": h_mm_raw is not None,
             "proton_mm_key_present": h_mm_proton is not None,
