@@ -389,6 +389,22 @@ PROTON_CONTAMINATION_CLEANING_IMPLEMENTATIONS = frozenset(
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
     }
 )
+PROTON_CONTAMINATION_RF_BRANCH_CANDIDATES = (
+    "RF",
+    "RFTime",
+    "RF_time",
+    "RFTime_ROC1",
+    "P_RFTime",
+    "P_RF_tdcTime",
+    "P_RF_adcTime",
+    "RF_Dist",
+    "RF_Distance",
+    "P_RF_Dist",
+    "P_RF_Distance",
+    "P_RF_Dist_Track",
+    "H_RFTime",
+    "H_RF_tdcTime",
+)
 PROTON_CONTAMINATION_CLEANING_METHODS = frozenset(
     {
         PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
@@ -412,6 +428,11 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     "enabled": True,
     "method": PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
     "implementation": PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
+    "timing_probe_policy": "rf_then_ct_best",
+    "rf_branch_candidates": PROTON_CONTAMINATION_RF_BRANCH_CANDIDATES,
+    "allow_rf_probe": True,
+    "disable_rf_timing_env": "PROTON_CHECKER_DISABLE_RF",
+    "force_rf_branch_env": "PROTON_CHECKER_RF_BRANCH",
     "debug_flares_enabled": True,
     "tree_policy": "explicit_norf_required",
     "rf_policy": "epsset_default_after_cleaning",

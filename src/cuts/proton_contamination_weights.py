@@ -271,6 +271,11 @@ def _join_rejection_reasons(reasons):
 def _build_exact_proton_cleaning_config(base_config):
     exact_config = deepcopy(base_config or {})
     exact_config["implementation"] = PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
+    exact_config.setdefault("timing_probe_policy", "rf_then_ct_best")
+    exact_config.setdefault("rf_branch_candidates", tuple(DEFAULT_RF_BRANCH_CANDIDATES))
+    exact_config.setdefault("allow_rf_probe", True)
+    exact_config.setdefault("disable_rf_timing_env", "PROTON_CHECKER_DISABLE_RF")
+    exact_config.setdefault("force_rf_branch_env", "PROTON_CHECKER_RF_BRANCH")
     exact_config["ct_timing_branch"] = PROTON_CLEANING_EXACT_TIMING_BRANCH
     exact_config["ctime_hist_range"] = tuple(PROTON_CLEANING_EXACT_TIMING_RANGE)
     exact_config["ctime_hist_bins"] = int(PROTON_CLEANING_EXACT_TIMING_BINS)
@@ -370,14 +375,19 @@ def _bundle_has_branch(source_bundle, branch_name):
     return False
 
 
-def _resolve_rf_branch_candidates(source_bundle):
-    if str(os.environ.get("PROTON_CHECKER_DISABLE_RF", "")).strip() == "1":
+def _resolve_rf_branch_candidates(source_bundle, config=None):
+    config = config or {}
+    disable_env = str(config.get("disable_rf_timing_env") or "PROTON_CHECKER_DISABLE_RF")
+    force_env = str(config.get("force_rf_branch_env") or "PROTON_CHECKER_RF_BRANCH")
+    if not bool(config.get("allow_rf_probe", True)):
+        return []
+    if str(os.environ.get(disable_env, "")).strip() == "1":
         return []
     candidates = []
-    forced = str(os.environ.get("PROTON_CHECKER_RF_BRANCH", "")).strip()
+    forced = str(os.environ.get(force_env, "")).strip()
     if forced:
         candidates.append(forced)
-    for candidate in DEFAULT_RF_BRANCH_CANDIDATES:
+    for candidate in tuple(config.get("rf_branch_candidates") or DEFAULT_RF_BRANCH_CANDIDATES):
         if candidate not in candidates:
             candidates.append(candidate)
     return [candidate for candidate in candidates if _bundle_has_branch(source_bundle, candidate)]
@@ -404,12 +414,16 @@ def prepare_kaon_proton_cleaning_source_bundle(
     hole_contains,
     mm_min,
     mm_max,
+    proton_cleaning_config=None,
 ):
     prepared_bundle = dict(source_bundle or {})
     prepared_sources = {}
     prepared_source_stats = {}
     available_timing_branches = set()
     requested_timing_branches = [PROTON_CLEANING_EXACT_TIMING_BRANCH]
+    for branch_name in _resolve_rf_branch_candidates(source_bundle, proton_cleaning_config):
+        if branch_name not in requested_timing_branches:
+            requested_timing_branches.append(branch_name)
     prompt_source_spec = ((source_bundle or {}).get("sources") or {}).get("prompt") or {}
     prompt_physical_coefficient = float(prompt_source_spec.get("coefficient", 0.0) or 0.0)
     if (not math.isfinite(prompt_physical_coefficient)) or prompt_physical_coefficient == 0.0:
@@ -2236,10 +2250,7 @@ def _run_timing_probe(
             timing_branch,
         )
     else:
-        display_range = (
-            -float(beam_bunch_spacing_ns),
-            float(beam_bunch_spacing_ns),
-        )
+        display_range = tuple(PROTON_CLEANING_EXACT_TIMING_RANGE)
     time_hist_bins = _resolve_probe_time_histogram_bins(
         source_bundle,
         probe_kind,
@@ -2659,8 +2670,7 @@ def _resolve_probe_time_histogram_bins(source_bundle, probe_kind, display_range)
             80,
             int(round(candidate_width / 0.0305)),
         )
-    epsset = normalize_epsset((source_bundle or {}).get("epsset"))
-    return 262 if epsset == "high" else 131
+    return int(PROTON_CLEANING_EXACT_TIMING_BINS)
 
 
 def build_kaon_proton_cleaning_result(
@@ -2796,75 +2806,225 @@ def build_kaon_proton_cleaning_result(
             (((source_bundle or {}).get("prepared_sources") or {}).get(str(source_name)) or {})
         ]
     }
-    ct_time_branch = PROTON_CLEANING_EXACT_TIMING_BRANCH
-    global_fit_cfg = exact_config.get("global_fit") or {}
-    result["diagnostics"]["rf_timing_attempted"] = False
-    result["diagnostics"]["ct_timing_evaluated"] = True
-    result["diagnostics"]["timingFitUsedPerAeroDefault"] = True
-    result["diagnostics"]["timingFitUsedStandardFallback"] = False
-    result["diagnostics"]["timingFitUsedPreDiamondFallback"] = False
-    result["diagnostics"]["timingFitUsedLocalPeakRescue"] = False
-
-    pid_payload = _build_signed_pid_histograms(
-        source_bundle,
-        exact_config,
-        evaluate_event,
-        shifted_mm_getter,
-        hole_contains,
-        mm_min,
-        mm_max,
-        timing_branch=ct_time_branch,
-        time_hist_range=PROTON_CLEANING_EXACT_TIMING_RANGE,
-        time_hist_bins=PROTON_CLEANING_EXACT_TIMING_BINS,
-    )
     beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
+    global_fit_cfg = exact_config.get("global_fit") or {}
     global_fit_cfg = dict(global_fit_cfg)
     global_fit_cfg["beam_bunch_spacing_ns"] = float(beam_bunch_spacing_ns)
     exact_config["global_fit"] = global_fit_cfg
 
-    global_shapes = []
-    for aero_index, slice_hist in enumerate(pid_payload.get("global_slice_hists") or []):
-        global_shapes.append(
-            _fit_global_timing_shape(
-                slice_hist,
-                exact_config,
-                "f_proton_cleaning_global_ctime_aero_{}".format(aero_index),
-                proton_peak_is_lower=False,
-                display_range=pid_payload.get("time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE,
-                fit_mode="per_aero_multistart",
-            )
+    def _summary_without_root_payload(probe):
+        if not probe:
+            return None
+        return _json_ready_value(
+            {
+                key: value
+                for key, value in probe.items()
+                if key not in ("pid_payload", "global_shapes")
+            }
         )
-    selected_probe = _summarize_global_probe(
-        ct_time_branch,
-        "ct",
-        "per_aero_multistart",
-        pid_payload,
-        global_shapes,
-        False,
+
+    def _best_rf_probe(rf_probe_list):
+        best = None
+        for candidate_probe in rf_probe_list or []:
+            if best is None or _compare_timing_probes(candidate_probe, best) > 0:
+                best = candidate_probe
+        return best
+
+    def _run_probe_set(fit_mode):
+        rf_probe_list = []
+        for rf_branch in _resolve_rf_branch_candidates(source_bundle, exact_config):
+            rf_probe_list.append(
+                _run_timing_probe(
+                    source_bundle,
+                    exact_config,
+                    evaluate_event,
+                    shifted_mm_getter,
+                    hole_contains,
+                    mm_min,
+                    mm_max,
+                    timing_branch=rf_branch,
+                    proton_peak_is_lower=True,
+                    probe_kind="rf",
+                    fit_mode=fit_mode,
+                )
+            )
+        ct_probe = _run_timing_probe(
+            source_bundle,
+            exact_config,
+            evaluate_event,
+            shifted_mm_getter,
+            hole_contains,
+            mm_min,
+            mm_max,
+            timing_branch=PROTON_CLEANING_EXACT_TIMING_BRANCH,
+            proton_peak_is_lower=False,
+            probe_kind="ct",
+            fit_mode=fit_mode,
+        )
+        return rf_probe_list, ct_probe, _best_rf_probe(rf_probe_list)
+
+    probe_stage_plan = (
+        ("per_aero_multistart", "per_aerogel_multistart_default"),
+        ("standard", "standard_fit_fallback"),
+        ("local_peak_rescue", "local_peak_rescue"),
     )
-    timing_selection_reason = "exact_ctime_single_path"
+    selected_probe = None
+    selected_stage_prefix = ""
+    selected_stage_rf_probes = []
+    selected_stage_ct_probe = None
+    selected_stage_best_rf_probe = None
+    probe_stage_summaries = []
+
+    for fit_mode, reason_prefix in probe_stage_plan:
+        rf_probes, ct_probe, best_rf_probe = _run_probe_set(fit_mode)
+        stage_summary = {
+            "fit_mode": str(fit_mode),
+            "reason_prefix": str(reason_prefix),
+            "rf_probes": [_summary_without_root_payload(probe) for probe in rf_probes],
+            "ct_probe": _summary_without_root_payload(ct_probe),
+            "best_rf_probe": _summary_without_root_payload(best_rf_probe),
+        }
+        probe_stage_summaries.append(stage_summary)
+        best_valid_count = max(
+            int((best_rf_probe or {}).get("validShapes", 0) or 0),
+            int((ct_probe or {}).get("validShapes", 0) or 0),
+        )
+        selected_probe = ct_probe
+        selected_stage_prefix = reason_prefix
+        selected_stage_rf_probes = rf_probes
+        selected_stage_ct_probe = ct_probe
+        selected_stage_best_rf_probe = best_rf_probe
+        if best_valid_count > 0 or fit_mode == probe_stage_plan[-1][0]:
+            break
+
+    best_rf_probe = selected_stage_best_rf_probe
+    ct_probe = selected_stage_ct_probe
+    rf_probe_count = len(selected_stage_rf_probes or [])
+    rescue_rf_peak_pair_tiebreak = bool(
+        best_rf_probe
+        and str(selected_probe.get("fit_mode", "")) == "local_peak_rescue"
+        and int(best_rf_probe.get("validShapes", 0) or 0) == 0
+        and int((ct_probe or {}).get("validShapes", 0) or 0) == 0
+        and bool(best_rf_probe.get("peakPairFound", False))
+        and not bool((ct_probe or {}).get("peakPairFound", False))
+    )
+    rf_compare_to_ct = (
+        _compare_timing_probes(best_rf_probe, ct_probe)
+        if best_rf_probe is not None and ct_probe is not None
+        else None
+    )
+    select_rf = bool(
+        best_rf_probe
+        and (
+            (
+                int(best_rf_probe.get("validShapes", 0) or 0) > 0
+                and rf_compare_to_ct is not None
+                and int(rf_compare_to_ct) >= 0
+            )
+            or rescue_rf_peak_pair_tiebreak
+        )
+    )
+    if select_rf:
+        selected_probe = best_rf_probe
+        if rescue_rf_peak_pair_tiebreak:
+            timing_selection_reason = "rf_local_peak_rescue_peak_pair_tiebreak"
+        elif rf_probe_count <= 1:
+            timing_selection_reason = "rf_resolved_single_candidate"
+        elif int(rf_compare_to_ct or 0) == 0:
+            timing_selection_reason = "rf_won_exact_probe_tie"
+        else:
+            timing_selection_reason = "rf_probe_ranked_better_than_ct"
+    else:
+        selected_probe = ct_probe
+        if not bool(exact_config.get("allow_rf_probe", True)):
+            timing_selection_reason = "rf_disabled_ct_selected"
+        elif rf_probe_count <= 0:
+            timing_selection_reason = "no_rf_branch_ct_selected"
+        elif (
+            int((best_rf_probe or {}).get("validShapes", 0) or 0) <= 0
+            and int((ct_probe or {}).get("validShapes", 0) or 0) <= 0
+        ):
+            timing_selection_reason = "no_valid_rf_or_ct_shapes_ct_selected_for_diagnostics"
+        else:
+            timing_selection_reason = "ct_probe_ranked_better_than_rf"
+    timing_selection_reason = "{}_{}".format(
+        str(selected_stage_prefix),
+        str(timing_selection_reason),
+    )
+
+    pid_payload = selected_probe.get("pid_payload") or {}
+    global_shapes = selected_probe.get("global_shapes") or []
+    selected_time_branch = str(
+        selected_probe.get("timing_branch")
+        or selected_probe.get("branch")
+        or PROTON_CLEANING_EXACT_TIMING_BRANCH
+    )
+    selected_time_hist_range = tuple(pid_payload.get("time_hist_range") or (
+        float(selected_probe.get("displayMin", PROTON_CLEANING_EXACT_TIMING_RANGE[0])),
+        float(selected_probe.get("displayMax", PROTON_CLEANING_EXACT_TIMING_RANGE[1])),
+    ))
+    selected_time_hist_bins = int(
+        pid_payload.get("time_hist_bins")
+        or selected_probe.get("histogramBins")
+        or PROTON_CLEANING_EXACT_TIMING_BINS
+    )
+    exact_config["selected_timing_branch"] = selected_time_branch
+    exact_config["selected_timing_probe_kind"] = str(selected_probe.get("probe_kind", "ct"))
+    exact_config["selected_timing_fit_mode"] = str(selected_probe.get("fit_mode", "unknown"))
+    exact_config["selected_proton_peak_is_lower"] = bool(selected_probe.get("proton_peak_is_lower", False))
+    exact_config["ctime_hist_range"] = tuple(selected_time_hist_range)
+    exact_config["ctime_hist_bins"] = int(selected_time_hist_bins)
 
     valid_global_shape_count = int(selected_probe.get("validShapes", 0) or 0)
 
-    selected_probe_summary = {
-        key: value
-        for key, value in selected_probe.items()
-        if key not in ("pid_payload", "global_shapes")
-    }
-    result["diagnostics"]["rf_probe_summaries"] = []
-    result["diagnostics"]["ct_probe_summary"] = _json_ready_value(selected_probe_summary)
-    result["diagnostics"]["selected_timing_branch"] = ct_time_branch
-    result["diagnostics"]["selected_probe_kind"] = "ct"
-    result["diagnostics"]["selected_probe_fit_mode"] = "per_aero_multistart"
+    selected_probe_summary = _summary_without_root_payload(selected_probe)
+    result["diagnostics"]["rf_timing_attempted"] = bool(rf_probe_count > 0)
+    result["diagnostics"]["ct_timing_evaluated"] = True
+    result["diagnostics"]["timingFitUsedPerAeroDefault"] = (
+        str(selected_probe.get("fit_mode", "")) == "per_aero_multistart"
+    )
+    result["diagnostics"]["timingFitUsedStandardFallback"] = (
+        str(selected_probe.get("fit_mode", "")) == "standard"
+    )
+    result["diagnostics"]["timingFitUsedPreDiamondFallback"] = False
+    result["diagnostics"]["timingFitUsedLocalPeakRescue"] = (
+        str(selected_probe.get("fit_mode", "")) == "local_peak_rescue"
+    )
+    result["diagnostics"]["timing_probe_policy"] = str(
+        exact_config.get("timing_probe_policy", "rf_then_ct_best")
+    )
+    result["diagnostics"]["rf_branch_candidates"] = list(
+        _resolve_rf_branch_candidates(source_bundle, exact_config)
+    )
+    result["diagnostics"]["timing_probe_stage_summaries"] = _json_ready_value(probe_stage_summaries)
+    result["diagnostics"]["rf_probe_summaries"] = _json_ready_value(
+        [_summary_without_root_payload(probe) for probe in selected_stage_rf_probes]
+    )
+    result["diagnostics"]["ct_probe_summary"] = _json_ready_value(
+        _summary_without_root_payload(selected_stage_ct_probe)
+    )
+    result["diagnostics"]["best_rf_probe_summary"] = _json_ready_value(
+        _summary_without_root_payload(selected_stage_best_rf_probe)
+    )
+    result["diagnostics"]["selected_probe_summary"] = _json_ready_value(selected_probe_summary)
+    result["diagnostics"]["selected_timing_branch"] = selected_time_branch
+    result["diagnostics"]["selected_probe_kind"] = str(selected_probe.get("probe_kind", "unknown"))
+    result["diagnostics"]["selected_probe_fit_mode"] = str(selected_probe.get("fit_mode", "unknown"))
     result["diagnostics"]["implementation"] = (
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
     )
-    result["diagnostics"]["selected_probe_local_peak_rescue"] = False
-    result["diagnostics"]["rf_timing_selected"] = False
+    result["diagnostics"]["selected_probe_local_peak_rescue"] = bool(selected_probe.get("localPeakRescue", False))
+    result["diagnostics"]["selected_probe_per_aero_multistart"] = bool(selected_probe.get("perAeroMultistart", False))
+    result["diagnostics"]["selected_proton_peak_is_lower"] = bool(selected_probe.get("proton_peak_is_lower", False))
+    result["diagnostics"]["rf_timing_selected"] = bool(str(selected_probe.get("probe_kind", "")) == "rf")
+    result["diagnostics"]["rf_compare_to_ct"] = (
+        None if rf_compare_to_ct is None else int(rf_compare_to_ct)
+    )
+    result["diagnostics"]["rf_rescue_peak_pair_tiebreak"] = bool(rescue_rf_peak_pair_tiebreak)
     result["diagnostics"]["timingSelectionReason"] = str(timing_selection_reason)
     result["diagnostics"]["valid_global_shape_count"] = int(valid_global_shape_count)
     result["diagnostics"]["source_stats"] = pid_payload.get("source_stats") or {}
-    result["selected_timing_branch"] = ct_time_branch
+    result["selected_timing_branch"] = selected_time_branch
     result["global_shapes"] = global_shapes
     result["H_global_pid"] = pid_payload.get("H_global_pid")
     result["H_global_timing_slices"] = pid_payload.get("global_slice_hists") or []
@@ -2872,8 +3032,8 @@ def build_kaon_proton_cleaning_result(
     result["H_delta_timing_slices"] = pid_payload.get("delta_slice_hists") or []
     result["aero_edges"] = pid_payload.get("aero_edges") or []
     result["delta_edges"] = pid_payload.get("delta_edges") or []
-    result["diagnostics"]["selected_time_hist_range"] = list(pid_payload.get("time_hist_range") or ())
-    result["diagnostics"]["selected_time_hist_bins"] = int(pid_payload.get("time_hist_bins", 90) or 90)
+    result["diagnostics"]["selected_time_hist_range"] = list(selected_time_hist_range)
+    result["diagnostics"]["selected_time_hist_bins"] = int(selected_time_hist_bins)
     global_shape_debug_rows = []
     for aero_index, shape in enumerate(global_shapes):
         row = {
@@ -3507,6 +3667,10 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         "Particle selection: {}".format(diagnostics.get("input_tree_particle_selection", "unknown")),
         "Tree policy: {}".format(diagnostics.get("tree_policy", "unknown")),
         "RF policy: {}".format(diagnostics.get("rf_policy", "unknown")),
+        "Timing probe policy: {}".format(diagnostics.get("timing_probe_policy", "unknown")),
+        "RF probe candidates: {}".format(
+            ", ".join(diagnostics.get("rf_branch_candidates") or []) or "none"
+        ),
         "Exact timing branch/range/bins: {} {} {}".format(
             diagnostics.get("selected_timing_branch", PROTON_CLEANING_EXACT_TIMING_BRANCH),
             tuple(diagnostics.get("selected_time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE),
@@ -3551,6 +3715,8 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
                 diagnostics.get("selected_probe_kind", "unknown"),
                 diagnostics.get("selected_probe_fit_mode", "unknown"),
             ),
+            "RF timing selected: {}".format("yes" if diagnostics.get("rf_timing_selected") else "no"),
+            "Best RF compare-to-CT: {}".format(diagnostics.get("rf_compare_to_ct", "n/a")),
             "Timing selection reason: {}".format(diagnostics.get("timingSelectionReason", "unknown")),
             "Supported delta bins: {}".format(supported_delta_bins),
             "Marginal delta bins: {}".format(marginal_delta_bins),
@@ -3883,6 +4049,130 @@ def _set_hist_line_marker(hist, color, width=2, style=1, marker=20):
     hist.SetMarkerStyle(marker)
 
 
+def _probe_fit_goodness(probe_summary):
+    if not isinstance(probe_summary, dict):
+        return 0.0
+    if bool(probe_summary.get("perAeroMultistart", False)) or bool(probe_summary.get("localPeakRescue", False)):
+        value = probe_summary.get("meanPoissonDeviancePerEntry", 0.0)
+    else:
+        value = probe_summary.get("meanPoissonDevianceNdf", 0.0)
+    try:
+        value = float(value)
+    except Exception:
+        return 0.0
+    return value if math.isfinite(value) else 0.0
+
+
+def _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix):
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    rf_probes = [
+        probe for probe in (diagnostics.get("rf_probe_summaries") or [])
+        if isinstance(probe, dict)
+    ]
+    ct_probe = diagnostics.get("ct_probe_summary")
+    probes = list(rf_probes)
+    if isinstance(ct_probe, dict):
+        probes.append(ct_probe)
+    if not probes:
+        return
+    page_id = abs(id(cleaning_result))
+    n_bins = max(len(probes), 1)
+    h_valid = ROOT.TH1D(
+        "H_proton_cleaning_probe_valid_{}".format(page_id),
+        "{} timing probe valid slice count;probe;valid global slices".format(prefix),
+        n_bins,
+        0.0,
+        float(n_bins),
+    )
+    h_sep = ROOT.TH1D(
+        "H_proton_cleaning_probe_sep_{}".format(page_id),
+        "{} timing probe peak separation;probe;mean separation [ns]".format(prefix),
+        n_bins,
+        0.0,
+        float(n_bins),
+    )
+    h_goodness = ROOT.TH1D(
+        "H_proton_cleaning_probe_goodness_{}".format(page_id),
+        "{} timing probe goodness;probe;ranking goodness".format(prefix),
+        n_bins,
+        0.0,
+        float(n_bins),
+    )
+    for hist in (h_valid, h_sep, h_goodness):
+        hist.SetDirectory(0)
+        hist.Sumw2()
+        hist.SetLineWidth(3)
+        hist.SetMarkerStyle(20)
+    h_valid.SetLineColor(kBlue)
+    h_valid.SetMarkerColor(kBlue)
+    h_sep.SetLineColor(kGreen + 2)
+    h_sep.SetMarkerColor(kGreen + 2)
+    h_goodness.SetLineColor(kRed)
+    h_goodness.SetMarkerColor(kRed)
+
+    selected_branch = str(diagnostics.get("selected_timing_branch", ""))
+    for index, probe in enumerate(probes, start=1):
+        label = "{}:{}".format(
+            str(probe.get("probe_kind", "?")),
+            str(probe.get("branch", probe.get("timing_branch", "?"))),
+        )
+        for hist in (h_valid, h_sep, h_goodness):
+            hist.GetXaxis().SetBinLabel(index, label)
+        h_valid.SetBinContent(index, float(probe.get("validShapes", 0) or 0))
+        h_sep.SetBinContent(index, float(probe.get("meanSeparation", 0.0) or 0.0))
+        h_goodness.SetBinContent(index, _probe_fit_goodness(probe))
+        if str(probe.get("branch", probe.get("timing_branch", ""))) == selected_branch:
+            h_valid.SetBinError(index, 0.15)
+            h_sep.SetBinError(index, 0.0)
+            h_goodness.SetBinError(index, 0.0)
+
+    canvas = TCanvas(
+        "C_proton_cleaning_timing_probe_comparison_{}".format(page_id),
+        "{} proton-cleaning timing probe comparison".format(prefix),
+        1400,
+        900,
+    )
+    canvas.Divide(2, 2)
+    drawn_objects = [h_valid, h_sep, h_goodness]
+    canvas.cd(1)
+    h_valid.SetMinimum(0.0)
+    h_valid.Draw("hist text")
+    gPad.Modified()
+    gPad.Update()
+    canvas.cd(2)
+    h_sep.SetMinimum(0.0)
+    h_sep.Draw("hist text")
+    gPad.Modified()
+    gPad.Update()
+    canvas.cd(3)
+    h_goodness.SetMinimum(0.0)
+    h_goodness.Draw("hist text")
+    gPad.Modified()
+    gPad.Update()
+    canvas.cd(4)
+    info = TPaveText(0.08, 0.15, 0.92, 0.88, "NDC")
+    info.SetBorderSize(1)
+    info.SetFillStyle(0)
+    info.SetTextAlign(12)
+    info.SetTextSize(0.035)
+    info.AddText("selected branch: {}".format(diagnostics.get("selected_timing_branch", "unknown")))
+    info.AddText("selected kind/mode: {}/{}".format(
+        diagnostics.get("selected_probe_kind", "unknown"),
+        diagnostics.get("selected_probe_fit_mode", "unknown"),
+    ))
+    info.AddText("selection reason: {}".format(diagnostics.get("timingSelectionReason", "unknown")))
+    info.AddText("RF selected: {}".format("yes" if diagnostics.get("rf_timing_selected") else "no"))
+    info.AddText("RF candidates: {}".format(", ".join(diagnostics.get("rf_branch_candidates") or []) or "none"))
+    info.Draw()
+    drawn_objects.append(info)
+    gPad.Modified()
+    gPad.Update()
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
+    canvas.Print(output_pdf)
+
+
 def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, prefix):
     application = cleaning_result.get("application") or {}
     diagnostics = cleaning_result.get("diagnostics") or {}
@@ -4151,6 +4441,8 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     application = cleaning_result.get("application") or {}
     diagnostics = cleaning_result.get("diagnostics") or {}
     support_by_delta = cleaning_result.get("support_by_delta") or []
+
+    _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix)
 
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:

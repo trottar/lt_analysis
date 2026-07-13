@@ -75,6 +75,7 @@ from background_config import (
     resolve_particle_subtraction_weight_clip_bounds,
     resolve_particle_subtraction_weight_denominator_floor,
     resolve_particle_subtraction_weight_warn_max,
+    get_proton_contamination_cleaning_config,
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
@@ -2613,6 +2614,10 @@ def rand_sub(
                 hole_contains,
                 mm_min,
                 mm_max,
+                proton_cleaning_config=get_proton_contamination_cleaning_config(
+                    inp_dict=inpDict,
+                    phi_setting=phi_setting,
+                ),
             )
             proton_cleaning_result = build_kaon_proton_cleaning_result(
                 inpDict,
