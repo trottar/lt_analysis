@@ -22,6 +22,7 @@ from ROOT import (
     kBlue,
     kGray,
     kGreen,
+    kMagenta,
     kOrange,
     kRed,
     kViolet,
@@ -3765,6 +3766,309 @@ def _build_timing_shape_overlays(hist, global_shape, slice_fit):
     }
 
 
+def _make_delta_axis_hist(name, title, delta_edges):
+    edges = [float(edge) for edge in (delta_edges or [])]
+    if len(edges) < 2:
+        edges = [
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+        ]
+    hist = ROOT.TH1D(
+        str(name),
+        str(title),
+        len(edges) - 1,
+        array("d", edges),
+    )
+    hist.SetDirectory(0)
+    hist.Sumw2()
+    return hist
+
+
+def _hist_integral_in_range(hist, x_min, x_max):
+    if hist is None:
+        return 0.0
+    try:
+        axis = hist.GetXaxis()
+        first_bin = max(1, axis.FindFixBin(float(x_min)))
+        last_bin = min(
+            int(hist.GetNbinsX()),
+            axis.FindFixBin(np.nextafter(float(x_max), float(x_min))),
+        )
+        if last_bin < first_bin:
+            return 0.0
+        return float(hist.Integral(first_bin, last_bin))
+    except Exception:
+        return 0.0
+
+
+def _set_hist_line_marker(hist, color, width=2, style=1, marker=20):
+    if hist is None:
+        return
+    hist.SetLineColor(color)
+    hist.SetLineStyle(style)
+    hist.SetLineWidth(width)
+    hist.SetMarkerColor(color)
+    hist.SetMarkerStyle(marker)
+
+
+def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, prefix):
+    application = cleaning_result.get("application") or {}
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
+    if len(delta_edges) < 2:
+        delta_edges = np.linspace(
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+            int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
+        ).tolist()
+    aero_edges = [float(edge) for edge in (cleaning_result.get("aero_edges") or PROTON_CLEANING_EXACT_AERO_EDGES)]
+    page_id = abs(id(cleaning_result))
+    n_delta_bins = max(len(delta_edges) - 1, 1)
+    support_by_delta = [str(label) for label in (cleaning_result.get("support_by_delta") or [])]
+
+    proton_yields = [float(value) for value in (diagnostics.get("proton_yield_by_delta") or [])]
+    kaon_yields = [float(value) for value in (diagnostics.get("kaon_yield_by_delta") or [])]
+    other_yields = [float(value) for value in (diagnostics.get("other_yield_by_delta") or [])]
+    coverage_values = [float(value) for value in (diagnostics.get("valid_coverage_by_delta") or [])]
+
+    h_fit_fraction = _make_delta_axis_hist(
+        "H_proton_cleaning_fit_fraction_delta_{}".format(page_id),
+        "Integrated fitted proton fraction;SHMS #delta [%];w_{p}^{fit}(#delta)",
+        delta_edges,
+    )
+    h_coverage = _make_delta_axis_hist(
+        "H_proton_cleaning_fit_coverage_delta_{}".format(page_id),
+        "Accepted PID-fit coverage;SHMS #delta [%];Accepted fit data / total data",
+        delta_edges,
+    )
+    h_proton_yield = _make_delta_axis_hist(
+        "H_proton_cleaning_summary_proton_yield_delta_{}".format(page_id),
+        "Fitted yields versus SHMS #delta;SHMS #delta [%];Fitted yield",
+        delta_edges,
+    )
+    h_kaon_yield = _make_delta_axis_hist(
+        "H_proton_cleaning_summary_kaon_yield_delta_{}".format(page_id),
+        "Fitted yields versus SHMS #delta;SHMS #delta [%];Fitted yield",
+        delta_edges,
+    )
+    h_other_yield = _make_delta_axis_hist(
+        "H_proton_cleaning_summary_other_yield_delta_{}".format(page_id),
+        "Fitted yields versus SHMS #delta;SHMS #delta [%];Fitted yield",
+        delta_edges,
+    )
+
+    for index in range(n_delta_bins):
+        root_bin = index + 1
+        proton_yield = proton_yields[index] if index < len(proton_yields) else 0.0
+        kaon_yield = kaon_yields[index] if index < len(kaon_yields) else 0.0
+        other_yield = other_yields[index] if index < len(other_yields) else 0.0
+        total_yield = proton_yield + kaon_yield + other_yield
+        h_proton_yield.SetBinContent(root_bin, proton_yield)
+        h_kaon_yield.SetBinContent(root_bin, kaon_yield)
+        h_other_yield.SetBinContent(root_bin, other_yield)
+        if index < len(coverage_values):
+            h_coverage.SetBinContent(root_bin, max(0.0, min(1.0, coverage_values[index])))
+        support_label = support_by_delta[index] if index < len(support_by_delta) else SUPPORT_UNSUPPORTED
+        if support_label != SUPPORT_UNSUPPORTED and total_yield > 0.0:
+            proton_fraction = max(0.0, min(1.0, proton_yield / total_yield))
+            h_fit_fraction.SetBinContent(root_bin, proton_fraction)
+            h_fit_fraction.SetBinError(
+                root_bin,
+                math.sqrt(max(proton_fraction * (1.0 - proton_fraction) / total_yield, 0.0)),
+            )
+
+    h_applied_delta = _clone_hist(
+        application.get("H_proton_weight_vs_delta"),
+        "H_proton_cleaning_summary_applied_weight_delta_{}".format(page_id),
+        reset=False,
+    )
+    if h_applied_delta is None:
+        h_applied_delta = _make_delta_axis_hist(
+            "H_proton_cleaning_summary_applied_weight_delta_empty_{}".format(page_id),
+            "Mean applied event-level proton weight;SHMS #delta [%];#LTw_{p}^{event}#GT",
+            delta_edges,
+        )
+    h_applied_delta.SetTitle("Mean applied event-level proton weight;SHMS #delta [%];#LTw_{p}^{event}#GT")
+
+    h_applied_map = _clone_hist(
+        application.get("H_proton_weight_vs_delta_aero"),
+        "H_proton_cleaning_summary_applied_weight_map_{}".format(page_id),
+        reset=False,
+    )
+    if h_applied_map is None:
+        h_applied_map = ROOT.TH2D(
+            "H_proton_cleaning_summary_applied_weight_map_empty_{}".format(page_id),
+            "Mean applied proton probability;SHMS #delta [%];P_aero_npeSum;#LTw_{p}^{event}#GT",
+            n_delta_bins,
+            array("d", delta_edges),
+            max(len(aero_edges) - 1, 1),
+            array("d", aero_edges if len(aero_edges) >= 2 else [0.0, 25.0]),
+        )
+        h_applied_map.SetDirectory(0)
+        h_applied_map.Sumw2()
+    h_applied_map.SetTitle("Mean applied proton probability;SHMS #delta [%];P_aero_npeSum;#LTw_{p}^{event}#GT")
+
+    h_mm_before = application.get("H_MM_before_proton_cleaning")
+    h_mm_proton = application.get("H_MM_estimated_proton")
+    h_mm_after = application.get("H_MM_after_proton_cleaning")
+    h_mm_fraction = application.get("H_proton_fraction_vs_MM")
+
+    _set_hist_line_marker(h_fit_fraction, kGray + 2, width=2, marker=21)
+    _set_hist_line_marker(h_applied_delta, kRed, width=4, marker=20)
+    _set_hist_line_marker(h_proton_yield, kRed, width=4, marker=20)
+    _set_hist_line_marker(h_kaon_yield, kMagenta + 1, width=4, marker=20)
+    _set_hist_line_marker(h_other_yield, kBlue, width=4, marker=20)
+    _set_hist_line_marker(h_coverage, kBlue, width=3, marker=20)
+    _set_hist_line_marker(h_mm_before, kBlack, width=2)
+    _set_hist_line_marker(h_mm_proton, kRed, width=3)
+    _set_hist_line_marker(h_mm_after, kGreen + 2, width=3)
+    _set_hist_line_marker(h_mm_fraction, kRed, width=4)
+
+    canvas = TCanvas(
+        "C_proton_cleaning_final_summary_{}".format(page_id),
+        "{} proton-cleaning final summary".format(prefix),
+        1800,
+        1100,
+    )
+    canvas.Divide(3, 2)
+    drawn_objects = [
+        h_fit_fraction,
+        h_applied_delta,
+        h_proton_yield,
+        h_kaon_yield,
+        h_other_yield,
+        h_coverage,
+        h_applied_map,
+    ]
+
+    canvas.cd(1)
+    h_fit_fraction.SetMinimum(0.0)
+    h_fit_fraction.SetMaximum(1.05)
+    h_fit_fraction.Draw("E1")
+    h_applied_delta.Draw("hist same")
+    legend = TLegend(0.48, 0.70, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_fit_fraction, "integrated fitted fraction", "lep")
+    legend.AddEntry(h_applied_delta, "mean applied event weight", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(2)
+    max_yield = max(
+        float(h_proton_yield.GetMaximum()),
+        float(h_kaon_yield.GetMaximum()),
+        float(h_other_yield.GetMaximum()),
+        1.0,
+    )
+    h_proton_yield.SetMaximum(1.20 * max_yield)
+    h_proton_yield.SetMinimum(0.0)
+    h_proton_yield.Draw("hist")
+    h_kaon_yield.Draw("hist same")
+    h_other_yield.Draw("hist same")
+    legend = TLegend(0.66, 0.68, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_proton_yield, "proton", "l")
+    legend.AddEntry(h_kaon_yield, "kaon", "l")
+    legend.AddEntry(h_other_yield, "other", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(3)
+    gPad.SetRightMargin(0.16)
+    h_applied_map.SetMinimum(0.0)
+    h_applied_map.SetMaximum(1.0)
+    h_applied_map.SetMarkerSize(0.8)
+    h_applied_map.Draw("colz text")
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(4)
+    h_coverage.SetMinimum(0.0)
+    h_coverage.SetMaximum(1.05)
+    h_coverage.Draw("hist")
+    x_min = float(delta_edges[0])
+    x_max = float(delta_edges[-1])
+    supported_threshold = float(PROTON_CLEANING_EXACT_SUPPORT_THRESHOLDS["minimum_supported_coverage"])
+    marginal_threshold = float(PROTON_CLEANING_EXACT_SUPPORT_THRESHOLDS["minimum_marginal_coverage"])
+    support_line = TLine(x_min, supported_threshold, x_max, supported_threshold)
+    support_line.SetLineColor(kGreen + 2)
+    support_line.SetLineStyle(2)
+    support_line.SetLineWidth(2)
+    support_line.Draw("same")
+    marginal_line = TLine(x_min, marginal_threshold, x_max, marginal_threshold)
+    marginal_line.SetLineColor(kOrange + 7)
+    marginal_line.SetLineStyle(2)
+    marginal_line.SetLineWidth(2)
+    marginal_line.Draw("same")
+    drawn_objects.extend([support_line, marginal_line])
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(5)
+    if h_mm_before is not None and h_mm_proton is not None and h_mm_after is not None:
+        max_mm = max(
+            float(h_mm_before.GetMaximum()),
+            float(h_mm_proton.GetMaximum()),
+            float(h_mm_after.GetMaximum()),
+            1.0,
+        )
+        h_mm_before.SetMaximum(1.18 * max_mm)
+        h_mm_before.SetMinimum(0.0)
+        h_mm_before.Draw("hist")
+        h_mm_proton.Draw("hist same")
+        h_mm_after.Draw("hist same")
+        legend = TLegend(0.50, 0.70, 0.88, 0.88)
+        legend.SetBorderSize(1)
+        legend.SetFillStyle(0)
+        legend.AddEntry(h_mm_before, "raw kaon-selected MM", "l")
+        legend.AddEntry(h_mm_proton, "estimated proton contamination", "l")
+        legend.AddEntry(h_mm_after, "proton-cleaned kaon MM", "l")
+        legend.Draw()
+        drawn_objects.append(legend)
+        validation_windows = (cleaning_result.get("settings") or {}).get("validation_windows") or {}
+        low_bounds = validation_windows.get("low_mm") or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS["low_mm"]
+        lambda_bounds = validation_windows.get("lambda_peak") or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS["lambda_peak"]
+        low_raw = _hist_integral_in_range(h_mm_before, low_bounds[0], low_bounds[1])
+        low_proton = _hist_integral_in_range(h_mm_proton, low_bounds[0], low_bounds[1])
+        lambda_raw = _hist_integral_in_range(h_mm_before, lambda_bounds[0], lambda_bounds[1])
+        lambda_proton = _hist_integral_in_range(h_mm_proton, lambda_bounds[0], lambda_bounds[1])
+        low_removed = 100.0 * low_proton / low_raw if low_raw > 0.0 else 0.0
+        lambda_removed = 100.0 * lambda_proton / lambda_raw if lambda_raw > 0.0 else 0.0
+        pave = TPaveText(0.48, 0.40, 0.88, 0.62, "NDC")
+        pave.SetBorderSize(1)
+        pave.SetFillStyle(0)
+        pave.SetTextAlign(12)
+        pave.SetTextSize(0.035)
+        pave.AddText("Low-MM removed: {:.1f}%".format(low_removed))
+        pave.AddText("#Lambda region removed: {:.1f}%".format(lambda_removed))
+        pave.Draw()
+        drawn_objects.append(pave)
+        drawn_objects.extend([h_mm_before, h_mm_proton, h_mm_after])
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(6)
+    if h_mm_fraction is not None:
+        h_mm_fraction.SetMinimum(0.0)
+        h_mm_fraction.SetMaximum(max(1.0, 1.15 * float(h_mm_fraction.GetMaximum())))
+        h_mm_fraction.SetTitle("Estimated proton fraction versus MM;MM [GeV];Estimated proton / raw")
+        h_mm_fraction.Draw("hist")
+        drawn_objects.append(h_mm_fraction)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
+    canvas.Print(output_pdf)
+
+
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):
     if not isinstance(cleaning_result, dict):
         return
@@ -4121,3 +4425,5 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
             h_mm_before.GetXaxis().UnZoom()
             h_mm_proton.GetXaxis().UnZoom()
             h_mm_after.GetXaxis().UnZoom()
+
+    _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, prefix)
