@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gc
 import math
 import os
 import sys
@@ -3178,6 +3179,13 @@ def apply_kaon_proton_cleaning_to_targets(
     h_mm_raw = raw_targets.get("h_mm_nosub")
     h_mm_proton = proton_targets.get("h_mm_nosub")
     h_mm_cleaned = final_targets.get("h_mm_nosub")
+    mm_fill_counters = {
+        "events_sent_to_mm_filling": 0,
+        "raw_mm_fills": 0,
+        "proton_mm_fills": 0,
+        "final_mm_fills": 0,
+        "sum_physical_mm_weights": 0.0,
+    }
 
     rf_counts = {"accepted": 0, "rejected": 0}
     support_counts = {SUPPORT_SUPPORTED: 0, SUPPORT_MARGINAL: 0, SUPPORT_UNSUPPORTED: 0}
@@ -3246,6 +3254,11 @@ def apply_kaon_proton_cleaning_to_targets(
             proton_component_weight = float(coefficient) * float(proton_weight)
             cleaned_weight = float(coefficient) * float(cleaned_factor)
             final_cleaned_weight = float(coefficient) * float(final_cleaned_factor)
+            if allcuts:
+                mm_fill_counters["events_sent_to_mm_filling"] += 1
+                mm_fill_counters["raw_mm_fills"] += 1
+                mm_fill_counters["proton_mm_fills"] += 1
+                mm_fill_counters["sum_physical_mm_weights"] += raw_weight
             _fill_standard_target_hists(
                 evt,
                 adj_mm,
@@ -3281,6 +3294,8 @@ def apply_kaon_proton_cleaning_to_targets(
             )
             if rf_accept:
                 rf_counts["accepted"] += 1
+                if allcuts:
+                    mm_fill_counters["final_mm_fills"] += 1
                 _fill_standard_target_hists(
                     evt,
                     adj_mm,
@@ -3345,6 +3360,14 @@ def apply_kaon_proton_cleaning_to_targets(
             "raw_mm_integral": _hist_integral(h_mm_raw),
             "estimated_proton_mm_integral": _hist_integral(h_mm_proton),
             "cleaned_mm_integral": _hist_integral(h_mm_cleaned),
+            "mm_fill_counters": dict(mm_fill_counters),
+            "raw_mm_key_present": h_mm_raw is not None,
+            "proton_mm_key_present": h_mm_proton is not None,
+            "final_mm_key_present": h_mm_cleaned is not None,
+            "target_template_keys": sorted(str(key) for key in (target_templates or {}).keys()),
+            "raw_target_keys": sorted(str(key) for key in (raw_targets or {}).keys()),
+            "proton_target_keys": sorted(str(key) for key in (proton_targets or {}).keys()),
+            "final_target_keys": sorted(str(key) for key in (final_targets or {}).keys()),
             "target_sample_definition": (
                 "signed noRF kaon target bundle after proton cleaning, with RF "
                 "membership optionally applied only after event-level proton weights"
@@ -3486,6 +3509,27 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
                 "Proton-cleaned MM integral: {:.3e}".format(float(app_diag.get("cleaned_mm_integral", 0.0) or 0.0)),
             ]
         )
+        mm_fill_counters = app_diag.get("mm_fill_counters") or {}
+        lines.extend(
+            [
+                "MM target keys present raw/proton/final: {}/{}/{}".format(
+                    "yes" if app_diag.get("raw_mm_key_present", False) else "no",
+                    "yes" if app_diag.get("proton_mm_key_present", False) else "no",
+                    "yes" if app_diag.get("final_mm_key_present", False) else "no",
+                ),
+                "MM fill events raw/proton/final: {}/{}/{}".format(
+                    int(mm_fill_counters.get("raw_mm_fills", 0) or 0),
+                    int(mm_fill_counters.get("proton_mm_fills", 0) or 0),
+                    int(mm_fill_counters.get("final_mm_fills", 0) or 0),
+                ),
+                "Events sent to MM filling: {}".format(
+                    int(mm_fill_counters.get("events_sent_to_mm_filling", 0) or 0)
+                ),
+                "Sum physical MM weights: {:.3e}".format(
+                    float(mm_fill_counters.get("sum_physical_mm_weights", 0.0) or 0.0)
+                ),
+            ]
+        )
     if output_pdf and bool(cleaning_result.get("accepted")):
         lines.append("Diagnostic proton-cleaning plots: {}".format(output_pdf))
     lines.append("========================================")
@@ -3599,6 +3643,7 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
 def _draw_hist_overlay(canvas_name, title, histograms, legend_entries, output_pdf):
     canvas = TCanvas(canvas_name, title, 1000, 700)
     canvas.SetGrid()
+    drawn_objects = []
     maximum = 0.0
     minimum = 0.0
     for hist in histograms:
@@ -3622,6 +3667,12 @@ def _draw_hist_overlay(canvas_name, title, histograms, legend_entries, output_pd
         legend.AddEntry(hist, legend_entries.get(hist.GetName(), hist.GetTitle()), "l")
         first_drawn = True
     legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
     canvas.Print(output_pdf)
 
 
@@ -3670,9 +3721,11 @@ def _build_timing_shape_overlays(hist, global_shape, slice_fit):
     )
     kaon_hist = _clone_hist(hist, "{}_k_overlay".format(hist.GetName()), reset=True)
     proton_hist = _clone_hist(hist, "{}_p_overlay".format(hist.GetName()), reset=True)
+    other_hist = _clone_hist(hist, "{}_other_overlay".format(hist.GetName()), reset=True)
     total_hist = _clone_hist(hist, "{}_tot_overlay".format(hist.GetName()), reset=True)
-    if kaon_hist is None or proton_hist is None or total_hist is None:
+    if kaon_hist is None or proton_hist is None or other_hist is None or total_hist is None:
         return None
+    other_value = float(slice_fit.get("other_amplitude", 0.0) or 0.0)
     for bin_index, x_value in enumerate(x_values, start=1):
         kaon_value = float(
             _gaussian(
@@ -3690,20 +3743,24 @@ def _build_timing_shape_overlays(hist, global_shape, slice_fit):
                 global_shape["proton_sigma"],
             )[0]
         )
-        total_value = kaon_value + proton_value + float(slice_fit.get("other_amplitude", 0.0) or 0.0)
+        total_value = kaon_value + proton_value + other_value
         kaon_hist.SetBinContent(bin_index, kaon_value)
         proton_hist.SetBinContent(bin_index, proton_value)
+        other_hist.SetBinContent(bin_index, other_value)
         total_hist.SetBinContent(bin_index, total_value)
     line_style = 1 if (bool(global_shape.get("valid")) and bool(slice_fit.get("valid"))) else 2
     kaon_hist.SetLineColor(kBlue)
     kaon_hist.SetLineStyle(line_style)
     proton_hist.SetLineColor(kRed)
     proton_hist.SetLineStyle(line_style)
+    other_hist.SetLineColor(kGray + 2)
+    other_hist.SetLineStyle(line_style)
     total_hist.SetLineColor(kGreen + 2)
     total_hist.SetLineStyle(line_style)
     return {
         "kaon": kaon_hist,
         "proton": proton_hist,
+        "other": other_hist,
         "total": total_hist,
     }
 
@@ -3722,14 +3779,21 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:
         canvas = TCanvas("C_proton_cleaning_global_pid", "{} proton-cleaning global PID".format(prefix), 1000, 700)
+        drawn_objects = []
         h_global_pid.Draw("colz")
-        _draw_status_pave(cleaning_result)
+        drawn_objects.append(_draw_status_pave(cleaning_result))
+        gPad.Modified()
+        gPad.Update()
+        canvas.Modified()
+        canvas.Update()
+        gc.collect()
         canvas.Print(output_pdf)
 
     global_slice_hists = cleaning_result.get("H_global_timing_slices") or []
     if global_slice_hists:
         canvas = TCanvas("C_proton_cleaning_global_slices", "{} proton-cleaning global timing slices".format(prefix), 1200, 800)
         canvas.Divide(3, 2)
+        drawn_objects = []
         global_shapes = cleaning_result.get("global_shapes") or []
         for index, hist in enumerate(global_slice_hists[:6]):
             canvas.cd(index + 1)
@@ -3749,23 +3813,49 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                     },
                 )
                 if overlays is not None:
-                    overlays["kaon"].Draw("hist same")
-                    overlays["proton"].Draw("hist same")
-                    overlays["total"].Draw("hist same")
-                _draw_status_pave(
-                    cleaning_result,
-                    extra_lines=(
-                        "slice {} attempted={} valid={}".format(
-                            index + 1,
-                            bool(shape.get("fit_attempted", shape.get("valid"))),
-                            bool(shape.get("valid")),
+                    for overlay in overlays.values():
+                        overlay.SetLineWidth(2)
+                        overlay.Draw("hist same")
+                        drawn_objects.append(overlay)
+                elif shape.get("fit_attempted", shape.get("valid")):
+                    _print_proton_debug(
+                        "overlay construction failed",
+                        slice_index=index,
+                        fit_attempted=shape.get("fit_attempted"),
+                        valid=shape.get("valid"),
+                        kaon_mean=shape.get("kaon_mean"),
+                        proton_mean=shape.get("proton_mean"),
+                        kaon_sigma=shape.get("kaon_sigma"),
+                        proton_sigma=shape.get("proton_sigma"),
+                        kaon_amplitude=shape.get("kaon_amplitude"),
+                        proton_amplitude=shape.get("proton_amplitude"),
+                        other_amplitude=shape.get("other_amplitude"),
+                    )
+                drawn_objects.append(
+                    _draw_status_pave(
+                        cleaning_result,
+                        extra_lines=(
+                            "slice {} attempted={} valid={}".format(
+                                index + 1,
+                                bool(shape.get("fit_attempted", shape.get("valid"))),
+                                bool(shape.get("valid")),
+                            ),
+                            "status={}".format(shape.get("fit_status")),
+                            "entries={}".format(shape.get("support_entries", "n/a")),
+                            "chi2/ndf={}".format(shape.get("chi2_ndf")),
+                            "reason={}".format(shape.get("rejection_reason") or "none"),
                         ),
-                    ),
-                    x1=0.14,
-                    y1=0.74,
-                    x2=0.58,
-                    y2=0.88,
+                        x1=0.14,
+                        y1=0.68,
+                        x2=0.62,
+                        y2=0.90,
+                    )
                 )
+            gPad.Modified()
+            gPad.Update()
+        canvas.Modified()
+        canvas.Update()
+        gc.collect()
         canvas.Print(output_pdf)
 
     h_support = ROOT.TH1D(
@@ -3802,10 +3892,13 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     h_other.SetLineColor(kGray + 2)
     canvas = TCanvas("C_proton_cleaning_delta_summary", "{} proton-cleaning delta summary".format(prefix), 1200, 800)
     canvas.Divide(2, 2)
+    drawn_objects = [h_support, h_proton, h_kaon, h_other]
     canvas.cd(1)
     h_support.SetMinimum(-0.2)
     h_support.SetMaximum(2.2)
     h_support.Draw("hist")
+    gPad.Modified()
+    gPad.Update()
     canvas.cd(2)
     h_proton.Draw("hist")
     h_kaon.Draw("hist same")
@@ -3817,31 +3910,48 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     legend.AddEntry(h_kaon, "kaon yield", "l")
     legend.AddEntry(h_other, "other yield", "l")
     legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
     canvas.cd(3)
     if application.get("H_proton_weight_vs_delta") is not None:
         application["H_proton_weight_vs_delta"].SetLineColor(kViolet + 1)
         application["H_proton_weight_vs_delta"].Draw("hist")
+        drawn_objects.append(application["H_proton_weight_vs_delta"])
+    gPad.Modified()
+    gPad.Update()
     canvas.cd(4)
     if application.get("H_proton_weight_vs_delta_aero") is not None:
         application["H_proton_weight_vs_delta_aero"].Draw("colz")
+        drawn_objects.append(application["H_proton_weight_vs_delta_aero"])
     else:
         first_delta_pid = next((hist for hist in (cleaning_result.get("H_delta_pid") or []) if hist is not None), None)
         if first_delta_pid is not None:
             first_delta_pid.Draw("colz")
+            drawn_objects.append(first_delta_pid)
+    gPad.Modified()
+    gPad.Update()
     canvas.cd(1)
-    _draw_status_pave(
-        cleaning_result,
-        extra_lines=(
-            "supported={} marginal={}".format(
-                diagnostics.get("supported_delta_bins", 0),
-                diagnostics.get("marginal_delta_bins", 0),
+    drawn_objects.append(
+        _draw_status_pave(
+            cleaning_result,
+            extra_lines=(
+                "supported={} marginal={}".format(
+                    diagnostics.get("supported_delta_bins", 0),
+                    diagnostics.get("marginal_delta_bins", 0),
+                ),
             ),
-        ),
-        x1=0.14,
-        y1=0.74,
-        x2=0.54,
-        y2=0.88,
+            x1=0.14,
+            y1=0.74,
+            x2=0.54,
+            y2=0.88,
+        )
     )
+    gPad.Modified()
+    gPad.Update()
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
     canvas.Print(output_pdf)
 
     delta_pid_hists = cleaning_result.get("H_delta_pid") or []
@@ -3858,45 +3968,84 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
             900,
         )
         canvas.Divide(3, 2)
+        drawn_objects = []
         canvas.cd(1)
         if pid_hist is not None:
             pid_hist.Draw("colz")
+            drawn_objects.append(pid_hist)
         support_label = support_by_delta[delta_index] if delta_index < len(support_by_delta) else "unknown"
-        _draw_status_pave(
-            cleaning_result,
-            extra_lines=(
-                "delta bin {}".format(delta_index + 1),
-                "support={}".format(support_label),
-            ),
-            x1=0.14,
-            y1=0.72,
-            x2=0.54,
-            y2=0.88,
+        drawn_objects.append(
+            _draw_status_pave(
+                cleaning_result,
+                extra_lines=(
+                    "delta bin {}".format(delta_index + 1),
+                    "support={}".format(support_label),
+                ),
+                x1=0.14,
+                y1=0.72,
+                x2=0.54,
+                y2=0.88,
+            )
         )
+        gPad.Modified()
+        gPad.Update()
         for slice_index, hist in enumerate(slice_collection[:5], start=2):
             canvas.cd(slice_index)
             if hist is None:
                 continue
             hist.SetLineColor(kBlack)
             hist.Draw("hist")
+            drawn_objects.append(hist)
             global_shape = global_shapes[slice_index - 2] if (slice_index - 2) < len(global_shapes) else {}
             slice_fit = slice_fit_collection[slice_index - 2] if (slice_index - 2) < len(slice_fit_collection) else {}
             overlays = _build_timing_shape_overlays(hist, global_shape, slice_fit)
             if overlays is not None:
-                overlays["kaon"].Draw("hist same")
-                overlays["proton"].Draw("hist same")
-                overlays["total"].Draw("hist same")
-            _draw_status_pave(
-                cleaning_result,
-                extra_lines=(
-                    "aero slice {}".format(slice_index - 1),
-                    "valid={}".format(bool(slice_fit.get("valid"))),
-                ),
-                x1=0.16,
-                y1=0.74,
-                x2=0.56,
-                y2=0.88,
+                for overlay in overlays.values():
+                    overlay.SetLineWidth(2)
+                    overlay.Draw("hist same")
+                    drawn_objects.append(overlay)
+            elif slice_fit.get("fit_attempted", slice_fit.get("valid")):
+                _print_proton_debug(
+                    "overlay construction failed",
+                    delta_index=delta_index,
+                    aero_index=slice_index - 2,
+                    fit_attempted=slice_fit.get("fit_attempted"),
+                    valid=slice_fit.get("valid"),
+                    kaon_mean=global_shape.get("kaon_mean"),
+                    proton_mean=global_shape.get("proton_mean"),
+                    kaon_sigma=global_shape.get("kaon_sigma"),
+                    proton_sigma=global_shape.get("proton_sigma"),
+                    kaon_amplitude=slice_fit.get("kaon_amplitude"),
+                    proton_amplitude=slice_fit.get("proton_amplitude"),
+                    other_amplitude=slice_fit.get("other_amplitude"),
+                )
+            drawn_objects.append(
+                _draw_status_pave(
+                    cleaning_result,
+                    extra_lines=(
+                        "d{} a{} attempted={} valid={}".format(
+                            delta_index + 1,
+                            slice_index - 1,
+                            bool(slice_fit.get("fit_attempted", slice_fit.get("valid"))),
+                            bool(slice_fit.get("valid")),
+                        ),
+                        "status={}".format(slice_fit.get("fit_status")),
+                        "entries={}".format(slice_fit.get("support_entries", "n/a")),
+                        "model/data={}".format(slice_fit.get("model_data_ratio")),
+                        "chi2/ndf={}".format(slice_fit.get("chi2_ndf")),
+                        "reason={}".format(slice_fit.get("rejection_reason") or "none"),
+                    ),
+                    x1=0.16,
+                    y1=0.66,
+                    x2=0.62,
+                    y2=0.90,
+                )
             )
+            gPad.Modified()
+            gPad.Update()
+        canvas.Modified()
+        canvas.Update()
+        gc.collect()
         canvas.Print(output_pdf)
 
     h_mm_before = application.get("H_MM_before_proton_cleaning")
@@ -3905,6 +4054,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     if h_mm_before is not None and h_mm_proton is not None and h_mm_after is not None:
         canvas = TCanvas("C_proton_cleaning_mm", "{} proton-cleaning MM validation".format(prefix), 1000, 900)
         canvas.Divide(1, 2)
+        drawn_objects = [h_mm_before, h_mm_proton, h_mm_after]
         canvas.cd(1)
         h_mm_before.SetLineColor(kBlack)
         h_mm_proton.SetLineColor(kRed)
@@ -3919,12 +4069,21 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
         legend.AddEntry(h_mm_proton, "estimated proton", "l")
         legend.AddEntry(h_mm_after, "proton-cleaned", "l")
         legend.Draw()
+        drawn_objects.append(legend)
+        gPad.Modified()
+        gPad.Update()
         canvas.cd(2)
         if application.get("H_proton_fraction_vs_MM") is not None:
             application["H_proton_fraction_vs_MM"].SetLineColor(kViolet + 1)
             application["H_proton_fraction_vs_MM"].SetMinimum(0.0)
             application["H_proton_fraction_vs_MM"].SetMaximum(1.0)
             application["H_proton_fraction_vs_MM"].Draw("hist")
+            drawn_objects.append(application["H_proton_fraction_vs_MM"])
+        gPad.Modified()
+        gPad.Update()
+        canvas.Modified()
+        canvas.Update()
+        gc.collect()
         canvas.Print(output_pdf)
 
         validation_windows = ((cleaning_result.get("settings") or {}).get("validation_windows") or {})
@@ -3938,6 +4097,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                 1000,
                 700,
             )
+            drawn_objects = [h_mm_before, h_mm_proton, h_mm_after]
             h_mm_before.GetXaxis().SetRangeUser(float(bounds[0]), float(bounds[1]))
             h_mm_proton.GetXaxis().SetRangeUser(float(bounds[0]), float(bounds[1]))
             h_mm_after.GetXaxis().SetRangeUser(float(bounds[0]), float(bounds[1]))
@@ -3951,6 +4111,12 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
             legend.AddEntry(h_mm_proton, "estimated proton", "l")
             legend.AddEntry(h_mm_after, "proton-cleaned", "l")
             legend.Draw()
+            drawn_objects.append(legend)
+            gPad.Modified()
+            gPad.Update()
+            canvas.Modified()
+            canvas.Update()
+            gc.collect()
             canvas.Print(output_pdf)
             h_mm_before.GetXaxis().UnZoom()
             h_mm_proton.GetXaxis().UnZoom()
