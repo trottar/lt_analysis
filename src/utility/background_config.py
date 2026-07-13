@@ -381,6 +381,14 @@ PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED = "disabled"
 PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT = (
     "ctime_aero_event_weight"
 )
+PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT = (
+    "c_script_exact"
+)
+PROTON_CONTAMINATION_CLEANING_IMPLEMENTATIONS = frozenset(
+    {
+        PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
+    }
+)
 PROTON_CONTAMINATION_CLEANING_METHODS = frozenset(
     {
         PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
@@ -403,6 +411,7 @@ PROTON_CONTAMINATION_CLEANING_RF_POLICIES = frozenset(
 PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     "enabled": True,
     "method": PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
+    "implementation": PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
     "debug_flares_enabled": True,
     "tree_policy": "explicit_norf_required",
     "rf_policy": "epsset_default_after_cleaning",
@@ -423,6 +432,7 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     "aero_slice_edges": (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
     "aero_hist_range": (0.0, 25.0),
     "ctime_hist_range": (-1.50, 1.25),
+    "ctime_hist_bins": 90,
     "delta_hist_range": (-10.0, 20.0),
     "delta_bins": 10,
     "mm_validation_range": (0.70, 1.50),

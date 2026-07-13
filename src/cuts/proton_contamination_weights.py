@@ -27,6 +27,7 @@ from ROOT import (
 )
 sys.path.append("utility")
 from background_config import (  # noqa: E402
+    PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
     PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
     PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
     get_proton_contamination_cleaning_config,
@@ -68,6 +69,47 @@ DEFAULT_RF_BRANCH_CANDIDATES = (
     "H_RFTime",
     "H_RF_tdcTime",
 )
+
+PROTON_CLEANING_EXACT_TIMING_BRANCH = "CTime_ROC1"
+PROTON_CLEANING_EXACT_TIMING_RANGE = (-1.50, 1.25)
+PROTON_CLEANING_EXACT_TIMING_BINS = 90
+PROTON_CLEANING_EXACT_AERO_EDGES = (0.0, 3.0, 6.0, 10.0, 15.0, 25.0)
+PROTON_CLEANING_EXACT_AERO_RANGE = (0.0, 25.0)
+PROTON_CLEANING_EXACT_DELTA_RANGE = (-10.0, 20.0)
+PROTON_CLEANING_EXACT_DELTA_BINS = 10
+PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE = (0.70, 1.50)
+PROTON_CLEANING_EXACT_FIT_OPTIONS = "SRLQ0"
+PROTON_CLEANING_EXACT_GLOBAL_FIT = {
+    "kaon_mean_range": (-0.45, 0.20),
+    "proton_mean_range": (0.20, 0.95),
+    "sigma_range": (0.03, 0.45),
+    "initial_sigma": 0.15,
+    "minimum_separation": 0.75,
+    "minimum_amplitude_significance": 2.0,
+    "maximum_chi2_ndf": 5.0,
+    "bound_fraction_tolerance": 0.02,
+    "minimum_entries": 200,
+}
+PROTON_CLEANING_EXACT_SLICE_FIT = {
+    "maximum_chi2_ndf": 5.0,
+    "minimum_model_data_ratio": 0.50,
+    "maximum_model_data_ratio": 1.50,
+    "minimum_entries": 30,
+}
+PROTON_CLEANING_EXACT_SUPPORT_THRESHOLDS = {
+    "minimum_supported_slices": 2,
+    "minimum_marginal_slices": 1,
+    "minimum_supported_coverage": 0.35,
+    "minimum_marginal_coverage": 0.15,
+    "minimum_modeled_yield": 5.0,
+}
+PROTON_CLEANING_EXACT_WEIGHTING = {
+    "denominator_floor": 1.0e-12,
+}
+PROTON_CLEANING_EXACT_VALIDATION_WINDOWS = {
+    "low_mm": (0.80, 0.90),
+    "lambda_peak": (1.105, 1.125),
+}
 
 
 def _clone_hist(template_hist, name, reset=True):
@@ -161,6 +203,31 @@ def _format_debug_float(value, digits=4, scientific=False):
     if scientific:
         return ("{0:." + str(int(digits)) + "e}").format(numeric)
     return ("{0:." + str(int(digits)) + "f}").format(numeric)
+
+
+def _join_rejection_reasons(reasons):
+    cleaned = [str(reason).strip() for reason in (reasons or []) if str(reason).strip()]
+    return "; ".join(cleaned)
+
+
+def _build_exact_proton_cleaning_config(base_config):
+    exact_config = deepcopy(base_config or {})
+    exact_config["implementation"] = PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
+    exact_config["ct_timing_branch"] = PROTON_CLEANING_EXACT_TIMING_BRANCH
+    exact_config["ctime_hist_range"] = tuple(PROTON_CLEANING_EXACT_TIMING_RANGE)
+    exact_config["ctime_hist_bins"] = int(PROTON_CLEANING_EXACT_TIMING_BINS)
+    exact_config["aero_slice_edges"] = tuple(PROTON_CLEANING_EXACT_AERO_EDGES)
+    exact_config["aero_hist_range"] = tuple(PROTON_CLEANING_EXACT_AERO_RANGE)
+    exact_config["delta_hist_range"] = tuple(PROTON_CLEANING_EXACT_DELTA_RANGE)
+    exact_config["delta_bins"] = int(PROTON_CLEANING_EXACT_DELTA_BINS)
+    exact_config["mm_validation_range"] = tuple(PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE)
+    exact_config["global_fit"] = deepcopy(PROTON_CLEANING_EXACT_GLOBAL_FIT)
+    exact_config["slice_fit"] = deepcopy(PROTON_CLEANING_EXACT_SLICE_FIT)
+    exact_config["support_thresholds"] = deepcopy(PROTON_CLEANING_EXACT_SUPPORT_THRESHOLDS)
+    exact_config["weighting"] = deepcopy(PROTON_CLEANING_EXACT_WEIGHTING)
+    exact_config["validation_windows"] = deepcopy(PROTON_CLEANING_EXACT_VALIDATION_WINDOWS)
+    exact_config["fit_options"] = PROTON_CLEANING_EXACT_FIT_OPTIONS
+    return exact_config
 
 
 def _make_signature(evt, fields, round_digits):
@@ -284,7 +351,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
     prepared_sources = {}
     prepared_source_stats = {}
     available_timing_branches = set()
-    requested_timing_branches = ["CTime_ROC1", *DEFAULT_RF_BRANCH_CANDIDATES]
+    requested_timing_branches = [PROTON_CLEANING_EXACT_TIMING_BRANCH]
 
     for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items():
         tree = (source_spec or {}).get("tree")
@@ -1033,6 +1100,7 @@ def _fit_global_timing_shape_with_bounds(
     if histogram is None or float(histogram.Integral()) < float(minimum_entries):
         return {
             "valid": False,
+            "fit_attempted": False,
             "fit_status": "insufficient_support",
             "fit_status_code": None,
             "excluded_invalid_variance_bins": 0,
@@ -1041,6 +1109,10 @@ def _fit_global_timing_shape_with_bounds(
             "fit_min": float(fit_min),
             "fit_max": float(fit_max),
             "per_aero_fallback": False,
+            "peak_pair_found": False,
+            "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
+            "rejection_reasons": ["insufficient_entries"],
+            "rejection_reason": "insufficient entries",
         }
     histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
     kaon_seed = _find_peak_seed(histogram, kaon_mean_min, kaon_mean_max)
@@ -1108,7 +1180,7 @@ def _fit_global_timing_shape_with_bounds(
         0.0,
         10.0 * histogram_maximum,
     )
-    fit_result = histogram.Fit(fit_function, "SRLQ0")
+    fit_result = histogram.Fit(fit_function, PROTON_CLEANING_EXACT_FIT_OPTIONS)
     fit_status_code = int(fit_result)
     covariance_matrix, correlation_matrix, uncertainties = _extract_root_fit_matrices(
         fit_result,
@@ -1129,17 +1201,25 @@ def _fit_global_timing_shape_with_bounds(
     proton_mean = float(fit_function.GetParameter(4))
     proton_sigma = abs(float(fit_function.GetParameter(5)))
     other_amplitude = float(fit_function.GetParameter(6))
-    goodness = _compute_poisson_goodness_of_fit(
-        histogram,
-        fit_function,
-        fit_min,
-        fit_max,
-        7,
+    first_fit_bin = max(1, histogram.GetXaxis().FindFixBin(float(fit_min)))
+    last_fit_bin = min(
+        histogram.GetNbinsX(),
+        histogram.GetXaxis().FindFixBin(np.nextafter(float(fit_max), float(fit_min))),
     )
-    chi2_data = float(goodness.get("deviance", 0.0) or 0.0)
-    chi2_ndf = goodness.get("deviance_ndf")
-    chi2_per_abs_entry = goodness.get("deviance_per_entry")
-    active_bin_count = int(goodness.get("fitted_bins", 0) or 0)
+    active_bin_count = max(0, int(last_fit_bin - first_fit_bin + 1))
+    fitted_entries = float(histogram.Integral(first_fit_bin, last_fit_bin))
+    chi2_data = float(fit_function.GetChisquare())
+    fit_ndf = int(fit_function.GetNDF())
+    chi2_ndf = (
+        float(chi2_data / float(fit_ndf))
+        if fit_ndf > 0 and math.isfinite(float(chi2_data))
+        else None
+    )
+    chi2_per_abs_entry = (
+        float(chi2_data / abs(fitted_entries))
+        if abs(fitted_entries) > 0.0 and math.isfinite(float(chi2_data))
+        else None
+    )
     kaon_amp_err = float(fit_function.GetParError(0))
     proton_amp_err = float(fit_function.GetParError(3))
     separation_denominator = math.sqrt(max((kaon_sigma ** 2) + (proton_sigma ** 2), 0.0))
@@ -1161,42 +1241,47 @@ def _fit_global_timing_shape_with_bounds(
     )
     kaon_significance = float(kaon_amplitude / kaon_amp_err) if kaon_amp_err > 0.0 else 0.0
     proton_significance = float(proton_amplitude / proton_amp_err) if proton_amp_err > 0.0 else 0.0
-    maximum_poisson_deviance_per_entry = (
-        float(maximum_poisson_deviance_per_entry)
-        if maximum_poisson_deviance_per_entry is not None
-        else float("inf")
-    )
     chi2_ndf_valid = bool(chi2_ndf is not None and math.isfinite(float(chi2_ndf)))
-    chi2_per_entry_valid = bool(
-        chi2_per_abs_entry is not None and math.isfinite(float(chi2_per_abs_entry))
-    )
-    valid = (
-        fit_status_code == 0
-        and not bound_hit
-        and ordering_valid
-        and math.isfinite(float(kaon_amplitude))
+    finite_parameters = (
+        math.isfinite(float(kaon_amplitude))
         and math.isfinite(float(proton_amplitude))
         and math.isfinite(float(kaon_mean))
         and math.isfinite(float(proton_mean))
         and math.isfinite(float(kaon_sigma))
         and math.isfinite(float(proton_sigma))
-        and chi2_ndf_valid
-        and chi2_per_entry_valid
-        and float(kaon_amplitude) > 0.0
-        and float(proton_amplitude) > 0.0
-        and kaon_sigma > 0.0
-        and proton_sigma > 0.0
-        and separation >= float(minimum_separation)
-        and kaon_significance >= float(minimum_amplitude_significance)
-        and proton_significance >= float(minimum_amplitude_significance)
-        and (
-            float(chi2_per_abs_entry) <= maximum_poisson_deviance_per_entry
-            if bool(use_deviance_per_entry_validation)
-            else float(chi2_ndf) <= float(maximum_chi2_ndf)
-        )
+        and math.isfinite(float(other_amplitude))
     )
+    rejection_reasons = []
+    if fit_status_code != 0:
+        rejection_reasons.append("fit_status_{}".format(int(fit_status_code)))
+    if not finite_parameters:
+        rejection_reasons.append("nonfinite_parameters")
+    if bound_hit:
+        rejection_reasons.append("bound_hit")
+    if not ordering_valid:
+        rejection_reasons.append("ordering_invalid")
+    if float(kaon_amplitude) <= 0.0:
+        rejection_reasons.append("nonpositive_kaon_amplitude")
+    if float(proton_amplitude) <= 0.0:
+        rejection_reasons.append("nonpositive_proton_amplitude")
+    if kaon_sigma <= 0.0:
+        rejection_reasons.append("nonpositive_kaon_sigma")
+    if proton_sigma <= 0.0:
+        rejection_reasons.append("nonpositive_proton_sigma")
+    if separation < float(minimum_separation):
+        rejection_reasons.append("insufficient_separation")
+    if kaon_significance < float(minimum_amplitude_significance):
+        rejection_reasons.append("low_kaon_significance")
+    if proton_significance < float(minimum_amplitude_significance):
+        rejection_reasons.append("low_proton_significance")
+    if not chi2_ndf_valid:
+        rejection_reasons.append("invalid_chi2_ndf")
+    elif float(chi2_ndf) > float(maximum_chi2_ndf):
+        rejection_reasons.append("chi2_ndf_exceeds_max")
+    valid = len(rejection_reasons) == 0
     return {
         "valid": bool(valid),
+        "fit_attempted": True,
         "fit_status": "success" if fit_status_code == 0 else "failure",
         "fit_status_code": int(fit_status_code),
         "message": "",
@@ -1219,8 +1304,8 @@ def _fit_global_timing_shape_with_bounds(
         "poisson_deviance": chi2_data,
         "poisson_deviance_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
         "poisson_deviance_per_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
-        "goodness_ndf": int(goodness.get("ndf", 0) or 0),
-        "fitted_entries": float(goodness.get("fitted_entries", 0.0) or 0.0),
+        "goodness_ndf": int(fit_ndf),
+        "fitted_entries": float(fitted_entries),
         "active_bin_count": active_bin_count,
         "excluded_invalid_variance_bins": 0,
         "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
@@ -1235,6 +1320,9 @@ def _fit_global_timing_shape_with_bounds(
         "peak_pair_found": False,
         "applied_mean_offset": 0.0,
         "offset_adjusted": False,
+        "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
+        "rejection_reasons": rejection_reasons,
+        "rejection_reason": _join_rejection_reasons(rejection_reasons),
     }
 
 
@@ -1529,11 +1617,15 @@ def _fit_delta_timing_slice(
     ):
         return {
             "valid": False,
+            "fit_attempted": False,
             "fit_status": "insufficient_support",
             "fit_status_code": None,
             "function_name": str(function_name),
             "excluded_invalid_variance_bins": 0,
             "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
+            "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
+            "rejection_reasons": ["insufficient_entries_or_invalid_global_shape"],
+            "rejection_reason": "insufficient entries or invalid global shape",
         }
     histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
     kaon_seed = _find_peak_seed(
@@ -1572,7 +1664,7 @@ def _fit_delta_timing_slice(
     fit_function.FixParameter(5, float(global_shape["proton_sigma"]))
     fit_function.SetParameter(6, 0.02 * histogram_maximum)
     fit_function.SetParLimits(6, 0.0, 10.0 * histogram_maximum)
-    fit_result = histogram.Fit(fit_function, "SRLQ0")
+    fit_result = histogram.Fit(fit_function, PROTON_CLEANING_EXACT_FIT_OPTIONS)
     fit_status_code = int(fit_result)
     covariance_matrix, correlation_matrix, uncertainties = _extract_root_fit_matrices(
         fit_result,
@@ -1614,65 +1706,56 @@ def _fit_delta_timing_slice(
     data_yield = float(histogram.Integral(first_fit_bin, last_fit_bin))
     model_yield = float(kaon_yield + proton_yield + other_yield)
     model_data_ratio = float(model_yield / data_yield) if data_yield > 0.0 else None
-    goodness = _compute_poisson_goodness_of_fit(
-        histogram,
-        fit_function,
-        fit_min,
-        fit_max,
-        3,
+    chi2_data = float(fit_function.GetChisquare())
+    fit_ndf = int(fit_function.GetNDF())
+    chi2_ndf = (
+        float(chi2_data / float(fit_ndf))
+        if fit_ndf > 0 and math.isfinite(float(chi2_data))
+        else None
     )
-    chi2_data = float(goodness.get("deviance", 0.0) or 0.0)
-    chi2_ndf = goodness.get("deviance_ndf")
-    chi2_per_abs_entry = goodness.get("deviance_per_entry")
-    active_bin_count = int(goodness.get("fitted_bins", 0) or 0)
+    chi2_per_abs_entry = (
+        float(chi2_data / abs(data_yield))
+        if abs(data_yield) > 0.0 and math.isfinite(float(chi2_data))
+        else None
+    )
+    active_bin_count = max(0, int(last_fit_bin - first_fit_bin + 1))
     slice_cfg = config.get("slice_fit") or {}
-    use_deviance_per_entry_validation = bool(use_deviance_per_entry_validation)
-    maximum_poisson_deviance_per_entry = (
-        float(maximum_poisson_deviance_per_entry)
-        if maximum_poisson_deviance_per_entry is not None
-        else float(
-            slice_cfg.get("maximum_poisson_deviance_per_entry", 1.00)
-            or 1.00
-        )
-    )
-    slice_fit_status_accepted = bool(
-        fit_status_code == 0
-        or (
-            bool(global_shape.get("per_aero_fallback"))
-            and fit_status_code == 4
-            and chi2_per_abs_entry is not None
-            and math.isfinite(float(chi2_per_abs_entry))
-            and float(chi2_per_abs_entry) <= 0.05
-        )
-    )
-    valid = (
-        slice_fit_status_accepted
-        and math.isfinite(float(kaon_amplitude))
+    finite_outputs = (
+        math.isfinite(float(kaon_amplitude))
         and math.isfinite(float(proton_amplitude))
         and math.isfinite(float(other_amplitude))
         and math.isfinite(float(kaon_yield))
         and math.isfinite(float(proton_yield))
         and math.isfinite(float(other_yield))
-        and model_data_ratio is not None
-        and math.isfinite(float(model_data_ratio))
-        and chi2_ndf is not None
-        and math.isfinite(float(chi2_ndf))
-        and chi2_per_abs_entry is not None
-        and math.isfinite(float(chi2_per_abs_entry))
-        and float(kaon_amplitude) >= 0.0
-        and float(proton_amplitude) >= 0.0
-        and float(other_amplitude) >= 0.0
-        and model_yield > 0.0
-        and float(model_data_ratio) >= float(slice_cfg.get("minimum_model_data_ratio", 0.50))
-        and float(model_data_ratio) <= float(slice_cfg.get("maximum_model_data_ratio", 1.50))
-        and (
-            float(chi2_per_abs_entry) <= maximum_poisson_deviance_per_entry
-            if use_deviance_per_entry_validation
-            else float(chi2_ndf) <= float(slice_cfg.get("maximum_chi2_ndf", 5.0))
-        )
     )
+    rejection_reasons = []
+    if fit_status_code != 0:
+        rejection_reasons.append("fit_status_{}".format(int(fit_status_code)))
+    if not finite_outputs:
+        rejection_reasons.append("nonfinite_fit_outputs")
+    if model_data_ratio is None or not math.isfinite(float(model_data_ratio)):
+        rejection_reasons.append("invalid_model_data_ratio")
+    else:
+        if float(model_data_ratio) < float(slice_cfg.get("minimum_model_data_ratio", 0.50)):
+            rejection_reasons.append("model_data_ratio_below_min")
+        if float(model_data_ratio) > float(slice_cfg.get("maximum_model_data_ratio", 1.50)):
+            rejection_reasons.append("model_data_ratio_above_max")
+    if chi2_ndf is None or not math.isfinite(float(chi2_ndf)):
+        rejection_reasons.append("invalid_chi2_ndf")
+    elif float(chi2_ndf) > float(slice_cfg.get("maximum_chi2_ndf", 5.0)):
+        rejection_reasons.append("chi2_ndf_exceeds_max")
+    if float(kaon_amplitude) < 0.0:
+        rejection_reasons.append("negative_kaon_amplitude")
+    if float(proton_amplitude) < 0.0:
+        rejection_reasons.append("negative_proton_amplitude")
+    if float(other_amplitude) < 0.0:
+        rejection_reasons.append("negative_other_amplitude")
+    if model_yield <= 0.0:
+        rejection_reasons.append("nonpositive_model_yield")
+    valid = len(rejection_reasons) == 0
     return {
         "valid": bool(valid),
+        "fit_attempted": True,
         "fit_status": "success" if fit_status_code == 0 else "failure",
         "fit_status_code": int(fit_status_code),
         "message": "",
@@ -1695,14 +1778,17 @@ def _fit_delta_timing_slice(
         "poisson_deviance": chi2_data,
         "poisson_deviance_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
         "poisson_deviance_per_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
-        "goodness_ndf": int(goodness.get("ndf", 0) or 0),
-        "fitted_entries": float(goodness.get("fitted_entries", 0.0) or 0.0),
+        "goodness_ndf": int(fit_ndf),
+        "fitted_entries": float(data_yield),
         "active_bin_count": active_bin_count,
         "excluded_invalid_variance_bins": 0,
         "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
         "covariance_matrix": covariance_matrix,
         "correlation_matrix": correlation_matrix,
         "uncertainties": uncertainties,
+        "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
+        "rejection_reasons": rejection_reasons,
+        "rejection_reason": _join_rejection_reasons(rejection_reasons),
     }
 
 
@@ -2367,7 +2453,7 @@ def build_kaon_proton_cleaning_result(
         "context": str(context),
         "particle_type": "kaon",
         "phi_setting": phi_setting,
-        "settings": config,
+        "settings": {},
         "diagnostics": {
             "analysis_scope": str(analysis_scope),
             "context": str(context),
@@ -2403,6 +2489,28 @@ def build_kaon_proton_cleaning_result(
         return result
     if method != PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT:
         raise ValueError("Unsupported proton-cleaning method '{}'".format(method))
+    implementation = str(
+        config.get("implementation")
+        or PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
+    ).strip()
+    if implementation != PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT:
+        raise ValueError(
+            "Unsupported proton-cleaning implementation '{}'".format(implementation)
+        )
+    exact_config = _build_exact_proton_cleaning_config(config)
+    result["settings"] = exact_config
+    result["diagnostics"]["implementation"] = (
+        PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
+    )
+    result["diagnostics"]["exact_mode_constants"] = {
+        "timing_branch": PROTON_CLEANING_EXACT_TIMING_BRANCH,
+        "ctime_hist_range": list(PROTON_CLEANING_EXACT_TIMING_RANGE),
+        "ctime_hist_bins": int(PROTON_CLEANING_EXACT_TIMING_BINS),
+        "aero_slice_edges": list(PROTON_CLEANING_EXACT_AERO_EDGES),
+        "delta_hist_range": list(PROTON_CLEANING_EXACT_DELTA_RANGE),
+        "delta_bins": int(PROTON_CLEANING_EXACT_DELTA_BINS),
+        "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
+    }
 
     missing_norf = []
     for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
@@ -2432,27 +2540,14 @@ def build_kaon_proton_cleaning_result(
         )
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
     }
-    ct_time_branch = "CTime_ROC1"
-    exact_config = deepcopy(config)
-    exact_config["ct_timing_branch"] = ct_time_branch
-    exact_config["ctime_hist_range"] = (-1.50, 1.25)
-    exact_config["delta_hist_range"] = (-10.0, 20.0)
-    exact_config["delta_bins"] = 10
-    exact_config["aero_slice_edges"] = (0.0, 3.0, 6.0, 10.0, 15.0, 25.0)
-
-    rf_candidate_branches = _resolve_rf_branch_candidates(source_bundle)
-    result["diagnostics"]["rf_candidate_branches"] = list(rf_candidate_branches)
+    ct_time_branch = PROTON_CLEANING_EXACT_TIMING_BRANCH
+    global_fit_cfg = exact_config.get("global_fit") or {}
     result["diagnostics"]["rf_timing_attempted"] = False
     result["diagnostics"]["ct_timing_evaluated"] = True
     result["diagnostics"]["timingFitUsedPerAeroDefault"] = False
     result["diagnostics"]["timingFitUsedStandardFallback"] = False
     result["diagnostics"]["timingFitUsedPreDiamondFallback"] = False
     result["diagnostics"]["timingFitUsedLocalPeakRescue"] = False
-
-    beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
-    global_cfg = dict(exact_config.get("global_fit") or {})
-    global_cfg["beam_bunch_spacing_ns"] = float(beam_bunch_spacing_ns)
-    exact_config["global_fit"] = global_cfg
 
     pid_payload = _build_signed_pid_histograms(
         source_bundle,
@@ -2463,25 +2558,36 @@ def build_kaon_proton_cleaning_result(
         mm_min,
         mm_max,
         timing_branch=ct_time_branch,
-        time_hist_range=(-1.50, 1.25),
-        time_hist_bins=90,
+        time_hist_range=PROTON_CLEANING_EXACT_TIMING_RANGE,
+        time_hist_bins=PROTON_CLEANING_EXACT_TIMING_BINS,
     )
     global_shapes = []
     for aero_index, slice_hist in enumerate(pid_payload.get("global_slice_hists") or []):
         global_shapes.append(
-            _fit_global_timing_shape(
+            _fit_global_timing_shape_with_bounds(
                 slice_hist,
-                exact_config,
                 "f_proton_cleaning_global_ctime_aero_{}".format(aero_index),
-                proton_peak_is_lower=False,
-                display_range=pid_payload.get("time_hist_range") or (-1.50, 1.25),
-                fit_mode="standard",
+                float((pid_payload.get("time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE)[0]),
+                float((pid_payload.get("time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE)[1]),
+                float((global_fit_cfg.get("kaon_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["kaon_mean_range"])[0]),
+                float((global_fit_cfg.get("kaon_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["kaon_mean_range"])[1]),
+                float((global_fit_cfg.get("proton_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["proton_mean_range"])[0]),
+                float((global_fit_cfg.get("proton_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["proton_mean_range"])[1]),
+                False,
+                float((global_fit_cfg.get("sigma_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["sigma_range"])[0]),
+                float((global_fit_cfg.get("sigma_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["sigma_range"])[1]),
+                float(global_fit_cfg.get("initial_sigma", PROTON_CLEANING_EXACT_GLOBAL_FIT["initial_sigma"])),
+                float(global_fit_cfg.get("minimum_separation", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_separation"])),
+                float(global_fit_cfg.get("minimum_amplitude_significance", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_amplitude_significance"])),
+                float(global_fit_cfg.get("maximum_chi2_ndf", PROTON_CLEANING_EXACT_GLOBAL_FIT["maximum_chi2_ndf"])),
+                float(global_fit_cfg.get("bound_fraction_tolerance", PROTON_CLEANING_EXACT_GLOBAL_FIT["bound_fraction_tolerance"])),
+                int(global_fit_cfg.get("minimum_entries", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_entries"])),
             )
         )
     selected_probe = _summarize_global_probe(
         ct_time_branch,
         "ct",
-        "standard",
+        PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
         pid_payload,
         global_shapes,
         False,
@@ -2489,9 +2595,6 @@ def build_kaon_proton_cleaning_result(
     timing_selection_reason = "exact_ctime_single_path"
 
     valid_global_shape_count = int(selected_probe.get("validShapes", 0) or 0)
-    result["diagnostics"]["beam_bunch_spacing_ns"] = float(
-        _resolve_beam_bunch_spacing_ns(source_bundle)
-    )
 
     selected_probe_summary = {
         key: value
@@ -2502,7 +2605,9 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["ct_probe_summary"] = _json_ready_value(selected_probe_summary)
     result["diagnostics"]["selected_timing_branch"] = ct_time_branch
     result["diagnostics"]["selected_probe_kind"] = "ct"
-    result["diagnostics"]["selected_probe_fit_mode"] = "standard"
+    result["diagnostics"]["selected_probe_fit_mode"] = (
+        PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
+    )
     result["diagnostics"]["selected_probe_local_peak_rescue"] = False
     result["diagnostics"]["rf_timing_selected"] = False
     result["diagnostics"]["timingSelectionReason"] = str(timing_selection_reason)
@@ -2525,6 +2630,7 @@ def build_kaon_proton_cleaning_result(
             "valid": bool((shape or {}).get("valid", False)),
             "fit_status": (shape or {}).get("fit_status"),
             "fit_status_code": (shape or {}).get("fit_status_code"),
+            "fit_attempted": bool((shape or {}).get("fit_attempted", False)),
             "fitted_entries": float((shape or {}).get("fitted_entries", 0.0) or 0.0),
             "fit_min": (shape or {}).get("fit_min"),
             "fit_max": (shape or {}).get("fit_max"),
@@ -2541,23 +2647,13 @@ def build_kaon_proton_cleaning_result(
             "ordering_valid": bool((shape or {}).get("ordering_valid", False)),
             "per_aero_fallback": bool((shape or {}).get("per_aero_fallback", False)),
             "peak_pair_found": bool((shape or {}).get("peak_pair_found", False)),
+            "fit_options": (shape or {}).get("fit_options"),
+            "rejection_reason": (shape or {}).get("rejection_reason"),
         }
         global_shape_debug_rows.append(_json_ready_value(row))
     result["diagnostics"]["global_shape_debug_rows"] = global_shape_debug_rows
-    slice_fit_cfg = config.get("slice_fit") or {}
-    active_use_slice_deviance_per_entry_validation = bool(
-        selected_probe.get("localPeakRescue", False)
-    )
-    active_maximum_slice_poisson_deviance_per_entry = float(
-        slice_fit_cfg.get("maximum_poisson_deviance_per_entry", 1.00)
-        or 1.00
-    )
-    result["diagnostics"]["activeUseSliceDeviancePerEntryValidation"] = bool(
-        active_use_slice_deviance_per_entry_validation
-    )
-    result["diagnostics"]["activeMaximumSlicePoissonDeviancePerEntry"] = float(
-        active_maximum_slice_poisson_deviance_per_entry
-    )
+    result["diagnostics"]["activeUseSliceDeviancePerEntryValidation"] = False
+    result["diagnostics"]["activeMaximumSlicePoissonDeviancePerEntry"] = None
 
     if valid_global_shape_count <= 0:
         result["fallback_reason"] = "no identifiable proton-kaon timing shapes"
@@ -2593,10 +2689,10 @@ def build_kaon_proton_cleaning_result(
             slice_fit = _fit_delta_timing_slice(
                 slice_hist,
                 global_shape,
-                config,
+                exact_config,
                 "f_proton_cleaning_delta_{}_aero_{}".format(delta_index, aero_index),
-                use_deviance_per_entry_validation=active_use_slice_deviance_per_entry_validation,
-                maximum_poisson_deviance_per_entry=active_maximum_slice_poisson_deviance_per_entry,
+                use_deviance_per_entry_validation=False,
+                maximum_poisson_deviance_per_entry=None,
             )
             slice_fits.append(slice_fit)
             slice_debug_rows.append(
@@ -2606,6 +2702,7 @@ def build_kaon_proton_cleaning_result(
                         "aero_index": int(aero_index),
                         "global_shape_valid": bool((global_shape or {}).get("valid", False)),
                         "valid": bool((slice_fit or {}).get("valid", False)),
+                        "fit_attempted": bool((slice_fit or {}).get("fit_attempted", False)),
                         "fit_status": (slice_fit or {}).get("fit_status"),
                         "fit_status_code": (slice_fit or {}).get("fit_status_code"),
                         "data_yield": (slice_fit or {}).get("data_yield"),
@@ -2617,6 +2714,8 @@ def build_kaon_proton_cleaning_result(
                         "chi2_ndf": (slice_fit or {}).get("chi2_ndf"),
                         "chi2_per_abs_entry": (slice_fit or {}).get("chi2_per_abs_entry"),
                         "active_bin_count": (slice_fit or {}).get("active_bin_count"),
+                        "fit_options": (slice_fit or {}).get("fit_options"),
+                        "rejection_reason": (slice_fit or {}).get("rejection_reason"),
                     }
                 )
             )
@@ -2634,7 +2733,7 @@ def build_kaon_proton_cleaning_result(
             )
             chi2_weight += float(slice_fit.get("data_yield", 0.0) or 0.0)
         coverage = float(fitted_data_total / data_total) if data_total > 0.0 else 0.0
-        support_thresholds = config.get("support_thresholds") or {}
+        support_thresholds = exact_config.get("support_thresholds") or {}
         if (
             valid_slices >= int(support_thresholds.get("minimum_supported_slices", 2))
             and coverage >= float(support_thresholds.get("minimum_supported_coverage", 0.35))
@@ -3105,10 +3204,33 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         "Scope: {}".format(cleaning_result.get("analysis_scope", "unknown")),
         "Context: {}".format(cleaning_result.get("context", "")),
         "Method: {}".format(cleaning_result.get("method", "unknown")),
+        "Implementation: {}".format(
+            diagnostics.get("implementation", "unknown")
+        ),
         "Input tree state: {}".format(diagnostics.get("input_tree_state", "unknown")),
         "Particle selection: {}".format(diagnostics.get("input_tree_particle_selection", "unknown")),
         "Tree policy: {}".format(diagnostics.get("tree_policy", "unknown")),
         "RF policy: {}".format(diagnostics.get("rf_policy", "unknown")),
+        "Exact timing branch/range/bins: {} {} {}".format(
+            diagnostics.get("selected_timing_branch", PROTON_CLEANING_EXACT_TIMING_BRANCH),
+            tuple(diagnostics.get("selected_time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE),
+            int(diagnostics.get("selected_time_hist_bins", PROTON_CLEANING_EXACT_TIMING_BINS) or PROTON_CLEANING_EXACT_TIMING_BINS),
+        ),
+        "Exact aero edges: {}".format(
+            tuple(
+                ((cleaning_result.get("aero_edges") or ()) or PROTON_CLEANING_EXACT_AERO_EDGES)
+            )
+        ),
+        "Exact delta range/bins: {} {}".format(
+            (
+                float((cleaning_result.get("delta_edges") or [PROTON_CLEANING_EXACT_DELTA_RANGE[0]])[0]),
+                float((cleaning_result.get("delta_edges") or [PROTON_CLEANING_EXACT_DELTA_RANGE[1]])[-1]),
+            )
+            if cleaning_result.get("delta_edges")
+            else PROTON_CLEANING_EXACT_DELTA_RANGE,
+            max(len(cleaning_result.get("delta_edges") or []) - 1, PROTON_CLEANING_EXACT_DELTA_BINS),
+        ),
+        "Fit options: {}".format(PROTON_CLEANING_EXACT_FIT_OPTIONS),
         "Global PID source usage:",
     ]
     for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
@@ -3174,7 +3296,6 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
     _print_proton_debug(
         "prepared sample overview",
         available_timing_branches=", ".join(diagnostics.get("available_timing_branches") or []) or "none",
-        beam_bunch_spacing_ns=_format_debug_float(diagnostics.get("beam_bunch_spacing_ns")),
         selected_time_hist_range=tuple(diagnostics.get("selected_time_hist_range") or ()),
         selected_time_hist_bins=diagnostics.get("selected_time_hist_bins"),
         source_coefficients=_json_ready_value(diagnostics.get("source_coefficients") or {}),
@@ -3196,6 +3317,7 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             valid=row.get("valid"),
             fit_status=row.get("fit_status"),
             fit_status_code=row.get("fit_status_code"),
+            fit_attempted=row.get("fit_attempted"),
             fitted_entries=_format_debug_float(row.get("fitted_entries"), scientific=True),
             fit_window="[{}, {}]".format(
                 _format_debug_float(row.get("fit_min")),
@@ -3213,6 +3335,7 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             bound_hit=row.get("bound_hit"),
             ordering_valid=row.get("ordering_valid"),
             peak_pair_found=row.get("peak_pair_found"),
+            rejection_reason=row.get("rejection_reason") or "none",
         )
 
     for row in (diagnostics.get("delta_support_debug_rows") or []):
@@ -3237,6 +3360,7 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
                 ),
                 global_shape_valid=slice_row.get("global_shape_valid"),
                 valid=slice_row.get("valid"),
+                fit_attempted=slice_row.get("fit_attempted"),
                 fit_status=slice_row.get("fit_status"),
                 fit_status_code=slice_row.get("fit_status_code"),
                 data_yield=_format_debug_float(slice_row.get("data_yield"), scientific=True),
@@ -3248,6 +3372,7 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
                 chi2_ndf=_format_debug_float(slice_row.get("chi2_ndf")),
                 dev_per_entry=_format_debug_float(slice_row.get("chi2_per_abs_entry")),
                 active_bin_count=slice_row.get("active_bin_count"),
+                rejection_reason=slice_row.get("rejection_reason") or "none",
             )
 
 
@@ -3305,7 +3430,19 @@ def _draw_status_pave(cleaning_result, extra_lines=None, x1=0.12, y1=0.74, x2=0.
 def _build_timing_shape_overlays(hist, global_shape, slice_fit):
     if hist is None or not global_shape or not slice_fit:
         return None
-    if not global_shape.get("valid") or not slice_fit.get("valid"):
+    if not bool(global_shape.get("fit_attempted", global_shape.get("valid", False))):
+        return None
+    if not bool(slice_fit.get("fit_attempted", slice_fit.get("valid", False))):
+        return None
+    if not (
+        math.isfinite(float(global_shape.get("kaon_mean", float("nan"))))
+        and math.isfinite(float(global_shape.get("proton_mean", float("nan"))))
+        and math.isfinite(float(global_shape.get("kaon_sigma", float("nan"))))
+        and math.isfinite(float(global_shape.get("proton_sigma", float("nan"))))
+        and math.isfinite(float(slice_fit.get("kaon_amplitude", float("nan"))))
+        and math.isfinite(float(slice_fit.get("proton_amplitude", float("nan"))))
+        and math.isfinite(float(slice_fit.get("other_amplitude", float("nan"))))
+    ):
         return None
     x_values = np.asarray(
         [hist.GetXaxis().GetBinCenter(bin_index) for bin_index in range(1, hist.GetNbinsX() + 1)],
@@ -3337,9 +3474,13 @@ def _build_timing_shape_overlays(hist, global_shape, slice_fit):
         kaon_hist.SetBinContent(bin_index, kaon_value)
         proton_hist.SetBinContent(bin_index, proton_value)
         total_hist.SetBinContent(bin_index, total_value)
+    line_style = 1 if (bool(global_shape.get("valid")) and bool(slice_fit.get("valid"))) else 2
     kaon_hist.SetLineColor(kBlue)
+    kaon_hist.SetLineStyle(line_style)
     proton_hist.SetLineColor(kRed)
+    proton_hist.SetLineStyle(line_style)
     total_hist.SetLineColor(kGreen + 2)
+    total_hist.SetLineStyle(line_style)
     return {
         "kaon": kaon_hist,
         "proton": proton_hist,
@@ -3380,6 +3521,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                     hist,
                     shape,
                     {
+                        "fit_attempted": shape.get("fit_attempted", shape.get("valid")),
                         "valid": shape.get("valid"),
                         "kaon_amplitude": shape.get("kaon_amplitude", 0.0),
                         "proton_amplitude": shape.get("proton_amplitude", 0.0),
@@ -3393,7 +3535,11 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                 _draw_status_pave(
                     cleaning_result,
                     extra_lines=(
-                        "slice {} valid={}".format(index + 1, bool(shape.get("valid"))),
+                        "slice {} attempted={} valid={}".format(
+                            index + 1,
+                            bool(shape.get("fit_attempted", shape.get("valid"))),
+                            bool(shape.get("valid")),
+                        ),
                     ),
                     x1=0.14,
                     y1=0.74,
