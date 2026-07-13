@@ -106,7 +106,10 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
-from proton_contamination_weights import get_kaon_proton_cleaning_event_payload
+from proton_contamination_weights import (
+    get_kaon_proton_cleaning_event_payload,
+    print_kaon_proton_cleaning_pages,
+)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -2280,6 +2283,16 @@ def process_hist_data(
                     canvas_iter += 1
 
     if emit_plots:
+        if isinstance(proton_cleaning_result, dict):
+            if not pdf_opened:
+                open_canvas = ROOT.TCanvas("yield_data_open_{}".format(phi_setting), "Canvas", 10, 10)
+                pdf_opened = _open_root_pdf_page_stream(open_canvas, pdf_name, pdf_opened)
+                open_canvas.Close()
+            print_kaon_proton_cleaning_pages(
+                pdf_name,
+                proton_cleaning_result,
+                title_prefix="{} yield".format(phi_setting),
+            )
         _close_root_pdf_page_stream(
             pdf_name,
             pdf_opened,

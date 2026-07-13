@@ -106,7 +106,10 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
-from proton_contamination_weights import get_kaon_proton_cleaning_event_payload
+from proton_contamination_weights import (
+    get_kaon_proton_cleaning_event_payload,
+    print_kaon_proton_cleaning_pages,
+)
 
 ##################################################################################################################################################
 
@@ -145,6 +148,21 @@ def _fill_cached_ave_section(cache_section, hist_group, t_bins, update_mm_offset
                 mm_offset_data = cache_section["mm_offset"][idx]
 
     return mm_offset_data
+
+
+def _open_root_pdf_page_stream(canvas, pdf_name, opened):
+    if not opened:
+        canvas.Print(pdf_name + "[")
+        return True
+    return opened
+
+
+def _close_root_pdf_page_stream(pdf_name, opened, canvas_name):
+    if not opened:
+        return
+    close_canvas = ROOT.TCanvas(canvas_name, "Canvas", 10, 10)
+    close_canvas.Print(pdf_name + "]")
+    close_canvas.Close()
 
 
 def _resolve_hist_background_sample_root(hist, inpDict, background_name):
@@ -833,6 +851,9 @@ def process_hist_data(
     from background_fit import bg_fit
         
     # Loop through bins in t_data and identify events in specified bins
+    pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))
+    pdf_opened = False
+
     for j in range(len(t_bins)-1):
 
         hist_bin_dict["H_Q2_DATA_{}".format(j)]       = TH1D("H_Q2_DATA_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
@@ -1433,28 +1454,41 @@ def process_hist_data(
             text.SetTextColor(ROOT.kRed); # Set text color to red            
             # Add the centroid value to the plot
             text.DrawLatex(0.7, 0.65, "Centroid: {:.2f}+/-{:.3f}".format(centroid[0], centroid[1]))
-            if i==0 and j==0:
-                canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+'(')
-            elif i==len(processed_dict["t_bin{}".format(j+1)].items())-1 and j==len(t_bins)-2:
-                canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))+')')
-            else:
-                canvas.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)))
+            pdf_opened = _open_root_pdf_page_stream(canvas, pdf_name, pdf_opened)
+            canvas.Print(pdf_name)
 
             if key == "H_MM_DATA" and component_fit_results[j] is not None:
                 print_particle_subtraction_component_fit_pages(
-                    outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)),
+                    pdf_name,
                     component_fit_results[j],
                     title_prefix="{} t{}".format(phi_setting, j + 1),
                     cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
                 )
                 if isinstance(component_subtraction_payloads[j], dict):
                     print_particle_subtraction_component_application_pages(
-                        outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType)),
+                        pdf_name,
                         component_subtraction_payloads[j],
                         title_prefix="{} t{}".format(phi_setting, j + 1),
                         cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
                     )
             del canvas
+
+    if isinstance(proton_cleaning_result, dict):
+        if not pdf_opened:
+            open_canvas = ROOT.TCanvas("averages_data_open_{}".format(phi_setting), "Canvas", 10, 10)
+            pdf_opened = _open_root_pdf_page_stream(open_canvas, pdf_name, pdf_opened)
+            open_canvas.Close()
+        print_kaon_proton_cleaning_pages(
+            pdf_name,
+            proton_cleaning_result,
+            title_prefix="{} averages".format(phi_setting),
+        )
+
+    _close_root_pdf_page_stream(
+        pdf_name,
+        pdf_opened,
+        "averages_data_close_{}".format(phi_setting),
+    )
             
     return processed_dict
 

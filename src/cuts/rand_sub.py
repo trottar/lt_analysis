@@ -857,6 +857,12 @@ def _apply_component_pion_subtraction_setting(
             "H_kaon_fit_k_lambda_reference": component_fit_result.get("H_kaon_fit_k_lambda_reference").Clone(
                 "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_reference").GetName())
             ) if component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None else None,
+            "H_kaon_fit_k_lambda_scaled": component_fit_result.get("H_kaon_fit_k_lambda_scaled").Clone(
+                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_scaled").GetName())
+            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled") is not None else None,
+            "H_kaon_fit_k_lambda_scaled_refined": component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined").Clone(
+                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined").GetName())
+            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined") is not None else None,
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
