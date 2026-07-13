@@ -2685,6 +2685,7 @@ def rand_sub(
                 "h_w": H_W_DATA,
                 "h_epsilon": H_epsilon_DATA,
                 "h_mm": H_MM_DATA,
+                "h_mm_nosub": H_MM_nosub_DATA,
                 "h_mm_fit2sub": H_MM_fit2sub_DATA,
                 "h_mm_fit1sub": H_MM_fit1sub_DATA,
                 "h_mm_pisub": H_MM_pisub_DATA,
@@ -2772,12 +2773,12 @@ def rand_sub(
                         H_t_DATA = active_component_targets.get("h_t")
                         H_W_DATA = active_component_targets.get("h_w")
                         H_epsilon_DATA = active_component_targets.get("h_epsilon")
-                        H_MM_DATA = active_component_targets.get("h_mm")
-                        H_MM_nosub_DATA = active_component_targets.get("h_mm_nosub")
-                        H_MM_fit2sub_DATA = active_component_targets.get("h_mm_fit2sub")
-                        H_MM_fit1sub_DATA = active_component_targets.get("h_mm_fit1sub")
-                        H_MM_pisub_DATA = active_component_targets.get("h_mm_pisub")
-                        H_MM_full_DATA = active_component_targets.get("h_mm_full")
+                        H_MM_DATA = active_component_targets.get("h_mm") or H_MM_DATA
+                        H_MM_nosub_DATA = active_component_targets.get("h_mm_nosub") or H_MM_nosub_DATA
+                        H_MM_fit2sub_DATA = active_component_targets.get("h_mm_fit2sub") or H_MM_fit2sub_DATA
+                        H_MM_fit1sub_DATA = active_component_targets.get("h_mm_fit1sub") or H_MM_fit1sub_DATA
+                        H_MM_pisub_DATA = active_component_targets.get("h_mm_pisub") or H_MM_pisub_DATA
+                        H_MM_full_DATA = active_component_targets.get("h_mm_full") or H_MM_full_DATA
                         H_pmiss_DATA = active_component_targets.get("h_pmiss")
                         H_emiss_DATA = active_component_targets.get("h_emiss")
                         H_pmx_DATA = active_component_targets.get("h_pmx")
