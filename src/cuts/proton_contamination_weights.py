@@ -134,6 +134,58 @@ def _hist_integral(hist):
         return 0.0
 
 
+def _hist_absolute_integral(hist, first_bin=None, last_bin=None):
+    if hist is None:
+        return 0.0
+    try:
+        start_bin = int(first_bin) if first_bin is not None else 1
+        stop_bin = int(last_bin) if last_bin is not None else int(hist.GetNbinsX())
+        total = 0.0
+        for bin_index in range(max(1, start_bin), min(int(hist.GetNbinsX()), stop_bin) + 1):
+            total += abs(float(hist.GetBinContent(bin_index)))
+        return float(total)
+    except Exception:
+        return 0.0
+
+
+def _build_hist_support_snapshot(histogram, support_entries, minimum_required_entries, first_fit_bin=None, last_fit_bin=None):
+    signed_integral = _hist_integral(histogram)
+    absolute_integral = _hist_absolute_integral(histogram)
+    root_entries = 0.0
+    effective_entries = 0.0
+    fit_range_signed_integral = 0.0
+    fit_range_absolute_integral = 0.0
+    if histogram is not None:
+        try:
+            root_entries = float(histogram.GetEntries())
+        except Exception:
+            root_entries = 0.0
+        try:
+            effective_entries = float(histogram.GetEffectiveEntries())
+        except Exception:
+            effective_entries = 0.0
+        if first_fit_bin is not None and last_fit_bin is not None:
+            try:
+                fit_range_signed_integral = float(histogram.Integral(int(first_fit_bin), int(last_fit_bin)))
+            except Exception:
+                fit_range_signed_integral = 0.0
+            fit_range_absolute_integral = _hist_absolute_integral(
+                histogram,
+                first_bin=first_fit_bin,
+                last_bin=last_fit_bin,
+            )
+    return {
+        "support_entries": int(max(0, int(support_entries or 0))),
+        "minimum_required_entries": int(max(0, int(minimum_required_entries or 0))),
+        "signed_integral": float(signed_integral),
+        "absolute_integral": float(absolute_integral),
+        "root_entries": float(root_entries),
+        "effective_entries": float(effective_entries),
+        "fit_range_signed_integral": float(fit_range_signed_integral),
+        "fit_range_absolute_integral": float(fit_range_absolute_integral),
+    }
+
+
 def _hist_abs_integral(hist):
     if hist is None:
         return 0.0
@@ -352,6 +404,14 @@ def prepare_kaon_proton_cleaning_source_bundle(
     prepared_source_stats = {}
     available_timing_branches = set()
     requested_timing_branches = [PROTON_CLEANING_EXACT_TIMING_BRANCH]
+    prompt_source_spec = ((source_bundle or {}).get("sources") or {}).get("prompt") or {}
+    prompt_physical_coefficient = float(prompt_source_spec.get("coefficient", 0.0) or 0.0)
+    if (not math.isfinite(prompt_physical_coefficient)) or prompt_physical_coefficient == 0.0:
+        raise RuntimeError(
+            "invalid prompt physical coefficient for proton-cleaning fit scaling: {}".format(
+                prompt_physical_coefficient
+            )
+        )
 
     for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items():
         tree = (source_spec or {}).get("tree")
@@ -359,6 +419,8 @@ def prepare_kaon_proton_cleaning_source_bundle(
         entries_seen = 0
         entries_prepared = 0
         available_for_source = []
+        physical_coefficient = float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+        fit_coefficient = float(physical_coefficient / prompt_physical_coefficient)
 
         if tree is not None:
             available_for_source = [
@@ -407,6 +469,9 @@ def prepare_kaon_proton_cleaning_source_bundle(
 
         prepared_sources[str(source_name)] = {
             **dict(source_spec or {}),
+            "coefficient": float(physical_coefficient),
+            "fit_coefficient": float(fit_coefficient),
+            "is_prompt_source": bool(str(source_name) == "prompt"),
             "entries": entry_payloads,
             "available_timing_branches": list(available_for_source),
         }
@@ -1096,8 +1161,16 @@ def _fit_global_timing_shape_with_bounds(
     minimum_entries,
     use_deviance_per_entry_validation=False,
     maximum_poisson_deviance_per_entry=None,
+    support_entries=None,
 ):
-    if histogram is None or float(histogram.Integral()) < float(minimum_entries):
+    if support_entries is None:
+        support_entries = int(round(float(histogram.GetEntries()))) if histogram is not None else 0
+    support_snapshot = _build_hist_support_snapshot(
+        histogram,
+        support_entries,
+        minimum_entries,
+    )
+    if histogram is None or int(support_entries) < int(minimum_entries):
         return {
             "valid": False,
             "fit_attempted": False,
@@ -1113,6 +1186,7 @@ def _fit_global_timing_shape_with_bounds(
             "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
             "rejection_reasons": ["insufficient_entries"],
             "rejection_reason": "insufficient entries",
+            **support_snapshot,
         }
     histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
     kaon_seed = _find_peak_seed(histogram, kaon_mean_min, kaon_mean_max)
@@ -1208,6 +1282,13 @@ def _fit_global_timing_shape_with_bounds(
     )
     active_bin_count = max(0, int(last_fit_bin - first_fit_bin + 1))
     fitted_entries = float(histogram.Integral(first_fit_bin, last_fit_bin))
+    support_snapshot = _build_hist_support_snapshot(
+        histogram,
+        support_entries,
+        minimum_entries,
+        first_fit_bin=first_fit_bin,
+        last_fit_bin=last_fit_bin,
+    )
     chi2_data = float(fit_function.GetChisquare())
     fit_ndf = int(fit_function.GetNDF())
     chi2_ndf = (
@@ -1323,6 +1404,7 @@ def _fit_global_timing_shape_with_bounds(
         "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
         "rejection_reasons": rejection_reasons,
         "rejection_reason": _join_rejection_reasons(rejection_reasons),
+        **support_snapshot,
     }
 
 
@@ -1606,15 +1688,31 @@ def _fit_delta_timing_slice(
     function_name,
     use_deviance_per_entry_validation=False,
     maximum_poisson_deviance_per_entry=None,
+    support_entries=None,
 ):
     fit_min = float(global_shape.get("fit_min", (config.get("ctime_hist_range") or (-1.50, 1.25))[0]))
     fit_max = float(global_shape.get("fit_max", (config.get("ctime_hist_range") or (-1.50, 1.25))[1]))
     minimum_entries = int((config.get("slice_fit") or {}).get("minimum_entries", 30))
+    if support_entries is None:
+        support_entries = int(round(float(histogram.GetEntries()))) if histogram is not None else 0
+    support_snapshot = _build_hist_support_snapshot(
+        histogram,
+        support_entries,
+        minimum_entries,
+    )
+    invalid_global_shape = not global_shape.get("valid")
     if (
         histogram is None
-        or (not global_shape.get("valid"))
-        or float(histogram.Integral()) < float(minimum_entries)
+        or invalid_global_shape
+        or int(support_entries) < int(minimum_entries)
     ):
+        rejection_reasons = []
+        if invalid_global_shape:
+            rejection_reasons.append("invalid_global_shape")
+        if histogram is None:
+            rejection_reasons.append("missing_histogram")
+        elif int(support_entries) < int(minimum_entries):
+            rejection_reasons.append("insufficient_entries")
         return {
             "valid": False,
             "fit_attempted": False,
@@ -1624,8 +1722,9 @@ def _fit_delta_timing_slice(
             "excluded_invalid_variance_bins": 0,
             "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
             "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
-            "rejection_reasons": ["insufficient_entries_or_invalid_global_shape"],
-            "rejection_reason": "insufficient entries or invalid global shape",
+            "rejection_reasons": rejection_reasons or ["insufficient_entries_or_invalid_global_shape"],
+            "rejection_reason": _join_rejection_reasons(rejection_reasons or ["insufficient_entries_or_invalid_global_shape"]),
+            **support_snapshot,
         }
     histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
     kaon_seed = _find_peak_seed(
@@ -1719,6 +1818,13 @@ def _fit_delta_timing_slice(
         else None
     )
     active_bin_count = max(0, int(last_fit_bin - first_fit_bin + 1))
+    support_snapshot = _build_hist_support_snapshot(
+        histogram,
+        support_entries,
+        minimum_entries,
+        first_fit_bin=first_fit_bin,
+        last_fit_bin=last_fit_bin,
+    )
     slice_cfg = config.get("slice_fit") or {}
     finite_outputs = (
         math.isfinite(float(kaon_amplitude))
@@ -1789,6 +1895,7 @@ def _fit_delta_timing_slice(
         "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
         "rejection_reasons": rejection_reasons,
         "rejection_reason": _join_rejection_reasons(rejection_reasons),
+        **support_snapshot,
     }
 
 
@@ -2320,51 +2427,97 @@ def _build_signed_pid_histograms(
         delta_slice_hists.append(slice_hists)
 
     delta_edges = [delta_min + (((delta_max - delta_min) / float(delta_bins)) * i) for i in range(delta_bins + 1)]
+    n_aero_slices = max(len(aero_edges) - 1, 0)
+    global_prompt_support = [0 for _ in range(n_aero_slices)]
+    cell_prompt_support = [
+        [0 for _ in range(n_aero_slices)]
+        for _ in range(delta_bins)
+    ]
     source_stats = {}
     prepared_sources = _get_prepared_sources(source_bundle)
     if prepared_sources:
         prepared_source_stats = (source_bundle.get("prepared_source_stats") or {})
         for source_name, source_spec in prepared_sources.items():
-            coefficient = float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+            fit_coefficient = float((source_spec or {}).get("fit_coefficient", 0.0) or 0.0)
             prepared_stats = prepared_source_stats.get(source_name) or {}
             source_stats[source_name] = {
                 "tree_name": (source_spec or {}).get("tree_name"),
                 "entries_seen": int(prepared_stats.get("entries_seen", 0) or 0),
+                "entries_prepared": int(prepared_stats.get("entries_prepared", 0) or 0),
+                "entries_passing_nommcuts": 0,
+                "entries_missing_CTime_ROC1": 0,
+                "entries_outside_timing_range": 0,
+                "entries_outside_aerogel_range": 0,
+                "entries_outside_delta_range": 0,
+                "entries_used_in_global_pid": 0,
+                "entries_used_in_pid": 0,
                 "entries_used": 0,
             }
-            if coefficient == 0.0:
+            if fit_coefficient == 0.0:
                 continue
             for entry_payload in (((source_spec or {}).get("entries") or {}).values()):
                 if not bool((entry_payload or {}).get("nommcuts", False)):
                     continue
+                source_stats[source_name]["entries_passing_nommcuts"] += 1
                 aero_value = float((entry_payload or {}).get("aero_value", 0.0) or 0.0)
                 timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(timing_branch))
                 if timing_value is None:
+                    source_stats[source_name]["entries_missing_CTime_ROC1"] += 1
                     continue
                 timing_value = float(timing_value)
                 delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
-                if (aero_value < aero_min) or (aero_value > aero_max) or (timing_value < time_min) or (timing_value > time_max):
+                if (timing_value < time_min) or (timing_value > time_max):
+                    source_stats[source_name]["entries_outside_timing_range"] += 1
                     continue
-                source_stats[source_name]["entries_used"] += 1
-                h_global_pid.Fill(aero_value, timing_value, coefficient)
+                if (aero_value < aero_min) or (aero_value > aero_max):
+                    source_stats[source_name]["entries_outside_aerogel_range"] += 1
+                    continue
                 aero_index = _find_collection_bin(aero_value, aero_edges)
-                delta_index = _find_collection_bin(delta_value, delta_edges)
                 if 0 <= aero_index < len(global_slice_hists):
-                    global_slice_hists[aero_index].Fill(timing_value, coefficient)
-                if 0 <= delta_index < delta_bins:
-                    delta_pid_hists[delta_index].Fill(aero_value, timing_value, coefficient)
-                    if 0 <= aero_index < len(delta_slice_hists[delta_index]):
-                        delta_slice_hists[delta_index][aero_index].Fill(timing_value, coefficient)
+                    source_stats[source_name]["entries_used_in_global_pid"] += 1
+                    source_stats[source_name]["entries_used"] += 1
+                    h_global_pid.Fill(aero_value, timing_value, fit_coefficient)
+                    global_slice_hists[aero_index].Fill(timing_value, fit_coefficient)
+                    if bool((source_spec or {}).get("is_prompt_source", False)):
+                        global_prompt_support[aero_index] += 1
+                delta_index = _find_collection_bin(delta_value, delta_edges)
+                if not (0 <= delta_index < delta_bins):
+                    source_stats[source_name]["entries_outside_delta_range"] += 1
+                    continue
+                source_stats[source_name]["entries_used_in_pid"] += 1
+                delta_pid_hists[delta_index].Fill(aero_value, timing_value, fit_coefficient)
+                if 0 <= aero_index < len(delta_slice_hists[delta_index]):
+                    delta_slice_hists[delta_index][aero_index].Fill(timing_value, fit_coefficient)
+                    if bool((source_spec or {}).get("is_prompt_source", False)):
+                        cell_prompt_support[delta_index][aero_index] += 1
     else:
+        prompt_physical_coefficient = float(
+            ((((source_bundle or {}).get("sources") or {}).get("prompt") or {}).get("coefficient", 0.0) or 0.0)
+        )
+        if (not math.isfinite(prompt_physical_coefficient)) or prompt_physical_coefficient == 0.0:
+            raise RuntimeError(
+                "invalid prompt physical coefficient for proton-cleaning fit scaling: {}".format(
+                    prompt_physical_coefficient
+                )
+            )
         for source_name, source_spec in (source_bundle.get("sources") or {}).items():
             tree = source_spec.get("tree")
-            coefficient = float(source_spec.get("coefficient", 0.0) or 0.0)
+            physical_coefficient = float(source_spec.get("coefficient", 0.0) or 0.0)
+            fit_coefficient = float(physical_coefficient / prompt_physical_coefficient)
             source_stats[source_name] = {
                 "tree_name": source_spec.get("tree_name"),
                 "entries_seen": 0,
+                "entries_prepared": 0,
+                "entries_passing_nommcuts": 0,
+                "entries_missing_CTime_ROC1": 0,
+                "entries_outside_timing_range": 0,
+                "entries_outside_aerogel_range": 0,
+                "entries_outside_delta_range": 0,
+                "entries_used_in_global_pid": 0,
+                "entries_used_in_pid": 0,
                 "entries_used": 0,
             }
-            if tree is None or coefficient == 0.0:
+            if tree is None or fit_coefficient == 0.0:
                 continue
             for evt in tree:
                 source_stats[source_name]["entries_seen"] += 1
@@ -2372,24 +2525,38 @@ def _build_signed_pid_histograms(
                 hole_rejected = hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer) if hole_contains is not None else False
                 if not (nommcuts and not hole_rejected):
                     continue
+                source_stats[source_name]["entries_passing_nommcuts"] += 1
                 aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
                 try:
                     timing_value = float(getattr(evt, str(timing_branch)))
                 except Exception:
+                    source_stats[source_name]["entries_missing_CTime_ROC1"] += 1
                     continue
                 delta_value = float(getattr(evt, "ssdelta", 0.0))
-                if (aero_value < aero_min) or (aero_value > aero_max) or (timing_value < time_min) or (timing_value > time_max):
+                if (timing_value < time_min) or (timing_value > time_max):
+                    source_stats[source_name]["entries_outside_timing_range"] += 1
                     continue
-                source_stats[source_name]["entries_used"] += 1
-                h_global_pid.Fill(aero_value, timing_value, coefficient)
+                if (aero_value < aero_min) or (aero_value > aero_max):
+                    source_stats[source_name]["entries_outside_aerogel_range"] += 1
+                    continue
                 aero_index = _find_collection_bin(aero_value, aero_edges)
-                delta_index = _find_collection_bin(delta_value, delta_edges)
                 if 0 <= aero_index < len(global_slice_hists):
-                    global_slice_hists[aero_index].Fill(timing_value, coefficient)
-                if 0 <= delta_index < delta_bins:
-                    delta_pid_hists[delta_index].Fill(aero_value, timing_value, coefficient)
-                    if 0 <= aero_index < len(delta_slice_hists[delta_index]):
-                        delta_slice_hists[delta_index][aero_index].Fill(timing_value, coefficient)
+                    source_stats[source_name]["entries_used_in_global_pid"] += 1
+                    source_stats[source_name]["entries_used"] += 1
+                    h_global_pid.Fill(aero_value, timing_value, fit_coefficient)
+                    global_slice_hists[aero_index].Fill(timing_value, fit_coefficient)
+                    if str(source_name) == "prompt":
+                        global_prompt_support[aero_index] += 1
+                delta_index = _find_collection_bin(delta_value, delta_edges)
+                if not (0 <= delta_index < delta_bins):
+                    source_stats[source_name]["entries_outside_delta_range"] += 1
+                    continue
+                source_stats[source_name]["entries_used_in_pid"] += 1
+                delta_pid_hists[delta_index].Fill(aero_value, timing_value, fit_coefficient)
+                if 0 <= aero_index < len(delta_slice_hists[delta_index]):
+                    delta_slice_hists[delta_index][aero_index].Fill(timing_value, fit_coefficient)
+                    if str(source_name) == "prompt":
+                        cell_prompt_support[delta_index][aero_index] += 1
 
     return {
         "H_global_pid": h_global_pid,
@@ -2397,6 +2564,8 @@ def _build_signed_pid_histograms(
         "delta_pid_hists": delta_pid_hists,
         "delta_slice_hists": delta_slice_hists,
         "source_stats": source_stats,
+        "global_prompt_support": global_prompt_support,
+        "cell_prompt_support": cell_prompt_support,
         "aero_edges": aero_edges,
         "delta_edges": delta_edges,
         "timing_branch": str(timing_branch),
@@ -2470,15 +2639,16 @@ def build_kaon_proton_cleaning_result(
             "input_tree_particle_selection": "Cut_Kaon_Events_*_noRF",
             "fit_sample_definition": (
                 "prepared signed noRF prompt/random/dummy bundle from the upstream "
-                "kaon sample immediately before pion subtraction, using the exact "
-                "prepared signed coefficients for the timing-fit histograms"
+                "kaon sample immediately before pion subtraction, using prompt-"
+                "relative count-scale coefficients for the proton timing-fit histograms"
             ),
             "fit_sample_signed_combination": (
                 "norm_data*prompt - norm_data*rand/nWindows - norm_dummy*dummy + "
                 "norm_dummy*dummy_rand/nWindows"
             ),
             "fit_sample_uses_signed_random_dummy_subtraction": True,
-            "fit_sample_uses_normalized_coefficients": True,
+            "fit_sample_uses_normalized_coefficients": False,
+            "fit_sample_uses_prompt_relative_fit_coefficients": True,
             "fit_sample_requires_nommcuts": True,
             "fit_sample_requires_hgcer_hole_rejection": True,
         },
@@ -2524,10 +2694,13 @@ def build_kaon_proton_cleaning_result(
             raise RuntimeError(reason)
         return result
 
-    result["diagnostics"]["source_coefficients"] = {
+    result["diagnostics"]["physical_source_coefficients"] = {
         str(source_name): float((source_spec or {}).get("coefficient", 0.0) or 0.0)
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
     }
+    result["diagnostics"]["source_coefficients"] = deepcopy(
+        result["diagnostics"]["physical_source_coefficients"]
+    )
     result["diagnostics"]["prepared_source_stats"] = _json_ready_value(
         (source_bundle or {}).get("prepared_source_stats") or {}
     )
@@ -2536,9 +2709,15 @@ def build_kaon_proton_cleaning_result(
     )
     result["diagnostics"]["fit_source_coefficients"] = {
         str(source_name): float(
-            (source_spec or {}).get("coefficient", 0.0) or 0.0
+            (
+                (prepared_source or {}).get("fit_coefficient", (source_spec or {}).get("coefficient", 0.0))
+                or 0.0
+            )
         )
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
+        for prepared_source in [
+            (((source_bundle or {}).get("prepared_sources") or {}).get(str(source_name)) or {})
+        ]
     }
     ct_time_branch = PROTON_CLEANING_EXACT_TIMING_BRANCH
     global_fit_cfg = exact_config.get("global_fit") or {}
@@ -2582,6 +2761,7 @@ def build_kaon_proton_cleaning_result(
                 float(global_fit_cfg.get("maximum_chi2_ndf", PROTON_CLEANING_EXACT_GLOBAL_FIT["maximum_chi2_ndf"])),
                 float(global_fit_cfg.get("bound_fraction_tolerance", PROTON_CLEANING_EXACT_GLOBAL_FIT["bound_fraction_tolerance"])),
                 int(global_fit_cfg.get("minimum_entries", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_entries"])),
+                support_entries=((pid_payload.get("global_prompt_support") or [0])[aero_index] if aero_index < len(pid_payload.get("global_prompt_support") or []) else 0),
             )
         )
     selected_probe = _summarize_global_probe(
@@ -2631,7 +2811,13 @@ def build_kaon_proton_cleaning_result(
             "fit_status": (shape or {}).get("fit_status"),
             "fit_status_code": (shape or {}).get("fit_status_code"),
             "fit_attempted": bool((shape or {}).get("fit_attempted", False)),
+            "support_entries": int((shape or {}).get("support_entries", 0) or 0),
+            "minimum_required_entries": int((shape or {}).get("minimum_required_entries", 0) or 0),
             "fitted_entries": float((shape or {}).get("fitted_entries", 0.0) or 0.0),
+            "signed_integral": float((shape or {}).get("signed_integral", 0.0) or 0.0),
+            "absolute_integral": float((shape or {}).get("absolute_integral", 0.0) or 0.0),
+            "root_entries": float((shape or {}).get("root_entries", 0.0) or 0.0),
+            "effective_entries": float((shape or {}).get("effective_entries", 0.0) or 0.0),
             "fit_min": (shape or {}).get("fit_min"),
             "fit_max": (shape or {}).get("fit_max"),
             "kaon_mean": (shape or {}).get("kaon_mean"),
@@ -2693,6 +2879,14 @@ def build_kaon_proton_cleaning_result(
                 "f_proton_cleaning_delta_{}_aero_{}".format(delta_index, aero_index),
                 use_deviance_per_entry_validation=False,
                 maximum_poisson_deviance_per_entry=None,
+                support_entries=(
+                    (
+                        (pid_payload.get("cell_prompt_support") or [])[delta_index][aero_index]
+                    )
+                    if delta_index < len(pid_payload.get("cell_prompt_support") or [])
+                    and aero_index < len((pid_payload.get("cell_prompt_support") or [])[delta_index])
+                    else 0
+                ),
             )
             slice_fits.append(slice_fit)
             slice_debug_rows.append(
@@ -2703,11 +2897,17 @@ def build_kaon_proton_cleaning_result(
                         "global_shape_valid": bool((global_shape or {}).get("valid", False)),
                         "valid": bool((slice_fit or {}).get("valid", False)),
                         "fit_attempted": bool((slice_fit or {}).get("fit_attempted", False)),
+                        "support_entries": int((slice_fit or {}).get("support_entries", 0) or 0),
+                        "minimum_required_entries": int((slice_fit or {}).get("minimum_required_entries", 0) or 0),
                         "fit_status": (slice_fit or {}).get("fit_status"),
                         "fit_status_code": (slice_fit or {}).get("fit_status_code"),
                         "data_yield": (slice_fit or {}).get("data_yield"),
                         "model_yield": (slice_fit or {}).get("model_yield"),
                         "model_data_ratio": (slice_fit or {}).get("model_data_ratio"),
+                        "signed_integral": (slice_fit or {}).get("signed_integral"),
+                        "absolute_integral": (slice_fit or {}).get("absolute_integral"),
+                        "root_entries": (slice_fit or {}).get("root_entries"),
+                        "effective_entries": (slice_fit or {}).get("effective_entries"),
                         "kaon_yield": (slice_fit or {}).get("kaon_yield"),
                         "proton_yield": (slice_fit or {}).get("proton_yield"),
                         "other_yield": (slice_fit or {}).get("other_yield"),
@@ -3236,10 +3436,11 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
     for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
         source_payload = source_stats.get(source_name) or {}
         lines.append(
-            "  {}: seen={} used={} tree={}".format(
+            "  {}: seen={} used_global={} used_delta={} tree={}".format(
                 source_name,
                 int(source_payload.get("entries_seen", 0) or 0),
-                int(source_payload.get("entries_used", 0) or 0),
+                int(source_payload.get("entries_used_in_global_pid", source_payload.get("entries_used", 0)) or 0),
+                int(source_payload.get("entries_used_in_pid", 0) or 0),
                 source_payload.get("tree_name", "missing"),
             )
         )
@@ -3298,7 +3499,8 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         available_timing_branches=", ".join(diagnostics.get("available_timing_branches") or []) or "none",
         selected_time_hist_range=tuple(diagnostics.get("selected_time_hist_range") or ()),
         selected_time_hist_bins=diagnostics.get("selected_time_hist_bins"),
-        source_coefficients=_json_ready_value(diagnostics.get("source_coefficients") or {}),
+        physical_source_coefficients=_json_ready_value(diagnostics.get("physical_source_coefficients") or diagnostics.get("source_coefficients") or {}),
+        fit_source_coefficients=_json_ready_value(diagnostics.get("fit_source_coefficients") or {}),
     )
     for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
         prep_stats = prepared_source_stats.get(source_name) or {}
@@ -3308,7 +3510,13 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             tree_name=prep_stats.get("tree_name") or pid_stats.get("tree_name") or "missing",
             entries_seen=prep_stats.get("entries_seen", pid_stats.get("entries_seen", 0)),
             entries_prepared=prep_stats.get("entries_prepared", 0),
-            entries_used_in_pid=pid_stats.get("entries_used", 0),
+            entries_passing_nommcuts=pid_stats.get("entries_passing_nommcuts", 0),
+            entries_missing_CTime_ROC1=pid_stats.get("entries_missing_CTime_ROC1", 0),
+            entries_outside_timing_range=pid_stats.get("entries_outside_timing_range", 0),
+            entries_outside_aerogel_range=pid_stats.get("entries_outside_aerogel_range", 0),
+            entries_outside_delta_range=pid_stats.get("entries_outside_delta_range", 0),
+            entries_used_in_global_pid=pid_stats.get("entries_used_in_global_pid", pid_stats.get("entries_used", 0)),
+            entries_used_in_pid=pid_stats.get("entries_used_in_pid", 0),
         )
 
     for row in (diagnostics.get("global_shape_debug_rows") or []):
@@ -3318,6 +3526,12 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             fit_status=row.get("fit_status"),
             fit_status_code=row.get("fit_status_code"),
             fit_attempted=row.get("fit_attempted"),
+            support_entries=row.get("support_entries"),
+            minimum_required_entries=row.get("minimum_required_entries"),
+            signed_integral=_format_debug_float(row.get("signed_integral"), scientific=True),
+            absolute_integral=_format_debug_float(row.get("absolute_integral"), scientific=True),
+            root_entries=_format_debug_float(row.get("root_entries"), scientific=True),
+            effective_entries=_format_debug_float(row.get("effective_entries"), scientific=True),
             fitted_entries=_format_debug_float(row.get("fitted_entries"), scientific=True),
             fit_window="[{}, {}]".format(
                 _format_debug_float(row.get("fit_min")),
@@ -3361,8 +3575,14 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
                 global_shape_valid=slice_row.get("global_shape_valid"),
                 valid=slice_row.get("valid"),
                 fit_attempted=slice_row.get("fit_attempted"),
+                support_entries=slice_row.get("support_entries"),
+                minimum_required_entries=slice_row.get("minimum_required_entries"),
                 fit_status=slice_row.get("fit_status"),
                 fit_status_code=slice_row.get("fit_status_code"),
+                signed_integral=_format_debug_float(slice_row.get("signed_integral"), scientific=True),
+                absolute_integral=_format_debug_float(slice_row.get("absolute_integral"), scientific=True),
+                root_entries=_format_debug_float(slice_row.get("root_entries"), scientific=True),
+                effective_entries=_format_debug_float(slice_row.get("effective_entries"), scientific=True),
                 data_yield=_format_debug_float(slice_row.get("data_yield"), scientific=True),
                 model_yield=_format_debug_float(slice_row.get("model_yield"), scientific=True),
                 model_ratio=_format_debug_float(slice_row.get("model_data_ratio")),
