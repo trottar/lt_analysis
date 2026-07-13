@@ -73,8 +73,12 @@ DEFAULT_RF_BRANCH_CANDIDATES = (
 )
 
 PROTON_CLEANING_EXACT_TIMING_BRANCH = "CTime_ROC1"
-PROTON_CLEANING_EXACT_TIMING_RANGE = (-1.50, 1.25)
-PROTON_CLEANING_EXACT_TIMING_BINS = 90
+PROTON_CLEANING_EXACT_TIMING_RANGE = (-2.0, 2.0)
+PROTON_CLEANING_EXACT_TIMING_BINS = 131
+PROTON_CLEANING_EXACT_CT_LOW_EPSILON_RANGE = (-2.0, 2.0)
+PROTON_CLEANING_EXACT_CT_HIGH_EPSILON_RANGE = (-4.0, 4.0)
+PROTON_CLEANING_EXACT_CT_LOW_EPSILON_BINS = 131
+PROTON_CLEANING_EXACT_CT_HIGH_EPSILON_BINS = 262
 PROTON_CLEANING_EXACT_AERO_EDGES = (0.0, 3.0, 6.0, 10.0, 15.0, 25.0)
 PROTON_CLEANING_EXACT_AERO_RANGE = (0.0, 25.0)
 PROTON_CLEANING_EXACT_DELTA_RANGE = (-10.0, 20.0)
@@ -263,6 +267,32 @@ def _format_debug_float(value, digits=4, scientific=False):
     return ("{0:." + str(int(digits)) + "f}").format(numeric)
 
 
+def _format_probe_summary_for_log(label, probe):
+    if not isinstance(probe, dict):
+        return "{}: unavailable".format(label)
+    goodness_key = (
+        "meanPoissonDeviancePerEntry"
+        if bool(probe.get("perAeroMultistart", False)) or bool(probe.get("localPeakRescue", False))
+        else "meanPoissonDevianceNdf"
+    )
+    return (
+        "{}: branch={} kind={} mode={} selection={} valid={} pair={} sep={} "
+        "D/ndf={} D/N={} score={}"
+    ).format(
+        label,
+        probe.get("branch", probe.get("timing_branch", "unknown")),
+        probe.get("probe_kind", "unknown"),
+        probe.get("fit_mode", "unknown"),
+        probe.get("selection_key", "unknown"),
+        int(probe.get("validShapes", 0) or 0),
+        "yes" if probe.get("peakPairFound", False) else "no",
+        _format_debug_float(probe.get("meanSeparation"), digits=4),
+        _format_debug_float(probe.get("meanPoissonDevianceNdf"), digits=4),
+        _format_debug_float(probe.get("meanPoissonDeviancePerEntry"), digits=4),
+        _format_debug_float(probe.get(goodness_key), digits=4),
+    )
+
+
 def _join_rejection_reasons(reasons):
     cleaned = [str(reason).strip() for reason in (reasons or []) if str(reason).strip()]
     return "; ".join(cleaned)
@@ -364,11 +394,16 @@ def _tree_has_branch(tree, branch_name):
         return False
 
 
-def _bundle_has_branch(source_bundle, branch_name):
+def _bundle_has_branch(source_bundle, branch_name, source_names=None):
     prepared_branches = (source_bundle or {}).get("available_timing_branches") or ()
     if branch_name in prepared_branches:
         return True
-    for source_spec in ((source_bundle or {}).get("sources") or {}).values():
+    allowed_sources = None
+    if source_names is not None:
+        allowed_sources = {str(source_name) for source_name in source_names}
+    for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items():
+        if allowed_sources is not None and str(source_name) not in allowed_sources:
+            continue
         tree = (source_spec or {}).get("tree")
         if _tree_has_branch(tree, branch_name):
             return True
@@ -397,13 +432,40 @@ def _get_prepared_sources(source_bundle):
     return ((source_bundle or {}).get("prepared_sources") or {})
 
 
-def _iter_prepared_records(source_bundle, require_nommcuts=False):
+def _iter_prepared_records(source_bundle, require_nommcuts=False, selection_key=None, source_names=None):
+    allowed_sources = None
+    if source_names is not None:
+        allowed_sources = {str(source_name) for source_name in source_names}
+    active_selection_key = str(selection_key) if selection_key else ("nommcuts" if require_nommcuts else None)
     for source_name, source_spec in _get_prepared_sources(source_bundle).items():
+        if allowed_sources is not None and str(source_name) not in allowed_sources:
+            continue
         entry_map = (source_spec or {}).get("entries") or {}
         for entry_index, entry_payload in entry_map.items():
-            if require_nommcuts and not bool((entry_payload or {}).get("nommcuts", False)):
+            if active_selection_key and not bool((entry_payload or {}).get(active_selection_key, False)):
                 continue
             yield source_name, source_spec, int(entry_index), entry_payload
+
+
+def _passes_exact_spectrometer_base_acceptance(evt):
+    """C macro baseAcceptanceCut without the Q2/W diamond polygon."""
+    try:
+        return bool(
+            float(getattr(evt, "ssdelta")) >= -10.0
+            and float(getattr(evt, "ssdelta")) <= 20.0
+            and float(getattr(evt, "ssxptar")) >= -0.06
+            and float(getattr(evt, "ssxptar")) <= 0.06
+            and float(getattr(evt, "ssyptar")) >= -0.04
+            and float(getattr(evt, "ssyptar")) <= 0.04
+            and float(getattr(evt, "hsdelta")) >= -8.0
+            and float(getattr(evt, "hsdelta")) <= 8.0
+            and float(getattr(evt, "hsxptar")) >= -0.08
+            and float(getattr(evt, "hsxptar")) <= 0.08
+            and float(getattr(evt, "hsyptar")) >= -0.045
+            and float(getattr(evt, "hsyptar")) <= 0.045
+        )
+    except Exception:
+        return False
 
 
 def prepare_kaon_proton_cleaning_source_bundle(
@@ -461,8 +523,12 @@ def prepare_kaon_proton_cleaning_source_bundle(
                 allcuts = bool(base_all_cuts and (not hole_rejected))
                 nommcuts = bool(base_sub_cuts and (not hole_rejected))
                 noholecuts = bool(base_all_cuts)
+                pre_diamond_nommcuts = bool(
+                    _passes_exact_spectrometer_base_acceptance(evt)
+                    and (not hole_rejected)
+                )
 
-                if not (allcuts or nommcuts or noholecuts):
+                if not (allcuts or nommcuts or noholecuts or pre_diamond_nommcuts):
                     continue
 
                 timing_values = {}
@@ -478,6 +544,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
                     "allcuts": bool(allcuts),
                     "nommcuts": bool(nommcuts),
                     "noholecuts": bool(noholecuts),
+                    "pre_diamond_nommcuts": bool(pre_diamond_nommcuts),
                     "adj_mm": float(shifted_mm_getter(evt)),
                     "adj_t": float(shifted_t_getter(evt)),
                     "adj_hsdelta": float(adj_hsdelta),
@@ -513,10 +580,23 @@ def _preselection_passes(evt, evaluate_event, hole_contains, mm_min, mm_max):
     return bool(nommcuts and (not hole_rejected))
 
 
-def _collect_branch_values(source_bundle, evaluate_event, hole_contains, mm_min, mm_max, branch_name):
+def _collect_branch_values(
+    source_bundle,
+    evaluate_event,
+    hole_contains,
+    mm_min,
+    mm_max,
+    branch_name,
+    source_names=None,
+    selection_key="nommcuts",
+):
     if _get_prepared_sources(source_bundle):
         values = []
-        for _, _, _, entry_payload in _iter_prepared_records(source_bundle, require_nommcuts=True):
+        for _, _, _, entry_payload in _iter_prepared_records(
+            source_bundle,
+            selection_key=selection_key,
+            source_names=source_names,
+        ):
             timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(branch_name))
             if timing_value is None:
                 continue
@@ -525,7 +605,12 @@ def _collect_branch_values(source_bundle, evaluate_event, hole_contains, mm_min,
                 values.append(timing_value)
         return values
     values = []
-    for source_spec in ((source_bundle or {}).get("sources") or {}).values():
+    allowed_sources = None
+    if source_names is not None:
+        allowed_sources = {str(source_name) for source_name in source_names}
+    for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items():
+        if allowed_sources is not None and str(source_name) not in allowed_sources:
+            continue
         tree = (source_spec or {}).get("tree")
         if tree is None or not _tree_has_branch(tree, branch_name):
             continue
@@ -546,6 +631,39 @@ def _resolve_beam_bunch_spacing_ns(source_bundle):
     return 4.0 if epsset == "high" else 2.0
 
 
+def _resolve_ct_probe_configuration(source_bundle):
+    epsset = normalize_epsset((source_bundle or {}).get("epsset"))
+    if epsset == "high":
+        ctime_range = tuple(PROTON_CLEANING_EXACT_CT_HIGH_EPSILON_RANGE)
+        ctime_bins = int(PROTON_CLEANING_EXACT_CT_HIGH_EPSILON_BINS)
+    else:
+        ctime_range = tuple(PROTON_CLEANING_EXACT_CT_LOW_EPSILON_RANGE)
+        ctime_bins = int(PROTON_CLEANING_EXACT_CT_LOW_EPSILON_BINS)
+    global_fit = deepcopy(PROTON_CLEANING_EXACT_GLOBAL_FIT)
+    global_fit["kaon_mean_range"] = (-0.45, 0.20)
+    global_fit["proton_mean_range"] = (0.20, 0.95)
+    global_fit["sigma_range"] = (0.03, 0.45)
+    global_fit["initial_sigma"] = 0.15
+    return {
+        "timing_branch": PROTON_CLEANING_EXACT_TIMING_BRANCH,
+        "display_range": tuple(float(value) for value in ctime_range),
+        "fit_range": tuple(float(value) for value in ctime_range),
+        "histogram_bins": int(ctime_bins),
+        "kaonMeanMin": -0.45,
+        "kaonMeanMax": 0.20,
+        "protonMeanMin": 0.20,
+        "protonMeanMax": 0.95,
+        "sigmaMin": 0.03,
+        "sigmaMax": 0.45,
+        "sigmaInitial": 0.15,
+        "minimumGlobalSeparation": 0.75,
+        "boundFractionTolerance": 0.02,
+        "useDeviancePerEntryValidation": False,
+        "maximumPoissonDeviancePerEntry": 0.85,
+        "global_fit": global_fit,
+    }
+
+
 def _build_unweighted_timing_projection(
     source_bundle,
     evaluate_event,
@@ -556,6 +674,8 @@ def _build_unweighted_timing_projection(
     histogram_name,
     histogram_range,
     histogram_bins,
+    source_names=None,
+    selection_key="nommcuts",
 ):
     time_min, time_max = [float(value) for value in histogram_range]
     projection = ROOT.TH1D(
@@ -568,7 +688,11 @@ def _build_unweighted_timing_projection(
     projection.SetDirectory(0)
     projection.Sumw2()
     if _get_prepared_sources(source_bundle):
-        for _, _, _, entry_payload in _iter_prepared_records(source_bundle, require_nommcuts=True):
+        for _, _, _, entry_payload in _iter_prepared_records(
+            source_bundle,
+            selection_key=selection_key,
+            source_names=source_names,
+        ):
             timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(branch_name))
             if timing_value is None:
                 continue
@@ -601,6 +725,9 @@ def _resolve_rf_probe_display_range(
     mm_min,
     mm_max,
     timing_branch,
+    selection_key="nommcuts",
+    source_names=("prompt",),
+    return_diagnostics=False,
 ):
     beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
     fallback_range = (-float(beam_bunch_spacing_ns), float(beam_bunch_spacing_ns))
@@ -611,7 +738,16 @@ def _resolve_rf_probe_display_range(
         mm_min,
         mm_max,
         timing_branch,
+        source_names=source_names,
+        selection_key=selection_key,
     )
+    diagnostics = {
+        "rf_window_discovery_source": ",".join(str(source_name) for source_name in (source_names or ())),
+        "rf_window_discovery_entry_count": int(len(branch_values)),
+        "rf_window_discovery_branch": str(timing_branch),
+        "rf_window_discovery_selection_key": str(selection_key),
+        "rf_window_discovery_range": None,
+    }
     raw_display_range = _estimate_value_central_range(
         branch_values,
         fallback_range[0],
@@ -619,7 +755,8 @@ def _resolve_rf_probe_display_range(
     )
     raw_display_min, raw_display_max = [float(value) for value in raw_display_range]
     if raw_display_max <= raw_display_min:
-        return fallback_range
+        diagnostics["rf_window_discovery_range"] = [float(fallback_range[0]), float(fallback_range[1])]
+        return (fallback_range, diagnostics) if return_diagnostics else fallback_range
     raw_display_width = float(raw_display_max - raw_display_min)
     search_bins = max(
         160,
@@ -660,11 +797,15 @@ def _resolve_rf_probe_display_range(
         if selected_max > raw_display_max:
             selected_min -= selected_max - raw_display_max
             selected_max = raw_display_max
-        return (
+        selected_range = (
             max(float(selected_min), raw_display_min),
             min(float(selected_max), raw_display_max),
         )
-    return raw_display_min, raw_display_max
+        diagnostics["rf_window_discovery_range"] = [float(selected_range[0]), float(selected_range[1])]
+        return (selected_range, diagnostics) if return_diagnostics else selected_range
+    selected_range = (raw_display_min, raw_display_max)
+    diagnostics["rf_window_discovery_range"] = [float(selected_range[0]), float(selected_range[1])]
+    return (selected_range, diagnostics) if return_diagnostics else selected_range
 
 
 def _build_rf_membership_lookup(rf_source_bundle, signature_fields, round_digits):
@@ -1201,6 +1342,21 @@ def _fit_global_timing_shape_with_bounds(
             "function_name": str(function_name),
             "fit_min": float(fit_min),
             "fit_max": float(fit_max),
+            "kaonMeanMin": float(kaon_mean_min),
+            "kaonMeanMax": float(kaon_mean_max),
+            "protonMeanMin": float(proton_mean_min),
+            "protonMeanMax": float(proton_mean_max),
+            "sigmaMin": float(sigma_min),
+            "sigmaMax": float(sigma_max),
+            "sigmaInitial": float(initial_sigma),
+            "minimumGlobalSeparation": float(minimum_separation),
+            "boundFractionTolerance": float(bound_fraction_tolerance),
+            "useDeviancePerEntryValidation": bool(use_deviance_per_entry_validation),
+            "maximumPoissonDeviancePerEntry": (
+                float(maximum_poisson_deviance_per_entry)
+                if maximum_poisson_deviance_per_entry is not None
+                else None
+            ),
             "per_aero_fallback": False,
             "peak_pair_found": False,
             "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
@@ -1443,6 +1599,21 @@ def _fit_global_timing_shape_with_bounds(
         "uncertainties": uncertainties,
         "fit_min": float(fit_min),
         "fit_max": float(fit_max),
+        "kaonMeanMin": float(kaon_mean_min),
+        "kaonMeanMax": float(kaon_mean_max),
+        "protonMeanMin": float(proton_mean_min),
+        "protonMeanMax": float(proton_mean_max),
+        "sigmaMin": float(sigma_min),
+        "sigmaMax": float(sigma_max),
+        "sigmaInitial": float(initial_sigma),
+        "minimumGlobalSeparation": float(minimum_separation),
+        "boundFractionTolerance": float(bound_fraction_tolerance),
+        "useDeviancePerEntryValidation": bool(use_deviance_per_entry_validation),
+        "maximumPoissonDeviancePerEntry": (
+            float(maximum_poisson_deviance_per_entry)
+            if maximum_poisson_deviance_per_entry is not None
+            else None
+        ),
         "per_aero_fallback": False,
         "peak_pair_found": False,
         "applied_mean_offset": 0.0,
@@ -2111,13 +2282,25 @@ def _fit_global_timing_shape(
             max(1.5, 0.75 * minimum_amplitude_significance),
             max(40, int(0.5 * minimum_entries)),
         )
-    bounds = _resolve_standard_peak_bounds(
-        histogram,
-        display_min,
-        display_max,
-        proton_peak_is_lower,
-        beam_bunch_spacing_ns,
-    )
+    fixed_bounds = config.get("probe_fixed_bounds")
+    if fixed_bounds:
+        bounds = {
+            "kaon_mean_min": float(fixed_bounds.get("kaonMeanMin")),
+            "kaon_mean_max": float(fixed_bounds.get("kaonMeanMax")),
+            "proton_mean_min": float(fixed_bounds.get("protonMeanMin")),
+            "proton_mean_max": float(fixed_bounds.get("protonMeanMax")),
+            "sigma_max": float(fixed_bounds.get("sigmaMax", sigma_max)),
+            "sigma_initial": float(fixed_bounds.get("sigmaInitial", global_cfg.get("initial_sigma", 0.15) or 0.15)),
+            "peak_pair_found": False,
+        }
+    else:
+        bounds = _resolve_standard_peak_bounds(
+            histogram,
+            display_min,
+            display_max,
+            proton_peak_is_lower,
+            beam_bunch_spacing_ns,
+        )
     shape = _fit_global_timing_shape_with_bounds(
         histogram,
         function_name,
@@ -2171,7 +2354,26 @@ def _summarize_global_probe(
         if valid_shapes
         else float("inf")
     )
+    poisson_ndf_values = [
+        float(shape.get("poisson_deviance_ndf"))
+        for shape in valid_shapes
+        if shape.get("poisson_deviance_ndf") is not None
+        and math.isfinite(float(shape.get("poisson_deviance_ndf")))
+    ]
+    poisson_per_entry_values = [
+        float(shape.get("poisson_deviance_per_entry"))
+        for shape in valid_shapes
+        if shape.get("poisson_deviance_per_entry") is not None
+        and math.isfinite(float(shape.get("poisson_deviance_per_entry")))
+    ]
+    mean_poisson_deviance_ndf = (
+        float(np.mean(poisson_ndf_values)) if poisson_ndf_values else float("inf")
+    )
+    mean_poisson_deviance_per_entry = (
+        float(np.mean(poisson_per_entry_values)) if poisson_per_entry_values else float("inf")
+    )
     peak_pair_found = bool(any(shape.get("peak_pair_found") for shape in active_shapes))
+    representative_shape = active_shapes[0] if active_shapes else {}
     return {
         "branch": str(branch_name),
         "probe_kind": str(probe_kind),
@@ -2184,9 +2386,22 @@ def _summarize_global_probe(
         "histogramBins": int(histogram_bins),
         "validShapes": int(len(valid_shapes)),
         "meanSeparation": float(mean_separation),
-        "meanPoissonDevianceNdf": float(mean_chi2_ndf),
-        "meanPoissonDeviancePerEntry": float(mean_chi2_per_abs_entry),
+        "meanPoissonDevianceNdf": float(mean_poisson_deviance_ndf),
+        "meanPoissonDeviancePerEntry": float(mean_poisson_deviance_per_entry),
+        "meanChi2Ndf": float(mean_chi2_ndf),
+        "meanChi2PerAbsEntry": float(mean_chi2_per_abs_entry),
         "peakPairFound": bool(peak_pair_found),
+        "kaonMeanMin": representative_shape.get("kaonMeanMin"),
+        "kaonMeanMax": representative_shape.get("kaonMeanMax"),
+        "protonMeanMin": representative_shape.get("protonMeanMin"),
+        "protonMeanMax": representative_shape.get("protonMeanMax"),
+        "sigmaMin": representative_shape.get("sigmaMin"),
+        "sigmaMax": representative_shape.get("sigmaMax"),
+        "sigmaInitial": representative_shape.get("sigmaInitial"),
+        "minimumGlobalSeparation": representative_shape.get("minimumGlobalSeparation"),
+        "boundFractionTolerance": representative_shape.get("boundFractionTolerance"),
+        "useDeviancePerEntryValidation": representative_shape.get("useDeviancePerEntryValidation"),
+        "maximumPoissonDeviancePerEntry": representative_shape.get("maximumPoissonDeviancePerEntry"),
         "perAeroMultistart": str(fit_mode) == "per_aero_multistart",
         "localPeakRescue": str(fit_mode) == "local_peak_rescue",
         "proton_peak_is_lower": bool(proton_peak_is_lower),
@@ -2233,6 +2448,7 @@ def _run_timing_probe(
     proton_peak_is_lower,
     probe_kind,
     fit_mode,
+    selection_key="nommcuts",
 ):
     beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
     probe_config = deepcopy(config)
@@ -2240,22 +2456,43 @@ def _run_timing_probe(
     global_cfg["beam_bunch_spacing_ns"] = float(beam_bunch_spacing_ns)
     probe_config["global_fit"] = global_cfg
     display_range = None
+    rf_discovery_diagnostics = {}
     if str(probe_kind) == "rf":
-        display_range = _resolve_rf_probe_display_range(
+        display_range, rf_discovery_diagnostics = _resolve_rf_probe_display_range(
             source_bundle,
             evaluate_event,
             hole_contains,
             mm_min,
             mm_max,
             timing_branch,
+            selection_key=selection_key,
+            source_names=("prompt",),
+            return_diagnostics=True,
         )
     else:
-        display_range = tuple(PROTON_CLEANING_EXACT_TIMING_RANGE)
-    time_hist_bins = _resolve_probe_time_histogram_bins(
-        source_bundle,
-        probe_kind,
-        display_range,
-    )
+        ct_probe_config = _resolve_ct_probe_configuration(source_bundle)
+        display_range = tuple(ct_probe_config["display_range"])
+        probe_config["global_fit"] = {
+            **dict(probe_config.get("global_fit") or {}),
+            **dict(ct_probe_config.get("global_fit") or {}),
+            "beam_bunch_spacing_ns": float(beam_bunch_spacing_ns),
+        }
+        probe_config["probe_fixed_bounds"] = {
+            "kaonMeanMin": ct_probe_config["kaonMeanMin"],
+            "kaonMeanMax": ct_probe_config["kaonMeanMax"],
+            "protonMeanMin": ct_probe_config["protonMeanMin"],
+            "protonMeanMax": ct_probe_config["protonMeanMax"],
+            "sigmaMax": ct_probe_config["sigmaMax"],
+            "sigmaInitial": ct_probe_config["sigmaInitial"],
+        }
+    if str(probe_kind) == "ct":
+        time_hist_bins = int(_resolve_ct_probe_configuration(source_bundle)["histogram_bins"])
+    else:
+        time_hist_bins = _resolve_probe_time_histogram_bins(
+            source_bundle,
+            probe_kind,
+            display_range,
+        )
     pid_payload = _build_signed_pid_histograms(
         source_bundle,
         config,
@@ -2267,6 +2504,7 @@ def _run_timing_probe(
         timing_branch=str(timing_branch),
         time_hist_range=display_range,
         time_hist_bins=time_hist_bins,
+        selection_key=selection_key,
     )
     global_shapes = []
     for aero_index, slice_hist in enumerate(pid_payload["global_slice_hists"]):
@@ -2282,7 +2520,7 @@ def _run_timing_probe(
             fit_mode=fit_mode,
         )
         global_shapes.append(shape)
-    return _summarize_global_probe(
+    summary = _summarize_global_probe(
         timing_branch,
         probe_kind,
         fit_mode,
@@ -2290,6 +2528,27 @@ def _run_timing_probe(
         global_shapes,
         proton_peak_is_lower,
     )
+    summary["selection_key"] = str(selection_key)
+    if str(probe_kind) == "ct":
+        ct_probe_config = _resolve_ct_probe_configuration(source_bundle)
+        for key in (
+            "kaonMeanMin",
+            "kaonMeanMax",
+            "protonMeanMin",
+            "protonMeanMax",
+            "sigmaMin",
+            "sigmaMax",
+            "sigmaInitial",
+            "minimumGlobalSeparation",
+            "boundFractionTolerance",
+            "useDeviancePerEntryValidation",
+            "maximumPoissonDeviancePerEntry",
+        ):
+            if summary.get(key) is None and key in ct_probe_config:
+                summary[key] = ct_probe_config[key]
+    for key, value in rf_discovery_diagnostics.items():
+        summary[key] = value
+    return summary
 
 
 def _find_collection_bin(value, edges):
@@ -2447,6 +2706,7 @@ def _build_signed_pid_histograms(
     timing_branch,
     time_hist_range=None,
     time_hist_bins=None,
+    selection_key="nommcuts",
 ):
     aero_edges = [float(edge) for edge in (config.get("aero_slice_edges") or (0.0, 3.0, 6.0, 10.0, 15.0, 25.0))]
     aero_min, aero_max = [float(value) for value in (config.get("aero_hist_range") or (0.0, 25.0))]
@@ -2533,7 +2793,12 @@ def _build_signed_pid_histograms(
                 "entries_seen": int(prepared_stats.get("entries_seen", 0) or 0),
                 "entries_prepared": int(prepared_stats.get("entries_prepared", 0) or 0),
                 "entries_passing_nommcuts": 0,
+                "entries_passing_selection": 0,
                 "entries_missing_CTime_ROC1": 0,
+                "entries_missing_timing_branch": 0,
+                "entries_missing_selected_timing_branch": 0,
+                "timing_branch": str(timing_branch),
+                "selection_key": str(selection_key),
                 "entries_outside_timing_range": 0,
                 "entries_outside_aerogel_range": 0,
                 "entries_outside_delta_range": 0,
@@ -2544,13 +2809,16 @@ def _build_signed_pid_histograms(
             if fit_coefficient == 0.0:
                 continue
             for entry_payload in (((source_spec or {}).get("entries") or {}).values()):
-                if not bool((entry_payload or {}).get("nommcuts", False)):
+                if not bool((entry_payload or {}).get(selection_key, False)):
                     continue
                 source_stats[source_name]["entries_passing_nommcuts"] += 1
+                source_stats[source_name]["entries_passing_selection"] += 1
                 aero_value = float((entry_payload or {}).get("aero_value", 0.0) or 0.0)
                 timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(timing_branch))
                 if timing_value is None:
                     source_stats[source_name]["entries_missing_CTime_ROC1"] += 1
+                    source_stats[source_name]["entries_missing_timing_branch"] += 1
+                    source_stats[source_name]["entries_missing_selected_timing_branch"] += 1
                     continue
                 timing_value = float(timing_value)
                 delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
@@ -2597,7 +2865,12 @@ def _build_signed_pid_histograms(
                 "entries_seen": 0,
                 "entries_prepared": 0,
                 "entries_passing_nommcuts": 0,
+                "entries_passing_selection": 0,
                 "entries_missing_CTime_ROC1": 0,
+                "entries_missing_timing_branch": 0,
+                "entries_missing_selected_timing_branch": 0,
+                "timing_branch": str(timing_branch),
+                "selection_key": str(selection_key),
                 "entries_outside_timing_range": 0,
                 "entries_outside_aerogel_range": 0,
                 "entries_outside_delta_range": 0,
@@ -2614,11 +2887,14 @@ def _build_signed_pid_histograms(
                 if not (nommcuts and not hole_rejected):
                     continue
                 source_stats[source_name]["entries_passing_nommcuts"] += 1
+                source_stats[source_name]["entries_passing_selection"] += 1
                 aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
                 try:
                     timing_value = float(getattr(evt, str(timing_branch)))
                 except Exception:
                     source_stats[source_name]["entries_missing_CTime_ROC1"] += 1
+                    source_stats[source_name]["entries_missing_timing_branch"] += 1
+                    source_stats[source_name]["entries_missing_selected_timing_branch"] += 1
                     continue
                 delta_value = float(getattr(evt, "ssdelta", 0.0))
                 if (timing_value < time_min) or (timing_value > time_max):
@@ -2670,7 +2946,13 @@ def _resolve_probe_time_histogram_bins(source_bundle, probe_kind, display_range)
             80,
             int(round(candidate_width / 0.0305)),
         )
-    return int(PROTON_CLEANING_EXACT_TIMING_BINS)
+    return int(_resolve_ct_probe_configuration(source_bundle)["histogram_bins"])
+
+
+def _prepared_selection_has_entries(source_bundle, selection_key):
+    for _, _, _, _ in _iter_prepared_records(source_bundle, selection_key=selection_key):
+        return True
+    return False
 
 
 def build_kaon_proton_cleaning_result(
@@ -2759,10 +3041,18 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["implementation"] = (
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
     )
-    result["diagnostics"]["exact_mode_constants"] = {
-        "timing_branch": PROTON_CLEANING_EXACT_TIMING_BRANCH,
-        "ctime_hist_range": list(PROTON_CLEANING_EXACT_TIMING_RANGE),
-        "ctime_hist_bins": int(PROTON_CLEANING_EXACT_TIMING_BINS),
+    ct_probe_base_configuration = _resolve_ct_probe_configuration(source_bundle)
+    result["diagnostics"]["ct_probe_base_configuration"] = {
+        "timing_branch": ct_probe_base_configuration["timing_branch"],
+        "ctime_hist_range": list(ct_probe_base_configuration["display_range"]),
+        "ctime_hist_bins": int(ct_probe_base_configuration["histogram_bins"]),
+        "kaonMeanMin": ct_probe_base_configuration["kaonMeanMin"],
+        "kaonMeanMax": ct_probe_base_configuration["kaonMeanMax"],
+        "protonMeanMin": ct_probe_base_configuration["protonMeanMin"],
+        "protonMeanMax": ct_probe_base_configuration["protonMeanMax"],
+        "sigmaMin": ct_probe_base_configuration["sigmaMin"],
+        "sigmaMax": ct_probe_base_configuration["sigmaMax"],
+        "sigmaInitial": ct_probe_base_configuration["sigmaInitial"],
         "aero_slice_edges": list(PROTON_CLEANING_EXACT_AERO_EDGES),
         "delta_hist_range": list(PROTON_CLEANING_EXACT_DELTA_RANGE),
         "delta_bins": int(PROTON_CLEANING_EXACT_DELTA_BINS),
@@ -2830,7 +3120,7 @@ def build_kaon_proton_cleaning_result(
                 best = candidate_probe
         return best
 
-    def _run_probe_set(fit_mode):
+    def _run_probe_set(fit_mode, selection_key="nommcuts"):
         rf_probe_list = []
         for rf_branch in _resolve_rf_branch_candidates(source_bundle, exact_config):
             rf_probe_list.append(
@@ -2846,6 +3136,7 @@ def build_kaon_proton_cleaning_result(
                     proton_peak_is_lower=True,
                     probe_kind="rf",
                     fit_mode=fit_mode,
+                    selection_key=selection_key,
                 )
             )
         ct_probe = _run_timing_probe(
@@ -2860,49 +3151,103 @@ def build_kaon_proton_cleaning_result(
             proton_peak_is_lower=False,
             probe_kind="ct",
             fit_mode=fit_mode,
+            selection_key=selection_key,
         )
         return rf_probe_list, ct_probe, _best_rf_probe(rf_probe_list)
 
-    probe_stage_plan = (
-        ("per_aero_multistart", "per_aerogel_multistart_default"),
-        ("standard", "standard_fit_fallback"),
-        ("local_peak_rescue", "local_peak_rescue"),
-    )
     selected_probe = None
-    selected_stage_prefix = ""
+    selected_stage_prefix = "per_aerogel_multistart_default"
     selected_stage_rf_probes = []
     selected_stage_ct_probe = None
     selected_stage_best_rf_probe = None
     probe_stage_summaries = []
+    timing_fit_used_pre_diamond_fallback = False
+    timing_fit_used_local_peak_rescue = False
 
-    for fit_mode, reason_prefix in probe_stage_plan:
-        rf_probes, ct_probe, best_rf_probe = _run_probe_set(fit_mode)
+    def _append_probe_stage(fit_mode, reason_prefix, selection_key):
+        rf_probes, ct_probe, best_rf_probe = _run_probe_set(
+            fit_mode,
+            selection_key=selection_key,
+        )
+        acceptance_mode = (
+            "pre_diamond" if str(selection_key) == "pre_diamond_nommcuts" else "inside_diamond"
+        )
         stage_summary = {
             "fit_mode": str(fit_mode),
+            "acceptance_mode": acceptance_mode,
             "reason_prefix": str(reason_prefix),
+            "stage_trigger_reason": str(reason_prefix),
+            "selection_key": str(selection_key),
             "rf_probes": [_summary_without_root_payload(probe) for probe in rf_probes],
             "ct_probe": _summary_without_root_payload(ct_probe),
             "best_rf_probe": _summary_without_root_payload(best_rf_probe),
         }
         probe_stage_summaries.append(stage_summary)
-        best_valid_count = max(
+        return rf_probes, ct_probe, best_rf_probe, max(
             int((best_rf_probe or {}).get("validShapes", 0) or 0),
             int((ct_probe or {}).get("validShapes", 0) or 0),
         )
+
+    rf_probes, ct_probe, best_rf_probe, best_valid_count = _append_probe_stage(
+        "per_aero_multistart",
+        "per_aerogel_multistart_default",
+        "nommcuts",
+    )
+    selected_probe = ct_probe
+    selected_stage_prefix = "per_aerogel_multistart_default"
+    selected_stage_rf_probes = rf_probes
+    selected_stage_ct_probe = ct_probe
+    selected_stage_best_rf_probe = best_rf_probe
+
+    if best_valid_count <= 0:
+        rf_probes, ct_probe, best_rf_probe, best_valid_count = _append_probe_stage(
+            "standard",
+            "standard_fit_fallback",
+            "nommcuts",
+        )
         selected_probe = ct_probe
-        selected_stage_prefix = reason_prefix
+        selected_stage_prefix = "standard_fit_fallback"
         selected_stage_rf_probes = rf_probes
         selected_stage_ct_probe = ct_probe
         selected_stage_best_rf_probe = best_rf_probe
-        if best_valid_count > 0 or fit_mode == probe_stage_plan[-1][0]:
-            break
+
+    if best_valid_count <= 0 and _prepared_selection_has_entries(source_bundle, "pre_diamond_nommcuts"):
+        timing_fit_used_pre_diamond_fallback = True
+        rf_probes, ct_probe, best_rf_probe, best_valid_count = _append_probe_stage(
+            "standard",
+            "pre_diamond_fit_fallback",
+            "pre_diamond_nommcuts",
+        )
+        selected_probe = ct_probe
+        selected_stage_prefix = "pre_diamond_fit_fallback"
+        selected_stage_rf_probes = rf_probes
+        selected_stage_ct_probe = ct_probe
+        selected_stage_best_rf_probe = best_rf_probe
+
+    if timing_fit_used_pre_diamond_fallback and best_valid_count <= 0:
+        timing_fit_used_local_peak_rescue = True
+        rf_probes, ct_probe, best_rf_probe, best_valid_count = _append_probe_stage(
+            "local_peak_rescue",
+            "local_peak_rescue",
+            "pre_diamond_nommcuts",
+        )
+        selected_probe = ct_probe
+        selected_stage_prefix = "local_peak_rescue"
+        selected_stage_rf_probes = rf_probes
+        selected_stage_ct_probe = ct_probe
+        selected_stage_best_rf_probe = best_rf_probe
 
     best_rf_probe = selected_stage_best_rf_probe
     ct_probe = selected_stage_ct_probe
     rf_probe_count = len(selected_stage_rf_probes or [])
+    local_rescue_active = bool(
+        timing_fit_used_local_peak_rescue
+        or (best_rf_probe or {}).get("localPeakRescue", False)
+        or (ct_probe or {}).get("localPeakRescue", False)
+    )
     rescue_rf_peak_pair_tiebreak = bool(
         best_rf_probe
-        and str(selected_probe.get("fit_mode", "")) == "local_peak_rescue"
+        and local_rescue_active
         and int(best_rf_probe.get("validShapes", 0) or 0) == 0
         and int((ct_probe or {}).get("validShapes", 0) or 0) == 0
         and bool(best_rf_probe.get("peakPairFound", False))
@@ -2927,9 +3272,7 @@ def build_kaon_proton_cleaning_result(
     if select_rf:
         selected_probe = best_rf_probe
         if rescue_rf_peak_pair_tiebreak:
-            timing_selection_reason = "rf_local_peak_rescue_peak_pair_tiebreak"
-        elif rf_probe_count <= 1:
-            timing_selection_reason = "rf_resolved_single_candidate"
+            timing_selection_reason = "rf_resolved_peak_pair_used_after_all_fit_validation_failed"
         elif int(rf_compare_to_ct or 0) == 0:
             timing_selection_reason = "rf_won_exact_probe_tie"
         else:
@@ -2960,13 +3303,13 @@ def build_kaon_proton_cleaning_result(
         or PROTON_CLEANING_EXACT_TIMING_BRANCH
     )
     selected_time_hist_range = tuple(pid_payload.get("time_hist_range") or (
-        float(selected_probe.get("displayMin", PROTON_CLEANING_EXACT_TIMING_RANGE[0])),
-        float(selected_probe.get("displayMax", PROTON_CLEANING_EXACT_TIMING_RANGE[1])),
+        float(selected_probe.get("displayMin", ct_probe_base_configuration["display_range"][0])),
+        float(selected_probe.get("displayMax", ct_probe_base_configuration["display_range"][1])),
     ))
     selected_time_hist_bins = int(
         pid_payload.get("time_hist_bins")
         or selected_probe.get("histogramBins")
-        or PROTON_CLEANING_EXACT_TIMING_BINS
+        or ct_probe_base_configuration["histogram_bins"]
     )
     exact_config["selected_timing_branch"] = selected_time_branch
     exact_config["selected_timing_probe_kind"] = str(selected_probe.get("probe_kind", "ct"))
@@ -2974,6 +3317,21 @@ def build_kaon_proton_cleaning_result(
     exact_config["selected_proton_peak_is_lower"] = bool(selected_probe.get("proton_peak_is_lower", False))
     exact_config["ctime_hist_range"] = tuple(selected_time_hist_range)
     exact_config["ctime_hist_bins"] = int(selected_time_hist_bins)
+    for selected_key in (
+        "kaonMeanMin",
+        "kaonMeanMax",
+        "protonMeanMin",
+        "protonMeanMax",
+        "sigmaMin",
+        "sigmaMax",
+        "sigmaInitial",
+        "minimumGlobalSeparation",
+        "boundFractionTolerance",
+        "useDeviancePerEntryValidation",
+        "maximumPoissonDeviancePerEntry",
+    ):
+        if selected_probe.get(selected_key) is not None:
+            exact_config[selected_key] = selected_probe.get(selected_key)
 
     valid_global_shape_count = int(selected_probe.get("validShapes", 0) or 0)
 
@@ -2981,15 +3339,13 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["rf_timing_attempted"] = bool(rf_probe_count > 0)
     result["diagnostics"]["ct_timing_evaluated"] = True
     result["diagnostics"]["timingFitUsedPerAeroDefault"] = (
-        str(selected_probe.get("fit_mode", "")) == "per_aero_multistart"
+        str(selected_stage_prefix) == "per_aerogel_multistart_default"
     )
     result["diagnostics"]["timingFitUsedStandardFallback"] = (
-        str(selected_probe.get("fit_mode", "")) == "standard"
+        str(selected_stage_prefix) == "standard_fit_fallback"
     )
-    result["diagnostics"]["timingFitUsedPreDiamondFallback"] = False
-    result["diagnostics"]["timingFitUsedLocalPeakRescue"] = (
-        str(selected_probe.get("fit_mode", "")) == "local_peak_rescue"
-    )
+    result["diagnostics"]["timingFitUsedPreDiamondFallback"] = bool(timing_fit_used_pre_diamond_fallback)
+    result["diagnostics"]["timingFitUsedLocalPeakRescue"] = bool(timing_fit_used_local_peak_rescue)
     result["diagnostics"]["timing_probe_policy"] = str(
         exact_config.get("timing_probe_policy", "rf_then_ct_best")
     )
@@ -3034,6 +3390,14 @@ def build_kaon_proton_cleaning_result(
     result["delta_edges"] = pid_payload.get("delta_edges") or []
     result["diagnostics"]["selected_time_hist_range"] = list(selected_time_hist_range)
     result["diagnostics"]["selected_time_hist_bins"] = int(selected_time_hist_bins)
+    result["diagnostics"]["selected_kaonMeanMin"] = selected_probe.get("kaonMeanMin")
+    result["diagnostics"]["selected_kaonMeanMax"] = selected_probe.get("kaonMeanMax")
+    result["diagnostics"]["selected_protonMeanMin"] = selected_probe.get("protonMeanMin")
+    result["diagnostics"]["selected_protonMeanMax"] = selected_probe.get("protonMeanMax")
+    result["diagnostics"]["selected_sigmaMin"] = selected_probe.get("sigmaMin")
+    result["diagnostics"]["selected_sigmaMax"] = selected_probe.get("sigmaMax")
+    result["diagnostics"]["selected_sigmaInitial"] = selected_probe.get("sigmaInitial")
+    result["diagnostics"]["selected_boundFractionTolerance"] = selected_probe.get("boundFractionTolerance")
     global_shape_debug_rows = []
     for aero_index, shape in enumerate(global_shapes):
         row = {
@@ -3671,10 +4035,28 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         "RF probe candidates: {}".format(
             ", ".join(diagnostics.get("rf_branch_candidates") or []) or "none"
         ),
-        "Exact timing branch/range/bins: {} {} {}".format(
+        "Selected timing branch/range/bins: {} {} {}".format(
             diagnostics.get("selected_timing_branch", PROTON_CLEANING_EXACT_TIMING_BRANCH),
             tuple(diagnostics.get("selected_time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE),
             int(diagnostics.get("selected_time_hist_bins", PROTON_CLEANING_EXACT_TIMING_BINS) or PROTON_CLEANING_EXACT_TIMING_BINS),
+        ),
+        "CT probe branch/range/bins: {} {} {}".format(
+            (diagnostics.get("ct_probe_base_configuration") or {}).get(
+                "timing_branch",
+                PROTON_CLEANING_EXACT_TIMING_BRANCH,
+            ),
+            tuple(
+                (diagnostics.get("ct_probe_base_configuration") or {}).get(
+                    "ctime_hist_range",
+                    PROTON_CLEANING_EXACT_TIMING_RANGE,
+                )
+            ),
+            int(
+                (diagnostics.get("ct_probe_base_configuration") or {}).get(
+                    "ctime_hist_bins",
+                    PROTON_CLEANING_EXACT_TIMING_BINS,
+                )
+            ),
         ),
         "Exact aero edges: {}".format(
             tuple(
@@ -3718,6 +4100,18 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             "RF timing selected: {}".format("yes" if diagnostics.get("rf_timing_selected") else "no"),
             "Best RF compare-to-CT: {}".format(diagnostics.get("rf_compare_to_ct", "n/a")),
             "Timing selection reason: {}".format(diagnostics.get("timingSelectionReason", "unknown")),
+            _format_probe_summary_for_log(
+                "Selected probe",
+                diagnostics.get("selected_probe_summary"),
+            ),
+            _format_probe_summary_for_log(
+                "Best RF probe",
+                diagnostics.get("best_rf_probe_summary"),
+            ),
+            _format_probe_summary_for_log(
+                "CT probe",
+                diagnostics.get("ct_probe_summary"),
+            ),
             "Supported delta bins: {}".format(supported_delta_bins),
             "Marginal delta bins: {}".format(marginal_delta_bins),
             "Unsupported delta bins: {}".format(unsupported_delta_bins),
@@ -3791,10 +4185,13 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         _print_proton_debug(
             "prepared source {}".format(source_name),
             tree_name=prep_stats.get("tree_name") or pid_stats.get("tree_name") or "missing",
+            timing_branch=pid_stats.get("timing_branch", diagnostics.get("selected_timing_branch", "unknown")),
+            selection_key=pid_stats.get("selection_key", "unknown"),
             entries_seen=prep_stats.get("entries_seen", pid_stats.get("entries_seen", 0)),
             entries_prepared=prep_stats.get("entries_prepared", 0),
             entries_passing_nommcuts=pid_stats.get("entries_passing_nommcuts", 0),
-            entries_missing_CTime_ROC1=pid_stats.get("entries_missing_CTime_ROC1", 0),
+            entries_passing_selection=pid_stats.get("entries_passing_selection", 0),
+            entries_missing_selected_timing_branch=pid_stats.get("entries_missing_selected_timing_branch", 0),
             entries_outside_timing_range=pid_stats.get("entries_outside_timing_range", 0),
             entries_outside_aerogel_range=pid_stats.get("entries_outside_aerogel_range", 0),
             entries_outside_delta_range=pid_stats.get("entries_outside_delta_range", 0),
