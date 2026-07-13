@@ -80,7 +80,7 @@ PROTON_CLEANING_EXACT_AERO_RANGE = (0.0, 25.0)
 PROTON_CLEANING_EXACT_DELTA_RANGE = (-10.0, 20.0)
 PROTON_CLEANING_EXACT_DELTA_BINS = 10
 PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE = (0.70, 1.50)
-PROTON_CLEANING_EXACT_FIT_OPTIONS = "SRLQ0"
+PROTON_CLEANING_EXACT_FIT_OPTIONS = "SRLIQ0"
 PROTON_CLEANING_EXACT_GLOBAL_FIT = {
     "kaon_mean_range": (-0.45, 0.20),
     "proton_mean_range": (0.20, 0.95),
@@ -88,11 +88,15 @@ PROTON_CLEANING_EXACT_GLOBAL_FIT = {
     "initial_sigma": 0.15,
     "minimum_separation": 0.75,
     "minimum_amplitude_significance": 2.0,
+    "maximum_poisson_deviance_ndf": 5.0,
+    "maximum_poisson_deviance_per_entry": 0.85,
     "maximum_chi2_ndf": 5.0,
     "bound_fraction_tolerance": 0.02,
     "minimum_entries": 200,
 }
 PROTON_CLEANING_EXACT_SLICE_FIT = {
+    "maximum_poisson_deviance_ndf": 5.0,
+    "maximum_poisson_deviance_per_entry": 1.0,
     "maximum_chi2_ndf": 5.0,
     "minimum_model_data_ratio": 0.50,
     "maximum_model_data_ratio": 1.50,
@@ -1303,6 +1307,17 @@ def _fit_global_timing_shape_with_bounds(
         if abs(fitted_entries) > 0.0 and math.isfinite(float(chi2_data))
         else None
     )
+    goodness = _compute_poisson_goodness_of_fit(
+        histogram,
+        fit_function,
+        fit_min,
+        fit_max,
+        7,
+    )
+    poisson_deviance = float(goodness.get("deviance", 0.0) or 0.0)
+    poisson_ndf = int(goodness.get("ndf", 0) or 0)
+    poisson_deviance_ndf = goodness.get("deviance_ndf")
+    poisson_deviance_per_entry = goodness.get("deviance_per_entry")
     kaon_amp_err = float(fit_function.GetParError(0))
     proton_amp_err = float(fit_function.GetParError(3))
     separation_denominator = math.sqrt(max((kaon_sigma ** 2) + (proton_sigma ** 2), 0.0))
@@ -1324,7 +1339,9 @@ def _fit_global_timing_shape_with_bounds(
     )
     kaon_significance = float(kaon_amplitude / kaon_amp_err) if kaon_amp_err > 0.0 else 0.0
     proton_significance = float(proton_amplitude / proton_amp_err) if proton_amp_err > 0.0 else 0.0
-    chi2_ndf_valid = bool(chi2_ndf is not None and math.isfinite(float(chi2_ndf)))
+    poisson_ndf_valid = bool(
+        poisson_deviance_ndf is not None and math.isfinite(float(poisson_deviance_ndf))
+    )
     finite_parameters = (
         math.isfinite(float(kaon_amplitude))
         and math.isfinite(float(proton_amplitude))
@@ -1357,10 +1374,19 @@ def _fit_global_timing_shape_with_bounds(
         rejection_reasons.append("low_kaon_significance")
     if proton_significance < float(minimum_amplitude_significance):
         rejection_reasons.append("low_proton_significance")
-    if not chi2_ndf_valid:
-        rejection_reasons.append("invalid_chi2_ndf")
-    elif float(chi2_ndf) > float(maximum_chi2_ndf):
-        rejection_reasons.append("chi2_ndf_exceeds_max")
+    if not poisson_ndf_valid:
+        rejection_reasons.append("invalid_poisson_deviance_ndf")
+    else:
+        if bool(use_deviance_per_entry_validation):
+            if (
+                poisson_deviance_per_entry is None
+                or not math.isfinite(float(poisson_deviance_per_entry))
+            ):
+                rejection_reasons.append("invalid_poisson_deviance_per_entry")
+            elif float(poisson_deviance_per_entry) > float(maximum_poisson_deviance_per_entry):
+                rejection_reasons.append("poisson_deviance_per_entry_exceeds_max")
+        elif float(poisson_deviance_ndf) > float(maximum_chi2_ndf):
+            rejection_reasons.append("poisson_deviance_ndf_exceeds_max")
     valid = len(rejection_reasons) == 0
     return {
         "valid": bool(valid),
@@ -1384,10 +1410,14 @@ def _fit_global_timing_shape_with_bounds(
         "chi2_data": chi2_data,
         "chi2_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
         "chi2_per_abs_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
-        "poisson_deviance": chi2_data,
-        "poisson_deviance_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
-        "poisson_deviance_per_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
-        "goodness_ndf": int(fit_ndf),
+        "poisson_deviance": float(poisson_deviance),
+        "poisson_deviance_ndf": float(poisson_deviance_ndf) if poisson_deviance_ndf is not None else None,
+        "poisson_deviance_per_entry": (
+            float(poisson_deviance_per_entry)
+            if poisson_deviance_per_entry is not None
+            else None
+        ),
+        "goodness_ndf": int(poisson_ndf),
         "fitted_entries": float(fitted_entries),
         "active_bin_count": active_bin_count,
         "excluded_invalid_variance_bins": 0,
@@ -1819,6 +1849,17 @@ def _fit_delta_timing_slice(
         if abs(data_yield) > 0.0 and math.isfinite(float(chi2_data))
         else None
     )
+    goodness = _compute_poisson_goodness_of_fit(
+        histogram,
+        fit_function,
+        fit_min,
+        fit_max,
+        3,
+    )
+    poisson_deviance = float(goodness.get("deviance", 0.0) or 0.0)
+    poisson_ndf = int(goodness.get("ndf", 0) or 0)
+    poisson_deviance_ndf = goodness.get("deviance_ndf")
+    poisson_deviance_per_entry = goodness.get("deviance_per_entry")
     active_bin_count = max(0, int(last_fit_bin - first_fit_bin + 1))
     support_snapshot = _build_hist_support_snapshot(
         histogram,
@@ -1837,8 +1878,6 @@ def _fit_delta_timing_slice(
         and math.isfinite(float(other_yield))
     )
     rejection_reasons = []
-    if fit_status_code != 0:
-        rejection_reasons.append("fit_status_{}".format(int(fit_status_code)))
     if not finite_outputs:
         rejection_reasons.append("nonfinite_fit_outputs")
     if model_data_ratio is None or not math.isfinite(float(model_data_ratio)):
@@ -1848,10 +1887,38 @@ def _fit_delta_timing_slice(
             rejection_reasons.append("model_data_ratio_below_min")
         if float(model_data_ratio) > float(slice_cfg.get("maximum_model_data_ratio", 1.50)):
             rejection_reasons.append("model_data_ratio_above_max")
-    if chi2_ndf is None or not math.isfinite(float(chi2_ndf)):
-        rejection_reasons.append("invalid_chi2_ndf")
-    elif float(chi2_ndf) > float(slice_cfg.get("maximum_chi2_ndf", 5.0)):
-        rejection_reasons.append("chi2_ndf_exceeds_max")
+    slice_fit_status_accepted = bool(
+        fit_status_code == 0
+        or (
+            bool(global_shape.get("per_aero_fallback", False))
+            and fit_status_code == 4
+            and poisson_deviance_per_entry is not None
+            and math.isfinite(float(poisson_deviance_per_entry))
+            and float(poisson_deviance_per_entry) <= 0.05
+        )
+    )
+    if not slice_fit_status_accepted:
+        rejection_reasons.append("fit_status_{}".format(int(fit_status_code)))
+    if (
+        poisson_deviance_ndf is None
+        or not math.isfinite(float(poisson_deviance_ndf))
+    ):
+        rejection_reasons.append("invalid_poisson_deviance_ndf")
+    if (
+        poisson_deviance_per_entry is None
+        or not math.isfinite(float(poisson_deviance_per_entry))
+    ):
+        rejection_reasons.append("invalid_poisson_deviance_per_entry")
+    else:
+        if bool(use_deviance_per_entry_validation):
+            if float(poisson_deviance_per_entry) > float(maximum_poisson_deviance_per_entry):
+                rejection_reasons.append("poisson_deviance_per_entry_exceeds_max")
+        elif (
+            poisson_deviance_ndf is not None
+            and math.isfinite(float(poisson_deviance_ndf))
+            and float(poisson_deviance_ndf) > float(slice_cfg.get("maximum_poisson_deviance_ndf", 5.0))
+        ):
+            rejection_reasons.append("poisson_deviance_ndf_exceeds_max")
     if float(kaon_amplitude) < 0.0:
         rejection_reasons.append("negative_kaon_amplitude")
     if float(proton_amplitude) < 0.0:
@@ -1883,10 +1950,18 @@ def _fit_delta_timing_slice(
         "chi2_data": chi2_data,
         "chi2_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
         "chi2_per_abs_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
-        "poisson_deviance": chi2_data,
-        "poisson_deviance_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
-        "poisson_deviance_per_entry": float(chi2_per_abs_entry) if chi2_per_abs_entry is not None else None,
-        "goodness_ndf": int(fit_ndf),
+        "poisson_deviance": float(poisson_deviance),
+        "poisson_deviance_ndf": (
+            float(poisson_deviance_ndf)
+            if poisson_deviance_ndf is not None
+            else None
+        ),
+        "poisson_deviance_per_entry": (
+            float(poisson_deviance_per_entry)
+            if poisson_deviance_per_entry is not None
+            else None
+        ),
+        "goodness_ndf": int(poisson_ndf),
         "fitted_entries": float(data_yield),
         "active_bin_count": active_bin_count,
         "excluded_invalid_variance_bins": 0,
