@@ -2787,6 +2787,9 @@ def rand_sub(
                 histDict["proton_contamination_cleaning_result_setting"] = (
                     serialize_kaon_proton_cleaning_result(proton_cleaning_result)
                 )
+                histDict["_proton_contamination_cleaning_result_setting"] = (
+                    proton_cleaning_result
+                )
                 histDict["proton_contamination_cleaning_setting"] = (
                     summarize_kaon_proton_cleaning_result(proton_cleaning_result)
                 )

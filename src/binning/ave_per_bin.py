@@ -106,6 +106,7 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
+from proton_contamination_weights import get_kaon_proton_cleaning_event_payload
 
 ##################################################################################################################################################
 
@@ -123,18 +124,23 @@ def _fill_cached_ave_section(cache_section, hist_group, t_bins, update_mm_offset
             continue
 
         adj_mm = cache_section["adj_MM"][idx]
+        event_weight = 1.0
+        if "proton_cleaning_factor" in cache_section:
+            event_weight = float(cache_section["proton_cleaning_factor"][idx])
+        if event_weight == 0.0:
+            continue
 
         if cache_section["nommcuts"][idx]:
-            hist_group["fit1sub"][t_index].Fill(adj_mm)
-            hist_group["pisub"][t_index].Fill(adj_mm)
-            hist_group["nosub"][t_index].Fill(adj_mm)
+            hist_group["fit1sub"][t_index].Fill(adj_mm, event_weight)
+            hist_group["pisub"][t_index].Fill(adj_mm, event_weight)
+            hist_group["nosub"][t_index].Fill(adj_mm, event_weight)
 
         if cache_section["allcuts"][idx]:
-            hist_group["t"][t_index].Fill(adj_t)
-            hist_group["Q2"][t_index].Fill(cache_section["Q2"][idx])
-            hist_group["W"][t_index].Fill(cache_section["W"][idx])
-            hist_group["epsilon"][t_index].Fill(cache_section["epsilon"][idx])
-            hist_group["mm"][t_index].Fill(adj_mm)
+            hist_group["t"][t_index].Fill(adj_t, event_weight)
+            hist_group["Q2"][t_index].Fill(cache_section["Q2"][idx], event_weight)
+            hist_group["W"][t_index].Fill(cache_section["W"][idx], event_weight)
+            hist_group["epsilon"][t_index].Fill(cache_section["epsilon"][idx], event_weight)
+            hist_group["mm"][t_index].Fill(adj_mm, event_weight)
             if update_mm_offset:
                 mm_offset_data = cache_section["mm_offset"][idx]
 
@@ -331,7 +337,10 @@ def _fill_ave_background_templates_for_tbin(
                 continue
 
             adj_mm = cache_section["adj_MM"][idx]
-            event_weight = coeff * mm_background_weight_from_value(
+            event_weight = coeff
+            if "proton_cleaning_factor" in cache_section:
+                event_weight *= float(cache_section["proton_cleaning_factor"][idx])
+            event_weight *= mm_background_weight_from_value(
                 adj_mm,
                 mm_reference_hist,
                 mm_background_weights,
@@ -624,6 +633,8 @@ def _process_ave_data_tree(
     mm_max,
     progress_bar,
     update_mm_offset=False,
+    source_label=None,
+    proton_cleaning_result=None,
 ):
     mm_offset_data = None
     total_entries = tree.GetEntries()
@@ -645,21 +656,36 @@ def _process_ave_data_tree(
 
         adj_MM = shifted_mm_getter(evt)
         adj_t = shifted_t_getter(evt)
+        proton_factor = 1.0
+        if (
+            particle_type == "kaon"
+            and isinstance(proton_cleaning_result, dict)
+            and bool(proton_cleaning_result.get("accepted"))
+        ):
+            proton_payload = get_kaon_proton_cleaning_event_payload(
+                proton_cleaning_result,
+                source_label,
+                i,
+                strict=True,
+            )
+            proton_factor = float(
+                proton_payload.get("final_cleaned_factor", 1.0) or 0.0
+            )
         t_index = find_bin_index(adj_t, t_bins)
         if t_index is None:
             continue
 
         if nommcuts:
-            hist_group["fit1sub"][t_index].Fill(adj_MM)
-            hist_group["pisub"][t_index].Fill(adj_MM)
-            hist_group["nosub"][t_index].Fill(adj_MM)
+            hist_group["fit1sub"][t_index].Fill(adj_MM, proton_factor)
+            hist_group["pisub"][t_index].Fill(adj_MM, proton_factor)
+            hist_group["nosub"][t_index].Fill(adj_MM, proton_factor)
 
         if allcuts:
-            hist_group["t"][t_index].Fill(adj_t)
-            hist_group["Q2"][t_index].Fill(evt.Q2)
-            hist_group["W"][t_index].Fill(evt.W)
-            hist_group["epsilon"][t_index].Fill(evt.epsilon)
-            hist_group["mm"][t_index].Fill(adj_MM)
+            hist_group["t"][t_index].Fill(adj_t, proton_factor)
+            hist_group["Q2"][t_index].Fill(evt.Q2, proton_factor)
+            hist_group["W"][t_index].Fill(evt.W, proton_factor)
+            hist_group["epsilon"][t_index].Fill(evt.epsilon, proton_factor)
+            hist_group["mm"][t_index].Fill(adj_MM, proton_factor)
             if update_mm_offset:
                 mm_offset_data = adj_MM - evt.MM
 
@@ -714,6 +740,7 @@ def process_hist_data(
     particle_subtraction_scale_factor=None,
     kaon_signal_shape_payload=None,
     kaon_sigma0_shape_payload=None,
+    proton_cleaning_result=None,
 ):
 
     processed_dict = {}
@@ -756,8 +783,17 @@ def process_hist_data(
     
     ################################################################################################################################################
         
-    prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET)
-    rand_tree_name = get_rand_tree_name(ParticleType, EPSSET)
+    proton_cleaning_active = (
+        ParticleType == "kaon"
+        and isinstance(proton_cleaning_result, dict)
+        and bool(proton_cleaning_result.get("accepted"))
+    )
+    if proton_cleaning_active:
+        prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET, rf_state="noRF")
+        rand_tree_name = get_rand_tree_name(ParticleType, EPSSET, rf_state="noRF")
+    else:
+        prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET)
+        rand_tree_name = get_rand_tree_name(ParticleType, EPSSET)
 
     TBRANCH_DATA  = tree_data.Get(prompt_tree_name)
     TBRANCH_RAND  = tree_data.Get(rand_tree_name)
@@ -923,6 +959,8 @@ def process_hist_data(
             mm_max,
             Misc.progressBar,
             update_mm_offset=True,
+            source_label="prompt",
+            proton_cleaning_result=proton_cleaning_result,
         )
         if mm_offset_from_tree is not None:
             MM_offset_DATA = mm_offset_from_tree
@@ -943,6 +981,8 @@ def process_hist_data(
             mm_min,
             mm_max,
             Misc.progressBar,
+            source_label="dummy_prompt",
+            proton_cleaning_result=proton_cleaning_result,
         )
 
     print("\nBinning rand...")
@@ -961,6 +1001,8 @@ def process_hist_data(
             mm_min,
             mm_max,
             Misc.progressBar,
+            source_label="rand",
+            proton_cleaning_result=proton_cleaning_result,
         )
 
     print("\nBinning dummy_rand...")
@@ -979,6 +1021,8 @@ def process_hist_data(
             mm_min,
             mm_max,
             Misc.progressBar,
+            source_label="dummy_rand",
+            proton_cleaning_result=proton_cleaning_result,
         )
 
     # Pion subtraction by scaling simc to peak size
@@ -1428,6 +1472,7 @@ def bin_data(
     particle_subtraction_scale_factor=None,
     kaon_signal_shape_payload=None,
     kaon_sigma0_shape_payload=None,
+    proton_cleaning_result=None,
 ):
 
     processed_dict = process_hist_data(
@@ -1443,6 +1488,7 @@ def bin_data(
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+        proton_cleaning_result=proton_cleaning_result,
     )
     
     binned_dict = {}
@@ -1580,6 +1626,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         phi_bins,
         "ave_per_bin_sigma0",
     )
+    proton_cleaning_result = hist.get("_proton_contamination_cleaning_result_setting")
     binned_dict = bin_data(
         kinematic_types,
         tree_data,
@@ -1594,6 +1641,7 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+        proton_cleaning_result=proton_cleaning_result,
     )
 
     group_dict = {}

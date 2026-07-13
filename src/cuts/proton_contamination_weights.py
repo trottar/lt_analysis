@@ -177,6 +177,54 @@ def _make_signature(evt, fields, round_digits):
     return tuple(signature)
 
 
+def _make_prepared_event_signature(source_label, entry_index):
+    return "{}:{}".format(str(source_label), int(entry_index))
+
+
+def get_kaon_proton_cleaning_event_payload(
+    cleaning_result,
+    source_label,
+    entry_index,
+    strict=False,
+):
+    if not isinstance(cleaning_result, dict) or not bool(cleaning_result.get("accepted")):
+        return None
+    lookup = cleaning_result.get("_prepared_event_weight_lookup") or {}
+    signature = _make_prepared_event_signature(source_label, entry_index)
+    payload = lookup.get(signature)
+    if payload is None and strict:
+        raise KeyError(
+            "Missing proton-cleaning payload for source '{}' entry {}".format(
+                source_label,
+                int(entry_index),
+            )
+        )
+    return payload
+
+
+def get_kaon_proton_cleaning_event_scale(
+    cleaning_result,
+    source_label,
+    entry_index,
+    strict=False,
+    scale_key="final_cleaned_factor",
+):
+    payload = get_kaon_proton_cleaning_event_payload(
+        cleaning_result,
+        source_label,
+        entry_index,
+        strict=strict,
+    )
+    if payload is None:
+        return None
+    try:
+        return float(payload.get(str(scale_key), 1.0) or 0.0)
+    except Exception:
+        if strict:
+            raise
+        return None
+
+
 def _tree_has_branch(tree, branch_name):
     if tree is None or not branch_name:
         return False
@@ -1060,7 +1108,7 @@ def _fit_global_timing_shape_with_bounds(
         0.0,
         10.0 * histogram_maximum,
     )
-    fit_result = histogram.Fit(fit_function, "SRLIQ0")
+    fit_result = histogram.Fit(fit_function, "SRLQ0")
     fit_status_code = int(fit_result)
     covariance_matrix, correlation_matrix, uncertainties = _extract_root_fit_matrices(
         fit_result,
@@ -1524,7 +1572,7 @@ def _fit_delta_timing_slice(
     fit_function.FixParameter(5, float(global_shape["proton_sigma"]))
     fit_function.SetParameter(6, 0.02 * histogram_maximum)
     fit_function.SetParLimits(6, 0.0, 10.0 * histogram_maximum)
-    fit_result = histogram.Fit(fit_function, "SRLIQ0")
+    fit_result = histogram.Fit(fit_function, "SRLQ0")
     fit_status_code = int(fit_result)
     covariance_matrix, correlation_matrix, uncertainties = _extract_root_fit_matrices(
         fit_result,
@@ -2010,6 +2058,103 @@ def _evaluate_event_proton_probability(
     return max(0.0, min(1.0, float(proton_value / denominator)))
 
 
+def _build_prepared_event_weight_lookup(cleaning_result, source_bundle):
+    if not isinstance(cleaning_result, dict):
+        return {}
+    prepared_sources = _get_prepared_sources(source_bundle)
+    if not prepared_sources:
+        return {}
+
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    config = cleaning_result.get("settings") or {}
+    timing_branch = str(cleaning_result.get("selected_timing_branch") or "CTime_ROC1")
+    denominator_floor = float(
+        ((config.get("weighting") or {}).get("denominator_floor", 1.0e-12))
+    )
+    delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
+    aero_edges = [float(edge) for edge in (cleaning_result.get("aero_edges") or [])]
+    support_by_delta = list(cleaning_result.get("support_by_delta") or [])
+    delta_slice_fits = list(cleaning_result.get("delta_slice_fits") or [])
+    global_shapes = list(cleaning_result.get("global_shapes") or [])
+    lookup = {}
+
+    active_sources = (source_bundle or {}).get("sources") or {}
+    for source_name, source_spec in prepared_sources.items():
+        tree = (active_sources.get(source_name) or {}).get("tree")
+        entry_map = (source_spec or {}).get("entries") or {}
+        if tree is None:
+            for entry_index, entry_payload in entry_map.items():
+                signature = _make_prepared_event_signature(source_name, entry_index)
+                lookup[signature] = {
+                    "source_label": str(source_name),
+                    "source_entry_index": int(entry_index),
+                    "delta_index": -1,
+                    "aero_index": -1,
+                    "support_label": SUPPORT_UNSUPPORTED,
+                    "proton_weight": 0.0,
+                    "cleaned_factor": 1.0,
+                    "rf_accept": True,
+                    "final_cleaned_factor": 1.0,
+                }
+            continue
+
+        for entry_index, evt in enumerate(tree):
+            entry_payload = entry_map.get(int(entry_index))
+            if entry_payload is None:
+                continue
+            delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
+            aero_value = float((entry_payload or {}).get("aero_value", 0.0) or 0.0)
+            delta_index = _find_collection_bin(delta_value, delta_edges)
+            aero_index = _find_collection_bin(aero_value, aero_edges)
+            support_label = SUPPORT_UNSUPPORTED
+            proton_weight = 0.0
+
+            if 0 <= delta_index < len(support_by_delta):
+                support_label = str(support_by_delta[delta_index])
+                if (
+                    support_label in (SUPPORT_SUPPORTED, SUPPORT_MARGINAL)
+                    and 0 <= aero_index < len(global_shapes)
+                    and 0 <= delta_index < len(delta_slice_fits)
+                ):
+                    slice_collection = delta_slice_fits[delta_index] or []
+                    if 0 <= aero_index < len(slice_collection):
+                        timing_value = ((entry_payload or {}).get("timing_values") or {}).get(
+                            str(timing_branch)
+                        )
+                        if timing_value is not None:
+                            proton_weight = _evaluate_event_proton_probability(
+                                float(timing_value),
+                                global_shapes[aero_index],
+                                slice_collection[aero_index],
+                                denominator_floor,
+                            )
+
+            proton_weight = max(0.0, min(1.0, float(proton_weight)))
+            cleaned_factor = max(0.0, min(1.0, 1.0 - proton_weight))
+            rf_accept = apply_low_epsilon_rf_after_proton_cleaning(
+                cleaning_result,
+                source_name,
+                evt,
+            )
+            final_cleaned_factor = cleaned_factor if rf_accept else 0.0
+            signature = _make_prepared_event_signature(source_name, entry_index)
+            lookup[signature] = {
+                "source_label": str(source_name),
+                "source_entry_index": int(entry_index),
+                "delta_index": int(delta_index),
+                "aero_index": int(aero_index),
+                "support_label": str(support_label),
+                "proton_weight": float(proton_weight),
+                "cleaned_factor": float(cleaned_factor),
+                "rf_accept": bool(rf_accept),
+                "final_cleaned_factor": float(final_cleaned_factor),
+            }
+
+    diagnostics["prepared_event_lookup_count"] = int(len(lookup))
+    diagnostics["event_weight_source"] = "setting_wide_immutable_prepared_lookup"
+    return lookup
+
+
 def _build_signed_pid_histograms(
     source_bundle,
     config,
@@ -2287,114 +2432,83 @@ def build_kaon_proton_cleaning_result(
         )
         for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items()
     }
-    ct_time_branch = str(config.get("ct_timing_branch", "CTime_ROC1") or "CTime_ROC1")
+    ct_time_branch = "CTime_ROC1"
+    exact_config = deepcopy(config)
+    exact_config["ct_timing_branch"] = ct_time_branch
+    exact_config["ctime_hist_range"] = (-1.50, 1.25)
+    exact_config["delta_hist_range"] = (-10.0, 20.0)
+    exact_config["delta_bins"] = 10
+    exact_config["aero_slice_edges"] = (0.0, 3.0, 6.0, 10.0, 15.0, 25.0)
+
     rf_candidate_branches = _resolve_rf_branch_candidates(source_bundle)
     result["diagnostics"]["rf_candidate_branches"] = list(rf_candidate_branches)
-    result["diagnostics"]["rf_timing_attempted"] = bool(rf_candidate_branches)
+    result["diagnostics"]["rf_timing_attempted"] = False
     result["diagnostics"]["ct_timing_evaluated"] = True
-    result["diagnostics"]["timingFitUsedPerAeroDefault"] = True
+    result["diagnostics"]["timingFitUsedPerAeroDefault"] = False
     result["diagnostics"]["timingFitUsedStandardFallback"] = False
     result["diagnostics"]["timingFitUsedPreDiamondFallback"] = False
     result["diagnostics"]["timingFitUsedLocalPeakRescue"] = False
 
-    def _probe_summary(probe):
-        if not isinstance(probe, dict):
-            return {}
-        summary = {
-            key: value
-            for key, value in probe.items()
-            if key not in ("pid_payload", "global_shapes")
-        }
-        return _json_ready_value(summary)
+    beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
+    global_cfg = dict(exact_config.get("global_fit") or {})
+    global_cfg["beam_bunch_spacing_ns"] = float(beam_bunch_spacing_ns)
+    exact_config["global_fit"] = global_cfg
 
-    def _best_rf_probe_or_none(probes):
-        best_probe = None
-        for probe in probes or []:
-            if best_probe is None or _compare_timing_probes(probe, best_probe) > 0:
-                best_probe = probe
-        return best_probe
-
-    current_fit_mode = "per_aero_multistart"
-    rf_probes = [
-        _run_timing_probe(
-            source_bundle,
-            config,
-            evaluate_event,
-            shifted_mm_getter,
-            hole_contains,
-            mm_min,
-            mm_max,
-            timing_branch=candidate,
-            proton_peak_is_lower=True,
-            probe_kind="rf",
-            fit_mode=current_fit_mode,
-        )
-        for candidate in rf_candidate_branches
-    ]
-    ct_probe = _run_timing_probe(
+    pid_payload = _build_signed_pid_histograms(
         source_bundle,
-        config,
+        exact_config,
         evaluate_event,
         shifted_mm_getter,
         hole_contains,
         mm_min,
         mm_max,
         timing_branch=ct_time_branch,
-        proton_peak_is_lower=False,
-        probe_kind="ct",
-        fit_mode=current_fit_mode,
+        time_hist_range=(-1.50, 1.25),
+        time_hist_bins=90,
     )
-    best_rf_probe = _best_rf_probe_or_none(rf_probes)
-    rescue_rf_peak_pair_tiebreak = False
-
-    selected_probe = ct_probe
-    timing_selection_reason = "ct_probe_ranked_better_than_rf"
-    if best_rf_probe is None:
-        timing_selection_reason = (
-            "no_rf_branch_ct_selected"
-            if rf_candidate_branches
-            else "rf_disabled_or_unavailable_ct_selected"
-        )
-    else:
-        if int(best_rf_probe.get("validShapes", 0) or 0) > 0 and _compare_timing_probes(best_rf_probe, ct_probe) >= 0:
-            selected_probe = best_rf_probe
-            timing_selection_reason = (
-                "rf_probe_ranked_better_than_ct"
-                if _compare_timing_probes(best_rf_probe, ct_probe) > 0
-                else "rf_won_exact_probe_tie"
+    global_shapes = []
+    for aero_index, slice_hist in enumerate(pid_payload.get("global_slice_hists") or []):
+        global_shapes.append(
+            _fit_global_timing_shape(
+                slice_hist,
+                exact_config,
+                "f_proton_cleaning_global_ctime_aero_{}".format(aero_index),
+                proton_peak_is_lower=False,
+                display_range=pid_payload.get("time_hist_range") or (-1.50, 1.25),
+                fit_mode="standard",
             )
-        elif (
-            rescue_rf_peak_pair_tiebreak
-            and int(best_rf_probe.get("validShapes", 0) or 0) == 0
-            and int(ct_probe.get("validShapes", 0) or 0) == 0
-            and bool(best_rf_probe.get("peakPairFound", False))
-            and not bool(ct_probe.get("peakPairFound", False))
-        ):
-            selected_probe = best_rf_probe
-            timing_selection_reason = "rf_resolved_peak_pair_used_after_all_fit_validation_failed"
+        )
+    selected_probe = _summarize_global_probe(
+        ct_time_branch,
+        "ct",
+        "standard",
+        pid_payload,
+        global_shapes,
+        False,
+    )
+    timing_selection_reason = "exact_ctime_single_path"
 
-    timing_selection_reason = "per_aerogel_multistart_default_{}".format(timing_selection_reason)
-
-    pid_payload = selected_probe.get("pid_payload") or {}
-    global_shapes = selected_probe.get("global_shapes") or []
     valid_global_shape_count = int(selected_probe.get("validShapes", 0) or 0)
     result["diagnostics"]["beam_bunch_spacing_ns"] = float(
         _resolve_beam_bunch_spacing_ns(source_bundle)
     )
 
-    result["diagnostics"]["rf_probe_summaries"] = [_probe_summary(probe) for probe in rf_probes]
-    result["diagnostics"]["ct_probe_summary"] = _probe_summary(ct_probe)
-    result["diagnostics"]["selected_timing_branch"] = str(selected_probe.get("timing_branch", ct_time_branch))
-    result["diagnostics"]["selected_probe_kind"] = str(selected_probe.get("probe_kind", "ct"))
-    result["diagnostics"]["selected_probe_fit_mode"] = str(current_fit_mode)
-    result["diagnostics"]["selected_probe_local_peak_rescue"] = bool(
-        selected_probe.get("localPeakRescue", False)
-    )
-    result["diagnostics"]["rf_timing_selected"] = bool(selected_probe.get("probe_kind") == "rf")
+    selected_probe_summary = {
+        key: value
+        for key, value in selected_probe.items()
+        if key not in ("pid_payload", "global_shapes")
+    }
+    result["diagnostics"]["rf_probe_summaries"] = []
+    result["diagnostics"]["ct_probe_summary"] = _json_ready_value(selected_probe_summary)
+    result["diagnostics"]["selected_timing_branch"] = ct_time_branch
+    result["diagnostics"]["selected_probe_kind"] = "ct"
+    result["diagnostics"]["selected_probe_fit_mode"] = "standard"
+    result["diagnostics"]["selected_probe_local_peak_rescue"] = False
+    result["diagnostics"]["rf_timing_selected"] = False
     result["diagnostics"]["timingSelectionReason"] = str(timing_selection_reason)
     result["diagnostics"]["valid_global_shape_count"] = int(valid_global_shape_count)
     result["diagnostics"]["source_stats"] = pid_payload.get("source_stats") or {}
-    result["selected_timing_branch"] = str(selected_probe.get("timing_branch", ct_time_branch))
+    result["selected_timing_branch"] = ct_time_branch
     result["global_shapes"] = global_shapes
     result["H_global_pid"] = pid_payload.get("H_global_pid")
     result["H_global_timing_slices"] = pid_payload.get("global_slice_hists") or []
@@ -2618,6 +2732,10 @@ def build_kaon_proton_cleaning_result(
         result["diagnostics"]["rf_lookup_counts"] = {}
         result["diagnostics"]["rf_source"] = "not_applied"
 
+    result["_prepared_event_weight_lookup"] = _build_prepared_event_weight_lookup(
+        result,
+        source_bundle,
+    )
     result["accepted"] = True
     return result
 
@@ -2806,26 +2924,29 @@ def apply_kaon_proton_cleaning_to_targets(
                     timing_value = 0.0
             if not (allcuts or nommcuts or noholecuts):
                 continue
-            delta_index = _find_collection_bin(delta_value, delta_edges)
-            aero_index = _find_collection_bin(aero_value, aero_edges)
-            support_label = SUPPORT_UNSUPPORTED
-            proton_weight = 0.0
-            if 0 <= delta_index < len(cleaning_result.get("support_by_delta") or []):
-                support_label = str(cleaning_result["support_by_delta"][delta_index])
-                if 0 <= aero_index < len(cleaning_result.get("global_shapes") or []):
-                    global_shape = cleaning_result["global_shapes"][aero_index]
-                    slice_collection = (cleaning_result.get("delta_slice_fits") or [])[delta_index]
-                    if 0 <= aero_index < len(slice_collection):
-                        proton_weight = _evaluate_event_proton_probability(
-                            timing_value,
-                            global_shape,
-                            slice_collection[aero_index],
-                            denominator_floor,
-                        )
+            frozen_payload = get_kaon_proton_cleaning_event_payload(
+                cleaning_result,
+                source_name,
+                entry_index,
+                strict=True,
+            )
+            delta_index = int(frozen_payload.get("delta_index", -1) or -1)
+            aero_index = int(frozen_payload.get("aero_index", -1) or -1)
+            support_label = str(
+                frozen_payload.get("support_label", SUPPORT_UNSUPPORTED)
+                or SUPPORT_UNSUPPORTED
+            )
+            proton_weight = float(frozen_payload.get("proton_weight", 0.0) or 0.0)
+            cleaned_factor = float(frozen_payload.get("cleaned_factor", 1.0) or 0.0)
+            rf_accept = bool(frozen_payload.get("rf_accept", True))
+            final_cleaned_factor = float(
+                frozen_payload.get("final_cleaned_factor", cleaned_factor) or 0.0
+            )
             support_counts[support_label] = support_counts.get(support_label, 0) + 1
             raw_weight = float(coefficient)
             proton_component_weight = float(coefficient) * float(proton_weight)
-            cleaned_weight = float(coefficient) * float(max(0.0, min(1.0, 1.0 - proton_weight)))
+            cleaned_weight = float(coefficient) * float(cleaned_factor)
+            final_cleaned_weight = float(coefficient) * float(final_cleaned_factor)
             _fill_standard_target_hists(
                 evt,
                 adj_mm,
@@ -2859,11 +2980,6 @@ def apply_kaon_proton_cleaning_to_targets(
                 nommcuts=nommcuts,
                 noholecuts=noholecuts,
             )
-            rf_accept = apply_low_epsilon_rf_after_proton_cleaning(
-                cleaning_result,
-                source_name,
-                evt,
-            )
             if rf_accept:
                 rf_counts["accepted"] += 1
                 _fill_standard_target_hists(
@@ -2871,7 +2987,7 @@ def apply_kaon_proton_cleaning_to_targets(
                     adj_mm,
                     adj_t,
                     adj_hsdelta,
-                    cleaned_weight,
+                    final_cleaned_weight,
                     final_targets,
                     allcuts=allcuts,
                     nommcuts=nommcuts,
@@ -2946,6 +3062,7 @@ def serialize_kaon_proton_cleaning_result(cleaning_result):
         return {}
     payload = dict(cleaning_result)
     payload.pop("_rf_signature_lookup", None)
+    payload.pop("_prepared_event_weight_lookup", None)
     return _json_ready_value(payload)
 
 

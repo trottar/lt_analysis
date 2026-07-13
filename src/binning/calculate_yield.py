@@ -106,6 +106,7 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
+from proton_contamination_weights import get_kaon_proton_cleaning_event_payload
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -345,6 +346,10 @@ def _init_ave_event_cache():
         "t_index": [],
         "phi_index": [],
         "phi_shift_deg": [],
+        "source_label": [],
+        "source_entry_index": [],
+        "proton_cleaning_factor": [],
+        "proton_rf_accept": [],
     }
     return {
         key: {name: values.copy() for name, values in cache_template.items()}
@@ -370,6 +375,10 @@ def _append_ave_event(
     t_index=-1,
     phi_index=-1,
     phi_shift_deg=float("nan"),
+    source_label="",
+    source_entry_index=-1,
+    proton_cleaning_factor=1.0,
+    proton_rf_accept=True,
 ):
     if not (allcuts or nommcuts):
         return
@@ -390,6 +399,10 @@ def _append_ave_event(
     cache_section["t_index"].append(int(t_index))
     cache_section["phi_index"].append(int(phi_index))
     cache_section["phi_shift_deg"].append(phi_shift_deg)
+    cache_section["source_label"].append(str(source_label))
+    cache_section["source_entry_index"].append(int(source_entry_index))
+    cache_section["proton_cleaning_factor"].append(float(proton_cleaning_factor))
+    cache_section["proton_rf_accept"].append(bool(proton_rf_accept))
 
 
 def _freeze_ave_event_cache(event_cache):
@@ -412,6 +425,10 @@ def _freeze_ave_event_cache(event_cache):
             "t_index": np.asarray(cache_section["t_index"], dtype=np.int32),
             "phi_index": np.asarray(cache_section["phi_index"], dtype=np.int32),
             "phi_shift_deg": np.asarray(cache_section["phi_shift_deg"], dtype=np.float64),
+            "source_label": np.asarray(cache_section["source_label"], dtype=object),
+            "source_entry_index": np.asarray(cache_section["source_entry_index"], dtype=np.int32),
+            "proton_cleaning_factor": np.asarray(cache_section["proton_cleaning_factor"], dtype=np.float64),
+            "proton_rf_accept": np.asarray(cache_section["proton_rf_accept"], dtype=bool),
         }
         frozen_section["allcut_bin_index"] = _build_allcut_bin_index(frozen_section)
         frozen_section["nommcut_bin_index"] = _build_nommcut_bin_index(frozen_section)
@@ -593,6 +610,10 @@ def _fill_yield_background_templates_for_bin(
 
             adj_mm = cache_section["adj_MM"][idx]
             event_weight = coeff
+            proton_factor = 1.0
+            if "proton_cleaning_factor" in cache_section:
+                proton_factor = float(cache_section["proton_cleaning_factor"][idx])
+            event_weight *= proton_factor
             if apply_pion_weight:
                 event_weight *= simc_shape_pion_weight_from_value(
                     adj_mm,
@@ -951,6 +972,8 @@ def _process_yield_data_tree(
     mm_max,
     progress_bar,
     update_mm_offset=False,
+    source_label=None,
+    proton_cleaning_result=None,
 ):
     mm_offset_data = None
     total_entries = tree.GetEntries()
@@ -973,6 +996,23 @@ def _process_yield_data_tree(
 
         adj_MM = shifted_mm_getter(evt)
         adj_t = shifted_t_getter(evt)
+        proton_factor = 1.0
+        proton_rf_accept = True
+        if (
+            particle_type == "kaon"
+            and isinstance(proton_cleaning_result, dict)
+            and bool(proton_cleaning_result.get("accepted"))
+        ):
+            proton_payload = get_kaon_proton_cleaning_event_payload(
+                proton_cleaning_result,
+                source_label,
+                i,
+                strict=True,
+            )
+            proton_factor = float(
+                proton_payload.get("final_cleaned_factor", 1.0) or 0.0
+            )
+            proton_rf_accept = bool(proton_payload.get("rf_accept", True))
         phi_shift = evt.ph_q * phi_scale
         theta_cm_deg = calculate_theta_cm_deg(particle_type, pol, evt.W, evt.Q2, adj_t)
         t_index, phi_index = find_2d_bin_indices(adj_t, phi_shift, t_bins, phi_bins)
@@ -999,27 +1039,31 @@ def _process_yield_data_tree(
                 t_index=t_index if t_index is not None else -1,
                 phi_index=phi_index if phi_index is not None else -1,
                 phi_shift_deg=phi_shift,
+                source_label=source_label or "",
+                source_entry_index=i,
+                proton_cleaning_factor=proton_factor,
+                proton_rf_accept=proton_rf_accept,
             )
 
         if t_index is None or phi_index is None:
             continue
 
         if nommcuts:
-            hist_group["fit1sub"][t_index][phi_index].Fill(adj_MM)
-            hist_group["pisub"][t_index][phi_index].Fill(adj_MM)
-            hist_group["nosub"][t_index][phi_index].Fill(adj_MM)
+            hist_group["fit1sub"][t_index][phi_index].Fill(adj_MM, proton_factor)
+            hist_group["pisub"][t_index][phi_index].Fill(adj_MM, proton_factor)
+            hist_group["nosub"][t_index][phi_index].Fill(adj_MM, proton_factor)
 
         if allcuts:
-            hist_group["t"][t_index][phi_index].Fill(adj_t)
-            hist_group["Q2"][t_index][phi_index].Fill(evt.Q2)
-            hist_group["W"][t_index][phi_index].Fill(evt.W)
-            hist_group["q2_w"][t_index][phi_index].Fill(evt.Q2, evt.W)
+            hist_group["t"][t_index][phi_index].Fill(adj_t, proton_factor)
+            hist_group["Q2"][t_index][phi_index].Fill(evt.Q2, proton_factor)
+            hist_group["W"][t_index][phi_index].Fill(evt.W, proton_factor)
+            hist_group["q2_w"][t_index][phi_index].Fill(evt.Q2, evt.W, proton_factor)
             if math.isfinite(theta_cm_deg):
-                hist_group["theta_cm"][t_index][phi_index].Fill(theta_cm_deg)
-            hist_group["ssxptar"][t_index][phi_index].Fill(evt.ssxptar)
-            hist_group["ssyptar"][t_index][phi_index].Fill(evt.ssyptar)
-            hist_group["hsxptar"][t_index][phi_index].Fill(evt.hsxptar)
-            hist_group["hsyptar"][t_index][phi_index].Fill(evt.hsyptar)
+                hist_group["theta_cm"][t_index][phi_index].Fill(theta_cm_deg, proton_factor)
+            hist_group["ssxptar"][t_index][phi_index].Fill(evt.ssxptar, proton_factor)
+            hist_group["ssyptar"][t_index][phi_index].Fill(evt.ssyptar, proton_factor)
+            hist_group["hsxptar"][t_index][phi_index].Fill(evt.hsxptar, proton_factor)
+            hist_group["hsyptar"][t_index][phi_index].Fill(evt.hsyptar, proton_factor)
             _fill_t_vs_tmin_hist(
                 hist_group["t_vs_tmin"][t_index][phi_index],
                 particle_type,
@@ -1027,8 +1071,9 @@ def _process_yield_data_tree(
                 evt.W,
                 evt.Q2,
                 adj_t,
+                weight=proton_factor,
             )
-            hist_group["mm"][t_index][phi_index].Fill(adj_MM)
+            hist_group["mm"][t_index][phi_index].Fill(adj_MM, proton_factor)
             if update_mm_offset:
                 mm_offset_data = adj_MM - evt.MM
 
@@ -1124,6 +1169,7 @@ def process_hist_data(
     particle_subtraction_scale_factor=None,
     kaon_signal_shape_payload=None,
     kaon_sigma0_shape_payload=None,
+    proton_cleaning_result=None,
 ):
     emit_plots = inpDict.get("yield_emit_plots", True)
     suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
@@ -1178,8 +1224,17 @@ def process_hist_data(
     
     ################################################################################################################################################
     
-    prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET)
-    rand_tree_name = get_rand_tree_name(ParticleType, EPSSET)
+    proton_cleaning_active = (
+        ParticleType == "kaon"
+        and isinstance(proton_cleaning_result, dict)
+        and bool(proton_cleaning_result.get("accepted"))
+    )
+    if proton_cleaning_active:
+        prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET, rf_state="noRF")
+        rand_tree_name = get_rand_tree_name(ParticleType, EPSSET, rf_state="noRF")
+    else:
+        prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET)
+        rand_tree_name = get_rand_tree_name(ParticleType, EPSSET)
 
     TBRANCH_DATA  = tree_data.Get(prompt_tree_name)
     TBRANCH_RAND  = tree_data.Get(rand_tree_name)
@@ -1423,6 +1478,8 @@ def process_hist_data(
         mm_max,
         progress_bar,
         update_mm_offset=True,
+        source_label="prompt",
+        proton_cleaning_result=proton_cleaning_result,
     )
 
     print("\nBinning dummy...")
@@ -1441,6 +1498,8 @@ def process_hist_data(
         mm_min,
         mm_max,
         progress_bar,
+        source_label="dummy_prompt",
+        proton_cleaning_result=proton_cleaning_result,
     )
 
     print("\nBinning rand...")
@@ -1459,6 +1518,8 @@ def process_hist_data(
         mm_min,
         mm_max,
         progress_bar,
+        source_label="rand",
+        proton_cleaning_result=proton_cleaning_result,
     )
 
     print("\nBinning dummy_rand...")
@@ -1477,6 +1538,8 @@ def process_hist_data(
         mm_min,
         mm_max,
         progress_bar,
+        source_label="dummy_rand",
+        proton_cleaning_result=proton_cleaning_result,
     )
 
     # Pion subtraction by scaling pion background to peak size
@@ -2263,6 +2326,7 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         phi_bins,
         "calculate_yield_bg_opt_sigma0",
     )
+    proton_cleaning_result = hist.get("_proton_contamination_cleaning_result_setting")
     processed_dict, _, ave_event_cache, sub_event_cache = process_hist_data(
         hist["InFile_DATA"],
         hist["InFile_DUMMY"],
@@ -2275,6 +2339,7 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         base_inp,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+        proton_cleaning_result=proton_cleaning_result,
     )
 
     base_cache = {
@@ -2493,6 +2558,7 @@ def bin_data(
     particle_subtraction_scale_factor=None,
     kaon_signal_shape_payload=None,
     kaon_sigma0_shape_payload=None,
+    proton_cleaning_result=None,
 ):
 
     if data_base_cache is None:
@@ -2509,6 +2575,7 @@ def bin_data(
             particle_subtraction_scale_factor=particle_subtraction_scale_factor,
             kaon_signal_shape_payload=kaon_signal_shape_payload,
             kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+            proton_cleaning_result=proton_cleaning_result,
         )
     else:
         processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = _process_hist_data_from_base_cache(
@@ -2645,6 +2712,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         phi_bins,
         "calculate_yield_sigma0",
     )
+    proton_cleaning_result = hist.get("_proton_contamination_cleaning_result_setting")
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict, ave_event_cache, sub_event_cache = bin_data(
@@ -2662,6 +2730,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+        proton_cleaning_result=proton_cleaning_result,
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
