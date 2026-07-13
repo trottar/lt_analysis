@@ -2800,7 +2800,7 @@ def build_kaon_proton_cleaning_result(
     global_fit_cfg = exact_config.get("global_fit") or {}
     result["diagnostics"]["rf_timing_attempted"] = False
     result["diagnostics"]["ct_timing_evaluated"] = True
-    result["diagnostics"]["timingFitUsedPerAeroDefault"] = False
+    result["diagnostics"]["timingFitUsedPerAeroDefault"] = True
     result["diagnostics"]["timingFitUsedStandardFallback"] = False
     result["diagnostics"]["timingFitUsedPreDiamondFallback"] = False
     result["diagnostics"]["timingFitUsedLocalPeakRescue"] = False
@@ -2817,34 +2817,27 @@ def build_kaon_proton_cleaning_result(
         time_hist_range=PROTON_CLEANING_EXACT_TIMING_RANGE,
         time_hist_bins=PROTON_CLEANING_EXACT_TIMING_BINS,
     )
+    beam_bunch_spacing_ns = _resolve_beam_bunch_spacing_ns(source_bundle)
+    global_fit_cfg = dict(global_fit_cfg)
+    global_fit_cfg["beam_bunch_spacing_ns"] = float(beam_bunch_spacing_ns)
+    exact_config["global_fit"] = global_fit_cfg
+
     global_shapes = []
     for aero_index, slice_hist in enumerate(pid_payload.get("global_slice_hists") or []):
         global_shapes.append(
-            _fit_global_timing_shape_with_bounds(
+            _fit_global_timing_shape(
                 slice_hist,
+                exact_config,
                 "f_proton_cleaning_global_ctime_aero_{}".format(aero_index),
-                float((pid_payload.get("time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE)[0]),
-                float((pid_payload.get("time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE)[1]),
-                float((global_fit_cfg.get("kaon_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["kaon_mean_range"])[0]),
-                float((global_fit_cfg.get("kaon_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["kaon_mean_range"])[1]),
-                float((global_fit_cfg.get("proton_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["proton_mean_range"])[0]),
-                float((global_fit_cfg.get("proton_mean_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["proton_mean_range"])[1]),
-                False,
-                float((global_fit_cfg.get("sigma_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["sigma_range"])[0]),
-                float((global_fit_cfg.get("sigma_range") or PROTON_CLEANING_EXACT_GLOBAL_FIT["sigma_range"])[1]),
-                float(global_fit_cfg.get("initial_sigma", PROTON_CLEANING_EXACT_GLOBAL_FIT["initial_sigma"])),
-                float(global_fit_cfg.get("minimum_separation", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_separation"])),
-                float(global_fit_cfg.get("minimum_amplitude_significance", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_amplitude_significance"])),
-                float(global_fit_cfg.get("maximum_chi2_ndf", PROTON_CLEANING_EXACT_GLOBAL_FIT["maximum_chi2_ndf"])),
-                float(global_fit_cfg.get("bound_fraction_tolerance", PROTON_CLEANING_EXACT_GLOBAL_FIT["bound_fraction_tolerance"])),
-                int(global_fit_cfg.get("minimum_entries", PROTON_CLEANING_EXACT_GLOBAL_FIT["minimum_entries"])),
-                support_entries=((pid_payload.get("global_prompt_support") or [0])[aero_index] if aero_index < len(pid_payload.get("global_prompt_support") or []) else 0),
+                proton_peak_is_lower=False,
+                display_range=pid_payload.get("time_hist_range") or PROTON_CLEANING_EXACT_TIMING_RANGE,
+                fit_mode="per_aero_multistart",
             )
         )
     selected_probe = _summarize_global_probe(
         ct_time_branch,
         "ct",
-        PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
+        "per_aero_multistart",
         pid_payload,
         global_shapes,
         False,
@@ -2862,7 +2855,8 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["ct_probe_summary"] = _json_ready_value(selected_probe_summary)
     result["diagnostics"]["selected_timing_branch"] = ct_time_branch
     result["diagnostics"]["selected_probe_kind"] = "ct"
-    result["diagnostics"]["selected_probe_fit_mode"] = (
+    result["diagnostics"]["selected_probe_fit_mode"] = "per_aero_multistart"
+    result["diagnostics"]["implementation"] = (
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
     )
     result["diagnostics"]["selected_probe_local_peak_rescue"] = False
