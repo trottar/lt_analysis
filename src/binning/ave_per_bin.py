@@ -85,6 +85,7 @@ from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_fit_pages,
+    print_particle_subtraction_component_template_pages,
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
@@ -163,6 +164,15 @@ def _close_root_pdf_page_stream(pdf_name, opened, canvas_name):
     close_canvas = ROOT.TCanvas(canvas_name, "Canvas", 10, 10)
     close_canvas.Print(pdf_name + "]")
     close_canvas.Close()
+
+
+def _clone_hist_for_plot(hist):
+    if hist is None:
+        return None
+    cloned_hist = hist.Clone("{}_clone".format(hist.GetName()))
+    if hasattr(cloned_hist, "SetDirectory"):
+        cloned_hist.SetDirectory(0)
+    return cloned_hist
 
 
 def _resolve_hist_background_sample_root(hist, inpDict, background_name):
@@ -600,15 +610,9 @@ def _apply_component_pion_subtraction_for_tbin(
             "H_weighted_pion_control_model_stage": stage_weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM_stage": stage_weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
-            "H_pion_control_input": component_fit_result.get("H_pion_control_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
-            ) if component_fit_result.get("H_pion_control_input") is not None else None,
-            "H_kaon_nosub_input": component_fit_result.get("H_kaon_nosub_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_kaon_nosub_input").GetName())
-            ) if component_fit_result.get("H_kaon_nosub_input") is not None else None,
-            "H_pion_control_unscaled": component_fit_result.get("H_pion_control_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
-            ) if component_fit_result.get("H_pion_control_input") is not None else None,
+            "H_pion_control_input": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
+            "H_kaon_nosub_input": _clone_hist_for_plot(component_fit_result.get("H_kaon_nosub_input")),
+            "H_pion_control_unscaled": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
             "H_pion_subtraction_template_MM": template_hists["mm"],
             "H_pion_subtraction_template_MM_nosub": template_hists["mm_nosub"],
             "H_MM_before_pion_subtraction": h_mm_before,
@@ -619,12 +623,13 @@ def _apply_component_pion_subtraction_for_tbin(
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
             "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
             "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
-            "H_simc_shape_k_lambda": component_fit_result.get("H_simc_shape_k_lambda").Clone(
-                "{}_clone".format(component_fit_result.get("H_simc_shape_k_lambda").GetName())
-            ) if component_fit_result.get("H_simc_shape_k_lambda") is not None else None,
-            "H_kaon_fit_k_lambda_reference": component_fit_result.get("H_kaon_fit_k_lambda_reference").Clone(
-                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_reference").GetName())
-            ) if component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None else None,
+            "H_simc_shape_k_lambda": _clone_hist_for_plot(component_fit_result.get("H_simc_shape_k_lambda")),
+            "H_kaon_fit_k_lambda_reference": _clone_hist_for_plot(component_fit_result.get("H_kaon_fit_k_lambda_reference")),
+            "H_kaon_fit_k_lambda_scaled": _clone_hist_for_plot(component_fit_result.get("H_kaon_fit_k_lambda_scaled")),
+            "H_kaon_fit_k_lambda_scaled_refined": _clone_hist_for_plot(component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined")),
+            "H_simc_shape_k_sigma0": _clone_hist_for_plot(component_fit_result.get("H_simc_shape_k_sigma0")),
+            "H_kaon_fit_k_sigma0_scaled": _clone_hist_for_plot(component_fit_result.get("H_kaon_fit_k_sigma0_scaled")),
+            "H_kaon_fit_k_sigma0_scaled_refined": _clone_hist_for_plot(component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined")),
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
@@ -853,6 +858,19 @@ def process_hist_data(
     # Loop through bins in t_data and identify events in specified bins
     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))
     pdf_opened = False
+
+    if ParticleType == "kaon" and component_shape_payload is not None:
+        open_canvas = ROOT.TCanvas("averages_component_templates_open_{}".format(phi_setting), "Canvas", 10, 10)
+        pdf_opened = _open_root_pdf_page_stream(open_canvas, pdf_name, pdf_opened)
+        open_canvas.Close()
+        print_particle_subtraction_component_template_pages(
+            pdf_name,
+            component_shape_payload,
+            title_prefix="{} averages".format(phi_setting),
+            cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+            kaon_signal_payload=kaon_signal_shape_payload,
+            kaon_sigma0_payload=kaon_sigma0_shape_payload,
+        )
 
     for j in range(len(t_bins)-1):
 

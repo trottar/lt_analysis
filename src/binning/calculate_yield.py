@@ -91,6 +91,7 @@ from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_fit_pages,
+    print_particle_subtraction_component_template_pages,
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
@@ -939,6 +940,21 @@ def _apply_component_pion_subtraction_for_bin(
             "H_kaon_fit_k_lambda_reference": _clone_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_lambda_reference")
             ),
+            "H_kaon_fit_k_lambda_scaled": _clone_hist_for_plot(
+                component_fit_result.get("H_kaon_fit_k_lambda_scaled")
+            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled") is not None else None,
+            "H_kaon_fit_k_lambda_scaled_refined": _clone_hist_for_plot(
+                component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined")
+            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined") is not None else None,
+            "H_simc_shape_k_sigma0": _clone_hist_for_plot(
+                component_fit_result.get("H_simc_shape_k_sigma0")
+            ) if component_fit_result.get("H_simc_shape_k_sigma0") is not None else None,
+            "H_kaon_fit_k_sigma0_scaled": _clone_hist_for_plot(
+                component_fit_result.get("H_kaon_fit_k_sigma0_scaled")
+            ) if component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None else None,
+            "H_kaon_fit_k_sigma0_scaled_refined": _clone_hist_for_plot(
+                component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined")
+            ) if component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined") is not None else None,
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "diagnostics": {
                 **deepcopy(weight_payload["diagnostics"]),
@@ -2096,6 +2112,19 @@ def process_hist_data(
     canvas_iter = 0
     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_yield_data_".format(phi_setting, ParticleType))
     pdf_opened = False
+
+    if emit_plots and ParticleType == "kaon" and component_shape_payload is not None:
+        open_canvas = ROOT.TCanvas("yield_component_templates_open_{}".format(phi_setting), "Canvas", 10, 10)
+        pdf_opened = _open_root_pdf_page_stream(open_canvas, pdf_name, pdf_opened)
+        open_canvas.Close()
+        print_particle_subtraction_component_template_pages(
+            pdf_name,
+            component_shape_payload,
+            title_prefix="{} yield".format(phi_setting),
+            cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+            kaon_signal_payload=kaon_signal_shape_payload,
+            kaon_sigma0_payload=kaon_sigma0_shape_payload,
+        )
     
     # Loop through bins in t_data and identify events in specified bins
     for j in range(len(t_bins)-1):
