@@ -120,6 +120,11 @@ PROTON_CLEANING_EXACT_VALIDATION_WINDOWS = {
     "low_mm": (0.80, 0.90),
     "lambda_peak": (1.105, 1.125),
 }
+SHMS_CENTRAL_PATH_CM = 1810.0
+LIGHT_SPEED_CM_PER_NS = 29.9792
+KAON_MASS_GEV = 0.493677
+PROTON_MASS_GEV = 0.93827208
+PROTON_CLEANING_TOF_OFFSET_RANGE = (-0.35, 0.35)
 
 
 def _clone_hist(template_hist, name, reset=True):
@@ -265,6 +270,226 @@ def _format_debug_float(value, digits=4, scientific=False):
     if scientific:
         return ("{0:." + str(int(digits)) + "e}").format(numeric)
     return ("{0:." + str(int(digits)) + "f}").format(numeric)
+
+
+def _safe_event_float(evt, branch_name):
+    try:
+        value = float(getattr(evt, branch_name))
+    except Exception:
+        return None
+    return value if math.isfinite(value) else None
+
+
+def compute_shms_path_length_cm(p_shms_gev, ssxptar, ssyptar, ssdelta):
+    del p_shms_gev, ssyptar  # Kept in signature for diagnostics and future path terms.
+    path_length_cm = (
+        SHMS_CENTRAL_PATH_CM
+        + 0.11 * (1000.0 * float(ssxptar))
+        + 0.057 * (float(ssdelta) / 100.0)
+    )
+    return float(path_length_cm)
+
+
+def compute_proton_kaon_tof_separation_ns(p_shms_gev, path_length_cm):
+    p_shms_gev = float(p_shms_gev)
+    path_length_cm = float(path_length_cm)
+    beta_kaon = p_shms_gev / math.sqrt((p_shms_gev ** 2) + (KAON_MASS_GEV ** 2))
+    beta_proton = p_shms_gev / math.sqrt((p_shms_gev ** 2) + (PROTON_MASS_GEV ** 2))
+    tof_kaon_ns = path_length_cm / (LIGHT_SPEED_CM_PER_NS * beta_kaon)
+    tof_proton_ns = path_length_cm / (LIGHT_SPEED_CM_PER_NS * beta_proton)
+    return {
+        "beta_kaon": float(beta_kaon),
+        "beta_proton": float(beta_proton),
+        "tof_kaon_ns": float(tof_kaon_ns),
+        "tof_proton_ns": float(tof_proton_ns),
+        "delta_t_pk_ns": float(tof_proton_ns - tof_kaon_ns),
+    }
+
+
+def _build_shms_tof_payload(evt):
+    payload = {
+        "tof_valid": False,
+        "P_gtr_p": None,
+        "ssxptar": None,
+        "ssyptar": None,
+        "ssdelta": None,
+        "shms_path_length_cm": None,
+        "beta_kaon": None,
+        "beta_proton": None,
+        "tof_kaon_ns": None,
+        "tof_proton_ns": None,
+        "delta_t_pk_ns": None,
+        "tof_invalid_reason": "",
+        "tof_missing_fields": [],
+    }
+    missing_fields = []
+    for branch_name in ("P_gtr_p", "ssxptar", "ssyptar", "ssdelta"):
+        value = _safe_event_float(evt, branch_name)
+        payload[branch_name] = value
+        if value is None:
+            missing_fields.append(branch_name)
+    payload["tof_missing_fields"] = list(missing_fields)
+    if missing_fields:
+        payload["tof_invalid_reason"] = "missing_" + "_".join(missing_fields)
+        return payload
+    try:
+        if float(payload["P_gtr_p"]) <= 0.0:
+            payload["tof_invalid_reason"] = "nonpositive_P_gtr_p"
+            return payload
+        path_length_cm = compute_shms_path_length_cm(
+            payload["P_gtr_p"],
+            payload["ssxptar"],
+            payload["ssyptar"],
+            payload["ssdelta"],
+        )
+        if not math.isfinite(path_length_cm) or path_length_cm <= 0.0:
+            payload["tof_invalid_reason"] = "invalid_shms_path_length"
+            return payload
+        tof_payload = compute_proton_kaon_tof_separation_ns(
+            payload["P_gtr_p"],
+            path_length_cm,
+        )
+        if (
+            not math.isfinite(float(tof_payload["beta_kaon"]))
+            or not math.isfinite(float(tof_payload["beta_proton"]))
+            or float(tof_payload["beta_kaon"]) <= 0.0
+            or float(tof_payload["beta_proton"]) <= 0.0
+            or float(tof_payload["beta_kaon"]) > 1.0
+            or float(tof_payload["beta_proton"]) > 1.0
+            or not math.isfinite(float(tof_payload["delta_t_pk_ns"]))
+            or float(tof_payload["delta_t_pk_ns"]) <= 0.0
+        ):
+            payload["tof_invalid_reason"] = "invalid_delta_t_pk"
+            return payload
+        payload.update(tof_payload)
+        payload["shms_path_length_cm"] = float(path_length_cm)
+        payload["tof_valid"] = True
+        payload["tof_invalid_reason"] = ""
+        return payload
+    except Exception as exc:
+        payload["tof_invalid_reason"] = "exception_{}".format(type(exc).__name__)
+        return payload
+
+
+def _mean_rms(values):
+    clean_values = [float(value) for value in values if math.isfinite(float(value))]
+    if not clean_values:
+        return None, None
+    array_values = np.asarray(clean_values, dtype=float)
+    return float(np.mean(array_values)), float(np.std(array_values))
+
+
+def _build_prompt_tof_summary_by_delta(source_bundle, delta_edges, selection_key):
+    n_delta_bins = max(len(delta_edges) - 1, 0)
+    collections = [
+        {
+            "P_gtr_p": [],
+            "ssxptar": [],
+            "ssyptar": [],
+            "shms_path_length_cm": [],
+            "delta_t_pk_ns": [],
+        }
+        for _ in range(n_delta_bins)
+    ]
+    for source_name, source_spec, _, entry_payload in _iter_prepared_records(
+        source_bundle,
+        selection_key=selection_key,
+        source_names=("prompt",),
+    ):
+        del source_name
+        if not bool((source_spec or {}).get("is_prompt_source", False)):
+            continue
+        if not bool((entry_payload or {}).get("tof_valid", False)):
+            continue
+        delta_value = (entry_payload or {}).get("delta_value")
+        if delta_value is None:
+            continue
+        delta_index = _find_collection_bin(float(delta_value), delta_edges)
+        if not (0 <= delta_index < n_delta_bins):
+            continue
+        for key in collections[delta_index]:
+            value = (entry_payload or {}).get(key)
+            if value is not None and math.isfinite(float(value)):
+                collections[delta_index][key].append(float(value))
+    summaries = []
+    for delta_index, collection in enumerate(collections):
+        row = {
+            "delta_index": int(delta_index),
+            "delta_min": float(delta_edges[delta_index]),
+            "delta_max": float(delta_edges[delta_index + 1]),
+            "prompt_event_count": int(len(collection["delta_t_pk_ns"])),
+        }
+        for key, values in collection.items():
+            mean_value, rms_value = _mean_rms(values)
+            row["mean_" + key] = mean_value
+            row["rms_" + key] = rms_value
+        row["valid"] = bool(
+            row["prompt_event_count"] > 0
+            and row.get("mean_delta_t_pk_ns") is not None
+            and math.isfinite(float(row.get("mean_delta_t_pk_ns")))
+            and float(row.get("mean_delta_t_pk_ns")) > 0.0
+        )
+        summaries.append(row)
+    return summaries
+
+
+def _wrap_rf_mean_to_selected_window(
+    predicted_mean,
+    reference_mean,
+    display_min,
+    display_max,
+    bunch_spacing_ns,
+):
+    predicted_mean = float(predicted_mean)
+    reference_mean = float(reference_mean)
+    display_min = float(display_min)
+    display_max = float(display_max)
+    bunch_spacing_ns = float(bunch_spacing_ns)
+    if (
+        not math.isfinite(predicted_mean)
+        or not math.isfinite(reference_mean)
+        or not math.isfinite(display_min)
+        or not math.isfinite(display_max)
+        or not math.isfinite(bunch_spacing_ns)
+        or bunch_spacing_ns <= 0.0
+        or display_max <= display_min
+    ):
+        return {
+            "valid": False,
+            "raw_mean": predicted_mean,
+            "wrapped_mean": predicted_mean,
+            "period_shift": 0,
+            "reason": "invalid_rf_wrap_inputs",
+        }
+    candidates = []
+    for period_shift in range(-12, 13):
+        candidate = predicted_mean + (float(period_shift) * bunch_spacing_ns)
+        inside = display_min <= candidate <= display_max
+        edge_distance = 0.0
+        if candidate < display_min:
+            edge_distance = display_min - candidate
+        elif candidate > display_max:
+            edge_distance = candidate - display_max
+        candidates.append(
+            (
+                0 if inside else 1,
+                float(edge_distance),
+                abs(candidate - reference_mean),
+                abs(period_shift),
+                int(period_shift),
+                float(candidate),
+            )
+        )
+    candidates.sort()
+    selected = candidates[0]
+    return {
+        "valid": True,
+        "raw_mean": float(predicted_mean),
+        "wrapped_mean": float(selected[5]),
+        "period_shift": int(selected[4]),
+        "inside_display_range": bool(selected[0] == 0),
+        "reference_mean": float(reference_mean),
+    }
 
 
 def _format_probe_summary_for_log(label, probe):
@@ -540,6 +765,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
                     if math.isfinite(branch_value):
                         timing_values[str(branch_name)] = float(branch_value)
 
+                tof_payload = _build_shms_tof_payload(evt)
                 entry_payloads[int(entry_index)] = {
                     "allcuts": bool(allcuts),
                     "nommcuts": bool(nommcuts),
@@ -551,6 +777,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
                     "delta_value": float(getattr(evt, "ssdelta", 0.0)),
                     "aero_value": float(getattr(evt, "P_aero_npeSum", 0.0)),
                     "timing_values": timing_values,
+                    **tof_payload,
                 }
                 entries_prepared += 1
 
@@ -566,6 +793,55 @@ def prepare_kaon_proton_cleaning_source_bundle(
             "tree_name": (source_spec or {}).get("tree_name"),
             "entries_seen": int(entries_seen),
             "entries_prepared": int(entries_prepared),
+            "entries_missing_P_gtr_p": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if "P_gtr_p" in (entry_payload.get("tof_missing_fields") or [])
+                )
+            ),
+            "entries_missing_ssxptar": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if "ssxptar" in (entry_payload.get("tof_missing_fields") or [])
+                )
+            ),
+            "entries_missing_ssyptar": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if "ssyptar" in (entry_payload.get("tof_missing_fields") or [])
+                )
+            ),
+            "entries_missing_ssdelta": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if "ssdelta" in (entry_payload.get("tof_missing_fields") or [])
+                )
+            ),
+            "entries_invalid_shms_path_length": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if entry_payload.get("tof_invalid_reason") == "invalid_shms_path_length"
+                )
+            ),
+            "entries_invalid_delta_t_pk": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if entry_payload.get("tof_invalid_reason") == "invalid_delta_t_pk"
+                )
+            ),
+            "entries_valid_delta_t_pk": int(
+                sum(
+                    1
+                    for entry_payload in entry_payloads.values()
+                    if bool(entry_payload.get("tof_valid", False))
+                )
+            ),
         }
 
     prepared_bundle["prepared_sources"] = prepared_sources
@@ -1882,6 +2158,19 @@ def _fit_per_aero_fallback_timing_shape(
         and math.isfinite(float(result.get("poisson_deviance_per_entry", float("inf"))))
         and float(result.get("poisson_deviance_per_entry", float("inf"))) <= 0.35
     )
+    diagnostic_warnings = [
+        str(warning)
+        for warning in (result.get("diagnostic_warnings") or [])
+        if str(warning).strip()
+    ]
+    if bool(result.get("bound_hit", False)) and "bound_hit" not in diagnostic_warnings:
+        diagnostic_warnings.append("bound_hit")
+    if result.get("fit_status_code") == 4 and bool(result.get("valid", False)):
+        diagnostic_warnings.append("fit_status_4_recovered")
+    result["diagnostic_warnings"] = sorted(set(diagnostic_warnings))
+    if bool(result.get("valid", False)):
+        result["rejection_reasons"] = []
+        result["rejection_reason"] = ""
     result["per_aero_fallback"] = True
     return result
 
@@ -1898,6 +2187,305 @@ def _sum_component_over_bins(histogram, values, fit_min, fit_max):
     return float(total)
 
 
+def _valid_global_shapes_with_weights(global_shapes, support_entries_by_aero=None):
+    rows = []
+    support_entries_by_aero = support_entries_by_aero or []
+    for aero_index, shape in enumerate(global_shapes or []):
+        if not bool((shape or {}).get("valid", False)):
+            continue
+        try:
+            weight = float(support_entries_by_aero[aero_index])
+        except Exception:
+            weight = float((shape or {}).get("support_entries", 0.0) or 0.0)
+        if not math.isfinite(weight) or weight <= 0.0:
+            weight = 1.0
+        rows.append((int(aero_index), shape, float(weight)))
+    return rows
+
+
+def _weighted_shape_average(valid_shape_rows, key):
+    values = []
+    weights = []
+    for _, shape, weight in valid_shape_rows:
+        value = (shape or {}).get(key)
+        if value is None:
+            continue
+        try:
+            value = float(value)
+        except Exception:
+            continue
+        if not math.isfinite(value):
+            continue
+        values.append(value)
+        weights.append(float(weight))
+    if not values:
+        return None
+    return float(np.average(np.asarray(values, dtype=float), weights=np.asarray(weights, dtype=float)))
+
+
+def _build_reference_shape_for_delta_offset(global_shapes, support_entries_by_aero=None):
+    valid_shape_rows = _valid_global_shapes_with_weights(global_shapes, support_entries_by_aero)
+    if not valid_shape_rows:
+        return {"valid": False, "reason": "no_valid_global_shapes"}
+    reference = {
+        "valid": True,
+        "source_aero_indices": [int(row[0]) for row in valid_shape_rows],
+        "kaon_mean": _weighted_shape_average(valid_shape_rows, "kaon_mean"),
+        "proton_mean": _weighted_shape_average(valid_shape_rows, "proton_mean"),
+        "kaon_sigma": _weighted_shape_average(valid_shape_rows, "kaon_sigma"),
+        "proton_sigma": _weighted_shape_average(valid_shape_rows, "proton_sigma"),
+        "fit_min": _weighted_shape_average(valid_shape_rows, "fit_min"),
+        "fit_max": _weighted_shape_average(valid_shape_rows, "fit_max"),
+    }
+    required_keys = ("kaon_mean", "proton_mean", "kaon_sigma", "proton_sigma", "fit_min", "fit_max")
+    if any(reference.get(key) is None for key in required_keys):
+        reference["valid"] = False
+        reference["reason"] = "missing_reference_shape_values"
+        return reference
+    if (
+        float(reference["kaon_sigma"]) <= 0.0
+        or float(reference["proton_sigma"]) <= 0.0
+        or float(reference["fit_max"]) <= float(reference["fit_min"])
+    ):
+        reference["valid"] = False
+        reference["reason"] = "invalid_reference_shape_values"
+        return reference
+    return reference
+
+
+def _fit_delta_common_timing_offset(
+    histogram,
+    reference_shape,
+    tof_summary,
+    exact_config,
+    function_name,
+    proton_peak_is_lower,
+    probe_kind,
+    display_range,
+    bunch_spacing_ns,
+    support_entries=0,
+):
+    offset_min, offset_max = [float(value) for value in PROTON_CLEANING_TOF_OFFSET_RANGE]
+    base_result = {
+        "valid": False,
+        "fit_attempted": False,
+        "function_name": str(function_name),
+        "delta_offset": 0.0,
+        "delta_offset_error": None,
+        "fit_status": "not_attempted",
+        "fit_status_code": None,
+        "delta_offset_bound_hit": False,
+        "diagnostic_warnings": [],
+        "rejection_reasons": [],
+        "rejection_reason": "",
+        "mean_delta_t_pk_ns": (tof_summary or {}).get("mean_delta_t_pk_ns"),
+        "prompt_tof_event_count": int((tof_summary or {}).get("prompt_event_count", 0) or 0),
+        "reference_kaon_mean": (reference_shape or {}).get("kaon_mean"),
+        "reference_proton_mean": (reference_shape or {}).get("proton_mean"),
+        "reference_kaon_sigma": (reference_shape or {}).get("kaon_sigma"),
+        "reference_proton_sigma": (reference_shape or {}).get("proton_sigma"),
+        "fit_min": None,
+        "fit_max": None,
+    }
+    rejection_reasons = []
+    if histogram is None:
+        rejection_reasons.append("missing_delta_timing_histogram")
+    if not bool((reference_shape or {}).get("valid", False)):
+        rejection_reasons.append((reference_shape or {}).get("reason") or "invalid_reference_shape")
+    if not bool((tof_summary or {}).get("valid", False)):
+        rejection_reasons.append("invalid_prompt_tof_summary")
+    mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
+    if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
+        rejection_reasons.append("invalid_mean_delta_t_pk")
+    minimum_entries = int((exact_config.get("slice_fit") or {}).get("minimum_entries", 30))
+    if int(support_entries or 0) < int(minimum_entries):
+        rejection_reasons.append("insufficient_delta_offset_support")
+    if rejection_reasons:
+        base_result["rejection_reasons"] = list(rejection_reasons)
+        base_result["rejection_reason"] = _join_rejection_reasons(rejection_reasons)
+        return base_result
+
+    fit_min = float(reference_shape["fit_min"])
+    fit_max = float(reference_shape["fit_max"])
+    base_result["fit_min"] = fit_min
+    base_result["fit_max"] = fit_max
+    if fit_max <= fit_min:
+        base_result["rejection_reasons"] = ["invalid_fit_range"]
+        base_result["rejection_reason"] = "invalid_fit_range"
+        return base_result
+
+    reference_kaon_mean = float(reference_shape["kaon_mean"])
+    reference_proton_mean = float(reference_shape["proton_mean"])
+    kaon_sigma = float(reference_shape["kaon_sigma"])
+    proton_sigma = float(reference_shape["proton_sigma"])
+    branch_sign = -1.0 if bool(proton_peak_is_lower) else 1.0
+    raw_proton_reference = reference_kaon_mean + (branch_sign * float(mean_delta_t))
+    wrap_info = {
+        "valid": True,
+        "raw_mean": float(raw_proton_reference),
+        "wrapped_mean": float(raw_proton_reference),
+        "period_shift": 0,
+        "inside_display_range": True,
+        "reference_mean": float(reference_proton_mean),
+    }
+    if str(probe_kind) == "rf":
+        wrap_info = _wrap_rf_mean_to_selected_window(
+            raw_proton_reference,
+            reference_proton_mean,
+            float(display_range[0]),
+            float(display_range[1]),
+            float(bunch_spacing_ns),
+        )
+    if not bool(wrap_info.get("valid", False)):
+        base_result["rejection_reasons"] = [wrap_info.get("reason") or "invalid_rf_wrap"]
+        base_result["rejection_reason"] = _join_rejection_reasons(base_result["rejection_reasons"])
+        return base_result
+    effective_proton_reference = float(wrap_info["wrapped_mean"])
+    histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
+    fit_function = ROOT.TF1(
+        str(function_name),
+        "[0] * exp(-0.5 * pow((x - ([1] + [6])) / [2], 2))"
+        " + "
+        "[3] * exp(-0.5 * pow((x - ([4] + [6])) / [5], 2))"
+        " + [7]",
+        fit_min,
+        fit_max,
+    )
+    fit_function.SetParName(0, "K amplitude")
+    fit_function.SetParName(1, "K reference mean")
+    fit_function.SetParName(2, "K sigma")
+    fit_function.SetParName(3, "p amplitude")
+    fit_function.SetParName(4, "p reference mean")
+    fit_function.SetParName(5, "p sigma")
+    fit_function.SetParName(6, "delta offset")
+    fit_function.SetParName(7, "other constant")
+    kaon_seed = _find_peak_seed(histogram, reference_kaon_mean - (2.0 * kaon_sigma), reference_kaon_mean + (2.0 * kaon_sigma))
+    proton_seed = _find_peak_seed(histogram, effective_proton_reference - (2.0 * proton_sigma), effective_proton_reference + (2.0 * proton_sigma))
+    fit_function.SetParameter(0, max(float(kaon_seed[0]), 0.10 * histogram_maximum))
+    fit_function.SetParLimits(0, 0.0, 100.0 * histogram_maximum)
+    fit_function.FixParameter(1, reference_kaon_mean)
+    fit_function.FixParameter(2, kaon_sigma)
+    fit_function.SetParameter(3, max(float(proton_seed[0]), 0.05 * histogram_maximum))
+    fit_function.SetParLimits(3, 0.0, 100.0 * histogram_maximum)
+    fit_function.FixParameter(4, effective_proton_reference)
+    fit_function.FixParameter(5, proton_sigma)
+    fit_function.SetParameter(6, 0.0)
+    fit_function.SetParLimits(6, offset_min, offset_max)
+    fit_function.SetParameter(7, 0.02 * histogram_maximum)
+    fit_function.SetParLimits(7, 0.0, 10.0 * histogram_maximum)
+    fit_result = histogram.Fit(fit_function, PROTON_CLEANING_EXACT_FIT_OPTIONS)
+    fit_status_code = int(fit_result)
+    offset = float(fit_function.GetParameter(6))
+    offset_error = float(fit_function.GetParError(6))
+    bound_hit = _is_near_bound(offset, offset_min, offset_max, 0.02)
+    chi2_data = float(fit_function.GetChisquare())
+    fit_ndf = int(fit_function.GetNDF())
+    chi2_ndf = (
+        float(chi2_data / float(fit_ndf))
+        if fit_ndf > 0 and math.isfinite(float(chi2_data))
+        else None
+    )
+    finite_outputs = (
+        math.isfinite(offset)
+        and math.isfinite(float(fit_function.GetParameter(0)))
+        and math.isfinite(float(fit_function.GetParameter(3)))
+        and math.isfinite(float(fit_function.GetParameter(7)))
+    )
+    rejection_reasons = []
+    if fit_status_code != 0:
+        rejection_reasons.append("fit_status_{}".format(int(fit_status_code)))
+    if not finite_outputs:
+        rejection_reasons.append("nonfinite_offset_fit_outputs")
+    valid = len(rejection_reasons) == 0
+    diagnostic_warnings = []
+    if bound_hit:
+        diagnostic_warnings.append("bound_hit")
+    result = dict(base_result)
+    result.update(
+        {
+            "valid": bool(valid),
+            "fit_attempted": True,
+            "fit_status": "success" if fit_status_code == 0 else "failure",
+            "fit_status_code": int(fit_status_code),
+            "delta_offset": float(offset),
+            "delta_offset_error": float(offset_error) if math.isfinite(offset_error) else None,
+            "delta_offset_bound_hit": bool(bound_hit),
+            "diagnostic_warnings": diagnostic_warnings,
+            "rejection_reasons": rejection_reasons,
+            "rejection_reason": _join_rejection_reasons(rejection_reasons),
+            "chi2_data": chi2_data,
+            "chi2_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
+            "fit_ndf": int(fit_ndf),
+            "reference_kaon_mean": float(reference_kaon_mean),
+            "reference_proton_mean": float(reference_proton_mean),
+            "raw_reference_proton_from_tof": float(raw_proton_reference),
+            "wrapped_reference_proton_from_tof": float(effective_proton_reference),
+            "rf_period_shift": int(wrap_info.get("period_shift", 0) or 0),
+            "kaon_amplitude": float(fit_function.GetParameter(0)),
+            "proton_amplitude": float(fit_function.GetParameter(3)),
+            "other_amplitude": float(fit_function.GetParameter(7)),
+        }
+    )
+    return result
+
+
+def _build_timing_constraint_for_cell(
+    global_shape,
+    delta_offset_fit,
+    tof_summary,
+    proton_peak_is_lower,
+    probe_kind,
+    display_range,
+    bunch_spacing_ns,
+):
+    if not bool((global_shape or {}).get("valid", False)):
+        return {"valid": False, "reason": "invalid_global_shape"}
+    if not bool((delta_offset_fit or {}).get("valid", False)):
+        return {"valid": False, "reason": "invalid_delta_offset_fit"}
+    mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
+    if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
+        return {"valid": False, "reason": "invalid_mean_delta_t_pk"}
+    delta_offset = float((delta_offset_fit or {}).get("delta_offset", 0.0) or 0.0)
+    reference_kaon_mean = float((global_shape or {}).get("kaon_mean"))
+    reference_proton_mean = float((global_shape or {}).get("proton_mean"))
+    branch_sign = -1.0 if bool(proton_peak_is_lower) else 1.0
+    predicted_kaon_mean = reference_kaon_mean + delta_offset
+    raw_predicted_proton_mean = predicted_kaon_mean + (branch_sign * float(mean_delta_t))
+    wrap_info = {
+        "valid": True,
+        "raw_mean": float(raw_predicted_proton_mean),
+        "wrapped_mean": float(raw_predicted_proton_mean),
+        "period_shift": 0,
+        "inside_display_range": True,
+        "reference_mean": float(reference_proton_mean),
+    }
+    if str(probe_kind) == "rf":
+        wrap_info = _wrap_rf_mean_to_selected_window(
+            raw_predicted_proton_mean,
+            reference_proton_mean,
+            float(display_range[0]),
+            float(display_range[1]),
+            float(bunch_spacing_ns),
+        )
+    if not bool(wrap_info.get("valid", False)):
+        return {"valid": False, "reason": wrap_info.get("reason") or "invalid_rf_wrap"}
+    return {
+        "valid": True,
+        "reference_global_kaon_mean": float(reference_kaon_mean),
+        "reference_global_proton_mean": float(reference_proton_mean),
+        "delta_timing_offset": float(delta_offset),
+        "delta_timing_offset_error": (delta_offset_fit or {}).get("delta_offset_error"),
+        "mean_delta_t_pk_ns": float(mean_delta_t),
+        "predicted_kaon_mean": float(predicted_kaon_mean),
+        "predicted_proton_mean_raw": float(raw_predicted_proton_mean),
+        "predicted_proton_mean": float(wrap_info["wrapped_mean"]),
+        "wrapped_predicted_proton_mean": float(wrap_info["wrapped_mean"]),
+        "rf_period_shift": int(wrap_info.get("period_shift", 0) or 0),
+        "kaon_sigma": float((global_shape or {}).get("kaon_sigma")),
+        "proton_sigma": float((global_shape or {}).get("proton_sigma")),
+    }
+
+
 def _fit_delta_timing_slice(
     histogram,
     global_shape,
@@ -1906,6 +2494,7 @@ def _fit_delta_timing_slice(
     use_deviance_per_entry_validation=False,
     maximum_poisson_deviance_per_entry=None,
     support_entries=None,
+    timing_constraint=None,
 ):
     fit_min = float(global_shape.get("fit_min", (config.get("ctime_hist_range") or (-1.50, 1.25))[0]))
     fit_max = float(global_shape.get("fit_max", (config.get("ctime_hist_range") or (-1.50, 1.25))[1]))
@@ -1918,14 +2507,22 @@ def _fit_delta_timing_slice(
         minimum_entries,
     )
     invalid_global_shape = not global_shape.get("valid")
+    invalid_timing_constraint = bool(timing_constraint is not None) and not bool(
+        (timing_constraint or {}).get("valid", False)
+    )
     if (
         histogram is None
         or invalid_global_shape
+        or invalid_timing_constraint
         or int(support_entries) < int(minimum_entries)
     ):
         rejection_reasons = []
         if invalid_global_shape:
             rejection_reasons.append("invalid_global_shape")
+        if invalid_timing_constraint:
+            rejection_reasons.append(
+                (timing_constraint or {}).get("reason") or "invalid_timing_constraint"
+            )
         if histogram is None:
             rejection_reasons.append("missing_histogram")
         elif int(support_entries) < int(minimum_entries):
@@ -1943,16 +2540,25 @@ def _fit_delta_timing_slice(
             "rejection_reason": _join_rejection_reasons(rejection_reasons or ["insufficient_entries_or_invalid_global_shape"]),
             **support_snapshot,
         }
+    kaon_mean = float((timing_constraint or {}).get("predicted_kaon_mean", global_shape["kaon_mean"]))
+    proton_mean = float(
+        (timing_constraint or {}).get(
+            "wrapped_predicted_proton_mean",
+            (timing_constraint or {}).get("predicted_proton_mean", global_shape["proton_mean"]),
+        )
+    )
+    kaon_sigma = float((timing_constraint or {}).get("kaon_sigma", global_shape["kaon_sigma"]))
+    proton_sigma = float((timing_constraint or {}).get("proton_sigma", global_shape["proton_sigma"]))
     histogram_maximum = max(float(histogram.GetMaximum()), 1.0)
     kaon_seed = _find_peak_seed(
         histogram,
-        global_shape["kaon_mean"] - (2.0 * global_shape["kaon_sigma"]),
-        global_shape["kaon_mean"] + (2.0 * global_shape["kaon_sigma"]),
+        kaon_mean - (2.0 * kaon_sigma),
+        kaon_mean + (2.0 * kaon_sigma),
     )
     proton_seed = _find_peak_seed(
         histogram,
-        global_shape["proton_mean"] - (2.0 * global_shape["proton_sigma"]),
-        global_shape["proton_mean"] + (2.0 * global_shape["proton_sigma"]),
+        proton_mean - (2.0 * proton_sigma),
+        proton_mean + (2.0 * proton_sigma),
     )
     fit_function = ROOT.TF1(
         str(function_name),
@@ -1972,12 +2578,12 @@ def _fit_delta_timing_slice(
     fit_function.SetParName(6, "other constant")
     fit_function.SetParameter(0, max(float(kaon_seed[0]), 0.10 * histogram_maximum))
     fit_function.SetParLimits(0, 0.0, 100.0 * histogram_maximum)
-    fit_function.FixParameter(1, float(global_shape["kaon_mean"]))
-    fit_function.FixParameter(2, float(global_shape["kaon_sigma"]))
+    fit_function.FixParameter(1, float(kaon_mean))
+    fit_function.FixParameter(2, float(kaon_sigma))
     fit_function.SetParameter(3, max(float(proton_seed[0]), 0.05 * histogram_maximum))
     fit_function.SetParLimits(3, 0.0, 100.0 * histogram_maximum)
-    fit_function.FixParameter(4, float(global_shape["proton_mean"]))
-    fit_function.FixParameter(5, float(global_shape["proton_sigma"]))
+    fit_function.FixParameter(4, float(proton_mean))
+    fit_function.FixParameter(5, float(proton_sigma))
     fit_function.SetParameter(6, 0.02 * histogram_maximum)
     fit_function.SetParLimits(6, 0.0, 10.0 * histogram_maximum)
     fit_result = histogram.Fit(fit_function, PROTON_CLEANING_EXACT_FIT_OPTIONS)
@@ -1995,16 +2601,16 @@ def _fit_delta_timing_slice(
     kaon_yield = _sum_gaussian_over_bins(
         histogram,
         kaon_amplitude,
-        global_shape["kaon_mean"],
-        global_shape["kaon_sigma"],
+        kaon_mean,
+        kaon_sigma,
         fit_min,
         fit_max,
     )
     proton_yield = _sum_gaussian_over_bins(
         histogram,
         proton_amplitude,
-        global_shape["proton_mean"],
-        global_shape["proton_sigma"],
+        proton_mean,
+        proton_sigma,
         fit_min,
         fit_max,
     )
@@ -2120,6 +2726,18 @@ def _fit_delta_timing_slice(
         "fit_status_code": int(fit_status_code),
         "message": "",
         "function_name": str(function_name),
+        "reference_global_kaon_mean": (timing_constraint or {}).get("reference_global_kaon_mean", global_shape.get("kaon_mean")),
+        "reference_global_proton_mean": (timing_constraint or {}).get("reference_global_proton_mean", global_shape.get("proton_mean")),
+        "delta_timing_offset": (timing_constraint or {}).get("delta_timing_offset"),
+        "delta_timing_offset_error": (timing_constraint or {}).get("delta_timing_offset_error"),
+        "mean_delta_t_pk_ns": (timing_constraint or {}).get("mean_delta_t_pk_ns"),
+        "predicted_kaon_mean": float(kaon_mean),
+        "predicted_proton_mean": float(proton_mean),
+        "wrapped_predicted_proton_mean": float(proton_mean),
+        "predicted_proton_mean_raw": (timing_constraint or {}).get("predicted_proton_mean_raw", proton_mean),
+        "rf_period_shift": (timing_constraint or {}).get("rf_period_shift", 0),
+        "kaon_sigma": float(kaon_sigma),
+        "proton_sigma": float(proton_sigma),
         "kaon_amplitude": float(kaon_amplitude),
         "kaon_amplitude_error": float(kaon_amplitude_error),
         "proton_amplitude": float(proton_amplitude),
@@ -2575,20 +3193,29 @@ def _evaluate_event_proton_probability(
 ):
     if not global_shape.get("valid") or not slice_fit.get("valid"):
         return 0.0
+    kaon_mean = float(slice_fit.get("predicted_kaon_mean", global_shape["kaon_mean"]))
+    proton_mean = float(
+        slice_fit.get(
+            "wrapped_predicted_proton_mean",
+            slice_fit.get("predicted_proton_mean", global_shape["proton_mean"]),
+        )
+    )
+    kaon_sigma = float(slice_fit.get("kaon_sigma", global_shape["kaon_sigma"]))
+    proton_sigma = float(slice_fit.get("proton_sigma", global_shape["proton_sigma"]))
     proton_value = float(
         _gaussian(
             np.asarray([timing], dtype=float),
             slice_fit["proton_amplitude"],
-            global_shape["proton_mean"],
-            global_shape["proton_sigma"],
+            proton_mean,
+            proton_sigma,
         )[0]
     )
     kaon_value = float(
         _gaussian(
             np.asarray([timing], dtype=float),
             slice_fit["kaon_amplitude"],
-            global_shape["kaon_mean"],
-            global_shape["kaon_sigma"],
+            kaon_mean,
+            kaon_sigma,
         )[0]
     )
     other_value = max(float(slice_fit.get("other_amplitude", 0.0) or 0.0), 0.0)
@@ -2616,7 +3243,30 @@ def _build_prepared_event_weight_lookup(cleaning_result, source_bundle):
     support_by_delta = list(cleaning_result.get("support_by_delta") or [])
     delta_slice_fits = list(cleaning_result.get("delta_slice_fits") or [])
     global_shapes = list(cleaning_result.get("global_shapes") or [])
+    selected_selection_key = str(diagnostics.get("selected_timing_selection_key") or "nommcuts")
     lookup = {}
+    closure_by_cell = {}
+    closure_by_delta = {}
+    for delta_index, slice_collection in enumerate(delta_slice_fits):
+        for aero_index, slice_fit in enumerate(slice_collection or []):
+            key = (int(delta_index), int(aero_index))
+            closure_by_cell[key] = {
+                "delta_index": int(delta_index),
+                "aero_index": int(aero_index),
+                "fitted_proton_yield": float((slice_fit or {}).get("proton_yield", 0.0) or 0.0),
+                "summed_event_proton_probability": 0.0,
+                "closure_ratio": None,
+                "event_count": 0,
+            }
+        closure_by_delta[int(delta_index)] = {
+            "delta_index": int(delta_index),
+            "fitted_proton_yield": float(
+                sum(float((fit or {}).get("proton_yield", 0.0) or 0.0) for fit in (slice_collection or []))
+            ),
+            "summed_event_proton_probability": 0.0,
+            "closure_ratio": None,
+            "event_count": 0,
+        }
 
     active_sources = (source_bundle or {}).get("sources") or {}
     for source_name, source_spec in prepared_sources.items():
@@ -2670,6 +3320,16 @@ def _build_prepared_event_weight_lookup(cleaning_result, source_bundle):
                             )
 
             proton_weight = max(0.0, min(1.0, float(proton_weight)))
+            if bool((entry_payload or {}).get(selected_selection_key, False)):
+                fit_coefficient = float((source_spec or {}).get("fit_coefficient", 0.0) or 0.0)
+                weighted_probability = float(fit_coefficient * proton_weight)
+                cell_key = (int(delta_index), int(aero_index))
+                if cell_key in closure_by_cell:
+                    closure_by_cell[cell_key]["summed_event_proton_probability"] += weighted_probability
+                    closure_by_cell[cell_key]["event_count"] += 1
+                if int(delta_index) in closure_by_delta:
+                    closure_by_delta[int(delta_index)]["summed_event_proton_probability"] += weighted_probability
+                    closure_by_delta[int(delta_index)]["event_count"] += 1
             cleaned_factor = max(0.0, min(1.0, 1.0 - proton_weight))
             rf_accept = apply_low_epsilon_rf_after_proton_cleaning(
                 cleaning_result,
@@ -2692,6 +3352,16 @@ def _build_prepared_event_weight_lookup(cleaning_result, source_bundle):
 
     diagnostics["prepared_event_lookup_count"] = int(len(lookup))
     diagnostics["event_weight_source"] = "setting_wide_immutable_prepared_lookup"
+    for row in closure_by_cell.values():
+        fitted = float(row.get("fitted_proton_yield", 0.0) or 0.0)
+        if fitted > 0.0:
+            row["closure_ratio"] = float(row["summed_event_proton_probability"] / fitted)
+    for row in closure_by_delta.values():
+        fitted = float(row.get("fitted_proton_yield", 0.0) or 0.0)
+        if fitted > 0.0:
+            row["closure_ratio"] = float(row["summed_event_proton_probability"] / fitted)
+    diagnostics["event_weight_closure_by_cell"] = _json_ready_value(list(closure_by_cell.values()))
+    diagnostics["event_weight_closure_by_delta"] = _json_ready_value(list(closure_by_delta.values()))
     return lookup
 
 
@@ -3366,6 +4036,7 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["selected_timing_branch"] = selected_time_branch
     result["diagnostics"]["selected_probe_kind"] = str(selected_probe.get("probe_kind", "unknown"))
     result["diagnostics"]["selected_probe_fit_mode"] = str(selected_probe.get("fit_mode", "unknown"))
+    result["diagnostics"]["selected_timing_selection_key"] = str(selected_probe.get("selection_key") or "nommcuts")
     result["diagnostics"]["implementation"] = (
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
     )
@@ -3439,6 +4110,64 @@ def build_kaon_proton_cleaning_result(
     if valid_global_shape_count <= 0:
         result["fallback_reason"] = "no identifiable proton-kaon timing shapes"
         return result
+    selected_selection_key = str(selected_probe.get("selection_key") or "nommcuts")
+    delta_edges = [float(edge) for edge in (pid_payload.get("delta_edges") or [])]
+    if len(delta_edges) < 2:
+        delta_edges = np.linspace(
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+            int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
+        ).tolist()
+    delta_tof_summaries = _build_prompt_tof_summary_by_delta(
+        source_bundle,
+        delta_edges,
+        selected_selection_key,
+    )
+    result["diagnostics"]["tof_summary_by_delta"] = _json_ready_value(delta_tof_summaries)
+    result["diagnostics"]["valid_tof_delta_bins"] = int(
+        sum(1 for row in delta_tof_summaries if bool((row or {}).get("valid", False)))
+    )
+    delta_timing_offset_fits = []
+    for delta_index, pid_hist in enumerate(pid_payload.get("delta_pid_hists") or []):
+        delta_projection = None
+        if pid_hist is not None:
+            delta_projection = pid_hist.ProjectionY(
+                "H_proton_cleaning_delta_offset_time_{}".format(delta_index),
+                1,
+                int(pid_hist.GetNbinsX()),
+            )
+            if hasattr(delta_projection, "SetDirectory"):
+                delta_projection.SetDirectory(0)
+            if hasattr(delta_projection, "Sumw2"):
+                delta_projection.Sumw2()
+        support_by_aero = (
+            (pid_payload.get("cell_prompt_support") or [])[delta_index]
+            if delta_index < len(pid_payload.get("cell_prompt_support") or [])
+            else []
+        )
+        reference_shape = _build_reference_shape_for_delta_offset(
+            global_shapes,
+            support_by_aero,
+        )
+        offset_fit = _fit_delta_common_timing_offset(
+            delta_projection,
+            reference_shape,
+            delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {},
+            exact_config,
+            "f_proton_cleaning_delta_offset_{}".format(delta_index),
+            bool(selected_probe.get("proton_peak_is_lower", False)),
+            str(selected_probe.get("probe_kind", "ct")),
+            selected_time_hist_range,
+            beam_bunch_spacing_ns,
+            support_entries=sum(int(value or 0) for value in support_by_aero),
+        )
+        offset_fit["delta_index"] = int(delta_index)
+        delta_timing_offset_fits.append(offset_fit)
+    result["delta_timing_offset_fits"] = delta_timing_offset_fits
+    result["diagnostics"]["delta_timing_offset_fits"] = _json_ready_value(delta_timing_offset_fits)
+    result["diagnostics"]["valid_delta_offset_fits"] = int(
+        sum(1 for row in delta_timing_offset_fits if bool((row or {}).get("valid", False)))
+    )
     delta_fits = []
     support_by_delta = []
     proton_yield_by_delta = []
@@ -3452,6 +4181,12 @@ def build_kaon_proton_cleaning_result(
     valid_coverage_by_delta = []
     delta_support_debug_rows = []
     for delta_index, slice_collection in enumerate(pid_payload["delta_slice_hists"]):
+        tof_summary = delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {}
+        delta_offset_fit = (
+            delta_timing_offset_fits[delta_index]
+            if delta_index < len(delta_timing_offset_fits)
+            else {"valid": False, "rejection_reason": "missing_delta_offset_fit"}
+        )
         slice_fits = []
         slice_debug_rows = []
         proton_total = 0.0
@@ -3467,6 +4202,15 @@ def build_kaon_proton_cleaning_result(
         chi2_weight = 0.0
         for aero_index, slice_hist in enumerate(slice_collection):
             global_shape = global_shapes[aero_index] if aero_index < len(global_shapes) else {"valid": False}
+            timing_constraint = _build_timing_constraint_for_cell(
+                global_shape,
+                delta_offset_fit,
+                tof_summary,
+                bool(selected_probe.get("proton_peak_is_lower", False)),
+                str(selected_probe.get("probe_kind", "ct")),
+                selected_time_hist_range,
+                beam_bunch_spacing_ns,
+            )
             slice_fit = _fit_delta_timing_slice(
                 slice_hist,
                 global_shape,
@@ -3482,6 +4226,7 @@ def build_kaon_proton_cleaning_result(
                     and aero_index < len((pid_payload.get("cell_prompt_support") or [])[delta_index])
                     else 0
                 ),
+                timing_constraint=timing_constraint,
             )
             slice_fits.append(slice_fit)
             slice_debug_rows.append(
@@ -3511,6 +4256,11 @@ def build_kaon_proton_cleaning_result(
                         "active_bin_count": (slice_fit or {}).get("active_bin_count"),
                         "fit_options": (slice_fit or {}).get("fit_options"),
                         "rejection_reason": (slice_fit or {}).get("rejection_reason"),
+                        "delta_timing_offset": (slice_fit or {}).get("delta_timing_offset"),
+                        "mean_delta_t_pk_ns": (slice_fit or {}).get("mean_delta_t_pk_ns"),
+                        "predicted_kaon_mean": (slice_fit or {}).get("predicted_kaon_mean"),
+                        "predicted_proton_mean": (slice_fit or {}).get("predicted_proton_mean"),
+                        "rf_period_shift": (slice_fit or {}).get("rf_period_shift"),
                     }
                 )
             )
@@ -3570,6 +4320,8 @@ def build_kaon_proton_cleaning_result(
                     "chi2_ndf_weighted": (
                         float(chi2_weighted_sum / chi2_weight) if chi2_weight > 0.0 else None
                     ),
+                    "tof_summary": tof_summary,
+                    "delta_offset_fit": delta_offset_fit or {},
                     "slice_rows": slice_debug_rows,
                 }
             )
@@ -4341,11 +5093,18 @@ def _build_timing_shape_overlays(hist, global_shape, slice_fit):
         return None
     if not bool(slice_fit.get("fit_attempted", slice_fit.get("valid", False))):
         return None
+    kaon_mean = slice_fit.get("predicted_kaon_mean", global_shape.get("kaon_mean"))
+    proton_mean = slice_fit.get(
+        "wrapped_predicted_proton_mean",
+        slice_fit.get("predicted_proton_mean", global_shape.get("proton_mean")),
+    )
+    kaon_sigma = slice_fit.get("kaon_sigma", global_shape.get("kaon_sigma"))
+    proton_sigma = slice_fit.get("proton_sigma", global_shape.get("proton_sigma"))
     if not (
-        math.isfinite(float(global_shape.get("kaon_mean", float("nan"))))
-        and math.isfinite(float(global_shape.get("proton_mean", float("nan"))))
-        and math.isfinite(float(global_shape.get("kaon_sigma", float("nan"))))
-        and math.isfinite(float(global_shape.get("proton_sigma", float("nan"))))
+        math.isfinite(float(kaon_mean))
+        and math.isfinite(float(proton_mean))
+        and math.isfinite(float(kaon_sigma))
+        and math.isfinite(float(proton_sigma))
         and math.isfinite(float(slice_fit.get("kaon_amplitude", float("nan"))))
         and math.isfinite(float(slice_fit.get("proton_amplitude", float("nan"))))
         and math.isfinite(float(slice_fit.get("other_amplitude", float("nan"))))
@@ -4367,16 +5126,16 @@ def _build_timing_shape_overlays(hist, global_shape, slice_fit):
             _gaussian(
                 np.asarray([x_value]),
                 slice_fit["kaon_amplitude"],
-                global_shape["kaon_mean"],
-                global_shape["kaon_sigma"],
+                kaon_mean,
+                kaon_sigma,
             )[0]
         )
         proton_value = float(
             _gaussian(
                 np.asarray([x_value]),
                 slice_fit["proton_amplitude"],
-                global_shape["proton_mean"],
-                global_shape["proton_sigma"],
+                proton_mean,
+                proton_sigma,
             )[0]
         )
         total_value = kaon_value + proton_value + other_value
@@ -4828,6 +5587,233 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
     canvas.Print(output_pdf)
 
 
+def _finite_float_or_none(value):
+    if value is None:
+        return None
+    try:
+        numeric = float(value)
+    except Exception:
+        return None
+    return numeric if math.isfinite(numeric) else None
+
+
+def _set_hist_bin_if_finite(hist, bin_index, value, error=None):
+    numeric = _finite_float_or_none(value)
+    if hist is None or numeric is None:
+        return False
+    hist.SetBinContent(int(bin_index), float(numeric))
+    err_value = _finite_float_or_none(error)
+    if err_value is not None:
+        hist.SetBinError(int(bin_index), abs(float(err_value)))
+    return True
+
+
+def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, prefix):
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    tof_summaries = diagnostics.get("tof_summary_by_delta") or []
+    offset_fits = (cleaning_result or {}).get("delta_timing_offset_fits") or diagnostics.get("delta_timing_offset_fits") or []
+    if not tof_summaries and not offset_fits:
+        return
+
+    delta_edges = [float(edge) for edge in ((cleaning_result or {}).get("delta_edges") or [])]
+    if len(delta_edges) < 2:
+        delta_edges = np.linspace(
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+            int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
+        ).tolist()
+    page_id = abs(id(cleaning_result))
+    h_p = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_mean_p_delta_{}".format(page_id),
+        "Prompt SHMS momentum constraint;SHMS #delta [%];#LTp_{SHMS}#GT [GeV]",
+        delta_edges,
+    )
+    h_path = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_path_delta_{}".format(page_id),
+        "SHMS path-length constraint;SHMS #delta [%];#LTL#GT [cm]",
+        delta_edges,
+    )
+    h_dt = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_deltat_delta_{}".format(page_id),
+        "Predicted p-K TOF separation;SHMS #delta [%];#LT#Delta t_{pK}#GT [ns]",
+        delta_edges,
+    )
+    h_offset = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_offset_delta_{}".format(page_id),
+        "Fitted common timing offset;SHMS #delta [%];offset [ns]",
+        delta_edges,
+    )
+    h_k_ref = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_k_ref_delta_{}".format(page_id),
+        "Corrected timing centers;SHMS #delta [%];timing center [ns]",
+        delta_edges,
+    )
+    h_p_ref = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_p_ref_delta_{}".format(page_id),
+        "Corrected timing centers;SHMS #delta [%];timing center [ns]",
+        delta_edges,
+    )
+    h_k_global = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_k_global_delta_{}".format(page_id),
+        "Corrected timing centers;SHMS #delta [%];timing center [ns]",
+        delta_edges,
+    )
+    h_p_global = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_p_global_delta_{}".format(page_id),
+        "Corrected timing centers;SHMS #delta [%];timing center [ns]",
+        delta_edges,
+    )
+    h_closure = _make_delta_axis_hist(
+        "H_proton_cleaning_event_weight_closure_delta_{}".format(page_id),
+        "Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{p}^{event} / fitted p yield",
+        delta_edges,
+    )
+
+    for row in tof_summaries:
+        if not isinstance(row, dict):
+            continue
+        bin_index = int(row.get("delta_index", -1)) + 1
+        if bin_index < 1 or bin_index > h_p.GetNbinsX():
+            continue
+        _set_hist_bin_if_finite(h_p, bin_index, row.get("mean_P_gtr_p"), row.get("rms_P_gtr_p"))
+        _set_hist_bin_if_finite(h_path, bin_index, row.get("mean_shms_path_length_cm"), row.get("rms_shms_path_length_cm"))
+        _set_hist_bin_if_finite(h_dt, bin_index, row.get("mean_delta_t_pk_ns"), row.get("rms_delta_t_pk_ns"))
+
+    for row in offset_fits:
+        if not isinstance(row, dict):
+            continue
+        bin_index = int(row.get("delta_index", -1)) + 1
+        if bin_index < 1 or bin_index > h_offset.GetNbinsX():
+            continue
+        _set_hist_bin_if_finite(h_offset, bin_index, row.get("delta_offset"), row.get("delta_offset_error"))
+        reference_k = _finite_float_or_none(row.get("reference_kaon_mean"))
+        reference_p = _finite_float_or_none(row.get("reference_proton_mean"))
+        offset = _finite_float_or_none(row.get("delta_offset"))
+        wrapped_p = _finite_float_or_none(row.get("wrapped_reference_proton_from_tof"))
+        if reference_k is not None:
+            _set_hist_bin_if_finite(h_k_global, bin_index, reference_k)
+        if reference_p is not None:
+            _set_hist_bin_if_finite(h_p_global, bin_index, reference_p)
+        if reference_k is not None and offset is not None:
+            _set_hist_bin_if_finite(h_k_ref, bin_index, reference_k + offset, row.get("delta_offset_error"))
+        if wrapped_p is not None and offset is not None:
+            _set_hist_bin_if_finite(h_p_ref, bin_index, wrapped_p + offset, row.get("delta_offset_error"))
+
+    for row in diagnostics.get("event_weight_closure_by_delta") or []:
+        if not isinstance(row, dict):
+            continue
+        bin_index = int(row.get("delta_index", -1)) + 1
+        if bin_index < 1 or bin_index > h_closure.GetNbinsX():
+            continue
+        _set_hist_bin_if_finite(h_closure, bin_index, row.get("closure_ratio"))
+
+    _set_hist_line_marker(h_p, kBlue, width=2, marker=20)
+    _set_hist_line_marker(h_path, kGreen + 2, width=2, marker=20)
+    _set_hist_line_marker(h_dt, kMagenta + 1, width=2, marker=20)
+    _set_hist_line_marker(h_offset, kRed, width=2, marker=20)
+    _set_hist_line_marker(h_k_global, kBlue, width=2, style=2, marker=24)
+    _set_hist_line_marker(h_p_global, kRed, width=2, style=2, marker=25)
+    _set_hist_line_marker(h_k_ref, kBlue, width=3, marker=20)
+    _set_hist_line_marker(h_p_ref, kRed, width=3, marker=21)
+    _set_hist_line_marker(h_closure, kViolet + 1, width=3, marker=20)
+
+    canvas = TCanvas(
+        "C_proton_cleaning_tof_constraints_{}".format(page_id),
+        "{} proton-cleaning SHMS TOF constraints".format(prefix),
+        1800,
+        1100,
+    )
+    canvas.Divide(3, 2)
+    drawn_objects = [
+        h_p,
+        h_path,
+        h_dt,
+        h_offset,
+        h_k_global,
+        h_p_global,
+        h_k_ref,
+        h_p_ref,
+        h_closure,
+    ]
+
+    canvas.cd(1)
+    h_p.Draw("E1")
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(2)
+    h_path.Draw("E1")
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(3)
+    h_dt.Draw("E1")
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(4)
+    h_offset.Draw("E1")
+    zero_line = TLine(float(delta_edges[0]), 0.0, float(delta_edges[-1]), 0.0)
+    zero_line.SetLineColor(kGray + 2)
+    zero_line.SetLineStyle(2)
+    zero_line.Draw("same")
+    drawn_objects.append(zero_line)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(5)
+    max_center = max(
+        float(h_k_global.GetMaximum()),
+        float(h_p_global.GetMaximum()),
+        float(h_k_ref.GetMaximum()),
+        float(h_p_ref.GetMaximum()),
+        1.0e-6,
+    )
+    min_center = min(
+        float(h_k_global.GetMinimum()),
+        float(h_p_global.GetMinimum()),
+        float(h_k_ref.GetMinimum()),
+        float(h_p_ref.GetMinimum()),
+        -1.0e-6,
+    )
+    if max_center <= min_center:
+        max_center = min_center + 1.0
+    h_k_ref.SetMinimum(min_center - 0.10 * abs(max_center - min_center))
+    h_k_ref.SetMaximum(max_center + 0.15 * abs(max_center - min_center))
+    h_k_ref.Draw("E1")
+    h_p_ref.Draw("E1 same")
+    h_k_global.Draw("hist same")
+    h_p_global.Draw("hist same")
+    legend = TLegend(0.50, 0.62, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_k_ref, "corrected K center", "lep")
+    legend.AddEntry(h_p_ref, "corrected p center", "lep")
+    legend.AddEntry(h_k_global, "global K ref", "l")
+    legend.AddEntry(h_p_global, "global p ref", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(6)
+    h_closure.SetMinimum(0.0)
+    h_closure.SetMaximum(max(1.25, 1.15 * float(h_closure.GetMaximum())))
+    h_closure.Draw("E1")
+    unity_line = TLine(float(delta_edges[0]), 1.0, float(delta_edges[-1]), 1.0)
+    unity_line.SetLineColor(kGray + 2)
+    unity_line.SetLineStyle(2)
+    unity_line.Draw("same")
+    drawn_objects.append(unity_line)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
+    canvas.Print(output_pdf)
+
+
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):
     if not isinstance(cleaning_result, dict):
         return
@@ -4840,6 +5826,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     support_by_delta = cleaning_result.get("support_by_delta") or []
 
     _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix)
+    _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, prefix)
 
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:
@@ -4905,12 +5892,15 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                                 bool(shape.get("fit_attempted", shape.get("valid"))),
                                 bool(shape.get("valid")),
                             ),
-                            "status={}".format(shape.get("fit_status")),
-                            "entries={}".format(shape.get("support_entries", "n/a")),
-                            "chi2/ndf={}".format(shape.get("chi2_ndf")),
-                            "reason={}".format(shape.get("rejection_reason") or "none"),
-                        ),
-                        x1=0.14,
+	                            "status={}".format(shape.get("fit_status")),
+	                            "entries={}".format(shape.get("support_entries", "n/a")),
+	                            "chi2/ndf={}".format(shape.get("chi2_ndf")),
+	                            "warn={}".format(
+	                                ", ".join(str(w) for w in (shape.get("diagnostic_warnings") or [])) or "none"
+	                            ),
+	                            "reason={}".format(shape.get("rejection_reason") or "none"),
+	                        ),
+	                        x1=0.14,
                         y1=0.68,
                         x2=0.62,
                         y2=0.90,
@@ -5095,11 +6085,14 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                             bool(slice_fit.get("valid")),
                         ),
                         "status={}".format(slice_fit.get("fit_status")),
-                        "entries={}".format(slice_fit.get("support_entries", "n/a")),
-                        "model/data={}".format(slice_fit.get("model_data_ratio")),
-                        "chi2/ndf={}".format(slice_fit.get("chi2_ndf")),
-                        "reason={}".format(slice_fit.get("rejection_reason") or "none"),
-                    ),
+	                        "entries={}".format(slice_fit.get("support_entries", "n/a")),
+	                        "model/data={}".format(slice_fit.get("model_data_ratio")),
+	                        "chi2/ndf={}".format(slice_fit.get("chi2_ndf")),
+	                        "warn={}".format(
+	                            ", ".join(str(w) for w in (slice_fit.get("diagnostic_warnings") or [])) or "none"
+	                        ),
+	                        "reason={}".format(slice_fit.get("rejection_reason") or "none"),
+	                    ),
                     x1=0.16,
                     y1=0.66,
                     x2=0.62,
