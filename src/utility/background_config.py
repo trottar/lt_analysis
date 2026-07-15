@@ -491,6 +491,14 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "low_mm": (0.80, 0.90),
         "lambda_peak": (1.105, 1.125),
     },
+    "tof_offset_validation": {
+        "maximum_offset_error_ns": 0.10,
+        "maximum_chi2_ndf": 5.0,
+        "minimum_component_significance": 2.0,
+        "minimum_smaller_component_fraction": 0.02,
+        "reject_bound_hit_with_large_error": True,
+        "bound_hit_large_error_fraction": 0.50,
+    },
 }
 
 PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES = {}
@@ -524,6 +532,7 @@ PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
         "support_thresholds",
         "weighting",
         "validation_windows",
+        "tof_offset_validation",
     }
 )
 

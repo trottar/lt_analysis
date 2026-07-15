@@ -125,6 +125,14 @@ LIGHT_SPEED_CM_PER_NS = 29.9792
 KAON_MASS_GEV = 0.493677
 PROTON_MASS_GEV = 0.93827208
 PROTON_CLEANING_TOF_OFFSET_RANGE = (-0.35, 0.35)
+PROTON_CLEANING_TOF_OFFSET_VALIDATION = {
+    "maximum_offset_error_ns": 0.10,
+    "maximum_chi2_ndf": 5.0,
+    "minimum_component_significance": 2.0,
+    "minimum_smaller_component_fraction": 0.02,
+    "reject_bound_hit_with_large_error": True,
+    "bound_hit_large_error_fraction": 0.50,
+}
 
 
 def _clone_hist(template_hist, name, reset=True):
@@ -379,7 +387,15 @@ def _mean_rms(values):
     return float(np.mean(array_values)), float(np.std(array_values))
 
 
-def _build_prompt_tof_summary_by_delta(source_bundle, delta_edges, selection_key):
+def _build_prompt_tof_summary_by_delta(
+    source_bundle,
+    delta_edges,
+    selection_key,
+    timing_branch=None,
+    timing_range=None,
+    aero_range=None,
+    delta_range=None,
+):
     n_delta_bins = max(len(delta_edges) - 1, 0)
     collections = [
         {
@@ -391,6 +407,30 @@ def _build_prompt_tof_summary_by_delta(source_bundle, delta_edges, selection_key
         }
         for _ in range(n_delta_bins)
     ]
+    counters = [
+        {
+            "prompt_events_seen": 0,
+            "prompt_events_with_valid_tof": 0,
+            "prompt_events_with_selected_timing": 0,
+            "prompt_events_inside_timing_range": 0,
+            "prompt_events_inside_aero_range": 0,
+            "prompt_events_used": 0,
+        }
+        for _ in range(n_delta_bins)
+    ]
+    timing_branch = str(timing_branch or "")
+    timing_min = timing_max = None
+    if timing_range and len(timing_range) >= 2:
+        timing_min = float(timing_range[0])
+        timing_max = float(timing_range[1])
+    aero_min = aero_max = None
+    if aero_range and len(aero_range) >= 2:
+        aero_min = float(aero_range[0])
+        aero_max = float(aero_range[1])
+    delta_min = delta_max = None
+    if delta_range and len(delta_range) >= 2:
+        delta_min = float(delta_range[0])
+        delta_max = float(delta_range[1])
     for source_name, source_spec, _, entry_payload in _iter_prepared_records(
         source_bundle,
         selection_key=selection_key,
@@ -399,14 +439,56 @@ def _build_prompt_tof_summary_by_delta(source_bundle, delta_edges, selection_key
         del source_name
         if not bool((source_spec or {}).get("is_prompt_source", False)):
             continue
-        if not bool((entry_payload or {}).get("tof_valid", False)):
-            continue
         delta_value = (entry_payload or {}).get("delta_value")
         if delta_value is None:
             continue
-        delta_index = _find_collection_bin(float(delta_value), delta_edges)
+        try:
+            delta_value = float(delta_value)
+        except Exception:
+            continue
+        if not math.isfinite(delta_value):
+            continue
+        if delta_min is not None and (delta_value < delta_min or delta_value > delta_max):
+            continue
+        delta_index = _find_collection_bin(delta_value, delta_edges)
         if not (0 <= delta_index < n_delta_bins):
             continue
+        counters[delta_index]["prompt_events_seen"] += 1
+        if not bool((entry_payload or {}).get("tof_valid", False)):
+            continue
+        counters[delta_index]["prompt_events_with_valid_tof"] += 1
+        timing_values = (entry_payload or {}).get("timing_values") or {}
+        selected_timing = timing_values.get(timing_branch) if timing_branch else None
+        if selected_timing is None:
+            continue
+        try:
+            selected_timing = float(selected_timing)
+        except Exception:
+            continue
+        if not math.isfinite(selected_timing):
+            continue
+        counters[delta_index]["prompt_events_with_selected_timing"] += 1
+        if (
+            timing_min is not None
+            and (selected_timing < timing_min or selected_timing > timing_max)
+        ):
+            continue
+        counters[delta_index]["prompt_events_inside_timing_range"] += 1
+        aero_value = (entry_payload or {}).get("aero_value")
+        if aero_value is None:
+            aero_value = (entry_payload or {}).get("P_aero_npeSum")
+        if aero_value is None:
+            continue
+        try:
+            aero_value = float(aero_value)
+        except Exception:
+            continue
+        if not math.isfinite(aero_value):
+            continue
+        if aero_min is not None and (aero_value < aero_min or aero_value > aero_max):
+            continue
+        counters[delta_index]["prompt_events_inside_aero_range"] += 1
+        counters[delta_index]["prompt_events_used"] += 1
         for key in collections[delta_index]:
             value = (entry_payload or {}).get(key)
             if value is not None and math.isfinite(float(value)):
@@ -418,6 +500,7 @@ def _build_prompt_tof_summary_by_delta(source_bundle, delta_edges, selection_key
             "delta_min": float(delta_edges[delta_index]),
             "delta_max": float(delta_edges[delta_index + 1]),
             "prompt_event_count": int(len(collection["delta_t_pk_ns"])),
+            **counters[delta_index],
         }
         for key, values in collection.items():
             mean_value, rms_value = _mean_rms(values)
@@ -501,7 +584,7 @@ def _format_probe_summary_for_log(label, probe):
         else "meanPoissonDevianceNdf"
     )
     return (
-        "{}: branch={} kind={} mode={} selection={} valid={} pair={} sep={} "
+        "{}: branch={} kind={} mode={} selection={} valid={} pair={} sep_sigma={} "
         "D/ndf={} D/N={} score={}"
     ).format(
         label,
@@ -544,6 +627,10 @@ def _build_exact_proton_cleaning_config(base_config):
     exact_config["support_thresholds"] = deepcopy(PROTON_CLEANING_EXACT_SUPPORT_THRESHOLDS)
     exact_config["weighting"] = deepcopy(PROTON_CLEANING_EXACT_WEIGHTING)
     exact_config["validation_windows"] = deepcopy(PROTON_CLEANING_EXACT_VALIDATION_WINDOWS)
+    exact_config["tof_offset_validation"] = deepcopy(
+        (base_config or {}).get("tof_offset_validation")
+        or PROTON_CLEANING_TOF_OFFSET_VALIDATION
+    )
     exact_config["fit_options"] = PROTON_CLEANING_EXACT_FIT_OPTIONS
     return exact_config
 
@@ -2266,6 +2353,24 @@ def _fit_delta_common_timing_offset(
     support_entries=0,
 ):
     offset_min, offset_max = [float(value) for value in PROTON_CLEANING_TOF_OFFSET_RANGE]
+    validation_cfg = (
+        (exact_config or {}).get("tof_offset_validation")
+        or PROTON_CLEANING_TOF_OFFSET_VALIDATION
+    )
+    maximum_offset_error_ns = float(validation_cfg.get("maximum_offset_error_ns", 0.10))
+    maximum_chi2_ndf = float(validation_cfg.get("maximum_chi2_ndf", 5.0))
+    minimum_component_significance = float(
+        validation_cfg.get("minimum_component_significance", 2.0)
+    )
+    minimum_smaller_component_fraction = float(
+        validation_cfg.get("minimum_smaller_component_fraction", 0.02)
+    )
+    reject_bound_hit_with_large_error = bool(
+        validation_cfg.get("reject_bound_hit_with_large_error", True)
+    )
+    bound_hit_large_error_fraction = float(
+        validation_cfg.get("bound_hit_large_error_fraction", 0.50)
+    )
     base_result = {
         "valid": False,
         "fit_attempted": False,
@@ -2385,21 +2490,104 @@ def _fit_delta_common_timing_offset(
         if fit_ndf > 0 and math.isfinite(float(chi2_data))
         else None
     )
+    goodness = _compute_poisson_goodness_of_fit(
+        histogram,
+        fit_function,
+        fit_min,
+        fit_max,
+        3,
+    )
+    poisson_deviance = float(goodness.get("deviance", 0.0) or 0.0)
+    poisson_ndf = int(goodness.get("ndf", 0) or 0)
+    poisson_deviance_ndf = goodness.get("deviance_ndf")
+    poisson_deviance_per_entry = goodness.get("deviance_per_entry")
+    kaon_amplitude = float(fit_function.GetParameter(0))
+    kaon_amplitude_error = float(fit_function.GetParError(0))
+    proton_amplitude = float(fit_function.GetParameter(3))
+    proton_amplitude_error = float(fit_function.GetParError(3))
+    other_amplitude = float(fit_function.GetParameter(7))
+    other_amplitude_error = float(fit_function.GetParError(7))
+    kaon_significance = (
+        float(kaon_amplitude / kaon_amplitude_error)
+        if kaon_amplitude_error > 0.0 and math.isfinite(kaon_amplitude_error)
+        else None
+    )
+    proton_significance = (
+        float(proton_amplitude / proton_amplitude_error)
+        if proton_amplitude_error > 0.0 and math.isfinite(proton_amplitude_error)
+        else None
+    )
+    component_denominator = kaon_amplitude + proton_amplitude + max(other_amplitude, 0.0)
+    smaller_component_fraction = (
+        float(min(kaon_amplitude, proton_amplitude) / component_denominator)
+        if component_denominator > 0.0 and math.isfinite(component_denominator)
+        else None
+    )
     finite_outputs = (
         math.isfinite(offset)
-        and math.isfinite(float(fit_function.GetParameter(0)))
-        and math.isfinite(float(fit_function.GetParameter(3)))
-        and math.isfinite(float(fit_function.GetParameter(7)))
+        and math.isfinite(kaon_amplitude)
+        and math.isfinite(proton_amplitude)
+        and math.isfinite(other_amplitude)
     )
     rejection_reasons = []
     if fit_status_code != 0:
-        rejection_reasons.append("fit_status_{}".format(int(fit_status_code)))
+        rejection_reasons.append("fit_status_nonzero")
     if not finite_outputs:
         rejection_reasons.append("nonfinite_offset_fit_outputs")
+    if not math.isfinite(offset_error) or offset_error <= 0.0:
+        rejection_reasons.append("invalid_offset_error")
+    elif offset_error > maximum_offset_error_ns:
+        rejection_reasons.append("offset_error_exceeds_max")
+    if chi2_ndf is None or not math.isfinite(float(chi2_ndf)):
+        rejection_reasons.append("invalid_chi2_ndf")
+    elif float(chi2_ndf) > maximum_chi2_ndf:
+        rejection_reasons.append("chi2_ndf_exceeds_max")
+    if not math.isfinite(kaon_amplitude) or kaon_amplitude <= 0.0:
+        rejection_reasons.append("kaon_amplitude_nonpositive")
+    if not math.isfinite(proton_amplitude) or proton_amplitude <= 0.0:
+        rejection_reasons.append("proton_amplitude_nonpositive")
+    if (
+        kaon_significance is None
+        or not math.isfinite(float(kaon_significance))
+        or float(kaon_significance) < minimum_component_significance
+    ):
+        rejection_reasons.append("kaon_significance_below_min")
+    if (
+        proton_significance is None
+        or not math.isfinite(float(proton_significance))
+        or float(proton_significance) < minimum_component_significance
+    ):
+        rejection_reasons.append("proton_significance_below_min")
+    if (
+        smaller_component_fraction is None
+        or not math.isfinite(float(smaller_component_fraction))
+        or float(smaller_component_fraction) < minimum_smaller_component_fraction
+    ):
+        rejection_reasons.append("smaller_component_fraction_below_min")
+    weak_bound_constraint = False
+    if bound_hit:
+        weak_bound_constraint = (
+            (
+                math.isfinite(offset_error)
+                and offset_error
+                > bound_hit_large_error_fraction * maximum_offset_error_ns
+            )
+            or (chi2_ndf is None or not math.isfinite(float(chi2_ndf)) or float(chi2_ndf) > maximum_chi2_ndf)
+            or (
+                kaon_significance is None
+                or proton_significance is None
+                or min(float(kaon_significance), float(proton_significance))
+                < minimum_component_significance
+            )
+        )
+    if bound_hit and reject_bound_hit_with_large_error and weak_bound_constraint:
+        rejection_reasons.append("bound_hit_with_weak_constraint")
     valid = len(rejection_reasons) == 0
     diagnostic_warnings = []
     if bound_hit:
         diagnostic_warnings.append("bound_hit")
+        if weak_bound_constraint:
+            diagnostic_warnings.append("bound_hit_with_weak_constraint")
     result = dict(base_result)
     result.update(
         {
@@ -2416,14 +2604,53 @@ def _fit_delta_common_timing_offset(
             "chi2_data": chi2_data,
             "chi2_ndf": float(chi2_ndf) if chi2_ndf is not None else None,
             "fit_ndf": int(fit_ndf),
+            "poisson_deviance": float(poisson_deviance),
+            "poisson_deviance_ndf": (
+                float(poisson_deviance_ndf)
+                if poisson_deviance_ndf is not None
+                else None
+            ),
+            "poisson_deviance_per_entry": (
+                float(poisson_deviance_per_entry)
+                if poisson_deviance_per_entry is not None
+                else None
+            ),
+            "goodness_ndf": int(poisson_ndf),
             "reference_kaon_mean": float(reference_kaon_mean),
             "reference_proton_mean": float(reference_proton_mean),
             "raw_reference_proton_from_tof": float(raw_proton_reference),
             "wrapped_reference_proton_from_tof": float(effective_proton_reference),
             "rf_period_shift": int(wrap_info.get("period_shift", 0) or 0),
-            "kaon_amplitude": float(fit_function.GetParameter(0)),
-            "proton_amplitude": float(fit_function.GetParameter(3)),
-            "other_amplitude": float(fit_function.GetParameter(7)),
+            "kaon_amplitude": float(kaon_amplitude),
+            "kaon_amplitude_error": (
+                float(kaon_amplitude_error)
+                if math.isfinite(kaon_amplitude_error)
+                else None
+            ),
+            "kaon_significance": (
+                float(kaon_significance) if kaon_significance is not None else None
+            ),
+            "proton_amplitude": float(proton_amplitude),
+            "proton_amplitude_error": (
+                float(proton_amplitude_error)
+                if math.isfinite(proton_amplitude_error)
+                else None
+            ),
+            "proton_significance": (
+                float(proton_significance) if proton_significance is not None else None
+            ),
+            "other_amplitude": float(other_amplitude),
+            "other_amplitude_error": (
+                float(other_amplitude_error)
+                if math.isfinite(other_amplitude_error)
+                else None
+            ),
+            "smaller_component_fraction": (
+                float(smaller_component_fraction)
+                if smaller_component_fraction is not None
+                else None
+            ),
+            "tof_offset_validation": _json_ready_value(validation_cfg),
         }
     )
     return result
@@ -4122,6 +4349,10 @@ def build_kaon_proton_cleaning_result(
         source_bundle,
         delta_edges,
         selected_selection_key,
+        timing_branch=selected_time_branch,
+        timing_range=selected_time_hist_range,
+        aero_range=exact_config.get("aero_hist_range") or PROTON_CLEANING_EXACT_AERO_RANGE,
+        delta_range=exact_config.get("delta_hist_range") or PROTON_CLEANING_EXACT_DELTA_RANGE,
     )
     result["diagnostics"]["tof_summary_by_delta"] = _json_ready_value(delta_tof_summaries)
     result["diagnostics"]["valid_tof_delta_bins"] = int(
@@ -4709,6 +4940,12 @@ def apply_kaon_proton_cleaning_to_targets(
             "estimated_proton_mm_integral": _hist_integral(h_mm_proton),
             "cleaned_mm_integral": _hist_integral(h_mm_cleaned),
             "cleaned_final_rf_mm_integral": _hist_integral(h_mm_cleaned_final_rf),
+            "mm_validation_window_yields": _build_mm_window_yield_summary(
+                h_mm_raw,
+                h_mm_proton,
+                h_mm_cleaned,
+                (config.get("validation_windows") or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS),
+            ),
             "mm_fill_counters": dict(mm_fill_counters),
             "raw_mm_key_present": h_mm_raw is not None,
             "proton_mm_key_present": h_mm_proton is not None,
@@ -5195,6 +5432,79 @@ def _hist_integral_in_range(hist, x_min, x_max):
         return 0.0
 
 
+def _hist_integral_error_in_range(hist, x_min, x_max):
+    if hist is None:
+        return 0.0, 0.0
+    try:
+        axis = hist.GetXaxis()
+        first_bin = max(1, axis.FindFixBin(float(x_min)))
+        last_bin = min(
+            int(hist.GetNbinsX()),
+            axis.FindFixBin(np.nextafter(float(x_max), float(x_min))),
+        )
+        if last_bin < first_bin:
+            return 0.0, 0.0
+        total = 0.0
+        variance = 0.0
+        for bin_index in range(first_bin, last_bin + 1):
+            total += float(hist.GetBinContent(bin_index))
+            variance += float(hist.GetBinError(bin_index)) ** 2
+        return float(total), math.sqrt(max(float(variance), 0.0))
+    except Exception:
+        return 0.0, 0.0
+
+
+def _fraction_removed_with_uncertainty(raw_yield, raw_error, removed_yield, removed_error):
+    raw_yield = float(raw_yield)
+    raw_error = abs(float(raw_error))
+    removed_yield = float(removed_yield)
+    removed_error = abs(float(removed_error))
+    if not math.isfinite(raw_yield) or not math.isfinite(removed_yield):
+        return None, None
+    if abs(raw_yield) <= max(1.0e-12, raw_error):
+        return None, None
+    fraction = removed_yield / raw_yield
+    variance = (removed_error / raw_yield) ** 2
+    variance += ((removed_yield * raw_error) / (raw_yield * raw_yield)) ** 2
+    return float(fraction), math.sqrt(max(float(variance), 0.0))
+
+
+def _build_mm_window_yield_summary(raw_hist, proton_hist, cleaned_hist, validation_windows):
+    summaries = {}
+    for window_name, bounds in (validation_windows or {}).items():
+        if not bounds or len(bounds) < 2:
+            continue
+        x_min = float(bounds[0])
+        x_max = float(bounds[1])
+        raw_yield, raw_error = _hist_integral_error_in_range(raw_hist, x_min, x_max)
+        proton_yield, proton_error = _hist_integral_error_in_range(proton_hist, x_min, x_max)
+        cleaned_yield, cleaned_error = _hist_integral_error_in_range(cleaned_hist, x_min, x_max)
+        removed_fraction, removed_fraction_error = _fraction_removed_with_uncertainty(
+            raw_yield,
+            raw_error,
+            proton_yield,
+            proton_error,
+        )
+        summaries[str(window_name)] = {
+            "range": [float(x_min), float(x_max)],
+            "raw_yield": float(raw_yield),
+            "raw_yield_error": float(raw_error),
+            "estimated_proton_yield": float(proton_yield),
+            "estimated_proton_yield_error": float(proton_error),
+            "cleaned_yield": float(cleaned_yield),
+            "cleaned_yield_error": float(cleaned_error),
+            "removed_fraction": (
+                float(removed_fraction) if removed_fraction is not None else None
+            ),
+            "removed_fraction_error": (
+                float(removed_fraction_error)
+                if removed_fraction_error is not None
+                else None
+            ),
+        }
+    return summaries
+
+
 def _set_hist_line_marker(hist, color, width=2, style=1, marker=20):
     if hist is None:
         return
@@ -5242,7 +5552,7 @@ def _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix):
     )
     h_sep = ROOT.TH1D(
         "H_proton_cleaning_probe_sep_{}".format(page_id),
-        "{} timing probe peak separation;probe;mean separation [ns]".format(prefix),
+        "{} timing probe peak separation;probe;mean standardized separation [#sigma]".format(prefix),
         n_bins,
         0.0,
         float(n_bins),
@@ -5552,19 +5862,47 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
         validation_windows = (cleaning_result.get("settings") or {}).get("validation_windows") or {}
         low_bounds = validation_windows.get("low_mm") or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS["low_mm"]
         lambda_bounds = validation_windows.get("lambda_peak") or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS["lambda_peak"]
-        low_raw = _hist_integral_in_range(h_mm_before, low_bounds[0], low_bounds[1])
-        low_proton = _hist_integral_in_range(h_mm_proton, low_bounds[0], low_bounds[1])
-        lambda_raw = _hist_integral_in_range(h_mm_before, lambda_bounds[0], lambda_bounds[1])
-        lambda_proton = _hist_integral_in_range(h_mm_proton, lambda_bounds[0], lambda_bounds[1])
-        low_removed = 100.0 * low_proton / low_raw if low_raw > 0.0 else 0.0
-        lambda_removed = 100.0 * lambda_proton / lambda_raw if lambda_raw > 0.0 else 0.0
-        pave = TPaveText(0.48, 0.40, 0.88, 0.62, "NDC")
+        low_raw, low_raw_err = _hist_integral_error_in_range(h_mm_before, low_bounds[0], low_bounds[1])
+        low_proton, low_proton_err = _hist_integral_error_in_range(h_mm_proton, low_bounds[0], low_bounds[1])
+        low_cleaned, low_cleaned_err = _hist_integral_error_in_range(h_mm_after, low_bounds[0], low_bounds[1])
+        lambda_raw, lambda_raw_err = _hist_integral_error_in_range(h_mm_before, lambda_bounds[0], lambda_bounds[1])
+        lambda_proton, lambda_proton_err = _hist_integral_error_in_range(h_mm_proton, lambda_bounds[0], lambda_bounds[1])
+        lambda_cleaned, lambda_cleaned_err = _hist_integral_error_in_range(h_mm_after, lambda_bounds[0], lambda_bounds[1])
+        low_removed, low_removed_err = _fraction_removed_with_uncertainty(
+            low_raw, low_raw_err, low_proton, low_proton_err
+        )
+        lambda_removed, lambda_removed_err = _fraction_removed_with_uncertainty(
+            lambda_raw, lambda_raw_err, lambda_proton, lambda_proton_err
+        )
+        pave = TPaveText(0.43, 0.31, 0.88, 0.64, "NDC")
         pave.SetBorderSize(1)
         pave.SetFillStyle(0)
         pave.SetTextAlign(12)
-        pave.SetTextSize(0.035)
-        pave.AddText("Low-MM removed: {:.1f}%".format(low_removed))
-        pave.AddText("#Lambda region removed: {:.1f}%".format(lambda_removed))
+        pave.SetTextSize(0.026)
+        pave.AddText("Low-MM raw/proton/clean = {:.3g}+/-{:.2g} / {:.3g}+/-{:.2g} / {:.3g}+/-{:.2g}".format(
+            low_raw,
+            low_raw_err,
+            low_proton,
+            low_proton_err,
+            low_cleaned,
+            low_cleaned_err,
+        ))
+        if low_removed is not None:
+            pave.AddText("Low-MM removed = {:.1f}+/-{:.1f}%".format(100.0 * low_removed, 100.0 * low_removed_err))
+        else:
+            pave.AddText("Low-MM removed = unavailable")
+        pave.AddText("#Lambda raw/proton/clean = {:.3g}+/-{:.2g} / {:.3g}+/-{:.2g} / {:.3g}+/-{:.2g}".format(
+            lambda_raw,
+            lambda_raw_err,
+            lambda_proton,
+            lambda_proton_err,
+            lambda_cleaned,
+            lambda_cleaned_err,
+        ))
+        if lambda_removed is not None:
+            pave.AddText("#Lambda removed = {:.1f}+/-{:.1f}%".format(100.0 * lambda_removed, 100.0 * lambda_removed_err))
+        else:
+            pave.AddText("#Lambda removed = unavailable")
         pave.Draw()
         drawn_objects.append(pave)
         drawn_objects.extend([h_mm_before, h_mm_proton, h_mm_after])
@@ -5643,6 +5981,16 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
         "Fitted common timing offset;SHMS #delta [%];offset [ns]",
         delta_edges,
     )
+    h_offset_invalid = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_offset_invalid_delta_{}".format(page_id),
+        "Fitted common timing offset;SHMS #delta [%];offset [ns]",
+        delta_edges,
+    )
+    h_offset_bound = _make_delta_axis_hist(
+        "H_proton_cleaning_tof_offset_bound_delta_{}".format(page_id),
+        "Fitted common timing offset;SHMS #delta [%];offset [ns]",
+        delta_edges,
+    )
     h_k_ref = _make_delta_axis_hist(
         "H_proton_cleaning_tof_k_ref_delta_{}".format(page_id),
         "Corrected timing centers;SHMS #delta [%];timing center [ns]",
@@ -5663,12 +6011,6 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
         "Corrected timing centers;SHMS #delta [%];timing center [ns]",
         delta_edges,
     )
-    h_closure = _make_delta_axis_hist(
-        "H_proton_cleaning_event_weight_closure_delta_{}".format(page_id),
-        "Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{p}^{event} / fitted p yield",
-        delta_edges,
-    )
-
     for row in tof_summaries:
         if not isinstance(row, dict):
             continue
@@ -5685,7 +6027,12 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
         bin_index = int(row.get("delta_index", -1)) + 1
         if bin_index < 1 or bin_index > h_offset.GetNbinsX():
             continue
-        _set_hist_bin_if_finite(h_offset, bin_index, row.get("delta_offset"), row.get("delta_offset_error"))
+        if bool(row.get("valid", False)):
+            _set_hist_bin_if_finite(h_offset, bin_index, row.get("delta_offset"), row.get("delta_offset_error"))
+        else:
+            _set_hist_bin_if_finite(h_offset_invalid, bin_index, row.get("delta_offset"), row.get("delta_offset_error"))
+        if bool(row.get("delta_offset_bound_hit", False)):
+            _set_hist_bin_if_finite(h_offset_bound, bin_index, row.get("delta_offset"), row.get("delta_offset_error"))
         reference_k = _finite_float_or_none(row.get("reference_kaon_mean"))
         reference_p = _finite_float_or_none(row.get("reference_proton_mean"))
         offset = _finite_float_or_none(row.get("delta_offset"))
@@ -5699,23 +6046,16 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
         if wrapped_p is not None and offset is not None:
             _set_hist_bin_if_finite(h_p_ref, bin_index, wrapped_p + offset, row.get("delta_offset_error"))
 
-    for row in diagnostics.get("event_weight_closure_by_delta") or []:
-        if not isinstance(row, dict):
-            continue
-        bin_index = int(row.get("delta_index", -1)) + 1
-        if bin_index < 1 or bin_index > h_closure.GetNbinsX():
-            continue
-        _set_hist_bin_if_finite(h_closure, bin_index, row.get("closure_ratio"))
-
     _set_hist_line_marker(h_p, kBlue, width=2, marker=20)
     _set_hist_line_marker(h_path, kGreen + 2, width=2, marker=20)
     _set_hist_line_marker(h_dt, kMagenta + 1, width=2, marker=20)
     _set_hist_line_marker(h_offset, kRed, width=2, marker=20)
+    _set_hist_line_marker(h_offset_invalid, kRed + 2, width=2, style=2, marker=24)
+    _set_hist_line_marker(h_offset_bound, kOrange + 7, width=2, style=1, marker=25)
     _set_hist_line_marker(h_k_global, kBlue, width=2, style=2, marker=24)
     _set_hist_line_marker(h_p_global, kRed, width=2, style=2, marker=25)
     _set_hist_line_marker(h_k_ref, kBlue, width=3, marker=20)
     _set_hist_line_marker(h_p_ref, kRed, width=3, marker=21)
-    _set_hist_line_marker(h_closure, kViolet + 1, width=3, marker=20)
 
     canvas = TCanvas(
         "C_proton_cleaning_tof_constraints_{}".format(page_id),
@@ -5729,11 +6069,12 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
         h_path,
         h_dt,
         h_offset,
+        h_offset_invalid,
+        h_offset_bound,
         h_k_global,
         h_p_global,
         h_k_ref,
         h_p_ref,
-        h_closure,
     ]
 
     canvas.cd(1)
@@ -5752,12 +6093,37 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     gPad.Update()
 
     canvas.cd(4)
+    offset_abs_max = max(
+        abs(float(h_offset.GetMaximum())),
+        abs(float(h_offset.GetMinimum())),
+        abs(float(h_offset_invalid.GetMaximum())),
+        abs(float(h_offset_invalid.GetMinimum())),
+        abs(float(h_offset_bound.GetMaximum())),
+        abs(float(h_offset_bound.GetMinimum())),
+        0.05,
+    )
+    h_offset.SetMinimum(-1.15 * offset_abs_max)
+    h_offset.SetMaximum(1.15 * offset_abs_max)
     h_offset.Draw("E1")
+    h_offset_invalid.Draw("E1 same")
+    h_offset_bound.Draw("E1 same")
     zero_line = TLine(float(delta_edges[0]), 0.0, float(delta_edges[-1]), 0.0)
     zero_line.SetLineColor(kGray + 2)
     zero_line.SetLineStyle(2)
     zero_line.Draw("same")
     drawn_objects.append(zero_line)
+    valid_offsets = sum(1 for row in offset_fits if bool((row or {}).get("valid", False)))
+    invalid_offsets = sum(1 for row in offset_fits if not bool((row or {}).get("valid", False)))
+    bound_offsets = sum(1 for row in offset_fits if bool((row or {}).get("delta_offset_bound_hit", False)))
+    offset_info = TPaveText(0.14, 0.73, 0.52, 0.90, "NDC")
+    offset_info.SetBorderSize(1)
+    offset_info.SetFillStyle(0)
+    offset_info.SetTextAlign(12)
+    offset_info.SetTextSize(0.032)
+    offset_info.AddText("valid/invalid: {} / {}".format(valid_offsets, invalid_offsets))
+    offset_info.AddText("bound-hit warnings: {}".format(bound_offsets))
+    offset_info.Draw()
+    drawn_objects.append(offset_info)
     gPad.Modified()
     gPad.Update()
 
@@ -5797,14 +6163,66 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     gPad.Update()
 
     canvas.cd(6)
-    h_closure.SetMinimum(0.0)
-    h_closure.SetMaximum(max(1.25, 1.15 * float(h_closure.GetMaximum())))
-    h_closure.Draw("E1")
+    closure_rows = []
+    for row in diagnostics.get("event_weight_closure_by_delta") or []:
+        if not isinstance(row, dict):
+            continue
+        ratio = _finite_float_or_none(row.get("closure_ratio"))
+        delta_index = int(row.get("delta_index", -1))
+        if ratio is None or not (0 <= delta_index < len(delta_edges) - 1):
+            continue
+        closure_rows.append((delta_index, ratio))
+    graph = None
+    if closure_rows:
+        x_values = array(
+            "d",
+            [
+                0.5 * (float(delta_edges[index]) + float(delta_edges[index + 1]))
+                for index, _ in closure_rows
+            ],
+        )
+        y_values = array("d", [float(value) for _, value in closure_rows])
+        x_errors = array(
+            "d",
+            [
+                0.5 * abs(float(delta_edges[index + 1]) - float(delta_edges[index]))
+                for index, _ in closure_rows
+            ],
+        )
+        y_errors = array("d", [0.0 for _ in closure_rows])
+        graph = ROOT.TGraphErrors(len(closure_rows), x_values, y_values, x_errors, y_errors)
+        graph.SetTitle("Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{p}^{event} / fitted p yield")
+        graph.SetLineColor(kViolet + 1)
+        graph.SetMarkerColor(kViolet + 1)
+        graph.SetMarkerStyle(20)
+        graph.SetLineWidth(3)
+        graph.SetMinimum(0.0)
+        graph.SetMaximum(max(1.25, 1.15 * max(float(value) for _, value in closure_rows)))
+        graph.Draw("AP")
+        drawn_objects.append(graph)
+    else:
+        empty_axis = _make_delta_axis_hist(
+            "H_proton_cleaning_event_weight_closure_empty_{}".format(page_id),
+            "Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{p}^{event} / fitted p yield",
+            delta_edges,
+        )
+        empty_axis.SetMinimum(0.0)
+        empty_axis.SetMaximum(1.25)
+        empty_axis.Draw("axis")
+        drawn_objects.append(empty_axis)
     unity_line = TLine(float(delta_edges[0]), 1.0, float(delta_edges[-1]), 1.0)
     unity_line.SetLineColor(kGray + 2)
     unity_line.SetLineStyle(2)
     unity_line.Draw("same")
     drawn_objects.append(unity_line)
+    closure_info = TPaveText(0.14, 0.78, 0.48, 0.90, "NDC")
+    closure_info.SetBorderSize(1)
+    closure_info.SetFillStyle(0)
+    closure_info.SetTextAlign(12)
+    closure_info.SetTextSize(0.035)
+    closure_info.AddText("valid closure bins: {} / {}".format(len(closure_rows), max(len(delta_edges) - 1, 0)))
+    closure_info.Draw()
+    drawn_objects.append(closure_info)
     gPad.Modified()
     gPad.Update()
 

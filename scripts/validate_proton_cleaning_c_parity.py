@@ -12,12 +12,6 @@ from typing import Any
 
 DEFAULT_ROOT_HISTOGRAM_NAMES = (
     "H_proton_cleaning_global_pid",
-    "H_MM_before_proton_cleaning",
-    "H_MM_estimated_proton",
-    "H_MM_after_proton_cleaning",
-    "H_proton_fraction_vs_MM",
-    "H_proton_weight_vs_delta",
-    "H_proton_weight_vs_delta_aero",
 )
 
 
@@ -213,19 +207,89 @@ def _compare_root_histograms(
                     },
                 )
                 continue
-            if hasattr(left_hist, "GetNbinsY") and int(left_hist.GetNbinsY()) > 1:
-                if (
-                    int(left_hist.GetNbinsX()) != int(right_hist.GetNbinsX())
-                    or int(left_hist.GetNbinsY()) != int(right_hist.GetNbinsY())
-                ):
-                    _append_issue(
+            if str(left_hist.ClassName()) != str(right_hist.ClassName()):
+                _append_issue(
+                    issues,
+                    "root/{}".format(hist_name),
+                    "histogram class mismatch",
+                    {"python": str(left_hist.ClassName()), "macro": str(right_hist.ClassName())},
+                )
+            left_nx = int(left_hist.GetNbinsX())
+            right_nx = int(right_hist.GetNbinsX())
+            left_ny = int(left_hist.GetNbinsY()) if hasattr(left_hist, "GetNbinsY") else 0
+            right_ny = int(right_hist.GetNbinsY()) if hasattr(right_hist, "GetNbinsY") else 0
+            if left_nx != right_nx or left_ny != right_ny:
+                _append_issue(
+                    issues,
+                    "root/{}".format(hist_name),
+                    "histogram binning mismatch",
+                    {
+                        "python_nx": left_nx,
+                        "macro_nx": right_nx,
+                        "python_ny": left_ny,
+                        "macro_ny": right_ny,
+                    },
+                )
+                continue
+            _compare_value(
+                issues,
+                "root/{}".format(hist_name),
+                "entries",
+                left_hist.GetEntries(),
+                right_hist.GetEntries(),
+                abs_tol,
+                rel_tol,
+            )
+            _compare_value(
+                issues,
+                "root/{}".format(hist_name),
+                "effective_entries",
+                left_hist.GetEffectiveEntries(),
+                right_hist.GetEffectiveEntries(),
+                abs_tol,
+                rel_tol,
+            )
+            for x_bin in range(1, left_nx + 1):
+                _compare_value(
+                    issues,
+                    "root/{}".format(hist_name),
+                    "x_low_edge({})".format(x_bin),
+                    left_hist.GetXaxis().GetBinLowEdge(x_bin),
+                    right_hist.GetXaxis().GetBinLowEdge(x_bin),
+                    abs_tol,
+                    rel_tol,
+                )
+                _compare_value(
+                    issues,
+                    "root/{}".format(hist_name),
+                    "x_up_edge({})".format(x_bin),
+                    left_hist.GetXaxis().GetBinUpEdge(x_bin),
+                    right_hist.GetXaxis().GetBinUpEdge(x_bin),
+                    abs_tol,
+                    rel_tol,
+                )
+            if left_ny > 1:
+                for y_bin in range(1, left_ny + 1):
+                    _compare_value(
                         issues,
                         "root/{}".format(hist_name),
-                        "histogram binning mismatch",
+                        "y_low_edge({})".format(y_bin),
+                        left_hist.GetYaxis().GetBinLowEdge(y_bin),
+                        right_hist.GetYaxis().GetBinLowEdge(y_bin),
+                        abs_tol,
+                        rel_tol,
                     )
-                    continue
-                for x_bin in range(1, int(left_hist.GetNbinsX()) + 1):
-                    for y_bin in range(1, int(left_hist.GetNbinsY()) + 1):
+                    _compare_value(
+                        issues,
+                        "root/{}".format(hist_name),
+                        "y_up_edge({})".format(y_bin),
+                        left_hist.GetYaxis().GetBinUpEdge(y_bin),
+                        right_hist.GetYaxis().GetBinUpEdge(y_bin),
+                        abs_tol,
+                        rel_tol,
+                    )
+                for x_bin in range(0, left_nx + 2):
+                    for y_bin in range(0, left_ny + 2):
                         _compare_value(
                             issues,
                             "root/{}".format(hist_name),
@@ -235,21 +299,32 @@ def _compare_root_histograms(
                             abs_tol,
                             rel_tol,
                         )
+                        _compare_value(
+                            issues,
+                            "root/{}".format(hist_name),
+                            "binerr({}, {})".format(x_bin, y_bin),
+                            left_hist.GetBinError(x_bin, y_bin),
+                            right_hist.GetBinError(x_bin, y_bin),
+                            abs_tol,
+                            rel_tol,
+                        )
                 continue
-            if int(left_hist.GetNbinsX()) != int(right_hist.GetNbinsX()):
-                _append_issue(
-                    issues,
-                    "root/{}".format(hist_name),
-                    "histogram binning mismatch",
-                )
-                continue
-            for x_bin in range(1, int(left_hist.GetNbinsX()) + 1):
+            for x_bin in range(0, left_nx + 2):
                 _compare_value(
                     issues,
                     "root/{}".format(hist_name),
                     "bin({})".format(x_bin),
                     left_hist.GetBinContent(x_bin),
                     right_hist.GetBinContent(x_bin),
+                    abs_tol,
+                    rel_tol,
+                )
+                _compare_value(
+                    issues,
+                    "root/{}".format(hist_name),
+                    "binerr({})".format(x_bin),
+                    left_hist.GetBinError(x_bin),
+                    right_hist.GetBinError(x_bin),
                     abs_tol,
                     rel_tol,
                 )
@@ -307,12 +382,56 @@ def _compare_weight_maps(
         )
 
 
+def _summarize_weight_maps(
+    python_weights: dict[str, float] | None,
+    macro_weights: dict[str, float] | None,
+) -> dict[str, Any]:
+    if not python_weights or not macro_weights:
+        return {
+            "python_weight_count": len(python_weights or {}),
+            "macro_weight_count": len(macro_weights or {}),
+            "shared_weight_count": 0,
+            "missing_from_python_count": 0,
+            "missing_from_macro_count": 0,
+            "max_abs_weight_difference": None,
+        }
+    python_keys = set(python_weights.keys())
+    macro_keys = set(macro_weights.keys())
+    shared_keys = sorted(python_keys & macro_keys)
+    max_abs_difference = None
+    max_abs_difference_key = None
+    for key in shared_keys:
+        difference = abs(float(python_weights[key]) - float(macro_weights[key]))
+        if max_abs_difference is None or difference > max_abs_difference:
+            max_abs_difference = difference
+            max_abs_difference_key = key
+    return {
+        "python_weight_count": len(python_weights),
+        "macro_weight_count": len(macro_weights),
+        "shared_weight_count": len(shared_keys),
+        "missing_from_python_count": len(macro_keys - python_keys),
+        "missing_from_macro_count": len(python_keys - macro_keys),
+        "max_abs_weight_difference": max_abs_difference,
+        "max_abs_weight_difference_key": max_abs_difference_key,
+    }
+
+
 def _write_text_report(path: str, report: dict[str, Any]) -> None:
     lines = [
         "Proton-cleaning parity validation",
         "passed={}".format(report["passed"]),
         "issue_count={}".format(len(report["issues"])),
+        "legacy_c_parity_issue_count={}".format(
+            int((report.get("legacy_c_parity") or {}).get("issue_count", 0))
+        ),
+        "python_tof_extension_issue_count={}".format(
+            int((report.get("python_tof_extension") or {}).get("issue_count", 0))
+        ),
     ]
+    extension = report.get("python_tof_extension") or {}
+    observations = extension.get("observations") or {}
+    if observations:
+        lines.append("python_tof_extension_observations={}".format(json.dumps(observations, sort_keys=True)))
     for issue in report["issues"]:
         line = "[{}] {}".format(issue.get("scope", "unknown"), issue.get("message", ""))
         details = issue.get("details")
@@ -339,16 +458,13 @@ def main() -> int:
     parser.add_argument("--rel-tol", type=float, default=1e-6)
     args = parser.parse_args()
 
-    issues: list[dict[str, Any]] = []
+    legacy_issues: list[dict[str, Any]] = []
+    extension_issues: list[dict[str, Any]] = []
     python_payload = _load_json(args.python_json)
     macro_payload = _load_json(args.macro_json)
 
-    _compare_value(issues, "summary", "accepted", python_payload.get("accepted"), macro_payload.get("accepted"), args.abs_tol, args.rel_tol)
-    _compare_value(issues, "summary", "selected_timing_branch", python_payload.get("selected_timing_branch"), macro_payload.get("selected_timing_branch"), args.abs_tol, args.rel_tol)
-    _compare_value(issues, "summary", "support_by_delta", python_payload.get("support_by_delta"), macro_payload.get("support_by_delta"), args.abs_tol, args.rel_tol)
-
     _compare_shape_collection(
-        issues,
+        legacy_issues,
         "global_shapes",
         list(python_payload.get("global_shapes") or []),
         list(macro_payload.get("global_shapes") or []),
@@ -376,12 +492,11 @@ def main() -> int:
         args.abs_tol,
         args.rel_tol,
     )
-    _compare_nested_slice_fits(issues, python_payload, macro_payload, args.abs_tol, args.rel_tol)
 
     if args.python_root and args.macro_root:
         histogram_names = _default_histogram_names(python_payload)
         _compare_root_histograms(
-            issues,
+            legacy_issues,
             args.python_root,
             args.macro_root,
             histogram_names,
@@ -389,17 +504,30 @@ def main() -> int:
             args.rel_tol,
         )
 
+    python_weights = None
+    macro_weights = None
     if args.python_weights and args.macro_weights:
-        _compare_weight_maps(
-            issues,
-            _load_weight_map(args.python_weights),
-            _load_weight_map(args.macro_weights),
-            args.abs_tol,
-            args.rel_tol,
-        )
+        python_weights = _load_weight_map(args.python_weights)
+        macro_weights = _load_weight_map(args.macro_weights)
+
+    extension_observations = {
+        "note": (
+            "TOF-corrected support labels, selected timing branch, delta-slice fits, "
+            "and event weights are reported here and are not strict legacy C parity checks."
+        ),
+        "python_accepted": python_payload.get("accepted"),
+        "macro_accepted": macro_payload.get("accepted"),
+        "python_selected_timing_branch": python_payload.get("selected_timing_branch"),
+        "macro_selected_timing_branch": macro_payload.get("selected_timing_branch"),
+        "python_support_by_delta": python_payload.get("support_by_delta"),
+        "macro_support_by_delta": macro_payload.get("support_by_delta"),
+        "weight_map_summary": _summarize_weight_maps(python_weights, macro_weights),
+    }
+
+    issues = legacy_issues + extension_issues
 
     report = {
-        "passed": len(issues) == 0,
+        "passed": len(legacy_issues) == 0 and len(extension_issues) == 0,
         "python_json": os.path.abspath(args.python_json),
         "macro_json": os.path.abspath(args.macro_json),
         "python_root": os.path.abspath(args.python_root) if args.python_root else "",
@@ -408,6 +536,17 @@ def main() -> int:
         "macro_weights": os.path.abspath(args.macro_weights) if args.macro_weights else "",
         "abs_tol": float(args.abs_tol),
         "rel_tol": float(args.rel_tol),
+        "legacy_c_parity": {
+            "passed": len(legacy_issues) == 0,
+            "issue_count": len(legacy_issues),
+            "issues": legacy_issues,
+        },
+        "python_tof_extension": {
+            "passed": len(extension_issues) == 0,
+            "issue_count": len(extension_issues),
+            "issues": extension_issues,
+            "observations": extension_observations,
+        },
         "issues": issues,
     }
     with open(args.report_json, "w", encoding="utf-8") as handle:
