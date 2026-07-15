@@ -846,6 +846,47 @@ def _make_not_required_offset_fit(delta_index, mode, reason):
     }
 
 
+CELL_FIT_SKIP_COUNTER_FIELDS = {
+    "insufficient_support": "cell_fit_skipped_insufficient_support_count",
+    "missing_histogram": "cell_fit_skipped_missing_histogram_count",
+    "invalid_global_shape": "cell_fit_skipped_invalid_global_shape_count",
+    "invalid_timing_center_model": "cell_fit_skipped_invalid_timing_center_model_count",
+}
+CELL_FIT_SKIPPED_OTHER_COUNTER_FIELD = "cell_fit_skipped_other_count"
+
+
+def _cell_fit_skip_counter_key(fit_status):
+    """Map an explicit pre-fit status to its diagnostic skip counter."""
+    return CELL_FIT_SKIP_COUNTER_FIELDS.get(
+        str(fit_status or "").strip(),
+        CELL_FIT_SKIPPED_OTHER_COUNTER_FIELD,
+    )
+
+
+def _build_selected_tof_summary(delta_offset_fit, primary_summary, fallback_summary):
+    """Attach the TOF diagnostic to the timing-center source actually selected."""
+    source = str(
+        (delta_offset_fit or {}).get("selected_timing_center_source")
+        or (delta_offset_fit or {}).get("timing_center_source")
+        or "unavailable"
+    )
+    if source == "low_aero_0_5_fit":
+        selected = deepcopy(primary_summary or {})
+        role = "offset_fit_input"
+    elif source == "low_aero_0_6_fit":
+        selected = deepcopy(fallback_summary or {})
+        role = "offset_fit_input"
+    elif source == "stable_global_center_fallback":
+        selected = deepcopy(primary_summary or fallback_summary or {})
+        role = "stable_fallback_diagnostic"
+    else:
+        selected = {}
+        role = "unavailable"
+    selected["selected_timing_center_source"] = source
+    selected["tof_summary_role"] = role
+    return selected
+
+
 def _decorate_selected_timing_center_model(
     selected_fit,
     source,
@@ -2788,9 +2829,7 @@ def _fit_delta_common_timing_offset(
             reason_text = str(reason).strip()
             if reason_text and reason_text not in rejection_reasons:
                 rejection_reasons.append(reason_text)
-    mean_delta_t = (delta_offset_fit or {}).get("mean_delta_t_pk_ns")
-    if mean_delta_t is None:
-        mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
+    mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
     if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
         rejection_reasons.append("invalid_mean_delta_t_pk")
     low_aero_config = exact_config.get("low_aero_offset") or PROTON_CLEANING_LOW_AERO_OFFSET_CONFIG
@@ -3179,15 +3218,24 @@ def _fit_delta_timing_slice(
         or int(support_entries) < int(minimum_entries)
     ):
         rejection_reasons = []
+        if histogram is None:
+            fit_status = "missing_histogram"
+        elif invalid_global_shape:
+            fit_status = "invalid_global_shape"
+        elif invalid_timing_constraint:
+            fit_status = "invalid_timing_center_model"
+        else:
+            fit_status = "insufficient_support"
         if invalid_global_shape:
             rejection_reasons.append("invalid_global_shape")
         if invalid_timing_constraint:
-            rejection_reasons.append(
-                (timing_constraint or {}).get("reason") or "invalid_timing_constraint"
-            )
+            rejection_reasons.append("invalid_timing_center_model")
+            timing_reason = str((timing_constraint or {}).get("reason") or "").strip()
+            if timing_reason and timing_reason not in rejection_reasons:
+                rejection_reasons.append(timing_reason)
         if histogram is None:
             rejection_reasons.append("missing_histogram")
-        elif int(support_entries) < int(minimum_entries):
+        if int(support_entries) < int(minimum_entries):
             rejection_reasons.append("insufficient_entries")
         return {
             "valid": False,
@@ -3202,14 +3250,14 @@ def _fit_delta_timing_slice(
             "proton_component_significance": None,
             "proton_component_below_significance": True,
             "fit_attempted": False,
-            "fit_status": "insufficient_support",
+            "fit_status": fit_status,
             "fit_status_code": None,
             "function_name": str(function_name),
             "excluded_invalid_variance_bins": 0,
             "invalid_bin_rule": "macro ROOT fit uses all histogram bins in the fit range",
             "fit_options": PROTON_CLEANING_EXACT_FIT_OPTIONS,
-            "rejection_reasons": rejection_reasons or ["insufficient_entries_or_invalid_global_shape"],
-            "rejection_reason": _join_rejection_reasons(rejection_reasons or ["insufficient_entries_or_invalid_global_shape"]),
+            "rejection_reasons": rejection_reasons,
+            "rejection_reason": _join_rejection_reasons(rejection_reasons),
             **support_snapshot,
         }
     kaon_mean = float((timing_constraint or {}).get("predicted_kaon_mean", global_shape["kaon_mean"]))
@@ -4895,19 +4943,6 @@ def build_kaon_proton_cleaning_result(
         tof_summary_validation=exact_config.get("tof_summary_validation")
         or PROTON_CLEANING_TOF_SUMMARY_VALIDATION,
     )
-    delta_tof_summaries = [
-        _select_low_aero_offset_summary(
-            primary_low_aero_tof_summaries[index]
-            if index < len(primary_low_aero_tof_summaries)
-            else {},
-            fallback_low_aero_tof_summaries[index]
-            if index < len(fallback_low_aero_tof_summaries)
-            else {},
-            low_aero_config,
-        )
-        for index in range(max(len(delta_edges) - 1, 0))
-    ]
-    result["diagnostics"]["tof_summary_by_delta"] = _json_ready_value(delta_tof_summaries)
     result["diagnostics"]["primary_low_aero_tof_summary_by_delta"] = _json_ready_value(primary_low_aero_tof_summaries)
     result["diagnostics"]["fallback_low_aero_tof_summary_by_delta"] = _json_ready_value(fallback_low_aero_tof_summaries)
     result["diagnostics"]["full_aero_tof_summary_by_delta"] = _json_ready_value(full_aero_tof_summaries)
@@ -4917,10 +4952,6 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["tof_summary_validation"] = _json_ready_value(
         exact_config.get("tof_summary_validation")
         or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
-    )
-    result["diagnostics"]["tof_summary_rejection_counts"] = _count_rejection_reasons(delta_tof_summaries)
-    result["diagnostics"]["valid_tof_delta_bins"] = int(
-        sum(1 for row in delta_tof_summaries if bool((row or {}).get("valid", False)))
     )
     delta_timing_offset_fits = []
     primary_low_aero_offset_fits = []
@@ -4945,7 +4976,6 @@ def build_kaon_proton_cleaning_result(
             full_diagnostic_aero_range,
             upper_inclusive=True,
         )
-        selected_tof_summary = delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {}
         primary_tof_summary = (
             primary_low_aero_tof_summaries[delta_index]
             if delta_index < len(primary_low_aero_tof_summaries)
@@ -5103,12 +5133,60 @@ def build_kaon_proton_cleaning_result(
         source = str((row or {}).get("selected_timing_center_source") or "unavailable")
         selected_center_counts[source] = int(selected_center_counts.get(source, 0) + 1)
     result["diagnostics"]["selected_timing_center_source_counts"] = selected_center_counts
+    result["diagnostics"]["selected_timing_center_source_by_delta"] = [
+        str((row or {}).get("selected_timing_center_source") or "unavailable")
+        for row in delta_timing_offset_fits
+    ]
+    for diagnostic_key, offset_fits in (
+        ("primary_low_aero_offset_fit_counts", primary_low_aero_offset_fits),
+        ("fallback_low_aero_offset_fit_counts", fallback_low_aero_offset_fits),
+    ):
+        result["diagnostics"][diagnostic_key] = {
+            "attempted": int(
+                sum(1 for row in offset_fits if bool((row or {}).get("fit_attempted", False)))
+            ),
+            "valid": int(
+                sum(1 for row in offset_fits if bool((row or {}).get("valid", False)))
+            ),
+        }
     result["diagnostics"]["stable_center_fallback_count"] = int(
         sum(
             1
             for row in delta_timing_offset_fits
             if str((row or {}).get("selected_timing_center_source")) == "stable_global_center_fallback"
         )
+    )
+    selected_tof_summary_by_delta = []
+    for delta_index, delta_offset_fit in enumerate(delta_timing_offset_fits):
+        primary_tof_summary = (
+            primary_low_aero_tof_summaries[delta_index]
+            if delta_index < len(primary_low_aero_tof_summaries)
+            else {}
+        )
+        fallback_tof_summary = (
+            fallback_low_aero_tof_summaries[delta_index]
+            if delta_index < len(fallback_low_aero_tof_summaries)
+            else {}
+        )
+        selected_tof_summary = _build_selected_tof_summary(
+            delta_offset_fit,
+            primary_tof_summary,
+            fallback_tof_summary,
+        )
+        delta_offset_fit["selected_tof_summary"] = _json_ready_value(selected_tof_summary)
+        selected_tof_summary_by_delta.append(selected_tof_summary)
+    result["diagnostics"]["selected_tof_summary_by_delta"] = _json_ready_value(
+        selected_tof_summary_by_delta
+    )
+    # Compatibility alias: always the final source-selected summary, never the preliminary choice.
+    result["diagnostics"]["tof_summary_by_delta"] = _json_ready_value(
+        selected_tof_summary_by_delta
+    )
+    result["diagnostics"]["tof_summary_rejection_counts"] = _count_rejection_reasons(
+        selected_tof_summary_by_delta
+    )
+    result["diagnostics"]["valid_tof_delta_bins"] = int(
+        sum(1 for row in selected_tof_summary_by_delta if bool((row or {}).get("valid", False)))
     )
     delta_fits = []
     support_by_delta = []
@@ -5128,19 +5206,11 @@ def build_kaon_proton_cleaning_result(
             if delta_index < len(delta_timing_offset_fits)
             else {"valid": False, "rejection_reason": "missing_delta_offset_fit"}
         )
-        selected_center_source = str((delta_offset_fit or {}).get("selected_timing_center_source") or "")
-        if selected_center_source == "low_aero_0_6_fit":
-            tof_summary = (delta_offset_fit or {}).get("fallback_low_aero_tof_summary") or (
-                fallback_low_aero_tof_summaries[delta_index]
-                if delta_index < len(fallback_low_aero_tof_summaries)
-                else {}
-            )
-        else:
-            tof_summary = (delta_offset_fit or {}).get("primary_low_aero_tof_summary") or (
-                primary_low_aero_tof_summaries[delta_index]
-                if delta_index < len(primary_low_aero_tof_summaries)
-                else {}
-            )
+        tof_summary = (
+            selected_tof_summary_by_delta[delta_index]
+            if delta_index < len(selected_tof_summary_by_delta)
+            else {}
+        )
         slice_fits = []
         slice_debug_rows = []
         proton_total = 0.0
@@ -5158,6 +5228,10 @@ def build_kaon_proton_cleaning_result(
         cell_fit_valid_count = 0
         cell_fit_skipped_count = 0
         cell_fit_skipped_insufficient_support_count = 0
+        cell_fit_skipped_missing_histogram_count = 0
+        cell_fit_skipped_invalid_global_shape_count = 0
+        cell_fit_skipped_invalid_timing_center_model_count = 0
+        cell_fit_skipped_other_count = 0
         for aero_index, slice_hist in enumerate(slice_collection):
             global_shape = global_shapes[aero_index] if aero_index < len(global_shapes) else {"valid": False}
             timing_constraint = _build_timing_constraint_for_cell(
@@ -5191,8 +5265,19 @@ def build_kaon_proton_cleaning_result(
                 cell_fit_attempt_count += 1
             else:
                 cell_fit_skipped_count += 1
-                if str((slice_fit or {}).get("fit_status", "")) == "insufficient_support":
+                skip_counter_key = _cell_fit_skip_counter_key(
+                    (slice_fit or {}).get("fit_status")
+                )
+                if skip_counter_key == "cell_fit_skipped_insufficient_support_count":
                     cell_fit_skipped_insufficient_support_count += 1
+                elif skip_counter_key == "cell_fit_skipped_missing_histogram_count":
+                    cell_fit_skipped_missing_histogram_count += 1
+                elif skip_counter_key == "cell_fit_skipped_invalid_global_shape_count":
+                    cell_fit_skipped_invalid_global_shape_count += 1
+                elif skip_counter_key == "cell_fit_skipped_invalid_timing_center_model_count":
+                    cell_fit_skipped_invalid_timing_center_model_count += 1
+                else:
+                    cell_fit_skipped_other_count += 1
             slice_debug_rows.append(
                 _json_ready_value(
                     {
@@ -5205,6 +5290,7 @@ def build_kaon_proton_cleaning_result(
                         "minimum_required_entries": int((slice_fit or {}).get("minimum_required_entries", 0) or 0),
                         "fit_status": (slice_fit or {}).get("fit_status"),
                         "fit_status_code": (slice_fit or {}).get("fit_status_code"),
+                        "rejection_reasons": (slice_fit or {}).get("rejection_reasons") or [],
                         "data_yield": (slice_fit or {}).get("data_yield"),
                         "model_yield": (slice_fit or {}).get("model_yield"),
                         "model_data_ratio": (slice_fit or {}).get("model_data_ratio"),
@@ -5300,6 +5386,10 @@ def build_kaon_proton_cleaning_result(
                     "cell_fit_valid_count": int(cell_fit_valid_count),
                     "cell_fit_skipped_count": int(cell_fit_skipped_count),
                     "cell_fit_skipped_insufficient_support_count": int(cell_fit_skipped_insufficient_support_count),
+                    "cell_fit_skipped_missing_histogram_count": int(cell_fit_skipped_missing_histogram_count),
+                    "cell_fit_skipped_invalid_global_shape_count": int(cell_fit_skipped_invalid_global_shape_count),
+                    "cell_fit_skipped_invalid_timing_center_model_count": int(cell_fit_skipped_invalid_timing_center_model_count),
+                    "cell_fit_skipped_other_count": int(cell_fit_skipped_other_count),
                     "chi2_ndf_weighted": (
                         float(chi2_weighted_sum / chi2_weight) if chi2_weight > 0.0 else None
                     ),
@@ -5335,6 +5425,15 @@ def build_kaon_proton_cleaning_result(
             for row in delta_support_debug_rows
         )
     )
+    for counter_key in (
+        "cell_fit_skipped_missing_histogram_count",
+        "cell_fit_skipped_invalid_global_shape_count",
+        "cell_fit_skipped_invalid_timing_center_model_count",
+        "cell_fit_skipped_other_count",
+    ):
+        result["diagnostics"][counter_key] = int(
+            sum(int((row or {}).get(counter_key, 0) or 0) for row in delta_support_debug_rows)
+        )
     n_delta_diag = max(len(delta_fits), max(len(delta_edges) - 1, 0))
     n_aero_diag = max(len(result.get("aero_edges") or []) - 1, len(global_shapes), 0)
     proton_yield_by_delta_aero = []
@@ -5926,11 +6025,21 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             int((diagnostics.get("selected_timing_center_source_counts") or {}).get("low_aero_0_6_fit", 0) or 0),
             int((diagnostics.get("selected_timing_center_source_counts") or {}).get("stable_global_center_fallback", 0) or 0),
         ),
-        "Cell fits: attempted={} valid={} skipped={} skipped_insufficient_support={}".format(
+        "Low-aero actual fits: 0-5 attempted/valid={}/{} 0-6 attempted/valid={}/{}".format(
+            int((diagnostics.get("primary_low_aero_offset_fit_counts") or {}).get("attempted", 0) or 0),
+            int((diagnostics.get("primary_low_aero_offset_fit_counts") or {}).get("valid", 0) or 0),
+            int((diagnostics.get("fallback_low_aero_offset_fit_counts") or {}).get("attempted", 0) or 0),
+            int((diagnostics.get("fallback_low_aero_offset_fit_counts") or {}).get("valid", 0) or 0),
+        ),
+        "Cell fits: attempted={} valid={} skipped={} low_support={} missing_hist={} invalid_global={} invalid_center={} other={}".format(
             int(diagnostics.get("cell_fit_attempt_count", 0) or 0),
             int(diagnostics.get("cell_fit_valid_count", 0) or 0),
             int(diagnostics.get("cell_fit_skipped_count", 0) or 0),
             int(diagnostics.get("cell_fit_skipped_insufficient_support_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_missing_histogram_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_invalid_global_shape_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_invalid_timing_center_model_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_other_count", 0) or 0),
         ),
         "Global PID source usage:",
     ]
@@ -7444,6 +7553,14 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     offset_info.AddText("weak-component: {}".format(int(weak_component)))
     offset_info.AddText("bound-hit weak: {}".format(int(offset_counts.get("bound_hit_with_weak_constraint", 0))))
     offset_info.AddText("TOF-support: {}".format(int(tof_support)))
+    offset_info.AddText(
+        "skipped low/missing/global/center: {} / {} / {} / {}".format(
+            int(diagnostics.get("cell_fit_skipped_insufficient_support_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_missing_histogram_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_invalid_global_shape_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_invalid_timing_center_model_count", 0) or 0),
+        )
+    )
     offset_info.Draw()
     drawn_objects.append(offset_info)
     gPad.Modified()
@@ -7855,16 +7972,21 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
                             bool(slice_fit.get("valid")),
                         ),
                         "status={}".format(slice_fit.get("fit_status")),
-	                        "entries={}".format(slice_fit.get("support_entries", "n/a")),
-	                        "model/data={}".format(slice_fit.get("model_data_ratio")),
-	                        "chi2/ndf={}".format(slice_fit.get("chi2_ndf")),
-	                        "warn={}".format(
-	                            ", ".join(str(w) for w in (slice_fit.get("diagnostic_warnings") or [])) or "none"
-	                        ),
-	                        "reason={}".format(slice_fit.get("rejection_reason") or "none"),
-	                    ),
+                        "support entries={}".format(slice_fit.get("support_entries", "n/a")),
+                        "timing center={}".format(slice_fit.get("timing_center_source") or "unavailable"),
+                        "offset applied/valid={}/{}".format(
+                            bool(slice_fit.get("offset_refinement_applied", False)),
+                            bool(slice_fit.get("offset_refinement_valid", False)),
+                        ),
+                        "model/data={}".format(slice_fit.get("model_data_ratio")),
+                        "chi2/ndf={}".format(slice_fit.get("chi2_ndf")),
+                        "warn={}".format(
+                            ", ".join(str(w) for w in (slice_fit.get("diagnostic_warnings") or [])) or "none"
+                        ),
+                        "reason={}".format(slice_fit.get("rejection_reason") or "none"),
+                    ),
                     x1=0.16,
-                    y1=0.66,
+                    y1=0.54,
                     x2=0.62,
                     y2=0.90,
                 )

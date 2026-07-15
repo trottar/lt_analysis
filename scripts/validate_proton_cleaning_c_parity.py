@@ -568,33 +568,59 @@ def _validate_low_aero_offset_metadata(
     else:
         if _float_or_none(full_range[0]) != 0.0 or _float_or_none(full_range[1]) != 25.0:
             _append_issue(issues, "python_tof_extension/low_aero", "wrong full diagnostic aerogel range", {"full_aerogel_range": full_range})
-    primary_rows = list(diag.get("primary_low_aero_tof_summary_by_delta") or [])
-    fallback_rows = list(diag.get("fallback_low_aero_tof_summary_by_delta") or [])
     full_rows = list(diag.get("full_aero_tof_summary_by_delta") or [])
-    selected_rows = list(diag.get("tof_summary_by_delta") or payload.get("tof_summary_by_delta") or [])
+    selected_rows = list(
+        diag.get("selected_tof_summary_by_delta")
+        or diag.get("tof_summary_by_delta")
+        or payload.get("tof_summary_by_delta")
+        or []
+    )
     offsets = list(payload.get("delta_timing_offset_fits") or diag.get("delta_timing_offset_fits") or [])
-    allowed_summary_modes = {"low_aero_0_5", "low_aero_0_6_fallback", "unavailable"}
     allowed_selected_sources = {"low_aero_0_5_fit", "low_aero_0_6_fit", "stable_global_center_fallback"}
     for index, row in enumerate(selected_rows):
         if not isinstance(row, dict):
             continue
         scope = "python_tof_extension/low_aero[{}]".format(index)
+        selected_source = str(row.get("selected_timing_center_source") or "unavailable")
+        expected_source = (
+            str((offsets[index] or {}).get("selected_timing_center_source") or "unavailable")
+            if index < len(offsets) and isinstance(offsets[index], dict)
+            else "unavailable"
+        )
+        if selected_source != expected_source:
+            _append_issue(
+                issues,
+                scope,
+                "selected TOF summary does not follow the resolved timing-center source",
+                {"summary_source": selected_source, "resolved_source": expected_source},
+            )
+        expected_role = (
+            "offset_fit_input"
+            if selected_source in {"low_aero_0_5_fit", "low_aero_0_6_fit"}
+            else "stable_fallback_diagnostic"
+            if selected_source == "stable_global_center_fallback"
+            else "unavailable"
+        )
+        if str(row.get("tof_summary_role") or "unavailable") != expected_role:
+            _append_issue(
+                issues,
+                scope,
+                "selected TOF summary has the wrong diagnostic role",
+                {"role": row.get("tof_summary_role"), "expected_role": expected_role},
+            )
         mode = str(row.get("offset_fit_aero_mode") or "unavailable")
-        if mode not in allowed_summary_modes:
-            _append_issue(issues, scope, "unsupported low-aerogel offset mode", {"mode": mode})
         aero_min = _float_or_none(row.get("offset_fit_aero_min"))
         aero_max = _float_or_none(row.get("offset_fit_aero_max"))
-        if mode == "low_aero_0_5":
+        if selected_source == "low_aero_0_5_fit":
+            if mode != "low_aero_0_5":
+                _append_issue(issues, scope, "0-5 source has the wrong TOF summary mode", {"mode": mode})
             if aero_min != 0.0 or aero_max is None or aero_max > 5.0:
                 _append_issue(issues, scope, "primary offset mode is not restricted to 0-5 NPE", {"aero_min": aero_min, "aero_max": aero_max})
-        if mode == "low_aero_0_6_fallback":
+        if selected_source == "low_aero_0_6_fit":
+            if mode != "low_aero_0_6_fallback":
+                _append_issue(issues, scope, "0-6 source has the wrong TOF summary mode", {"mode": mode})
             if aero_min != 0.0 or aero_max is None or aero_max > 6.0:
                 _append_issue(issues, scope, "fallback offset mode is not restricted to 0-6 NPE", {"aero_min": aero_min, "aero_max": aero_max})
-            primary_valid = bool(primary_rows[index].get("valid", False)) if index < len(primary_rows) and isinstance(primary_rows[index], dict) else False
-            if primary_valid:
-                _append_issue(issues, scope, "fallback selected even though primary low-aerogel summary is valid")
-        if mode == "unavailable" and bool(row.get("valid", False)):
-            _append_issue(issues, scope, "unavailable offset mode has valid selected TOF summary")
         if index < len(full_rows) and isinstance(full_rows[index], dict):
             full_max = _float_or_none(full_rows[index].get("offset_fit_aero_max"))
             if full_max is not None and full_max < 25.0:
@@ -818,6 +844,8 @@ def _validate_cell_fit_attempts(
                 continue
             if not bool(slice_row.get("global_shape_valid", False)):
                 continue
+            if not bool(slice_row.get("timing_center_model_valid", False)):
+                continue
             support_entries = int(slice_row.get("support_entries", 0) or 0)
             minimum_required = int(slice_row.get("minimum_required_entries", 0) or 0)
             if minimum_required > 0 and support_entries < minimum_required:
@@ -858,6 +886,74 @@ def _validate_cell_fit_attempts(
                     "cell_fit_attempt_count": row.get("cell_fit_attempt_count"),
                 },
             )
+
+
+def _validate_cell_fit_statuses_and_counters(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    expected_reason_by_status = {
+        "insufficient_support": "insufficient_entries",
+        "missing_histogram": "missing_histogram",
+        "invalid_global_shape": "invalid_global_shape",
+        "invalid_timing_center_model": "invalid_timing_center_model",
+    }
+    counter_by_status = {
+        "insufficient_support": "cell_fit_skipped_insufficient_support_count",
+        "missing_histogram": "cell_fit_skipped_missing_histogram_count",
+        "invalid_global_shape": "cell_fit_skipped_invalid_global_shape_count",
+        "invalid_timing_center_model": "cell_fit_skipped_invalid_timing_center_model_count",
+    }
+    diag = _diagnostics(payload)
+    debug_rows = list(diag.get("delta_support_debug_rows") or [])
+    for delta_index, row in enumerate(debug_rows):
+        if not isinstance(row, dict):
+            continue
+        slice_rows = [entry for entry in (row.get("slice_rows") or []) if isinstance(entry, dict)]
+        attempted_count = sum(bool(entry.get("fit_attempted", False)) for entry in slice_rows)
+        skipped_count = len(slice_rows) - attempted_count
+        status_counts = {key: 0 for key in counter_by_status.values()}
+        other_count = 0
+        for aero_index, slice_row in enumerate(slice_rows):
+            if bool(slice_row.get("fit_attempted", False)):
+                continue
+            status = str(slice_row.get("fit_status") or "")
+            reasons = set(str(reason) for reason in (slice_row.get("rejection_reasons") or []))
+            if not reasons and slice_row.get("rejection_reason"):
+                reasons = {
+                    reason.strip()
+                    for reason in str(slice_row.get("rejection_reason")).split(";")
+                    if reason.strip()
+                }
+            required_reason = expected_reason_by_status.get(status)
+            scope = "python_tof_extension/cell_status[{}][{}]".format(delta_index, aero_index)
+            if required_reason and required_reason not in reasons:
+                _append_issue(
+                    issues,
+                    scope,
+                    "pre-fit status does not have its required rejection reason",
+                    {"fit_status": status, "reasons": sorted(reasons), "required_reason": required_reason},
+                )
+            counter_key = counter_by_status.get(status)
+            if counter_key:
+                status_counts[counter_key] += 1
+            else:
+                other_count += 1
+        scope = "python_tof_extension/cell_counters[{}]".format(delta_index)
+        if int(row.get("cell_fit_attempt_count", 0) or 0) != attempted_count:
+            _append_issue(issues, scope, "cell-fit attempt counter mismatch", {"stored": row.get("cell_fit_attempt_count"), "actual": attempted_count})
+        if int(row.get("cell_fit_skipped_count", 0) or 0) != skipped_count:
+            _append_issue(issues, scope, "cell-fit skipped counter mismatch", {"stored": row.get("cell_fit_skipped_count"), "actual": skipped_count})
+        if attempted_count + skipped_count != len(slice_rows):
+            _append_issue(issues, scope, "cell-fit attempts and skips do not cover all aerogel cells")
+        for counter_key, actual_count in status_counts.items():
+            if int(row.get(counter_key, 0) or 0) != actual_count:
+                _append_issue(issues, scope, "cell-fit skipped-status counter mismatch", {"counter": counter_key, "stored": row.get(counter_key), "actual": actual_count})
+        if int(row.get("cell_fit_skipped_other_count", 0) or 0) != other_count:
+            _append_issue(issues, scope, "cell-fit skipped-other counter mismatch", {"stored": row.get("cell_fit_skipped_other_count"), "actual": other_count})
+        expected_skips = sum(status_counts.values()) + other_count
+        if skipped_count != expected_skips:
+            _append_issue(issues, scope, "cell-fit skipped subcategories do not sum to skipped total", {"skipped": skipped_count, "categorized": expected_skips})
 
 
 def _validate_weak_high_aero_components(
@@ -1013,6 +1109,7 @@ def _validate_python_tof_extension(
     _validate_timing_constraints(issues, payload, center_tolerance=1.0e-6)
     _validate_invalid_offset_propagation(issues, payload)
     _validate_cell_fit_attempts(issues, payload)
+    _validate_cell_fit_statuses_and_counters(issues, payload)
     _validate_weak_high_aero_components(issues, payload, abs_tol)
     _validate_closure_and_weights(issues, payload, python_weight_payloads, abs_tol)
     _validate_branch_alias_metadata(issues, payload)
@@ -1023,6 +1120,7 @@ def _write_text_report(path: str, report: dict[str, Any]) -> None:
     lines = [
         "Proton-cleaning parity validation",
         "passed={}".format(report["passed"]),
+        "validation_scope={}".format(report.get("validation_scope", "combined")),
         "issue_count={}".format(len(report["issues"])),
         "legacy_c_parity_issue_count={}".format(
             int((report.get("legacy_c_parity") or {}).get("issue_count", 0))
@@ -1059,6 +1157,12 @@ def main() -> int:
     parser.add_argument("--report-text", required=True, help="Path to write the text report.")
     parser.add_argument("--abs-tol", type=float, default=1e-6)
     parser.add_argument("--rel-tol", type=float, default=1e-6)
+    parser.add_argument(
+        "--validation-scope",
+        choices=("legacy_parity", "python_tof_extension", "combined"),
+        default="combined",
+        help="Run only immutable C-owned parity checks, Python TOF-extension consistency checks, or both.",
+    )
     args = parser.parse_args()
 
     legacy_issues: list[dict[str, Any]] = []
@@ -1066,46 +1170,46 @@ def main() -> int:
     python_payload = _load_json(args.python_json)
     macro_payload = _load_json(args.macro_json)
 
-    _compare_shape_collection(
-        legacy_issues,
-        "global_shapes",
-        list(python_payload.get("global_shapes") or []),
-        list(macro_payload.get("global_shapes") or []),
-        (
-            "fit_attempted",
-            "valid",
-            "fit_status_code",
-            "kaon_amplitude",
-            "kaon_amplitude_error",
-            "kaon_mean",
-            "kaon_sigma",
-            "proton_amplitude",
-            "proton_amplitude_error",
-            "proton_mean",
-            "proton_sigma",
-            "other_amplitude",
-            "separation",
-            "kaon_significance",
-            "proton_significance",
-            "chi2_data",
-            "chi2_ndf",
-            "goodness_ndf",
-            "rejection_reason",
-        ),
-        args.abs_tol,
-        args.rel_tol,
-    )
-
-    if args.python_root and args.macro_root:
-        histogram_names = _default_histogram_names(python_payload)
-        _compare_root_histograms(
+    if args.validation_scope in ("legacy_parity", "combined"):
+        _compare_shape_collection(
             legacy_issues,
-            args.python_root,
-            args.macro_root,
-            histogram_names,
+            "global_shapes",
+            list(python_payload.get("global_shapes") or []),
+            list(macro_payload.get("global_shapes") or []),
+            (
+                "fit_attempted",
+                "valid",
+                "fit_status_code",
+                "kaon_amplitude",
+                "kaon_amplitude_error",
+                "kaon_mean",
+                "kaon_sigma",
+                "proton_amplitude",
+                "proton_amplitude_error",
+                "proton_mean",
+                "proton_sigma",
+                "other_amplitude",
+                "separation",
+                "kaon_significance",
+                "proton_significance",
+                "chi2_data",
+                "chi2_ndf",
+                "goodness_ndf",
+                "rejection_reason",
+            ),
             args.abs_tol,
             args.rel_tol,
         )
+        if args.python_root and args.macro_root:
+            histogram_names = _default_histogram_names(python_payload)
+            _compare_root_histograms(
+                legacy_issues,
+                args.python_root,
+                args.macro_root,
+                histogram_names,
+                args.abs_tol,
+                args.rel_tol,
+            )
 
     python_weights = None
     macro_weights = None
@@ -1115,14 +1219,18 @@ def main() -> int:
         python_weights = _load_weight_map(args.python_weights)
         macro_weights = _load_weight_map(args.macro_weights)
 
-    _validate_python_tof_extension(
-        extension_issues,
-        python_payload,
-        python_weight_payloads,
-        args.abs_tol,
-    )
+    if args.validation_scope in ("python_tof_extension", "combined"):
+        _validate_python_tof_extension(
+            extension_issues,
+            python_payload,
+            python_weight_payloads,
+            args.abs_tol,
+        )
 
     extension_observations = {
+        "validation_scope": args.validation_scope,
+        "strict_c_checks_applied": args.validation_scope in ("legacy_parity", "combined"),
+        "python_tof_extension_checks_applied": args.validation_scope in ("python_tof_extension", "combined"),
         "note": (
             "TOF-corrected support labels, selected timing branch, delta-slice fits, "
             "and event weights are reported here and are not strict legacy C parity checks."
@@ -1140,6 +1248,7 @@ def main() -> int:
 
     report = {
         "passed": len(legacy_issues) == 0 and len(extension_issues) == 0,
+        "validation_scope": args.validation_scope,
         "python_json": os.path.abspath(args.python_json),
         "macro_json": os.path.abspath(args.macro_json),
         "python_root": os.path.abspath(args.python_root) if args.python_root else "",
