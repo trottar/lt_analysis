@@ -334,20 +334,36 @@ def _compare_root_histograms(
 
 
 def _load_weight_map(path: str) -> dict[str, float]:
+    result = {}
+    for row in _load_weight_payloads(path):
+        signature = row.get("signature")
+        value = row.get("proton_weight")
+        if signature is None or value is None:
+            continue
+        result[str(signature)] = float(value)
+    if result:
+        return result
+    raise TypeError("Unsupported weight payload format for '{}'".format(path))
+
+
+def _load_weight_payloads(path: str) -> list[dict[str, Any]]:
     payload = _load_json(path)
     if isinstance(payload, dict):
-        return {str(key): float(value) for key, value in payload.items()}
+        if all(not isinstance(value, dict) for value in payload.values()):
+            return [
+                {"signature": str(key), "proton_weight": value}
+                for key, value in payload.items()
+            ]
+        rows = []
+        for key, value in payload.items():
+            if not isinstance(value, dict):
+                continue
+            row = dict(value)
+            row.setdefault("signature", str(key))
+            rows.append(row)
+        return rows
     if isinstance(payload, list):
-        result = {}
-        for row in payload:
-            if not isinstance(row, dict):
-                continue
-            signature = row.get("signature")
-            value = row.get("proton_weight")
-            if signature is None or value is None:
-                continue
-            result[str(signature)] = float(value)
-        return result
+        return [dict(row) for row in payload if isinstance(row, dict)]
     raise TypeError("Unsupported weight payload format for '{}'".format(path))
 
 
@@ -414,6 +430,306 @@ def _summarize_weight_maps(
         "max_abs_weight_difference": max_abs_difference,
         "max_abs_weight_difference_key": max_abs_difference_key,
     }
+
+
+def _float_or_none(value: Any) -> float | None:
+    try:
+        numeric = float(value)
+    except Exception:
+        return None
+    return numeric if math.isfinite(numeric) else None
+
+
+def _diagnostics(payload: dict[str, Any]) -> dict[str, Any]:
+    return payload.get("diagnostics") or {}
+
+
+def _modulo_distance(left: float, right: float, period: float) -> float:
+    if period <= 0.0 or not math.isfinite(period):
+        return abs(left - right)
+    return abs(((left - right + 0.5 * period) % period) - 0.5 * period)
+
+
+def _validate_tof_summary_rows(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    rows = list(diag.get("tof_summary_by_delta") or payload.get("tof_summary_by_delta") or [])
+    if not rows:
+        _append_issue(issues, "python_tof_extension/tof_summary", "missing TOF summary rows")
+        return
+    default_cfg = diag.get("tof_summary_validation") or {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        delta_index = int(row.get("delta_index", -1))
+        scope = "python_tof_extension/tof_summary[{}]".format(delta_index)
+        cfg = row.get("tof_summary_validation") or default_cfg
+        min_events = int((cfg or {}).get("minimum_prompt_tof_events", 30) or 30)
+        min_fraction = float((cfg or {}).get("minimum_valid_tof_fraction", 0.90) or 0.90)
+        counter_keys = (
+            "prompt_events_seen",
+            "prompt_events_with_valid_tof",
+            "prompt_events_with_selected_timing",
+            "prompt_events_inside_timing_range",
+            "prompt_events_inside_aero_range",
+            "prompt_events_used",
+        )
+        counters = [int(row.get(key, 0) or 0) for key in counter_keys]
+        if any(left < right for left, right in zip(counters, counters[1:])):
+            _append_issue(
+                issues,
+                scope,
+                "TOF counter ordering is inconsistent",
+                dict(zip(counter_keys, counters)),
+            )
+        valid_tof_fraction = _float_or_none(row.get("valid_tof_fraction"))
+        if valid_tof_fraction is None:
+            _append_issue(issues, scope, "missing valid_tof_fraction")
+        prompt_count = int(row.get("prompt_event_count", 0) or 0)
+        required_fields = (
+            "mean_delta_t_pk_ns",
+            "mean_P_gtr_p",
+            "mean_shms_path_length_cm",
+        )
+        finite_required = all(
+            (_float_or_none(row.get(field_name)) is not None and _float_or_none(row.get(field_name)) > 0.0)
+            for field_name in required_fields
+        )
+        expected_valid = bool(
+            prompt_count >= min_events
+            and valid_tof_fraction is not None
+            and valid_tof_fraction >= min_fraction
+            and finite_required
+        )
+        if bool(row.get("valid", False)) != expected_valid:
+            _append_issue(
+                issues,
+                scope,
+                "TOF summary valid flag does not match serialized thresholds",
+                {
+                    "valid": row.get("valid"),
+                    "expected_valid": expected_valid,
+                    "prompt_event_count": prompt_count,
+                    "minimum_prompt_tof_events": min_events,
+                    "valid_tof_fraction": valid_tof_fraction,
+                    "minimum_valid_tof_fraction": min_fraction,
+                },
+            )
+        if not bool(row.get("valid", False)) and not row.get("rejection_reasons"):
+            _append_issue(issues, scope, "invalid TOF summary has no rejection_reasons")
+
+
+def _validate_offset_rows(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    rows = list(payload.get("delta_timing_offset_fits") or diag.get("delta_timing_offset_fits") or [])
+    if not rows:
+        _append_issue(issues, "python_tof_extension/delta_offsets", "missing delta offset fit rows")
+        return
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        delta_index = int(row.get("delta_index", -1))
+        scope = "python_tof_extension/delta_offsets[{}]".format(delta_index)
+        cfg = row.get("tof_offset_validation") or {}
+        for key in (
+            "maximum_offset_error_ns",
+            "maximum_chi2_ndf",
+            "minimum_component_significance",
+            "minimum_smaller_component_fraction",
+        ):
+            if key not in cfg:
+                _append_issue(issues, scope, "missing serialized offset threshold", {"key": key})
+        if row.get("smaller_component_fraction_definition") != "min(K_amp,p_amp)/(K_amp+p_amp)":
+            _append_issue(
+                issues,
+                scope,
+                "wrong smaller-component fraction definition",
+                {"definition": row.get("smaller_component_fraction_definition")},
+            )
+        valid = bool(row.get("valid", False))
+        if valid:
+            if int(row.get("fit_status_code", -999) or -999) != 0:
+                _append_issue(issues, scope, "valid offset fit does not have ROOT status 0")
+            offset_error = _float_or_none(row.get("delta_offset_error"))
+            chi2_ndf = _float_or_none(row.get("chi2_ndf"))
+            max_error = _float_or_none(cfg.get("maximum_offset_error_ns"))
+            max_chi2 = _float_or_none(cfg.get("maximum_chi2_ndf"))
+            if offset_error is None or (max_error is not None and offset_error > max_error):
+                _append_issue(issues, scope, "valid offset error violates serialized threshold")
+            if chi2_ndf is None or (max_chi2 is not None and chi2_ndf > max_chi2):
+                _append_issue(issues, scope, "valid offset chi2/ndf violates serialized threshold")
+            if row.get("rejection_reasons"):
+                _append_issue(issues, scope, "valid offset row has rejection_reasons", {"reasons": row.get("rejection_reasons")})
+        elif not row.get("rejection_reasons"):
+            _append_issue(issues, scope, "invalid offset row has no rejection_reasons")
+
+
+def _validate_timing_constraints(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+    center_tolerance: float = 1.0e-6,
+) -> None:
+    diag = _diagnostics(payload)
+    probe_kind = str(diag.get("selected_probe_kind") or (payload.get("settings") or {}).get("selected_timing_probe_kind") or "ct")
+    beam_spacing = _float_or_none(((payload.get("settings") or {}).get("global_fit") or {}).get("beam_bunch_spacing_ns"))
+    if beam_spacing is None:
+        beam_spacing = 2.0
+    delta_slices = list(payload.get("delta_slice_fits") or diag.get("delta_slice_fits") or [])
+    global_shapes = list(payload.get("global_shapes") or [])
+    for delta_index, slice_rows in enumerate(delta_slices):
+        for aero_index, row in enumerate(slice_rows or []):
+            if not isinstance(row, dict) or not bool(row.get("valid", False)):
+                continue
+            scope = "python_tof_extension/delta_slice_fits[{}][{}]".format(delta_index, aero_index)
+            k_mean = _float_or_none(row.get("predicted_kaon_mean"))
+            p_mean = _float_or_none(row.get("predicted_proton_mean"))
+            p_mean_raw = _float_or_none(row.get("predicted_proton_mean_raw", row.get("predicted_proton_mean")))
+            delta_t = _float_or_none(row.get("mean_delta_t_pk_ns"))
+            if k_mean is None or p_mean is None or delta_t is None:
+                _append_issue(issues, scope, "missing timing-constraint mean fields")
+                continue
+            if probe_kind == "rf":
+                distance = _modulo_distance(abs(p_mean - k_mean), delta_t, beam_spacing)
+            else:
+                distance = abs(abs(p_mean - k_mean) - delta_t)
+            if distance > center_tolerance:
+                _append_issue(
+                    issues,
+                    scope,
+                    "timing-constraint center inconsistency",
+                    {
+                        "probe_kind": probe_kind,
+                        "distance": distance,
+                        "tolerance": center_tolerance,
+                        "k_mean": k_mean,
+                        "p_mean": p_mean,
+                        "mean_delta_t_pk_ns": delta_t,
+                    },
+                )
+            for sigma_key, reference_key in (
+                ("kaon_sigma", "reference_global_kaon_sigma"),
+                ("proton_sigma", "reference_global_proton_sigma"),
+            ):
+                sigma = _float_or_none(row.get(sigma_key))
+                reference_sigma = _float_or_none(row.get(reference_key))
+                if reference_sigma is None and 0 <= aero_index < len(global_shapes):
+                    reference_sigma = _float_or_none((global_shapes[aero_index] or {}).get(sigma_key))
+                if reference_sigma is None:
+                    continue
+                if sigma is None or abs(sigma - reference_sigma) > center_tolerance:
+                    _append_issue(
+                        issues,
+                        scope,
+                        "fixed-width consistency failure",
+                        {"sigma_key": sigma_key, "sigma": sigma, "reference": reference_sigma},
+                    )
+
+
+def _validate_invalid_offset_propagation(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    offsets = list(payload.get("delta_timing_offset_fits") or diag.get("delta_timing_offset_fits") or [])
+    delta_slices = list(payload.get("delta_slice_fits") or [])
+    support = list(payload.get("support_by_delta") or [])
+    for row in offsets:
+        if not isinstance(row, dict) or bool(row.get("valid", False)):
+            continue
+        delta_index = int(row.get("delta_index", -1))
+        if delta_index < 0:
+            continue
+        scope = "python_tof_extension/invalid_offset_propagation[{}]".format(delta_index)
+        if delta_index < len(support) and str(support[delta_index]) != "unsupported":
+            _append_issue(issues, scope, "invalid offset did not force unsupported support label", {"support": support[delta_index]})
+        for aero_index, slice_row in enumerate(delta_slices[delta_index] if delta_index < len(delta_slices) else []):
+            if isinstance(slice_row, dict) and bool(slice_row.get("valid", False)):
+                _append_issue(issues, scope, "invalid offset produced valid slice fit", {"aero_index": aero_index})
+
+
+def _validate_closure_and_weights(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+    python_weight_payloads: list[dict[str, Any]] | None,
+    abs_tol: float,
+) -> None:
+    diag = _diagnostics(payload)
+    for row in diag.get("event_weight_closure_by_delta") or []:
+        if not isinstance(row, dict):
+            continue
+        delta_index = int(row.get("delta_index", -1))
+        fitted = _float_or_none(row.get("fitted_proton_yield"))
+        summed = _float_or_none(row.get("summed_event_proton_probability"))
+        ratio = _float_or_none(row.get("closure_ratio"))
+        if fitted is None or summed is None:
+            continue
+        expected = summed / fitted if fitted != 0.0 else None
+        if expected is not None and ratio is not None and abs(ratio - expected) > max(abs_tol, 1.0e-12):
+            _append_issue(
+                issues,
+                "python_tof_extension/event_weight_closure[{}]".format(delta_index),
+                "closure ratio does not match summed/fitted algebra",
+                {"ratio": ratio, "expected": expected},
+            )
+    for row in python_weight_payloads or []:
+        if not isinstance(row, dict):
+            continue
+        signature = row.get("signature", "unknown")
+        for key in ("proton_weight", "cleaned_factor", "final_cleaned_factor"):
+            value = _float_or_none(row.get(key))
+            if value is None:
+                continue
+            if value < -abs_tol or value > 1.0 + abs_tol:
+                _append_issue(
+                    issues,
+                    "python_tof_extension/event_weights",
+                    "{} out of [0, 1]".format(key),
+                    {"signature": signature, "value": value},
+                )
+
+
+def _validate_branch_alias_metadata(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    aliases = set(str(value) for value in diag.get("tof_required_aliases") or [])
+    forbidden = set(str(value) for value in diag.get("tof_forbidden_replay_names") or [])
+    required = {"P_gtr_p", "ssxptar", "ssyptar", "ssdelta"}
+    missing = sorted(required - aliases)
+    if missing:
+        _append_issue(
+            issues,
+            "python_tof_extension/branch_aliases",
+            "missing required alias metadata",
+            {"missing": missing},
+        )
+    if aliases & forbidden:
+        _append_issue(
+            issues,
+            "python_tof_extension/branch_aliases",
+            "forbidden replay names listed as required aliases",
+            {"overlap": sorted(aliases & forbidden)},
+        )
+
+
+def _validate_python_tof_extension(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+    python_weight_payloads: list[dict[str, Any]] | None,
+    abs_tol: float,
+) -> None:
+    _validate_tof_summary_rows(issues, payload)
+    _validate_offset_rows(issues, payload)
+    _validate_timing_constraints(issues, payload, center_tolerance=1.0e-6)
+    _validate_invalid_offset_propagation(issues, payload)
+    _validate_closure_and_weights(issues, payload, python_weight_payloads, abs_tol)
+    _validate_branch_alias_metadata(issues, payload)
 
 
 def _write_text_report(path: str, report: dict[str, Any]) -> None:
@@ -506,9 +822,18 @@ def main() -> int:
 
     python_weights = None
     macro_weights = None
+    python_weight_payloads = None
     if args.python_weights and args.macro_weights:
+        python_weight_payloads = _load_weight_payloads(args.python_weights)
         python_weights = _load_weight_map(args.python_weights)
         macro_weights = _load_weight_map(args.macro_weights)
+
+    _validate_python_tof_extension(
+        extension_issues,
+        python_payload,
+        python_weight_payloads,
+        args.abs_tol,
+    )
 
     extension_observations = {
         "note": (

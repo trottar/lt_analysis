@@ -499,6 +499,10 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "reject_bound_hit_with_large_error": True,
         "bound_hit_large_error_fraction": 0.50,
     },
+    "tof_summary_validation": {
+        "minimum_prompt_tof_events": 30,
+        "minimum_valid_tof_fraction": 0.90,
+    },
 }
 
 PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES = {}
@@ -533,6 +537,7 @@ PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
         "weighting",
         "validation_windows",
         "tof_offset_validation",
+        "tof_summary_validation",
     }
 )
 

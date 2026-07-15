@@ -133,6 +133,24 @@ PROTON_CLEANING_TOF_OFFSET_VALIDATION = {
     "reject_bound_hit_with_large_error": True,
     "bound_hit_large_error_fraction": 0.50,
 }
+PROTON_CLEANING_TOF_SUMMARY_VALIDATION = {
+    "minimum_prompt_tof_events": 30,
+    "minimum_valid_tof_fraction": 0.90,
+}
+PROTON_CLEANING_TOF_REQUIRED_ALIASES = (
+    "P_gtr_p",
+    "ssxptar",
+    "ssyptar",
+    "ssdelta",
+)
+PROTON_CLEANING_TOF_FORBIDDEN_REPLAY_NAMES = (
+    "P.gtr.p",
+    "P.gtr.th",
+    "P.gtr.ph",
+    "P.gtr.dp",
+    "P.gtr.xp",
+    "P.gtr.yp",
+)
 
 
 def _clone_hist(template_hist, name, reset=True):
@@ -395,7 +413,17 @@ def _build_prompt_tof_summary_by_delta(
     timing_range=None,
     aero_range=None,
     delta_range=None,
+    tof_summary_validation=None,
 ):
+    validation_cfg = deepcopy(
+        tof_summary_validation or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
+    )
+    minimum_prompt_tof_events = int(
+        validation_cfg.get("minimum_prompt_tof_events", 30) or 30
+    )
+    minimum_valid_tof_fraction = float(
+        validation_cfg.get("minimum_valid_tof_fraction", 0.90) or 0.90
+    )
     n_delta_bins = max(len(delta_edges) - 1, 0)
     collections = [
         {
@@ -488,30 +516,65 @@ def _build_prompt_tof_summary_by_delta(
         if aero_min is not None and (aero_value < aero_min or aero_value > aero_max):
             continue
         counters[delta_index]["prompt_events_inside_aero_range"] += 1
-        counters[delta_index]["prompt_events_used"] += 1
+        candidate_values = {}
         for key in collections[delta_index]:
             value = (entry_payload or {}).get(key)
-            if value is not None and math.isfinite(float(value)):
-                collections[delta_index][key].append(float(value))
+            try:
+                value = float(value)
+            except Exception:
+                candidate_values = None
+                break
+            if not math.isfinite(float(value)):
+                candidate_values = None
+                break
+            candidate_values[key] = float(value)
+        if candidate_values is None:
+            continue
+        counters[delta_index]["prompt_events_used"] += 1
+        for key, value in candidate_values.items():
+            collections[delta_index][key].append(float(value))
     summaries = []
     for delta_index, collection in enumerate(collections):
+        denominator = int(counters[delta_index]["prompt_events_inside_aero_range"] or 0)
+        prompt_events_used = int(counters[delta_index]["prompt_events_used"] or 0)
+        valid_tof_fraction = (
+            float(prompt_events_used / float(denominator))
+            if denominator > 0
+            else 0.0
+        )
         row = {
             "delta_index": int(delta_index),
             "delta_min": float(delta_edges[delta_index]),
             "delta_max": float(delta_edges[delta_index + 1]),
             "prompt_event_count": int(len(collection["delta_t_pk_ns"])),
+            "valid_tof_fraction": float(valid_tof_fraction),
+            "tof_summary_validation": _json_ready_value(validation_cfg),
             **counters[delta_index],
         }
         for key, values in collection.items():
             mean_value, rms_value = _mean_rms(values)
             row["mean_" + key] = mean_value
             row["rms_" + key] = rms_value
-        row["valid"] = bool(
-            row["prompt_event_count"] > 0
-            and row.get("mean_delta_t_pk_ns") is not None
-            and math.isfinite(float(row.get("mean_delta_t_pk_ns")))
-            and float(row.get("mean_delta_t_pk_ns")) > 0.0
-        )
+        rejection_reasons = []
+        if int(row["prompt_event_count"]) < int(minimum_prompt_tof_events):
+            rejection_reasons.append("insufficient_prompt_tof_events")
+        if float(valid_tof_fraction) < float(minimum_valid_tof_fraction):
+            rejection_reasons.append("valid_tof_fraction_below_min")
+        for field_name in (
+            "mean_delta_t_pk_ns",
+            "mean_P_gtr_p",
+            "mean_shms_path_length_cm",
+        ):
+            field_value = row.get(field_name)
+            if (
+                field_value is None
+                or not math.isfinite(float(field_value))
+                or float(field_value) <= 0.0
+            ):
+                rejection_reasons.append("invalid_{}".format(field_name))
+        row["valid"] = bool(len(rejection_reasons) == 0)
+        row["rejection_reasons"] = list(rejection_reasons)
+        row["rejection_reason"] = _join_rejection_reasons(rejection_reasons)
         summaries.append(row)
     return summaries
 
@@ -606,6 +669,22 @@ def _join_rejection_reasons(reasons):
     return "; ".join(cleaned)
 
 
+def _count_rejection_reasons(rows):
+    counts = {}
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        reasons = row.get("rejection_reasons")
+        if not reasons and row.get("rejection_reason"):
+            reasons = [row.get("rejection_reason")]
+        for reason in reasons or []:
+            reason_text = str(reason).strip()
+            if not reason_text:
+                continue
+            counts[reason_text] = int(counts.get(reason_text, 0)) + 1
+    return counts
+
+
 def _build_exact_proton_cleaning_config(base_config):
     exact_config = deepcopy(base_config or {})
     exact_config["implementation"] = PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
@@ -630,6 +709,10 @@ def _build_exact_proton_cleaning_config(base_config):
     exact_config["tof_offset_validation"] = deepcopy(
         (base_config or {}).get("tof_offset_validation")
         or PROTON_CLEANING_TOF_OFFSET_VALIDATION
+    )
+    exact_config["tof_summary_validation"] = deepcopy(
+        (base_config or {}).get("tof_summary_validation")
+        or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
     )
     exact_config["fit_options"] = PROTON_CLEANING_EXACT_FIT_OPTIONS
     return exact_config
@@ -707,12 +790,19 @@ def _tree_has_branch(tree, branch_name):
 
 
 def _bundle_has_branch(source_bundle, branch_name, source_names=None):
-    prepared_branches = (source_bundle or {}).get("available_timing_branches") or ()
-    if branch_name in prepared_branches:
-        return True
     allowed_sources = None
     if source_names is not None:
         allowed_sources = {str(source_name) for source_name in source_names}
+    if allowed_sources is None:
+        prepared_branches = (source_bundle or {}).get("available_timing_branches") or ()
+        if branch_name in prepared_branches:
+            return True
+    for source_name, source_spec in ((source_bundle or {}).get("prepared_sources") or {}).items():
+        if allowed_sources is not None and str(source_name) not in allowed_sources:
+            continue
+        prepared_branches = (source_spec or {}).get("available_timing_branches") or ()
+        if branch_name in prepared_branches:
+            return True
     for source_name, source_spec in ((source_bundle or {}).get("sources") or {}).items():
         if allowed_sources is not None and str(source_name) not in allowed_sources:
             continue
@@ -737,7 +827,11 @@ def _resolve_rf_branch_candidates(source_bundle, config=None):
     for candidate in tuple(config.get("rf_branch_candidates") or DEFAULT_RF_BRANCH_CANDIDATES):
         if candidate not in candidates:
             candidates.append(candidate)
-    return [candidate for candidate in candidates if _bundle_has_branch(source_bundle, candidate)]
+    return [
+        candidate
+        for candidate in candidates
+        if _bundle_has_branch(source_bundle, candidate, source_names=("prompt",))
+    ]
 
 
 def _get_prepared_sources(source_bundle):
@@ -2391,6 +2485,8 @@ def _fit_delta_common_timing_offset(
         "reference_proton_sigma": (reference_shape or {}).get("proton_sigma"),
         "fit_min": None,
         "fit_max": None,
+        "smaller_component_fraction_definition": "min(K_amp,p_amp)/(K_amp+p_amp)",
+        "tof_offset_validation": _json_ready_value(validation_cfg),
     }
     rejection_reasons = []
     if histogram is None:
@@ -2399,6 +2495,10 @@ def _fit_delta_common_timing_offset(
         rejection_reasons.append((reference_shape or {}).get("reason") or "invalid_reference_shape")
     if not bool((tof_summary or {}).get("valid", False)):
         rejection_reasons.append("invalid_prompt_tof_summary")
+        for reason in (tof_summary or {}).get("rejection_reasons") or []:
+            reason_text = str(reason).strip()
+            if reason_text and reason_text not in rejection_reasons:
+                rejection_reasons.append(reason_text)
     mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
     if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
         rejection_reasons.append("invalid_mean_delta_t_pk")
@@ -2495,7 +2595,7 @@ def _fit_delta_common_timing_offset(
         fit_function,
         fit_min,
         fit_max,
-        3,
+        4,
     )
     poisson_deviance = float(goodness.get("deviance", 0.0) or 0.0)
     poisson_ndf = int(goodness.get("ndf", 0) or 0)
@@ -2517,7 +2617,7 @@ def _fit_delta_common_timing_offset(
         if proton_amplitude_error > 0.0 and math.isfinite(proton_amplitude_error)
         else None
     )
-    component_denominator = kaon_amplitude + proton_amplitude + max(other_amplitude, 0.0)
+    component_denominator = kaon_amplitude + proton_amplitude
     smaller_component_fraction = (
         float(min(kaon_amplitude, proton_amplitude) / component_denominator)
         if component_denominator > 0.0 and math.isfinite(component_denominator)
@@ -2650,6 +2750,7 @@ def _fit_delta_common_timing_offset(
                 if smaller_component_fraction is not None
                 else None
             ),
+            "smaller_component_fraction_definition": "min(K_amp,p_amp)/(K_amp+p_amp)",
             "tof_offset_validation": _json_ready_value(validation_cfg),
         }
     )
@@ -3938,6 +4039,8 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["implementation"] = (
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
     )
+    result["diagnostics"]["tof_required_aliases"] = list(PROTON_CLEANING_TOF_REQUIRED_ALIASES)
+    result["diagnostics"]["tof_forbidden_replay_names"] = list(PROTON_CLEANING_TOF_FORBIDDEN_REPLAY_NAMES)
     ct_probe_base_configuration = _resolve_ct_probe_configuration(source_bundle)
     result["diagnostics"]["ct_probe_base_configuration"] = {
         "timing_branch": ct_probe_base_configuration["timing_branch"],
@@ -4333,6 +4436,8 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["global_shape_debug_rows"] = global_shape_debug_rows
     result["diagnostics"]["activeUseSliceDeviancePerEntryValidation"] = False
     result["diagnostics"]["activeMaximumSlicePoissonDeviancePerEntry"] = None
+    result["diagnostics"]["tof_required_aliases"] = list(PROTON_CLEANING_TOF_REQUIRED_ALIASES)
+    result["diagnostics"]["tof_forbidden_replay_names"] = list(PROTON_CLEANING_TOF_FORBIDDEN_REPLAY_NAMES)
 
     if valid_global_shape_count <= 0:
         result["fallback_reason"] = "no identifiable proton-kaon timing shapes"
@@ -4353,8 +4458,15 @@ def build_kaon_proton_cleaning_result(
         timing_range=selected_time_hist_range,
         aero_range=exact_config.get("aero_hist_range") or PROTON_CLEANING_EXACT_AERO_RANGE,
         delta_range=exact_config.get("delta_hist_range") or PROTON_CLEANING_EXACT_DELTA_RANGE,
+        tof_summary_validation=exact_config.get("tof_summary_validation")
+        or PROTON_CLEANING_TOF_SUMMARY_VALIDATION,
     )
     result["diagnostics"]["tof_summary_by_delta"] = _json_ready_value(delta_tof_summaries)
+    result["diagnostics"]["tof_summary_validation"] = _json_ready_value(
+        exact_config.get("tof_summary_validation")
+        or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
+    )
+    result["diagnostics"]["tof_summary_rejection_counts"] = _count_rejection_reasons(delta_tof_summaries)
     result["diagnostics"]["valid_tof_delta_bins"] = int(
         sum(1 for row in delta_tof_summaries if bool((row or {}).get("valid", False)))
     )
@@ -4396,6 +4508,7 @@ def build_kaon_proton_cleaning_result(
         delta_timing_offset_fits.append(offset_fit)
     result["delta_timing_offset_fits"] = delta_timing_offset_fits
     result["diagnostics"]["delta_timing_offset_fits"] = _json_ready_value(delta_timing_offset_fits)
+    result["diagnostics"]["delta_offset_rejection_counts"] = _count_rejection_reasons(delta_timing_offset_fits)
     result["diagnostics"]["valid_delta_offset_fits"] = int(
         sum(1 for row in delta_timing_offset_fits if bool((row or {}).get("valid", False)))
     )
@@ -6041,9 +6154,9 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
             _set_hist_bin_if_finite(h_k_global, bin_index, reference_k)
         if reference_p is not None:
             _set_hist_bin_if_finite(h_p_global, bin_index, reference_p)
-        if reference_k is not None and offset is not None:
+        if bool(row.get("valid", False)) and reference_k is not None and offset is not None:
             _set_hist_bin_if_finite(h_k_ref, bin_index, reference_k + offset, row.get("delta_offset_error"))
-        if wrapped_p is not None and offset is not None:
+        if bool(row.get("valid", False)) and wrapped_p is not None and offset is not None:
             _set_hist_bin_if_finite(h_p_ref, bin_index, wrapped_p + offset, row.get("delta_offset_error"))
 
     _set_hist_line_marker(h_p, kBlue, width=2, marker=20)
@@ -6115,13 +6228,32 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     valid_offsets = sum(1 for row in offset_fits if bool((row or {}).get("valid", False)))
     invalid_offsets = sum(1 for row in offset_fits if not bool((row or {}).get("valid", False)))
     bound_offsets = sum(1 for row in offset_fits if bool((row or {}).get("delta_offset_bound_hit", False)))
-    offset_info = TPaveText(0.14, 0.73, 0.52, 0.90, "NDC")
+    offset_counts = diagnostics.get("delta_offset_rejection_counts") or _count_rejection_reasons(offset_fits)
+    tof_counts = diagnostics.get("tof_summary_rejection_counts") or _count_rejection_reasons(tof_summaries)
+    weak_component = (
+        int(offset_counts.get("kaon_significance_below_min", 0))
+        + int(offset_counts.get("proton_significance_below_min", 0))
+        + int(offset_counts.get("smaller_component_fraction_below_min", 0))
+    )
+    tof_support = (
+        int(tof_counts.get("insufficient_prompt_tof_events", 0))
+        + int(tof_counts.get("valid_tof_fraction_below_min", 0))
+        + int(tof_counts.get("invalid_mean_delta_t_pk_ns", 0))
+        + int(tof_counts.get("invalid_mean_P_gtr_p", 0))
+        + int(tof_counts.get("invalid_mean_shms_path_length_cm", 0))
+    )
+    offset_info = TPaveText(0.14, 0.62, 0.62, 0.90, "NDC")
     offset_info.SetBorderSize(1)
     offset_info.SetFillStyle(0)
     offset_info.SetTextAlign(12)
-    offset_info.SetTextSize(0.032)
+    offset_info.SetTextSize(0.026)
     offset_info.AddText("valid/invalid: {} / {}".format(valid_offsets, invalid_offsets))
     offset_info.AddText("bound-hit warnings: {}".format(bound_offsets))
+    offset_info.AddText("large-error: {}".format(int(offset_counts.get("offset_error_exceeds_max", 0))))
+    offset_info.AddText("poor-goodness: {}".format(int(offset_counts.get("chi2_ndf_exceeds_max", 0))))
+    offset_info.AddText("weak-component: {}".format(int(weak_component)))
+    offset_info.AddText("bound-hit weak: {}".format(int(offset_counts.get("bound_hit_with_weak_constraint", 0))))
+    offset_info.AddText("TOF-support: {}".format(int(tof_support)))
     offset_info.Draw()
     drawn_objects.append(offset_info)
     gPad.Modified()
