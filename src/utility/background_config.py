@@ -503,6 +503,15 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "minimum_prompt_tof_events": 30,
         "minimum_valid_tof_fraction": 0.90,
     },
+    "low_aero_offset": {
+        "primary_range": (0.0, 5.0),
+        "fallback_range": (0.0, 6.0),
+        "full_diagnostic_range": (0.0, 25.0),
+        "minimum_prompt_events": 20,
+        "minimum_valid_tof_events": 10,
+        "minimum_valid_tof_fraction": 0.50,
+        "show_reference_npe": 5.0,
+    },
 }
 
 PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES = {}
@@ -538,6 +547,7 @@ PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
         "validation_windows",
         "tof_offset_validation",
         "tof_summary_validation",
+        "low_aero_offset",
     }
 )
 

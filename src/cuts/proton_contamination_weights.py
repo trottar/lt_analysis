@@ -13,6 +13,7 @@ import numpy as np
 import ROOT
 from ROOT import (
     TCanvas,
+    TLatex,
     TLegend,
     TLine,
     TPaveText,
@@ -136,6 +137,15 @@ PROTON_CLEANING_TOF_OFFSET_VALIDATION = {
 PROTON_CLEANING_TOF_SUMMARY_VALIDATION = {
     "minimum_prompt_tof_events": 30,
     "minimum_valid_tof_fraction": 0.90,
+}
+PROTON_CLEANING_LOW_AERO_OFFSET_CONFIG = {
+    "primary_range": (0.0, 5.0),
+    "fallback_range": (0.0, 6.0),
+    "full_diagnostic_range": (0.0, 25.0),
+    "minimum_prompt_events": 20,
+    "minimum_valid_tof_events": 10,
+    "minimum_valid_tof_fraction": 0.50,
+    "show_reference_npe": 5.0,
 }
 PROTON_CLEANING_TOF_REQUIRED_ALIASES = (
     "P_gtr_p",
@@ -414,16 +424,38 @@ def _build_prompt_tof_summary_by_delta(
     aero_range=None,
     delta_range=None,
     tof_summary_validation=None,
+    reason_prefix="",
 ):
     validation_cfg = deepcopy(
         tof_summary_validation or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
     )
-    minimum_prompt_tof_events = int(
-        validation_cfg.get("minimum_prompt_tof_events", 30) or 30
+    minimum_prompt_events = int(
+        validation_cfg.get(
+            "minimum_prompt_events",
+            validation_cfg.get("minimum_prompt_tof_events", 30),
+        )
+        or 30
+    )
+    minimum_valid_tof_events = int(
+        validation_cfg.get("minimum_valid_tof_events", minimum_prompt_events)
+        or minimum_prompt_events
     )
     minimum_valid_tof_fraction = float(
         validation_cfg.get("minimum_valid_tof_fraction", 0.90) or 0.90
     )
+    reason_prefix = str(reason_prefix or "").strip()
+    def _summary_reason(kind):
+        if reason_prefix == "low_aero":
+            mapping = {
+                "insufficient_prompt_events": "insufficient_low_aero_prompt_events",
+                "insufficient_valid_tof_events": "insufficient_low_aero_valid_tof_events",
+                "valid_tof_fraction_below_min": "low_aero_valid_tof_fraction_below_min",
+                "invalid_mean_delta_t_pk_ns": "invalid_low_aero_mean_delta_t_pk",
+                "invalid_mean_P_gtr_p": "invalid_low_aero_mean_P_gtr_p",
+                "invalid_mean_shms_path_length_cm": "invalid_low_aero_mean_shms_path_length_cm",
+            }
+            return mapping.get(kind, "low_aero_{}".format(kind))
+        return kind
     n_delta_bins = max(len(delta_edges) - 1, 0)
     collections = [
         {
@@ -438,10 +470,11 @@ def _build_prompt_tof_summary_by_delta(
     counters = [
         {
             "prompt_events_seen": 0,
-            "prompt_events_with_valid_tof": 0,
             "prompt_events_with_selected_timing": 0,
             "prompt_events_inside_timing_range": 0,
             "prompt_events_inside_aero_range": 0,
+            "prompt_events_inside_timing_and_aero_domain": 0,
+            "prompt_events_with_valid_tof": 0,
             "prompt_events_used": 0,
         }
         for _ in range(n_delta_bins)
@@ -482,9 +515,6 @@ def _build_prompt_tof_summary_by_delta(
         if not (0 <= delta_index < n_delta_bins):
             continue
         counters[delta_index]["prompt_events_seen"] += 1
-        if not bool((entry_payload or {}).get("tof_valid", False)):
-            continue
-        counters[delta_index]["prompt_events_with_valid_tof"] += 1
         timing_values = (entry_payload or {}).get("timing_values") or {}
         selected_timing = timing_values.get(timing_branch) if timing_branch else None
         if selected_timing is None:
@@ -516,6 +546,10 @@ def _build_prompt_tof_summary_by_delta(
         if aero_min is not None and (aero_value < aero_min or aero_value > aero_max):
             continue
         counters[delta_index]["prompt_events_inside_aero_range"] += 1
+        counters[delta_index]["prompt_events_inside_timing_and_aero_domain"] += 1
+        if not bool((entry_payload or {}).get("tof_valid", False)):
+            continue
+        counters[delta_index]["prompt_events_with_valid_tof"] += 1
         candidate_values = {}
         for key in collections[delta_index]:
             value = (entry_payload or {}).get(key)
@@ -535,7 +569,9 @@ def _build_prompt_tof_summary_by_delta(
             collections[delta_index][key].append(float(value))
     summaries = []
     for delta_index, collection in enumerate(collections):
-        denominator = int(counters[delta_index]["prompt_events_inside_aero_range"] or 0)
+        denominator = int(
+            counters[delta_index]["prompt_events_inside_timing_and_aero_domain"] or 0
+        )
         prompt_events_used = int(counters[delta_index]["prompt_events_used"] or 0)
         valid_tof_fraction = (
             float(prompt_events_used / float(denominator))
@@ -547,6 +583,7 @@ def _build_prompt_tof_summary_by_delta(
             "delta_min": float(delta_edges[delta_index]),
             "delta_max": float(delta_edges[delta_index + 1]),
             "prompt_event_count": int(len(collection["delta_t_pk_ns"])),
+            "usable_tof_events": int(prompt_events_used),
             "valid_tof_fraction": float(valid_tof_fraction),
             "tof_summary_validation": _json_ready_value(validation_cfg),
             **counters[delta_index],
@@ -556,10 +593,12 @@ def _build_prompt_tof_summary_by_delta(
             row["mean_" + key] = mean_value
             row["rms_" + key] = rms_value
         rejection_reasons = []
-        if int(row["prompt_event_count"]) < int(minimum_prompt_tof_events):
-            rejection_reasons.append("insufficient_prompt_tof_events")
+        if int(denominator) < int(minimum_prompt_events):
+            rejection_reasons.append(_summary_reason("insufficient_prompt_events"))
+        if int(prompt_events_used) < int(minimum_valid_tof_events):
+            rejection_reasons.append(_summary_reason("insufficient_valid_tof_events"))
         if float(valid_tof_fraction) < float(minimum_valid_tof_fraction):
-            rejection_reasons.append("valid_tof_fraction_below_min")
+            rejection_reasons.append(_summary_reason("valid_tof_fraction_below_min"))
         for field_name in (
             "mean_delta_t_pk_ns",
             "mean_P_gtr_p",
@@ -571,7 +610,7 @@ def _build_prompt_tof_summary_by_delta(
                 or not math.isfinite(float(field_value))
                 or float(field_value) <= 0.0
             ):
-                rejection_reasons.append("invalid_{}".format(field_name))
+                rejection_reasons.append(_summary_reason("invalid_{}".format(field_name)))
         row["valid"] = bool(len(rejection_reasons) == 0)
         row["rejection_reasons"] = list(rejection_reasons)
         row["rejection_reason"] = _join_rejection_reasons(rejection_reasons)
@@ -685,6 +724,98 @@ def _count_rejection_reasons(rows):
     return counts
 
 
+def _offset_summary_validation_from_low_aero_config(low_aero_config):
+    low_aero_config = low_aero_config or {}
+    return {
+        "minimum_prompt_events": int(
+            low_aero_config.get("minimum_prompt_events", 20) or 20
+        ),
+        "minimum_valid_tof_events": int(
+            low_aero_config.get("minimum_valid_tof_events", 10) or 10
+        ),
+        "minimum_valid_tof_fraction": float(
+            low_aero_config.get("minimum_valid_tof_fraction", 0.50) or 0.50
+        ),
+    }
+
+
+def _project_delta_pid_timing_by_aero_range(pid_hist, name, aero_range, upper_inclusive=False):
+    if pid_hist is None or not aero_range or len(aero_range) < 2:
+        return None
+    aero_min = float(aero_range[0])
+    aero_max = float(aero_range[1])
+    x_axis = pid_hist.GetXaxis()
+    first_bin = max(1, int(x_axis.FindFixBin(aero_min)))
+    upper_value = aero_max if upper_inclusive else np.nextafter(aero_max, aero_min)
+    last_bin = min(int(pid_hist.GetNbinsX()), int(x_axis.FindFixBin(float(upper_value))))
+    if last_bin < first_bin:
+        return None
+    projection = pid_hist.ProjectionY(str(name), first_bin, last_bin)
+    if hasattr(projection, "SetDirectory"):
+        projection.SetDirectory(0)
+    if hasattr(projection, "Sumw2"):
+        projection.Sumw2()
+    return projection
+
+
+def _clone_tof_summary_with_mode(row, mode, aero_range, low_aero_config):
+    cloned = deepcopy(row or {})
+    if aero_range and len(aero_range) >= 2:
+        cloned["offset_fit_aero_min"] = float(aero_range[0])
+        cloned["offset_fit_aero_max"] = float(aero_range[1])
+    else:
+        cloned["offset_fit_aero_min"] = None
+        cloned["offset_fit_aero_max"] = None
+    cloned["offset_fit_aero_mode"] = str(mode)
+    cloned["low_aero_offset_config"] = _json_ready_value(low_aero_config or {})
+    return cloned
+
+
+def _select_low_aero_offset_summary(primary_row, fallback_row, low_aero_config):
+    primary_range = tuple((low_aero_config or {}).get("primary_range") or (0.0, 5.0))
+    fallback_range = tuple((low_aero_config or {}).get("fallback_range") or (0.0, 6.0))
+    if bool((primary_row or {}).get("valid", False)):
+        return _clone_tof_summary_with_mode(
+            primary_row,
+            "low_aero_0_5",
+            primary_range,
+            low_aero_config,
+        )
+    if bool((fallback_row or {}).get("valid", False)):
+        selected = _clone_tof_summary_with_mode(
+            fallback_row,
+            "low_aero_0_6_fallback",
+            fallback_range,
+            low_aero_config,
+        )
+        selected["primary_low_aero_rejection_reasons"] = list(
+            (primary_row or {}).get("rejection_reasons") or []
+        )
+        return selected
+    selected = _clone_tof_summary_with_mode(
+        primary_row or fallback_row or {},
+        "unavailable",
+        primary_range,
+        low_aero_config,
+    )
+    rejection_reasons = []
+    for row in (primary_row, fallback_row):
+        for reason in (row or {}).get("rejection_reasons") or []:
+            reason_text = str(reason).strip()
+            if reason_text and reason_text not in rejection_reasons:
+                rejection_reasons.append(reason_text)
+    selected["valid"] = False
+    selected["rejection_reasons"] = rejection_reasons or ["low_aero_offset_unavailable"]
+    selected["rejection_reason"] = _join_rejection_reasons(selected["rejection_reasons"])
+    selected["primary_low_aero_rejection_reasons"] = list(
+        (primary_row or {}).get("rejection_reasons") or []
+    )
+    selected["fallback_low_aero_rejection_reasons"] = list(
+        (fallback_row or {}).get("rejection_reasons") or []
+    )
+    return selected
+
+
 def _build_exact_proton_cleaning_config(base_config):
     exact_config = deepcopy(base_config or {})
     exact_config["implementation"] = PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
@@ -713,6 +844,10 @@ def _build_exact_proton_cleaning_config(base_config):
     exact_config["tof_summary_validation"] = deepcopy(
         (base_config or {}).get("tof_summary_validation")
         or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
+    )
+    exact_config["low_aero_offset"] = deepcopy(
+        (base_config or {}).get("low_aero_offset")
+        or PROTON_CLEANING_LOW_AERO_OFFSET_CONFIG
     )
     exact_config["fit_options"] = PROTON_CLEANING_EXACT_FIT_OPTIONS
     return exact_config
@@ -1791,6 +1926,11 @@ def _fit_global_timing_shape_with_bounds(
     if histogram is None or int(support_entries) < int(minimum_entries):
         return {
             "valid": False,
+            "timing_model_valid": False,
+            "cell_fit_valid": False,
+            "proton_component_detected": False,
+            "proton_component_significance": None,
+            "proton_component_below_significance": True,
             "fit_attempted": False,
             "fit_status": "insufficient_support",
             "fit_status_code": None,
@@ -2502,7 +2642,8 @@ def _fit_delta_common_timing_offset(
     mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
     if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
         rejection_reasons.append("invalid_mean_delta_t_pk")
-    minimum_entries = int((exact_config.get("slice_fit") or {}).get("minimum_entries", 30))
+    low_aero_config = exact_config.get("low_aero_offset") or PROTON_CLEANING_LOW_AERO_OFFSET_CONFIG
+    minimum_entries = int(low_aero_config.get("minimum_prompt_events", 20) or 20)
     if int(support_entries or 0) < int(minimum_entries):
         rejection_reasons.append("insufficient_delta_offset_support")
     if rejection_reasons:
@@ -2857,6 +2998,11 @@ def _fit_delta_timing_slice(
             rejection_reasons.append("insufficient_entries")
         return {
             "valid": False,
+            "timing_model_valid": bool(not invalid_global_shape and not invalid_timing_constraint),
+            "cell_fit_valid": False,
+            "proton_component_detected": False,
+            "proton_component_significance": None,
+            "proton_component_below_significance": True,
             "fit_attempted": False,
             "fit_status": "insufficient_support",
             "fit_status_code": None,
@@ -2926,6 +3072,24 @@ def _fit_delta_timing_slice(
     kaon_amplitude_error = float(fit_function.GetParError(0))
     proton_amplitude_error = float(fit_function.GetParError(3))
     other_amplitude_error = float(fit_function.GetParError(6))
+    proton_component_significance = (
+        float(proton_amplitude / proton_amplitude_error)
+        if proton_amplitude_error > 0.0 and math.isfinite(float(proton_amplitude_error))
+        else None
+    )
+    proton_significance_threshold = float(
+        (config.get("tof_offset_validation") or {}).get(
+            "minimum_component_significance",
+            (config.get("global_fit") or {}).get("minimum_amplitude_significance", 2.0),
+        )
+        or 2.0
+    )
+    proton_component_detected = bool(
+        proton_component_significance is not None
+        and math.isfinite(float(proton_component_significance))
+        and float(proton_component_significance) >= float(proton_significance_threshold)
+        and float(proton_amplitude) > 0.0
+    )
     kaon_yield = _sum_gaussian_over_bins(
         histogram,
         kaon_amplitude,
@@ -2942,6 +3106,11 @@ def _fit_delta_timing_slice(
         fit_min,
         fit_max,
     )
+    raw_proton_yield = float(proton_yield)
+    raw_proton_amplitude = float(proton_amplitude)
+    if not proton_component_detected:
+        proton_yield = 0.0
+        proton_amplitude = 0.0
     other_yield = _sum_constant_over_bins(
         histogram,
         other_amplitude,
@@ -2954,7 +3123,7 @@ def _fit_delta_timing_slice(
         histogram.GetXaxis().FindFixBin(np.nextafter(float(fit_max), float(fit_min))),
     )
     data_yield = float(histogram.Integral(first_fit_bin, last_fit_bin))
-    model_yield = float(kaon_yield + proton_yield + other_yield)
+    model_yield = float(kaon_yield + raw_proton_yield + other_yield)
     model_data_ratio = float(model_yield / data_yield) if data_yield > 0.0 else None
     chi2_data = float(fit_function.GetChisquare())
     fit_ndf = int(fit_function.GetNDF())
@@ -3049,6 +3218,18 @@ def _fit_delta_timing_slice(
     valid = len(rejection_reasons) == 0
     return {
         "valid": bool(valid),
+        "timing_model_valid": True,
+        "cell_fit_valid": bool(valid),
+        "proton_component_detected": bool(proton_component_detected and valid),
+        "proton_component_significance": (
+            float(proton_component_significance)
+            if proton_component_significance is not None
+            else None
+        ),
+        "proton_component_below_significance": bool(
+            not proton_component_detected
+        ),
+        "proton_component_significance_threshold": float(proton_significance_threshold),
         "fit_attempted": True,
         "fit_status": "success" if fit_status_code == 0 else "failure",
         "fit_status_code": int(fit_status_code),
@@ -3068,11 +3249,13 @@ def _fit_delta_timing_slice(
         "proton_sigma": float(proton_sigma),
         "kaon_amplitude": float(kaon_amplitude),
         "kaon_amplitude_error": float(kaon_amplitude_error),
+        "raw_proton_amplitude": float(raw_proton_amplitude),
         "proton_amplitude": float(proton_amplitude),
         "proton_amplitude_error": float(proton_amplitude_error),
         "other_amplitude": float(other_amplitude),
         "other_amplitude_error": float(other_amplitude_error),
         "kaon_yield": float(kaon_yield),
+        "raw_proton_yield": float(raw_proton_yield),
         "proton_yield": float(proton_yield),
         "other_yield": float(other_yield),
         "data_yield": float(data_yield),
@@ -3688,8 +3871,23 @@ def _build_prepared_event_weight_lookup(cleaning_result, source_bundle):
         fitted = float(row.get("fitted_proton_yield", 0.0) or 0.0)
         if fitted > 0.0:
             row["closure_ratio"] = float(row["summed_event_proton_probability"] / fitted)
+    event_probability_sum_by_delta_aero = []
+    event_probability_count_by_delta_aero = []
+    for delta_index, slice_collection in enumerate(delta_slice_fits):
+        probability_row = []
+        count_row = []
+        for aero_index, _ in enumerate(slice_collection or []):
+            closure_row = closure_by_cell.get((int(delta_index), int(aero_index))) or {}
+            probability_row.append(
+                float(closure_row.get("summed_event_proton_probability", 0.0) or 0.0)
+            )
+            count_row.append(int(closure_row.get("event_count", 0) or 0))
+        event_probability_sum_by_delta_aero.append(probability_row)
+        event_probability_count_by_delta_aero.append(count_row)
     diagnostics["event_weight_closure_by_cell"] = _json_ready_value(list(closure_by_cell.values()))
     diagnostics["event_weight_closure_by_delta"] = _json_ready_value(list(closure_by_delta.values()))
+    diagnostics["event_probability_sum_by_delta_aero"] = _json_ready_value(event_probability_sum_by_delta_aero)
+    diagnostics["event_probability_count_by_delta_aero"] = _json_ready_value(event_probability_count_by_delta_aero)
     return lookup
 
 
@@ -4450,18 +4648,69 @@ def build_kaon_proton_cleaning_result(
             float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
             int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
         ).tolist()
-    delta_tof_summaries = _build_prompt_tof_summary_by_delta(
+    low_aero_config = deepcopy(
+        exact_config.get("low_aero_offset") or PROTON_CLEANING_LOW_AERO_OFFSET_CONFIG
+    )
+    primary_low_aero_range = tuple(low_aero_config.get("primary_range") or (0.0, 5.0))
+    fallback_low_aero_range = tuple(low_aero_config.get("fallback_range") or (0.0, 6.0))
+    full_diagnostic_aero_range = tuple(
+        low_aero_config.get("full_diagnostic_range") or PROTON_CLEANING_EXACT_AERO_RANGE
+    )
+    low_aero_summary_validation = _offset_summary_validation_from_low_aero_config(
+        low_aero_config
+    )
+    primary_low_aero_tof_summaries = _build_prompt_tof_summary_by_delta(
         source_bundle,
         delta_edges,
         selected_selection_key,
         timing_branch=selected_time_branch,
         timing_range=selected_time_hist_range,
-        aero_range=exact_config.get("aero_hist_range") or PROTON_CLEANING_EXACT_AERO_RANGE,
+        aero_range=primary_low_aero_range,
+        delta_range=exact_config.get("delta_hist_range") or PROTON_CLEANING_EXACT_DELTA_RANGE,
+        tof_summary_validation=low_aero_summary_validation,
+        reason_prefix="low_aero",
+    )
+    fallback_low_aero_tof_summaries = _build_prompt_tof_summary_by_delta(
+        source_bundle,
+        delta_edges,
+        selected_selection_key,
+        timing_branch=selected_time_branch,
+        timing_range=selected_time_hist_range,
+        aero_range=fallback_low_aero_range,
+        delta_range=exact_config.get("delta_hist_range") or PROTON_CLEANING_EXACT_DELTA_RANGE,
+        tof_summary_validation=low_aero_summary_validation,
+        reason_prefix="low_aero",
+    )
+    full_aero_tof_summaries = _build_prompt_tof_summary_by_delta(
+        source_bundle,
+        delta_edges,
+        selected_selection_key,
+        timing_branch=selected_time_branch,
+        timing_range=selected_time_hist_range,
+        aero_range=full_diagnostic_aero_range,
         delta_range=exact_config.get("delta_hist_range") or PROTON_CLEANING_EXACT_DELTA_RANGE,
         tof_summary_validation=exact_config.get("tof_summary_validation")
         or PROTON_CLEANING_TOF_SUMMARY_VALIDATION,
     )
+    delta_tof_summaries = [
+        _select_low_aero_offset_summary(
+            primary_low_aero_tof_summaries[index]
+            if index < len(primary_low_aero_tof_summaries)
+            else {},
+            fallback_low_aero_tof_summaries[index]
+            if index < len(fallback_low_aero_tof_summaries)
+            else {},
+            low_aero_config,
+        )
+        for index in range(max(len(delta_edges) - 1, 0))
+    ]
     result["diagnostics"]["tof_summary_by_delta"] = _json_ready_value(delta_tof_summaries)
+    result["diagnostics"]["primary_low_aero_tof_summary_by_delta"] = _json_ready_value(primary_low_aero_tof_summaries)
+    result["diagnostics"]["fallback_low_aero_tof_summary_by_delta"] = _json_ready_value(fallback_low_aero_tof_summaries)
+    result["diagnostics"]["full_aero_tof_summary_by_delta"] = _json_ready_value(full_aero_tof_summaries)
+    result["diagnostics"]["low_aero_offset_config"] = _json_ready_value(low_aero_config)
+    result["diagnostics"]["full_aerogel_range"] = list(full_diagnostic_aero_range)
+    result["diagnostics"]["aerogel_reference_npe"] = float(low_aero_config.get("show_reference_npe", 5.0) or 5.0)
     result["diagnostics"]["tof_summary_validation"] = _json_ready_value(
         exact_config.get("tof_summary_validation")
         or PROTON_CLEANING_TOF_SUMMARY_VALIDATION
@@ -4471,18 +4720,37 @@ def build_kaon_proton_cleaning_result(
         sum(1 for row in delta_tof_summaries if bool((row or {}).get("valid", False)))
     )
     delta_timing_offset_fits = []
+    low_aero_projection_payloads = []
     for delta_index, pid_hist in enumerate(pid_payload.get("delta_pid_hists") or []):
-        delta_projection = None
-        if pid_hist is not None:
-            delta_projection = pid_hist.ProjectionY(
-                "H_proton_cleaning_delta_offset_time_{}".format(delta_index),
-                1,
-                int(pid_hist.GetNbinsX()),
-            )
-            if hasattr(delta_projection, "SetDirectory"):
-                delta_projection.SetDirectory(0)
-            if hasattr(delta_projection, "Sumw2"):
-                delta_projection.Sumw2()
+        primary_projection = _project_delta_pid_timing_by_aero_range(
+            pid_hist,
+            "H_proton_cleaning_delta_offset_time_primary_{}".format(delta_index),
+            primary_low_aero_range,
+            upper_inclusive=False,
+        )
+        fallback_projection = _project_delta_pid_timing_by_aero_range(
+            pid_hist,
+            "H_proton_cleaning_delta_offset_time_fallback_{}".format(delta_index),
+            fallback_low_aero_range,
+            upper_inclusive=False,
+        )
+        full_projection = _project_delta_pid_timing_by_aero_range(
+            pid_hist,
+            "H_proton_cleaning_delta_offset_time_full_{}".format(delta_index),
+            full_diagnostic_aero_range,
+            upper_inclusive=True,
+        )
+        selected_tof_summary = delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {}
+        selected_mode = str((selected_tof_summary or {}).get("offset_fit_aero_mode") or "unavailable")
+        if selected_mode == "low_aero_0_6_fallback":
+            delta_projection = fallback_projection
+            selected_projection_name = fallback_projection.GetName() if fallback_projection is not None else ""
+        elif selected_mode == "low_aero_0_5":
+            delta_projection = primary_projection
+            selected_projection_name = primary_projection.GetName() if primary_projection is not None else ""
+        else:
+            delta_projection = None
+            selected_projection_name = ""
         support_by_aero = (
             (pid_payload.get("cell_prompt_support") or [])[delta_index]
             if delta_index < len(pid_payload.get("cell_prompt_support") or [])
@@ -4495,18 +4763,80 @@ def build_kaon_proton_cleaning_result(
         offset_fit = _fit_delta_common_timing_offset(
             delta_projection,
             reference_shape,
-            delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {},
+            selected_tof_summary,
             exact_config,
             "f_proton_cleaning_delta_offset_{}".format(delta_index),
             bool(selected_probe.get("proton_peak_is_lower", False)),
             str(selected_probe.get("probe_kind", "ct")),
             selected_time_hist_range,
             beam_bunch_spacing_ns,
-            support_entries=sum(int(value or 0) for value in support_by_aero),
+            support_entries=int(
+                (selected_tof_summary or {}).get(
+                    "prompt_events_inside_timing_and_aero_domain",
+                    (selected_tof_summary or {}).get("prompt_event_count", 0),
+                )
+                or 0
+            ),
         )
         offset_fit["delta_index"] = int(delta_index)
+        offset_fit["offset_fit_aero_mode"] = str(selected_mode)
+        offset_fit["offset_fit_aero_min"] = (selected_tof_summary or {}).get("offset_fit_aero_min")
+        offset_fit["offset_fit_aero_max"] = (selected_tof_summary or {}).get("offset_fit_aero_max")
+        offset_fit["selected_projection_name"] = selected_projection_name
+        offset_fit["primary_low_aero_prompt_events"] = int(
+            (primary_low_aero_tof_summaries[delta_index] if delta_index < len(primary_low_aero_tof_summaries) else {}).get(
+                "prompt_events_inside_timing_and_aero_domain",
+                0,
+            )
+            or 0
+        )
+        offset_fit["primary_low_aero_valid_tof_events"] = int(
+            (primary_low_aero_tof_summaries[delta_index] if delta_index < len(primary_low_aero_tof_summaries) else {}).get(
+                "usable_tof_events",
+                0,
+            )
+            or 0
+        )
+        offset_fit["fallback_low_aero_prompt_events"] = int(
+            (fallback_low_aero_tof_summaries[delta_index] if delta_index < len(fallback_low_aero_tof_summaries) else {}).get(
+                "prompt_events_inside_timing_and_aero_domain",
+                0,
+            )
+            or 0
+        )
+        offset_fit["fallback_low_aero_valid_tof_events"] = int(
+            (fallback_low_aero_tof_summaries[delta_index] if delta_index < len(fallback_low_aero_tof_summaries) else {}).get(
+                "usable_tof_events",
+                0,
+            )
+            or 0
+        )
+        offset_fit["full_range_prompt_events"] = int(
+            (full_aero_tof_summaries[delta_index] if delta_index < len(full_aero_tof_summaries) else {}).get(
+                "prompt_events_inside_timing_and_aero_domain",
+                0,
+            )
+            or 0
+        )
+        offset_fit["full_range_valid_tof_events"] = int(
+            (full_aero_tof_summaries[delta_index] if delta_index < len(full_aero_tof_summaries) else {}).get(
+                "usable_tof_events",
+                0,
+            )
+            or 0
+        )
         delta_timing_offset_fits.append(offset_fit)
+        low_aero_projection_payloads.append(
+            {
+                "delta_index": int(delta_index),
+                "selected_mode": str(selected_mode),
+                "primary_projection": primary_projection,
+                "fallback_projection": fallback_projection,
+                "full_projection": full_projection,
+            }
+        )
     result["delta_timing_offset_fits"] = delta_timing_offset_fits
+    result["H_delta_offset_low_aero_projections"] = low_aero_projection_payloads
     result["diagnostics"]["delta_timing_offset_fits"] = _json_ready_value(delta_timing_offset_fits)
     result["diagnostics"]["delta_offset_rejection_counts"] = _count_rejection_reasons(delta_timing_offset_fits)
     result["diagnostics"]["valid_delta_offset_fits"] = int(
@@ -4593,8 +4923,14 @@ def build_kaon_proton_cleaning_result(
                         "root_entries": (slice_fit or {}).get("root_entries"),
                         "effective_entries": (slice_fit or {}).get("effective_entries"),
                         "kaon_yield": (slice_fit or {}).get("kaon_yield"),
+                        "raw_proton_yield": (slice_fit or {}).get("raw_proton_yield"),
                         "proton_yield": (slice_fit or {}).get("proton_yield"),
                         "other_yield": (slice_fit or {}).get("other_yield"),
+                        "timing_model_valid": (slice_fit or {}).get("timing_model_valid"),
+                        "cell_fit_valid": (slice_fit or {}).get("cell_fit_valid"),
+                        "proton_component_detected": (slice_fit or {}).get("proton_component_detected"),
+                        "proton_component_significance": (slice_fit or {}).get("proton_component_significance"),
+                        "proton_component_below_significance": (slice_fit or {}).get("proton_component_below_significance"),
                         "chi2_ndf": (slice_fit or {}).get("chi2_ndf"),
                         "chi2_per_abs_entry": (slice_fit or {}).get("chi2_per_abs_entry"),
                         "active_bin_count": (slice_fit or {}).get("active_bin_count"),
@@ -4681,6 +5017,85 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["valid_coverage_by_delta"] = valid_coverage_by_delta
     result["diagnostics"]["chi2_ndf_by_delta"] = chi2_ndf_by_delta
     result["diagnostics"]["delta_support_debug_rows"] = delta_support_debug_rows
+    n_delta_diag = max(len(delta_fits), max(len(delta_edges) - 1, 0))
+    n_aero_diag = max(len(result.get("aero_edges") or []) - 1, len(global_shapes), 0)
+    proton_yield_by_delta_aero = []
+    raw_proton_yield_by_delta_aero = []
+    kaon_yield_by_delta_aero = []
+    other_yield_by_delta_aero = []
+    total_fit_yield_by_delta_aero = []
+    proton_fraction_by_delta_aero = []
+    proton_detected_by_delta_aero = []
+    for delta_index in range(n_delta_diag):
+        slice_collection = delta_fits[delta_index] if delta_index < len(delta_fits) else []
+        proton_row = []
+        raw_proton_row = []
+        kaon_row = []
+        other_row = []
+        total_row = []
+        fraction_row = []
+        detected_row = []
+        for aero_index in range(n_aero_diag):
+            slice_fit = slice_collection[aero_index] if aero_index < len(slice_collection or []) else {}
+            proton_value = float((slice_fit or {}).get("proton_yield", 0.0) or 0.0)
+            raw_proton_value = float((slice_fit or {}).get("raw_proton_yield", proton_value) or 0.0)
+            kaon_value = float((slice_fit or {}).get("kaon_yield", 0.0) or 0.0)
+            other_value = float((slice_fit or {}).get("other_yield", 0.0) or 0.0)
+            total_value = float(proton_value + kaon_value + other_value)
+            proton_row.append(float(proton_value))
+            raw_proton_row.append(float(raw_proton_value))
+            kaon_row.append(float(kaon_value))
+            other_row.append(float(other_value))
+            total_row.append(float(total_value))
+            fraction_row.append(float(proton_value / total_value) if total_value > 0.0 else 0.0)
+            detected_row.append(bool((slice_fit or {}).get("proton_component_detected", False)))
+        proton_yield_by_delta_aero.append(proton_row)
+        raw_proton_yield_by_delta_aero.append(raw_proton_row)
+        kaon_yield_by_delta_aero.append(kaon_row)
+        other_yield_by_delta_aero.append(other_row)
+        total_fit_yield_by_delta_aero.append(total_row)
+        proton_fraction_by_delta_aero.append(fraction_row)
+        proton_detected_by_delta_aero.append(detected_row)
+    result["diagnostics"]["proton_yield_by_delta_aero"] = proton_yield_by_delta_aero
+    result["diagnostics"]["raw_proton_yield_by_delta_aero"] = raw_proton_yield_by_delta_aero
+    result["diagnostics"]["kaon_yield_by_delta_aero"] = kaon_yield_by_delta_aero
+    result["diagnostics"]["other_yield_by_delta_aero"] = other_yield_by_delta_aero
+    result["diagnostics"]["total_fit_yield_by_delta_aero"] = total_fit_yield_by_delta_aero
+    result["diagnostics"]["proton_fraction_by_delta_aero"] = proton_fraction_by_delta_aero
+    result["diagnostics"]["proton_detected_by_delta_aero"] = proton_detected_by_delta_aero
+    aero_edges_for_diag = [float(edge) for edge in (result.get("aero_edges") or [])]
+    low_fraction_num = 0.0
+    low_fraction_den = 0.0
+    high_fraction_num = 0.0
+    high_fraction_den = 0.0
+    for aero_index in range(n_aero_diag):
+        if aero_index + 1 < len(aero_edges_for_diag):
+            aero_center = 0.5 * (aero_edges_for_diag[aero_index] + aero_edges_for_diag[aero_index + 1])
+        else:
+            aero_center = float(aero_index)
+        aero_proton = sum(row[aero_index] for row in proton_yield_by_delta_aero if aero_index < len(row))
+        aero_total = sum(row[aero_index] for row in total_fit_yield_by_delta_aero if aero_index < len(row))
+        if aero_total <= 0.0:
+            continue
+        if aero_center < 5.0:
+            low_fraction_num += float(aero_proton)
+            low_fraction_den += float(aero_total)
+        if aero_center >= 10.0:
+            high_fraction_num += float(aero_proton)
+            high_fraction_den += float(aero_total)
+    low_aero_proton_fraction = float(low_fraction_num / low_fraction_den) if low_fraction_den > 0.0 else None
+    high_aero_proton_fraction = float(high_fraction_num / high_fraction_den) if high_fraction_den > 0.0 else None
+    result["diagnostics"]["proton_fraction_below_5_npe"] = low_aero_proton_fraction
+    result["diagnostics"]["proton_fraction_above_10_npe"] = high_aero_proton_fraction
+    if (
+        low_aero_proton_fraction is not None
+        and high_aero_proton_fraction is not None
+        and high_aero_proton_fraction > low_aero_proton_fraction
+    ):
+        warning_list = list(result["diagnostics"].get("warnings") or [])
+        if "high_aero_proton_fraction_exceeds_low_aero" not in warning_list:
+            warning_list.append("high_aero_proton_fraction_exceeds_low_aero")
+        result["diagnostics"]["warnings"] = warning_list
     result["diagnostics"]["supported_delta_bins"] = int(sum(1 for label in support_by_delta if label == SUPPORT_SUPPORTED))
     result["diagnostics"]["marginal_delta_bins"] = int(sum(1 for label in support_by_delta if label == SUPPORT_MARGINAL))
 
@@ -5175,6 +5590,19 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
             max(len(cleaning_result.get("delta_edges") or []) - 1, PROTON_CLEANING_EXACT_DELTA_BINS),
         ),
         "Fit options: {}".format(PROTON_CLEANING_EXACT_FIT_OPTIONS),
+        "Low-aero offset primary/fallback/full: {} / {} / {}".format(
+            tuple((diagnostics.get("low_aero_offset_config") or {}).get("primary_range") or (0.0, 5.0)),
+            tuple((diagnostics.get("low_aero_offset_config") or {}).get("fallback_range") or (0.0, 6.0)),
+            tuple((diagnostics.get("low_aero_offset_config") or {}).get("full_diagnostic_range") or (0.0, 25.0)),
+        ),
+        "Low-aero offset thresholds prompt/valid/fraction: {} / {} / {}".format(
+            int((diagnostics.get("low_aero_offset_config") or {}).get("minimum_prompt_events", 20) or 20),
+            int((diagnostics.get("low_aero_offset_config") or {}).get("minimum_valid_tof_events", 10) or 10),
+            float((diagnostics.get("low_aero_offset_config") or {}).get("minimum_valid_tof_fraction", 0.50) or 0.50),
+        ),
+        "Aerogel reference line: {} NPE".format(
+            float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0)
+        ),
         "Global PID source usage:",
     ]
     for source_name in ("prompt", "rand", "dummy_prompt", "dummy_rand"):
@@ -5628,6 +6056,69 @@ def _set_hist_line_marker(hist, color, width=2, style=1, marker=20):
     hist.SetMarkerStyle(marker)
 
 
+def _make_aero_axis_hist(name, title, aero_edges):
+    edges = [float(edge) for edge in (aero_edges or [])]
+    if len(edges) < 2:
+        edges = [float(PROTON_CLEANING_EXACT_AERO_RANGE[0]), float(PROTON_CLEANING_EXACT_AERO_RANGE[1])]
+    hist = ROOT.TH1D(
+        str(name),
+        str(title),
+        len(edges) - 1,
+        array("d", edges),
+    )
+    hist.SetDirectory(0)
+    hist.Sumw2()
+    return hist
+
+
+def _draw_aerogel_reference_line(hist, reference_npe=5.0, orientation="x", label="5 NPE"):
+    if hist is None:
+        return []
+    try:
+        reference_npe = float(reference_npe)
+    except Exception:
+        return []
+    if not math.isfinite(reference_npe):
+        return []
+    drawn = []
+    try:
+        if str(orientation).lower() == "y":
+            x_axis = hist.GetXaxis()
+            y_axis = hist.GetYaxis()
+            x_min = float(x_axis.GetXmin())
+            x_max = float(x_axis.GetXmax())
+            y_min = float(y_axis.GetXmin())
+            y_max = float(y_axis.GetXmax())
+            if not (y_min <= reference_npe <= y_max):
+                return []
+            line = TLine(x_min, reference_npe, x_max, reference_npe)
+            text = TLatex(x_min + 0.03 * (x_max - x_min), reference_npe + 0.03 * (y_max - y_min), str(label))
+        else:
+            x_axis = hist.GetXaxis()
+            x_min = float(x_axis.GetXmin())
+            x_max = float(x_axis.GetXmax())
+            if not (x_min <= reference_npe <= x_max):
+                return []
+            y_min = float(hist.GetMinimum())
+            y_max = float(hist.GetMaximum())
+            if y_max <= y_min:
+                y_min = 0.0
+                y_max = 1.0
+            line = TLine(reference_npe, y_min, reference_npe, y_max)
+            text = TLatex(reference_npe + 0.02 * (x_max - x_min), y_max - 0.08 * (y_max - y_min), str(label))
+        line.SetLineColor(kOrange + 7)
+        line.SetLineStyle(2)
+        line.SetLineWidth(2)
+        line.Draw("same")
+        text.SetTextColor(kOrange + 7)
+        text.SetTextSize(0.028)
+        text.Draw("same")
+        drawn.extend([line, text])
+    except Exception:
+        return []
+    return drawn
+
+
 def _probe_fit_goodness(probe_summary):
     if not isinstance(probe_summary, dict):
         return 0.0
@@ -5742,6 +6233,345 @@ def _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix):
     info.AddText("selection reason: {}".format(diagnostics.get("timingSelectionReason", "unknown")))
     info.AddText("RF selected: {}".format("yes" if diagnostics.get("rf_timing_selected") else "no"))
     info.AddText("RF candidates: {}".format(", ".join(diagnostics.get("rf_branch_candidates") or []) or "none"))
+    info.Draw()
+    drawn_objects.append(info)
+    gPad.Modified()
+    gPad.Update()
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
+    canvas.Print(output_pdf)
+
+
+def _make_delta_aero_hist(name, title, delta_edges, aero_edges, values=None):
+    delta_edges = [float(edge) for edge in (delta_edges or [])]
+    if len(delta_edges) < 2:
+        delta_edges = np.linspace(
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+            int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
+        ).tolist()
+    aero_edges = [float(edge) for edge in (aero_edges or [])]
+    if len(aero_edges) < 2:
+        aero_edges = list(PROTON_CLEANING_EXACT_AERO_EDGES)
+    hist = ROOT.TH2D(
+        str(name),
+        str(title),
+        len(delta_edges) - 1,
+        array("d", delta_edges),
+        len(aero_edges) - 1,
+        array("d", aero_edges),
+    )
+    hist.SetDirectory(0)
+    hist.Sumw2()
+    for delta_index, row in enumerate(values or []):
+        if delta_index >= hist.GetNbinsX():
+            break
+        for aero_index, value in enumerate(row or []):
+            if aero_index >= hist.GetNbinsY():
+                break
+            numeric = _finite_float_or_none(value)
+            if numeric is not None:
+                hist.SetBinContent(delta_index + 1, aero_index + 1, float(numeric))
+    return hist
+
+
+def _print_low_aero_offset_diagnostics_page(output_pdf, cleaning_result, prefix):
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    offset_fits = (cleaning_result or {}).get("delta_timing_offset_fits") or diagnostics.get("delta_timing_offset_fits") or []
+    primary_rows = diagnostics.get("primary_low_aero_tof_summary_by_delta") or []
+    fallback_rows = diagnostics.get("fallback_low_aero_tof_summary_by_delta") or []
+    full_rows = diagnostics.get("full_aero_tof_summary_by_delta") or []
+    if not offset_fits and not primary_rows and not fallback_rows and not full_rows:
+        return
+    delta_edges = [float(edge) for edge in ((cleaning_result or {}).get("delta_edges") or [])]
+    if len(delta_edges) < 2:
+        delta_edges = np.linspace(
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+            int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
+        ).tolist()
+    page_id = abs(id(cleaning_result))
+    h_mode = _make_delta_axis_hist(
+        "H_proton_cleaning_low_aero_offset_mode_{}".format(page_id),
+        "Low-aerogel offset source;SHMS #delta [%];mode code",
+        delta_edges,
+    )
+    h_primary_prompt = _make_delta_axis_hist(
+        "H_proton_cleaning_low_aero_primary_prompt_{}".format(page_id),
+        "Low-aerogel offset prompt support;SHMS #delta [%];prompt events",
+        delta_edges,
+    )
+    h_fallback_prompt = _clone_hist(h_primary_prompt, "H_proton_cleaning_low_aero_fallback_prompt_{}".format(page_id), reset=True)
+    h_full_prompt = _clone_hist(h_primary_prompt, "H_proton_cleaning_low_aero_full_prompt_{}".format(page_id), reset=True)
+    h_primary_valid = _make_delta_axis_hist(
+        "H_proton_cleaning_low_aero_primary_valid_{}".format(page_id),
+        "Low-aerogel offset usable TOF support;SHMS #delta [%];usable TOF events",
+        delta_edges,
+    )
+    h_fallback_valid = _clone_hist(h_primary_valid, "H_proton_cleaning_low_aero_fallback_valid_{}".format(page_id), reset=True)
+    h_full_valid = _clone_hist(h_primary_valid, "H_proton_cleaning_low_aero_full_valid_{}".format(page_id), reset=True)
+    h_primary_fraction = _make_delta_axis_hist(
+        "H_proton_cleaning_low_aero_primary_fraction_{}".format(page_id),
+        "Low-aerogel valid TOF fraction;SHMS #delta [%];usable / timing+aero",
+        delta_edges,
+    )
+    h_fallback_fraction = _clone_hist(h_primary_fraction, "H_proton_cleaning_low_aero_fallback_fraction_{}".format(page_id), reset=True)
+    h_full_fraction = _clone_hist(h_primary_fraction, "H_proton_cleaning_low_aero_full_fraction_{}".format(page_id), reset=True)
+    mode_codes = {"unavailable": 0.0, "low_aero_0_5": 1.0, "low_aero_0_6_fallback": 2.0}
+    for index in range(max(len(delta_edges) - 1, 0)):
+        fit_row = offset_fits[index] if index < len(offset_fits) else {}
+        primary = primary_rows[index] if index < len(primary_rows) else {}
+        fallback = fallback_rows[index] if index < len(fallback_rows) else {}
+        full = full_rows[index] if index < len(full_rows) else {}
+        h_mode.SetBinContent(index + 1, float(mode_codes.get(str(fit_row.get("offset_fit_aero_mode", "unavailable")), 0.0)))
+        for hist, row in (
+            (h_primary_prompt, primary),
+            (h_fallback_prompt, fallback),
+            (h_full_prompt, full),
+        ):
+            hist.SetBinContent(index + 1, float((row or {}).get("prompt_events_inside_timing_and_aero_domain", 0) or 0))
+        for hist, row in (
+            (h_primary_valid, primary),
+            (h_fallback_valid, fallback),
+            (h_full_valid, full),
+        ):
+            hist.SetBinContent(index + 1, float((row or {}).get("usable_tof_events", 0) or 0))
+        for hist, row in (
+            (h_primary_fraction, primary),
+            (h_fallback_fraction, fallback),
+            (h_full_fraction, full),
+        ):
+            hist.SetBinContent(index + 1, float((row or {}).get("valid_tof_fraction", 0.0) or 0.0))
+
+    _set_hist_line_marker(h_mode, kBlack, width=3, marker=20)
+    _set_hist_line_marker(h_primary_prompt, kBlue, width=3, marker=20)
+    _set_hist_line_marker(h_fallback_prompt, kOrange + 7, width=3, marker=21)
+    _set_hist_line_marker(h_full_prompt, kGray + 2, width=2, style=2, marker=24)
+    _set_hist_line_marker(h_primary_valid, kBlue, width=3, marker=20)
+    _set_hist_line_marker(h_fallback_valid, kOrange + 7, width=3, marker=21)
+    _set_hist_line_marker(h_full_valid, kGray + 2, width=2, style=2, marker=24)
+    _set_hist_line_marker(h_primary_fraction, kBlue, width=3, marker=20)
+    _set_hist_line_marker(h_fallback_fraction, kOrange + 7, width=3, marker=21)
+    _set_hist_line_marker(h_full_fraction, kGray + 2, width=2, style=2, marker=24)
+
+    canvas = TCanvas(
+        "C_proton_cleaning_low_aero_offset_{}".format(page_id),
+        "{} proton-cleaning low-aerogel offset diagnostics".format(prefix),
+        1800,
+        1100,
+    )
+    canvas.Divide(2, 2)
+    drawn_objects = [
+        h_mode,
+        h_primary_prompt,
+        h_fallback_prompt,
+        h_full_prompt,
+        h_primary_valid,
+        h_fallback_valid,
+        h_full_valid,
+        h_primary_fraction,
+        h_fallback_fraction,
+        h_full_fraction,
+    ]
+    canvas.cd(1)
+    h_mode.SetMinimum(-0.1)
+    h_mode.SetMaximum(2.2)
+    h_mode.Draw("hist text")
+    info = TPaveText(0.14, 0.70, 0.60, 0.90, "NDC")
+    info.SetBorderSize(1)
+    info.SetFillStyle(0)
+    info.SetTextAlign(12)
+    info.SetTextSize(0.030)
+    info.AddText("0=unavailable")
+    info.AddText("1=primary 0-5 NPE")
+    info.AddText("2=fallback 0-6 NPE")
+    info.Draw()
+    drawn_objects.append(info)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(2)
+    max_prompt = max(float(h_primary_prompt.GetMaximum()), float(h_fallback_prompt.GetMaximum()), float(h_full_prompt.GetMaximum()), 1.0)
+    h_primary_prompt.SetMaximum(1.20 * max_prompt)
+    h_primary_prompt.Draw("hist")
+    h_fallback_prompt.Draw("hist same")
+    h_full_prompt.Draw("hist same")
+    legend = TLegend(0.58, 0.68, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_primary_prompt, "0-5 prompt", "l")
+    legend.AddEntry(h_fallback_prompt, "0-6 prompt", "l")
+    legend.AddEntry(h_full_prompt, "0-25 prompt", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(3)
+    max_valid = max(float(h_primary_valid.GetMaximum()), float(h_fallback_valid.GetMaximum()), float(h_full_valid.GetMaximum()), 1.0)
+    h_primary_valid.SetMaximum(1.20 * max_valid)
+    h_primary_valid.Draw("hist")
+    h_fallback_valid.Draw("hist same")
+    h_full_valid.Draw("hist same")
+    legend = TLegend(0.58, 0.68, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_primary_valid, "0-5 usable TOF", "l")
+    legend.AddEntry(h_fallback_valid, "0-6 usable TOF", "l")
+    legend.AddEntry(h_full_valid, "0-25 usable TOF", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(4)
+    h_primary_fraction.SetMinimum(0.0)
+    h_primary_fraction.SetMaximum(1.05)
+    h_primary_fraction.Draw("hist")
+    h_fallback_fraction.Draw("hist same")
+    h_full_fraction.Draw("hist same")
+    legend = TLegend(0.58, 0.68, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_primary_fraction, "0-5 fraction", "l")
+    legend.AddEntry(h_fallback_fraction, "0-6 fraction", "l")
+    legend.AddEntry(h_full_fraction, "0-25 diagnostic", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+    canvas.Modified()
+    canvas.Update()
+    gc.collect()
+    canvas.Print(output_pdf)
+
+
+def _print_proton_aerogel_diagnostics_page(output_pdf, cleaning_result, prefix):
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    aero_edges = [float(edge) for edge in ((cleaning_result or {}).get("aero_edges") or PROTON_CLEANING_EXACT_AERO_EDGES)]
+    delta_edges = [float(edge) for edge in ((cleaning_result or {}).get("delta_edges") or [])]
+    if len(delta_edges) < 2:
+        delta_edges = np.linspace(
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[0]),
+            float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
+            int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
+        ).tolist()
+    proton_matrix = diagnostics.get("proton_yield_by_delta_aero") or []
+    kaon_matrix = diagnostics.get("kaon_yield_by_delta_aero") or []
+    other_matrix = diagnostics.get("other_yield_by_delta_aero") or []
+    fraction_matrix = diagnostics.get("proton_fraction_by_delta_aero") or []
+    event_sum_matrix = diagnostics.get("event_probability_sum_by_delta_aero") or []
+    if not (proton_matrix or kaon_matrix or other_matrix or fraction_matrix or event_sum_matrix):
+        return
+    page_id = abs(id(cleaning_result))
+    n_aero = max(len(aero_edges) - 1, 1)
+    h_fraction_aero = _make_aero_axis_hist(
+        "H_proton_cleaning_fitted_fraction_aero_{}".format(page_id),
+        "Fitted proton fraction versus aerogel;P_aero_npeSum;fitted proton / total",
+        aero_edges,
+    )
+    h_proton_aero = _make_aero_axis_hist(
+        "H_proton_cleaning_fitted_proton_yield_aero_{}".format(page_id),
+        "Fitted yields versus aerogel;P_aero_npeSum;Fitted yield",
+        aero_edges,
+    )
+    h_kaon_aero = _clone_hist(h_proton_aero, "H_proton_cleaning_fitted_kaon_yield_aero_{}".format(page_id), reset=True)
+    h_other_aero = _clone_hist(h_proton_aero, "H_proton_cleaning_fitted_other_yield_aero_{}".format(page_id), reset=True)
+    h_event_sum_aero = _make_aero_axis_hist(
+        "H_proton_cleaning_event_probability_sum_aero_{}".format(page_id),
+        "Applied proton probability sum versus aerogel;P_aero_npeSum;#Sigma w_{p}^{event}",
+        aero_edges,
+    )
+    for aero_index in range(n_aero):
+        proton_total = sum(float(row[aero_index]) for row in proton_matrix if aero_index < len(row))
+        kaon_total = sum(float(row[aero_index]) for row in kaon_matrix if aero_index < len(row))
+        other_total = sum(float(row[aero_index]) for row in other_matrix if aero_index < len(row))
+        event_total = sum(float(row[aero_index]) for row in event_sum_matrix if aero_index < len(row))
+        total = proton_total + kaon_total + other_total
+        h_proton_aero.SetBinContent(aero_index + 1, float(proton_total))
+        h_kaon_aero.SetBinContent(aero_index + 1, float(kaon_total))
+        h_other_aero.SetBinContent(aero_index + 1, float(other_total))
+        h_event_sum_aero.SetBinContent(aero_index + 1, float(event_total))
+        h_fraction_aero.SetBinContent(aero_index + 1, float(proton_total / total) if total > 0.0 else 0.0)
+    h_fraction_map = _make_delta_aero_hist(
+        "H_proton_cleaning_fitted_fraction_delta_aero_{}".format(page_id),
+        "Fitted proton fraction by #delta and aerogel;SHMS #delta [%];P_aero_npeSum;fitted proton / total",
+        delta_edges,
+        aero_edges,
+        fraction_matrix,
+    )
+    h_event_sum_map = _make_delta_aero_hist(
+        "H_proton_cleaning_event_probability_sum_delta_aero_{}".format(page_id),
+        "Applied proton probability sum by #delta and aerogel;SHMS #delta [%];P_aero_npeSum;#Sigma w_{p}^{event}",
+        delta_edges,
+        aero_edges,
+        event_sum_matrix,
+    )
+    reference_npe = float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0)
+    _set_hist_line_marker(h_fraction_aero, kRed, width=4, marker=20)
+    _set_hist_line_marker(h_proton_aero, kRed, width=4, marker=20)
+    _set_hist_line_marker(h_kaon_aero, kMagenta + 1, width=4, marker=20)
+    _set_hist_line_marker(h_other_aero, kBlue, width=4, marker=20)
+    _set_hist_line_marker(h_event_sum_aero, kViolet + 1, width=4, marker=20)
+    canvas = TCanvas(
+        "C_proton_cleaning_aerogel_diagnostics_{}".format(page_id),
+        "{} proton-cleaning aerogel diagnostics".format(prefix),
+        1800,
+        1100,
+    )
+    canvas.Divide(2, 2)
+    drawn_objects = [h_fraction_aero, h_proton_aero, h_kaon_aero, h_other_aero, h_event_sum_aero, h_fraction_map, h_event_sum_map]
+    canvas.cd(1)
+    h_fraction_aero.SetMinimum(0.0)
+    h_fraction_aero.SetMaximum(1.05)
+    h_fraction_aero.Draw("hist")
+    drawn_objects.extend(_draw_aerogel_reference_line(h_fraction_aero, reference_npe, "x"))
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(2)
+    max_yield = max(float(h_proton_aero.GetMaximum()), float(h_kaon_aero.GetMaximum()), float(h_other_aero.GetMaximum()), 1.0)
+    h_proton_aero.SetMinimum(0.0)
+    h_proton_aero.SetMaximum(1.20 * max_yield)
+    h_proton_aero.Draw("hist")
+    h_kaon_aero.Draw("hist same")
+    h_other_aero.Draw("hist same")
+    drawn_objects.extend(_draw_aerogel_reference_line(h_proton_aero, reference_npe, "x"))
+    legend = TLegend(0.62, 0.68, 0.88, 0.88)
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.AddEntry(h_proton_aero, "proton", "l")
+    legend.AddEntry(h_kaon_aero, "kaon", "l")
+    legend.AddEntry(h_other_aero, "other", "l")
+    legend.Draw()
+    drawn_objects.append(legend)
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(3)
+    gPad.SetRightMargin(0.16)
+    h_fraction_map.SetMinimum(0.0)
+    h_fraction_map.SetMaximum(1.0)
+    h_fraction_map.Draw("colz text")
+    drawn_objects.extend(_draw_aerogel_reference_line(h_fraction_map, reference_npe, "y"))
+    gPad.Modified()
+    gPad.Update()
+
+    canvas.cd(4)
+    h_event_sum_aero.SetMinimum(0.0)
+    h_event_sum_aero.SetMaximum(max(1.0, 1.20 * float(h_event_sum_aero.GetMaximum())))
+    h_event_sum_aero.Draw("hist")
+    drawn_objects.extend(_draw_aerogel_reference_line(h_event_sum_aero, reference_npe, "x"))
+    info = TPaveText(0.52, 0.68, 0.88, 0.88, "NDC")
+    info.SetBorderSize(1)
+    info.SetFillStyle(0)
+    info.SetTextAlign(12)
+    info.SetTextSize(0.030)
+    info.AddText("fraction <5 NPE: {}".format(_format_debug_float(diagnostics.get("proton_fraction_below_5_npe"), digits=3)))
+    info.AddText("fraction >10 NPE: {}".format(_format_debug_float(diagnostics.get("proton_fraction_above_10_npe"), digits=3)))
+    warnings = ", ".join(str(w) for w in (diagnostics.get("warnings") or [])) or "none"
+    info.AddText("warnings: {}".format(warnings[:80]))
     info.Draw()
     drawn_objects.append(info)
     gPad.Modified()
@@ -5926,6 +6756,13 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
     h_applied_map.SetMaximum(1.0)
     h_applied_map.SetMarkerSize(0.8)
     h_applied_map.Draw("colz text")
+    drawn_objects.extend(
+        _draw_aerogel_reference_line(
+            h_applied_map,
+            float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
+            "y",
+        )
+    )
     gPad.Modified()
     gPad.Update()
 
@@ -6237,10 +7074,16 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     )
     tof_support = (
         int(tof_counts.get("insufficient_prompt_tof_events", 0))
+        + int(tof_counts.get("insufficient_low_aero_prompt_events", 0))
+        + int(tof_counts.get("insufficient_low_aero_valid_tof_events", 0))
         + int(tof_counts.get("valid_tof_fraction_below_min", 0))
+        + int(tof_counts.get("low_aero_valid_tof_fraction_below_min", 0))
         + int(tof_counts.get("invalid_mean_delta_t_pk_ns", 0))
+        + int(tof_counts.get("invalid_low_aero_mean_delta_t_pk", 0))
         + int(tof_counts.get("invalid_mean_P_gtr_p", 0))
+        + int(tof_counts.get("invalid_low_aero_mean_P_gtr_p", 0))
         + int(tof_counts.get("invalid_mean_shms_path_length_cm", 0))
+        + int(tof_counts.get("invalid_low_aero_mean_shms_path_length_cm", 0))
     )
     offset_info = TPaveText(0.14, 0.62, 0.62, 0.90, "NDC")
     offset_info.SetBorderSize(1)
@@ -6377,12 +7220,21 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
 
     _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix)
     _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, prefix)
+    _print_low_aero_offset_diagnostics_page(output_pdf, cleaning_result, prefix)
+    _print_proton_aerogel_diagnostics_page(output_pdf, cleaning_result, prefix)
 
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:
         canvas = TCanvas("C_proton_cleaning_global_pid", "{} proton-cleaning global PID".format(prefix), 1000, 700)
         drawn_objects = []
         h_global_pid.Draw("colz")
+        drawn_objects.extend(
+            _draw_aerogel_reference_line(
+                h_global_pid,
+                float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
+                "x",
+            )
+        )
         drawn_objects.append(_draw_status_pave(cleaning_result))
         gPad.Modified()
         gPad.Update()
@@ -6528,11 +7380,25 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     canvas.cd(4)
     if application.get("H_proton_weight_vs_delta_aero") is not None:
         application["H_proton_weight_vs_delta_aero"].Draw("colz")
+        drawn_objects.extend(
+            _draw_aerogel_reference_line(
+                application["H_proton_weight_vs_delta_aero"],
+                float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
+                "y",
+            )
+        )
         drawn_objects.append(application["H_proton_weight_vs_delta_aero"])
     else:
         first_delta_pid = next((hist for hist in (cleaning_result.get("H_delta_pid") or []) if hist is not None), None)
         if first_delta_pid is not None:
             first_delta_pid.Draw("colz")
+            drawn_objects.extend(
+                _draw_aerogel_reference_line(
+                    first_delta_pid,
+                    float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
+                    "x",
+                )
+            )
             drawn_objects.append(first_delta_pid)
     gPad.Modified()
     gPad.Update()
@@ -6577,6 +7443,13 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
         canvas.cd(1)
         if pid_hist is not None:
             pid_hist.Draw("colz")
+            drawn_objects.extend(
+                _draw_aerogel_reference_line(
+                    pid_hist,
+                    float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
+                    "x",
+                )
+            )
             drawn_objects.append(pid_hist)
         support_label = support_by_delta[delta_index] if delta_index < len(support_by_delta) else "unknown"
         drawn_objects.append(

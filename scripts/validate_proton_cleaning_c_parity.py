@@ -466,14 +466,22 @@ def _validate_tof_summary_rows(
         delta_index = int(row.get("delta_index", -1))
         scope = "python_tof_extension/tof_summary[{}]".format(delta_index)
         cfg = row.get("tof_summary_validation") or default_cfg
-        min_events = int((cfg or {}).get("minimum_prompt_tof_events", 30) or 30)
+        min_events = int(
+            (cfg or {}).get(
+                "minimum_prompt_events",
+                (cfg or {}).get("minimum_prompt_tof_events", 30),
+            )
+            or 30
+        )
+        min_valid_events = int((cfg or {}).get("minimum_valid_tof_events", min_events) or min_events)
         min_fraction = float((cfg or {}).get("minimum_valid_tof_fraction", 0.90) or 0.90)
         counter_keys = (
             "prompt_events_seen",
-            "prompt_events_with_valid_tof",
             "prompt_events_with_selected_timing",
             "prompt_events_inside_timing_range",
             "prompt_events_inside_aero_range",
+            "prompt_events_inside_timing_and_aero_domain",
+            "prompt_events_with_valid_tof",
             "prompt_events_used",
         )
         counters = [int(row.get(key, 0) or 0) for key in counter_keys]
@@ -487,7 +495,28 @@ def _validate_tof_summary_rows(
         valid_tof_fraction = _float_or_none(row.get("valid_tof_fraction"))
         if valid_tof_fraction is None:
             _append_issue(issues, scope, "missing valid_tof_fraction")
-        prompt_count = int(row.get("prompt_event_count", 0) or 0)
+        denominator = int(row.get("prompt_events_inside_timing_and_aero_domain", 0) or 0)
+        usable_tof = int(row.get("usable_tof_events", row.get("prompt_events_used", 0)) or 0)
+        expected_fraction = float(usable_tof / denominator) if denominator > 0 else 0.0
+        if valid_tof_fraction is not None and abs(valid_tof_fraction - expected_fraction) > 1.0e-12:
+            _append_issue(
+                issues,
+                scope,
+                "valid_tof_fraction uses wrong denominator",
+                {
+                    "valid_tof_fraction": valid_tof_fraction,
+                    "expected": expected_fraction,
+                    "usable_tof_events": usable_tof,
+                    "prompt_events_inside_timing_and_aero_domain": denominator,
+                },
+            )
+        if usable_tof > denominator:
+            _append_issue(
+                issues,
+                scope,
+                "usable TOF events exceed active timing+aerogel denominator",
+                {"usable_tof_events": usable_tof, "denominator": denominator},
+            )
         required_fields = (
             "mean_delta_t_pk_ns",
             "mean_P_gtr_p",
@@ -498,7 +527,8 @@ def _validate_tof_summary_rows(
             for field_name in required_fields
         )
         expected_valid = bool(
-            prompt_count >= min_events
+            denominator >= min_events
+            and usable_tof >= min_valid_events
             and valid_tof_fraction is not None
             and valid_tof_fraction >= min_fraction
             and finite_required
@@ -511,14 +541,76 @@ def _validate_tof_summary_rows(
                 {
                     "valid": row.get("valid"),
                     "expected_valid": expected_valid,
-                    "prompt_event_count": prompt_count,
-                    "minimum_prompt_tof_events": min_events,
+                    "prompt_events_inside_timing_and_aero_domain": denominator,
+                    "minimum_prompt_events": min_events,
+                    "usable_tof_events": usable_tof,
+                    "minimum_valid_tof_events": min_valid_events,
                     "valid_tof_fraction": valid_tof_fraction,
                     "minimum_valid_tof_fraction": min_fraction,
                 },
             )
         if not bool(row.get("valid", False)) and not row.get("rejection_reasons"):
             _append_issue(issues, scope, "invalid TOF summary has no rejection_reasons")
+
+
+def _validate_low_aero_offset_metadata(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    cfg = diag.get("low_aero_offset_config") or {}
+    reference_npe = _float_or_none(diag.get("aerogel_reference_npe"))
+    if reference_npe is None:
+        _append_issue(issues, "python_tof_extension/low_aero", "missing aerogel_reference_npe")
+    full_range = diag.get("full_aerogel_range")
+    if not isinstance(full_range, list) or len(full_range) != 2:
+        _append_issue(issues, "python_tof_extension/low_aero", "missing full_aerogel_range")
+    else:
+        if _float_or_none(full_range[0]) != 0.0 or _float_or_none(full_range[1]) != 25.0:
+            _append_issue(issues, "python_tof_extension/low_aero", "wrong full diagnostic aerogel range", {"full_aerogel_range": full_range})
+    primary_rows = list(diag.get("primary_low_aero_tof_summary_by_delta") or [])
+    fallback_rows = list(diag.get("fallback_low_aero_tof_summary_by_delta") or [])
+    full_rows = list(diag.get("full_aero_tof_summary_by_delta") or [])
+    selected_rows = list(diag.get("tof_summary_by_delta") or payload.get("tof_summary_by_delta") or [])
+    offsets = list(payload.get("delta_timing_offset_fits") or diag.get("delta_timing_offset_fits") or [])
+    allowed_modes = {"low_aero_0_5", "low_aero_0_6_fallback", "unavailable"}
+    for index, row in enumerate(selected_rows):
+        if not isinstance(row, dict):
+            continue
+        scope = "python_tof_extension/low_aero[{}]".format(index)
+        mode = str(row.get("offset_fit_aero_mode") or "unavailable")
+        if mode not in allowed_modes:
+            _append_issue(issues, scope, "unsupported low-aerogel offset mode", {"mode": mode})
+        aero_min = _float_or_none(row.get("offset_fit_aero_min"))
+        aero_max = _float_or_none(row.get("offset_fit_aero_max"))
+        if mode == "low_aero_0_5":
+            if aero_min != 0.0 or aero_max is None or aero_max > 5.0:
+                _append_issue(issues, scope, "primary offset mode is not restricted to 0-5 NPE", {"aero_min": aero_min, "aero_max": aero_max})
+        if mode == "low_aero_0_6_fallback":
+            if aero_min != 0.0 or aero_max is None or aero_max > 6.0:
+                _append_issue(issues, scope, "fallback offset mode is not restricted to 0-6 NPE", {"aero_min": aero_min, "aero_max": aero_max})
+            primary_valid = bool(primary_rows[index].get("valid", False)) if index < len(primary_rows) and isinstance(primary_rows[index], dict) else False
+            if primary_valid:
+                _append_issue(issues, scope, "fallback selected even though primary low-aerogel summary is valid")
+        if mode == "unavailable" and bool(row.get("valid", False)):
+            _append_issue(issues, scope, "unavailable offset mode has valid selected TOF summary")
+        if index < len(full_rows) and isinstance(full_rows[index], dict):
+            full_max = _float_or_none(full_rows[index].get("offset_fit_aero_max"))
+            if full_max is not None and full_max < 25.0:
+                _append_issue(issues, scope, "full diagnostic row does not cover 0-25 NPE", {"full_aero_max": full_max})
+    for index, row in enumerate(offsets):
+        if not isinstance(row, dict):
+            continue
+        mode = str(row.get("offset_fit_aero_mode") or "unavailable")
+        if mode not in allowed_modes:
+            _append_issue(
+                issues,
+                "python_tof_extension/low_aero_offset_fit[{}]".format(index),
+                "offset fit selected non-low-aerogel mode",
+                {"mode": mode},
+            )
+    if not isinstance(cfg, dict) or not cfg:
+        _append_issue(issues, "python_tof_extension/low_aero", "missing serialized low_aero_offset_config")
 
 
 def _validate_offset_rows(
@@ -652,6 +744,57 @@ def _validate_invalid_offset_propagation(
                 _append_issue(issues, scope, "invalid offset produced valid slice fit", {"aero_index": aero_index})
 
 
+def _validate_weak_high_aero_components(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+    abs_tol: float,
+) -> None:
+    aero_edges = [float(value) for value in (payload.get("aero_edges") or (0.0, 3.0, 6.0, 10.0, 15.0, 25.0))]
+    delta_slices = list(payload.get("delta_slice_fits") or [])
+    for delta_index, slice_rows in enumerate(delta_slices):
+        for aero_index, row in enumerate(slice_rows or []):
+            if not isinstance(row, dict):
+                continue
+            if aero_index + 1 < len(aero_edges):
+                aero_center = 0.5 * (aero_edges[aero_index] + aero_edges[aero_index + 1])
+            else:
+                aero_center = float(aero_index)
+            if aero_center < 10.0:
+                continue
+            scope = "python_tof_extension/high_aero_weak_component[{}][{}]".format(delta_index, aero_index)
+            proton_yield = _float_or_none(row.get("proton_yield"))
+            detected = bool(row.get("proton_component_detected", False))
+            below = bool(row.get("proton_component_below_significance", False))
+            if bool(row.get("valid", False)) and below and detected:
+                _append_issue(issues, scope, "cell cannot be both below-significance and proton-detected")
+            if bool(row.get("valid", False)) and below and proton_yield is not None and abs(proton_yield) > max(abs_tol, 1.0e-12):
+                _append_issue(
+                    issues,
+                    scope,
+                    "below-significance high-aerogel proton component was not zeroed",
+                    {"proton_yield": proton_yield},
+                )
+            if not detected and proton_yield is not None and abs(proton_yield) > max(abs_tol, 1.0e-12):
+                _append_issue(
+                    issues,
+                    scope,
+                    "undetected proton component has nonzero effective proton yield",
+                    {"proton_yield": proton_yield},
+                )
+    diag = _diagnostics(payload)
+    warnings = [str(value) for value in (diag.get("warnings") or [])]
+    warning_name = "high_aero_proton_fraction_exceeds_low_aero"
+    if warning_name in warnings:
+        fallback_reason = str(payload.get("fallback_reason") or "")
+        if warning_name in fallback_reason:
+            _append_issue(
+                issues,
+                "python_tof_extension/high_aero_warning",
+                "high-aerogel warning propagated into fallback reason",
+                {"fallback_reason": fallback_reason},
+            )
+
+
 def _validate_closure_and_weights(
     issues: list[dict[str, Any]],
     payload: dict[str, Any],
@@ -725,9 +868,11 @@ def _validate_python_tof_extension(
     abs_tol: float,
 ) -> None:
     _validate_tof_summary_rows(issues, payload)
+    _validate_low_aero_offset_metadata(issues, payload)
     _validate_offset_rows(issues, payload)
     _validate_timing_constraints(issues, payload, center_tolerance=1.0e-6)
     _validate_invalid_offset_propagation(issues, payload)
+    _validate_weak_high_aero_components(issues, payload, abs_tol)
     _validate_closure_and_weights(issues, payload, python_weight_payloads, abs_tol)
     _validate_branch_alias_metadata(issues, payload)
 
