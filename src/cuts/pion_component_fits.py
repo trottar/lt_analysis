@@ -966,9 +966,46 @@ def _build_scaled_reference_hist_with_fallback(target_hist, reference_hist, x_mi
     return scaled_hist, scale_factor, source
 
 
+def _clone_lambda_reference_candidate(payload, hist_key, hist_name):
+    if not isinstance(payload, dict):
+        return None
+    reference_hist = payload.get(hist_key)
+    if reference_hist is None:
+        return None
+    return _clone_hist(reference_hist, hist_name)
+
+
 def _resolve_kaon_lambda_reference_for_plot(payload, target_hist, cut_window, scope_label, hist_name):
     if not isinstance(payload, dict):
         return None, None, "missing payload"
+
+    input_loaded = bool(payload.get("k_lambda_simc_input_loaded", False))
+    canonical_reference = (
+        payload.get("H_k_lambda_simc_reference")
+        or payload.get("k_lambda_simc_reference_hist")
+    )
+    if canonical_reference is not None:
+        reference_hist, scale_factor, source = _build_scaled_reference_hist_with_fallback(
+            target_hist,
+            canonical_reference,
+            float(cut_window[0]),
+            float(cut_window[1]),
+            "{}_{}".format(hist_name, str(scope_label).replace(" ", "_")),
+        ) if (
+            target_hist is not None
+            and isinstance(cut_window, (list, tuple))
+            and len(cut_window) == 2
+            and _is_finite_number(cut_window[0])
+            and _is_finite_number(cut_window[1])
+        ) else (None, None, "immutable_aligned_k_lambda_simc")
+        if reference_hist is None:
+            reference_hist = _clone_hist(
+                canonical_reference,
+                "{}_{}".format(hist_name, str(scope_label).replace(" ", "_")),
+            )
+            scale_factor = payload.get("k_lambda_reference_scale")
+        if reference_hist is not None:
+            return reference_hist, scale_factor, "immutable_aligned_k_lambda_simc"
 
     reference_hist = payload.get("H_kaon_fit_k_lambda_reference")
     if reference_hist is not None:
@@ -978,36 +1015,36 @@ def _resolve_kaon_lambda_reference_for_plot(payload, target_hist, cut_window, sc
             "cut-window normalized K-Lambda gauge",
         )
 
-    if (
-        payload.get("H_simc_shape_k_lambda") is not None
-        and target_hist is not None
-        and isinstance(cut_window, (list, tuple))
-        and len(cut_window) == 2
-        and _is_finite_number(cut_window[0])
-        and _is_finite_number(cut_window[1])
-    ):
+    simc_reference = payload.get("H_simc_shape_k_lambda")
+    if simc_reference is not None:
         reference_hist, scale_factor, source = _build_scaled_reference_hist_with_fallback(
             target_hist,
-            payload.get("H_simc_shape_k_lambda"),
+            simc_reference,
             float(cut_window[0]),
             float(cut_window[1]),
             "{}_{}".format(hist_name, str(scope_label).replace(" ", "_")),
-        )
+        ) if (
+            target_hist is not None
+            and isinstance(cut_window, (list, tuple))
+            and len(cut_window) == 2
+            and _is_finite_number(cut_window[0])
+            and _is_finite_number(cut_window[1])
+        ) else (None, None, "H_simc_shape_k_lambda")
+        if reference_hist is None:
+            reference_hist = _clone_hist(
+                simc_reference,
+                "{}_{}".format(hist_name, str(scope_label).replace(" ", "_")),
+            )
+            scale_factor = payload.get("k_lambda_reference_scale")
         if reference_hist is not None:
             return reference_hist, scale_factor, source
 
-    reference_hist = (
-        payload.get("H_kaon_fit_k_lambda_scaled_refined")
-        or payload.get("H_kaon_fit_k_lambda_scaled")
-    )
-    if reference_hist is not None:
-        return (
-            reference_hist,
-            payload.get("S_lambda_reference_scale"),
-            "refined/staged K-Lambda fit contribution",
+    if input_loaded:
+        raise RuntimeError(
+            "K-Lambda SIMC input was loaded but the immutable comparison reference was lost"
         )
 
-    return None, None, "K-Lambda SIMC unavailable"
+    return None, None, "K-Lambda SIMC input missing at source"
 
 
 def _mask_hist_windows_inplace(hist, windows, zero_errors=True):
@@ -3892,6 +3929,12 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         mm_max,
         "A_k_lambda_reference_{}_kaon_nosub".format(context or "scope"),
     )
+    k_lambda_simc_reference_hist = _clone_hist(
+        h_kaon_signal_shape,
+        "H_k_lambda_simc_reference_{}_kaon_nosub".format(context or "scope"),
+    )
+    k_lambda_simc_input_loaded = bool(h_kaon_signal_shape is not None)
+    k_lambda_simc_reference_available = bool(k_lambda_simc_reference_hist is not None)
     return_payload = {
         "A_n": result["A_n"],
         "A_delta": result["A_delta"],
@@ -3901,6 +3944,22 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "fit_mode": fit_mode,
         "S_lambda_reference_scale": (
             None if signal_reference_scale is None else float(signal_reference_scale)
+        ),
+        "k_lambda_reference_scale": (
+            None if signal_reference_scale is None else float(signal_reference_scale)
+        ),
+        "k_lambda_fit_amplitude": None if signal_amplitude is None else float(signal_amplitude),
+        "k_lambda_simc_input_loaded": bool(k_lambda_simc_input_loaded),
+        "k_lambda_simc_reference_available": bool(k_lambda_simc_reference_available),
+        "k_lambda_simc_reference_source": (
+            "immutable_aligned_k_lambda_simc"
+            if k_lambda_simc_reference_available
+            else ("K-Lambda SIMC input missing at source" if not k_lambda_simc_input_loaded else "reference_build_failed")
+        ),
+        "k_lambda_simc_reference_integral": (
+            _hist_integral(k_lambda_simc_reference_hist)
+            if k_lambda_simc_reference_hist is not None
+            else None
         ),
         "fit_status": result["fit_status"],
         "diagnostics": result["diagnostics"],
@@ -3927,6 +3986,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             (result.get("refined_scaled_hist_map_pre_postrefine") or {}).get(KAON_SIGMA0_TEMPLATE_NAME)
             or sigma0_scaled_hist
         ),
+        "H_k_lambda_simc_reference": k_lambda_simc_reference_hist,
         "k_lambda_reference_hist": signal_reference_hist,
         "step_overlays": result.get("step_overlays") or [],
         "sigma0_requested": bool(anchor_windows.get(KAON_SIGMA0_TEMPLATE_NAME)),
@@ -4332,6 +4392,20 @@ def build_particle_subtraction_component_result(
         "pion_control": deepcopy(pion_diagnostics.get("amplitude_shift_fractions") or {}),
         "kaon_nosub": deepcopy(kaon_diagnostics.get("amplitude_shift_fractions") or {}),
     }
+    k_lambda_simc_reference_hist = (
+        _clone_hist(
+            kaon_fit.get("H_k_lambda_simc_reference"),
+            "H_k_lambda_simc_reference_{}".format(context or analysis_scope),
+        )
+        or _clone_hist(
+            aligned_kaon_signal_shape,
+            "H_k_lambda_simc_reference_{}".format(context or analysis_scope),
+        )
+    )
+    k_lambda_simc_input_loaded = bool(
+        kaon_fit.get("k_lambda_simc_input_loaded", aligned_kaon_signal_shape is not None)
+    )
+    k_lambda_simc_reference_available = bool(k_lambda_simc_reference_hist is not None)
 
     result = {
         "particle_subtraction_mode": mode,
@@ -4347,6 +4421,20 @@ def build_particle_subtraction_component_result(
         "S_lambda": s_lambda,
         "S_sigma0": s_sigma0,
         "S_lambda_reference_scale": kaon_fit.get("S_lambda_reference_scale"),
+        "k_lambda_reference_scale": kaon_fit.get("k_lambda_reference_scale", kaon_fit.get("S_lambda_reference_scale")),
+        "k_lambda_fit_amplitude": s_lambda,
+        "k_lambda_simc_input_loaded": bool(k_lambda_simc_input_loaded),
+        "k_lambda_simc_reference_available": bool(k_lambda_simc_reference_available),
+        "k_lambda_simc_reference_source": (
+            "immutable_aligned_k_lambda_simc"
+            if k_lambda_simc_reference_available
+            else ("K-Lambda SIMC input missing at source" if not k_lambda_simc_input_loaded else "reference_build_failed")
+        ),
+        "k_lambda_simc_reference_integral": (
+            _hist_integral(k_lambda_simc_reference_hist)
+            if k_lambda_simc_reference_hist is not None
+            else None
+        ),
         "B_n": b_n,
         "B_delta": b_delta,
         "B_sidis": b_sidis,
@@ -4422,8 +4510,9 @@ def build_particle_subtraction_component_result(
             aligned_component_shapes.get("pi_sidis"),
             "H_simc_shape_pi_sidis_{}".format(context or analysis_scope),
         ),
+        "H_k_lambda_simc_reference": k_lambda_simc_reference_hist,
         "H_simc_shape_k_lambda": _clone_hist(
-            aligned_kaon_signal_shape,
+            k_lambda_simc_reference_hist,
             "H_simc_shape_k_lambda_{}".format(context or analysis_scope),
         ),
         "H_simc_shape_k_sigma0": _clone_hist(
@@ -6713,6 +6802,11 @@ def print_particle_subtraction_component_application_pages(
             "K-Lambda gauge scale={}".format(
                 _format_fit_number(lambda_reference_scale)
                 if lambda_reference_scale is not None
+                else "n/a"
+            ),
+            "K-Lambda fitted amplitude={}".format(
+                _format_fit_number(component_payload.get("k_lambda_fit_amplitude"))
+                if component_payload.get("k_lambda_fit_amplitude") is not None
                 else "n/a"
             ),
             "fit validation pion/kaon={}/{}".format(

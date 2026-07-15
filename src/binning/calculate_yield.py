@@ -934,6 +934,9 @@ def _apply_component_pion_subtraction_for_bin(
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
             "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
             "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
+            "H_k_lambda_simc_reference": _clone_hist_for_plot(
+                component_fit_result.get("H_k_lambda_simc_reference")
+            ),
             "H_simc_shape_k_lambda": _clone_hist_for_plot(
                 component_fit_result.get("H_simc_shape_k_lambda")
             ),
@@ -956,6 +959,12 @@ def _apply_component_pion_subtraction_for_bin(
                 component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined")
             ) if component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined") is not None else None,
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
+            "k_lambda_reference_scale": component_fit_result.get("k_lambda_reference_scale"),
+            "k_lambda_fit_amplitude": component_fit_result.get("k_lambda_fit_amplitude"),
+            "k_lambda_simc_input_loaded": component_fit_result.get("k_lambda_simc_input_loaded"),
+            "k_lambda_simc_reference_available": component_fit_result.get("k_lambda_simc_reference_available"),
+            "k_lambda_simc_reference_source": component_fit_result.get("k_lambda_simc_reference_source"),
+            "k_lambda_simc_reference_integral": component_fit_result.get("k_lambda_simc_reference_integral"),
             "diagnostics": {
                 **deepcopy(weight_payload["diagnostics"]),
                 "weight_diagnostics_stage": deepcopy(stage_weight_payload.get("diagnostics") or {}),

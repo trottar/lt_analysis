@@ -816,6 +816,155 @@ def _select_low_aero_offset_summary(primary_row, fallback_row, low_aero_config):
     return selected
 
 
+def _make_offset_attempt_summary(offset_fit):
+    offset_fit = offset_fit or {}
+    return {
+        "attempted": bool(offset_fit.get("fit_attempted", False)),
+        "valid": bool(offset_fit.get("valid", False)),
+        "rejection_reasons": list(offset_fit.get("rejection_reasons") or []),
+        "rejection_reason": offset_fit.get("rejection_reason", ""),
+        "delta_offset": offset_fit.get("delta_offset"),
+        "delta_offset_error": offset_fit.get("delta_offset_error"),
+        "fit_status": offset_fit.get("fit_status"),
+        "fit_status_code": offset_fit.get("fit_status_code"),
+        "chi2_ndf": offset_fit.get("chi2_ndf"),
+    }
+
+
+def _make_not_required_offset_fit(delta_index, mode, reason):
+    return {
+        "valid": False,
+        "fit_attempted": False,
+        "fit_status": "not_required",
+        "fit_status_code": None,
+        "delta_index": int(delta_index),
+        "offset_fit_aero_mode": str(mode),
+        "delta_offset": 0.0,
+        "delta_offset_error": None,
+        "rejection_reasons": [str(reason)],
+        "rejection_reason": str(reason),
+    }
+
+
+def _decorate_selected_timing_center_model(
+    selected_fit,
+    source,
+    primary_fit,
+    fallback_fit,
+    primary_summary,
+    fallback_summary,
+    reference_shape,
+):
+    selected_fit = deepcopy(selected_fit or {})
+    source = str(source)
+    selected_fit["selected_timing_center_source"] = source
+    selected_fit["timing_center_source"] = source
+    selected_fit["selected_offset_source"] = source
+    selected_fit["offset_refinement_applied"] = bool(source in ("low_aero_0_5_fit", "low_aero_0_6_fit"))
+    selected_fit["offset_refinement_valid"] = bool(selected_fit.get("valid", False))
+    selected_fit["timing_center_model_valid"] = bool(
+        selected_fit.get("valid", False)
+        or (
+            source == "stable_global_center_fallback"
+            and bool((reference_shape or {}).get("valid", False))
+        )
+    )
+    selected_fit["primary_offset_attempt"] = _json_ready_value(
+        _make_offset_attempt_summary(primary_fit)
+    )
+    selected_fit["fallback_offset_attempt"] = _json_ready_value(
+        _make_offset_attempt_summary(fallback_fit)
+    )
+    selected_fit["primary_offset_attempted"] = bool((primary_fit or {}).get("fit_attempted", False))
+    selected_fit["primary_offset_valid"] = bool((primary_fit or {}).get("valid", False))
+    selected_fit["primary_offset_rejection_reasons"] = list((primary_fit or {}).get("rejection_reasons") or [])
+    selected_fit["fallback_offset_attempted"] = bool((fallback_fit or {}).get("fit_attempted", False))
+    selected_fit["fallback_offset_valid"] = bool((fallback_fit or {}).get("valid", False))
+    selected_fit["fallback_offset_rejection_reasons"] = list((fallback_fit or {}).get("rejection_reasons") or [])
+    selected_fit["primary_low_aero_tof_summary"] = _json_ready_value(primary_summary or {})
+    selected_fit["fallback_low_aero_tof_summary"] = _json_ready_value(fallback_summary or {})
+    selected_fit["offset_refinement_failure_reasons"] = []
+    for attempt in (primary_fit, fallback_fit):
+        if bool((attempt or {}).get("valid", False)):
+            continue
+        for reason in (attempt or {}).get("rejection_reasons") or []:
+            reason_text = str(reason).strip()
+            if reason_text and reason_text not in selected_fit["offset_refinement_failure_reasons"]:
+                selected_fit["offset_refinement_failure_reasons"].append(reason_text)
+    if source == "stable_global_center_fallback":
+        selected_fit["valid"] = False
+        selected_fit["offset_refinement_valid"] = False
+        selected_fit["offset_refinement_applied"] = False
+        selected_fit["delta_offset"] = 0.0
+        selected_fit["delta_offset_error"] = None
+        selected_fit["fit_status"] = "stable_global_center_fallback"
+        selected_fit["fit_status_code"] = None
+        selected_fit["rejection_reasons"] = list(
+            selected_fit.get("offset_refinement_failure_reasons")
+            or ["low_aero_offset_refinement_failed"]
+        )
+        selected_fit["rejection_reason"] = _join_rejection_reasons(
+            selected_fit["rejection_reasons"]
+        )
+        selected_fit["timing_center_rejection_reasons"] = (
+            []
+            if selected_fit["timing_center_model_valid"]
+            else [(reference_shape or {}).get("reason") or "invalid_reference_shape"]
+        )
+        selected_fit["reference_kaon_mean"] = (reference_shape or {}).get("kaon_mean")
+        selected_fit["reference_proton_mean"] = (reference_shape or {}).get("proton_mean")
+        selected_fit["reference_kaon_sigma"] = (reference_shape or {}).get("kaon_sigma")
+        selected_fit["reference_proton_sigma"] = (reference_shape or {}).get("proton_sigma")
+        selected_fit["mean_delta_t_pk_ns"] = (
+            (primary_summary or {}).get("mean_delta_t_pk_ns")
+            or (fallback_summary or {}).get("mean_delta_t_pk_ns")
+        )
+    return selected_fit
+
+
+def _select_resolved_timing_center_model(
+    delta_index,
+    primary_fit,
+    fallback_fit,
+    primary_summary,
+    fallback_summary,
+    reference_shape,
+):
+    if bool((primary_fit or {}).get("valid", False)):
+        return _decorate_selected_timing_center_model(
+            primary_fit,
+            "low_aero_0_5_fit",
+            primary_fit,
+            fallback_fit,
+            primary_summary,
+            fallback_summary,
+            reference_shape,
+        )
+    if bool((fallback_fit or {}).get("valid", False)):
+        return _decorate_selected_timing_center_model(
+            fallback_fit,
+            "low_aero_0_6_fit",
+            primary_fit,
+            fallback_fit,
+            primary_summary,
+            fallback_summary,
+            reference_shape,
+        )
+    stable_model = {
+        "delta_index": int(delta_index),
+        "offset_fit_aero_mode": "stable_global_center_fallback",
+    }
+    return _decorate_selected_timing_center_model(
+        stable_model,
+        "stable_global_center_fallback",
+        primary_fit,
+        fallback_fit,
+        primary_summary,
+        fallback_summary,
+        reference_shape,
+    )
+
+
 def _build_exact_proton_cleaning_config(base_config):
     exact_config = deepcopy(base_config or {})
     exact_config["implementation"] = PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT
@@ -2639,7 +2788,9 @@ def _fit_delta_common_timing_offset(
             reason_text = str(reason).strip()
             if reason_text and reason_text not in rejection_reasons:
                 rejection_reasons.append(reason_text)
-    mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
+    mean_delta_t = (delta_offset_fit or {}).get("mean_delta_t_pk_ns")
+    if mean_delta_t is None:
+        mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
     if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
         rejection_reasons.append("invalid_mean_delta_t_pk")
     low_aero_config = exact_config.get("low_aero_offset") or PROTON_CLEANING_LOW_AERO_OFFSET_CONFIG
@@ -2909,17 +3060,53 @@ def _build_timing_constraint_for_cell(
 ):
     if not bool((global_shape or {}).get("valid", False)):
         return {"valid": False, "reason": "invalid_global_shape"}
-    if not bool((delta_offset_fit or {}).get("valid", False)):
-        return {"valid": False, "reason": "invalid_delta_offset_fit"}
-    mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
-    if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
-        return {"valid": False, "reason": "invalid_mean_delta_t_pk"}
+    center_source = str(
+        (delta_offset_fit or {}).get("timing_center_source")
+        or (delta_offset_fit or {}).get("selected_timing_center_source")
+        or ("low_aero_offset_fit" if bool((delta_offset_fit or {}).get("valid", False)) else "")
+    )
+    timing_center_model_valid = bool(
+        (delta_offset_fit or {}).get(
+            "timing_center_model_valid",
+            bool((delta_offset_fit or {}).get("valid", False)),
+        )
+    )
+    if not timing_center_model_valid:
+        return {
+            "valid": False,
+            "reason": "invalid_timing_center_model",
+            "timing_center_source": center_source or "unavailable",
+            "offset_refinement_valid": bool((delta_offset_fit or {}).get("valid", False)),
+            "offset_refinement_applied": bool((delta_offset_fit or {}).get("offset_refinement_applied", False)),
+            "offset_refinement_failure_reasons": list((delta_offset_fit or {}).get("offset_refinement_failure_reasons") or []),
+        }
     delta_offset = float((delta_offset_fit or {}).get("delta_offset", 0.0) or 0.0)
     reference_kaon_mean = float((global_shape or {}).get("kaon_mean"))
     reference_proton_mean = float((global_shape or {}).get("proton_mean"))
-    branch_sign = -1.0 if bool(proton_peak_is_lower) else 1.0
-    predicted_kaon_mean = reference_kaon_mean + delta_offset
-    raw_predicted_proton_mean = predicted_kaon_mean + (branch_sign * float(mean_delta_t))
+    stable_center_fallback = center_source == "stable_global_center_fallback"
+    mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
+    if stable_center_fallback:
+        predicted_kaon_mean = reference_kaon_mean
+        raw_predicted_proton_mean = reference_proton_mean
+        mean_delta_t_out = (
+            float(mean_delta_t)
+            if mean_delta_t is not None and math.isfinite(float(mean_delta_t))
+            else abs(reference_proton_mean - reference_kaon_mean)
+        )
+    else:
+        if mean_delta_t is None or not math.isfinite(float(mean_delta_t)) or float(mean_delta_t) <= 0.0:
+            return {
+                "valid": False,
+                "reason": "invalid_mean_delta_t_pk",
+                "timing_center_source": center_source or "unavailable",
+                "offset_refinement_valid": bool((delta_offset_fit or {}).get("valid", False)),
+                "offset_refinement_applied": bool((delta_offset_fit or {}).get("offset_refinement_applied", False)),
+                "offset_refinement_failure_reasons": list((delta_offset_fit or {}).get("offset_refinement_failure_reasons") or []),
+            }
+        branch_sign = -1.0 if bool(proton_peak_is_lower) else 1.0
+        predicted_kaon_mean = reference_kaon_mean + delta_offset
+        raw_predicted_proton_mean = predicted_kaon_mean + (branch_sign * float(mean_delta_t))
+        mean_delta_t_out = float(mean_delta_t)
     wrap_info = {
         "valid": True,
         "raw_mean": float(raw_predicted_proton_mean),
@@ -2928,7 +3115,7 @@ def _build_timing_constraint_for_cell(
         "inside_display_range": True,
         "reference_mean": float(reference_proton_mean),
     }
-    if str(probe_kind) == "rf":
+    if str(probe_kind) == "rf" and not stable_center_fallback:
         wrap_info = _wrap_rf_mean_to_selected_window(
             raw_predicted_proton_mean,
             reference_proton_mean,
@@ -2940,11 +3127,17 @@ def _build_timing_constraint_for_cell(
         return {"valid": False, "reason": wrap_info.get("reason") or "invalid_rf_wrap"}
     return {
         "valid": True,
+        "timing_center_model_valid": True,
+        "timing_center_source": center_source or "low_aero_offset_fit",
+        "selected_timing_center_source": center_source or "low_aero_offset_fit",
+        "offset_refinement_valid": bool((delta_offset_fit or {}).get("offset_refinement_valid", (delta_offset_fit or {}).get("valid", False))),
+        "offset_refinement_applied": bool((delta_offset_fit or {}).get("offset_refinement_applied", False)),
+        "offset_refinement_failure_reasons": list((delta_offset_fit or {}).get("offset_refinement_failure_reasons") or []),
         "reference_global_kaon_mean": float(reference_kaon_mean),
         "reference_global_proton_mean": float(reference_proton_mean),
         "delta_timing_offset": float(delta_offset),
         "delta_timing_offset_error": (delta_offset_fit or {}).get("delta_offset_error"),
-        "mean_delta_t_pk_ns": float(mean_delta_t),
+        "mean_delta_t_pk_ns": float(mean_delta_t_out),
         "predicted_kaon_mean": float(predicted_kaon_mean),
         "predicted_proton_mean_raw": float(raw_predicted_proton_mean),
         "predicted_proton_mean": float(wrap_info["wrapped_mean"]),
@@ -2999,6 +3192,11 @@ def _fit_delta_timing_slice(
         return {
             "valid": False,
             "timing_model_valid": bool(not invalid_global_shape and not invalid_timing_constraint),
+            "timing_center_model_valid": bool((timing_constraint or {}).get("timing_center_model_valid", False)),
+            "timing_center_source": (timing_constraint or {}).get("timing_center_source"),
+            "offset_refinement_valid": (timing_constraint or {}).get("offset_refinement_valid"),
+            "offset_refinement_applied": (timing_constraint or {}).get("offset_refinement_applied"),
+            "offset_refinement_failure_reasons": (timing_constraint or {}).get("offset_refinement_failure_reasons"),
             "cell_fit_valid": False,
             "proton_component_detected": False,
             "proton_component_significance": None,
@@ -3237,6 +3435,11 @@ def _fit_delta_timing_slice(
         "function_name": str(function_name),
         "reference_global_kaon_mean": (timing_constraint or {}).get("reference_global_kaon_mean", global_shape.get("kaon_mean")),
         "reference_global_proton_mean": (timing_constraint or {}).get("reference_global_proton_mean", global_shape.get("proton_mean")),
+        "timing_center_model_valid": (timing_constraint or {}).get("timing_center_model_valid"),
+        "timing_center_source": (timing_constraint or {}).get("timing_center_source"),
+        "offset_refinement_valid": (timing_constraint or {}).get("offset_refinement_valid"),
+        "offset_refinement_applied": (timing_constraint or {}).get("offset_refinement_applied"),
+        "offset_refinement_failure_reasons": (timing_constraint or {}).get("offset_refinement_failure_reasons"),
         "delta_timing_offset": (timing_constraint or {}).get("delta_timing_offset"),
         "delta_timing_offset_error": (timing_constraint or {}).get("delta_timing_offset_error"),
         "mean_delta_t_pk_ns": (timing_constraint or {}).get("mean_delta_t_pk_ns"),
@@ -4720,6 +4923,8 @@ def build_kaon_proton_cleaning_result(
         sum(1 for row in delta_tof_summaries if bool((row or {}).get("valid", False)))
     )
     delta_timing_offset_fits = []
+    primary_low_aero_offset_fits = []
+    fallback_low_aero_offset_fits = []
     low_aero_projection_payloads = []
     for delta_index, pid_hist in enumerate(pid_payload.get("delta_pid_hists") or []):
         primary_projection = _project_delta_pid_timing_by_aero_range(
@@ -4741,16 +4946,16 @@ def build_kaon_proton_cleaning_result(
             upper_inclusive=True,
         )
         selected_tof_summary = delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {}
-        selected_mode = str((selected_tof_summary or {}).get("offset_fit_aero_mode") or "unavailable")
-        if selected_mode == "low_aero_0_6_fallback":
-            delta_projection = fallback_projection
-            selected_projection_name = fallback_projection.GetName() if fallback_projection is not None else ""
-        elif selected_mode == "low_aero_0_5":
-            delta_projection = primary_projection
-            selected_projection_name = primary_projection.GetName() if primary_projection is not None else ""
-        else:
-            delta_projection = None
-            selected_projection_name = ""
+        primary_tof_summary = (
+            primary_low_aero_tof_summaries[delta_index]
+            if delta_index < len(primary_low_aero_tof_summaries)
+            else {}
+        )
+        fallback_tof_summary = (
+            fallback_low_aero_tof_summaries[delta_index]
+            if delta_index < len(fallback_low_aero_tof_summaries)
+            else {}
+        )
         support_by_aero = (
             (pid_payload.get("cell_prompt_support") or [])[delta_index]
             if delta_index < len(pid_payload.get("cell_prompt_support") or [])
@@ -4760,29 +4965,74 @@ def build_kaon_proton_cleaning_result(
             global_shapes,
             support_by_aero,
         )
-        offset_fit = _fit_delta_common_timing_offset(
-            delta_projection,
+        primary_offset_fit = _fit_delta_common_timing_offset(
+            primary_projection,
             reference_shape,
-            selected_tof_summary,
+            primary_tof_summary,
             exact_config,
-            "f_proton_cleaning_delta_offset_{}".format(delta_index),
+            "f_proton_cleaning_delta_offset_primary_{}".format(delta_index),
             bool(selected_probe.get("proton_peak_is_lower", False)),
             str(selected_probe.get("probe_kind", "ct")),
             selected_time_hist_range,
             beam_bunch_spacing_ns,
             support_entries=int(
-                (selected_tof_summary or {}).get(
+                (primary_tof_summary or {}).get(
                     "prompt_events_inside_timing_and_aero_domain",
-                    (selected_tof_summary or {}).get("prompt_event_count", 0),
+                    (primary_tof_summary or {}).get("prompt_event_count", 0),
                 )
                 or 0
             ),
         )
-        offset_fit["delta_index"] = int(delta_index)
-        offset_fit["offset_fit_aero_mode"] = str(selected_mode)
-        offset_fit["offset_fit_aero_min"] = (selected_tof_summary or {}).get("offset_fit_aero_min")
-        offset_fit["offset_fit_aero_max"] = (selected_tof_summary or {}).get("offset_fit_aero_max")
-        offset_fit["selected_projection_name"] = selected_projection_name
+        primary_offset_fit["delta_index"] = int(delta_index)
+        primary_offset_fit["offset_fit_aero_mode"] = "low_aero_0_5"
+        primary_offset_fit["offset_fit_aero_min"] = float(primary_low_aero_range[0])
+        primary_offset_fit["offset_fit_aero_max"] = float(primary_low_aero_range[1])
+        primary_offset_fit["selected_projection_name"] = (
+            primary_projection.GetName() if primary_projection is not None else ""
+        )
+        if bool(primary_offset_fit.get("valid", False)):
+            fallback_offset_fit = _make_not_required_offset_fit(
+                delta_index,
+                "low_aero_0_6_fallback",
+                "primary_low_aero_offset_fit_valid",
+            )
+        else:
+            fallback_offset_fit = _fit_delta_common_timing_offset(
+                fallback_projection,
+                reference_shape,
+                fallback_tof_summary,
+                exact_config,
+                "f_proton_cleaning_delta_offset_fallback_{}".format(delta_index),
+                bool(selected_probe.get("proton_peak_is_lower", False)),
+                str(selected_probe.get("probe_kind", "ct")),
+                selected_time_hist_range,
+                beam_bunch_spacing_ns,
+                support_entries=int(
+                    (fallback_tof_summary or {}).get(
+                        "prompt_events_inside_timing_and_aero_domain",
+                        (fallback_tof_summary or {}).get("prompt_event_count", 0),
+                    )
+                    or 0
+                ),
+            )
+            fallback_offset_fit["delta_index"] = int(delta_index)
+            fallback_offset_fit["offset_fit_aero_mode"] = "low_aero_0_6_fallback"
+            fallback_offset_fit["offset_fit_aero_min"] = float(fallback_low_aero_range[0])
+            fallback_offset_fit["offset_fit_aero_max"] = float(fallback_low_aero_range[1])
+            fallback_offset_fit["selected_projection_name"] = (
+                fallback_projection.GetName() if fallback_projection is not None else ""
+            )
+        offset_fit = _select_resolved_timing_center_model(
+            delta_index,
+            primary_offset_fit,
+            fallback_offset_fit,
+            primary_tof_summary,
+            fallback_tof_summary,
+            reference_shape,
+        )
+        selected_mode = str(offset_fit.get("selected_timing_center_source") or "unavailable")
+        offset_fit["primary_low_aero_offset_fit"] = _json_ready_value(primary_offset_fit)
+        offset_fit["fallback_low_aero_offset_fit"] = _json_ready_value(fallback_offset_fit)
         offset_fit["primary_low_aero_prompt_events"] = int(
             (primary_low_aero_tof_summaries[delta_index] if delta_index < len(primary_low_aero_tof_summaries) else {}).get(
                 "prompt_events_inside_timing_and_aero_domain",
@@ -4826,6 +5076,8 @@ def build_kaon_proton_cleaning_result(
             or 0
         )
         delta_timing_offset_fits.append(offset_fit)
+        primary_low_aero_offset_fits.append(primary_offset_fit)
+        fallback_low_aero_offset_fits.append(fallback_offset_fit)
         low_aero_projection_payloads.append(
             {
                 "delta_index": int(delta_index),
@@ -4836,11 +5088,27 @@ def build_kaon_proton_cleaning_result(
             }
         )
     result["delta_timing_offset_fits"] = delta_timing_offset_fits
+    result["primary_low_aero_offset_fits"] = primary_low_aero_offset_fits
+    result["fallback_low_aero_offset_fits"] = fallback_low_aero_offset_fits
     result["H_delta_offset_low_aero_projections"] = low_aero_projection_payloads
     result["diagnostics"]["delta_timing_offset_fits"] = _json_ready_value(delta_timing_offset_fits)
+    result["diagnostics"]["primary_low_aero_offset_fits_by_delta"] = _json_ready_value(primary_low_aero_offset_fits)
+    result["diagnostics"]["fallback_low_aero_offset_fits_by_delta"] = _json_ready_value(fallback_low_aero_offset_fits)
     result["diagnostics"]["delta_offset_rejection_counts"] = _count_rejection_reasons(delta_timing_offset_fits)
     result["diagnostics"]["valid_delta_offset_fits"] = int(
         sum(1 for row in delta_timing_offset_fits if bool((row or {}).get("valid", False)))
+    )
+    selected_center_counts = {}
+    for row in delta_timing_offset_fits:
+        source = str((row or {}).get("selected_timing_center_source") or "unavailable")
+        selected_center_counts[source] = int(selected_center_counts.get(source, 0) + 1)
+    result["diagnostics"]["selected_timing_center_source_counts"] = selected_center_counts
+    result["diagnostics"]["stable_center_fallback_count"] = int(
+        sum(
+            1
+            for row in delta_timing_offset_fits
+            if str((row or {}).get("selected_timing_center_source")) == "stable_global_center_fallback"
+        )
     )
     delta_fits = []
     support_by_delta = []
@@ -4855,12 +5123,24 @@ def build_kaon_proton_cleaning_result(
     valid_coverage_by_delta = []
     delta_support_debug_rows = []
     for delta_index, slice_collection in enumerate(pid_payload["delta_slice_hists"]):
-        tof_summary = delta_tof_summaries[delta_index] if delta_index < len(delta_tof_summaries) else {}
         delta_offset_fit = (
             delta_timing_offset_fits[delta_index]
             if delta_index < len(delta_timing_offset_fits)
             else {"valid": False, "rejection_reason": "missing_delta_offset_fit"}
         )
+        selected_center_source = str((delta_offset_fit or {}).get("selected_timing_center_source") or "")
+        if selected_center_source == "low_aero_0_6_fit":
+            tof_summary = (delta_offset_fit or {}).get("fallback_low_aero_tof_summary") or (
+                fallback_low_aero_tof_summaries[delta_index]
+                if delta_index < len(fallback_low_aero_tof_summaries)
+                else {}
+            )
+        else:
+            tof_summary = (delta_offset_fit or {}).get("primary_low_aero_tof_summary") or (
+                primary_low_aero_tof_summaries[delta_index]
+                if delta_index < len(primary_low_aero_tof_summaries)
+                else {}
+            )
         slice_fits = []
         slice_debug_rows = []
         proton_total = 0.0
@@ -4874,6 +5154,10 @@ def build_kaon_proton_cleaning_result(
         valid_slices = 0
         chi2_weighted_sum = 0.0
         chi2_weight = 0.0
+        cell_fit_attempt_count = 0
+        cell_fit_valid_count = 0
+        cell_fit_skipped_count = 0
+        cell_fit_skipped_insufficient_support_count = 0
         for aero_index, slice_hist in enumerate(slice_collection):
             global_shape = global_shapes[aero_index] if aero_index < len(global_shapes) else {"valid": False}
             timing_constraint = _build_timing_constraint_for_cell(
@@ -4903,6 +5187,12 @@ def build_kaon_proton_cleaning_result(
                 timing_constraint=timing_constraint,
             )
             slice_fits.append(slice_fit)
+            if bool((slice_fit or {}).get("fit_attempted", False)):
+                cell_fit_attempt_count += 1
+            else:
+                cell_fit_skipped_count += 1
+                if str((slice_fit or {}).get("fit_status", "")) == "insufficient_support":
+                    cell_fit_skipped_insufficient_support_count += 1
             slice_debug_rows.append(
                 _json_ready_value(
                     {
@@ -4927,6 +5217,11 @@ def build_kaon_proton_cleaning_result(
                         "proton_yield": (slice_fit or {}).get("proton_yield"),
                         "other_yield": (slice_fit or {}).get("other_yield"),
                         "timing_model_valid": (slice_fit or {}).get("timing_model_valid"),
+                        "timing_center_model_valid": (slice_fit or {}).get("timing_center_model_valid"),
+                        "timing_center_source": (slice_fit or {}).get("timing_center_source"),
+                        "offset_refinement_valid": (slice_fit or {}).get("offset_refinement_valid"),
+                        "offset_refinement_applied": (slice_fit or {}).get("offset_refinement_applied"),
+                        "offset_refinement_failure_reasons": (slice_fit or {}).get("offset_refinement_failure_reasons"),
                         "cell_fit_valid": (slice_fit or {}).get("cell_fit_valid"),
                         "proton_component_detected": (slice_fit or {}).get("proton_component_detected"),
                         "proton_component_significance": (slice_fit or {}).get("proton_component_significance"),
@@ -4947,6 +5242,7 @@ def build_kaon_proton_cleaning_result(
             if not slice_fit.get("valid"):
                 continue
             valid_slices += 1
+            cell_fit_valid_count += 1
             proton_total += float(slice_fit.get("proton_yield", 0.0) or 0.0)
             kaon_total += float(slice_fit.get("kaon_yield", 0.0) or 0.0)
             other_total += float(slice_fit.get("other_yield", 0.0) or 0.0)
@@ -4997,6 +5293,13 @@ def build_kaon_proton_cleaning_result(
                     "proton_total": float(proton_total),
                     "kaon_total": float(kaon_total),
                     "other_total": float(other_total),
+                    "selected_timing_center_source": (delta_offset_fit or {}).get("selected_timing_center_source"),
+                    "offset_refinement_applied": bool((delta_offset_fit or {}).get("offset_refinement_applied", False)),
+                    "timing_center_model_valid": bool((delta_offset_fit or {}).get("timing_center_model_valid", False)),
+                    "cell_fit_attempt_count": int(cell_fit_attempt_count),
+                    "cell_fit_valid_count": int(cell_fit_valid_count),
+                    "cell_fit_skipped_count": int(cell_fit_skipped_count),
+                    "cell_fit_skipped_insufficient_support_count": int(cell_fit_skipped_insufficient_support_count),
                     "chi2_ndf_weighted": (
                         float(chi2_weighted_sum / chi2_weight) if chi2_weight > 0.0 else None
                     ),
@@ -5017,6 +5320,21 @@ def build_kaon_proton_cleaning_result(
     result["diagnostics"]["valid_coverage_by_delta"] = valid_coverage_by_delta
     result["diagnostics"]["chi2_ndf_by_delta"] = chi2_ndf_by_delta
     result["diagnostics"]["delta_support_debug_rows"] = delta_support_debug_rows
+    result["diagnostics"]["cell_fit_attempt_count"] = int(
+        sum(int((row or {}).get("cell_fit_attempt_count", 0) or 0) for row in delta_support_debug_rows)
+    )
+    result["diagnostics"]["cell_fit_valid_count"] = int(
+        sum(int((row or {}).get("cell_fit_valid_count", 0) or 0) for row in delta_support_debug_rows)
+    )
+    result["diagnostics"]["cell_fit_skipped_count"] = int(
+        sum(int((row or {}).get("cell_fit_skipped_count", 0) or 0) for row in delta_support_debug_rows)
+    )
+    result["diagnostics"]["cell_fit_skipped_insufficient_support_count"] = int(
+        sum(
+            int((row or {}).get("cell_fit_skipped_insufficient_support_count", 0) or 0)
+            for row in delta_support_debug_rows
+        )
+    )
     n_delta_diag = max(len(delta_fits), max(len(delta_edges) - 1, 0))
     n_aero_diag = max(len(result.get("aero_edges") or []) - 1, len(global_shapes), 0)
     proton_yield_by_delta_aero = []
@@ -5602,6 +5920,17 @@ def print_kaon_proton_cleaning_terminal_summary(cleaning_result, output_pdf=None
         ),
         "Aerogel reference line: {} NPE".format(
             float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0)
+        ),
+        "Low-aero selected centers: 0-5={} 0-6={} stable={}".format(
+            int((diagnostics.get("selected_timing_center_source_counts") or {}).get("low_aero_0_5_fit", 0) or 0),
+            int((diagnostics.get("selected_timing_center_source_counts") or {}).get("low_aero_0_6_fit", 0) or 0),
+            int((diagnostics.get("selected_timing_center_source_counts") or {}).get("stable_global_center_fallback", 0) or 0),
+        ),
+        "Cell fits: attempted={} valid={} skipped={} skipped_insufficient_support={}".format(
+            int(diagnostics.get("cell_fit_attempt_count", 0) or 0),
+            int(diagnostics.get("cell_fit_valid_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_count", 0) or 0),
+            int(diagnostics.get("cell_fit_skipped_insufficient_support_count", 0) or 0),
         ),
         "Global PID source usage:",
     ]
@@ -6318,13 +6647,31 @@ def _print_low_aero_offset_diagnostics_page(output_pdf, cleaning_result, prefix)
     )
     h_fallback_fraction = _clone_hist(h_primary_fraction, "H_proton_cleaning_low_aero_fallback_fraction_{}".format(page_id), reset=True)
     h_full_fraction = _clone_hist(h_primary_fraction, "H_proton_cleaning_low_aero_full_fraction_{}".format(page_id), reset=True)
-    mode_codes = {"unavailable": 0.0, "low_aero_0_5": 1.0, "low_aero_0_6_fallback": 2.0}
+    mode_codes = {
+        "unavailable": 0.0,
+        "low_aero_0_5": 1.0,
+        "low_aero_0_6_fallback": 2.0,
+        "low_aero_0_5_fit": 1.0,
+        "low_aero_0_6_fit": 2.0,
+        "stable_global_center_fallback": 3.0,
+    }
     for index in range(max(len(delta_edges) - 1, 0)):
         fit_row = offset_fits[index] if index < len(offset_fits) else {}
         primary = primary_rows[index] if index < len(primary_rows) else {}
         fallback = fallback_rows[index] if index < len(fallback_rows) else {}
         full = full_rows[index] if index < len(full_rows) else {}
-        h_mode.SetBinContent(index + 1, float(mode_codes.get(str(fit_row.get("offset_fit_aero_mode", "unavailable")), 0.0)))
+        h_mode.SetBinContent(
+            index + 1,
+            float(
+                mode_codes.get(
+                    str(
+                        fit_row.get("selected_timing_center_source")
+                        or fit_row.get("offset_fit_aero_mode", "unavailable")
+                    ),
+                    0.0,
+                )
+            ),
+        )
         for hist, row in (
             (h_primary_prompt, primary),
             (h_fallback_prompt, fallback),

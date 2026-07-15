@@ -573,13 +573,14 @@ def _validate_low_aero_offset_metadata(
     full_rows = list(diag.get("full_aero_tof_summary_by_delta") or [])
     selected_rows = list(diag.get("tof_summary_by_delta") or payload.get("tof_summary_by_delta") or [])
     offsets = list(payload.get("delta_timing_offset_fits") or diag.get("delta_timing_offset_fits") or [])
-    allowed_modes = {"low_aero_0_5", "low_aero_0_6_fallback", "unavailable"}
+    allowed_summary_modes = {"low_aero_0_5", "low_aero_0_6_fallback", "unavailable"}
+    allowed_selected_sources = {"low_aero_0_5_fit", "low_aero_0_6_fit", "stable_global_center_fallback"}
     for index, row in enumerate(selected_rows):
         if not isinstance(row, dict):
             continue
         scope = "python_tof_extension/low_aero[{}]".format(index)
         mode = str(row.get("offset_fit_aero_mode") or "unavailable")
-        if mode not in allowed_modes:
+        if mode not in allowed_summary_modes:
             _append_issue(issues, scope, "unsupported low-aerogel offset mode", {"mode": mode})
         aero_min = _float_or_none(row.get("offset_fit_aero_min"))
         aero_max = _float_or_none(row.get("offset_fit_aero_max"))
@@ -601,14 +602,46 @@ def _validate_low_aero_offset_metadata(
     for index, row in enumerate(offsets):
         if not isinstance(row, dict):
             continue
-        mode = str(row.get("offset_fit_aero_mode") or "unavailable")
-        if mode not in allowed_modes:
+        source = str(row.get("selected_timing_center_source") or row.get("timing_center_source") or "unavailable")
+        if source not in allowed_selected_sources:
             _append_issue(
                 issues,
                 "python_tof_extension/low_aero_offset_fit[{}]".format(index),
-                "offset fit selected non-low-aerogel mode",
-                {"mode": mode},
+                "offset fit selected unsupported timing-center source",
+                {"selected_timing_center_source": source},
             )
+            continue
+        primary_attempt = row.get("primary_offset_attempt") or {}
+        fallback_attempt = row.get("fallback_offset_attempt") or {}
+        primary_valid = bool(row.get("primary_offset_valid", primary_attempt.get("valid", False)))
+        fallback_valid = bool(row.get("fallback_offset_valid", fallback_attempt.get("valid", False)))
+        if source == "low_aero_0_5_fit" and not primary_valid:
+            _append_issue(issues, "python_tof_extension/low_aero_offset_fit[{}]".format(index), "0-5 timing-center source selected without a valid primary fit")
+        if source == "low_aero_0_6_fit":
+            if primary_valid:
+                _append_issue(issues, "python_tof_extension/low_aero_offset_fit[{}]".format(index), "0-6 fallback selected even though primary fit is valid")
+            if not fallback_valid:
+                _append_issue(issues, "python_tof_extension/low_aero_offset_fit[{}]".format(index), "0-6 timing-center source selected without a valid fallback fit")
+        if source == "stable_global_center_fallback":
+            if primary_valid or fallback_valid:
+                _append_issue(
+                    issues,
+                    "python_tof_extension/low_aero_offset_fit[{}]".format(index),
+                    "stable center fallback selected even though an offset fit is valid",
+                    {"primary_valid": primary_valid, "fallback_valid": fallback_valid},
+                )
+            if bool(row.get("offset_refinement_valid", False)) or bool(row.get("offset_refinement_applied", False)):
+                _append_issue(
+                    issues,
+                    "python_tof_extension/low_aero_offset_fit[{}]".format(index),
+                    "stable center fallback marked as applied/valid offset refinement",
+                )
+            if not bool(row.get("timing_center_model_valid", False)):
+                _append_issue(
+                    issues,
+                    "python_tof_extension/low_aero_offset_fit[{}]".format(index),
+                    "stable center fallback did not produce a valid timing-center model",
+                )
     if not isinstance(cfg, dict) or not cfg:
         _append_issue(issues, "python_tof_extension/low_aero", "missing serialized low_aero_offset_config")
 
@@ -627,6 +660,19 @@ def _validate_offset_rows(
             continue
         delta_index = int(row.get("delta_index", -1))
         scope = "python_tof_extension/delta_offsets[{}]".format(delta_index)
+        center_source = str(row.get("selected_timing_center_source") or row.get("timing_center_source") or "")
+        if center_source == "stable_global_center_fallback":
+            if bool(row.get("valid", False)):
+                _append_issue(issues, scope, "stable center fallback row is marked as a valid offset fit")
+            if bool(row.get("offset_refinement_valid", False)) or bool(row.get("offset_refinement_applied", False)):
+                _append_issue(issues, scope, "stable center fallback row is marked as applied/valid offset refinement")
+            if not bool(row.get("timing_center_model_valid", False)):
+                _append_issue(issues, scope, "stable center fallback row lacks a valid timing-center model")
+            if not row.get("reference_kaon_mean") and _float_or_none(row.get("reference_kaon_mean")) is None:
+                _append_issue(issues, scope, "stable center fallback row missing reference kaon mean")
+            if not row.get("reference_proton_mean") and _float_or_none(row.get("reference_proton_mean")) is None:
+                _append_issue(issues, scope, "stable center fallback row missing reference proton mean")
+            continue
         cfg = row.get("tof_offset_validation") or {}
         for key in (
             "maximum_offset_error_ns",
@@ -737,11 +783,81 @@ def _validate_invalid_offset_propagation(
         if delta_index < 0:
             continue
         scope = "python_tof_extension/invalid_offset_propagation[{}]".format(delta_index)
+        if bool(row.get("timing_center_model_valid", False)):
+            source = str(row.get("selected_timing_center_source") or row.get("timing_center_source") or "")
+            if source != "stable_global_center_fallback":
+                _append_issue(
+                    issues,
+                    scope,
+                    "invalid offset has timing-center model from unexpected source",
+                    {"selected_timing_center_source": source},
+                )
+            continue
         if delta_index < len(support) and str(support[delta_index]) != "unsupported":
             _append_issue(issues, scope, "invalid offset did not force unsupported support label", {"support": support[delta_index]})
         for aero_index, slice_row in enumerate(delta_slices[delta_index] if delta_index < len(delta_slices) else []):
             if isinstance(slice_row, dict) and bool(slice_row.get("valid", False)):
                 _append_issue(issues, scope, "invalid offset produced valid slice fit", {"aero_index": aero_index})
+
+
+def _validate_cell_fit_attempts(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    debug_rows = list(diag.get("delta_support_debug_rows") or [])
+    for delta_index, row in enumerate(debug_rows):
+        if not isinstance(row, dict):
+            continue
+        if not bool(row.get("timing_center_model_valid", False)):
+            continue
+        candidate_cells = 0
+        attempted_cells = 0
+        for aero_index, slice_row in enumerate(row.get("slice_rows") or []):
+            if not isinstance(slice_row, dict):
+                continue
+            if not bool(slice_row.get("global_shape_valid", False)):
+                continue
+            support_entries = int(slice_row.get("support_entries", 0) or 0)
+            minimum_required = int(slice_row.get("minimum_required_entries", 0) or 0)
+            if minimum_required > 0 and support_entries < minimum_required:
+                continue
+            candidate_cells += 1
+            if bool(slice_row.get("fit_attempted", False)):
+                attempted_cells += 1
+                continue
+            _append_issue(
+                issues,
+                "python_tof_extension/cell_fit_attempts[{}][{}]".format(delta_index, aero_index),
+                "cell had timing model and support but fit was not attempted",
+                {
+                    "fit_status": slice_row.get("fit_status"),
+                    "support_entries": support_entries,
+                    "minimum_required_entries": minimum_required,
+                    "timing_center_source": slice_row.get("timing_center_source"),
+                },
+            )
+            if str(slice_row.get("fit_status") or "") == "insufficient_support":
+                _append_issue(
+                    issues,
+                    "python_tof_extension/cell_fit_attempts[{}][{}]".format(delta_index, aero_index),
+                    "supported cell was incorrectly marked insufficient_support",
+                    {
+                        "support_entries": support_entries,
+                        "minimum_required_entries": minimum_required,
+                    },
+                )
+        if candidate_cells > 0 and attempted_cells <= 0:
+            _append_issue(
+                issues,
+                "python_tof_extension/cell_fit_attempts[{}]".format(delta_index),
+                "delta bin has supported timing cells but no cell fits were attempted",
+                {
+                    "candidate_cells": candidate_cells,
+                    "timing_center_source": row.get("selected_timing_center_source"),
+                    "cell_fit_attempt_count": row.get("cell_fit_attempt_count"),
+                },
+            )
 
 
 def _validate_weak_high_aero_components(
@@ -861,6 +977,30 @@ def _validate_branch_alias_metadata(
         )
 
 
+def _validate_k_lambda_reference_persistence(
+    issues: list[dict[str, Any]],
+    payload: dict[str, Any],
+) -> None:
+    diag = _diagnostics(payload)
+    input_loaded = payload.get("k_lambda_simc_input_loaded", diag.get("k_lambda_simc_input_loaded"))
+    if input_loaded is None:
+        return
+    scope = "component_subtraction/k_lambda_reference"
+    if not bool(input_loaded):
+        if str(payload.get("k_lambda_simc_reference_source") or diag.get("k_lambda_simc_reference_source") or "") == "immutable_aligned_k_lambda_simc":
+            _append_issue(issues, scope, "immutable K-Lambda reference source set even though input was not loaded")
+        return
+    available = payload.get("k_lambda_simc_reference_available", diag.get("k_lambda_simc_reference_available"))
+    source = str(payload.get("k_lambda_simc_reference_source") or diag.get("k_lambda_simc_reference_source") or "")
+    integral = _float_or_none(payload.get("k_lambda_simc_reference_integral", diag.get("k_lambda_simc_reference_integral")))
+    if not bool(available):
+        _append_issue(issues, scope, "K-Lambda SIMC input was loaded but the immutable comparison reference is not marked available")
+    if source != "immutable_aligned_k_lambda_simc":
+        _append_issue(issues, scope, "K-Lambda reference is not using the immutable aligned SIMC source", {"source": source})
+    if integral is None or integral <= 0.0:
+        _append_issue(issues, scope, "K-Lambda immutable reference has missing or non-positive integral", {"integral": integral})
+
+
 def _validate_python_tof_extension(
     issues: list[dict[str, Any]],
     payload: dict[str, Any],
@@ -872,9 +1012,11 @@ def _validate_python_tof_extension(
     _validate_offset_rows(issues, payload)
     _validate_timing_constraints(issues, payload, center_tolerance=1.0e-6)
     _validate_invalid_offset_propagation(issues, payload)
+    _validate_cell_fit_attempts(issues, payload)
     _validate_weak_high_aero_components(issues, payload, abs_tol)
     _validate_closure_and_weights(issues, payload, python_weight_payloads, abs_tol)
     _validate_branch_alias_metadata(issues, payload)
+    _validate_k_lambda_reference_persistence(issues, payload)
 
 
 def _write_text_report(path: str, report: dict[str, Any]) -> None:
