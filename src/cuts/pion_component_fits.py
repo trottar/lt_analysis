@@ -930,6 +930,86 @@ def _build_scaled_reference_hist(target_hist, reference_hist, x_min, x_max, hist
     return scaled_hist, scale_factor
 
 
+def _build_scaled_reference_hist_with_fallback(target_hist, reference_hist, x_min, x_max, hist_name):
+    scaled_hist, scale_factor = _build_scaled_reference_hist(
+        target_hist,
+        reference_hist,
+        x_min,
+        x_max,
+        hist_name,
+    )
+    if scaled_hist is not None:
+        return scaled_hist, scale_factor, "cut-window normalized K-Lambda SIMC"
+
+    if target_hist is None or reference_hist is None:
+        return None, None, "missing K-Lambda SIMC input"
+
+    reference_integral = _hist_integral(reference_hist)
+    if (not math.isfinite(reference_integral)) or reference_integral <= 0.0:
+        return None, None, "non-positive K-Lambda SIMC integral"
+
+    target_integral = _integrate_hist_range(target_hist, x_min, x_max)
+    if (not math.isfinite(target_integral)) or target_integral <= 0.0:
+        target_integral = _hist_integral(target_hist)
+
+    if (not math.isfinite(target_integral)) or target_integral <= 0.0:
+        scale_factor = 1.0
+        source = "unit-normalized raw K-Lambda SIMC"
+    else:
+        scale_factor = float(target_integral / reference_integral)
+        source = "full-range normalized K-Lambda SIMC fallback"
+
+    scaled_hist = _clone_hist(reference_hist, hist_name)
+    if scaled_hist is None:
+        return None, None, "failed to clone K-Lambda SIMC"
+    scaled_hist.Scale(scale_factor)
+    return scaled_hist, scale_factor, source
+
+
+def _resolve_kaon_lambda_reference_for_plot(payload, target_hist, cut_window, scope_label, hist_name):
+    if not isinstance(payload, dict):
+        return None, None, "missing payload"
+
+    reference_hist = payload.get("H_kaon_fit_k_lambda_reference")
+    if reference_hist is not None:
+        return (
+            reference_hist,
+            payload.get("S_lambda_reference_scale"),
+            "cut-window normalized K-Lambda gauge",
+        )
+
+    if (
+        payload.get("H_simc_shape_k_lambda") is not None
+        and target_hist is not None
+        and isinstance(cut_window, (list, tuple))
+        and len(cut_window) == 2
+        and _is_finite_number(cut_window[0])
+        and _is_finite_number(cut_window[1])
+    ):
+        reference_hist, scale_factor, source = _build_scaled_reference_hist_with_fallback(
+            target_hist,
+            payload.get("H_simc_shape_k_lambda"),
+            float(cut_window[0]),
+            float(cut_window[1]),
+            "{}_{}".format(hist_name, str(scope_label).replace(" ", "_")),
+        )
+        if reference_hist is not None:
+            return reference_hist, scale_factor, source
+
+    reference_hist = (
+        payload.get("H_kaon_fit_k_lambda_scaled_refined")
+        or payload.get("H_kaon_fit_k_lambda_scaled")
+    )
+    if reference_hist is not None:
+        return (
+            reference_hist,
+            payload.get("S_lambda_reference_scale"),
+            "refined/staged K-Lambda fit contribution",
+        )
+
+    return None, None, "K-Lambda SIMC unavailable"
+
+
 def _mask_hist_windows_inplace(hist, windows, zero_errors=True):
     if hist is None:
         return hist
@@ -6348,40 +6428,21 @@ def print_particle_subtraction_component_application_pages(
     pion_postrefine_scales = pion_diag.get("postrefine_component_scales") or {}
     kaon_postrefine_scales = kaon_diag.get("postrefine_component_scales") or {}
     kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
-    lambda_reference_hist = component_payload.get("H_kaon_fit_k_lambda_reference")
-    lambda_reference_scale = component_payload.get("S_lambda_reference_scale")
-    lambda_reference_label = "normalized K-Lambda gauge"
-    lambda_reference_source = "cut-window normalized reference"
-    if (
-        lambda_reference_hist is None
-        and component_payload.get("H_simc_shape_k_lambda") is not None
-        and component_payload.get("H_MM_nosub_before_pion_subtraction") is not None
-        and isinstance(cut_window, (list, tuple))
-        and len(cut_window) == 2
-        and _is_finite_number(cut_window[0])
-        and _is_finite_number(cut_window[1])
-    ):
-        lambda_reference_hist, lambda_reference_scale = _build_scaled_reference_hist(
-            component_payload.get("H_MM_nosub_before_pion_subtraction"),
-            component_payload.get("H_simc_shape_k_lambda"),
-            float(cut_window[0]),
-            float(cut_window[1]),
-            "H_k_lambda_reference_application_{}".format(
-                str(scope_label).replace(" ", "_")
-            ),
+    lambda_reference_hist, lambda_reference_scale, lambda_reference_source = (
+        _resolve_kaon_lambda_reference_for_plot(
+            component_payload,
+            component_payload.get("H_MM_nosub_after_pion_subtraction")
+            or component_payload.get("H_MM_nosub_before_pion_subtraction"),
+            cut_window,
+            scope_label,
+            "H_k_lambda_reference_application",
         )
-    if lambda_reference_hist is None:
-        lambda_reference_hist = (
-            component_payload.get("H_kaon_fit_k_lambda_scaled_refined")
-            or component_payload.get("H_kaon_fit_k_lambda_scaled")
-        )
-        if lambda_reference_hist is not None:
-            lambda_reference_label = "K-Lambda fit contribution"
-            lambda_reference_source = (
-                "refined K-Lambda fit"
-                if component_payload.get("H_kaon_fit_k_lambda_scaled_refined") is not None
-                else "staged K-Lambda fit"
-            )
+    )
+    lambda_reference_label = (
+        "K-Lambda SIMC comparison"
+        if lambda_reference_hist is not None
+        else "K-Lambda SIMC comparison unavailable"
+    )
 
     _print_single_hist_page(
         pdf_name,
@@ -6624,39 +6685,43 @@ def print_particle_subtraction_component_application_pages(
         cut_window=cut_window,
     )
 
-    if lambda_reference_hist is not None:
-        lambda_page_title = "{}Part 3 after pion subtraction vs K-Lambda comparison".format(
-            title_prefix
-        )
-        _print_component_overlay_page(
-            pdf_name,
-            component_payload.get("H_MM_nosub_after_pion_subtraction"),
-            "after pion subtraction",
-            lambda_page_title,
-            [
-                (lambda_reference_hist, lambda_reference_label, ROOT.kBlue + 1, 2),
-            ],
-            [
-                "scope: {}".format(scope_label),
-                "after full integral={}".format(
-                    _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
-                ),
-                "K-Lambda comparison full integral={}".format(
-                    _format_fit_number(_hist_integral(lambda_reference_hist))
-                ),
-                "K-Lambda comparison source={}".format(lambda_reference_source),
-                "K-Lambda gauge scale={}".format(
-                    _format_fit_number(lambda_reference_scale)
-                    if lambda_reference_scale is not None
-                    else "n/a"
-                ),
-                "fit validation pion/kaon={}/{}".format(
-                    "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
-                    "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail",
-                ),
-            ],
-            cut_window=cut_window,
-        )
+    lambda_page_title = "{}Part 3 after pion subtraction vs K-Lambda comparison".format(
+        title_prefix
+    )
+    _print_component_overlay_page(
+        pdf_name,
+        component_payload.get("H_MM_nosub_after_pion_subtraction"),
+        "after pion subtraction",
+        lambda_page_title,
+        [
+            (lambda_reference_hist, lambda_reference_label, ROOT.kBlue + 1, 2),
+        ],
+        [
+            "scope: {}".format(scope_label),
+            "after full integral={}".format(
+                _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
+            ),
+            "K-Lambda comparison status={}".format(
+                "available" if lambda_reference_hist is not None else "missing"
+            ),
+            "K-Lambda comparison full integral={}".format(
+                _format_fit_number(_hist_integral(lambda_reference_hist))
+                if lambda_reference_hist is not None
+                else "n/a"
+            ),
+            "K-Lambda comparison source={}".format(lambda_reference_source),
+            "K-Lambda gauge scale={}".format(
+                _format_fit_number(lambda_reference_scale)
+                if lambda_reference_scale is not None
+                else "n/a"
+            ),
+            "fit validation pion/kaon={}/{}".format(
+                "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
+                "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail",
+            ),
+        ],
+        cut_window=cut_window,
+    )
 
 
 def print_particle_subtraction_component_fit_pages(
@@ -6767,7 +6832,16 @@ def print_particle_subtraction_component_fit_pages(
         ],
     )
 
-    has_kaon_signal_reference = component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None
+    kaon_signal_reference_hist, kaon_signal_reference_scale, kaon_signal_reference_source = (
+        _resolve_kaon_lambda_reference_for_plot(
+            component_fit_result,
+            component_fit_result.get("H_kaon_nosub_input"),
+            cut_window,
+            component_fit_result.get("analysis_scope", "unknown"),
+            "H_k_lambda_reference_fit",
+        )
+    )
+    has_kaon_signal_reference = kaon_signal_reference_hist is not None
     has_sigma0_component = component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None
     kaon_title = "{}kaon no-sub SIMC pion-background fit".format(title_prefix)
     if has_kaon_signal_reference:
@@ -6786,7 +6860,7 @@ def print_particle_subtraction_component_fit_pages(
         )
     if has_kaon_signal_reference:
         kaon_overlay_specs.append(
-            (component_fit_result.get("H_kaon_fit_k_lambda_reference"), "K-Lambda gauge", ROOT.kBlue + 1, 2)
+            (kaon_signal_reference_hist, "K-Lambda gauge", ROOT.kBlue + 1, 2)
         )
     kaon_overlay_specs.append(
         (component_fit_result.get("H_kaon_pion_bg_fit_total"), "pion-bg sum", ROOT.kOrange + 7, 2)
@@ -6828,8 +6902,9 @@ def print_particle_subtraction_component_fit_pages(
                 _format_fit_number(kaon_stage_amplitudes.get(KAON_SIGMA0_TEMPLATE_NAME))
             ) if has_sigma0_component else "K-Sigma0 scale=n/a",
             "K-Lambda gauge scale={}".format(
-                _format_fit_number(kaon_stage_amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME))
+                _format_fit_number(kaon_signal_reference_scale)
             ) if has_kaon_signal_reference else "K-Lambda gauge scale=n/a",
+            "K-Lambda gauge source={}".format(kaon_signal_reference_source),
             "chi2/ndf={}  p={}".format(
                 _format_fit_metric(kaon_stage_validation.get("chi2_ndf")),
                 _format_fit_metric(kaon_stage_validation.get("fit_p_value")),
