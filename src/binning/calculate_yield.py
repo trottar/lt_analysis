@@ -81,6 +81,7 @@ from background_config import (
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
+    get_particle_subtraction_setting_key,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -96,6 +97,9 @@ from pion_component_fits import (
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
+    resolve_pion_component_alignment,
+    load_pion_component_alignment,
+    persist_pion_component_alignment,
 )
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
@@ -1205,6 +1209,7 @@ def process_hist_data(
     kaon_signal_shape_payload=None,
     kaon_sigma0_shape_payload=None,
     proton_cleaning_result=None,
+    parent_pion_alignment=None,
 ):
     emit_plots = inpDict.get("yield_emit_plots", True)
     suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
@@ -1752,15 +1757,50 @@ def process_hist_data(
                 use_legacy_scalar_subtraction = True
 
                 if component_shape_payload is not None:
+                    scope_component_shapes = resolve_scope_component_shapes(
+                        component_shape_payload,
+                        analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
+                        t_bin_index=j,
+                        phi_bin_index=k,
+                    )
+                    alignment_bin_key = {
+                        "kinematic_setting": get_particle_subtraction_setting_key(inpDict),
+                        "epsilon": EPSSET,
+                        "phi_setting": phi_setting,
+                        "analysis_scope": "yield_t_phi",
+                        "t_bin": {"index": int(j), "edges": [float(t_bins[j]), float(t_bins[j + 1])]},
+                        "phi_bin": {"index": int(k), "edges": [float(phi_bins[k]), float(phi_bins[k + 1])]},
+                        "active_dimensions": {
+                            "particle_type": ParticleType,
+                            "polarization": inpDict.get("POL"),
+                            "target": inpDict.get("target") or inpDict.get("Target"),
+                        },
+                    }
+                    requested_alignment = resolve_pion_component_alignment(
+                        get_particle_subtraction_setting_key(inpDict),
+                        "yield_t_phi",
+                        alignment_bin_key,
+                        subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
+                        scope_component_shapes,
+                        parent_alignment=parent_pion_alignment,
+                        inp_dict=inpDict,
+                        phi_setting=phi_setting,
+                        common_setting_shift_gev=MM_offset_DATA,
+                    )
+                    persisted_alignment, persistence_reasons, _ = load_pion_component_alignment(
+                        OUTPATH,
+                        get_particle_subtraction_setting_key(inpDict),
+                        phi_setting,
+                        EPSSET,
+                        requested_alignment,
+                    )
+                    active_alignment = persisted_alignment or requested_alignment
+                    if persistence_reasons:
+                        active_alignment["persistence_rejection_reasons"] = list(persistence_reasons)
                     scope_result = build_particle_subtraction_component_result(
                         subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
                         hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
-                        resolve_scope_component_shapes(
-                            component_shape_payload,
-                            analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
-                            t_bin_index=j,
-                            phi_bin_index=k,
-                        ),
+                        scope_component_shapes,
                         inpDict,
                         analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
                         kaon_signal_shape=resolve_scope_single_shape(
@@ -1778,7 +1818,24 @@ def process_hist_data(
                         mm_offset_data=MM_offset_DATA,
                         phi_setting=phi_setting,
                         context="yield_{}_t{}_phi{}".format(phi_setting, j + 1, k + 1),
+                        parent_alignment=parent_pion_alignment,
+                        pion_component_alignment=active_alignment,
+                        alignment_bin_key=alignment_bin_key,
                     )
+                    alignment_payload = scope_result.get("pion_component_alignment")
+                    if isinstance(alignment_payload, dict):
+                        alignment_paths = persist_pion_component_alignment(
+                            OUTPATH,
+                            get_particle_subtraction_setting_key(inpDict),
+                            phi_setting,
+                            EPSSET,
+                            alignment_payload,
+                        )
+                        alignment_payload["persistence_status"] = "reused" if persisted_alignment else "created"
+                        alignment_payload["artifact_paths"] = list(alignment_paths)
+                        for path in alignment_paths:
+                            if path not in inpDict.setdefault("pion_component_alignment_artifacts", []):
+                                inpDict["pion_component_alignment_artifacts"].append(path)
                     component_fit_results[j][k] = scope_result
                     component_payload = _apply_component_pion_subtraction_for_bin(
                         hist_bin_dict,
@@ -2385,6 +2442,9 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         "calculate_yield_bg_opt_sigma0",
     )
     proton_cleaning_result = hist.get("_proton_contamination_cleaning_result_setting")
+    parent_pion_alignment = (
+        (hist.get("_particle_subtraction_component_fit_setting") or {}).get("pion_component_alignment")
+    )
     processed_dict, _, ave_event_cache, sub_event_cache = process_hist_data(
         hist["InFile_DATA"],
         hist["InFile_DUMMY"],
@@ -2397,6 +2457,7 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         base_inp,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+        parent_pion_alignment=parent_pion_alignment,
         proton_cleaning_result=proton_cleaning_result,
     )
 
@@ -2617,6 +2678,7 @@ def bin_data(
     kaon_signal_shape_payload=None,
     kaon_sigma0_shape_payload=None,
     proton_cleaning_result=None,
+    parent_pion_alignment=None,
 ):
 
     if data_base_cache is None:
@@ -2634,6 +2696,7 @@ def bin_data(
             kaon_signal_shape_payload=kaon_signal_shape_payload,
             kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
             proton_cleaning_result=proton_cleaning_result,
+            parent_pion_alignment=parent_pion_alignment,
         )
     else:
         processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = _process_hist_data_from_base_cache(
@@ -2771,6 +2834,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         "calculate_yield_sigma0",
     )
     proton_cleaning_result = hist.get("_proton_contamination_cleaning_result_setting")
+    parent_pion_alignment = (
+        (hist.get("_particle_subtraction_component_fit_setting") or {}).get("pion_component_alignment")
+    )
     
     # Initialize lists for binned_t_data, binned_hist_data, and binned_hist_dummy
     binned_dict, ave_event_cache, sub_event_cache = bin_data(
@@ -2788,6 +2854,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         particle_subtraction_scale_factor=particle_subtraction_scale_factor,
         kaon_signal_shape_payload=kaon_signal_shape_payload,
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+        parent_pion_alignment=parent_pion_alignment,
         proton_cleaning_result=proton_cleaning_result,
     )
     hist["_yield_data_event_cache"] = ave_event_cache

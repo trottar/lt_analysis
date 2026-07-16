@@ -521,6 +521,74 @@ PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES = {}
 
 PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG_OVERRIDES = {}
 
+# Pion-template alignment is deliberately independent from the legacy
+# residual-component-shift switches above.  The legacy switches remain the
+# compatibility path when this layer is disabled; when enabled, one
+# pion-control calibration is shared by the pion and kaon fits.
+PION_COMPONENT_DYNAMIC_ALIGNMENT_SCHEMA_VERSION = 2
+PION_COMPONENT_DYNAMIC_ALIGNMENT = {
+    "enabled": True,
+    "components": {
+        "pi_n": {
+            "enabled": True,
+            "global_offset_scan_gev": {"minimum": -0.020, "maximum": 0.020, "step": 0.001},
+            "fine_bin_offset_scan_gev": {
+                "minimum_relative_to_parent": -0.010,
+                "maximum_relative_to_parent": 0.010,
+                "step": 0.001,
+            },
+            "window_expansion_candidates_gev": [0.000, 0.005, 0.010, 0.015, 0.020],
+        },
+        "pi_delta": {
+            "enabled": True,
+            "global_offset_scan_gev": {"minimum": -0.030, "maximum": 0.030, "step": 0.002},
+            "fine_bin_offset_scan_gev": {
+                "minimum_relative_to_parent": -0.012,
+                "maximum_relative_to_parent": 0.012,
+                "step": 0.002,
+            },
+            "window_expansion_candidates_gev": [0.000, 0.010, 0.020, 0.030],
+        },
+        "pi_sidis": {
+            "enabled": False,
+            "inherit_parent_by_default": True,
+            "global_offset_scan_gev": {"minimum": -0.010, "maximum": 0.010, "step": 0.002},
+            "fine_bin_offset_scan_gev": {
+                "minimum_relative_to_parent": -0.005,
+                "maximum_relative_to_parent": 0.005,
+                "step": 0.002,
+            },
+            "window_expansion_candidates_gev": [0.000, 0.010, 0.020],
+        },
+    },
+    "acceptance": {
+        "minimum_active_fit_bins": 6,
+        "minimum_evaluation_bins": 8,
+        "minimum_data_integral": 1.0,
+        "minimum_template_integral": 1.0,
+        "minimum_relative_score_improvement": 0.02,
+        "maximum_lost_template_integral_fraction": 0.05,
+        "reject_offset_boundary": True,
+        "reject_expansion_boundary": False,
+        "require_localized_minimum": True,
+        "maximum_near_minimum_candidate_fraction": 0.35,
+        "near_minimum_relative_score_tolerance": 0.01,
+    },
+    "ranking": {
+        "metric": "fixed_envelope_chi2_ndf",
+        "window_expansion_penalty": 0.0,
+        "offset_magnitude_penalty": 0.0,
+        "boundary_penalty": 1.0e6,
+    },
+    "interpolation_mode": "linear",
+    "renormalize_shifted_templates": True,
+}
+
+# Follow the same setting/phi override convention as the existing particle
+# subtraction configuration.  Runtime callers may also provide a complete or
+# partial ``pion_component_dynamic_alignment`` mapping in ``inpDict``.
+PION_COMPONENT_DYNAMIC_ALIGNMENT_OVERRIDES = {}
+
 PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS = frozenset(
     {
         "enabled_windows",
@@ -1821,6 +1889,77 @@ def _resolve_particle_subtraction_override_layers(
             )
 
     return layers
+
+
+def _deep_merge_pion_alignment_config(base, override):
+    """Recursively merge dynamic-alignment configuration mappings."""
+    merged = deepcopy(base) if isinstance(base, dict) else {}
+    if not isinstance(override, dict):
+        return merged
+    for key, value in override.items():
+        key = str(key)
+        if isinstance(merged.get(key), dict) and isinstance(value, dict):
+            merged[key] = _deep_merge_pion_alignment_config(merged[key], value)
+        else:
+            merged[key] = deepcopy(value)
+    return merged
+
+
+def get_pion_component_dynamic_alignment_config(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    """Return the resolved, serializable dynamic pion-alignment settings."""
+    config = deepcopy(PION_COMPONENT_DYNAMIC_ALIGNMENT)
+    if isinstance(inp_dict, dict) and isinstance(inp_dict.get("pion_component_dynamic_alignment"), dict):
+        config = _deep_merge_pion_alignment_config(
+            config,
+            inp_dict.get("pion_component_dynamic_alignment"),
+        )
+
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PION_COMPONENT_DYNAMIC_ALIGNMENT_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+    for override_layer in override_layers:
+        config = _deep_merge_pion_alignment_config(config, override_layer.get("payload"))
+
+    components = config.get("components") or {}
+    for component_name in ("pi_n", "pi_delta", "pi_sidis"):
+        component_config = components.get(component_name) or {}
+        for field_name in ("global_offset_scan_gev", "fine_bin_offset_scan_gev"):
+            scan = component_config.get(field_name) or {}
+            for value in scan.values():
+                try:
+                    float(value)
+                except (TypeError, ValueError):
+                    raise ValueError(
+                        "Dynamic pion alignment {}.{} must contain numeric values".format(
+                            component_name, field_name
+                        )
+                    )
+        for value in component_config.get("window_expansion_candidates_gev") or []:
+            if float(value) < 0.0:
+                raise ValueError(
+                    "Dynamic pion alignment expansion candidates for '{}' must be non-negative".format(
+                        component_name
+                    )
+                )
+
+    config["alignment_schema_version"] = int(PION_COMPONENT_DYNAMIC_ALIGNMENT_SCHEMA_VERSION)
+    config["particle_subtraction_setting_key"] = resolved_setting_key
+    config["particle_subtraction_phi_setting"] = resolved_phi_setting
+    config["particle_subtraction_override_layers"] = [
+        layer.get("path") for layer in override_layers
+    ]
+    return config
 
 
 def _attach_particle_subtraction_resolution_metadata(

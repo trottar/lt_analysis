@@ -76,6 +76,7 @@ from background_config import (
     resolve_particle_subtraction_weight_denominator_floor,
     resolve_particle_subtraction_weight_warn_max,
     get_proton_contamination_cleaning_config,
+    get_particle_subtraction_setting_key,
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
@@ -86,6 +87,7 @@ from pion_component_fits import (
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
+    persist_pion_component_alignment,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -2884,7 +2886,35 @@ def rand_sub(
                 mm_offset_data=MM_offset_DATA,
                 phi_setting=phi_setting,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
+                alignment_bin_key={
+                    "kinematic_setting": get_particle_subtraction_setting_key(inpDict),
+                    "epsilon": EPSSET,
+                    "phi_setting": phi_setting,
+                    "analysis_scope": "setting-wide",
+                    "t_bin": None,
+                    "phi_bin": None,
+                    "active_dimensions": {
+                        "particle_type": ParticleType,
+                        "polarization": inpDict.get("POL"),
+                        "target": inpDict.get("target") or inpDict.get("Target"),
+                    },
+                },
             )
+            alignment_payload = component_fit_result.get("pion_component_alignment")
+            if isinstance(alignment_payload, dict):
+                setting_key = component_fit_result.get("particle_subtraction_setting_key")
+                alignment_paths = persist_pion_component_alignment(
+                    OUTPATH,
+                    setting_key,
+                    phi_setting,
+                    EPSSET,
+                    alignment_payload,
+                )
+                alignment_payload["persistence_status"] = "created"
+                alignment_payload["artifact_paths"] = list(alignment_paths)
+                for path in alignment_paths:
+                    if path not in inpDict.setdefault("pion_component_alignment_artifacts", []):
+                        inpDict["pion_component_alignment_artifacts"].append(path)
             component_subtraction_payload = _apply_component_pion_subtraction_setting(
                 component_fit_result,
                 sub_tree_bundle,

@@ -1160,6 +1160,13 @@ debug_checkpoint(
 aveDict.update(ave_per_bin_data(histlist, inpDict))
 record_stage_time("Step 6 averages", stage_start)
 
+# Parent and fine-bin pion-alignment maps are normal analysis artifacts.  The
+# individual workflows append them as they are written; register their shared
+# JSON/CSV store once here so the standard archive stage preserves provenance.
+for alignment_artifact in inpDict.get("pion_component_alignment_artifacts", []):
+    if alignment_artifact not in output_file_lst:
+        output_file_lst.append(alignment_artifact)
+
 sys.path.append("plotting")
 from binned import plot_binned
 
