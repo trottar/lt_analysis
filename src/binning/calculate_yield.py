@@ -89,6 +89,7 @@ from pion_component_shapes import (
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
+    clone_kaon_lambda_comparison_payload,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_fit_pages,
     print_particle_subtraction_component_template_pages,
@@ -788,6 +789,12 @@ def _apply_component_pion_subtraction_for_bin(
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
+    payload.update(
+        clone_kaon_lambda_comparison_payload(
+            component_fit_result,
+            context="yield_t{}_phi{}".format(int(j) + 1, int(k) + 1),
+        )
+    )
     if not gate_result["accepted"]:
         return handle_particle_subtraction_fallback(
             payload,

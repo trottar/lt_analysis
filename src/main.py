@@ -655,7 +655,7 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
         record_stage_time("Step 3 pion component shapes {}".format(phiset), setting_start)
     record_stage_time("Step 3 pion component shapes total", stage_start)
 
-    if ParticleType == "kaon":
+    if str(ParticleType).strip().lower() == "kaon":
         stage_start = perf_counter()
         for phiset in phisetlist:
             setting_start = perf_counter()

@@ -79,6 +79,7 @@ from background_config import (
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
+    clone_kaon_lambda_comparison_payload,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_template_pages,
     print_particle_subtraction_component_fit_pages,
@@ -700,6 +701,12 @@ def _apply_component_pion_subtraction_setting(
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
+    payload.update(
+        clone_kaon_lambda_comparison_payload(
+            component_fit_result,
+            context="{}_setting".format(phi_setting),
+        )
+    )
     if not gate_result["accepted"]:
         return handle_particle_subtraction_fallback(
             payload,
@@ -2820,16 +2827,33 @@ def rand_sub(
                     output_pdf=proton_cleaning_output_pdf,
                 )
 
+            setting_kaon_signal_shape = resolve_scope_single_shape(
+                kaon_signal_shape_payload,
+                analysis_scope="setting-wide",
+            )
+            signal_shape_diagnostics = (
+                dict(kaon_signal_shape_payload.get("diagnostics") or {})
+                if isinstance(kaon_signal_shape_payload, dict)
+                else {}
+            )
+            print(
+                "[SIMC K-Lambda] setting-wide handoff phi={} root={} "
+                "hist_present={} integral={:.6e} normalized={} fallback_reason={}".format(
+                    phi_setting,
+                    signal_shape_diagnostics.get("root_filename"),
+                    setting_kaon_signal_shape is not None,
+                    _hist_integral(setting_kaon_signal_shape),
+                    signal_shape_diagnostics.get("normalized"),
+                    signal_shape_diagnostics.get("fallback_reason") or "none",
+                )
+            )
             component_fit_result = build_particle_subtraction_component_result(
                 subDict["H_MM_nosub_SUB_DATA"],
                 component_fit_kaon_input,
                 scope_shapes,
                 inpDict,
                 analysis_scope="setting-wide",
-                kaon_signal_shape=resolve_scope_single_shape(
-                    kaon_signal_shape_payload,
-                    analysis_scope="setting-wide",
-                ),
+                kaon_signal_shape=setting_kaon_signal_shape,
                 kaon_sigma0_shape=resolve_scope_single_shape(
                     kaon_sigma0_shape_payload,
                     analysis_scope="setting-wide",

@@ -1043,8 +1043,11 @@ def _resolve_kaon_lambda_reference_for_plot(payload, target_hist, cut_window, sc
         raise RuntimeError(
             "K-Lambda SIMC input was loaded but the immutable comparison reference was lost"
         )
-
-    return None, None, "K-Lambda SIMC input missing at source"
+    raise RuntimeError(
+        "K-Lambda SIMC comparison is mandatory for {} but no valid reference was retained".format(
+            scope_label
+        )
+    )
 
 
 def _mask_hist_windows_inplace(hist, windows, zero_errors=True):
@@ -3954,7 +3957,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         "k_lambda_simc_reference_source": (
             "immutable_aligned_k_lambda_simc"
             if k_lambda_simc_reference_available
-            else ("K-Lambda SIMC input missing at source" if not k_lambda_simc_input_loaded else "reference_build_failed")
+            else ("K-Lambda SIMC reference unavailable" if not k_lambda_simc_input_loaded else "reference_build_failed")
         ),
         "k_lambda_simc_reference_integral": (
             _hist_integral(k_lambda_simc_reference_hist)
@@ -4123,6 +4126,51 @@ def _hist_has_usable_support(hist, min_integral=1e-12):
     return math.isfinite(integral) and integral > float(min_integral)
 
 
+def _require_kaon_lambda_simc_shape(kaon_signal_shape, analysis_scope, phi_setting, context):
+    if _hist_has_usable_support(kaon_signal_shape):
+        return
+    raise RuntimeError(
+        "K-Lambda SIMC comparison is mandatory for kaon component subtraction; "
+        "no usable K-Lambda template is available "
+        "(phi_setting={}, analysis_scope={}, context={})".format(
+            phi_setting or "unknown",
+            analysis_scope or "unknown",
+            context or "unknown",
+        )
+    )
+
+
+def clone_kaon_lambda_comparison_payload(component_fit_result, context=""):
+    """Copy the immutable K-Lambda comparison state into an application payload."""
+    result = component_fit_result if isinstance(component_fit_result, dict) else {}
+    suffix = str(context or "scope").replace(" ", "_")
+    hist_keys = (
+        "H_k_lambda_simc_reference",
+        "H_simc_shape_k_lambda",
+        "H_kaon_fit_k_lambda_reference",
+        "H_kaon_fit_k_lambda_scaled",
+        "H_kaon_fit_k_lambda_scaled_refined",
+    )
+    payload = {
+        hist_key: _clone_hist(
+            result.get(hist_key),
+            "{}_{}_comparison".format(hist_key, suffix),
+        )
+        for hist_key in hist_keys
+    }
+    for scalar_key in (
+        "S_lambda_reference_scale",
+        "k_lambda_reference_scale",
+        "k_lambda_fit_amplitude",
+        "k_lambda_simc_input_loaded",
+        "k_lambda_simc_reference_available",
+        "k_lambda_simc_reference_source",
+        "k_lambda_simc_reference_integral",
+    ):
+        payload[scalar_key] = deepcopy(result.get(scalar_key))
+    return payload
+
+
 def _resolve_component_scope_hist(component_entry, component_name, analysis_scope, t_bin_index=None, phi_bin_index=None):
     if not isinstance(component_entry, dict):
         return None
@@ -4264,6 +4312,12 @@ def build_particle_subtraction_component_result(
             "fallback_reason": "particle subtraction mode is not simc_shape_components",
         }
 
+    _require_kaon_lambda_simc_shape(
+        kaon_signal_shape,
+        analysis_scope,
+        phi_setting,
+        context,
+    )
     template_mm_offset_data = float(mm_offset_data) if _is_finite_number(mm_offset_data) else 0.0
     aligned_component_shapes = {
         "pi_n": _build_mm_shifted_hist(
@@ -4285,6 +4339,10 @@ def build_particle_subtraction_component_result(
             renormalize=True,
         ),
     }
+    raw_kaon_signal_reference = _clone_hist(
+        kaon_signal_shape,
+        "H_k_lambda_simc_input_{}".format(context or analysis_scope),
+    )
     aligned_kaon_signal_shape = _build_mm_shifted_hist(
         kaon_signal_shape,
         template_mm_offset_data,
@@ -4401,9 +4459,15 @@ def build_particle_subtraction_component_result(
             aligned_kaon_signal_shape,
             "H_k_lambda_simc_reference_{}".format(context or analysis_scope),
         )
+        or _clone_hist(
+            raw_kaon_signal_reference,
+            "H_k_lambda_simc_reference_{}".format(context or analysis_scope),
+        )
     )
     k_lambda_simc_input_loaded = bool(
-        kaon_fit.get("k_lambda_simc_input_loaded", aligned_kaon_signal_shape is not None)
+        kaon_signal_shape is not None
+        or aligned_kaon_signal_shape is not None
+        or kaon_fit.get("k_lambda_simc_input_loaded", False)
     )
     k_lambda_simc_reference_available = bool(k_lambda_simc_reference_hist is not None)
 
@@ -4428,7 +4492,7 @@ def build_particle_subtraction_component_result(
         "k_lambda_simc_reference_source": (
             "immutable_aligned_k_lambda_simc"
             if k_lambda_simc_reference_available
-            else ("K-Lambda SIMC input missing at source" if not k_lambda_simc_input_loaded else "reference_build_failed")
+            else ("K-Lambda SIMC reference unavailable" if not k_lambda_simc_input_loaded else "reference_build_failed")
         ),
         "k_lambda_simc_reference_integral": (
             _hist_integral(k_lambda_simc_reference_hist)

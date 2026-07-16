@@ -41,6 +41,67 @@ from hgcer_hole import apply_HGCer_hole_cut
 _SIMC_COMPONENT_SHAPE_CACHE = {}
 
 
+def resolve_kaon_simc_signal_root_filename(root_filename, inpDict, phi_setting):
+    """Resolve the nominal K-Lambda SIMC file without changing its physics inputs.
+
+    Production can retain either the archived ``Prod_Coin`` file or the
+    setting-specific converted SIMC file.  They are equivalent nominal-SIMC
+    sources for this diagnostic; prefer the explicitly requested file, then
+    use the other production filename only when the requested one is absent.
+    """
+    requested_root = str(root_filename or "").strip()
+    candidate_roots = []
+
+    def add_candidate(candidate):
+        candidate = str(candidate or "").strip()
+        if candidate and candidate not in candidate_roots:
+            candidate_roots.append(candidate)
+
+    add_candidate(requested_root)
+    output_dir = os.path.dirname(requested_root)
+    if not output_dir:
+        output_dir = str((inpDict or {}).get("OUTPATH") or "").strip()
+
+    q2 = str((inpDict or {}).get("Q2") or "").strip()
+    w = str((inpDict or {}).get("W") or "").strip()
+    epsset = str((inpDict or {}).get("EPSSET") or "").strip()
+    phi_token = str(phi_setting or "").strip()
+    if output_dir and q2 and w and epsset and phi_token:
+        add_candidate(
+            os.path.join(
+                output_dir,
+                "Prod_Coin_Q{}W{}{}_{}e.root".format(
+                    q2,
+                    w,
+                    phi_token.lower(),
+                    epsset,
+                ),
+            )
+        )
+        add_candidate(
+            os.path.join(
+                output_dir,
+                "{}_kaon_Simc_Q{}W{}_{}e.root".format(
+                    phi_token,
+                    q2,
+                    w,
+                    epsset,
+                ),
+            )
+        )
+
+    existing_roots = [candidate for candidate in candidate_roots if os.path.isfile(candidate)]
+    resolved_root = existing_roots[0] if existing_roots else (candidate_roots[0] if candidate_roots else None)
+    resolution = {
+        "requested_root": requested_root or None,
+        "resolved_root": resolved_root,
+        "candidate_roots": candidate_roots,
+        "existing_roots": existing_roots,
+        "fallback_used": bool(existing_roots and existing_roots[0] != requested_root),
+    }
+    return resolved_root, resolution
+
+
 def _sanitize_token(value):
     token = re.sub(r"[^A-Za-z0-9_]+", "_", str(value or "").strip())
     return token.strip("_") or "component"
@@ -614,8 +675,21 @@ def load_kaon_simc_signal_shape(
     use_full_mm_range=True,
     context="",
 ):
-    return load_kaon_simc_extra_shape(
+    resolved_root_filename, root_resolution = resolve_kaon_simc_signal_root_filename(
         root_filename,
+        inpDict,
+        phi_setting,
+    )
+    print(
+        "[SIMC K-Lambda] {} requested={} resolved={} fallback={}".format(
+            phi_setting,
+            root_resolution.get("requested_root"),
+            root_resolution.get("resolved_root"),
+            root_resolution.get("fallback_used"),
+        )
+    )
+    payload = load_kaon_simc_extra_shape(
+        resolved_root_filename,
         inpDict,
         phi_setting,
         "k_lambda_signal",
@@ -625,6 +699,11 @@ def load_kaon_simc_signal_shape(
         use_full_mm_range=use_full_mm_range,
         context=context,
     )
+    if isinstance(payload, dict):
+        diagnostics = dict(payload.get("diagnostics") or {})
+        diagnostics["root_resolution"] = deepcopy(root_resolution)
+        payload["diagnostics"] = diagnostics
+    return payload
 
 
 def load_kaon_simc_sigma0_shape(
