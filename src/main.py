@@ -635,6 +635,57 @@ from pion_component_shapes import (
 sys.path.append("plotting")
 from pion_component_backgrounds import plot_pion_component_background_payload
 
+
+def _prepare_iter_weighted_kaon_simc(phi_setting):
+    """Create the K-Lambda model file consumed by component subtraction."""
+    archived_filename = "Prod_Coin_Q{}W{}{}_{}e.root".format(
+        Q2,
+        W,
+        phi_setting.lower(),
+        EPSSET,
+    )
+    model_filename = "{}_kaon_Simc_Q{}W{}_{}e.root".format(
+        phi_setting,
+        Q2,
+        W,
+        EPSSET,
+    )
+    archived_root = os.path.join(OUTPATH, archived_filename)
+    model_root = os.path.join(OUTPATH, model_filename)
+    archived_hist = archived_root.replace(".root", ".hist")
+    model_hist = model_root.replace(".root", ".hist")
+
+    if not os.path.isfile(archived_root):
+        raise FileNotFoundError(
+            "Missing archived SIMC input required to create the K-Lambda model: {}".format(
+                archived_root
+            )
+        )
+    if not os.path.isfile(archived_hist):
+        raise FileNotFoundError(
+            "Missing archived SIMC histogram file required to create the K-Lambda model: {}".format(
+                archived_hist
+            )
+        )
+
+    print("\nCopying {} to {}".format(archived_root, model_root))
+    shutil.copy(archived_root, model_root)
+    print("\nCopying {} to {}".format(archived_hist, model_hist))
+    shutil.copy(archived_hist, model_hist)
+    iter_weight(initial_param_file, model_root, inpDict, phi_setting)
+    if not os.path.isfile(model_root):
+        raise RuntimeError(
+            "K-Lambda model preparation did not produce the iter-weighted SIMC file: {}".format(
+                model_root
+            )
+        )
+
+    for path in (archived_root, archived_hist, model_root, model_hist):
+        if path not in output_file_lst:
+            output_file_lst.append(path)
+    return model_root
+
+
 # Call histogram function above to define dictonaries for right, left, center settings
 # Put these all into an array so that if we are missing a setting it is easier to remove
 # Plus it makes the code below less repetitive
@@ -642,7 +693,16 @@ histlist = []
 pion_component_payloads = {}
 kaon_signal_shape_payloads = {}
 kaon_sigma0_shape_payloads = {}
+kaon_model_simc_roots = {}
 if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
+    if str(ParticleType).strip().lower() == "kaon":
+        stage_start = perf_counter()
+        for phiset in phisetlist:
+            setting_start = perf_counter()
+            kaon_model_simc_roots[phiset] = _prepare_iter_weighted_kaon_simc(phiset)
+            record_stage_time("Step 3 K-Lambda model preparation {}".format(phiset), setting_start)
+        record_stage_time("Step 3 K-Lambda model preparation total", stage_start)
+
     stage_start = perf_counter()
     for phiset in phisetlist:
         setting_start = perf_counter()
@@ -659,17 +719,8 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
         stage_start = perf_counter()
         for phiset in phisetlist:
             setting_start = perf_counter()
-            archived_simc_root = os.path.join(
-                OUTPATH,
-                "Prod_Coin_Q{}W{}{}_{}e.root".format(
-                    Q2,
-                    W,
-                    phiset.lower(),
-                    EPSSET,
-                ),
-            )
             kaon_signal_shape_payloads[phiset] = load_kaon_simc_signal_shape(
-                archived_simc_root,
+                kaon_model_simc_roots[phiset],
                 inpDict,
                 phiset,
                 context="main_step3_pre_rand_sub_signal",
@@ -784,20 +835,23 @@ for hist in histlist:
     rootFileSimc = OUTPATH+"/"+InSIMCFilename
     hist["InSIMCFilename"] = InSIMCFilename
 
-    print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
-    shutil.copy(original_rootFileSimc, rootFileSimc)
+    prepared_model_root = kaon_model_simc_roots.get(hist["phi_setting"])
+    if not prepared_model_root or os.path.normcase(os.path.normpath(rootFileSimc)) != os.path.normcase(os.path.normpath(prepared_model_root)):
+        print("\nCopying {} to {}".format(original_rootFileSimc, rootFileSimc))
+        shutil.copy(original_rootFileSimc, rootFileSimc)
 
-    print("\nCopying {} to {}".format(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist")))
-    shutil.copy(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist"))
+        print("\nCopying {} to {}".format(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist")))
+        shutil.copy(original_rootFileSimc.replace(".root", ".hist"), rootFileSimc.replace(".root", ".hist"))
 
-    for f in [original_rootFileSimc, original_rootFileSimc.replace(".root", ".hist"), rootFileSimc, rootFileSimc.replace(".root", ".hist")]:
-        output_file_lst.append(f)
+        for f in [original_rootFileSimc, original_rootFileSimc.replace(".root", ".hist"), rootFileSimc, rootFileSimc.replace(".root", ".hist")]:
+            if f not in output_file_lst:
+                output_file_lst.append(f)
 
-    if os.path.exists(rootFileSimc):
-        iter_weight(initial_param_file, rootFileSimc, inpDict, hist["phi_setting"])
-    else:
-        print("ERROR: Issue with simc root file {}".format(rootFileSimc))
-        sys.exit(2)
+        if os.path.exists(rootFileSimc):
+            iter_weight(initial_param_file, rootFileSimc, inpDict, hist["phi_setting"])
+        else:
+            print("ERROR: Issue with simc root file {}".format(rootFileSimc))
+            sys.exit(2)
 
     record_stage_time("Step 3 iter_weight {}".format(hist["phi_setting"]), setting_start)
 record_stage_time("Step 3 iter_weight total", stage_start)

@@ -42,22 +42,24 @@ _SIMC_COMPONENT_SHAPE_CACHE = {}
 
 
 def resolve_kaon_simc_signal_root_filename(root_filename, inpDict, phi_setting):
-    """Resolve the nominal K-Lambda SIMC file without changing its physics inputs.
+    """Resolve the iter-weighted K-Lambda SIMC product for one phi setting.
 
-    Production can retain either the archived ``Prod_Coin`` file or the
-    setting-specific converted SIMC file.  They are equivalent nominal-SIMC
-    sources for this diagnostic; prefer the explicitly requested file, then
-    use the other production filename only when the requested one is absent.
+    ``Prod_Coin`` is the archived SIMC input.  The K-Lambda comparison must
+    instead use the setting-specific kaon file after ``iter_weight`` applies
+    the active LT-separation model.
     """
     requested_root = str(root_filename or "").strip()
     candidate_roots = []
+    rejected_roots = []
 
     def add_candidate(candidate):
         candidate = str(candidate or "").strip()
         if candidate and candidate not in candidate_roots:
             candidate_roots.append(candidate)
 
-    add_candidate(requested_root)
+    def is_archived_prod_coin(candidate):
+        return os.path.basename(str(candidate or "")).lower().startswith("prod_coin_")
+
     output_dir = os.path.dirname(requested_root)
     if not output_dir:
         output_dir = str((inpDict or {}).get("OUTPATH") or "").strip()
@@ -66,18 +68,14 @@ def resolve_kaon_simc_signal_root_filename(root_filename, inpDict, phi_setting):
     w = str((inpDict or {}).get("W") or "").strip()
     epsset = str((inpDict or {}).get("EPSSET") or "").strip()
     phi_token = str(phi_setting or "").strip()
+
+    if requested_root:
+        if is_archived_prod_coin(requested_root):
+            rejected_roots.append(requested_root)
+        else:
+            add_candidate(requested_root)
+
     if output_dir and q2 and w and epsset and phi_token:
-        add_candidate(
-            os.path.join(
-                output_dir,
-                "Prod_Coin_Q{}W{}{}_{}e.root".format(
-                    q2,
-                    w,
-                    phi_token.lower(),
-                    epsset,
-                ),
-            )
-        )
         add_candidate(
             os.path.join(
                 output_dir,
@@ -98,6 +96,7 @@ def resolve_kaon_simc_signal_root_filename(root_filename, inpDict, phi_setting):
         "candidate_roots": candidate_roots,
         "existing_roots": existing_roots,
         "fallback_used": bool(existing_roots and existing_roots[0] != requested_root),
+        "rejected_roots": rejected_roots,
     }
     return resolved_root, resolution
 

@@ -88,6 +88,7 @@ from pion_component_fits import (
     serialize_particle_subtraction_component_result,
 )
 from pion_component_shapes import (
+    load_kaon_simc_signal_shape,
     load_setting_pion_component_shapes,
 )
 from pion_component_subtraction import (
@@ -2654,6 +2655,28 @@ def rand_sub(
                     phi_setting,
                     particle_type=ParticleType,
                     context="rand_sub_setting_fit",
+                )
+            if kaon_signal_shape_payload is None:
+                k_lambda_simc_root = os.path.join(
+                    OUTPATH,
+                    "{}_kaon_Simc_Q{}W{}_{}e.root".format(
+                        phi_setting,
+                        Q2,
+                        W,
+                        EPSSET,
+                    ),
+                )
+                print(
+                    "[SIMC K-Lambda] loading mandatory fallback payload for {} from {}".format(
+                        phi_setting,
+                        k_lambda_simc_root,
+                    )
+                )
+                kaon_signal_shape_payload = load_kaon_simc_signal_shape(
+                    k_lambda_simc_root,
+                    inpDict,
+                    phi_setting,
+                    context="rand_sub_mandatory_k_lambda",
                 )
             scope_shapes = resolve_scope_component_shapes(
                 scope_payload,

@@ -1283,7 +1283,15 @@ def _rerun_final_rand_sub(histlist, inpDict, selected_bg_scale1s, selected_bg_sc
                 scale2,
             )
         )
-        refreshed_hist = rand_sub(phi_setting, final_inp, shift_mode="raw", emit_plots=True)
+        refreshed_hist = rand_sub(
+            phi_setting,
+            final_inp,
+            shift_mode="raw",
+            emit_plots=True,
+            component_payload=base_hist.get("_simc_pion_component_payload"),
+            kaon_signal_shape_payload=base_hist.get("_simc_kaon_signal_shape_payload"),
+            kaon_sigma0_shape_payload=base_hist.get("_simc_kaon_sigma0_shape_payload"),
+        )
         refreshed_histlist.append(_copy_static_hist_context(base_hist, refreshed_hist))
     return refreshed_histlist
 
