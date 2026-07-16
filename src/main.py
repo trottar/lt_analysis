@@ -541,6 +541,16 @@ inpDict["t_shift_summary"] = t_shift_summary
 inpDict["shift_mode"] = "raw"
 record_stage_time("MM/t shift setup total", stage_start)
 
+# shift_prep is the existing availability gate for phi settings.  Do not
+# prepare SIMC templates or run subtraction for settings without input files.
+available_phisetlist = [phiset for phiset in phisetlist if phiset in mm_shift_summary]
+skipped_phisetlist = [phiset for phiset in phisetlist if phiset not in mm_shift_summary]
+if skipped_phisetlist:
+    print("Skipping unavailable phi settings: {}".format(", ".join(skipped_phisetlist)))
+if not available_phisetlist:
+    raise RuntimeError("No phi settings have both data and archived SIMC inputs.")
+phisetlist = available_phisetlist
+
 if DEBUG:
     for phiset in phisetlist:
         mm_plot = mm_shift_summary.get(phiset, {}).get("plot_filename")
