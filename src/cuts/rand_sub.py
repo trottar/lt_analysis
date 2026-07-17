@@ -68,6 +68,7 @@ from background_config import (
     BG_OPT_MM_PLOT_NBINS,
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
+    PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     resolve_particle_subtraction_mode,
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
@@ -77,6 +78,7 @@ from background_config import (
     resolve_particle_subtraction_weight_warn_max,
     get_proton_contamination_cleaning_config,
     get_particle_subtraction_setting_key,
+    get_pion_component_dynamic_alignment_config,
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
@@ -87,7 +89,7 @@ from pion_component_fits import (
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
-    persist_pion_component_alignment,
+    load_or_resolve_pion_component_alignment,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -2872,6 +2874,44 @@ def rand_sub(
                     signal_shape_diagnostics.get("fallback_reason") or "none",
                 )
             )
+            alignment_bin_key = {
+                "kinematic_setting": get_particle_subtraction_setting_key(inpDict),
+                "epsilon": EPSSET,
+                "phi_setting": phi_setting,
+                "analysis_scope": "setting-wide",
+                "t_bin": None,
+                "phi_bin": None,
+                "active_dimensions": {
+                    "particle_type": ParticleType,
+                    "polarization": inpDict.get("POL"),
+                    "target": inpDict.get("target") or inpDict.get("Target"),
+                },
+            }
+            setting_alignment = None
+            alignment_status = "not_persisted"
+            alignment_reasons = []
+            alignment_paths = []
+            dynamic_alignment_config = get_pion_component_dynamic_alignment_config(
+                inp_dict=inpDict,
+                phi_setting=phi_setting,
+                setting_key=get_particle_subtraction_setting_key(inpDict),
+            )
+            if (
+                bool(dynamic_alignment_config.get("enabled", False))
+                and resolve_particle_subtraction_mode(inpDict) == PARTICLE_SUBTRACTION_MODE_COMPONENTS
+            ):
+                setting_alignment, alignment_status, alignment_reasons, alignment_paths = load_or_resolve_pion_component_alignment(
+                    OUTPATH,
+                    get_particle_subtraction_setting_key(inpDict),
+                    phi_setting,
+                    EPSSET,
+                    "setting-wide",
+                    alignment_bin_key,
+                    subDict["H_MM_nosub_SUB_DATA"],
+                    scope_shapes,
+                    inp_dict=inpDict,
+                    common_setting_shift_gev=MM_offset_DATA,
+                )
             component_fit_result = build_particle_subtraction_component_result(
                 subDict["H_MM_nosub_SUB_DATA"],
                 component_fit_kaon_input,
@@ -2886,31 +2926,13 @@ def rand_sub(
                 mm_offset_data=MM_offset_DATA,
                 phi_setting=phi_setting,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
-                alignment_bin_key={
-                    "kinematic_setting": get_particle_subtraction_setting_key(inpDict),
-                    "epsilon": EPSSET,
-                    "phi_setting": phi_setting,
-                    "analysis_scope": "setting-wide",
-                    "t_bin": None,
-                    "phi_bin": None,
-                    "active_dimensions": {
-                        "particle_type": ParticleType,
-                        "polarization": inpDict.get("POL"),
-                        "target": inpDict.get("target") or inpDict.get("Target"),
-                    },
-                },
+                pion_component_alignment=setting_alignment,
+                alignment_bin_key=alignment_bin_key,
             )
             alignment_payload = component_fit_result.get("pion_component_alignment")
             if isinstance(alignment_payload, dict):
-                setting_key = component_fit_result.get("particle_subtraction_setting_key")
-                alignment_paths = persist_pion_component_alignment(
-                    OUTPATH,
-                    setting_key,
-                    phi_setting,
-                    EPSSET,
-                    alignment_payload,
-                )
-                alignment_payload["persistence_status"] = "created"
+                alignment_payload["persistence_status"] = alignment_status
+                alignment_payload["persistence_rejection_reasons"] = list(alignment_reasons)
                 alignment_payload["artifact_paths"] = list(alignment_paths)
                 for path in alignment_paths:
                     if path not in inpDict.setdefault("pion_component_alignment_artifacts", []):

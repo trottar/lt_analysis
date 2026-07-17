@@ -4435,6 +4435,36 @@ def _alignment_windows_to_bin_indices(hist, windows):
     ]
 
 
+def _alignment_support_metrics(hist, active_bin_indices, metric_name="positive_integral"):
+    """Summarize residual support without allowing positive/negative cancellation."""
+    signed_integral = 0.0
+    absolute_integral = 0.0
+    positive_integral = 0.0
+    for bin_index in active_bin_indices or []:
+        value = float(hist.GetBinContent(bin_index))
+        if not _is_finite_number(value):
+            continue
+        signed_integral += value
+        absolute_integral += abs(value)
+        positive_integral += max(value, 0.0)
+    values = {
+        "signed_integral": float(signed_integral),
+        "absolute_integral": float(absolute_integral),
+        "positive_integral": float(positive_integral),
+    }
+    resolved_metric = str(metric_name or "positive_integral")
+    if resolved_metric not in values:
+        resolved_metric = "positive_integral"
+    return {
+        "signed_support_integral": values["signed_integral"],
+        "absolute_support_integral": values["absolute_integral"],
+        "positive_support_integral": values["positive_integral"],
+        "support_metric_used": resolved_metric,
+        "support_integral_for_acceptance": values[resolved_metric],
+        "support_bin_count": int(len(active_bin_indices or [])),
+    }
+
+
 def _build_alignment_template(source_hist, total_shift_gev, output_name, config):
     return build_shifted_template_histogram(
         source_hist,
@@ -4581,14 +4611,41 @@ def scan_pion_component_alignment(
             working_hist, template, mm_limits[0], mm_limits[1],
             include_windows=windows["effective_windows"], amplitude_windows=windows["effective_windows"],
         )
+        active_fit_indices = _alignment_windows_to_bin_indices(
+            working_hist, windows["effective_windows"]
+        )
+        support = _alignment_support_metrics(
+            working_hist,
+            active_fit_indices,
+            (acceptance or {}).get("data_support_metric", "positive_integral"),
+        )
+        support_threshold = float(acceptance.get("minimum_data_integral", 0.0) or 0.0)
         evaluation = _score_alignment_template(working_hist, template, amplitude.get("amplitude", 0.0), evaluation_indices)
         offset_boundary = abs(residual - min(residual_values)) <= 1e-12 or abs(residual - max(residual_values)) <= 1e-12
         expansion_boundary = abs(expansion - min(expansions)) <= 1e-12 or abs(expansion - max(expansions)) <= 1e-12
+        penalize_offset_boundary = bool(
+            offset_boundary and bool(acceptance.get("reject_offset_boundary", False))
+        )
+        penalize_expansion_boundary = bool(
+            expansion_boundary and bool(acceptance.get("reject_expansion_boundary", False))
+        )
+        offset_boundary_penalty = float(
+            ranking.get("offset_boundary_penalty", ranking.get("boundary_penalty", 0.0)) or 0.0
+        )
+        expansion_boundary_penalty = float(
+            ranking.get("expansion_boundary_penalty", ranking.get("boundary_penalty", 0.0)) or 0.0
+        )
+        applied_offset_boundary_penalty = 0.0
+        applied_expansion_boundary_penalty = 0.0
         score = evaluation.get("chi2_eval_ndf")
         if _is_finite_number(score):
             score = float(score) + float(ranking.get("window_expansion_penalty", 0.0) or 0.0) * abs(expansion) + float(ranking.get("offset_magnitude_penalty", 0.0) or 0.0) * abs(residual)
-            if (offset_boundary or expansion_boundary) and not is_baseline:
-                score += float(ranking.get("boundary_penalty", 0.0) or 0.0)
+            if not is_baseline and penalize_offset_boundary:
+                applied_offset_boundary_penalty = offset_boundary_penalty
+                score += applied_offset_boundary_penalty
+            if not is_baseline and penalize_expansion_boundary:
+                applied_expansion_boundary_penalty = expansion_boundary_penalty
+                score += applied_expansion_boundary_penalty
         reasons = []
         if not amplitude.get("success"):
             reasons.append(amplitude.get("message") or "amplitude fit failed")
@@ -4596,8 +4653,8 @@ def scan_pion_component_alignment(
             reasons.append("insufficient active fit bins")
         if int(evaluation.get("evaluation_bin_count", 0) or 0) < int(acceptance.get("minimum_evaluation_bins", 0) or 0):
             reasons.append("insufficient evaluation bins")
-        if abs(_hist_integral(working_hist)) < float(acceptance.get("minimum_data_integral", 0.0) or 0.0):
-            reasons.append("insufficient data integral")
+        if support["support_integral_for_acceptance"] < support_threshold:
+            reasons.append("insufficient {} support".format(support["support_metric_used"]))
         if _hist_integral(template) < float(acceptance.get("minimum_template_integral", 0.0) or 0.0):
             reasons.append("insufficient template integral")
         if float(shift_diagnostics.get("lost_integral_fraction", 0.0) or 0.0) > float(acceptance.get("maximum_lost_template_integral_fraction", 1.0) or 1.0):
@@ -4608,6 +4665,9 @@ def scan_pion_component_alignment(
             reasons.append("expansion scan boundary")
         if not _is_finite_number(score):
             reasons.append("nonfinite score")
+        warnings = []
+        if expansion_boundary and not bool(acceptance.get("reject_expansion_boundary", False)):
+            warnings.append("expansion scan boundary accepted without penalty")
         candidates.append({
             "residual_shift_gev": float(residual), "total_shift_gev": total_shift,
             "window_expansion_gev": float(expansion), "local_bin_correction_gev": float(correction),
@@ -4617,7 +4677,10 @@ def scan_pion_component_alignment(
             "window_clipping": deepcopy(windows["window_clipping"]),
             "lost_template_integral_fraction": float(shift_diagnostics.get("lost_integral_fraction", 0.0) or 0.0),
             "offset_boundary_hit": bool(offset_boundary), "expansion_boundary_hit": bool(expansion_boundary),
-            **evaluation, "score": score, "rejection_reasons": reasons,
+            "offset_boundary_penalty_applied": float(applied_offset_boundary_penalty),
+            "expansion_boundary_penalty_applied": float(applied_expansion_boundary_penalty),
+            "support_threshold": support_threshold, "warnings": warnings,
+            **support, **evaluation, "score": score, "rejection_reasons": reasons,
         })
     baseline_candidate = next((candidate for candidate in candidates if candidate["is_baseline"]), None)
     valid = [candidate for candidate in candidates if not candidate["rejection_reasons"]]
@@ -4679,6 +4742,59 @@ def _alignment_parent_hash(setting_key, common_shift_gev, components, config_has
     })
 
 
+def build_expected_pion_alignment_metadata(
+    setting_key,
+    analysis_scope,
+    bin_key,
+    pion_control_hist,
+    immutable_pion_simc_component_hists,
+    parent_alignment=None,
+    inp_dict=None,
+    phi_setting=None,
+    common_setting_shift_gev=0.0,
+):
+    """Build cache-validation metadata without constructing any shifted candidate."""
+    if pion_control_hist is None:
+        raise ValueError("pion_control_hist is required to build alignment metadata")
+    config = get_pion_component_dynamic_alignment_config(
+        inp_dict=inp_dict, phi_setting=phi_setting, setting_key=setting_key
+    )
+    sources = immutable_pion_simc_component_hists or {}
+    parent = parent_alignment or {}
+    return {
+        "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION,
+        "analysis_scope": str(analysis_scope or ""),
+        "bin_key": deepcopy(bin_key),
+        "complete_physical_bin_identity": deepcopy(bin_key),
+        "parent_setting_key": setting_key,
+        "common_setting_shift_gev": (
+            float(common_setting_shift_gev)
+            if _is_finite_number(common_setting_shift_gev)
+            else 0.0
+        ),
+        "parent_alignment_hash": parent.get("parent_alignment_hash"),
+        "resolved_config": config,
+        "resolved_configuration_hash": _alignment_hash(config),
+        "pion_control_histogram_identifier": _pion_control_histogram_identifier(
+            pion_control_hist
+        ),
+        "pion_control_histogram_provenance": "pion_control",
+        "histogram_axis_specification": _hist_axis_specification(pion_control_hist),
+        "immutable_source_template_identifier": {
+            name: deepcopy(_immutable_source_metadata(sources.get(name), name).get("immutable_source_hist_identifier"))
+            for name in COMPONENT_NAMES
+        },
+        "immutable_source_template_checksum": {
+            name: _immutable_source_metadata(sources.get(name), name).get("immutable_source_hist_checksum")
+            for name in COMPONENT_NAMES
+        },
+        "components": {
+            name: _immutable_source_metadata(sources.get(name), name)
+            for name in COMPONENT_NAMES
+        },
+    }
+
+
 def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_control_hist, immutable_pion_simc_component_hists, parent_alignment=None, inp_dict=None, phi_setting=None, common_setting_shift_gev=0.0):
     """Resolve parent/fine pion alignment without ever chaining shifted templates."""
     config = get_pion_component_dynamic_alignment_config(inp_dict=inp_dict, phi_setting=phi_setting, setting_key=setting_key)
@@ -4731,13 +4847,19 @@ def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_
         component["parent_score_in_current_bin"] = None
         component["local_candidate_score"] = None
         component["relative_improvement_over_parent"] = None
+        component["scan_candidate_accepted"] = False
+        component["component_applied_source"] = component["source"]
+        component["component_fallback_used"] = True
+        component["component_fallback_reason"] = "dynamic alignment unavailable"
     if not bool(config.get("enabled", False)) or (not is_parent and not parent_valid):
         reason = "dynamic alignment disabled" if not bool(config.get("enabled", False)) else "parent alignment unavailable, stale, incompatible, or invalid"
         return {
             "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION, "analysis_scope": scope, "bin_key": deepcopy(bin_key), "complete_physical_bin_identity": deepcopy(bin_key),
             "parent_setting_key": setting_key, "source": "component_disabled" if not bool(config.get("enabled", False)) else "current_common_shift_fallback", "accepted": False,
             "common_setting_shift_gev": common_shift, "baseline_source": "current_common_shift",
-            "baseline_score": None, "selected_score": None, "relative_score_improvement": None,
+            "baseline_score": None, "proposed_score": None, "proposed_relative_improvement": None,
+            "applied_score": None, "applied_relative_improvement": 0.0,
+            "selected_score": None, "relative_score_improvement": 0.0,
             "parent_global_score": parent.get("selected_score") if parent else None,
             "parent_score_in_current_bin": None, "parent_alignment_hash": parent.get("parent_alignment_hash") if parent else None,
             "resolved_config": config, "resolved_configuration_hash": config_hash,
@@ -4753,42 +4875,14 @@ def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_
                 name: component.get("immutable_source_hist_checksum")
                 for name, component in default_components.items()
             },
+            "proposed_components": deepcopy(default_components), "applied_components": deepcopy(default_components),
+            "component_counts": {
+                "locally_accepted": 0, "globally_accepted": 0,
+                "parent_fallback": 0, "common_shift_fallback": len(COMPONENT_NAMES),
+                "disabled": len(COMPONENT_NAMES) if not bool(config.get("enabled", False)) else 0,
+            },
             "components": default_components, "persistence_status": "not_persisted", "persistence_rejection_reasons": [reason],
         }
-
-    selected_components = {}
-    residual = _clone_hist(pion_control_hist, "{}_alignment_residual".format(pion_control_hist.GetName()))
-    for name in COMPONENT_NAMES:
-        component_config = (config.get("components") or {}).get(name, {}) or {}
-        source_hist, parent_component = sources.get(name), (parent.get("components") or {}).get(name, {})
-        if source_hist is None:
-            component = deepcopy(default_components[name]); component["rejection_reasons"] = ["missing immutable source template"]
-        elif not bool(component_config.get("enabled", False)):
-            component = deepcopy(parent_component) if (not is_parent and parent_component) else deepcopy(default_components[name])
-            component.update(_immutable_source_metadata(source_hist, name)); component["source"] = "parent_setting_fallback" if not is_parent and parent_component else "component_disabled"
-        else:
-            scan = scan_pion_component_alignment(pion_control_hist, residual, source_hist, name, canonical.get(name), common_shift, config, scope, bin_key, parent_component_alignment=parent_component, scan_level="parent" if is_parent else "fine")
-            candidate = deepcopy(scan.get("selected_candidate") or {})
-            component = {
-                "source": scan.get("source"), "accepted": bool(scan.get("accepted", False)), "common_shift_gev": common_shift,
-                "parent_residual_shift_gev": float(parent_component.get("residual_shift_gev", 0.0) or 0.0), "local_bin_correction_gev": float(candidate.get("local_bin_correction_gev", 0.0) or 0.0),
-                "parent_total_shift_gev": float(parent_component.get("total_shift_gev", common_shift) or common_shift),
-                "parent_window_expansion_gev": float(parent_component.get("window_expansion_gev", 0.0) or 0.0),
-                "parent_effective_windows": deepcopy(parent_component.get("effective_windows") or []),
-                "residual_shift_gev": float(candidate.get("residual_shift_gev", 0.0) or 0.0), "total_shift_gev": float(candidate.get("total_shift_gev", common_shift) or common_shift), "window_expansion_gev": float(candidate.get("window_expansion_gev", 0.0) or 0.0),
-                "canonical_windows": deepcopy(scan.get("canonical_windows") or []), "effective_windows": deepcopy(candidate.get("effective_windows") or []), "evaluation_envelope": deepcopy(scan.get("evaluation_envelope") or []),
-                "baseline_source": scan.get("baseline_source"), "baseline_score": scan.get("baseline_score"), "baseline_residual_shift_gev": scan.get("baseline_residual_shift_gev"), "baseline_total_shift_gev": scan.get("baseline_total_shift_gev"), "baseline_window_expansion_gev": scan.get("baseline_window_expansion_gev"), "parent_baseline_candidate_included": scan.get("parent_baseline_candidate_included", False),
-                "offset_boundary_hit": candidate.get("offset_boundary_hit", False), "expansion_boundary_hit": candidate.get("expansion_boundary_hit", False), "minimum_localized": scan.get("minimum_localized", False), "candidate_count": scan.get("candidate_count"), "near_minimum_candidate_count": scan.get("near_minimum_candidate_count"), "near_minimum_candidate_fraction": scan.get("near_minimum_candidate_fraction"), "candidate_summaries": deepcopy(scan.get("candidate_summaries") or []), "rejection_reasons": list(candidate.get("rejection_reasons") or []), "warnings": [],
-                **_immutable_source_metadata(source_hist, name),
-            }
-        selected_components[name] = component
-        if source_hist is None:
-            continue
-        template, _ = _build_alignment_template(source_hist, component.get("total_shift_gev", common_shift), "{}_selected_{}".format(residual.GetName(), name), config)
-        amplitude = _solve_nonnegative_template_amplitude(residual, template, limits[0], limits[1], include_windows=component.get("effective_windows"), amplitude_windows=component.get("effective_windows"))
-        scaled = _clone_hist(template, "{}_scaled".format(template.GetName()))
-        if scaled is not None:
-            scaled.Scale(float(amplitude.get("amplitude", 0.0) or 0.0)); residual.Add(scaled, -1.0)
 
     baseline_components = deepcopy(default_components) if is_parent else deepcopy(parent.get("components") or {})
     if not is_parent:
@@ -4811,70 +4905,231 @@ def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_
             baseline_component["baseline_total_shift_gev"] = float(baseline_component.get("total_shift_gev", common_shift) or common_shift)
             baseline_component["baseline_window_expansion_gev"] = float(baseline_component.get("window_expansion_gev", 0.0) or 0.0)
             baseline_component["parent_baseline_candidate_included"] = True
-    # Candidate and baseline maps are ranked on the identical fixed envelope.
-    # For a fine bin this is the union of the local correction envelope and the
-    # explicitly preserved parent windows produced by each component scan.
+
+    def _candidate_summary(component):
+        return {
+            key: deepcopy(component.get(key))
+            for key in (
+                "source", "residual_shift_gev", "total_shift_gev",
+                "window_expansion_gev", "local_bin_correction_gev",
+                "effective_windows", "evaluation_envelope", "score",
+                "offset_boundary_hit", "expansion_boundary_hit",
+                "offset_boundary_penalty_applied", "expansion_boundary_penalty_applied",
+                "signed_support_integral", "absolute_support_integral",
+                "positive_support_integral", "support_metric_used",
+                "support_integral_for_acceptance", "support_threshold",
+                "rejection_reasons", "warnings",
+            )
+        }
+
+    proposed_components = {}
+    mixed_components = {}
+    residual = _clone_hist(pion_control_hist, "{}_alignment_residual".format(pion_control_hist.GetName()))
+    for name in COMPONENT_NAMES:
+        component_config = (config.get("components") or {}).get(name, {}) or {}
+        source_hist = sources.get(name)
+        parent_component = (parent.get("components") or {}).get(name, {})
+        fallback = deepcopy(baseline_components.get(name) or default_components[name])
+        fallback_source = (
+            "parent_setting_fallback"
+            if not is_parent and parent_component
+            else "current_common_shift_fallback"
+        )
+        fallback["source"] = fallback_source
+        fallback["component_applied_source"] = fallback_source
+        fallback["component_fallback_used"] = True
+        fallback["component_fallback_reason"] = "component scan did not supply an accepted candidate"
+        fallback["scan_candidate_accepted"] = False
+        fallback.update(_immutable_source_metadata(source_hist, name))
+
+        if source_hist is None:
+            proposed = deepcopy(fallback)
+            proposed["source"] = "current_common_shift_fallback"
+            proposed["rejection_reasons"] = ["missing immutable source template"]
+            applied = deepcopy(proposed)
+            applied["component_fallback_reason"] = "missing immutable source template"
+        elif not bool(component_config.get("enabled", False)):
+            proposed = deepcopy(fallback)
+            if not is_parent and parent_component:
+                proposed["source"] = "parent_setting_fallback"
+                proposed["component_fallback_reason"] = "component disabled; inherited parent alignment"
+            else:
+                proposed["source"] = "component_disabled"
+                proposed["component_applied_source"] = "component_disabled"
+                proposed["component_fallback_used"] = False
+                proposed["component_fallback_reason"] = "component disabled"
+            proposed["component_disabled"] = True
+            applied = deepcopy(proposed)
+        else:
+            scan = scan_pion_component_alignment(
+                pion_control_hist, residual, source_hist, name, canonical.get(name),
+                common_shift, config, scope, bin_key,
+                parent_component_alignment=parent_component,
+                scan_level="parent" if is_parent else "fine",
+            )
+            candidate = deepcopy(scan.get("selected_candidate") or {})
+            proposed = {
+                "source": scan.get("source"), "accepted": bool(scan.get("accepted", False)),
+                "common_shift_gev": common_shift,
+                "parent_residual_shift_gev": float(parent_component.get("residual_shift_gev", 0.0) or 0.0),
+                "local_bin_correction_gev": float(candidate.get("local_bin_correction_gev", 0.0) or 0.0),
+                "parent_total_shift_gev": float(parent_component.get("total_shift_gev", common_shift) or common_shift),
+                "parent_window_expansion_gev": float(parent_component.get("window_expansion_gev", 0.0) or 0.0),
+                "parent_effective_windows": deepcopy(parent_component.get("effective_windows") or []),
+                "residual_shift_gev": float(candidate.get("residual_shift_gev", 0.0) or 0.0),
+                "total_shift_gev": float(candidate.get("total_shift_gev", common_shift) or common_shift),
+                "window_expansion_gev": float(candidate.get("window_expansion_gev", 0.0) or 0.0),
+                "canonical_windows": deepcopy(scan.get("canonical_windows") or []),
+                "effective_windows": deepcopy(candidate.get("effective_windows") or []),
+                "evaluation_envelope": deepcopy(scan.get("evaluation_envelope") or []),
+                "baseline_source": scan.get("baseline_source"), "baseline_score": scan.get("baseline_score"),
+                "baseline_residual_shift_gev": scan.get("baseline_residual_shift_gev"),
+                "baseline_total_shift_gev": scan.get("baseline_total_shift_gev"),
+                "baseline_window_expansion_gev": scan.get("baseline_window_expansion_gev"),
+                "parent_baseline_candidate_included": scan.get("parent_baseline_candidate_included", False),
+                "minimum_localized": scan.get("minimum_localized", False),
+                "candidate_count": scan.get("candidate_count"),
+                "near_minimum_candidate_count": scan.get("near_minimum_candidate_count"),
+                "near_minimum_candidate_fraction": scan.get("near_minimum_candidate_fraction"),
+                "candidate_summaries": deepcopy(scan.get("candidate_summaries") or []),
+                "scan_candidate_accepted": bool(scan.get("accepted", False)),
+                "component_applied_source": scan.get("source"),
+                "component_fallback_used": False, "component_fallback_reason": None,
+                "score": candidate.get("score"), "proposed_score": candidate.get("score"),
+                "rejection_reasons": list(candidate.get("rejection_reasons") or []),
+                "warnings": list(candidate.get("warnings") or []),
+                **{
+                    key: candidate.get(key)
+                    for key in (
+                        "offset_boundary_hit", "expansion_boundary_hit",
+                        "offset_boundary_penalty_applied", "expansion_boundary_penalty_applied",
+                        "signed_support_integral", "absolute_support_integral",
+                        "positive_support_integral", "support_metric_used",
+                        "support_integral_for_acceptance", "support_threshold",
+                    )
+                },
+                **_immutable_source_metadata(source_hist, name),
+            }
+            if proposed["scan_candidate_accepted"]:
+                applied = deepcopy(proposed)
+            else:
+                applied = deepcopy(fallback)
+                applied["component_fallback_reason"] = "; ".join(
+                    proposed.get("rejection_reasons") or ["candidate did not pass scan acceptance"]
+                )
+                applied["proposed_score"] = proposed.get("proposed_score")
+                applied["score"] = scan.get("baseline_score")
+                applied["candidate_summaries"] = deepcopy(proposed.get("candidate_summaries") or [])
+                applied["warnings"] = list(proposed.get("warnings") or [])
+                applied["scan_candidate_accepted"] = False
+
+        proposed["proposed_candidate"] = _candidate_summary(proposed)
+        proposed_components[name] = deepcopy(proposed)
+        applied["proposed_candidate"] = deepcopy(proposed["proposed_candidate"])
+        applied["applied_candidate"] = _candidate_summary(applied)
+        applied["applied_score"] = (
+            applied["applied_candidate"].get("score")
+            if applied["applied_candidate"].get("score") is not None
+            else applied.get("baseline_score")
+        )
+        mixed_components[name] = applied
+
+        if source_hist is None:
+            continue
+        template, _ = _build_alignment_template(
+            source_hist, applied.get("total_shift_gev", common_shift),
+            "{}_applied_{}".format(residual.GetName(), name), config,
+        )
+        amplitude = _solve_nonnegative_template_amplitude(
+            residual, template, limits[0], limits[1],
+            include_windows=applied.get("effective_windows"),
+            amplitude_windows=applied.get("effective_windows"),
+        )
+        scaled = _clone_hist(template, "{}_scaled".format(template.GetName()))
+        if scaled is not None:
+            scaled.Scale(float(amplitude.get("amplitude", 0.0) or 0.0))
+            residual.Add(scaled, -1.0)
+
+    # Candidate, mixed, and baseline maps share the same fixed envelope.
     fixed_evaluation_windows = []
-    for component in selected_components.values():
+    for component in proposed_components.values():
         fixed_evaluation_windows.extend(_normalize_window_collection(component.get("evaluation_envelope")))
     baseline_metrics = _score_complete_alignment(
         pion_control_hist, sources, baseline_components, config, fixed_evaluation_windows
     )
-    selected_metrics = _score_complete_alignment(
-        pion_control_hist, sources, selected_components, config, fixed_evaluation_windows
+    proposed_metrics = _score_complete_alignment(
+        pion_control_hist, sources, proposed_components, config, fixed_evaluation_windows
     )
-    improvement = _alignment_relative_improvement(baseline_metrics.get("score"), selected_metrics.get("score"))
-    enabled_component_names = [
-        name for name in COMPONENT_NAMES
-        if bool(((config.get("components") or {}).get(name) or {}).get("enabled", False))
-    ]
-    candidate_quality_ok = all(
-        bool((selected_components.get(name) or {}).get("accepted", False))
-        for name in enabled_component_names
+    mixed_metrics = _score_complete_alignment(
+        pion_control_hist, sources, mixed_components, config, fixed_evaluation_windows
+    )
+    proposed_improvement = _alignment_relative_improvement(
+        baseline_metrics.get("score"), proposed_metrics.get("score")
+    )
+    mixed_improvement = _alignment_relative_improvement(
+        baseline_metrics.get("score"), mixed_metrics.get("score")
     )
     accepted = bool(
-        candidate_quality_ok
-        and improvement is not None
-        and improvement >= float((config.get("acceptance") or {}).get("minimum_relative_score_improvement", 0.0) or 0.0)
+        mixed_improvement is not None
+        and mixed_improvement >= float((config.get("acceptance") or {}).get("minimum_relative_score_improvement", 0.0) or 0.0)
     )
+    applied_components = deepcopy(mixed_components) if accepted else deepcopy(baseline_components)
     if not accepted:
-        selected_components = baseline_components
-        for name, component in selected_components.items():
+        for name, component in applied_components.items():
             component["source"] = "current_common_shift_fallback" if is_parent else "parent_setting_fallback"
-            if not candidate_quality_ok:
-                component.setdefault("rejection_reasons", []).append("selected candidate failed scan-quality acceptance")
-            else:
-                component.setdefault("rejection_reasons", []).append("selected map did not improve baseline")
+            component["component_applied_source"] = component["source"]
+            component["component_fallback_used"] = True
+            component["component_fallback_reason"] = "mixed map did not improve complete baseline"
             component["baseline_source"] = "current_common_shift" if is_parent else "parent_setting_alignment"
             component["baseline_score"] = baseline_metrics.get("score")
             component.update(_immutable_source_metadata(sources.get(name), name))
-    parent_hash = _alignment_parent_hash(setting_key, common_shift, selected_components, config_hash) if is_parent else parent.get("parent_alignment_hash")
+            component["proposed_candidate"] = _candidate_summary(proposed_components.get(name) or {})
+            component["applied_candidate"] = _candidate_summary(component)
+            component["proposed_score"] = component["proposed_candidate"].get("score")
+            component["applied_score"] = component["applied_candidate"].get("score")
+
+    applied_metrics = mixed_metrics if accepted else baseline_metrics
+    applied_improvement = mixed_improvement if accepted else 0.0
+    parent_hash = _alignment_parent_hash(setting_key, common_shift, applied_components, config_hash) if is_parent else parent.get("parent_alignment_hash")
     parent_global_score = None if is_parent else parent.get("selected_score")
     parent_score_in_current_bin = None if is_parent else baseline_metrics.get("score")
-    for component in selected_components.values():
+    for component in applied_components.values():
         component["calibration_source"] = "pion_control"
         component["candidate_source"] = "immutable_original_pion_simc"
         component["parent_alignment_hash"] = parent_hash
         component["parent_global_score"] = parent_global_score
         component["parent_score_in_current_bin"] = parent_score_in_current_bin
-        component["local_candidate_score"] = selected_metrics.get("score")
-        component["relative_improvement_over_parent"] = improvement
+        component["local_candidate_score"] = component.get("proposed_score")
+        component["relative_improvement_over_parent"] = applied_improvement
+    component_counts = {
+        "locally_accepted": sum(1 for component in applied_components.values() if component.get("component_applied_source") == "bin_local_scan"),
+        "globally_accepted": sum(1 for component in applied_components.values() if component.get("component_applied_source") == "setting_global_scan"),
+        "parent_fallback": sum(1 for component in applied_components.values() if component.get("component_applied_source") == "parent_setting_fallback"),
+        "common_shift_fallback": sum(1 for component in applied_components.values() if component.get("component_applied_source") == "current_common_shift_fallback"),
+        "disabled": sum(1 for component in applied_components.values() if component.get("component_applied_source") == "component_disabled"),
+    }
     return {
         "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION, "analysis_scope": scope, "bin_key": deepcopy(bin_key), "complete_physical_bin_identity": deepcopy(bin_key), "parent_setting_key": setting_key,
         "source": "setting_global_scan" if is_parent and accepted else ("bin_local_scan" if accepted else ("current_common_shift_fallback" if is_parent else "parent_setting_fallback")), "accepted": accepted,
-        "common_setting_shift_gev": common_shift, "baseline_score": baseline_metrics.get("score"), "selected_score": selected_metrics.get("score"), "relative_score_improvement": improvement,
+        "common_setting_shift_gev": common_shift, "baseline_score": baseline_metrics.get("score"),
+        "proposed_score": proposed_metrics.get("score"), "proposed_relative_improvement": proposed_improvement,
+        "mixed_score": mixed_metrics.get("score"), "mixed_relative_improvement": mixed_improvement,
+        "applied_score": applied_metrics.get("score"), "applied_relative_improvement": applied_improvement,
+        "selected_score": applied_metrics.get("score"), "relative_score_improvement": applied_improvement,
         "parent_global_score": parent_global_score, "parent_score_in_current_bin": parent_score_in_current_bin, "parent_alignment_hash": parent_hash,
         "resolved_config": config, "resolved_configuration_hash": config_hash,
         "pion_control_histogram_identifier": _pion_control_histogram_identifier(pion_control_hist), "pion_control_histogram_provenance": "pion_control", "histogram_axis_specification": _hist_axis_specification(pion_control_hist), "creation_timestamp": datetime.now(timezone.utc).isoformat(),
         "immutable_source_template_identifier": {
             name: deepcopy(component.get("immutable_source_hist_identifier"))
-            for name, component in selected_components.items()
+            for name, component in applied_components.items()
         },
         "immutable_source_template_checksum": {
             name: component.get("immutable_source_hist_checksum")
-            for name, component in selected_components.items()
+            for name, component in applied_components.items()
         },
-        "components": selected_components, "persistence_status": "not_persisted", "persistence_rejection_reasons": [],
+        "proposed_components": proposed_components, "applied_components": deepcopy(applied_components),
+        "component_counts": component_counts,
+        "components": applied_components, "persistence_status": "not_persisted", "persistence_rejection_reasons": [],
     }
 
 
@@ -4971,8 +5226,15 @@ def persist_pion_component_alignment(outpath, setting_key, phi_setting, epsset, 
         except (OSError, ValueError):
             pass
     persisted = deepcopy(payload)
-    persisted["persistence_status"] = "created"
-    persisted["persistence_rejection_reasons"] = []
+    requested_status = str(persisted.get("persistence_status") or "")
+    persisted["persistence_status"] = (
+        requested_status
+        if requested_status in {"created", "rejected_stale_then_created"}
+        else "created"
+    )
+    persisted["persistence_rejection_reasons"] = list(
+        persisted.get("persistence_rejection_reasons") or []
+    )
     store["alignment_schema_version"] = ALIGNMENT_SCHEMA_VERSION
     store["records"][_alignment_record_key(persisted)] = persisted
     descriptor, temporary_path = tempfile.mkstemp(prefix=".pion_alignment_", suffix=".json", dir=str(outpath))
@@ -4997,9 +5259,26 @@ def persist_pion_component_alignment(outpath, setting_key, phi_setting, epsset, 
                 "parent_global_score": component.get("parent_global_score", record.get("selected_score")),
                 "parent_score_in_current_bin": component.get("parent_score_in_current_bin", record.get("parent_score_in_current_bin")),
                 "baseline_source": component.get("baseline_source"), "baseline_score": component.get("baseline_score", record.get("baseline_score")),
+                "proposed_score": component.get("proposed_score", record.get("proposed_score")),
+                "applied_score": component.get("applied_score", record.get("applied_score")),
+                "proposed_relative_improvement": record.get("proposed_relative_improvement"),
+                "applied_relative_improvement": record.get("applied_relative_improvement"),
+                "scan_candidate_accepted": component.get("scan_candidate_accepted"),
+                "component_applied_source": component.get("component_applied_source", component.get("source")),
+                "component_fallback_used": component.get("component_fallback_used"),
+                "component_fallback_reason": component.get("component_fallback_reason"),
                 "residual_shift_gev": component.get("residual_shift_gev"), "total_shift_gev": component.get("total_shift_gev"),
                 "window_expansion_gev": component.get("window_expansion_gev"), "local_candidate_score": component.get("local_candidate_score", record.get("selected_score")),
                 "relative_improvement_over_parent": component.get("relative_improvement_over_parent", record.get("relative_score_improvement")),
+                "offset_boundary_hit": component.get("offset_boundary_hit"),
+                "expansion_boundary_hit": component.get("expansion_boundary_hit"),
+                "offset_boundary_penalty_applied": component.get("offset_boundary_penalty_applied"),
+                "expansion_boundary_penalty_applied": component.get("expansion_boundary_penalty_applied"),
+                "signed_support_integral": component.get("signed_support_integral"),
+                "absolute_support_integral": component.get("absolute_support_integral"),
+                "positive_support_integral": component.get("positive_support_integral"),
+                "support_metric_used": component.get("support_metric_used"),
+                "support_threshold": component.get("support_threshold"),
                 "accepted": component.get("accepted", record.get("accepted")), "persistence_status": record.get("persistence_status"),
                 "candidate_source": component.get("candidate_source", "immutable_original_pion_simc"),
                 "immutable_source_hist_identifier": _canonical_json(component.get("immutable_source_hist_identifier")),
@@ -5017,6 +5296,71 @@ def persist_pion_component_alignment(outpath, setting_key, phi_setting, epsset, 
         writer.writeheader()
         writer.writerows(rows)
     return [paths["json"], paths["csv"]]
+
+
+def load_or_resolve_pion_component_alignment(
+    outpath,
+    setting_key,
+    phi_setting,
+    epsset,
+    analysis_scope,
+    bin_key,
+    pion_control_hist,
+    immutable_pion_simc_component_hists,
+    parent_alignment=None,
+    inp_dict=None,
+    common_setting_shift_gev=0.0,
+):
+    """Load a compatible map before scanning, or resolve and persist one once."""
+    expected = build_expected_pion_alignment_metadata(
+        setting_key,
+        analysis_scope,
+        bin_key,
+        pion_control_hist,
+        immutable_pion_simc_component_hists,
+        parent_alignment=parent_alignment,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        common_setting_shift_gev=common_setting_shift_gev,
+    )
+    if outpath:
+        cached, rejection_reasons, artifact_paths = load_pion_component_alignment(
+            outpath, setting_key, phi_setting, epsset, expected
+        )
+        if cached is not None:
+            cached["persistence_status"] = "reused"
+            cached["persistence_rejection_reasons"] = []
+            return cached, "reused", [], [artifact_paths["json"], artifact_paths["csv"]]
+    else:
+        rejection_reasons, artifact_paths = ["persistence disabled: no OUTPATH"], {}
+
+    resolved = resolve_pion_component_alignment(
+        setting_key,
+        analysis_scope,
+        bin_key,
+        pion_control_hist,
+        immutable_pion_simc_component_hists,
+        parent_alignment=parent_alignment,
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        common_setting_shift_gev=common_setting_shift_gev,
+    )
+    if not outpath:
+        resolved["persistence_status"] = "not_persisted"
+        resolved["persistence_rejection_reasons"] = list(rejection_reasons)
+        return resolved, "not_persisted", list(rejection_reasons), []
+
+    stale_rejection = any(
+        reason not in {"alignment store does not exist", "complete physical bin identity not found"}
+        for reason in rejection_reasons
+    )
+    status = "rejected_stale_then_created" if stale_rejection else "created"
+    resolved["persistence_status"] = status
+    resolved["persistence_rejection_reasons"] = list(rejection_reasons)
+    paths = persist_pion_component_alignment(
+        outpath, setting_key, phi_setting, epsset, resolved
+    )
+    return resolved, status, list(rejection_reasons), paths
 
 
 def build_particle_subtraction_component_result(
@@ -7705,6 +8049,25 @@ def print_particle_subtraction_component_fit_pages(
         or component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None
         or component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined") is not None
     )
+    alignment_payload = component_fit_result.get("pion_component_alignment") or {}
+    alignment_pdf_lines = []
+    if alignment_payload:
+        alignment_pdf_lines = [
+            "alignment baseline score={}".format(
+                _format_fit_number(alignment_payload.get("baseline_score"))
+            ),
+            "alignment proposed score={}".format(
+                _format_fit_number(alignment_payload.get("proposed_score"))
+            ),
+            "alignment applied score={}".format(
+                _format_fit_number(alignment_payload.get("applied_score"))
+            ),
+            "alignment applied source={}".format(
+                alignment_payload.get("source") or "unknown"
+            ),
+        ]
+        if not bool(alignment_payload.get("accepted", False)):
+            alignment_pdf_lines.append("alignment proposal rejected; baseline map applied")
 
     _print_component_overlay_page(
         pdf_name,
@@ -7720,6 +8083,7 @@ def print_particle_subtraction_component_fit_pages(
         ],
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            *alignment_pdf_lines,
             "status: staged baseline",
             "fit mode: {}".format(component_fit_result.get("fit_mode_pion") or component_fit_result.get("fit_mode") or "unknown"),
             "strategy: {}".format(
@@ -7868,6 +8232,7 @@ def print_particle_subtraction_component_fit_pages(
         "{}pion-control staged vs refined component fit".format(title_prefix),
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            *alignment_pdf_lines,
             "fit mode: {}".format(component_fit_result.get("fit_mode_pion") or component_fit_result.get("fit_mode") or "unknown"),
             "joint status: {}".format(pion_diagnostics.get("joint_refinement_status") or "unknown"),
             "refined validation: {}".format("pass" if bool((pion_diagnostics.get("validation") or {}).get("accepted")) else "fail"),
@@ -7928,6 +8293,7 @@ def print_particle_subtraction_component_fit_pages(
         [
             "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
             "pion alignment: imported from pion-control calibration",
+            *alignment_pdf_lines,
             "fit mode: {}".format(component_fit_result.get("fit_mode_kaon") or component_fit_result.get("fit_mode") or "unknown"),
             "joint status: {}".format(kaon_diagnostics.get("joint_refinement_status") or "unknown"),
             "refined validation: {}".format("pass" if bool((kaon_diagnostics.get("validation") or {}).get("accepted")) else "fail"),

@@ -565,6 +565,9 @@ PION_COMPONENT_DYNAMIC_ALIGNMENT = {
         "minimum_active_fit_bins": 6,
         "minimum_evaluation_bins": 8,
         "minimum_data_integral": 1.0,
+        # The staged residual can have substantial positive and negative
+        # structure.  Use a non-cancelling support measure for scan acceptance.
+        "data_support_metric": "positive_integral",
         "minimum_template_integral": 1.0,
         "minimum_relative_score_improvement": 0.02,
         "maximum_lost_template_integral_fraction": 0.05,
@@ -578,6 +581,10 @@ PION_COMPONENT_DYNAMIC_ALIGNMENT = {
         "metric": "fixed_envelope_chi2_ndf",
         "window_expansion_penalty": 0.0,
         "offset_magnitude_penalty": 0.0,
+        # Keep boundary penalties independent.  ``boundary_penalty`` remains
+        # the backwards-compatible fallback for either enabled policy.
+        "offset_boundary_penalty": 1.0e6,
+        "expansion_boundary_penalty": 0.0,
         "boundary_penalty": 1.0e6,
     },
     "interpolation_mode": "linear",
@@ -1952,6 +1959,13 @@ def get_pion_component_dynamic_alignment_config(
                         component_name
                     )
                 )
+
+    support_metric = str((config.get("acceptance") or {}).get("data_support_metric") or "positive_integral")
+    if support_metric not in {"signed_integral", "absolute_integral", "positive_integral"}:
+        raise ValueError(
+            "Dynamic pion alignment data_support_metric must be signed_integral, "
+            "absolute_integral, or positive_integral"
+        )
 
     config["alignment_schema_version"] = int(PION_COMPONENT_DYNAMIC_ALIGNMENT_SCHEMA_VERSION)
     config["particle_subtraction_setting_key"] = resolved_setting_key

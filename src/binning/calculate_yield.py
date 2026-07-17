@@ -97,9 +97,7 @@ from pion_component_fits import (
     resolve_scope_component_shapes,
     resolve_scope_single_shape,
     serialize_particle_subtraction_component_result,
-    resolve_pion_component_alignment,
-    load_pion_component_alignment,
-    persist_pion_component_alignment,
+    load_or_resolve_pion_component_alignment,
 )
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
@@ -1776,27 +1774,19 @@ def process_hist_data(
                             "target": inpDict.get("target") or inpDict.get("Target"),
                         },
                     }
-                    requested_alignment = resolve_pion_component_alignment(
+                    active_alignment, persistence_status, persistence_reasons, alignment_paths = load_or_resolve_pion_component_alignment(
+                        OUTPATH,
                         get_particle_subtraction_setting_key(inpDict),
+                        phi_setting,
+                        EPSSET,
                         "yield_t_phi",
                         alignment_bin_key,
                         subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
                         scope_component_shapes,
                         parent_alignment=parent_pion_alignment,
                         inp_dict=inpDict,
-                        phi_setting=phi_setting,
                         common_setting_shift_gev=MM_offset_DATA,
                     )
-                    persisted_alignment, persistence_reasons, _ = load_pion_component_alignment(
-                        OUTPATH,
-                        get_particle_subtraction_setting_key(inpDict),
-                        phi_setting,
-                        EPSSET,
-                        requested_alignment,
-                    )
-                    active_alignment = persisted_alignment or requested_alignment
-                    if persistence_reasons:
-                        active_alignment["persistence_rejection_reasons"] = list(persistence_reasons)
                     scope_result = build_particle_subtraction_component_result(
                         subDict[f"H_MM_nosub_SUB_DATA_{j}_{k}"],
                         hist_bin_dict[f"H_MM_nosub_DATA_{j}_{k}"],
@@ -1824,14 +1814,8 @@ def process_hist_data(
                     )
                     alignment_payload = scope_result.get("pion_component_alignment")
                     if isinstance(alignment_payload, dict):
-                        alignment_paths = persist_pion_component_alignment(
-                            OUTPATH,
-                            get_particle_subtraction_setting_key(inpDict),
-                            phi_setting,
-                            EPSSET,
-                            alignment_payload,
-                        )
-                        alignment_payload["persistence_status"] = "reused" if persisted_alignment else "created"
+                        alignment_payload["persistence_status"] = persistence_status
+                        alignment_payload["persistence_rejection_reasons"] = list(persistence_reasons)
                         alignment_payload["artifact_paths"] = list(alignment_paths)
                         for path in alignment_paths:
                             if path not in inpDict.setdefault("pion_component_alignment_artifacts", []):
