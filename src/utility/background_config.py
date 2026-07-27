@@ -104,7 +104,8 @@ REGRESSION_ABS_TOL = 1e-9
 REGRESSION_REL_TOL = 1e-6
 
 # Shared bin-finding controls migrated from find_bins.py.
-T_BIN_MIN_EVENTS = 500
+PHI_BIN_MIN_EVENTS = 10
+T_BIN_MIN_EVENTS = 500 
 T_BIN_MIN_EVENTS = 100
 MIN_PHI_BINS = 8
 MIN_T_BINS = 2
