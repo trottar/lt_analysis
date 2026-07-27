@@ -198,6 +198,27 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
             result = self._slice_prefit(_FakeHistogram(), timing_constraint=constraint, support_entries=100)
         self.assertTrue(result["fit_attempted"])
 
+    def test_stable_fallback_can_require_a_local_timing_offset(self):
+        stable_offset = {
+            "selected_timing_center_source": "stable_global_center_fallback",
+            "timing_center_model_valid": True,
+            "offset_refinement_valid": False,
+            "offset_refinement_applied": False,
+            "delta_offset": 0.0,
+        }
+        constraint = proton_cleaning._build_timing_constraint_for_cell(
+            self.global_shape,
+            stable_offset,
+            {},
+            False,
+            "ct",
+            (-2.0, 2.0),
+            2.0,
+            allow_stable_global_center_fallback=False,
+        )
+        self.assertFalse(constraint["valid"])
+        self.assertEqual(constraint["reason"], "local_low_aero_timing_offset_required")
+
     def test_skip_counter_mapping_is_exact(self):
         self.assertEqual(
             proton_cleaning._cell_fit_skip_counter_key("invalid_global_shape"),

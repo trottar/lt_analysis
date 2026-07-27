@@ -3096,6 +3096,7 @@ def _build_timing_constraint_for_cell(
     probe_kind,
     display_range,
     bunch_spacing_ns,
+    allow_stable_global_center_fallback=True,
 ):
     if not bool((global_shape or {}).get("valid", False)):
         return {"valid": False, "reason": "invalid_global_shape"}
@@ -3123,6 +3124,15 @@ def _build_timing_constraint_for_cell(
     reference_kaon_mean = float((global_shape or {}).get("kaon_mean"))
     reference_proton_mean = float((global_shape or {}).get("proton_mean"))
     stable_center_fallback = center_source == "stable_global_center_fallback"
+    if stable_center_fallback and not bool(allow_stable_global_center_fallback):
+        return {
+            "valid": False,
+            "reason": "local_low_aero_timing_offset_required",
+            "timing_center_source": center_source,
+            "offset_refinement_valid": bool((delta_offset_fit or {}).get("valid", False)),
+            "offset_refinement_applied": bool((delta_offset_fit or {}).get("offset_refinement_applied", False)),
+            "offset_refinement_failure_reasons": list((delta_offset_fit or {}).get("offset_refinement_failure_reasons") or []),
+        }
     mean_delta_t = (tof_summary or {}).get("mean_delta_t_pk_ns")
     if stable_center_fallback:
         predicted_kaon_mean = reference_kaon_mean
@@ -5242,6 +5252,9 @@ def build_kaon_proton_cleaning_result(
                 str(selected_probe.get("probe_kind", "ct")),
                 selected_time_hist_range,
                 beam_bunch_spacing_ns,
+                allow_stable_global_center_fallback=bool(
+                    (low_aero_config or {}).get("allow_stable_global_center_fallback", True)
+                ),
             )
             slice_fit = _fit_delta_timing_slice(
                 slice_hist,

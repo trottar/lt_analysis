@@ -104,8 +104,7 @@ REGRESSION_ABS_TOL = 1e-9
 REGRESSION_REL_TOL = 1e-6
 
 # Shared bin-finding controls migrated from find_bins.py.
-PHI_BIN_MIN_EVENTS = 10
-#T_BIN_MIN_EVENTS = 500
+T_BIN_MIN_EVENTS = 500
 T_BIN_MIN_EVENTS = 100
 MIN_PHI_BINS = 8
 MIN_T_BINS = 2
@@ -512,11 +511,23 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "minimum_valid_tof_events": 10,
         "minimum_valid_tof_fraction": 0.50,
         "show_reference_npe": 5.0,
+        # Most settings may use the stable center when a local offset is sparse.
+        "allow_stable_global_center_fallback": True,
     },
 }
 
 PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES = {}
-PROTON_CONTAMINATION_CLEANING_CONFIG_OVERRIDES = {}
+PROTON_CONTAMINATION_CLEANING_CONFIG_OVERRIDES = {
+    "Q3p0W2p32": {
+        "default": {
+            "low_aero_offset": {
+                # This setting's sparse, displaced slow-proton RF population
+                # cannot safely inherit the setting-wide timing center.
+                "allow_stable_global_center_fallback": False,
+            },
+        },
+    },
+}
 
 PARTICLE_SUBTRACTION_WINDOW_CONFIG_OVERRIDES = {}
 
