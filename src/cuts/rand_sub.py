@@ -2592,6 +2592,19 @@ def rand_sub(
     print("\n\n{} data total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DATA.Integral()))
     print("{} dummy total number of events (dummy & random subtraction): {:.3e}".format(phi_setting, H_MM_DUMMY.Integral()))      
 
+    binning_t_hist = None
+    binning_phi_hist = None
+    if ParticleType == "kaon":
+        # Freeze the bin-counting inputs before slow-proton and pion subtraction.
+        binning_t_hist = H_t_DATA.Clone(
+            "H_t_DATA_pre_particle_subtraction_{}".format(phi_setting)
+        )
+        binning_phi_hist = H_ph_q_DATA.Clone(
+            "H_ph_q_DATA_pre_particle_subtraction_{}".format(phi_setting)
+        )
+        binning_t_hist.SetDirectory(0)
+        binning_phi_hist.SetDirectory(0)
+
     component_fit_result = None
     component_subtraction_payload = None
     sub_tree_bundle = None
@@ -3852,6 +3865,7 @@ def rand_sub(
     histDict["H_q_DATA"] =     H_q_DATA
     histDict["H_Q2_DATA"] =     H_Q2_DATA
     histDict["H_t_DATA"] =     H_t_DATA
+    histDict["_binning_H_t_DATA_pre_particle_subtraction"] = binning_t_hist
     histDict["H_epsilon_DATA"] =     H_epsilon_DATA
     histDict["H_MM_DATA"] =     H_MM_DATA
     histDict["H_MM_rand_dummy_DATA"] =     H_MM_rand_dummy_DATA
@@ -3884,6 +3898,8 @@ def rand_sub(
     histDict["H_th_DATA"] =     H_th_DATA
     histDict["H_ph_DATA"] =     H_ph_DATA
     histDict["H_ph_q_DATA"] =     H_ph_q_DATA
+    histDict["_binning_H_ph_q_DATA_pre_particle_subtraction"] = binning_phi_hist
+    histDict["_binning_input_stage"] = "post_random_dummy_pre_particle_subtraction"
     histDict["H_th_q_DATA"] =     H_th_q_DATA
     histDict["H_ph_recoil_DATA"] =     H_ph_recoil_DATA
     histDict["H_th_recoil_DATA"] =     H_th_recoil_DATA

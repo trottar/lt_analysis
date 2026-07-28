@@ -34,6 +34,9 @@ from background_config import (
     T_BIN_MIN_EVENTS,
 )
 
+PRE_PARTICLE_SUBTRACTION_T_HIST_KEY = "_binning_H_t_DATA_pre_particle_subtraction"
+PRE_PARTICLE_SUBTRACTION_PHI_HIST_KEY = "_binning_H_ph_q_DATA_pre_particle_subtraction"
+
 
 def _clone_histlist(histlist):
     histlist_copy = []
@@ -46,6 +49,17 @@ def _clone_histlist(histlist):
                 hist_copy[key] = val
         histlist_copy.append(hist_copy)
     return histlist_copy
+
+
+def _get_binning_histograms(hist):
+    """Prefer kaon distributions captured before slow-proton and pion subtraction."""
+    t_hist = hist.get(PRE_PARTICLE_SUBTRACTION_T_HIST_KEY)
+    phi_hist = hist.get(PRE_PARTICLE_SUBTRACTION_PHI_HIST_KEY)
+    if t_hist is None:
+        t_hist = hist["H_t_DATA"]
+    if phi_hist is None:
+        phi_hist = hist["H_ph_q_DATA"]
+    return t_hist, phi_hist
 
 
 def _collect_bin_samples(histlist, inpDict):
@@ -61,11 +75,12 @@ def _collect_bin_samples(histlist, inpDict):
 
     for hist in _clone_histlist(histlist):
         normfac_data = hist.get("normfac_data", inpDict["normfac_data"])
-        hist["H_t_DATA"].Scale(1.0 / normfac_data)
-        hist["H_ph_q_DATA"].Scale(1.0 / normfac_data)
+        t_hist, phi_hist = _get_binning_histograms(hist)
+        t_hist.Scale(1.0 / normfac_data)
+        phi_hist.Scale(1.0 / normfac_data)
 
-        t_values = flatten_hist(hist["H_t_DATA"])
-        phi_deg = [(phi * (180.0 / math.pi)) for phi in flatten_hist(hist["H_ph_q_DATA"])]
+        t_values = flatten_hist(t_hist)
+        phi_deg = [(phi * (180.0 / math.pi)) for phi in flatten_hist(phi_hist)]
 
         if hist["phi_setting"] == "Right":
             h_t_right = np.append(h_t_right, t_values)
