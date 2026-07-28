@@ -7,547 +7,328 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 
-\title{SIMC-Shape Pion-Background Subtraction Procedure}
+\title{KaonLT Particle-Background Subtraction Procedure}
 \author{KaonLT Production Analysis}
 \date{\today}
 
 \begin{document}
 \maketitle
 
-\section{Purpose}
+\section{Purpose and Scope}
 
-This note documents the current \texttt{simc\_shape\_components} pion-background
-subtraction procedure implemented in the production analysis.
-The goal is to replace the legacy single-scale pion subtraction with an
-MM-dependent weighting constructed from SIMC component fits.
+This note documents the current particle-background treatment in the KaonLT
+production analysis.  The nominal kaon path uses two separate corrections:
+\begin{enumerate}[leftmargin=2em]
+  \item event-level slow-proton cleaning from coincidence timing, SHMS
+        $\delta$, and aerogel response; and
+  \item an MM-dependent pion-background subtraction from aligned SIMC neutron,
+        $\Delta$, and SIDIS component shapes.
+\end{enumerate}
 
-The three pion-background components are
+The pion fit uses the kaon spectrum after slow-proton cleaning.  The standard
+processing order is
+\begin{align}
+  \text{random/dummy correction}
+  \longrightarrow \text{freeze bin-counting spectra}
+  \longrightarrow \text{slow-proton cleaning}
+  \longrightarrow \text{pion component subtraction}
+  \longrightarrow \text{optional empirical residual fits}.
+\end{align}
+
+The main code owners are
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{src/cuts/rand\_sub.py} for setting-wide ordering and
+        application;
+  \item \texttt{src/cuts/proton\_contamination\_weights.py} for the
+        slow-proton method;
+  \item \texttt{src/cuts/pion\_component\_fits.py} and
+        \texttt{src/cuts/pion\_component\_subtraction.py} for pion templates
+        and weights;
+  \item \texttt{src/binning/calculate\_yield.py} and
+        \texttt{src/binning/ave\_per\_bin.py} for bin-level propagation; and
+  \item \texttt{src/utility/background\_config.py} for defaults and
+        setting/$\phi$ overrides.
+\end{itemize}
+
+\section{Common Data Staging}
+
+For each $\phi$ setting, prompt, random, dummy, and dummy-random sources are
+combined with their usual signs and normalization coefficients.  For any
+observable $X$,
+\begin{align}
+  H_X^{\mathrm{data}}
+  ={}&c_{\mathrm{prompt}}H_X^{\mathrm{prompt}}
+     +c_{\mathrm{rand}}H_X^{\mathrm{rand}} \\
+    &+c_{\mathrm{dummy}}H_X^{\mathrm{dummy}}
+     +c_{\mathrm{dummy\ rand}}H_X^{\mathrm{dummy\ rand}},
+\end{align}
+where the random and dummy terms carry the appropriate negative signs.
+
+Before either particle correction, the kaon $t$ and $\phi$ distributions used
+for bin finding are cloned.  The binning definition therefore remains fixed,
+while the final histograms, yields, and averages include both corrections.
+
+\section{Part I: Slow-Proton Cleaning}
+
+\subsection{Method and Input Sample}
+
+Slow protons can survive the kaon selection as a displaced timing component.
+They are removed with the configured
+\texttt{ctime\_aero\_event\_weight} method, implemented as
+\texttt{c\_script\_exact}.  The Python implementation follows the accepted
+\texttt{check\_slow\_protons.C} procedure; it is not a globally scaled
+proton-template subtraction.
+
+The fit uses explicit no-RF kaon trees for prompt, random, dummy, and
+dummy-random events.  Their signed, prompt-relative count-scale combination is
+used to build the timing-fit sample before pion subtraction.  Corrected physics
+targets are subsequently filled with the physical source coefficients.
+
+The timing sample requires the standard kaon acceptance, HGCer-hole rejection,
+and the no-MM-cut selection.  In strict mode, a missing explicit no-RF input is
+an error rather than a reason to substitute an RF-selected tree.  The stored
+result records the resolved setting, $\phi$ setting, override layers, input
+tree policy, and failure policy.
+
+\subsection{Timing Fits}
+
+The default PID partition is
+\begin{align}
+  N_{\mathrm{aero}}&\in[0,3),[3,6),[6,10),[10,15),[15,25), \\
+  \delta_{\mathrm{SHMS}}&\in[-10,20]\ \% \quad\text{in ten bins}.
+\end{align}
+For each aerogel slice, a global timing fit determines the kaon and proton
+shapes.  Per-$\delta$ fits then use those shapes as constraints while finding
+the local component normalizations and timing behavior.  The model contains
+kaon and proton Gaussian components and, when needed, a non-negative
+residual-other component.
+
+Fit quality, peak separation, component significance, support, and bound-hit
+tests determine whether an aerogel--$\delta$ cell is usable.  The default
+timing policy, \texttt{rf\_then\_ct\_best}, tests usable RF-like branches and
+\texttt{CTime\_ROC1}; it retains the preferred valid result.  The diagnostics
+record any per-aerogel multi-start, standard-fit, pre-diamond, or local-peak
+rescue attempts used to make that decision.
+
+\subsection{Event Weights and RF Handling}
+
+For timing value $\tau$, the proton probability is
+\begin{align}
+  P_p(\tau,\delta,N_{\mathrm{aero}})
+  =\frac{f_p(\tau)}
+         {f_p(\tau)+f_K(\tau)+f_{\mathrm{other}}},
+  \qquad 0\leq P_p\leq1.
+\end{align}
+For a source with physical coefficient $c_s$, the corresponding proton and
+cleaned contributions are
+\begin{align}
+  w_{p,s}=c_sP_p,\qquad
+  w_{\mathrm{clean},s}=c_s(1-P_p).
+\end{align}
+The output is therefore a parallel set of raw, estimated-proton, and
+proton-cleaned histograms.  The per-event factors are frozen in a lookup keyed
+by source and entry number, then reused in the setting-wide, yield, and
+averaging paths.
+
+For low-$\epsilon$ data, RF membership is optionally restored only after the
+proton factor is evaluated, by signature matching to the existing RF skim
+trees.  The default policy is \texttt{epsset\_default\_after\_cleaning};
+high-$\epsilon$ data do not receive this extra RF-membership step.  Thus RF
+selection cannot change the no-RF sample used to determine $P_p$.
+
+\subsection{Acceptance and Diagnostics}
+
+Each $\delta$ bin is classified as supported, marginal, or unsupported from
+its usable aerogel cells and modeled yield.  At least one supported or marginal
+bin is required for an accepted cleaning result.  An unaccepted result leaves
+the particle targets unchanged, while a missing required no-RF or RF-reference
+input remains a strict-mode error where configured.
+
+The diagnostic PDF and serialized result contain
+\begin{itemize}[leftmargin=2em]
+  \item selected timing branch, global timing shapes, and fit constraints;
+  \item aerogel and $\delta$ support, fitted yields, and proton fractions;
+  \item event-probability closure: summed event proton probability versus
+        fitted proton yield;
+  \item average proton weights versus $\delta$ and
+        $(\delta,N_{\mathrm{aero}})$; and
+  \item raw, proton-estimated, cleaned, and final-RF MM spectra, including
+        low-MM and $\Lambda$-peak validation windows.
+\end{itemize}
+
+\section{Part II: Pion SIMC-Shape Subtraction}
+
+\subsection{Templates and Provenance}
+
+After slow-proton cleaning, the nominal particle-subtraction mode is
+\texttt{simc\_shape\_components}.  The components are
 \begin{itemize}[leftmargin=2em]
   \item $\pi$-$n$,
-  \item $\pi$-$\Delta$,
+  \item $\pi$-$\Delta$, and
   \item $\pi$-SIDIS.
 \end{itemize}
 
-The procedure is implemented through the following code paths:
+Their ROOT inputs are resolved through the runtime
+\texttt{background\_samples} payload and the setting/$\phi$ map, not
+hard-coded in the fit.  The normal SIMC tree is \texttt{h10}.  Each component
+is filled with SIMC event weights and comparison cuts, then normalized to a
+unit-area MM template.
+
+Templates can be resolved at setting-wide and $(t,\phi)$ scope.  For a sparse
+fine bin, the fallback sequence is direct $(t,\phi)$, then $t$-aggregated, then
+setting-wide.  This is a template-support fallback and does not replace the
+configured physical input sample.
+
+\subsection{Dynamic Template Alignment}
+
+Pion-control data calibrate the SIMC MM alignment before amplitudes are fit.
+This dynamic-alignment layer is independent of the legacy residual-shift
+switches.  At setting-wide scope, $\pi$-$n$ scans offsets from $-0.020$ to
+$+0.020$~GeV in $0.001$~GeV steps, while $\pi$-$\Delta$ scans $-0.030$ to
+$+0.030$~GeV in $0.002$~GeV steps.  Candidate fit-window expansions are also
+tested.
+
+The selected alignment must satisfy support, retained-template-integral,
+score-improvement, and localized-minimum requirements.  Offset-boundary hits
+are rejected by default; expansion-boundary hits are diagnostic warnings by
+default.  The accepted pion-control map is shared with the kaon fit.  Fine
+bins can scan around their parent map, and only rejected components inherit
+the parent or common fallback.  $\pi$-SIDIS currently inherits the parent map
+by default rather than making an independent scan.
+
+The saved payload keeps proposed scan metrics distinct from the metrics of the
+alignment actually applied.  This distinction is important when a mixed
+fine-bin map uses an accepted component-specific scan together with parent
+fallback for another component.
+
+\subsection{Fit Targets and Current Configuration}
+
+The aligned templates are fit to
 \begin{itemize}[leftmargin=2em]
-  \item \texttt{src/cuts/pion\_component\_fits.py},
-  \item \texttt{src/cuts/pion\_component\_subtraction.py},
-  \item \texttt{src/cuts/rand\_sub.py},
-  \item \texttt{src/binning/calculate\_yield.py},
-  \item \texttt{src/binning/ave\_per\_bin.py},
-  \item \texttt{src/utility/background\_config.py}.
+  \item pion-control data, yielding denominator amplitudes
+        $B_n$, $B_\Delta$, and $B_{\mathrm{SIDIS}}$; and
+  \item proton-cleaned kaon no-subtraction data, yielding numerator amplitudes
+        $A_n$, $A_\Delta$, and $A_{\mathrm{SIDIS}}$.
 \end{itemize}
 
-\section{Definitions}
+Both paths use non-negative staged amplitudes: each component is fit to the
+residual after previous components.  Table~\ref{tab:pion-config} is the
+current nominal snapshot.  The resolved configuration, including a
+setting/$\phi$ override, remains authoritative for a production result.
 
-Let the unit-normalized SIMC MM templates be
+\begin{table}[htbp]
+  \centering
+  \caption{Nominal active pion-component fit configuration.}
+  \label{tab:pion-config}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Target & Fit mode and order & Active fit windows (GeV) \\
+    \midrule
+    Pion control &
+      staged plus regularized joint: $\pi n\to\pi$-SIDIS$\to\pi\Delta$ &
+      $\pi n:[0.88,0.94]$; $\pi\Delta:[1.16,1.18]\cup[1.24,1.26]$;
+      $\pi$-SIDIS$:[1.05,1.10]$ \\
+    Kaon no-sub &
+      staged only: $\pi n\to\pi$-SIDIS$\to\pi\Delta$ &
+      $\pi n:[0.88,0.94]$; $\pi\Delta:[1.16,1.18]\cup[1.24,1.26]$;
+      $\pi$-SIDIS$:[1.05,1.10]$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The $K\Sigma^0$ stage and its $[1.17,1.23]$~GeV window remain configured but
+are disabled in both current fits.  The pion-control path may regularize a
+joint non-negative refinement around its staged solution.  The kaon
+no-subtraction path is presently staged-only.  All active post-fit and
+post-refinement component scales are unity, so the control-model denominator
+is not phenomenologically rescaled.
+
+For a least-squares staged component $T_j$ with residual $R_{j-1}$,
 \begin{align}
-  T_n(MM), \qquad
-  T_\Delta(MM), \qquad
-  T_{\mathrm{SIDIS}}(MM).
+  C_j=\max\left(0,
+    \frac{\sum_iT_j(i)R_{j-1}(i)/\sigma_i^2}
+         {\sum_iT_j(i)^2/\sigma_i^2}\right),
+  \qquad R_j=R_{j-1}-C_jT_j.
 \end{align}
+Components configured for window-integral normalization instead use the ratio
+of residual and template integrals in their amplitude window.  A joint
+refinement augments the data objective with priors around the staged result
+and retains non-negative amplitudes.
 
-The pion-control fitted model is
+\subsection{MM-Dependent Event Weight}
+
+Let the aligned unit-normalized templates be
+\begin{align}
+  T_n(MM),\qquad T_\Delta(MM),\qquad T_{\mathrm{SIDIS}}(MM).
+\end{align}
+The fitted control and kaon-side models are
 \begin{align}
   P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
-  =
-  B_n T_n(MM)
-  +
-  B_\Delta T_\Delta(MM)
-  +
-  B_{\mathrm{SIDIS}} T_{\mathrm{SIDIS}}(MM),
-\end{align}
-and the kaon-side fitted pion-background model is
-\begin{align}
+  &=B_nT_n(MM)+B_\Delta T_\Delta(MM)
+    +B_{\mathrm{SIDIS}}T_{\mathrm{SIDIS}}(MM),\\
   K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM)
-  =
-  A_n T_n(MM)
-  +
-  A_\Delta T_\Delta(MM)
-  +
-  A_{\mathrm{SIDIS}} T_{\mathrm{SIDIS}}(MM).
+  &=A_nT_n(MM)+A_\Delta T_\Delta(MM)
+    +A_{\mathrm{SIDIS}}T_{\mathrm{SIDIS}}(MM).
 \end{align}
-
-The event-by-event pion weight is defined as
+The pion event weight is
 \begin{align}
   w_\pi(MM)
-  =
-  \frac{K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM)}
-       {P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)}.
+  =\frac{K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM)}
+         {P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)}.
 \end{align}
-
-The weighted pion-control model is therefore
+It is evaluated with the configured denominator floor and clip policy.  Its
+model-level closure identity is
 \begin{align}
-  w_\pi(MM)\,P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
-  =
-  K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM),
+  w_\pi(MM)P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
+  =K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM).
 \end{align}
-which is the model-level closure identity.
 
-In the current tuning scheme, the pion-control post-fit component scales are
-kept fixed at unity so that \(P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)\) remains
-the unmodified control-model denominator. Any phenomenological post-fit scaling
-is applied only on the kaon-side pion-background model
-\(K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM)\).
-
-\section{Part 1: Load SIMC Component Shapes}
-
-The SIMC component shapes are loaded from existing ROOT files and converted into
-unit-normalized MM templates.
-
-\subsection{Inputs}
-
-The current mode is controlled in
-\texttt{src/utility/background\_config.py} through
-\begin{itemize}[leftmargin=2em]
-  \item \texttt{PARTICLE\_SUBTRACTION\_MODE\_DEFAULT},
-  \item \texttt{SIMC\_TREE\_NAME\_DEFAULT},
-  \item \texttt{SIMC\_PION\_COMPONENT\_BACKGROUND\_MAP}.
-\end{itemize}
-
-The default SIMC tree name is
+The physical subtraction object is the weighted pion-control event template:
+$w_\pi$ is applied to accepted pion-control prompt, random, dummy, and
+dummy-random events with their usual signs and normalization coefficients.
+The final kaon target is therefore
 \begin{align}
-  \texttt{h10}.
+  H_{\mathrm{kaon,after\ pion}}
+  =H_{\mathrm{kaon,proton\ cleaned}}
+   -H_{\mathrm{weighted\ pion\ event\ template}}.
 \end{align}
+The weighted pion-control model is an algebra check; the weighted event
+template is the object actually subtracted from data.
 
-\subsection{Shape construction}
+\subsection{Fallback and Diagnostics}
 
-For each component:
-\begin{enumerate}[leftmargin=2em]
-  \item open the corresponding SIMC ROOT file,
-  \item read the SIMC tree,
-  \item loop over events,
-  \item fill an MM histogram using the SIMC event weight,
-  \item apply the same SIMC-side cuts used for MM-shape comparisons,
-  \item normalize the resulting MM histogram to unit area.
-\end{enumerate}
+The nominal production fallback for component subtraction is \texttt{error}.
+An invalid component result must not silently become a legacy single-scale
+subtraction.  The low-$\epsilon$ optimizer prepass is an intentional special
+case that may request \texttt{single\_scale} so a sparse exploratory bin does
+not abort the full scan; it does not redefine the nominal production mode.
 
-The loader can produce:
-\begin{itemize}[leftmargin=2em]
-  \item a setting-wide full-range MM template,
-  \item optional binned templates in $(t,\phi)$.
-\end{itemize}
+Pion diagnostics distinguish alignment scans and applied maps, staged and
+joint-fit models, model closure, event-template closure, and kaon MM spectra
+before and after pion subtraction.  Event-template closure is the physics
+validation: it checks whether the weighted control events reproduce the
+kaon-side pion background that is actually being removed.
 
-If a fine $(t,\phi)$ component template is empty or has non-usable support, the
-analysis can fall back hierarchically to:
-\begin{enumerate}[leftmargin=2em]
-  \item the direct $(t,\phi)$ template,
-  \item the corresponding $t$-aggregated template,
-  \item the setting-wide template.
-\end{enumerate}
+\section{Reproducibility Record}
 
-\subsection{MM alignment}
-
-When the target data side uses an MM offset, the SIMC component templates are
-shifted by the same data-side MM offset before fitting. This is handled inside
-\texttt{build\_particle\_subtraction\_component\_result(...)} so that the fit is
-performed with aligned MM locations.
-
-\section{Part 2: Fit the SIMC Shapes}
-
-\subsection{Two fit targets}
-
-The templates are fit to two different histograms:
-\begin{itemize}[leftmargin=2em]
-  \item the pion-control data histogram,
-  \item the kaon no-subtraction histogram.
-\end{itemize}
-
-For binned yield and averaging paths, the fit first attempts the direct
-$(t,\phi)$ component template for each channel. If that template is empty or
-non-usable, the code falls back to a broader support level as described in
-Part~1 rather than treating ordinary sparse-bin behavior as a fatal physics
-failure.
-
-The pion-control fit determines
+Each setting-level result should retain the resolved particle-subtraction
+configuration, background-sample provenance, dynamic pion-alignment payload,
+serialized slow-proton result, accepted or fallback status, and diagnostic
+PDF pages.  These records trace a final yield through
 \begin{align}
-  B_n,\quad B_\Delta,\quad B_{\mathrm{SIDIS}},
+  \text{raw kaon data}
+  \to\text{random/dummy corrected data}
+  \to\text{proton-cleaned data}
+  \to\text{pion-subtracted data}.
 \end{align}
-while the kaon-side fit determines
-\begin{align}
-  A_n,\quad A_\Delta,\quad A_{\mathrm{SIDIS}}.
-\end{align}
-
-\subsection{Ordered staged fit}
-
-The staged fit order is controlled directly in
-\texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
-
-Current defaults are:
-\begin{itemize}[leftmargin=2em]
-  \item pion-control:
-  \begin{align}
-    \pi\mathrm{-}n
-    \;\rightarrow\;
-    \pi\mathrm{-SIDIS}
-    \;\rightarrow\;
-    \pi\mathrm{-}\Delta,
-  \end{align}
-  \item kaon no-sub:
-  \begin{align}
-    \pi\mathrm{-}n
-    \;\rightarrow\;
-    \pi\mathrm{-}\Delta
-    \;\rightarrow\;
-    K\mathrm{-}\Sigma^0
-    \;\rightarrow\;
-    \pi\mathrm{-SIDIS}.
-  \end{align}
-\end{itemize}
-
-Each stage fits the residual remaining after the previous fitted components have
-been subtracted from the input histogram. Conceptually:
-\begin{align}
-  R_0(MM) &= D(MM), \\
-  R_1(MM) &= D(MM) - C_1 T_1(MM), \\
-  R_2(MM) &= D(MM) - C_1 T_1(MM) - C_2 T_2(MM),
-\end{align}
-where $D(MM)$ is the fit target and the $C_i$ are the staged component
-amplitudes in the configured fit order.
-
-The anchor windows for the current defaults are stored in
-\texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
-
-\subsection{How the amplitudes are found}
-
-At each staged step, the code solves for a single non-negative amplitude against
-the current residual histogram. The exact rule depends on the configured
-\texttt{stage\_amplitude\_mode}.
-
-\subsubsection*{Window-integral mode}
-
-If a component is configured with
-\texttt{stage\_amplitude\_mode = window\_integral}, then the amplitude is taken
-from the ratio of the residual integral to the unit-normalized template
-integral inside the configured stage-amplitude window:
-\begin{align}
-  C
-  =
-  \max\!\left(
-    0,\,
-    \frac{\sum\limits_{i \in W_{\mathrm{amp}}} R(i)}
-         {\sum\limits_{i \in W_{\mathrm{amp}}} T(i)}
-  \right),
-\end{align}
-where
-\begin{itemize}[leftmargin=2em]
-  \item $R(i)$ is the residual bin content,
-  \item $T(i)$ is the template bin content,
-  \item $W_{\mathrm{amp}}$ is the configured stage-amplitude window.
-\end{itemize}
-
-This is a direct window-normalization estimate. The implementation then stores
-the resulting amplitude uncertainty as the residual quadrature error inside the
-same window divided by the template integral in that window.
-
-\subsubsection*{Least-squares mode}
-
-If a component is configured with
-\texttt{stage\_amplitude\_mode = least\_squares}, the code minimizes the
-single-template weighted residual over the selected fit bins:
-\begin{align}
-  \chi^2(C)
-  =
-  \sum_i
-  \frac{\left[R(i) - C\,T(i)\right]^2}{\sigma_i^2}.
-\end{align}
-
-For one template, the solution is
-\begin{align}
-  C
-  =
-  \max\!\left(
-    0,\,
-    \frac{\sum_i T(i)\,R(i)/\sigma_i^2}
-         {\sum_i T(i)^2/\sigma_i^2}
-  \right).
-\end{align}
-
-The reported one-parameter uncertainty is
-\begin{align}
-  \delta C
-  =
-  \left(
-    \sum_i \frac{T(i)^2}{\sigma_i^2}
-  \right)^{-1/2}.
-\end{align}
-
-So in practical terms:
-\begin{itemize}[leftmargin=2em]
-  \item \texttt{window\_integral} uses an area match inside a core window,
-  \item \texttt{least\_squares} uses the actual template shape against the
-  residual.
-\end{itemize}
-
-\subsubsection*{Residual update}
-
-After a stage amplitude $C_j$ is found, the cumulative staged model is updated
-and the next component is fit to the new residual:
-\begin{align}
-  R_j(MM)
-  =
-  D(MM)
-  -
-  \sum_{k=1}^{j} C_k T_k(MM).
-\end{align}
-
-The amplitudes are explicitly constrained to remain non-negative at every
-staged step.
-
-\subsubsection*{Joint refinement after the staged pass}
-
-Once the ordered staged amplitudes are available, the code can refine all
-component amplitudes simultaneously with a non-negative bounded linear least
-squares solve. The staged solution provides the starting point and prior target.
-
-The refined objective is equivalent to minimizing
-\begin{align}
-  \chi^2_{\mathrm{data}}
-  +
-  \sum_j
-  \left(
-    \frac{C_j - C^{\mathrm{stage}}_j}{\tau_j}
-  \right)^2,
-\end{align}
-where $\tau_j$ is the configured prior width for component $j$.
-
-The implementation solves this as an augmented linear system with
-\begin{align}
-  C_j \ge 0
-\end{align}
-for all components.
-
-\subsubsection*{Coordinate-update fallback}
-
-If the joint prior refinement is not accepted by the validation logic, the code
-can perform ordered coordinate updates. For a given component $j$, it forms the
-residual with all other components held fixed:
-\begin{align}
-  R_{-j}(i)
-  =
-  D(i) - \sum_{k \ne j} C_k T_k(i),
-\end{align}
-and updates
-\begin{align}
-  C_j
-  =
-  \max\!\left(
-    0,\,
-    \frac{\sum_i T_j(i)\,R_{-j}(i)/\sigma_i^2}
-         {\sum_i T_j(i)^2/\sigma_i^2}
-  \right),
-\end{align}
-with the prior penalty included in the numerator and denominator when the prior
-width is finite.
-
-\subsection{Current default windows}
-
-\subsubsection*{Pion-control fit}
-\begin{align}
-  \pi\mathrm{-}n &: [0.90,\,0.94], \\
-  \pi\mathrm{-}\Delta &: [1.16,\,1.25], \\
-  \pi\mathrm{-SIDIS} &: [1.36,\,1.45].
-\end{align}
-
-There is also a current stage-amplitude core window for $\pi$-$\Delta$:
-\begin{align}
-  [1.17,\,1.23].
-\end{align}
-
-\subsubsection*{Kaon no-sub fit}
-\begin{align}
-  \pi\mathrm{-}n &: [0.90,\,0.94], \\
-  \pi\mathrm{-}\Delta &: [1.18,\,1.26], \\
-  \pi\mathrm{-SIDIS} &: [1.36,\,1.45].
-\end{align}
-
-The kaon-side fit currently excludes the configured Sigma region
-\begin{align}
-  [1.18,\,1.23]
-\end{align}
-from the relevant fit objects used for validation and staged diagnostics.
-
-\subsection{Post-fit component scales}
-
-After the staged amplitudes are extracted, the code can apply component-specific
-post-fit scale factors from the config.
-
-Current defaults:
-\begin{center}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Fit target & $\pi$-$n$ & $\pi$-$\Delta$ & $\pi$-SIDIS \\
-\midrule
-Pion control & 0.95 & 0.95 & 0.75 \\
-Kaon no-sub  & 0.95 & 0.95 & 0.25 \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\subsection{Refinement and validation}
-
-The current implementation also supports:
-\begin{itemize}[leftmargin=2em]
-  \item joint refinement with Gaussian-like prior penalties around the staged solution,
-  \item ordered coordinate updates,
-  \item full-range validation checks,
-  \item over-subtraction diagnostics.
-\end{itemize}
-
-The fallback mode is currently set to
-\begin{align}
-  \texttt{error},
-\end{align}
-so component mode is expected to fail hard rather than silently revert to the
-legacy subtraction path.
-
-\section{Part 3: Build and Apply the Event Weight}
-
-\subsection{Histogram-level weight construction}
-
-Once the fitted amplitudes are available, the code constructs:
-\begin{itemize}[leftmargin=2em]
-  \item \texttt{H\_pion\_control\_model},
-  \item \texttt{H\_kaon\_pion\_model},
-  \item \texttt{H\_pion\_weight\_vs\_MM},
-  \item \texttt{H\_weighted\_pion\_control\_model}.
-\end{itemize}
-
-The MM weight is evaluated bin by bin as
-\begin{align}
-  w_i = \frac{K_{\pi\mathrm{-bg},i}^{\mathrm{fit}}}
-               {P_{\mathrm{ctrl},i}^{\mathrm{fit}}},
-\end{align}
-subject to the configured denominator floor and clip bounds.
-
-\subsection{Event-template construction}
-
-The actual subtraction template is not the weighted model.
-It is built by looping over the pion-control event source:
-\begin{itemize}[leftmargin=2em]
-  \item prompt,
-  \item random,
-  \item dummy,
-  \item dummy-random,
-\end{itemize}
-with the usual signs and normalization coefficients, and applying
-\begin{align}
-  w_\pi(MM_{\mathrm{event}})
-\end{align}
-to each accepted event.
-
-This produces the weighted pion-control event template that is actually
-subtracted from the kaon data histograms.
-
-\subsection{Subtraction}
-
-For the relevant analysis scope, the corrected kaon histogram is formed as
-\begin{align}
-  H_{\mathrm{kaon,after}}
-  =
-  H_{\mathrm{kaon,before}}
-  -
-  H_{\mathrm{weighted\ pion\ template}}.
-\end{align}
-
-This same logic is applied in:
-\begin{itemize}[leftmargin=2em]
-  \item \texttt{rand\_sub.py},
-  \item \texttt{calculate\_yield.py},
-  \item \texttt{ave\_per\_bin.py},
-\end{itemize}
-with scope-specific histograms and caches.
-
-\section{Diagnostic Interpretation}
-
-\subsection{Model closure}
-
-The page
-\begin{quote}
-\texttt{Part 3 model closure: weighted pion model vs kaon bg model}
-\end{quote}
-checks the algebraic identity
-\begin{align}
-  w_\pi(MM)\,P_{\mathrm{ctrl}}^{\mathrm{fit}}(MM)
-  =
-  K_{\pi\mathrm{-bg}}^{\mathrm{fit}}(MM).
-\end{align}
-
-If this page fails, the problem is in the weight construction itself:
-binning mismatch, normalization inconsistency, or an implementation bug.
-
-\subsection{Event-template closure}
-
-The page
-\begin{quote}
-\texttt{Part 3 event-template closure vs kaon bg model}
-\end{quote}
-checks whether the weighted \emph{actual pion-control events} reproduce the
-kaon-side fitted pion-background model.
-
-This is the physically relevant closure test because the weighted event template
-is what is actually subtracted from kaon data.
-
-If model closure is good but event-template closure is poor, then the weight
-formula is behaving correctly while the fitted pion-control model does not map
-cleanly onto the real pion-control event distribution.
-
-\subsection{Kaon data vs pion-background models}
-
-The page
-\begin{quote}
-\texttt{Part 3 kaon data vs pion-background models}
-\end{quote}
-is a full-range comparison of:
-\begin{itemize}[leftmargin=2em]
-  \item the kaon data before pion subtraction,
-  \item the fitted kaon-side pion-background model,
-  \item the weighted pion-control event template.
-\end{itemize}
-
-This page is intended only to show how large the subtraction source is relative
-to the full kaon spectrum. It is not itself the closure test.
-
-\subsection{Before/after subtraction}
-
-The page
-\begin{quote}
-\texttt{Part 3 full-range MM before/after pion subtraction}
-\end{quote}
-shows the full-range kaon histogram before subtraction, the weighted pion
-template, and the resulting after-subtraction histogram.
-
-\section{Current Main Configuration Knobs}
-
-The principal controls for the current implementation are:
-\begin{itemize}[leftmargin=2em]
-  \item \texttt{PARTICLE\_SUBTRACTION\_MODE\_DEFAULT},
-  \item \texttt{PARTICLE\_SUBTRACTION\_FALLBACK\_MODE\_DEFAULT},
-  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_DENOM\_FLOOR\_DEFAULT},
-  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_CLIP\_MIN\_DEFAULT},
-  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_CLIP\_MAX\_DEFAULT},
-  \item \texttt{PARTICLE\_SUBTRACTION\_WEIGHT\_WARN\_MAX\_DEFAULT},
-  \item \texttt{PARTICLE\_SUBTRACTION\_WINDOW\_CONFIG},
-  \item \texttt{PARTICLE\_SUBTRACTION\_COMPONENT\_FIT\_WINDOW\_CONFIG}.
-\end{itemize}
 
 \section{Summary}
 
-The procedure has three logically separate steps:
-\begin{enumerate}[leftmargin=2em]
-  \item load aligned unit-area SIMC component shapes;
-  \item fit those shapes to pion-control and kaon no-sub histograms;
-  \item form an MM-dependent event weight and apply it to the actual pion-control events.
-\end{enumerate}
-
-The key distinction is:
-\begin{itemize}[leftmargin=2em]
-  \item \emph{weighted pion-control model}: an algebra/implementation check,
-  \item \emph{weighted pion event template}: the actual subtraction object.
-\end{itemize}
-
-For physics diagnosis, the most important page is the event-template closure page,
-because it tests whether the weighted pion-control event sample really reproduces
-the kaon-side fitted pion background that the subtraction is meant to remove.
+The current analysis first applies an event-level timing--$\delta$--aerogel
+slow-proton correction, then derives an MM-dependent pion weight from
+dynamically aligned SIMC component fits.  Both corrections are propagated to
+the same event sources and final targets, while bin-counting inputs are fixed
+before either correction.  This keeps the two physical backgrounds, their
+validations, and their configuration ownership explicit.
 
 \end{document}
