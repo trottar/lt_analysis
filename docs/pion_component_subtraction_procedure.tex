@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
+\usepackage{array}
 \usepackage{enumitem}
 \usepackage{hyperref}
 
@@ -70,91 +71,598 @@ while the final histograms, yields, and averages include both corrections.
 
 \section{Part I: Slow-Proton Cleaning}
 
-\subsection{Method and Input Sample}
+\subsection{Purpose and Quantity Being Estimated}
 
-Slow protons can survive the kaon selection as a displaced timing component.
-They are removed with the configured
-\texttt{ctime\_aero\_event\_weight} method, implemented as
-\texttt{c\_script\_exact}.  The Python implementation follows the accepted
-\texttt{check\_slow\_protons.C} procedure; it is not a globally scaled
-proton-template subtraction.
+Slow protons can survive the kaon PID selection and appear as a displaced timing
+population, particularly in the low-MM region.  The nominal correction does not
+fit or scale a proton template in missing mass.  Instead, it estimates a proton
+probability from PID observables for every kaon-selected event and applies that
+probability to all analysis histograms.
 
-The fit uses explicit no-RF kaon trees for prompt, random, dummy, and
-dummy-random events.  Their signed, prompt-relative count-scale combination is
-used to build the timing-fit sample before pion subtraction.  Corrected physics
-targets are subsequently filled with the physical source coefficients.
-
-The timing sample requires the standard kaon acceptance, HGCer-hole rejection,
-and the no-MM-cut selection.  In strict mode, a missing explicit no-RF input is
-an error rather than a reason to substitute an RF-selected tree.  The stored
-result records the resolved setting, $\phi$ setting, override layers, input
-tree policy, and failure policy.
-
-\subsection{Timing Fits}
-
-The default PID partition is
+For event $e$, define
 \begin{align}
-  N_{\mathrm{aero}}&\in[0,3),[3,6),[6,10),[10,15),[15,25), \\
-  \delta_{\mathrm{SHMS}}&\in[-10,20]\ \% \quad\text{in ten bins}.
+  P_p^{(e)}
+  =P\!\left(
+      p\mid
+      \tau_e,\delta_e,N_{\mathrm{aero},e}
+    \right),
 \end{align}
-For each aerogel slice, a global timing fit determines the kaon and proton
-shapes.  Per-$\delta$ fits then use those shapes as constraints while finding
-the local component normalizations and timing behavior.  The model contains
-kaon and proton Gaussian components and, when needed, a non-negative
-residual-other component.
-
-Fit quality, peak separation, component significance, support, and bound-hit
-tests determine whether an aerogel--$\delta$ cell is usable.  The default
-timing policy, \texttt{rf\_then\_ct\_best}, tests usable RF-like branches and
-\texttt{CTime\_ROC1}; it retains the preferred valid result.  The diagnostics
-record any per-aerogel multi-start, standard-fit, pre-diamond, or local-peak
-rescue attempts used to make that decision.
-
-\subsection{Event Weights and RF Handling}
-
-For timing value $\tau$, the proton probability is
-\begin{align}
-  P_p(\tau,\delta,N_{\mathrm{aero}})
-  =\frac{f_p(\tau)}
-         {f_p(\tau)+f_K(\tau)+f_{\mathrm{other}}},
-  \qquad 0\leq P_p\leq1.
-\end{align}
-For a source with physical coefficient $c_s$, the corresponding proton and
-cleaned contributions are
-\begin{align}
-  w_{p,s}=c_sP_p,\qquad
-  w_{\mathrm{clean},s}=c_s(1-P_p).
-\end{align}
-The output is therefore a parallel set of raw, estimated-proton, and
-proton-cleaned histograms.  The per-event factors are frozen in a lookup keyed
-by source and entry number, then reused in the setting-wide, yield, and
-averaging paths.
-
-For low-$\epsilon$ data, RF membership is optionally restored only after the
-proton factor is evaluated, by signature matching to the existing RF skim
-trees.  The default policy is \texttt{epsset\_default\_after\_cleaning};
-high-$\epsilon$ data do not receive this extra RF-membership step.  Thus RF
-selection cannot change the no-RF sample used to determine $P_p$.
-
-\subsection{Acceptance and Diagnostics}
-
-Each $\delta$ bin is classified as supported, marginal, or unsupported from
-its usable aerogel cells and modeled yield.  At least one supported or marginal
-bin is required for an accepted cleaning result.  An unaccepted result leaves
-the particle targets unchanged, while a missing required no-RF or RF-reference
-input remains a strict-mode error where configured.
-
-The diagnostic PDF and serialized result contain
+where
 \begin{itemize}[leftmargin=2em]
-  \item selected timing branch, global timing shapes, and fit constraints;
-  \item aerogel and $\delta$ support, fitted yields, and proton fractions;
-  \item event-probability closure: summed event proton probability versus
-        fitted proton yield;
-  \item average proton weights versus $\delta$ and
-        $(\delta,N_{\mathrm{aero}})$; and
-  \item raw, proton-estimated, cleaned, and final-RF MM spectra, including
-        low-MM and $\Lambda$-peak validation windows.
+  \item $\tau$ is the selected timing observable,
+  \item $\delta$ is \texttt{ssdelta}, and
+  \item $N_{\mathrm{aero}}$ is \texttt{P\_aero\_npeSum}.
 \end{itemize}
+
+The event is then split statistically into
+\begin{align}
+  \text{estimated proton contribution}:&\qquad P_p^{(e)},\\
+  \text{proton-cleaned contribution}:&\qquad 1-P_p^{(e)}.
+\end{align}
+Missing mass is used only to inspect the result.  It is not an input to the
+proton probability.
+
+The configured method is
+\begin{align}
+  \texttt{ctime\_aero\_event\_weight},
+\end{align}
+with implementation identifier
+\begin{align}
+  \texttt{c\_script\_exact}.
+\end{align}
+The identifier records the original accepted C-macro basis.  The production
+Python path also includes timing-probe selection, TOF-constrained local timing
+centers, fit rescue, signed source bookkeeping, RF restoration, and immutable
+propagation to the daughter scripts.
+
+\subsection{Part 1: Construct the Signed No-RF Fit Sample}
+
+\subsubsection*{Input trees}
+
+For each $\phi$ setting, the proton fit opens explicit no-RF kaon trees for
+\begin{itemize}[leftmargin=2em]
+  \item data prompt,
+  \item data random,
+  \item dummy prompt, and
+  \item dummy random.
+\end{itemize}
+The corresponding RF-selected trees are opened separately but are not used to
+construct the proton-fit histogram.  They are retained only for the final
+low-$\epsilon$ RF-membership step.
+
+Here, ``no-RF tree'' means that no RF-selection cut has yet been imposed.  It
+does not mean that RF-like timing branches are unavailable as candidate PID
+observables.
+
+\subsubsection*{Physical and fit coefficients}
+
+Let the physical source coefficients be
+\begin{align}
+  c_{\mathrm{prompt}} &= N_{\mathrm{data}},\\
+  c_{\mathrm{rand}} &= -\frac{N_{\mathrm{data}}}{n_{\mathrm{win}}},\\
+  c_{\mathrm{dummy}} &= -N_{\mathrm{dummy}},\\
+  c_{\mathrm{dummy\ rand}}
+    &= +\frac{N_{\mathrm{dummy}}}{n_{\mathrm{win}}}.
+\end{align}
+These coefficients are used when filling the physical raw, estimated-proton,
+and cleaned targets.
+
+The timing fits instead use prompt-relative coefficients
+\begin{align}
+  \widetilde c_s
+  =\frac{c_s}{c_{\mathrm{prompt}}}.
+\end{align}
+Thus the proton-fit sample has the same signed prompt--random--dummy structure,
+but its numerical scale is referenced to the prompt count rather than the final
+charge-normalized yield.
+
+\subsubsection*{Prepared event record}
+
+Each source tree is traversed once and an immutable prepared record is made for
+each usable entry.  The record contains
+\begin{itemize}[leftmargin=2em]
+  \item the normal all-cuts and no-MM-cut selection flags,
+  \item the HGCer-hole rejection state,
+  \item an additional pre-diamond no-MM-cut flag used only by a fit fallback,
+  \item shifted $MM$ and $t$,
+  \item adjusted HMS $\delta$,
+  \item \texttt{ssdelta},
+  \item \texttt{P\_aero\_npeSum},
+  \item all available candidate timing values, and
+  \item the event-level kaon--proton TOF prediction.
+\end{itemize}
+
+The nominal timing-fit selection is the normal no-MM-cut kaon selection after
+HGCer-hole rejection.  The proton fit therefore does not use the final MM cut
+and cannot sculpt the MM spectrum through the probability model.
+
+\subsection{Part 2: Partition the PID Space}
+
+The fit is performed in five aerogel slices and ten SHMS-$\delta$ bins:
+\begin{align}
+  N_{\mathrm{aero}}
+  &\in [0,3),\ [3,6),\ [6,10),\ [10,15),\ [15,25),\\
+  \delta_{\mathrm{SHMS}}
+  &\in [-10,20]\ \%.
+\end{align}
+The $\delta$ range is divided uniformly into ten bins, each three percentage
+points wide.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Nominal slow-proton PID and validation domains.}
+  \label{tab:proton-pid-domains}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Quantity & Low-$\epsilon$ & High-$\epsilon$ \\
+    \midrule
+    \texttt{CTime\_ROC1} display/fit range
+      & $[-2,2]$ ns, 131 bins
+      & $[-4,4]$ ns, 262 bins \\
+    \texttt{P\_aero\_npeSum}
+      & \multicolumn{2}{c}{$[0,25]$ in five fixed slices} \\
+    \texttt{ssdelta}
+      & \multicolumn{2}{c}{$[-10,20]\%$ in ten fixed bins} \\
+    MM validation range
+      & \multicolumn{2}{c}{$[0.70,1.50]$ GeV} \\
+    Low-MM validation window
+      & \multicolumn{2}{c}{$[0.80,0.90]$ GeV} \\
+    $\Lambda$ validation window
+      & \multicolumn{2}{c}{$[1.105,1.125]$ GeV} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The fixed PID partition is important.  The analysis does not smooth or
+extrapolate a proton fraction across unsupported cells.
+
+\subsection{Part 3: Select the Timing Observable}
+
+The default policy is
+\begin{align}
+  \texttt{rf\_then\_ct\_best}.
+\end{align}
+For the no-RF input sample, the code tests
+\begin{enumerate}[leftmargin=2em]
+  \item any available branch in the configured RF-like candidate list, and
+  \item \texttt{CTime\_ROC1}.
+\end{enumerate}
+Each candidate is treated as a separate complete timing probe.  The RF-like
+probe uses the ordering in which the proton peak is below the kaon peak; the
+coincidence-time probe uses the ordering in which the proton peak is above the
+kaon peak.
+
+The probe sequence is
+\begin{enumerate}[leftmargin=2em]
+  \item per-aerogel multistart fits with the nominal no-MM-cut selection;
+  \item a standard bounded-fit fallback if no valid global shape is found;
+  \item a pre-diamond selection fallback if the normal diamond acceptance leaves
+        no valid shape; and
+  \item a local-peak rescue only after the previous stages fail.
+\end{enumerate}
+The best RF-like probe is compared with the coincidence-time probe.  The
+selected probe is the one with the better validated global-shape support; the
+resolved branch, probe kind, fit mode, range, and selection stage are stored in
+the result.
+
+For RF-like timing, the displayed timing window is determined from the prompt
+population and the beam bunch spacing.  The bunch spacing used by the timing
+model is
+\begin{align}
+  T_{\mathrm{bunch}}
+  =\begin{cases}
+      2~\mathrm{ns}, & \text{low }\epsilon,\\
+      4~\mathrm{ns}, & \text{high }\epsilon.
+    \end{cases}
+\end{align}
+This timing-probe choice is distinct from the later RF-selection cut.
+
+\subsection{Part 4: Determine Global Kaon and Proton Timing Shapes}
+
+\subsubsection*{Global fit in each aerogel slice}
+
+For each aerogel slice $a$, the signed timing histogram is fit to
+\begin{align}
+  F_a(\tau)
+  =A_{K,a}\exp\!\left[
+       -\frac{1}{2}
+       \left(\frac{\tau-\mu_{K,a}}{\sigma_{K,a}}\right)^2
+     \right]
+   +A_{p,a}\exp\!\left[
+       -\frac{1}{2}
+       \left(\frac{\tau-\mu_{p,a}}{\sigma_{p,a}}\right)^2
+     \right]
+   +C_a.
+\end{align}
+The seven fit parameters are
+\begin{align}
+  A_{K,a},\ \mu_{K,a},\ \sigma_{K,a},\
+  A_{p,a},\ \mu_{p,a},\ \sigma_{p,a},\ C_a.
+\end{align}
+All amplitudes and the constant component are non-negative.  The mean and width
+parameters are free in the global fit.
+
+For the default coincidence-time probe, the nominal bounds are
+\begin{align}
+  -0.45 &\leq \mu_K \leq 0.20~\mathrm{ns},\\
+   0.20 &\leq \mu_p \leq 0.95~\mathrm{ns},\\
+   0.03 &\leq \sigma_K,\sigma_p \leq 0.45~\mathrm{ns},
+\end{align}
+with initial width
+\begin{align}
+  \sigma_{K,0}=\sigma_{p,0}=0.15~\mathrm{ns}.
+\end{align}
+The kaon and proton mean seeds are taken from the largest positive histogram bin
+inside their allowed mean intervals.  Amplitude seeds are bounded fractions of
+the timing-histogram maximum.
+
+\subsubsection*{Global-fit acceptance}
+
+A global aerogel shape is usable only when all active validation requirements
+are satisfied.  The nominal requirements are
+\begin{itemize}[leftmargin=2em]
+  \item at least 200 prompt-support events in the aerogel slice;
+  \item successful fit status;
+  \item finite, positive kaon and proton amplitudes and widths;
+  \item the physically expected kaon--proton mean ordering;
+  \item neither mean nor width within two percent of its allowed bound;
+  \item kaon and proton amplitude significance of at least $2\sigma$;
+  \item normalized peak separation
+  \begin{align}
+    S_{Kp}
+    =\frac{|\mu_p-\mu_K|}
+           {\sqrt{\sigma_K^2+\sigma_p^2}}
+    \geq0.75;
+  \end{align}
+  \item Poisson-deviance quality compatible with the configured maximum,
+        nominally 5 per degree of freedom.
+\end{itemize}
+
+The fit stores parameter uncertainties, covariance and correlation matrices,
+Poisson deviance, conventional ROOT $\chi^2$, bound status, component
+significances, and every rejection reason.  Invalid global shapes are not used
+for event probabilities.
+
+\subsection{Part 5: Determine a Local Timing Center in Each $\delta$ Bin}
+
+A single global timing center is not assumed to describe the full SHMS
+acceptance.  Before fitting individual aerogel cells, the code determines the
+kaon timing center separately in each $\delta$ bin and constrains the proton
+center with the expected proton--kaon time-of-flight separation.
+
+\subsubsection*{Event-level TOF prediction}
+
+For an event with reconstructed SHMS momentum $p$ and path length $L$, the
+species velocities are
+\begin{align}
+  \beta_K &= \frac{p}{\sqrt{p^2+m_K^2}},\\
+  \beta_p &= \frac{p}{\sqrt{p^2+m_p^2}},
+\end{align}
+and the predicted separation is
+\begin{align}
+  \Delta t_{pK}
+  =\frac{L}{c}
+    \left(\frac{1}{\beta_p}-\frac{1}{\beta_K}\right).
+\end{align}
+The implemented SHMS path-length approximation is
+\begin{align}
+  L\,[\mathrm{cm}]
+  =1810
+   +0.11\left(1000\,\texttt{ssxptar}\right)
+   +0.057\left(\frac{\texttt{ssdelta}}{100}\right).
+\end{align}
+The required reconstructed aliases are
+\begin{align}
+  \texttt{P\_gtr\_p},\qquad
+  \texttt{ssxptar},\qquad
+  \texttt{ssyptar},\qquad
+  \texttt{ssdelta}.
+\end{align}
+Invalid TOF records are counted and excluded from the local-center summary.
+
+\subsubsection*{Low-aerogel timing-center fit}
+
+For every $\delta$ bin, a prompt-event timing projection is built first in
+\begin{align}
+  0\leq N_{\mathrm{aero}}<5.
+\end{align}
+If this projection does not provide a valid local-center fit, the code retries
+with
+\begin{align}
+  0\leq N_{\mathrm{aero}}<6.
+\end{align}
+The full range $0\leq N_{\mathrm{aero}}\leq25$ is retained as a diagnostic but
+is not the primary center constraint.
+
+The low-aerogel projection is modeled with the global kaon and proton shapes,
+a common local timing offset $\Delta\tau_\delta$, and the mean event-level
+$\Delta t_{pK}$ for that $\delta$ bin.  For a coincidence-time probe,
+\begin{align}
+  \mu_{K,\delta}
+  &=\mu_{K,\mathrm{global}}+\Delta\tau_\delta,\\
+  \mu_{p,\delta}
+  &=\mu_{K,\delta}+\left\langle\Delta t_{pK}\right\rangle_\delta.
+\end{align}
+For an RF-like probe, the proton mean uses the opposite sign convention and is
+wrapped into the selected RF period when necessary.
+
+The local offset is limited to
+\begin{align}
+  -0.35\leq\Delta\tau_\delta\leq0.35~\mathrm{ns}.
+\end{align}
+Its nominal validation requires
+\begin{itemize}[leftmargin=2em]
+  \item offset uncertainty no larger than $0.10$ ns;
+  \item $\chi^2/\mathrm{ndf}\leq5$;
+  \item both kaon and proton components significant at at least $2\sigma$;
+  \item the smaller fitted timing component to contain at least two percent of
+        the kaon-plus-proton amplitude; and
+  \item no weakly constrained bound hit.
+\end{itemize}
+
+When both low-aerogel fits fail, a stable global timing center may be used only
+when allowed by the resolved setting configuration.  Settings that require a
+local slow-proton timing population can explicitly disable this fallback.
+
+\subsection{Part 6: Fit the Component Normalizations in Each PID Cell}
+
+For every cell $(\delta_d,N_{\mathrm{aero},a})$, the global widths and the
+TOF-constrained local means are held fixed.  Only the three component
+normalizations are fit:
+\begin{align}
+  F_{da}(\tau)
+  =a_{K,da}\,G_K(\tau;\mu_{K,da},\sigma_{K,a})
+   +a_{p,da}\,G_p(\tau;\mu_{p,da},\sigma_{p,a})
+   +c_{da}.
+\end{align}
+The free parameters satisfy
+\begin{align}
+  a_{K,da}\geq0,\qquad
+  a_{p,da}\geq0,\qquad
+  c_{da}\geq0.
+\end{align}
+At least 30 prompt-support events are required before a cell fit is attempted.
+
+The fitted kaon, proton, and other yields are obtained by summing the fixed-shape
+components over the timing bins in the active fit range:
+\begin{align}
+  Y_{K,da} &= \sum_i a_{K,da}G_K(\tau_i),\\
+  Y_{p,da}^{\mathrm{raw}} &= \sum_i a_{p,da}G_p(\tau_i),\\
+  Y_{\mathrm{other},da} &= \sum_i c_{da}.
+\end{align}
+
+The raw fitted proton amplitude is retained for diagnostics.  For the nominal
+correction, the proton component is considered detected only when
+\begin{align}
+  \frac{a_{p,da}}{\delta a_{p,da}}\geq2.
+\end{align}
+If this threshold is not met, the applied proton amplitude and yield are set to
+zero in that cell, while the raw fit result remains recorded.
+
+A cell fit is accepted only when
+\begin{itemize}[leftmargin=2em]
+  \item the global shape and local timing-center model are valid;
+  \item the fit has adequate prompt support;
+  \item all fitted outputs are finite and non-negative;
+  \item the model-to-data yield ratio is between 0.50 and 1.50;
+  \item the ROOT fit status is accepted; and
+  \item the Poisson-deviance criterion is satisfied, nominally no more than 5
+        per degree of freedom.
+\end{itemize}
+
+\subsection{Part 7: Classify $\delta$-Bin Support}
+
+The cell fits are summarized separately in each SHMS-$\delta$ bin.  Define the
+fit coverage as
+\begin{align}
+  f_{\mathrm{cov},d}
+  =\frac{\text{data yield in accepted aerogel-cell fits}}
+         {\text{total signed PID-histogram yield in }\delta_d}.
+\end{align}
+The nominal support classes are
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+  \toprule
+  Class & Minimum valid cells & Minimum coverage & Minimum modeled yield \\
+  \midrule
+  Supported & 2 & 0.35 & 5 \\
+  Marginal  & 1 & 0.15 & 5 \\
+  Unsupported & --- & --- & --- \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+An unsupported $\delta$ bin is not assigned a proton correction.  The complete
+cleaning result is accepted only if at least one $\delta$ bin is supported or
+marginal.
+
+\subsection{Part 8: Construct the Event-Level Proton Probability}
+
+For an event in an accepted PID cell, the fitted component values at its timing
+coordinate are
+\begin{align}
+  f_K^{(e)}
+  &=a_{K,da}
+    \exp\!\left[-\frac{1}{2}
+      \left(\frac{\tau_e-\mu_{K,da}}{\sigma_{K,a}}\right)^2\right],\\
+  f_p^{(e)}
+  &=a_{p,da}
+    \exp\!\left[-\frac{1}{2}
+      \left(\frac{\tau_e-\mu_{p,da}}{\sigma_{p,a}}\right)^2\right],\\
+  f_{\mathrm{other}}^{(e)}&=c_{da}.
+\end{align}
+The applied proton probability is
+\begin{align}
+  P_p^{(e)}
+  =\frac{f_p^{(e)}}
+         {f_p^{(e)}+f_K^{(e)}+f_{\mathrm{other}}^{(e)}}.
+\end{align}
+The denominator is protected by the configured floor, and the result is clipped
+to
+\begin{align}
+  0\leq P_p^{(e)}\leq1.
+\end{align}
+
+The other component remains in the denominator.  It is not automatically
+reclassified as proton.  For an event outside the configured PID range, in an
+unsupported $\delta$ bin, in an invalid aerogel cell, or without a usable timing
+value,
+\begin{align}
+  P_p^{(e)}=0.
+\end{align}
+This is a conservative incomplete-coverage rule rather than an extrapolation.
+
+For physical source coefficient $c_s$, four parallel event weights are formed:
+\begin{align}
+  w_{\mathrm{raw},s}^{(e)}
+    &=c_s,\\
+  w_{p,s}^{(e)}
+    &=c_sP_p^{(e)},\\
+  w_{\mathrm{clean,preRF},s}^{(e)}
+    &=c_s\left(1-P_p^{(e)}\right),\\
+  w_{\mathrm{clean,final},s}^{(e)}
+    &=c_s\left(1-P_p^{(e)}\right)I_{\mathrm{RF}}^{(e)}.
+\end{align}
+These weights fill complete parallel target maps rather than MM alone.  The raw,
+estimated-proton, cleaned-pre-RF, and final targets therefore contain the same
+observables with the same source signs.
+
+\subsection{Part 9: Restore the Low-$\epsilon$ RF Requirement}
+
+The default RF policy is
+\begin{align}
+  \texttt{epsset\_default\_after\_cleaning}.
+\end{align}
+For low-$\epsilon$ kaon data, the RF-selection state is restored only after
+$P_p^{(e)}$ has been evaluated on the no-RF sample.  Membership is determined by
+matching each no-RF event to the existing RF-selected skim using the signature
+\begin{align}
+  (&\texttt{CTime\_ROC1},\ \texttt{ssdelta},\ \texttt{MM},\\
+   &\texttt{Q2},\ \texttt{W},\ \texttt{ph\_q}),
+\end{align}
+with each floating value rounded to nine decimal places.
+
+Thus
+\begin{align}
+  I_{\mathrm{RF}}^{(e)}
+  =\begin{cases}
+      1, & \text{matching event exists in the RF skim},\\
+      0, & \text{otherwise}.
+    \end{cases}
+\end{align}
+For high-$\epsilon$ data, this extra membership requirement is not applied and
+$I_{\mathrm{RF}}^{(e)}=1$.
+
+This ordering prevents the RF cut from changing the sample used to determine
+the proton probability while preserving the normal low-$\epsilon$ kaon
+selection in the final physics target.
+
+\subsection{Part 10: Freeze and Propagate the Event Factors}
+
+The result stores an immutable lookup keyed by
+\begin{align}
+  \texttt{source label:source entry index}.
+\end{align}
+For every prepared event, the lookup contains
+\begin{itemize}[leftmargin=2em]
+  \item $\delta$-bin index,
+  \item aerogel-slice index,
+  \item support class,
+  \item $P_p^{(e)}$,
+  \item $1-P_p^{(e)}$,
+  \item RF acceptance, and
+  \item the final cleaned factor.
+\end{itemize}
+
+The setting-wide application in \texttt{rand\_sub.py} uses this lookup to build
+the complete cleaned target map.  The same lookup is then passed to
+\texttt{calculate\_yield.py} and \texttt{ave\_per\_bin.py}.  Those daughter
+scripts do not refit the proton contamination.  They retrieve the frozen event
+factor for the same source and entry and use it when filling each $(t,\phi)$ or
+$t$ bin.
+
+When slow-proton cleaning is accepted, the kaon-side pion fit receives
+\begin{align}
+  H_{\mathrm{kaon,no\ sub}}^{\mathrm{proton\ cleaned,final\ RF}},
+\end{align}
+not the original random/dummy-corrected kaon histogram.  The pion-control sample
+is not proton weighted.  The final particle-background sequence is therefore
+\begin{align}
+  H_{K}^{\mathrm{raw}}
+  &\longrightarrow
+  H_{K}^{\mathrm{rand/dummy\ corrected}}
+  \longrightarrow
+  H_{K}^{\mathrm{proton\ cleaned,final\ RF}}\\
+  &\longrightarrow
+  H_{K}^{\mathrm{proton\ cleaned,final\ RF}}
+  -H_{\mathrm{weighted\ pion\ event\ template}}.
+\end{align}
+
+\subsection{Slow-Proton Diagnostic Interpretation}
+
+\subsubsection*{Global timing-shape pages}
+
+These pages establish whether the kaon and proton peaks can be identified in
+each aerogel slice.  A smooth visual overlay alone is not sufficient.  The
+shape must also pass the support, ordering, separation, significance, bound, and
+Poisson-deviance requirements.
+
+\subsubsection*{Per-$\delta$ timing-center pages}
+
+These pages show whether the low-aerogel prompt sample supplies a local timing
+center and whether the event-based $\Delta t_{pK}$ prediction places the second
+species consistently.  They also identify primary $[0,5)$ fits, $[0,6)$
+fallbacks, and any stable-global-center fallback.
+
+\subsubsection*{Per-cell fit pages}
+
+These pages show the fixed kaon and proton shapes with the fitted kaon, proton,
+and other normalizations in each $(\delta,N_{\mathrm{aero}})$ cell.  The raw
+proton component, significance-gated applied proton component, model/data ratio,
+and rejection reasons must be distinguished.
+
+\subsubsection*{Event-probability closure}
+
+For each cell and each $\delta$ bin, the code compares
+\begin{align}
+  \sum_{e}\widetilde c_{s(e)}P_p^{(e)}
+\end{align}
+with the proton yield from the corresponding timing fit.  This is the direct
+closure test between the fitted proton component and the event-level
+probabilities used for subtraction.
+
+\subsubsection*{MM validation}
+
+The MM pages compare
+\begin{itemize}[leftmargin=2em]
+  \item raw kaon-selected MM,
+  \item estimated proton contamination,
+  \item proton-cleaned MM before RF restoration, and
+  \item the final low-$\epsilon$ RF-restored MM spectrum.
+\end{itemize}
+The low-MM and $\Lambda$ windows are validation regions only.  A credible result
+should remove the displaced low-MM proton population without introducing a
+large artificial loss at the $\Lambda$ peak.
+
+\subsection{Current Slow-Proton Configuration Knobs}
+
+The principal controls are stored in
+\texttt{src/utility/background\_config.py}:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{PROTON\_CONTAMINATION\_CLEANING\_DEFAULTS},
+  \item \texttt{PROTON\_CONTAMINATION\_CLEANING\_CONFIG\_OVERRIDES},
+  \item \texttt{PROTON\_CONTAMINATION\_CLEANING\_RUNTIME\_OVERRIDES},
+  \item \texttt{global\_fit},
+  \item \texttt{slice\_fit},
+  \item \texttt{support\_thresholds},
+  \item \texttt{weighting},
+  \item \texttt{validation\_windows},
+  \item \texttt{tof\_offset\_validation},
+  \item \texttt{tof\_summary\_validation}, and
+  \item \texttt{low\_aero\_offset}.
+\end{itemize}
+The resolved setting/$\phi$ configuration, rather than the module defaults
+alone, is authoritative for any production result.
 
 \section{Part II: Pion SIMC-Shape Subtraction}
 
@@ -220,7 +728,7 @@ setting/$\phi$ override, remains authoritative for a production result.
   \centering
   \caption{Nominal active pion-component fit configuration.}
   \label{tab:pion-config}
-  \begin{tabular}{@{}lll@{}}
+  \begin{tabular}{@{}p{0.16\textwidth}p{0.35\textwidth}p{0.39\textwidth}@{}}
     \toprule
     Target & Fit mode and order & Active fit windows (GeV) \\
     \midrule
