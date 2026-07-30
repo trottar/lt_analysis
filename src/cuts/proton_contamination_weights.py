@@ -9366,6 +9366,13 @@ def _set_hist_bin_if_finite(hist, bin_index, value, error=None):
 
 def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, prefix):
     diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    method_is_t_binned = (
+        str((cleaning_result or {}).get("method") or "")
+        == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT
+    )
+    closure_yield_label = (
+        "applied p yield" if method_is_t_binned else "fitted p yield"
+    )
     tof_summaries = diagnostics.get("tof_summary_by_delta") or []
     offset_fits = (cleaning_result or {}).get("delta_timing_offset_fits") or diagnostics.get("delta_timing_offset_fits") or []
     if not tof_summaries and not offset_fits:
