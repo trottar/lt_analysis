@@ -512,10 +512,25 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     },
     "aerogel_validation": {
         "enabled": True,
+        # ``slice_edges`` remains a compatibility alias for older setting
+        # overrides.  New timing-t diagnostics use these summary bins only
+        # for scalar/matrix reporting; fine display histograms are independent.
+        "summary_slice_edges": (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
         "slice_edges": (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
+        "display_range": (0.0, 25.0),
+        "display_bins": 100,
         "hist_range": (0.0, 25.0),
         "low_reference_max_npe": 5.0,
         "high_reference_min_npe": 10.0,
+        "write_global_aero_vs_t_pages": True,
+        "write_per_t_pid_pages": True,
+        "write_full_per_t_pid_pages": False,
+        "write_t_aero_heatmaps": True,
+        "minimum_events_per_t_bin": 20,
+        "maximum_high_aero_average_weight": 0.10,
+        "maximum_high_to_low_weight_ratio": 1.0,
+        "maximum_high_aero_lambda_removed_fraction": 0.10,
+        "minimum_low_aero_proton_fraction": 0.50,
         "warn_if_high_fraction_exceeds_low_fraction": True,
         "high_aero_lambda_removal_excess_threshold": 0.0,
         "affects_event_weights": False,

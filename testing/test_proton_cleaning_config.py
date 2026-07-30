@@ -64,6 +64,11 @@ class ProtonCleaningConfigTests(unittest.TestCase):
         self.assertEqual(config["t_support_thresholds"]["minimum_modeled_yield"], 5.0)
         self.assertFalse(config["aerogel_validation"]["enabled"])
         self.assertFalse(config["aerogel_validation"]["affects_event_weights"])
+        self.assertEqual(config["aerogel_validation"]["display_bins"], 100)
+        self.assertEqual(
+            tuple(config["aerogel_validation"]["summary_slice_edges"]),
+            (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
+        )
 
 
 if __name__ == "__main__":

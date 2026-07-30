@@ -1128,7 +1128,11 @@ def _write_timing_t_validation_artifacts(
     if str((cleaning_result or {}).get("method") or "") != "timing_t_event_weight":
         return []
     diagnostics = (cleaning_result or {}).get("diagnostics") or {}
-    aero_validation = diagnostics.get("aerogel_validation") or {}
+    aero_validation = (
+        diagnostics.get("aerogel_vs_t_validation")
+        or diagnostics.get("aerogel_validation")
+        or {}
+    )
     cross_stage = diagnostics.get("cross_stage_t_consistency") or []
     base = "{}_{}_{}_{}_timing_t".format(
         particle_type, outfilename, phi_setting, epsset
@@ -1174,7 +1178,9 @@ def _write_timing_t_validation_artifacts(
             "by_cell": diagnostics.get("event_weight_closure_by_cell") or [],
             "by_delta": diagnostics.get("event_weight_closure_by_delta") or [],
             "by_t": diagnostics.get("event_weight_closure_by_t") or [],
+            "lookup_by_t_phi": diagnostics.get("event_weight_lookup_by_t_phi") or [],
         },
+        "aerogel_vs_t_validation": aero_validation,
     }
     timing_diagnostics_json = os.path.join(outpath, "{}_candidate_cell_diagnostics.json".format(base))
     with open(timing_diagnostics_json, "w", encoding="utf-8") as handle:
@@ -1224,6 +1230,72 @@ def _write_timing_t_validation_artifacts(
                         **dict(cell),
                     })
         artifacts.append(aero_csv)
+        def _csv_value(value):
+            return (
+                json.dumps(value, sort_keys=True, separators=(",", ":"))
+                if isinstance(value, (dict, list, tuple)) else value
+            )
+
+        summary_csv = os.path.join(
+            outpath, "{}_proton_cleaning_aerogel_vs_t_summary.csv".format(base)
+        )
+        with open(summary_csv, "w", newline="", encoding="utf-8") as handle:
+            fields = ["t_index", "t_low", "t_high", "aero_index", "aero_low", "aero_high"]
+            fields.extend(sorted({key for row in cells for cell in row for key in cell}))
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            for t_index, row in enumerate(cells):
+                for aero_index, cell in enumerate(row):
+                    writer.writerow({
+                        "t_index": t_index,
+                        "t_low": t_edges[t_index] if t_index < len(t_edges) else None,
+                        "t_high": t_edges[t_index + 1] if t_index + 1 < len(t_edges) else None,
+                        "aero_index": aero_index,
+                        "aero_low": aero_edges[aero_index] if aero_index < len(aero_edges) else None,
+                        "aero_high": aero_edges[aero_index + 1] if aero_index + 1 < len(aero_edges) else None,
+                        **{key: _csv_value(value) for key, value in dict(cell).items()},
+                    })
+        artifacts.append(summary_csv)
+
+        tbin_rows = list(aero_validation.get("per_t_bin_summary") or [])
+        tbin_csv = os.path.join(
+            outpath, "{}_proton_cleaning_tbin_pid_summary.csv".format(base)
+        )
+        with open(tbin_csv, "w", newline="", encoding="utf-8") as handle:
+            fields = sorted({key for row in tbin_rows for key in (row or {})})
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            for row in tbin_rows:
+                writer.writerow({key: _csv_value(value) for key, value in (row or {}).items()})
+        artifacts.append(tbin_csv)
+
+        warning_rows = []
+        for row in list(aero_validation.get("warnings_by_t_bin") or []):
+            labels = list((row or {}).get("warnings") or [])
+            if not labels:
+                continue
+            for label in labels:
+                warning_rows.append({
+                    "t_index": row.get("t_index"), "t_low": row.get("t_low"),
+                    "t_high": row.get("t_high"), "warning": str(label),
+                    "low_aero_average_weight": row.get("low_aero_average_weight"),
+                    "high_aero_average_weight": row.get("high_aero_average_weight"),
+                    "low_aero_lambda_removed_fraction": row.get("low_aero_lambda_removed_fraction"),
+                    "high_aero_lambda_removed_fraction": row.get("high_aero_lambda_removed_fraction"),
+                })
+        warning_csv = os.path.join(
+            outpath, "{}_proton_cleaning_tbin_pid_warnings.csv".format(base)
+        )
+        with open(warning_csv, "w", newline="", encoding="utf-8") as handle:
+            fields = [
+                "t_index", "t_low", "t_high", "warning", "low_aero_average_weight",
+                "high_aero_average_weight", "low_aero_lambda_removed_fraction",
+                "high_aero_lambda_removed_fraction",
+            ]
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(warning_rows)
+        artifacts.append(warning_csv)
     return artifacts
 
 

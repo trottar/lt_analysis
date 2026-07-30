@@ -382,6 +382,53 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertEqual(validation["event_count_by_t_aero"][0][0], 1)
         self.assertAlmostEqual(validation["average_proton_probability_by_t_aero"][0][0], 0.25)
 
+    def test_aerogel_validation_records_signed_support_and_tbin_summary(self):
+        result = {"t_edges": [0.0, 1.0, 2.0]}
+        rows = [
+            {
+                "t_index": 0, "aero_index": 0, "source_label": "prompt",
+                "is_prompt_source": True, "physical_weight": 2.0,
+                "proton_weight": 0.50, "cleaned_factor": 0.50, "adj_mm": 0.85,
+            },
+            {
+                "t_index": 0, "aero_index": 1, "source_label": "rand",
+                "is_prompt_source": False, "physical_weight": -0.5,
+                "proton_weight": 0.20, "cleaned_factor": 0.80, "adj_mm": 1.115,
+            },
+        ]
+        config = {
+            "aerogel_validation": {
+                "enabled": True,
+                "summary_slice_edges": (0.0, 5.0, 10.0),
+                "minimum_events_per_t_bin": 3,
+                "affects_event_weights": False,
+                "affects_fit_acceptance": False,
+            },
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        validation = proton_cleaning._build_t_aerogel_validation(result, {}, rows, config)
+        self.assertEqual(validation["raw_prompt_event_count_by_t_aero"][0][0], 1)
+        self.assertAlmostEqual(validation["signed_event_weight_sum_by_t_aero"][0][1], -0.5)
+        self.assertAlmostEqual(validation["proton_probability_sum_by_t_aero"][0][0], 1.0)
+        self.assertAlmostEqual(validation["low_mm_removed_yield_by_t_aero"][0][0], 1.0)
+        self.assertAlmostEqual(validation["lambda_removed_yield_by_t_aero"][0][1], -0.1)
+        self.assertEqual(validation["signed_weight_diagnostics"]["positive_event_count"], 1)
+        self.assertEqual(validation["signed_weight_diagnostics"]["negative_event_count"], 1)
+        self.assertIn("insufficient_aerogel_support", validation["per_t_bin_summary"][0]["warnings"])
+
+    def test_aerogel_summary_edges_preserve_legacy_slice_override(self):
+        self.assertEqual(
+            proton_cleaning._resolve_aerogel_summary_edges({"slice_edges": (0.0, 5.0, 10.0)}),
+            [0.0, 5.0, 10.0],
+        )
+        self.assertEqual(
+            proton_cleaning._resolve_aerogel_summary_edges({
+                "summary_slice_edges": (0.0, 3.0, 9.0),
+                "slice_edges": (0.0, 5.0, 10.0),
+            }),
+            [0.0, 3.0, 9.0],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
