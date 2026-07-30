@@ -22,7 +22,7 @@ import scipy
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 from copy import deepcopy
-import sys, math, os, subprocess
+import sys, math, os, subprocess, csv, json
 import traceback
 import array
 from time import perf_counter
@@ -914,6 +914,11 @@ def _process_rand_sub_tree(
     progress_bar,
     update_mm_offset=False,
 ):
+    # Keep downstream filling on the same no-particle-subtraction selection and
+    # shifted-variable implementation used by the canonical prepass and the
+    # proton-cleaning source preparation.
+    from apply_cuts import evaluate_pre_particle_subtraction_event
+
     print(print_label)
     entries = tree.GetEntries()
     progress_time = 0.0
@@ -928,21 +933,19 @@ def _process_rand_sub_tree(
         progress_bar(i, entries, bar_length=25)
         progress_time += perf_counter() - progress_start
 
-        base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-        hole_rejected = (
-            hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-            if hole_contains is not None
-            else False
+        selection_state = evaluate_pre_particle_subtraction_event(
+            evt, mm_min, mm_max, hole_contains=hole_contains
         )
-        allcuts = base_all_cuts and not hole_rejected
-        nommcuts = base_sub_cuts and not hole_rejected
-        noholecuts = base_all_cuts if particle_type == "kaon" else False
+        allcuts = bool(selection_state["allcuts"])
+        nommcuts = bool(selection_state["nommcuts"])
+        noholecuts = bool(selection_state["noholecuts"]) if particle_type == "kaon" else False
+        adj_hsdelta = float(selection_state["adj_hsdelta"])
 
         if not (noholecuts or nommcuts or allcuts):
             continue
 
-        adj_MM = get_shifted_mm(evt)
-        adj_t = get_shifted_t(evt)
+        adj_MM = float(selection_state["adj_mm"])
+        adj_t = float(selection_state["adj_t"])
 
         if noholecuts and nohole_xy_fill is not None:
             nohole_xy_fill(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, evt.P_hgcer_npeSum)
@@ -963,6 +966,217 @@ def _process_rand_sub_tree(
     _print_rand_timer("{} progressBar".format(timer_label), progress_time, entries)
     _print_rand_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
     return mm_offset_value
+
+
+def _resolve_prepass_random_window_count(inp_dict, phi_setting):
+    """Read the same timing-table random-window count used by ``rand_sub``."""
+    run_key = {
+        "Right": "runNumRight",
+        "Left": "runNumLeft",
+        "Center": "runNumCenter",
+    }.get(phi_setting)
+    run_tokens = str(inp_dict.get(run_key, "")).split()
+    if not run_tokens:
+        raise RuntimeError("No run number configured for {} prepass".format(phi_setting))
+    try:
+        run_number = int(run_tokens[-1])
+    except ValueError as exc:
+        raise RuntimeError("Invalid run number for {} prepass".format(phi_setting)) from exc
+    timing_path = os.path.join(UTILPATH, "DB", "PARAM", "Timing_Parameters.csv")
+    matches = []
+    with open(timing_path, "r", encoding="utf-8") as handle:
+        next(handle, None)
+        for line in handle:
+            fields = line.partition("#")[0].strip().split(",")
+            if len(fields) < 6:
+                continue
+            try:
+                if int(fields[0]) <= run_number <= int(fields[1]):
+                    matches.append(float(fields[5]))
+            except ValueError:
+                continue
+    if not matches:
+        raise RuntimeError("No random-window timing entry for run {}".format(run_number))
+    return float(matches[-1])
+
+
+def build_pre_particle_subtraction_binning_payload(phi_setting, inp_dict, *, source_bundle=None):
+    """Collect only canonical-binning records before particle subtraction.
+
+    The payload is intentionally record based: its raw support is the number
+    of selected records, while signed support uses the physical source
+    coefficients.  It does not allocate final histograms or touch pion/proton
+    fitting code.
+    """
+    from apply_cuts import (
+        evaluate_pre_particle_subtraction_event,
+        set_shift_context,
+        set_val,
+    )
+
+    particle_type = inp_dict["ParticleType"]
+    epsset = inp_dict["EPSSET"]
+    set_val(inp_dict)
+    set_shift_context(phi_setting=phi_setting, shift_mode=inp_dict.get("shift_mode", "raw"))
+
+    owned_files = []
+    if source_bundle is None:
+        sys.path.append("normalize")
+        from get_eff_charge import get_eff_charge
+        from hgcer_hole import apply_HGCer_hole_cut
+
+        # The charge/normalization resolver is the existing owner of the
+        # prompt/random/dummy physical coefficients.
+        get_eff_charge({"phi_setting": phi_setting}, inp_dict, all_data=False)
+        data_path = "{}/{}_{}_{}.root".format(
+            OUTPATH, phi_setting, particle_type, inp_dict["InDATAFilename"]
+        )
+        dummy_path = "{}/{}_{}_{}.root".format(
+            OUTPATH, phi_setting, particle_type, inp_dict["InDUMMYFilename"]
+        )
+        if not (os.path.isfile(data_path) and os.path.isfile(dummy_path)):
+            raise FileNotFoundError("prepass source tree file missing for {}".format(phi_setting))
+        data_file = open_root_file(data_path)
+        dummy_file = open_root_file(dummy_path)
+        owned_files.extend((data_file, dummy_file))
+        source_bundle = _open_kaon_proton_cleaning_tree_bundle(
+            data_file,
+            dummy_file,
+            particle_type,
+            epsset,
+            phi_setting,
+            float(inp_dict["normfac_data"]),
+            float(inp_dict["normfac_dummy"]),
+            _resolve_prepass_random_window_count(inp_dict, phi_setting),
+        )
+        hole_cut = (
+            apply_HGCer_hole_cut(inp_dict["Q2"], inp_dict["W"], epsset, phi_setting)
+            if particle_type in ("kaon", "pion")
+            else None
+        )
+        hole_contains = hole_cut.IsInside if hole_cut is not None else None
+    else:
+        hole_contains = source_bundle.get("hole_contains")
+
+    records = []
+    source_stats = {}
+    for source_label, source_spec in ((source_bundle or {}).get("sources") or {}).items():
+        tree = (source_spec or {}).get("tree")
+        coefficient = float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+        selected = 0
+        seen = 0
+        if tree is not None:
+            for entry_index, event in enumerate(tree):
+                seen += 1
+                state = evaluate_pre_particle_subtraction_event(
+                    event,
+                    float(inp_dict["mm_min"]),
+                    float(inp_dict["mm_max"]),
+                    hole_contains=hole_contains,
+                )
+                if not state["nommcuts"]:
+                    continue
+                try:
+                    phi_value = float(event.ph_q)
+                except (AttributeError, TypeError, ValueError):
+                    continue
+                if not (math.isfinite(state["adj_t"]) and math.isfinite(phi_value)):
+                    continue
+                records.append(
+                    {
+                        "source_label": str(source_label),
+                        "entry_index": int(entry_index),
+                        "adj_t": float(state["adj_t"]),
+                        "adj_mm": float(state["adj_mm"]),
+                        "phi_value": phi_value,
+                        "physical_coefficient": coefficient,
+                    }
+                )
+                selected += 1
+        source_stats[str(source_label)] = {
+            "tree_name": (source_spec or {}).get("tree_name"),
+            "entries_seen": int(seen),
+            "entries_selected": int(selected),
+            "physical_coefficient": coefficient,
+        }
+
+    # ROOT owns the tree objects; do not close files supplied by a caller.
+    for owned_file in owned_files:
+        if owned_file is not None and hasattr(owned_file, "Close"):
+            owned_file.Close()
+    return {
+        "phi_setting": phi_setting,
+        "records": records,
+        "t_values": [record["adj_t"] for record in records],
+        "phi_values": [record["phi_value"] for record in records],
+        "signed_weights": [record["physical_coefficient"] for record in records],
+        "raw_event_support": int(len(records)),
+        "source_stats": source_stats,
+        "selection_provenance": {
+            "stage": "pre_particle_subtraction",
+            "selection": "shared_nommcuts_with_hgcer_hole_rejection",
+            "shifted_t_getter": "apply_cuts.get_shifted_t",
+            "source_bundle": "noRF_prompt_random_dummy",
+        },
+    }
+
+
+def _write_timing_t_validation_artifacts(
+    cleaning_result, *, outpath, particle_type, outfilename, epsset, phi_setting
+):
+    """Persist serializable, validation-only timing-t diagnostics."""
+    if str((cleaning_result or {}).get("method") or "") != "timing_t_event_weight":
+        return []
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    aero_validation = diagnostics.get("aerogel_validation") or {}
+    cross_stage = diagnostics.get("cross_stage_t_consistency") or []
+    base = "{}_{}_{}_{}_timing_t".format(
+        particle_type, outfilename, phi_setting, epsset
+    )
+    artifacts = []
+    cross_json = os.path.join(outpath, "{}_cross_stage_t_consistency.json".format(base))
+    with open(cross_json, "w", encoding="utf-8") as handle:
+        json.dump(cross_stage, handle, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    artifacts.append(cross_json)
+    cross_csv = os.path.join(outpath, "{}_cross_stage_t_consistency.csv".format(base))
+    with open(cross_csv, "w", newline="", encoding="utf-8") as handle:
+        fields = (
+            "event_signature", "prepass_t", "prepared_proton_cleaning_adj_t",
+            "downstream_t", "maximum_absolute_difference", "consistent",
+        )
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for row in cross_stage:
+            writer.writerow({field: row.get(field) for field in fields})
+    artifacts.append(cross_csv)
+    if aero_validation:
+        aero_json = os.path.join(outpath, "{}_t_aerogel_validation.json".format(base))
+        with open(aero_json, "w", encoding="utf-8") as handle:
+            json.dump(aero_validation, handle, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        artifacts.append(aero_json)
+        aero_csv = os.path.join(outpath, "{}_t_aerogel_validation.csv".format(base))
+        t_edges = list(aero_validation.get("t_edges") or [])
+        aero_edges = list(aero_validation.get("aero_edges") or [])
+        cells = list(aero_validation.get("cells") or [])
+        with open(aero_csv, "w", newline="", encoding="utf-8") as handle:
+            fields = ["t_index", "t_low", "t_high", "aero_index", "aero_low", "aero_high"]
+            metric_fields = sorted({key for row in cells for cell in row for key in cell})
+            writer = csv.DictWriter(handle, fieldnames=fields + metric_fields)
+            writer.writeheader()
+            for t_index, row in enumerate(cells):
+                for aero_index, cell in enumerate(row):
+                    writer.writerow({
+                        "t_index": t_index,
+                        "t_low": t_edges[t_index] if t_index < len(t_edges) else None,
+                        "t_high": t_edges[t_index + 1] if t_index + 1 < len(t_edges) else None,
+                        "aero_index": aero_index,
+                        "aero_low": aero_edges[aero_index] if aero_index < len(aero_edges) else None,
+                        "aero_high": aero_edges[aero_index + 1] if aero_index + 1 < len(aero_edges) else None,
+                        **dict(cell),
+                    })
+        artifacts.append(aero_csv)
+    return artifacts
+
 
 def rand_sub(
     phi_setting,
@@ -2640,6 +2854,9 @@ def rand_sub(
                 norm_factor_dummy,
                 nWindows,
             )
+            proton_cleaning_tree_bundle["canonical_t_prepass_samples"] = dict(
+                (inpDict.get("canonical_t_prepass_samples") or {}).get(phi_setting, {})
+            )
             proton_cleaning_tree_bundle = prepare_kaon_proton_cleaning_source_bundle(
                 proton_cleaning_tree_bundle,
                 evaluate_data_event,
@@ -2780,6 +2997,16 @@ def rand_sub(
                         mm_max,
                     )
                     if bool((proton_cleaning_application or {}).get("accepted")):
+                        production_map_key = (
+                            "H_proton_weight_vs_delta_t"
+                            if str(proton_cleaning_result.get("method") or "") == "timing_t_event_weight"
+                            else "H_proton_weight_vs_delta_aero"
+                        )
+                        production_map_name = (
+                            "H_proton_weight_vs_delta_t_DATA"
+                            if production_map_key.endswith("_t")
+                            else "H_proton_weight_vs_delta_aero_DATA"
+                        )
                         for key, clone_name in (
                             ("H_MM_before_proton_cleaning", "H_MM_before_proton_cleaning_DATA"),
                             ("H_MM_estimated_proton", "H_MM_estimated_proton_DATA"),
@@ -2787,7 +3014,7 @@ def rand_sub(
                             ("H_MM_after_proton_cleaning_final_rf", "H_MM_nosub_proton_cleaned_final_RF_DATA"),
                             ("H_proton_fraction_vs_MM", "H_proton_fraction_vs_MM_DATA"),
                             ("H_proton_weight_vs_delta", "H_proton_weight_vs_delta_DATA"),
-                            ("H_proton_weight_vs_delta_aero", "H_proton_weight_vs_delta_aero_DATA"),
+                            (production_map_key, production_map_name),
                         ):
                             proton_cleaning_application[key] = _clone_hist_detached(
                                 proton_cleaning_application.get(key),
@@ -2861,6 +3088,16 @@ def rand_sub(
                 )
                 histDict["proton_contamination_cleaning_setting"] = (
                     summarize_kaon_proton_cleaning_result(proton_cleaning_result)
+                )
+                histDict["proton_contamination_cleaning_artifacts"] = (
+                    _write_timing_t_validation_artifacts(
+                        proton_cleaning_result,
+                        outpath=OUTPATH,
+                        particle_type=ParticleType,
+                        outfilename=OutFilename,
+                        epsset=EPSSET,
+                        phi_setting=phi_setting,
+                    )
                 )
                 print_kaon_proton_cleaning_terminal_summary(
                     proton_cleaning_result,

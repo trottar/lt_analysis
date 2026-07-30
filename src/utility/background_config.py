@@ -382,12 +382,19 @@ PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED = "disabled"
 PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT = (
     "ctime_aero_event_weight"
 )
+PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT = (
+    "timing_t_event_weight"
+)
 PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT = (
     "c_script_exact"
+)
+PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED = (
+    "timing_t_binned"
 )
 PROTON_CONTAMINATION_CLEANING_IMPLEMENTATIONS = frozenset(
     {
         PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
+        PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED,
     }
 )
 PROTON_CONTAMINATION_RF_BRANCH_CANDIDATES = (
@@ -410,6 +417,7 @@ PROTON_CONTAMINATION_CLEANING_METHODS = frozenset(
     {
         PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
         PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
+        PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT,
     }
 )
 PROTON_CONTAMINATION_CLEANING_TREE_POLICIES = frozenset(
@@ -453,6 +461,54 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     ),
     "aero_slice_edges": (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
     "aero_hist_range": (0.0, 25.0),
+    # Canonical analysis bins are owned by ``find_bins``.  The t-indexed
+    # cleaner may consume them, but is never allowed to invent a private set.
+    "t_binning": {
+        "source": "canonical_find_bins",
+        "require_canonical_edges": True,
+        "allow_authoritative_interval_file": True,
+        "allow_internal_rebinning": False,
+        "minimum_t_bins": 1,
+        "metadata_schema_version": 1,
+        "require_metadata_sidecar": True,
+        "allow_legacy_interval_without_metadata": False,
+        "edge_tolerance": 1.0e-9,
+        "cross_stage_t_tolerance": 1.0e-10,
+        "canonical_bin_support_metric": "raw_event_count",
+        "canonical_bin_support_threshold": T_BIN_MIN_EVENTS,
+        "allowed_support_metrics": (
+            "raw_event_count",
+            "absolute_weighted_support",
+            "positive_weighted_support",
+        ),
+        "allowed_algorithm_identifiers": ("find_bins_adjust_t_bins",),
+        "allowed_algorithm_versions": (1,),
+    },
+    "t_cell_fit": {
+        "maximum_chi2_ndf": 5.0,
+        "maximum_poisson_deviance_per_entry": 1.00,
+        "minimum_model_data_ratio": 0.50,
+        "maximum_model_data_ratio": 1.50,
+        "minimum_entries": 30,
+    },
+    "t_support_thresholds": {
+        "minimum_supported_t_slices": 2,
+        "minimum_marginal_t_slices": 1,
+        "minimum_supported_coverage": 0.35,
+        "minimum_marginal_coverage": 0.15,
+        "minimum_modeled_yield": 5.0,
+    },
+    "aerogel_validation": {
+        "enabled": True,
+        "slice_edges": (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
+        "hist_range": (0.0, 25.0),
+        "low_reference_max_npe": 5.0,
+        "high_reference_min_npe": 10.0,
+        "warn_if_high_fraction_exceeds_low_fraction": True,
+        "high_aero_lambda_removal_excess_threshold": 0.0,
+        "affects_event_weights": False,
+        "affects_fit_acceptance": False,
+    },
     "ctime_hist_range": (-2.0, 2.0),
     "ctime_hist_bins": 131,
     "ctime_hist_range_high_epsilon": (-4.0, 4.0),

@@ -46,6 +46,7 @@ from background_config import (
     resolve_particle_subtraction_mode,
     resolve_simc_pion_component_files,
     resolve_simc_tree_name,
+    get_proton_contamination_cleaning_config,
 )
 from correction_ledger import build_correction_ledger, write_correction_ledger
 from epsilon_correction_compare import load_ledgers_and_compare, validate_epsilon_compare
@@ -608,7 +609,9 @@ if Q2 == "5p5" and W == "3p02":
 
 # DATA
 sys.path.append("cuts")
-from rand_sub import rand_sub
+from rand_sub import build_pre_particle_subtraction_binning_payload, rand_sub
+sys.path.append("binning")
+from find_bins import resolve_canonical_analysis_bins_pre_subtraction
 
 sys.path.append("normalize")
 from get_eff_charge import find_events
@@ -784,6 +787,56 @@ if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
         )
     record_stage_time("Step 3 pion component background plots total", stage_start)
 
+canonical_t_enabled = ParticleType == "kaon"
+if canonical_t_enabled:
+    canonical_prepass_start = perf_counter()
+    canonical_prepass_payloads = []
+    canonical_prepass_samples = {}
+    for phiset in phisetlist:
+        payload = build_pre_particle_subtraction_binning_payload(phiset, inpDict)
+        canonical_prepass_payloads.append(payload)
+        per_source_counts = {}
+        for record in payload.get("records") or []:
+            label = str(record.get("source_label", ""))
+            ordinal = per_source_counts.get(label, 0)
+            per_source_counts[label] = ordinal + 1
+            if ordinal < 128:
+                canonical_prepass_samples.setdefault(phiset, {})[
+                    "{}:{}".format(label, int(record.get("entry_index", -1)))
+                ] = float(record["adj_t"])
+    canonical_bin_resolution = resolve_canonical_analysis_bins_pre_subtraction(
+        canonical_prepass_payloads,
+        inpDict,
+        allow_interval_file=True,
+        write_interval_files=True,
+        quiet=not DEBUG,
+    )
+    inpDict["canonical_t_prepass_samples"] = canonical_prepass_samples
+    prepass_provenance_path = os.path.join(
+        OUTPATH, "{}_{}_canonical_t_prepass_{}.json".format(ParticleType, OutFilename, EPSSET)
+    )
+    with open(prepass_provenance_path, "w", encoding="utf-8") as handle:
+        json.dump(
+            {
+                "resolution": canonical_bin_resolution.get("metadata"),
+                "payloads": canonical_prepass_payloads,
+            },
+            handle,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+    output_file_lst.append(prepass_provenance_path)
+    for source_artifact in (
+        "{}/{}".format(ParticleType, os.path.basename(canonical_bin_resolution["metadata"]["interval_file"])),
+        "{}/{}".format(ParticleType, os.path.basename(canonical_bin_resolution["metadata"]["metadata_file"])),
+        "{}/{}".format(ParticleType, os.path.basename(canonical_bin_resolution["metadata"]["artifacts"]["phi_path"])),
+        "{}/{}".format(ParticleType, os.path.basename(canonical_bin_resolution["metadata"]["artifacts"]["phi_metadata_path"])),
+    ):
+        if source_artifact not in output_file_lst:
+            output_file_lst.append(source_artifact)
+    record_stage_time("Step 3 canonical t prepass/resolution", canonical_prepass_start)
+
 stage_start = perf_counter()
 for phiset in phisetlist:
     setting_start = perf_counter()
@@ -802,6 +855,9 @@ for phiset in phisetlist:
     attach_pion_component_payload(hist, pion_component_payloads.get(phiset))
     hist["_simc_kaon_signal_shape_payload"] = kaon_signal_shape_payloads.get(phiset)
     hist["_simc_kaon_sigma0_shape_payload"] = kaon_sigma0_shape_payloads.get(phiset)
+    for artifact in hist.get("proton_contamination_cleaning_artifacts") or []:
+        if artifact not in output_file_lst:
+            output_file_lst.append(artifact)
     histlist.append(hist)
     record_stage_time("Step 3 rand_sub {}".format(phiset), setting_start)
 record_stage_time("Step 3 rand_sub total", stage_start)
@@ -946,37 +1002,50 @@ if EPSSET == "low":
     except Exception as exc:
         print("WARNING: Failed to generate BG optimization diagnostics PDF {}: {}".format(bg_opt_csv_path, exc))
 
-try:
-    output_file_lst.append("{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
-    with open("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
-        # Read all lines from the file into a list
-        all_lines = file.readlines()
-        # Check if the file has at least two lines
-        if len(all_lines) >= 2:
-            # Extract the second line and remove leading/trailing whitespace
-            t_bins = all_lines[1].split("\t")
-            del t_bins[0]
-            t_bins = np.array([float(element) for element in t_bins])
-except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
-except IOError:
-    print("Error reading {}...".format("{}/src/{}/t_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
-
-try:
-    output_file_lst.append("{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p",""), W.replace("p","")))
-    with open("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p","")), "r") as file:
-        # Read all lines from the file into a list
-        all_lines = file.readlines()
-        # Check if the file has at least two lines
-        if len(all_lines) >= 2:
-            # Extract the second line and remove leading/trailing whitespace
-            phi_bins = all_lines[1].split("\t")
-            del phi_bins[0]
-            phi_bins = np.array([float(element) for element in phi_bins])
-except FileNotFoundError:
-    print("{} not found...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))
-except IOError:
-    print("Error reading {}...".format("{}/src/{}/phi_bin_interval_Q{}W{}".format(LTANAPATH, ParticleType, Q2.replace("p",""), W.replace("p",""))))    
+if canonical_t_enabled:
+    if not inpDict.get("canonical_t_binning"):
+        raise RuntimeError("canonical t bins were not resolved before Step 4")
+    t_bins = np.asarray(inpDict["t_bins"], dtype=float)
+    phi_bins = np.asarray(inpDict["phi_bins"], dtype=float)
+    canonical_t_edges = np.asarray(inpDict["canonical_t_binning"]["t_edges"], dtype=float)
+    canonical_edge_tolerance = float(
+        (get_proton_contamination_cleaning_config(inp_dict=inpDict).get("t_binning") or {}).get(
+            "edge_tolerance", 1.0e-9
+        )
+    )
+    maximum_edge_difference = (
+        float(np.max(np.abs(t_bins - canonical_t_edges)))
+        if t_bins.shape == canonical_t_edges.shape and t_bins.size
+        else float("inf")
+    )
+    canonical_edge_match = bool(
+        t_bins.shape == canonical_t_edges.shape
+        and t_bins.size >= 2
+        and np.all(np.isfinite(t_bins))
+        and maximum_edge_difference <= canonical_edge_tolerance
+    )
+    inpDict["canonical_t_binning"]["canonical_edge_match"] = canonical_edge_match
+    inpDict["canonical_t_binning"]["maximum_edge_difference"] = maximum_edge_difference
+    inpDict["canonical_t_binning"].setdefault("edge_validation_by_stage", {})["main.Step4"] = {
+        "canonical_edge_match": canonical_edge_match,
+        "maximum_edge_difference": maximum_edge_difference,
+        "edge_tolerance": canonical_edge_tolerance,
+    }
+    if not canonical_edge_match:
+        raise RuntimeError("Step 4 attempted to replace immutable canonical t edges")
+else:
+    # Keep pion/non-kaon interval ownership unchanged.
+    interval_root = "{}/src/{}".format(LTANAPATH, ParticleType)
+    t_interval = "{}/t_bin_interval_Q{}W{}".format(interval_root, Q2.replace("p", ""), W.replace("p", ""))
+    phi_interval = "{}/phi_bin_interval_Q{}W{}".format(interval_root, Q2.replace("p", ""), W.replace("p", ""))
+    output_file_lst.extend((
+        "{}/t_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p", ""), W.replace("p", "")),
+        "{}/phi_bin_interval_Q{}W{}".format(ParticleType, Q2.replace("p", ""), W.replace("p", "")),
+    ))
+    with open(t_interval, "r", encoding="utf-8") as handle:
+        t_bins = np.asarray([float(value) for value in handle.readlines()[1].split("\t") if value.strip()], dtype=float)
+    with open(phi_interval, "r", encoding="utf-8") as handle:
+        phi_bins = np.asarray([float(value) for value in handle.readlines()[1].split("\t") if value.strip()], dtype=float)
     
 for hist in histlist:
     hist["t_bins"] = t_bins

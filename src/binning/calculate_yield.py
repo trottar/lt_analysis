@@ -82,6 +82,7 @@ from background_config import (
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
     get_particle_subtraction_setting_key,
+    get_proton_contamination_cleaning_config,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -114,6 +115,39 @@ from proton_contamination_weights import (
     get_kaon_proton_cleaning_event_payload,
     print_kaon_proton_cleaning_pages,
 )
+
+
+def _assert_canonical_t_edges(inpDict, t_bins, stage):
+    """Record and enforce immutable canonical edges at downstream consumers."""
+    canonical = inpDict.get("canonical_t_binning") if isinstance(inpDict, dict) else None
+    if not isinstance(canonical, dict) or canonical.get("t_edges") is None:
+        return True
+    expected = np.asarray(canonical.get("t_edges"), dtype=float)
+    actual = np.asarray(t_bins, dtype=float)
+    maximum_difference = float("inf")
+    if expected.shape == actual.shape and expected.size:
+        maximum_difference = float(np.max(np.abs(expected - actual)))
+    edge_tolerance = float(
+        (get_proton_contamination_cleaning_config(inp_dict=inpDict).get("t_binning") or {}).get(
+            "edge_tolerance", 1.0e-9
+        )
+    )
+    matched = bool(
+        expected.shape == actual.shape
+        and expected.size >= 2
+        and np.all(np.isfinite(actual))
+        and maximum_difference <= edge_tolerance
+    )
+    canonical["canonical_edge_match"] = matched
+    canonical["maximum_edge_difference"] = maximum_difference
+    canonical.setdefault("edge_validation_by_stage", {})[str(stage)] = {
+        "canonical_edge_match": matched,
+        "maximum_edge_difference": maximum_difference,
+        "edge_tolerance": edge_tolerance,
+    }
+    if not matched and bool(get_proton_contamination_cleaning_config(inp_dict=inpDict).get("strict_mode", False)):
+        raise RuntimeError("{} received non-canonical t edges".format(stage))
+    return matched
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -2961,6 +2995,7 @@ def find_yield_data(histlist, inpDict):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
+    _assert_canonical_t_edges(inpDict, t_bins, "calculate_yield.find_yield_data")
 
     yieldDict = {
         "t_bins" : t_bins,
@@ -3332,6 +3367,7 @@ def find_yield_simc(histlist, inpDict, iteration=False):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
+    _assert_canonical_t_edges(inpDict, t_bins, "calculate_yield.find_yield_simc")
 
     yieldDict = {
         "t_bins" : t_bins,

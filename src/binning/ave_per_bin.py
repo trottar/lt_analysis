@@ -76,6 +76,7 @@ from background_config import (
     resolve_particle_subtraction_weight_denominator_floor,
     resolve_particle_subtraction_weight_warn_max,
     get_particle_subtraction_setting_key,
+    get_proton_contamination_cleaning_config,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -114,6 +115,36 @@ from proton_contamination_weights import (
     get_kaon_proton_cleaning_event_payload,
     print_kaon_proton_cleaning_pages,
 )
+
+
+def _assert_canonical_t_edges(inpDict, t_bins, stage):
+    """Record and enforce immutable canonical edges at downstream consumers."""
+    canonical = inpDict.get("canonical_t_binning") if isinstance(inpDict, dict) else None
+    if not isinstance(canonical, dict) or canonical.get("t_edges") is None:
+        return True
+    expected = np.asarray(canonical.get("t_edges"), dtype=float)
+    actual = np.asarray(t_bins, dtype=float)
+    maximum_difference = float("inf")
+    if expected.shape == actual.shape and expected.size:
+        maximum_difference = float(np.max(np.abs(expected - actual)))
+    config = get_proton_contamination_cleaning_config(inp_dict=inpDict)
+    edge_tolerance = float((config.get("t_binning") or {}).get("edge_tolerance", 1.0e-9))
+    matched = bool(
+        expected.shape == actual.shape
+        and expected.size >= 2
+        and np.all(np.isfinite(actual))
+        and maximum_difference <= edge_tolerance
+    )
+    canonical["canonical_edge_match"] = matched
+    canonical["maximum_edge_difference"] = maximum_difference
+    canonical.setdefault("edge_validation_by_stage", {})[str(stage)] = {
+        "canonical_edge_match": matched,
+        "maximum_edge_difference": maximum_difference,
+        "edge_tolerance": edge_tolerance,
+    }
+    if not matched and bool(config.get("strict_mode", False)):
+        raise RuntimeError("{} received non-canonical t edges".format(stage))
+    return matched
 
 ##################################################################################################################################################
 
@@ -1857,6 +1888,7 @@ def ave_per_bin_data(histlist, inpDict):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
+    _assert_canonical_t_edges(inpDict, t_bins, "ave_per_bin.ave_per_bin_data")
 
     aveDict = {
         "t_bins" : t_bins,
@@ -2128,6 +2160,7 @@ def ave_per_bin_simc(histlist, inpDict, iteration=False):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
+    _assert_canonical_t_edges(inpDict, t_bins, "ave_per_bin.ave_per_bin_simc")
 
     aveDict = {
         "t_bins" : t_bins,

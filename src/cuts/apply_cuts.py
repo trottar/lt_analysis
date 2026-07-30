@@ -292,6 +292,39 @@ def evaluate_data_event(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
     return _compute_data_cut_state(evt, mm_min, mm_max, mm_offset)
 
 
+def evaluate_pre_particle_subtraction_event(
+    evt,
+    mm_min=0.7,
+    mm_max=1.5,
+    mm_offset=0.0,
+    hole_contains=None,
+):
+    """Return the common non-particle-subtraction event state.
+
+    The canonical-bin prepass, proton-cleaning source preparation, and the
+    downstream data loops all need the same shifted kinematics and the same
+    no-missing-mass-window selection.  Keeping that state here prevents a
+    second implementation from drifting from ``evaluate_data_event``.
+    """
+    allcuts_base, nommcuts_base, adj_hsdelta = evaluate_data_event(
+        evt, mm_min, mm_max, mm_offset
+    )
+    hole_rejected = (
+        bool(hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer))
+        if hole_contains is not None
+        else False
+    )
+    return {
+        "allcuts": bool(allcuts_base and not hole_rejected),
+        "nommcuts": bool(nommcuts_base and not hole_rejected),
+        "noholecuts": bool(allcuts_base),
+        "hole_rejected": bool(hole_rejected),
+        "adj_hsdelta": float(adj_hsdelta),
+        "adj_mm": float(get_shifted_mm(evt, mm_offset=mm_offset)),
+        "adj_t": float(get_shifted_t(evt)),
+    }
+
+
 def evaluate_data_cut_bools(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
     allcuts, subcuts, _ = _compute_data_cut_state(evt, mm_min, mm_max, mm_offset)
     return allcuts, subcuts

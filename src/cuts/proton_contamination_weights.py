@@ -31,8 +31,10 @@ from ROOT import (
 sys.path.append("utility")
 from background_config import (  # noqa: E402
     PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
+    PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED,
     PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT,
     PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED,
+    PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT,
     get_proton_contamination_cleaning_config,
     resolve_proton_contamination_cleaning_enabled,
     resolve_proton_contamination_cleaning_method,
@@ -1209,10 +1211,20 @@ def prepare_kaon_proton_cleaning_source_bundle(
     mm_max,
     proton_cleaning_config=None,
 ):
+    from apply_cuts import evaluate_pre_particle_subtraction_event
+
     prepared_bundle = dict(source_bundle or {})
     prepared_sources = {}
     prepared_source_stats = {}
     available_timing_branches = set()
+    cross_stage_rows = []
+    prepass_samples = dict((source_bundle or {}).get("canonical_t_prepass_samples") or {})
+    cross_stage_tolerance = float(
+        ((proton_cleaning_config or {}).get("t_binning") or {}).get(
+            "cross_stage_t_tolerance", 1.0e-10
+        )
+    )
+    strict_cross_stage = bool((proton_cleaning_config or {}).get("strict_mode", False))
     requested_timing_branches = [PROTON_CLEANING_EXACT_TIMING_BRANCH]
     for branch_name in _resolve_rf_branch_candidates(source_bundle, proton_cleaning_config):
         if branch_name not in requested_timing_branches:
@@ -1245,15 +1257,16 @@ def prepare_kaon_proton_cleaning_source_bundle(
 
             for entry_index, evt in enumerate(tree):
                 entries_seen += 1
-                base_all_cuts, base_sub_cuts, adj_hsdelta = evaluate_event(evt, mm_min, mm_max)
-                hole_rejected = (
-                    hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
-                    if hole_contains is not None
-                    else False
+                # ``apply_cuts`` is the single owner of shifted t/mm and the
+                # non-particle-subtraction selection shared with the prepass.
+                selection_state = evaluate_pre_particle_subtraction_event(
+                    evt, mm_min, mm_max, hole_contains=hole_contains
                 )
-                allcuts = bool(base_all_cuts and (not hole_rejected))
-                nommcuts = bool(base_sub_cuts and (not hole_rejected))
-                noholecuts = bool(base_all_cuts)
+                allcuts = bool(selection_state["allcuts"])
+                nommcuts = bool(selection_state["nommcuts"])
+                noholecuts = bool(selection_state["noholecuts"])
+                hole_rejected = bool(selection_state["hole_rejected"])
+                adj_hsdelta = float(selection_state["adj_hsdelta"])
                 pre_diamond_nommcuts = bool(
                     _passes_exact_spectrometer_base_acceptance(evt)
                     and (not hole_rejected)
@@ -1277,14 +1290,32 @@ def prepare_kaon_proton_cleaning_source_bundle(
                     "nommcuts": bool(nommcuts),
                     "noholecuts": bool(noholecuts),
                     "pre_diamond_nommcuts": bool(pre_diamond_nommcuts),
-                    "adj_mm": float(shifted_mm_getter(evt)),
-                    "adj_t": float(shifted_t_getter(evt)),
+                    "adj_mm": float(selection_state["adj_mm"]),
+                    "adj_t": float(selection_state["adj_t"]),
                     "adj_hsdelta": float(adj_hsdelta),
                     "delta_value": float(getattr(evt, "ssdelta", 0.0)),
                     "aero_value": float(getattr(evt, "P_aero_npeSum", 0.0)),
                     "timing_values": timing_values,
                     **tof_payload,
                 }
+                signature = _make_prepared_event_signature(source_name, entry_index)
+                if signature in prepass_samples:
+                    prepass_t = float(prepass_samples[signature])
+                    prepared_t = float(selection_state["adj_t"])
+                    difference = abs(prepass_t - prepared_t)
+                    row = {
+                        "event_signature": signature,
+                        "prepass_t": prepass_t,
+                        "prepared_proton_cleaning_adj_t": prepared_t,
+                        "downstream_t": None,
+                        "maximum_absolute_difference": difference,
+                        "consistent": bool(difference <= cross_stage_tolerance),
+                    }
+                    cross_stage_rows.append(row)
+                    if strict_cross_stage and not row["consistent"]:
+                        raise RuntimeError(
+                            "prepass/proton shifted-t mismatch for {}".format(signature)
+                        )
                 entries_prepared += 1
 
         prepared_sources[str(source_name)] = {
@@ -1353,6 +1384,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
     prepared_bundle["prepared_sources"] = prepared_sources
     prepared_bundle["prepared_source_stats"] = prepared_source_stats
     prepared_bundle["available_timing_branches"] = sorted(available_timing_branches)
+    prepared_bundle["cross_stage_t_consistency"] = cross_stage_rows
     return prepared_bundle
 
 
@@ -3997,6 +4029,281 @@ def _evaluate_event_proton_probability(
     return max(0.0, min(1.0, float(proton_value / denominator)))
 
 
+def _build_t_aerogel_validation(cleaning_result, source_bundle, event_rows, config):
+    validation_cfg = dict(config.get("aerogel_validation") or {})
+    if not bool(validation_cfg.get("enabled", True)):
+        return {"enabled": False, "affects_event_weights": False, "affects_fit_acceptance": False}
+    t_edges = [float(edge) for edge in (cleaning_result.get("t_edges") or [])]
+    aero_edges = [float(edge) for edge in (validation_cfg.get("slice_edges") or ())]
+    if len(t_edges) < 2 or len(aero_edges) < 2:
+        return {"enabled": True, "warnings": ["aerogel_validation_edges_unavailable"]}
+    metric_names = (
+        "event_count",
+        "signed_event_weight_sum",
+        "absolute_event_weight_support",
+        "sum_proton_probability",
+        "absolute_weighted_probability_sum",
+        "raw_missing_mass_yield",
+        "estimated_proton_missing_mass_yield",
+        "cleaned_missing_mass_yield",
+        "low_mm_raw_yield",
+        "low_mm_removed_yield",
+        "lambda_raw_yield",
+        "lambda_removed_yield",
+    )
+    cells = [[{name: (0 if name == "event_count" else 0.0) for name in metric_names} for _ in range(len(aero_edges) - 1)] for _ in range(len(t_edges) - 1)]
+    windows = dict(config.get("validation_windows") or {})
+    low_mm = tuple(windows.get("low_mm") or (0.80, 0.90))
+    lambda_peak = tuple(windows.get("lambda_peak") or (1.105, 1.125))
+    for row in event_rows:
+        t_index = row.get("t_index")
+        aero_index = row.get("aero_index")
+        if not (isinstance(t_index, int) and isinstance(aero_index, int)):
+            continue
+        if not (0 <= t_index < len(cells) and 0 <= aero_index < len(cells[t_index])):
+            continue
+        cell = cells[t_index][aero_index]
+        physical_weight = float(row["physical_weight"])
+        proton_weight = float(row["proton_weight"])
+        adj_mm = float(row["adj_mm"])
+        cell["event_count"] += 1
+        cell["signed_event_weight_sum"] += physical_weight
+        cell["absolute_event_weight_support"] += abs(physical_weight)
+        cell["sum_proton_probability"] += physical_weight * proton_weight
+        cell["absolute_weighted_probability_sum"] += abs(physical_weight) * proton_weight
+        cell["raw_missing_mass_yield"] += physical_weight
+        cell["estimated_proton_missing_mass_yield"] += physical_weight * proton_weight
+        cell["cleaned_missing_mass_yield"] += physical_weight * (1.0 - proton_weight)
+        if low_mm[0] <= adj_mm < low_mm[1]:
+            cell["low_mm_raw_yield"] += physical_weight
+            cell["low_mm_removed_yield"] += physical_weight * proton_weight
+        if lambda_peak[0] <= adj_mm < lambda_peak[1]:
+            cell["lambda_raw_yield"] += physical_weight
+            cell["lambda_removed_yield"] += physical_weight * proton_weight
+
+    matrices = {name: [[cell[name] for cell in row] for row in cells] for name in metric_names}
+    average_probability = []
+    low_removed_fraction = []
+    lambda_removed_fraction = []
+    for row in cells:
+        average_probability.append([
+            float(cell["absolute_weighted_probability_sum"] / cell["absolute_event_weight_support"])
+            if cell["absolute_event_weight_support"] > 0.0 else 0.0
+            for cell in row
+        ])
+        low_removed_fraction.append([
+            float(cell["low_mm_removed_yield"] / cell["low_mm_raw_yield"])
+            if cell["low_mm_raw_yield"] != 0.0 else 0.0
+            for cell in row
+        ])
+        lambda_removed_fraction.append([
+            float(cell["lambda_removed_yield"] / cell["lambda_raw_yield"])
+            if cell["lambda_raw_yield"] != 0.0 else 0.0
+            for cell in row
+        ])
+    low_limit = float(validation_cfg.get("low_reference_max_npe", 5.0))
+    high_limit = float(validation_cfg.get("high_reference_min_npe", 10.0))
+    warnings = []
+    per_t_warnings = []
+    for t_index, row in enumerate(cells):
+        low_cells = [cell for index, cell in enumerate(row) if aero_edges[index + 1] <= low_limit]
+        high_cells = [cell for index, cell in enumerate(row) if aero_edges[index] >= high_limit]
+        def _average(selected):
+            den = sum(cell["absolute_event_weight_support"] for cell in selected)
+            return (sum(cell["absolute_weighted_probability_sum"] for cell in selected) / den) if den else None
+        def _lambda_fraction(selected):
+            den = sum(cell["lambda_raw_yield"] for cell in selected)
+            return (sum(cell["lambda_removed_yield"] for cell in selected) / den) if den else None
+        low_avg, high_avg = _average(low_cells), _average(high_cells)
+        low_lambda, high_lambda = _lambda_fraction(low_cells), _lambda_fraction(high_cells)
+        labels = []
+        if low_avg is not None and high_avg is not None and high_avg > low_avg:
+            labels.append("high_aero_average_weight_exceeds_low_aero")
+        threshold = float(validation_cfg.get("high_aero_lambda_removal_excess_threshold", 0.0))
+        if low_lambda is not None and high_lambda is not None and (high_lambda - low_lambda) > threshold:
+            labels.append("lambda_region_removal_large_in_high_aero")
+        if labels:
+            labels.append("t_bin_aerogel_validation_inconsistent")
+            warnings.extend(labels)
+        per_t_warnings.append({
+            "t_index": t_index,
+            "low_aero_average_weight": low_avg,
+            "high_aero_average_weight": high_avg,
+            "low_aero_lambda_removed_fraction": low_lambda,
+            "high_aero_lambda_removed_fraction": high_lambda,
+            "warnings": labels,
+        })
+    total_low, total_high = [], []
+    for row in cells:
+        total_low.extend(cell for index, cell in enumerate(row) if aero_edges[index + 1] <= low_limit)
+        total_high.extend(cell for index, cell in enumerate(row) if aero_edges[index] >= high_limit)
+    def _global_average(selected):
+        den = sum(cell["absolute_event_weight_support"] for cell in selected)
+        return (sum(cell["absolute_weighted_probability_sum"] for cell in selected) / den) if den else None
+    low_avg, high_avg = _global_average(total_low), _global_average(total_high)
+    if low_avg is not None and high_avg is not None and high_avg > low_avg:
+        warnings.append("high_aero_proton_fraction_exceeds_low_aero")
+    return {
+        "enabled": True,
+        "affects_event_weights": False,
+        "affects_fit_acceptance": False,
+        "t_edges": t_edges,
+        "aero_edges": aero_edges,
+        "event_count_by_t_aero": matrices["event_count"],
+        "signed_event_weight_sum_by_t_aero": matrices["signed_event_weight_sum"],
+        "absolute_event_weight_support_by_t_aero": matrices["absolute_event_weight_support"],
+        "proton_probability_sum_by_t_aero": matrices["sum_proton_probability"],
+        "average_proton_probability_by_t_aero": average_probability,
+        "low_mm_removed_fraction_by_t_aero": low_removed_fraction,
+        "lambda_removed_fraction_by_t_aero": lambda_removed_fraction,
+        "cells": cells,
+        "proton_fraction_below_5_npe": low_avg,
+        "proton_fraction_above_10_npe": high_avg,
+        "average_weight_below_5_npe": low_avg,
+        "average_weight_above_10_npe": high_avg,
+        "warnings": sorted(set(warnings)),
+        "warnings_by_t_bin": per_t_warnings,
+        "high_aero_weight_exceeds_low_aero_by_t_bin": [
+            "high_aero_average_weight_exceeds_low_aero" in row["warnings"]
+            for row in per_t_warnings
+        ],
+        "high_aero_lambda_removal_exceeds_threshold_by_t_bin": [
+            "lambda_region_removal_large_in_high_aero" in row["warnings"]
+            for row in per_t_warnings
+        ],
+    }
+
+
+def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config):
+    t_edges = [float(edge) for edge in (cleaning_result.get("t_edges") or [])]
+    delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
+    cell_fits = list(cleaning_result.get("delta_t_cell_fits") or [])
+    center_shapes = list(cleaning_result.get("delta_timing_center_shapes") or [])
+    timing_branch = str((cleaning_result.get("diagnostics") or {}).get("timing_branch") or "")
+    denominator_floor = float((config.get("weighting") or {}).get("denominator_floor", 1.0e-12))
+    lookup = {}
+    closure_by_cell = {}
+    closure_by_delta = {}
+    closure_by_t = {}
+    underflow = overflow = nonfinite = 0
+    validation_rows = []
+    prepared_sources = _get_prepared_sources(source_bundle)
+    rf_accept_by_signature = {}
+    if bool((cleaning_result.get("diagnostics") or {}).get("rf_applied", False)):
+        for source_name, source_spec in prepared_sources.items():
+            tree = (((source_bundle or {}).get("sources") or {}).get(source_name) or {}).get("tree")
+            entry_map = (source_spec or {}).get("entries") or {}
+            if tree is None:
+                continue
+            for entry_index, evt in enumerate(tree):
+                if int(entry_index) not in entry_map:
+                    continue
+                signature = _make_prepared_event_signature(source_name, entry_index)
+                rf_accept_by_signature[signature] = bool(
+                    apply_low_epsilon_rf_after_proton_cleaning(cleaning_result, source_name, evt)
+                )
+    for delta_index, slices in enumerate(cell_fits):
+        closure_by_delta[delta_index] = {"delta_index": delta_index, "fitted_proton_yield": 0.0, "summed_event_proton_probability": 0.0, "event_count": 0}
+        for t_index, fit in enumerate(slices or []):
+            applied = float((fit or {}).get("applied_proton_yield", (fit or {}).get("proton_yield", 0.0)) or 0.0)
+            closure_by_cell[(delta_index, t_index)] = {
+                "delta_index": delta_index,
+                "t_index": t_index,
+                "t_low": float(t_edges[t_index]),
+                "t_high": float(t_edges[t_index + 1]),
+                "fitted_proton_yield": applied,
+                "summed_event_proton_probability": 0.0,
+                "event_count": 0,
+            }
+            closure_by_delta[delta_index]["fitted_proton_yield"] += applied
+            closure_by_t.setdefault(t_index, {"t_index": t_index, "t_low": float(t_edges[t_index]), "t_high": float(t_edges[t_index + 1]), "fitted_proton_yield": 0.0, "summed_event_proton_probability": 0.0, "event_count": 0})["fitted_proton_yield"] += applied
+    for source_name, source_spec in prepared_sources.items():
+        fit_coefficient = float((source_spec or {}).get("fit_coefficient", 0.0) or 0.0)
+        physical_coefficient = float((source_spec or {}).get("coefficient", 0.0) or 0.0)
+        for entry_index, entry_payload in ((source_spec or {}).get("entries") or {}).items():
+            t_value = float((entry_payload or {}).get("adj_t", float("nan")))
+            delta_value = float((entry_payload or {}).get("delta_value", float("nan")))
+            support_label = SUPPORT_UNSUPPORTED
+            proton_weight = 0.0
+            t_index = -1
+            if not math.isfinite(t_value):
+                nonfinite += 1
+            else:
+                t_index = _find_collection_bin(t_value, t_edges)
+                if t_index < 0:
+                    if t_edges and t_value > float(t_edges[-1]):
+                        overflow += 1
+                    else:
+                        underflow += 1
+                elif t_index >= len(t_edges) - 1:
+                    overflow += 1
+            delta_index = _find_collection_bin(delta_value, delta_edges)
+            if 0 <= t_index < len(t_edges) - 1 and 0 <= delta_index < len(cell_fits):
+                fit = (cell_fits[delta_index] or [])[t_index] if t_index < len(cell_fits[delta_index] or []) else None
+                shape = center_shapes[delta_index] if delta_index < len(center_shapes) else None
+                timing_value = ((entry_payload or {}).get("timing_values") or {}).get(timing_branch)
+                support_label = str((fit or {}).get("support_label", SUPPORT_UNSUPPORTED))
+                if fit and shape and timing_value is not None and bool((fit or {}).get("valid", False)):
+                    proton_weight = _evaluate_event_proton_probability(
+                        float(timing_value), shape, fit, denominator_floor
+                    )
+            proton_weight = max(0.0, min(1.0, float(proton_weight)))
+            cleaned_factor = 1.0 - proton_weight
+            signature = _make_prepared_event_signature(source_name, entry_index)
+            rf_accept = bool(rf_accept_by_signature.get(signature, True))
+            lookup[signature] = {
+                "source_label": str(source_name), "source_entry_index": int(entry_index),
+                "delta_index": int(delta_index), "t_index": int(t_index),
+                "t_low": float(t_edges[t_index]) if 0 <= t_index < len(t_edges) - 1 else None,
+                "t_high": float(t_edges[t_index + 1]) if 0 <= t_index < len(t_edges) - 1 else None,
+                "support_label": support_label, "proton_weight": proton_weight,
+                "cleaned_factor": cleaned_factor, "rf_accept": rf_accept,
+                "final_cleaned_factor": cleaned_factor if rf_accept else 0.0,
+            }
+            if bool((entry_payload or {}).get("nommcuts", False)):
+                if (delta_index, t_index) in closure_by_cell:
+                    weighted_probability = fit_coefficient * proton_weight
+                    cell = closure_by_cell[(delta_index, t_index)]
+                    cell["summed_event_proton_probability"] += weighted_probability
+                    cell["event_count"] += 1
+                    closure_by_delta[delta_index]["summed_event_proton_probability"] += weighted_probability
+                    closure_by_delta[delta_index]["event_count"] += 1
+                    closure_by_t[t_index]["summed_event_proton_probability"] += weighted_probability
+                    closure_by_t[t_index]["event_count"] += 1
+                aero_edges = (config.get("aerogel_validation") or {}).get("slice_edges") or ()
+                aero_index = _find_collection_bin(float((entry_payload or {}).get("aero_value", float("nan"))), aero_edges)
+                validation_rows.append({
+                    "t_index": int(t_index), "aero_index": int(aero_index),
+                    "physical_weight": physical_coefficient, "proton_weight": proton_weight,
+                    "adj_mm": float((entry_payload or {}).get("adj_mm", float("nan"))),
+                })
+    for collection in (closure_by_cell, closure_by_delta, closure_by_t):
+        for row in collection.values():
+            fitted = float(row.get("fitted_proton_yield", 0.0) or 0.0)
+            if fitted > 0.0:
+                row["closure_ratio"] = float(row["summed_event_proton_probability"] / fitted)
+    diagnostics = cleaning_result.setdefault("diagnostics", {})
+    diagnostics["event_weight_source"] = "setting_wide_immutable_prepared_lookup"
+    diagnostics["event_weight_closure_by_cell"] = _json_ready_value(list(closure_by_cell.values()))
+    diagnostics["event_weight_closure_by_delta"] = _json_ready_value(list(closure_by_delta.values()))
+    diagnostics["event_weight_closure_by_t"] = _json_ready_value(list(closure_by_t.values()))
+    diagnostics["event_weight_closure_by_delta_t"] = _json_ready_value(list(closure_by_cell.values()))
+    diagnostics["event_probability_sum_by_delta_t"] = _json_ready_value([
+        [float(closure_by_cell[(delta_index, t_index)]["summed_event_proton_probability"]) for t_index in range(len(slices or []))]
+        for delta_index, slices in enumerate(cell_fits)
+    ])
+    diagnostics["event_probability_count_by_delta_t"] = _json_ready_value([
+        [int(closure_by_cell[(delta_index, t_index)]["event_count"]) for t_index in range(len(slices or []))]
+        for delta_index, slices in enumerate(cell_fits)
+    ])
+    diagnostics["t_lookup_boundary_counts"] = {"underflow": underflow, "overflow": overflow, "nonfinite": nonfinite}
+    diagnostics["aerogel_validation"] = _json_ready_value(
+        _build_t_aerogel_validation(cleaning_result, source_bundle, validation_rows, config)
+    )
+    diagnostics["prepared_event_lookup_count"] = int(len(lookup))
+    return lookup
+
+
 def _build_prepared_event_weight_lookup(cleaning_result, source_bundle):
     if not isinstance(cleaning_result, dict):
         return {}
@@ -4395,6 +4702,143 @@ def _build_signed_pid_histograms(
     }
 
 
+def _build_signed_timing_t_histograms(source_bundle, config, t_edges, timing_branch):
+    """Build the production timing histograms with canonical t as the cell axis."""
+    t_edges = [float(edge) for edge in (t_edges if t_edges is not None else [])]
+    if len(t_edges) < 2 or not np.all(np.isfinite(t_edges)) or np.any(np.diff(t_edges) <= 0.0):
+        raise ValueError("timing-t cleaning requires finite, strictly increasing canonical t edges")
+    time_min, time_max = [float(value) for value in (config.get("ctime_hist_range") or (-2.0, 2.0))]
+    n_time_bins = int(config.get("ctime_hist_bins", 131) or 131)
+    delta_min, delta_max = [float(value) for value in (config.get("delta_hist_range") or (-10.0, 20.0))]
+    delta_bins = int(config.get("delta_bins", 10) or 10)
+    phi_token = str((source_bundle or {}).get("phi_setting") or "setting").lower()
+    eps_token = str((source_bundle or {}).get("epsset") or "eps").lower()
+    prefix = "H_proton_cleaning_t_{}_{}_{}".format(phi_token, eps_token, timing_branch)
+    t_axis = array("d", t_edges)
+
+    h_global_timing = ROOT.TH1D(
+        "{}_global".format(prefix), "Global {};{} [ns];Signed yield".format(timing_branch, timing_branch),
+        n_time_bins, time_min, time_max,
+    )
+    h_global_timing.SetDirectory(0)
+    h_global_timing.Sumw2()
+    h_global_timing_vs_t = ROOT.TH2D(
+        "{}_vs_t".format(prefix), "Global {} versus canonical -t;-t;{} [ns];Signed yield".format(timing_branch, timing_branch),
+        len(t_edges) - 1, t_axis, n_time_bins, time_min, time_max,
+    )
+    h_global_timing_vs_t.SetDirectory(0)
+    h_global_timing_vs_t.Sumw2()
+    h_delta_timing = ROOT.TH2D(
+        "{}_vs_delta".format(prefix), "{} versus SHMS delta;SHMS delta;{} [ns];Signed yield".format(timing_branch, timing_branch),
+        delta_bins, delta_min, delta_max, n_time_bins, time_min, time_max,
+    )
+    h_delta_timing.SetDirectory(0)
+    h_delta_timing.Sumw2()
+
+    global_t_slices = []
+    delta_t_cells = []
+    delta_all_t_hists = []
+    for t_index in range(len(t_edges) - 1):
+        hist = ROOT.TH1D(
+            "{}_global_t_{}".format(prefix, t_index),
+            "Global canonical t slice {};{} [ns];Signed yield".format(t_index + 1, timing_branch),
+            n_time_bins, time_min, time_max,
+        )
+        hist.SetDirectory(0)
+        hist.Sumw2()
+        global_t_slices.append(hist)
+    for delta_index in range(delta_bins):
+        all_t_hist = ROOT.TH1D(
+            "{}_delta_{}_all_t".format(prefix, delta_index),
+            "Delta {} all t;{} [ns];Signed yield".format(delta_index + 1, timing_branch),
+            n_time_bins, time_min, time_max,
+        )
+        all_t_hist.SetDirectory(0)
+        all_t_hist.Sumw2()
+        delta_all_t_hists.append(all_t_hist)
+        cells = []
+        for t_index in range(len(t_edges) - 1):
+            hist = ROOT.TH1D(
+                "{}_delta_{}_t_{}".format(prefix, delta_index, t_index),
+                "Timing delta {} canonical t {};{} [ns];Signed yield".format(
+                    delta_index + 1, t_index + 1, timing_branch
+                ),
+                n_time_bins, time_min, time_max,
+            )
+            hist.SetDirectory(0)
+            hist.Sumw2()
+            cells.append(hist)
+        delta_t_cells.append(cells)
+
+    delta_edges = np.linspace(delta_min, delta_max, delta_bins + 1)
+    global_prompt_support = [0 for _ in range(len(t_edges) - 1)]
+    cell_prompt_support = [[0 for _ in range(len(t_edges) - 1)] for _ in range(delta_bins)]
+    source_stats = {}
+    for source_name, source_spec in _get_prepared_sources(source_bundle).items():
+        fit_coefficient = float((source_spec or {}).get("fit_coefficient", 0.0) or 0.0)
+        stats = {
+            "tree_name": (source_spec or {}).get("tree_name"),
+            "timing_branch": str(timing_branch),
+            "entries_passing_selection": 0,
+            "entries_missing_timing_branch": 0,
+            "entries_outside_timing_range": 0,
+            "entries_outside_t_range": 0,
+            "entries_outside_delta_range": 0,
+            "entries_used": 0,
+        }
+        source_stats[str(source_name)] = stats
+        if fit_coefficient == 0.0:
+            continue
+        for entry_payload in ((source_spec or {}).get("entries") or {}).values():
+            if not bool((entry_payload or {}).get("nommcuts", False)):
+                continue
+            stats["entries_passing_selection"] += 1
+            timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(timing_branch))
+            if timing_value is None:
+                stats["entries_missing_timing_branch"] += 1
+                continue
+            timing_value = float(timing_value)
+            if not (time_min <= timing_value <= time_max):
+                stats["entries_outside_timing_range"] += 1
+                continue
+            t_index = _find_collection_bin(float((entry_payload or {}).get("adj_t", float("nan"))), t_edges)
+            if not (0 <= t_index < len(global_t_slices)):
+                stats["entries_outside_t_range"] += 1
+                continue
+            delta_index = _find_collection_bin(
+                float((entry_payload or {}).get("delta_value", float("nan"))), delta_edges
+            )
+            if not (0 <= delta_index < delta_bins):
+                stats["entries_outside_delta_range"] += 1
+                continue
+            stats["entries_used"] += 1
+            h_global_timing.Fill(timing_value, fit_coefficient)
+            h_global_timing_vs_t.Fill(float(entry_payload["adj_t"]), timing_value, fit_coefficient)
+            h_delta_timing.Fill(float(entry_payload["delta_value"]), timing_value, fit_coefficient)
+            global_t_slices[t_index].Fill(timing_value, fit_coefficient)
+            delta_all_t_hists[delta_index].Fill(timing_value, fit_coefficient)
+            delta_t_cells[delta_index][t_index].Fill(timing_value, fit_coefficient)
+            if bool((source_spec or {}).get("is_prompt_source", False)):
+                global_prompt_support[t_index] += 1
+                cell_prompt_support[delta_index][t_index] += 1
+    return {
+        "H_global_timing": h_global_timing,
+        "H_global_timing_vs_t": h_global_timing_vs_t,
+        "H_delta_timing": h_delta_timing,
+        "global_t_slices": global_t_slices,
+        "delta_all_t_hists": delta_all_t_hists,
+        "delta_t_cells": delta_t_cells,
+        "global_prompt_support": global_prompt_support,
+        "cell_prompt_support": cell_prompt_support,
+        "delta_edges": [float(edge) for edge in delta_edges],
+        "t_edges": t_edges,
+        "source_stats": source_stats,
+        "time_hist_range": (time_min, time_max),
+        "time_hist_bins": n_time_bins,
+        "timing_branch": str(timing_branch),
+    }
+
+
 def _resolve_probe_time_histogram_bins(source_bundle, probe_kind, display_range):
     if str(probe_kind) == "rf":
         display_min, display_max = [float(value) for value in display_range]
@@ -4410,6 +4854,253 @@ def _prepared_selection_has_entries(source_bundle, selection_key):
     for _, _, _, _ in _iter_prepared_records(source_bundle, selection_key=selection_key):
         return True
     return False
+
+
+def _build_timing_t_event_weight_result(
+    result,
+    inp_dict,
+    phi_setting,
+    source_bundle,
+    config,
+):
+    """Build the non-legacy delta x canonical-t production model."""
+    configured_t_edges = inp_dict.get("t_bins")
+    t_edges = np.asarray(configured_t_edges if configured_t_edges is not None else [], dtype=float)
+    canonical = dict(inp_dict.get("canonical_t_binning") or {})
+    t_cfg = dict(config.get("t_binning") or {})
+    tolerance = float(t_cfg.get("edge_tolerance", 1.0e-9))
+    canonical_source = canonical.get("t_edges")
+    canonical_edges = np.asarray(canonical_source if canonical_source is not None else [], dtype=float)
+    if (
+        t_edges.size < 2
+        or canonical_edges.size != t_edges.size
+        or not np.allclose(t_edges, canonical_edges, rtol=0.0, atol=tolerance)
+    ):
+        result["fallback_reason"] = "canonical t edges unavailable or inconsistent"
+        if bool(config.get("strict_mode", False)):
+            raise RuntimeError(result["fallback_reason"])
+        return result
+
+    timing_config = deepcopy(config)
+    timing_config["slice_fit"] = dict(config.get("t_cell_fit") or config.get("slice_fit") or {})
+    timing_config["support_thresholds"] = dict(
+        config.get("t_support_thresholds") or config.get("support_thresholds") or {}
+    )
+    available_branches = list((source_bundle or {}).get("available_timing_branches") or [])
+    candidates = [PROTON_CLEANING_EXACT_TIMING_BRANCH]
+    if bool(config.get("allow_rf_probe", True)):
+        candidates = [
+            branch for branch in _resolve_rf_branch_candidates(source_bundle, config)
+            if branch in available_branches
+        ] + candidates
+    candidates = list(dict.fromkeys(branch for branch in candidates if branch in available_branches))
+    if not candidates:
+        result["fallback_reason"] = "no configured timing branch available in prepared trees"
+        return result
+
+    selected = None
+    for branch in candidates:
+        payload = _build_signed_timing_t_histograms(source_bundle, timing_config, t_edges, branch)
+        shape = _fit_global_timing_shape(
+            payload["H_global_timing"],
+            timing_config,
+            "F_proton_cleaning_t_global_{}_{}".format(phi_setting, branch),
+            proton_peak_is_lower=(branch != PROTON_CLEANING_EXACT_TIMING_BRANCH),
+            display_range=payload["time_hist_range"],
+            fit_mode="local_peak_rescue",
+        )
+        score = (
+            int(bool(shape.get("valid", False))),
+            float(shape.get("proton_component_significance", 0.0) or 0.0),
+            -float(shape.get("poisson_deviance_per_entry", float("inf")) or float("inf")),
+        )
+        if selected is None or score > selected[0]:
+            selected = (score, branch, payload, shape)
+    _, timing_branch, timing_payload, stable_global_shape = selected
+
+    global_t_shapes = []
+    for t_index, hist in enumerate(timing_payload["global_t_slices"]):
+        global_t_shapes.append(
+            _fit_global_timing_shape(
+                hist,
+                timing_config,
+                "F_proton_cleaning_t_global_{}_{}_{}".format(phi_setting, timing_branch, t_index),
+                proton_peak_is_lower=(timing_branch != PROTON_CLEANING_EXACT_TIMING_BRANCH),
+                display_range=timing_payload["time_hist_range"],
+                fit_mode="local_peak_rescue",
+            )
+        )
+
+    delta_center_shapes = []
+    center_sources = []
+    for delta_index, hist in enumerate(timing_payload["delta_all_t_hists"]):
+        shape = _fit_global_timing_shape(
+            hist,
+            timing_config,
+            "F_proton_cleaning_t_delta_all_{}_{}".format(phi_setting, delta_index),
+            proton_peak_is_lower=(timing_branch != PROTON_CLEANING_EXACT_TIMING_BRANCH),
+            display_range=timing_payload["time_hist_range"],
+            fit_mode="local_peak_rescue",
+        )
+        source = "delta_all_t_fit" if bool(shape.get("valid", False)) else "invalid_timing_center"
+        if not bool(shape.get("valid", False)):
+            supported_hist = _clone_hist(hist, "{}_supported".format(hist.GetName()), reset=True)
+            for t_index, cell_hist in enumerate(timing_payload["delta_t_cells"][delta_index]):
+                if t_index < len(global_t_shapes) and bool(global_t_shapes[t_index].get("valid", False)):
+                    supported_hist.Add(cell_hist)
+            supported_shape = _fit_global_timing_shape(
+                supported_hist,
+                timing_config,
+                "F_proton_cleaning_t_delta_supported_{}_{}".format(phi_setting, delta_index),
+                proton_peak_is_lower=(timing_branch != PROTON_CLEANING_EXACT_TIMING_BRANCH),
+                display_range=timing_payload["time_hist_range"],
+                fit_mode="local_peak_rescue",
+            )
+            if bool(supported_shape.get("valid", False)):
+                shape, source = supported_shape, "delta_supported_t_fit"
+        delta_center_shapes.append(shape)
+        center_sources.append(source)
+    for delta_index, shape in enumerate(delta_center_shapes):
+        if bool(shape.get("valid", False)):
+            continue
+        neighbours = [
+            delta_center_shapes[index]
+            for index in (delta_index - 1, delta_index + 1)
+            if 0 <= index < len(delta_center_shapes)
+            and bool(delta_center_shapes[index].get("valid", False))
+        ]
+        if neighbours:
+            delta_center_shapes[delta_index] = deepcopy(neighbours[0])
+            center_sources[delta_index] = "neighbor_delta_interpolation"
+        elif bool(stable_global_shape.get("valid", False)):
+            delta_center_shapes[delta_index] = deepcopy(stable_global_shape)
+            center_sources[delta_index] = "stable_global_center_fallback"
+
+    delta_t_cell_fits = []
+    support_by_delta_t = []
+    support_by_delta = []
+    for delta_index, cell_hists in enumerate(timing_payload["delta_t_cells"]):
+        delta_fits = []
+        delta_labels = []
+        center_shape = delta_center_shapes[delta_index]
+        for t_index, hist in enumerate(cell_hists):
+            timing_constraint = {
+                "valid": bool(center_shape.get("valid", False)),
+                "timing_center_model_valid": bool(center_shape.get("valid", False)),
+                "timing_center_source": center_sources[delta_index],
+                "selected_timing_center_source": center_sources[delta_index],
+                "predicted_kaon_mean": center_shape.get("kaon_mean"),
+                "predicted_proton_mean": center_shape.get("proton_mean"),
+                "wrapped_predicted_proton_mean": center_shape.get("proton_mean"),
+                "kaon_sigma": center_shape.get("kaon_sigma"),
+                "proton_sigma": center_shape.get("proton_sigma"),
+            }
+            fit = _fit_delta_timing_slice(
+                hist,
+                center_shape,
+                timing_config,
+                "F_proton_cleaning_delta_{}_t_{}".format(delta_index, t_index),
+                use_deviance_per_entry_validation=True,
+                support_entries=(timing_payload["cell_prompt_support"][delta_index][t_index]),
+                timing_constraint=timing_constraint,
+            )
+            fit["delta_index"] = int(delta_index)
+            fit["t_index"] = int(t_index)
+            fit["t_low"] = float(t_edges[t_index])
+            fit["t_high"] = float(t_edges[t_index + 1])
+            fit["timing_center_source"] = center_sources[delta_index]
+            # The legacy fitter already records raw/applied yields when a weak
+            # component is zeroed.  Make the values explicit for consumers.
+            fit.setdefault("raw_proton_yield", float(fit.get("proton_yield", 0.0) or 0.0))
+            fit.setdefault("applied_proton_yield", float(fit.get("proton_yield", 0.0) or 0.0))
+            label = SUPPORT_SUPPORTED if bool(fit.get("valid", False)) else SUPPORT_UNSUPPORTED
+            fit["support_label"] = label
+            delta_fits.append(fit)
+            delta_labels.append(label)
+        delta_t_cell_fits.append(delta_fits)
+        support_by_delta_t.append(delta_labels)
+        support_by_delta.append(
+            SUPPORT_SUPPORTED if any(label == SUPPORT_SUPPORTED for label in delta_labels) else SUPPORT_UNSUPPORTED
+        )
+
+    result.update(
+        {
+            "accepted": any(label == SUPPORT_SUPPORTED for labels in support_by_delta_t for label in labels),
+            "implementation": PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED,
+            "settings": timing_config,
+            "selected_timing_branch": str(timing_branch),
+            "t_edges": [float(edge) for edge in t_edges],
+            "delta_edges": list(timing_payload["delta_edges"]),
+            "support_by_delta": support_by_delta,
+            "support_by_delta_t": support_by_delta_t,
+            "delta_t_cell_fits": delta_t_cell_fits,
+            "delta_timing_center_shapes": delta_center_shapes,
+            "global_timing_t_shapes": global_t_shapes,
+            "H_global_timing": timing_payload["H_global_timing"],
+            "H_global_timing_vs_t": timing_payload["H_global_timing_vs_t"],
+            "H_global_timing_t_slices": timing_payload["global_t_slices"],
+            "H_delta_timing": timing_payload["H_delta_timing"],
+            "H_delta_timing_t_cells": timing_payload["delta_t_cells"],
+        }
+    )
+    result["diagnostics"].update(
+        {
+            "implementation": PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED,
+            "timing_branch": timing_branch,
+            "canonical_t_binning": _json_ready_value(canonical),
+            "source_stats": _json_ready_value(timing_payload["source_stats"]),
+            "timing_center_source_by_delta": center_sources,
+            "supported_delta_t_cells": int(
+                sum(label == SUPPORT_SUPPORTED for labels in support_by_delta_t for label in labels)
+            ),
+        }
+    )
+    if not result["accepted"]:
+        result["fallback_reason"] = "no supported delta-t cells for proton cleaning"
+        return result
+
+    rf_policy = resolve_proton_contamination_cleaning_rf_policy(
+        inp_dict=inp_dict, phi_setting=phi_setting
+    )
+    apply_rf = (
+        rf_policy == "epsset_default_after_cleaning"
+        and bool(config.get("apply_only_low_epsilon_rf", True))
+        and normalize_epsset(inp_dict.get("EPSSET")) == "low"
+    )
+    result["diagnostics"]["rf_policy"] = rf_policy
+    result["diagnostics"]["rf_applied"] = bool(apply_rf)
+    result["diagnostics"]["rf_signature_fields"] = list(config.get("rf_signature_fields") or [])
+    result["diagnostics"]["signature_round_digits"] = int(
+        config.get("signature_round_digits", 9) or 9
+    )
+    if apply_rf:
+        rf_sources = (source_bundle or {}).get("rf_sources") or {}
+        missing_rf = [
+            name
+            for name in ("prompt", "rand", "dummy_prompt", "dummy_rand")
+            if rf_sources.get(name, {}).get("tree") is None
+        ]
+        if missing_rf:
+            reason = "missing explicit RF reference trees: {}".format(", ".join(missing_rf))
+            result["fallback_reason"] = reason
+            if bool(config.get("strict_mode", False)) and not bool(config.get("allow_missing_rf_reference", False)):
+                raise RuntimeError(reason)
+            return result
+        lookup, lookup_counts = _build_rf_membership_lookup(
+            {key: value.get("tree") for key, value in rf_sources.items()},
+            config.get("rf_signature_fields") or (),
+            int(config.get("signature_round_digits", 9) or 9),
+        )
+        result["_rf_signature_lookup"] = lookup
+        result["diagnostics"]["rf_lookup_counts"] = lookup_counts
+        result["diagnostics"]["rf_source"] = "existing_RF_skim_tree_membership"
+    else:
+        result["diagnostics"]["rf_lookup_counts"] = {}
+        result["diagnostics"]["rf_source"] = "not_applied"
+    result["_prepared_event_weight_lookup"] = _build_t_prepared_event_weight_lookup(
+        result, source_bundle, config
+    )
+    return result
 
 
 def build_kaon_proton_cleaning_result(
@@ -4477,12 +5168,32 @@ def build_kaon_proton_cleaning_result(
             "fit_sample_uses_prompt_relative_fit_coefficients": True,
             "fit_sample_requires_nommcuts": True,
             "fit_sample_requires_hgcer_hole_rejection": True,
+            "cross_stage_t_consistency": list(
+                (source_bundle or {}).get("cross_stage_t_consistency") or []
+            ),
         },
         "fallback_reason": "",
     }
     if method == PROTON_CONTAMINATION_CLEANING_METHOD_DISABLED or not enabled:
         result["fallback_reason"] = "proton cleaning disabled"
         return result
+    if method == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT:
+        implementation = str(
+            config.get("implementation")
+            or PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED
+        ).strip()
+        # The retained global default identifies the legacy method.  Selecting
+        # the new method without an override intentionally resolves to its
+        # own implementation rather than claiming C-macro parity.
+        if implementation == PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT:
+            implementation = PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED
+        if implementation != PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED:
+            raise ValueError(
+                "Unsupported timing-t proton-cleaning implementation '{}'".format(implementation)
+            )
+        return _build_timing_t_event_weight_result(
+            result, inpDict, phi_setting, source_bundle, config
+        )
     if method != PROTON_CONTAMINATION_CLEANING_METHOD_CTIME_AERO_EVENT_WEIGHT:
         raise ValueError("Unsupported proton-cleaning method '{}'".format(method))
     implementation = str(
@@ -5676,8 +6387,15 @@ def apply_kaon_proton_cleaning_to_targets(
         return {"accepted": False, "reason": cleaning_result.get("fallback_reason") or "cleaning result rejected"}
 
     config = cleaning_result.get("settings") or {}
+    method_is_t_binned = str(cleaning_result.get("method") or "") == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT
     aero_edges = [float(edge) for edge in (cleaning_result.get("aero_edges") or config.get("aero_slice_edges") or (0.0, 3.0, 6.0, 10.0, 15.0, 25.0))]
+    t_edges = [float(edge) for edge in (cleaning_result.get("t_edges") or [])]
     delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
+    secondary_edges = t_edges if method_is_t_binned else aero_edges
+    secondary_label = "canonical -t [GeV^{2}]" if method_is_t_binned else "P_aero NPE"
+    secondary_name = "t" if method_is_t_binned else "aero"
+    if len(delta_edges) < 2 or len(secondary_edges) < 2:
+        return {"accepted": False, "reason": "missing production bin edges"}
     timing_branch = str(cleaning_result.get("selected_timing_branch") or "CTime_ROC1")
     denominator_floor = float(((config.get("weighting") or {}).get("denominator_floor", 1.0e-12)))
     raw_targets = _clone_target_map(target_templates, "_proton_clean_raw")
@@ -5697,19 +6415,27 @@ def apply_kaon_proton_cleaning_to_targets(
     h_weight_norm_delta = _clone_hist(h_weight_sum_delta, "H_proton_weight_norm_delta", reset=True)
     h_weight_avg_delta = _clone_hist(h_weight_sum_delta, "H_proton_weight_avg_delta", reset=True)
 
-    h_weight_sum_delta_aero = ROOT.TH2D(
-        "H_proton_weight_sum_delta_aero",
-        "Average proton weight vs #delta and aero;SHMS #delta [%];P_aero NPE",
+    h_weight_sum_delta_secondary = ROOT.TH2D(
+        "H_proton_weight_sum_delta_{}".format(secondary_name),
+        "Average proton weight vs #delta and {};SHMS #delta [%];{}".format(secondary_name, secondary_label),
         len(delta_edges) - 1,
         float(delta_edges[0]),
         float(delta_edges[-1]),
-        len(aero_edges) - 1,
-        array("d", aero_edges),
+        len(secondary_edges) - 1,
+        array("d", secondary_edges),
     )
-    h_weight_sum_delta_aero.SetDirectory(0)
-    h_weight_sum_delta_aero.Sumw2()
-    h_weight_norm_delta_aero = _clone_hist(h_weight_sum_delta_aero, "H_proton_weight_norm_delta_aero", reset=True)
-    h_weight_avg_delta_aero = _clone_hist(h_weight_sum_delta_aero, "H_proton_weight_avg_delta_aero", reset=True)
+    h_weight_sum_delta_secondary.SetDirectory(0)
+    h_weight_sum_delta_secondary.Sumw2()
+    h_weight_norm_delta_secondary = _clone_hist(
+        h_weight_sum_delta_secondary,
+        "H_proton_weight_norm_delta_{}".format(secondary_name),
+        reset=True,
+    )
+    h_weight_avg_delta_secondary = _clone_hist(
+        h_weight_sum_delta_secondary,
+        "H_proton_weight_avg_delta_{}".format(secondary_name),
+        reset=True,
+    )
 
     h_mm_raw = raw_targets.get("h_mm_nosub")
     h_mm_proton = proton_targets.get("h_mm_nosub")
@@ -5726,6 +6452,17 @@ def apply_kaon_proton_cleaning_to_targets(
     rf_counts = {"accepted": 0, "rejected": 0}
     support_counts = {SUPPORT_SUPPORTED: 0, SUPPORT_MARGINAL: 0, SUPPORT_UNSUPPORTED: 0}
     prepared_sources = _get_prepared_sources(source_bundle)
+    diagnostics_payload = cleaning_result.setdefault("diagnostics", {})
+    cross_stage_rows = list(diagnostics_payload.get("cross_stage_t_consistency") or [])
+    cross_stage_by_signature = {
+        str(row.get("event_signature")): row
+        for row in cross_stage_rows
+        if isinstance(row, dict) and row.get("event_signature")
+    }
+    cross_stage_tolerance = float(
+        ((config.get("t_binning") or {}).get("cross_stage_t_tolerance", 1.0e-10))
+    )
+    strict_cross_stage = bool(config.get("strict_mode", False))
 
     for source_name, source_spec in (source_bundle.get("sources") or {}).items():
         tree = source_spec.get("tree")
@@ -5767,6 +6504,22 @@ def apply_kaon_proton_cleaning_to_targets(
                     timing_value = 0.0
             if not (allcuts or nommcuts or noholecuts):
                 continue
+            signature = _make_prepared_event_signature(source_name, entry_index)
+            cross_stage_row = cross_stage_by_signature.get(signature)
+            if cross_stage_row is not None:
+                downstream_t = float(shifted_t_getter(evt))
+                prepass_t = float(cross_stage_row.get("prepass_t"))
+                prepared_t = float(cross_stage_row.get("prepared_proton_cleaning_adj_t"))
+                max_difference = max(
+                    abs(prepass_t - prepared_t),
+                    abs(prepass_t - downstream_t),
+                    abs(prepared_t - downstream_t),
+                )
+                cross_stage_row["downstream_t"] = downstream_t
+                cross_stage_row["maximum_absolute_difference"] = max_difference
+                cross_stage_row["consistent"] = bool(max_difference <= cross_stage_tolerance)
+                if strict_cross_stage and not cross_stage_row["consistent"]:
+                    raise RuntimeError("cross-stage shifted-t mismatch for {}".format(signature))
             frozen_payload = get_kaon_proton_cleaning_event_payload(
                 cleaning_result,
                 source_name,
@@ -5774,7 +6527,9 @@ def apply_kaon_proton_cleaning_to_targets(
                 strict=True,
             )
             delta_index = int(frozen_payload.get("delta_index", -1) or -1)
-            aero_index = int(frozen_payload.get("aero_index", -1) or -1)
+            secondary_index = int(
+                frozen_payload.get("t_index" if method_is_t_binned else "aero_index", -1) or -1
+            )
             support_label = str(
                 frozen_payload.get("support_label", SUPPORT_UNSUPPORTED)
                 or SUPPORT_UNSUPPORTED
@@ -5849,21 +6604,22 @@ def apply_kaon_proton_cleaning_to_targets(
                 abs_norm = abs(float(coefficient))
                 h_weight_sum_delta.Fill(delta_value, abs_norm * proton_weight)
                 h_weight_norm_delta.Fill(delta_value, abs_norm)
-                if 0 <= aero_index < (len(aero_edges) - 1):
-                    h_weight_sum_delta_aero.Fill(delta_value, aero_value, abs_norm * proton_weight)
-                    h_weight_norm_delta_aero.Fill(delta_value, aero_value, abs_norm)
+                secondary_value = adj_t if method_is_t_binned else aero_value
+                if 0 <= secondary_index < (len(secondary_edges) - 1):
+                    h_weight_sum_delta_secondary.Fill(delta_value, secondary_value, abs_norm * proton_weight)
+                    h_weight_norm_delta_secondary.Fill(delta_value, secondary_value, abs_norm)
 
     for bin_index in range(1, h_weight_avg_delta.GetNbinsX() + 1):
         denominator = float(h_weight_norm_delta.GetBinContent(bin_index))
         numerator = float(h_weight_sum_delta.GetBinContent(bin_index))
         if denominator > 0.0:
             h_weight_avg_delta.SetBinContent(bin_index, numerator / denominator)
-    for x_bin in range(1, h_weight_avg_delta_aero.GetNbinsX() + 1):
-        for y_bin in range(1, h_weight_avg_delta_aero.GetNbinsY() + 1):
-            denominator = float(h_weight_norm_delta_aero.GetBinContent(x_bin, y_bin))
-            numerator = float(h_weight_sum_delta_aero.GetBinContent(x_bin, y_bin))
+    for x_bin in range(1, h_weight_avg_delta_secondary.GetNbinsX() + 1):
+        for y_bin in range(1, h_weight_avg_delta_secondary.GetNbinsY() + 1):
+            denominator = float(h_weight_norm_delta_secondary.GetBinContent(x_bin, y_bin))
+            numerator = float(h_weight_sum_delta_secondary.GetBinContent(x_bin, y_bin))
             if denominator > 0.0:
-                h_weight_avg_delta_aero.SetBinContent(x_bin, y_bin, numerator / denominator)
+                h_weight_avg_delta_secondary.SetBinContent(x_bin, y_bin, numerator / denominator)
 
     h_proton_fraction_vs_mm = _clone_hist(h_mm_cleaned, "H_proton_fraction_vs_MM", reset=True) if h_mm_cleaned is not None else None
     if h_proton_fraction_vs_mm is not None and h_mm_raw is not None and h_mm_proton is not None:
@@ -5887,7 +6643,7 @@ def apply_kaon_proton_cleaning_to_targets(
         "H_MM_after_proton_cleaning_final_rf": h_mm_cleaned_final_rf,
         "H_proton_fraction_vs_MM": h_proton_fraction_vs_mm,
         "H_proton_weight_vs_delta": h_weight_avg_delta,
-        "H_proton_weight_vs_delta_aero": h_weight_avg_delta_aero,
+        "H_proton_weight_vs_delta_{}".format(secondary_name): h_weight_avg_delta_secondary,
         "rf_counts": rf_counts,
         "support_counts": support_counts,
         "diagnostics": {
@@ -5918,6 +6674,19 @@ def apply_kaon_proton_cleaning_to_targets(
             ),
             "selected_timing_branch": str(timing_branch),
         },
+    }
+    diagnostics_payload["cross_stage_t_consistency"] = _json_ready_value(cross_stage_rows)
+    diagnostics_payload["cross_stage_t_consistency_summary"] = {
+        "sample_count": int(len(cross_stage_rows)),
+        "completed_downstream_count": int(
+            sum(row.get("downstream_t") is not None for row in cross_stage_rows)
+        ),
+        "maximum_absolute_difference": max(
+            (float(row.get("maximum_absolute_difference", 0.0) or 0.0) for row in cross_stage_rows),
+            default=0.0,
+        ),
+        "tolerance": cross_stage_tolerance,
+        "all_consistent": all(bool(row.get("consistent", False)) for row in cross_stage_rows),
     }
     cleaning_result["application"] = application
     return application
@@ -7054,6 +7823,7 @@ def _print_proton_aerogel_diagnostics_page(output_pdf, cleaning_result, prefix):
 def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, prefix):
     application = cleaning_result.get("application") or {}
     diagnostics = cleaning_result.get("diagnostics") or {}
+    method_is_t_binned = str(cleaning_result.get("method") or "") == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT
     delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
     if len(delta_edges) < 2:
         delta_edges = np.linspace(
@@ -7061,7 +7831,11 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
             float(PROTON_CLEANING_EXACT_DELTA_RANGE[1]),
             int(PROTON_CLEANING_EXACT_DELTA_BINS) + 1,
         ).tolist()
-    aero_edges = [float(edge) for edge in (cleaning_result.get("aero_edges") or PROTON_CLEANING_EXACT_AERO_EDGES)]
+    secondary_edges = [float(edge) for edge in (
+        cleaning_result.get("t_edges") if method_is_t_binned else cleaning_result.get("aero_edges")
+    ) or (PROTON_CLEANING_EXACT_AERO_EDGES if not method_is_t_binned else [0.0, 1.0])]
+    secondary_label = "canonical -t [GeV^{2}]" if method_is_t_binned else "P_aero_npeSum"
+    secondary_key = "H_proton_weight_vs_delta_t" if method_is_t_binned else "H_proton_weight_vs_delta_aero"
     page_id = abs(id(cleaning_result))
     n_delta_bins = max(len(delta_edges) - 1, 1)
     support_by_delta = [str(label) for label in (cleaning_result.get("support_by_delta") or [])]
@@ -7131,22 +7905,24 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
     h_applied_delta.SetTitle("Mean applied event-level proton weight;SHMS #delta [%];#LTw_{p}^{event}#GT")
 
     h_applied_map = _clone_hist(
-        application.get("H_proton_weight_vs_delta_aero"),
+        application.get(secondary_key),
         "H_proton_cleaning_summary_applied_weight_map_{}".format(page_id),
         reset=False,
     )
     if h_applied_map is None:
         h_applied_map = ROOT.TH2D(
             "H_proton_cleaning_summary_applied_weight_map_empty_{}".format(page_id),
-            "Mean applied proton probability;SHMS #delta [%];P_aero_npeSum;#LTw_{p}^{event}#GT",
+            "Mean applied proton probability;SHMS #delta [%];{};#LTw_{{p}}^{{event}}#GT".format(secondary_label),
             n_delta_bins,
             array("d", delta_edges),
-            max(len(aero_edges) - 1, 1),
-            array("d", aero_edges if len(aero_edges) >= 2 else [0.0, 25.0]),
+            max(len(secondary_edges) - 1, 1),
+            array("d", secondary_edges if len(secondary_edges) >= 2 else [0.0, 1.0]),
         )
         h_applied_map.SetDirectory(0)
         h_applied_map.Sumw2()
-    h_applied_map.SetTitle("Mean applied proton probability;SHMS #delta [%];P_aero_npeSum;#LTw_{p}^{event}#GT")
+    h_applied_map.SetTitle(
+        "Mean applied proton probability;SHMS #delta [%];{};#LTw_{{p}}^{{event}}#GT".format(secondary_label)
+    )
 
     h_mm_before = application.get("H_MM_before_proton_cleaning")
     h_mm_proton = application.get("H_MM_estimated_proton")
@@ -7684,6 +8460,106 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     canvas.Print(output_pdf)
 
 
+def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
+    """Append provenance and observational t x aerogel pages for timing-t."""
+    if str(cleaning_result.get("method") or "") != PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT:
+        return
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    canonical = diagnostics.get("canonical_t_binning") or {}
+    page_id = abs(id(cleaning_result))
+    canvas = TCanvas(
+        "C_timing_t_canonical_provenance_{}".format(page_id),
+        "{} canonical t provenance".format(prefix), 1200, 800,
+    )
+    provenance = TPaveText(0.05, 0.06, 0.95, 0.94, "NDC")
+    provenance.SetBorderSize(1)
+    provenance.SetFillStyle(0)
+    provenance.SetTextAlign(12)
+    provenance.SetTextSize(0.026)
+    provenance.AddText("Canonical-t production provenance")
+    for label, value in (
+        ("canonical source", canonical.get("source")),
+        ("interval file", canonical.get("interval_file")),
+        ("metadata file", canonical.get("metadata_file")),
+        ("schema version", canonical.get("schema_version")),
+        ("source epsilon", canonical.get("source_epsilon")),
+        ("consumer epsilon", canonical.get("consumer_epsilon")),
+        ("pre-particle-subtraction", canonical.get("source_stage")),
+        ("requested / actual t bins", "{} / {}".format(canonical.get("requested_num_t_bins"), canonical.get("actual_num_t_bins"))),
+        ("support metric", canonical.get("support_metric")),
+        ("raw counts", canonical.get("raw_event_count_by_t_bin")),
+        ("signed weighted yields", canonical.get("signed_weighted_yield_by_t_bin")),
+        ("absolute support", canonical.get("absolute_weighted_support_by_t_bin")),
+        ("validation status", canonical.get("validation_status")),
+        ("rejection reasons", canonical.get("validation_rejection_reasons")),
+        ("t edges", canonical.get("t_edges")),
+    ):
+        provenance.AddText("{}: {}".format(label, value))
+    provenance.Draw()
+    canvas.Print(output_pdf)
+
+    rows = list(diagnostics.get("cross_stage_t_consistency") or [])
+    canvas = TCanvas(
+        "C_timing_t_cross_stage_{}".format(page_id),
+        "{} cross-stage shifted-t consistency".format(prefix), 1100, 750,
+    )
+    h_difference = TH1D(
+        "H_timing_t_cross_stage_difference_{}".format(page_id),
+        "Cross-stage shifted-t maximum difference;sample index;max |#Delta t|",
+        max(len(rows), 1), 0.0, float(max(len(rows), 1)),
+    )
+    h_difference.SetDirectory(0)
+    for index, row in enumerate(rows, start=1):
+        h_difference.SetBinContent(index, float(row.get("maximum_absolute_difference", 0.0) or 0.0))
+    h_difference.Draw("hist")
+    consistency = diagnostics.get("cross_stage_t_consistency_summary") or {}
+    text = TPaveText(0.50, 0.70, 0.90, 0.90, "NDC")
+    text.SetBorderSize(1)
+    text.SetFillStyle(0)
+    text.AddText("prepass / proton / downstream")
+    text.AddText("samples: {}".format(consistency.get("sample_count", len(rows))))
+    text.AddText("completed downstream: {}".format(consistency.get("completed_downstream_count", 0)))
+    text.AddText("max difference: {}".format(consistency.get("maximum_absolute_difference", 0.0)))
+    text.AddText("tolerance: {}".format(consistency.get("tolerance", "n/a")))
+    text.Draw()
+    canvas.Print(output_pdf)
+
+    aero = diagnostics.get("aerogel_validation") or {}
+    t_edges = list(aero.get("t_edges") or [])
+    aero_edges = list(aero.get("aero_edges") or [])
+    if len(t_edges) < 2 or len(aero_edges) < 2:
+        return
+    for metric_key, metric_label in (
+        ("event_count_by_t_aero", "Event count"),
+        ("average_proton_probability_by_t_aero", "Average proton probability"),
+        ("proton_probability_sum_by_t_aero", "Signed proton-probability sum"),
+        ("low_mm_removed_fraction_by_t_aero", "Low-MM removal fraction"),
+        ("lambda_removed_fraction_by_t_aero", "Lambda-window removal fraction"),
+    ):
+        matrix = aero.get(metric_key) or []
+        canvas = TCanvas(
+            "C_timing_t_aero_{}_{}".format(metric_key, page_id),
+            "{} t x aerogel {}".format(prefix, metric_label), 1100, 800,
+        )
+        hist = TH2D(
+            "H_timing_t_aero_{}_{}".format(metric_key, page_id),
+            "Aerogel secondary validation only - {};-t [GeV^{{2}}];P_aero NPE".format(metric_label),
+            len(t_edges) - 1, array("d", t_edges), len(aero_edges) - 1, array("d", aero_edges),
+        )
+        hist.SetDirectory(0)
+        for t_index, row in enumerate(matrix):
+            for aero_index, value in enumerate(row or []):
+                if t_index < hist.GetNbinsX() and aero_index < hist.GetNbinsY():
+                    hist.SetBinContent(t_index + 1, aero_index + 1, float(value))
+        hist.Draw("colz text")
+        label = TPaveText(0.12, 0.91, 0.88, 0.98, "NDC")
+        label.SetBorderSize(1)
+        label.SetFillStyle(0)
+        label.AddText("Aerogel secondary validation only - Not used in production timing-t event weights")
+        label.Draw()
+        canvas.Print(output_pdf)
+
+
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):
     if not isinstance(cleaning_result, dict):
         return
@@ -7699,6 +8575,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, prefix)
     _print_low_aero_offset_diagnostics_page(output_pdf, cleaning_result, prefix)
     _print_proton_aerogel_diagnostics_page(output_pdf, cleaning_result, prefix)
+    _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix)
 
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:
@@ -7855,16 +8732,22 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     gPad.Modified()
     gPad.Update()
     canvas.cd(4)
-    if application.get("H_proton_weight_vs_delta_aero") is not None:
-        application["H_proton_weight_vs_delta_aero"].Draw("colz")
-        drawn_objects.extend(
-            _draw_aerogel_reference_line(
-                application["H_proton_weight_vs_delta_aero"],
-                float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
-                "y",
+    applied_map_key = (
+        "H_proton_weight_vs_delta_t"
+        if str(cleaning_result.get("method") or "") == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT
+        else "H_proton_weight_vs_delta_aero"
+    )
+    if application.get(applied_map_key) is not None:
+        application[applied_map_key].Draw("colz")
+        if applied_map_key.endswith("_aero"):
+            drawn_objects.extend(
+                _draw_aerogel_reference_line(
+                    application[applied_map_key],
+                    float(diagnostics.get("aerogel_reference_npe", 5.0) or 5.0),
+                    "y",
+                )
             )
-        )
-        drawn_objects.append(application["H_proton_weight_vs_delta_aero"])
+        drawn_objects.append(application[applied_map_key])
     else:
         first_delta_pid = next((hist for hist in (cleaning_result.get("H_delta_pid") or []) if hist is not None), None)
         if first_delta_pid is not None:
