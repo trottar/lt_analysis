@@ -238,7 +238,6 @@ def _build_hist_support_snapshot(histogram, support_entries, minimum_required_en
         "fit_range_absolute_integral": float(fit_range_absolute_integral),
     }
 
-
 def _hist_abs_integral(hist):
     if hist is None:
         return 0.0
@@ -1219,6 +1218,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
     available_timing_branches = set()
     cross_stage_rows = []
     prepass_samples = dict((source_bundle or {}).get("canonical_t_prepass_samples") or {})
+    cross_stage_sampling = dict((source_bundle or {}).get("canonical_t_prepass_sampling") or {})
     cross_stage_tolerance = float(
         ((proton_cleaning_config or {}).get("t_binning") or {}).get(
             "cross_stage_t_tolerance", 1.0e-10
@@ -1385,6 +1385,7 @@ def prepare_kaon_proton_cleaning_source_bundle(
     prepared_bundle["prepared_source_stats"] = prepared_source_stats
     prepared_bundle["available_timing_branches"] = sorted(available_timing_branches)
     prepared_bundle["cross_stage_t_consistency"] = cross_stage_rows
+    prepared_bundle["cross_stage_t_sampling"] = cross_stage_sampling
     return prepared_bundle
 
 
@@ -4203,7 +4204,7 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                     apply_low_epsilon_rf_after_proton_cleaning(cleaning_result, source_name, evt)
                 )
     for delta_index, slices in enumerate(cell_fits):
-        closure_by_delta[delta_index] = {"delta_index": delta_index, "fitted_proton_yield": 0.0, "summed_event_proton_probability": 0.0, "event_count": 0}
+        closure_by_delta[delta_index] = {"delta_index": delta_index, "applied_proton_yield": 0.0, "summed_event_proton_probability": 0.0, "event_count": 0}
         for t_index, fit in enumerate(slices or []):
             applied = float((fit or {}).get("applied_proton_yield", (fit or {}).get("proton_yield", 0.0)) or 0.0)
             closure_by_cell[(delta_index, t_index)] = {
@@ -4211,12 +4212,16 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                 "t_index": t_index,
                 "t_low": float(t_edges[t_index]),
                 "t_high": float(t_edges[t_index + 1]),
-                "fitted_proton_yield": applied,
+                "raw_proton_yield": float((fit or {}).get("raw_proton_yield", 0.0) or 0.0),
+                "fitted_proton_yield": float((fit or {}).get("fitted_proton_yield", (fit or {}).get("proton_yield", 0.0)) or 0.0),
+                "applied_proton_yield": applied,
+                "applied_cell_enabled": bool((fit or {}).get("applied_cell_enabled", False)),
+                "applied_zero_reason": (fit or {}).get("applied_zero_reason"),
                 "summed_event_proton_probability": 0.0,
                 "event_count": 0,
             }
-            closure_by_delta[delta_index]["fitted_proton_yield"] += applied
-            closure_by_t.setdefault(t_index, {"t_index": t_index, "t_low": float(t_edges[t_index]), "t_high": float(t_edges[t_index + 1]), "fitted_proton_yield": 0.0, "summed_event_proton_probability": 0.0, "event_count": 0})["fitted_proton_yield"] += applied
+            closure_by_delta[delta_index]["applied_proton_yield"] += applied
+            closure_by_t.setdefault(t_index, {"t_index": t_index, "t_low": float(t_edges[t_index]), "t_high": float(t_edges[t_index + 1]), "applied_proton_yield": 0.0, "summed_event_proton_probability": 0.0, "event_count": 0})["applied_proton_yield"] += applied
     for source_name, source_spec in prepared_sources.items():
         fit_coefficient = float((source_spec or {}).get("fit_coefficient", 0.0) or 0.0)
         physical_coefficient = float((source_spec or {}).get("coefficient", 0.0) or 0.0)
@@ -4226,17 +4231,22 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
             support_label = SUPPORT_UNSUPPORTED
             proton_weight = 0.0
             t_index = -1
+            lookup_zero_reason = None
             if not math.isfinite(t_value):
                 nonfinite += 1
+                lookup_zero_reason = "nonfinite_t"
             else:
                 t_index = _find_collection_bin(t_value, t_edges)
                 if t_index < 0:
                     if t_edges and t_value > float(t_edges[-1]):
                         overflow += 1
+                        lookup_zero_reason = "t_overflow"
                     else:
                         underflow += 1
+                        lookup_zero_reason = "t_underflow"
                 elif t_index >= len(t_edges) - 1:
                     overflow += 1
+                    lookup_zero_reason = "t_overflow"
             delta_index = _find_collection_bin(delta_value, delta_edges)
             if 0 <= t_index < len(t_edges) - 1 and 0 <= delta_index < len(cell_fits):
                 fit = (cell_fits[delta_index] or [])[t_index] if t_index < len(cell_fits[delta_index] or []) else None
@@ -4248,9 +4258,16 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                     and str((fit or {}).get("support_label", SUPPORT_UNSUPPORTED))
                     in (SUPPORT_SUPPORTED, SUPPORT_MARGINAL)
                     and bool((fit or {}).get("valid", False))
+                    and bool((fit or {}).get("applied_cell_enabled", False))
                 ):
                     proton_weight = _evaluate_event_proton_probability(
                         float(timing_value), shape, fit, denominator_floor
+                    )
+                elif timing_value is None:
+                    lookup_zero_reason = "missing_timing_value"
+                elif fit:
+                    lookup_zero_reason = str(
+                        (fit or {}).get("applied_zero_reason") or "unsupported_delta"
                     )
             proton_weight = max(0.0, min(1.0, float(proton_weight)))
             cleaned_factor = 1.0 - proton_weight
@@ -4262,6 +4279,7 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                 "t_low": float(t_edges[t_index]) if 0 <= t_index < len(t_edges) - 1 else None,
                 "t_high": float(t_edges[t_index + 1]) if 0 <= t_index < len(t_edges) - 1 else None,
                 "support_label": support_label, "proton_weight": proton_weight,
+                "event_lookup_zero_reason": lookup_zero_reason,
                 "cleaned_factor": cleaned_factor, "rf_accept": rf_accept,
                 "final_cleaned_factor": cleaned_factor if rf_accept else 0.0,
             }
@@ -4284,15 +4302,28 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                 })
     for collection in (closure_by_cell, closure_by_delta, closure_by_t):
         for row in collection.values():
-            fitted = float(row.get("fitted_proton_yield", 0.0) or 0.0)
-            if fitted > 0.0:
-                row["closure_ratio"] = float(row["summed_event_proton_probability"] / fitted)
+            applied = float(row.get("applied_proton_yield", 0.0) or 0.0)
+            if applied > 0.0:
+                row["closure_ratio"] = float(row["summed_event_proton_probability"] / applied)
+                row["closure_status"] = "evaluated_applied_yield"
+            else:
+                row["closure_ratio"] = None
+                row["closure_status"] = "not_applicable_zero_applied_yield"
+    for delta_index, slices in enumerate(cell_fits):
+        for t_index, fit in enumerate(slices or []):
+            closure = closure_by_cell.get((delta_index, t_index))
+            if closure is not None:
+                fit["closure_status"] = closure.get("closure_status")
+                fit["closure_ratio"] = closure.get("closure_ratio")
     diagnostics = cleaning_result.setdefault("diagnostics", {})
     diagnostics["event_weight_source"] = "setting_wide_immutable_prepared_lookup"
     diagnostics["event_weight_closure_by_cell"] = _json_ready_value(list(closure_by_cell.values()))
     diagnostics["event_weight_closure_by_delta"] = _json_ready_value(list(closure_by_delta.values()))
     diagnostics["event_weight_closure_by_t"] = _json_ready_value(list(closure_by_t.values()))
     diagnostics["event_weight_closure_by_delta_t"] = _json_ready_value(list(closure_by_cell.values()))
+    diagnostics["applied_timing_t_cell_map"] = _json_ready_value(
+        [dict(fit or {}) for slices in cell_fits for fit in (slices or [])]
+    )
     diagnostics["event_probability_sum_by_delta_t"] = _json_ready_value([
         [float(closure_by_cell[(delta_index, t_index)]["summed_event_proton_probability"]) for t_index in range(len(slices or []))]
         for delta_index, slices in enumerate(cell_fits)
@@ -4946,6 +4977,49 @@ def _prepared_selection_has_entries(source_bundle, selection_key):
     return False
 
 
+def _timing_center_payload(shape, source, **provenance):
+    """Create a timing-center-only object safe to reuse across delta bins."""
+    shape = dict(shape or {})
+    fields = ("kaon_mean", "proton_mean", "kaon_sigma", "proton_sigma")
+    resolved = {}
+    valid = bool(shape.get("valid", False))
+    for field in fields:
+        try:
+            value = float(shape[field])
+        except (KeyError, TypeError, ValueError):
+            valid = False
+            break
+        if not math.isfinite(value):
+            valid = False
+            break
+        resolved[field] = value
+    payload = {
+        "valid": bool(valid),
+        "timing_center_model_valid": bool(valid),
+        "timing_center_source": str(source),
+        "fit_min": shape.get("fit_min"),
+        "fit_max": shape.get("fit_max"),
+        "kaon_mean": resolved.get("kaon_mean"),
+        "proton_mean": resolved.get("proton_mean"),
+        "kaon_sigma": resolved.get("kaon_sigma"),
+        "proton_sigma": resolved.get("proton_sigma"),
+        "source_parameters": dict(provenance.pop("source_parameters", resolved)),
+        "resolved_parameters": dict(resolved),
+        "lower_neighbor_index": provenance.pop("lower_neighbor_index", None),
+        "upper_neighbor_index": provenance.pop("upper_neighbor_index", None),
+        "nearest_neighbor_index": provenance.pop("nearest_neighbor_index", None),
+        "target_delta_center": provenance.pop("target_delta_center", None),
+        "lower_delta_center": provenance.pop("lower_delta_center", None),
+        "upper_delta_center": provenance.pop("upper_delta_center", None),
+        "interpolation_fraction": provenance.pop("interpolation_fraction", None),
+        "rejection_reasons": list(provenance.pop("rejection_reasons", [])),
+    }
+    payload.update(provenance)
+    if not payload["valid"] and not payload["rejection_reasons"]:
+        payload["rejection_reasons"] = ["invalid_timing_center"]
+    return payload
+
+
 def _interpolate_delta_timing_center_shape(left_shape, right_shape, left_center, target_center, right_center):
     """Interpolate only timing locations and widths between valid delta fits."""
     if not (bool((left_shape or {}).get("valid", False)) and bool((right_shape or {}).get("valid", False))):
@@ -4958,7 +5032,7 @@ def _interpolate_delta_timing_center_shape(left_shape, right_shape, left_center,
     if right_center <= left_center:
         return None
     fraction = (target_center - left_center) / (right_center - left_center)
-    result = deepcopy(left_shape)
+    resolved = {}
     for field in ("kaon_mean", "proton_mean", "kaon_sigma", "proton_sigma"):
         try:
             left_value = float(left_shape[field])
@@ -4967,16 +5041,34 @@ def _interpolate_delta_timing_center_shape(left_shape, right_shape, left_center,
             return None
         if not (math.isfinite(left_value) and math.isfinite(right_value)):
             return None
-        result[field] = float(left_value + fraction * (right_value - left_value))
-    result["valid"] = True
-    result["timing_center_interpolation"] = {
-        "left_delta_center": left_center,
-        "target_delta_center": target_center,
-        "right_delta_center": right_center,
-        "fraction": fraction,
-        "interpolated_fields": ["kaon_mean", "proton_mean", "kaon_sigma", "proton_sigma"],
-    }
-    return result
+        resolved[field] = float(left_value + fraction * (right_value - left_value))
+    return _timing_center_payload(
+        {
+            "valid": True,
+            "fit_min": left_shape.get("fit_min"),
+            "fit_max": left_shape.get("fit_max"),
+            **resolved,
+        },
+        "neighbor_delta_interpolation",
+        lower_delta_center=left_center,
+        target_delta_center=target_center,
+        upper_delta_center=right_center,
+        interpolation_fraction=float(fraction),
+        source_parameters={
+            "lower": {field: left_shape.get(field) for field in resolved},
+            "upper": {field: right_shape.get(field) for field in resolved},
+        },
+    )
+
+
+def _nearest_delta_timing_center_shape(neighbor_shape, neighbor_index, neighbor_center, target_center):
+    return _timing_center_payload(
+        neighbor_shape,
+        "neighbor_delta_nearest_fallback",
+        nearest_neighbor_index=int(neighbor_index),
+        target_delta_center=float(target_center),
+        lower_delta_center=float(neighbor_center),
+    )
 
 
 def _classify_timing_t_support(valid_cells, coverage, modeled_yield, thresholds):
@@ -5042,6 +5134,291 @@ def _classify_timing_t_setting_support(delta_rows, thresholds):
     }
 
 
+def _apply_timing_t_cell_map(delta_t_cell_fits, support_by_delta, setting_support):
+    """Freeze fit/support decisions into the only cell map lookup may use."""
+    setting_label = str(setting_support.get("support_label", SUPPORT_UNSUPPORTED))
+    for delta_index, slices in enumerate(delta_t_cell_fits or []):
+        delta_label = str(
+            support_by_delta[delta_index]
+            if delta_index < len(support_by_delta)
+            else SUPPORT_UNSUPPORTED
+        )
+        for fit in slices or []:
+            raw_yield = float((fit or {}).get("raw_proton_yield", 0.0) or 0.0)
+            fitted_yield = float((fit or {}).get("proton_yield", 0.0) or 0.0)
+            fit_valid = bool((fit or {}).get("cell_fit_valid", (fit or {}).get("valid", False)))
+            component_detected = bool((fit or {}).get("proton_component_detected", False))
+            zero_reason = None
+            if not fit_valid:
+                zero_reason = "invalid_cell_fit"
+            elif not component_detected:
+                zero_reason = "weak_proton_component"
+            elif delta_label == SUPPORT_UNSUPPORTED:
+                zero_reason = "unsupported_delta"
+            elif setting_label == SUPPORT_UNSUPPORTED:
+                zero_reason = "setting_gate_rejected"
+            enabled = zero_reason is None
+            fit.update({
+                "raw_proton_yield": raw_yield,
+                "fitted_proton_yield": fitted_yield,
+                "delta_support_label": delta_label,
+                "setting_support_label": setting_label,
+                "applied_cell_enabled": bool(enabled),
+                "applied_proton_yield": fitted_yield if enabled else 0.0,
+                "applied_zero_reason": zero_reason,
+                "cell_fit_valid": fit_valid,
+                "proton_component_detected": component_detected,
+            })
+
+
+def _timing_t_candidate_selection_score(setting_support, global_shape, branch_preference):
+    """Comparable RF/CT ranking: support first, normalized fit metrics last."""
+    support_rank = SUPPORT_CLASS_TO_CODE.get(
+        str(setting_support.get("support_label", SUPPORT_UNSUPPORTED)), 0.0
+    )
+    significance = _finite_float_or_none(
+        (global_shape or {}).get("proton_component_significance")
+    )
+    deviance = _finite_float_or_none(
+        (global_shape or {}).get("poisson_deviance_per_entry")
+    )
+    return (
+        int(bool(setting_support.get("accepted", False))),
+        int(support_rank),
+        int(setting_support.get("supported_delta_bins", 0) or 0),
+        int(setting_support.get("marginal_delta_bins", 0) or 0),
+        int(setting_support.get("valid_t_cells", 0) or 0),
+        float(setting_support.get("coverage", 0.0) or 0.0),
+        int(bool((global_shape or {}).get("valid", False))),
+        float(significance if significance is not None else -1.0e300),
+        -float(deviance if deviance is not None else 1.0e300),
+        int(branch_preference),
+    )
+
+
+def _rank_timing_t_candidate_evaluations(candidate_evaluations):
+    """Return production-ranked candidates; scores are already axis-normalized."""
+    ranked = sorted(
+        list(candidate_evaluations or []),
+        key=lambda item: tuple(item.get("candidate_selection_score") or ()),
+        reverse=True,
+    )
+    return ranked
+
+
+def _evaluate_timing_t_candidate_production(
+    candidate,
+    timing_payload,
+    stable_global_shape,
+    t_edges,
+    phi_setting,
+):
+    """Evaluate one RF/CT candidate through the full delta x canonical-t model."""
+    selected_config = candidate["candidate_config"]
+    timing_branch = str(candidate["timing_branch"])
+    peak_is_lower = bool(candidate["proton_peak_is_lower"])
+    fit_range = candidate["fit_range"]
+    rejection_reasons = []
+    if not bool((stable_global_shape or {}).get("valid", False)):
+        rejection_reasons.append("global_timing_fit_invalid")
+        return {
+            "candidate": candidate,
+            "timing_payload": timing_payload,
+            "stable_global_shape": stable_global_shape,
+            "global_t_shapes": [],
+            "delta_timing_center_shapes": [],
+            "timing_center_source_by_delta": [],
+            "delta_t_cell_fits": [],
+            "support_by_delta": [],
+            "support_by_delta_t": [],
+            "delta_support": [],
+            "setting_support": {
+                "support_label": SUPPORT_UNSUPPORTED,
+                "accepted": False,
+                "valid_t_cells": 0,
+                "coverage": 0.0,
+                "supported_delta_bins": 0,
+                "marginal_delta_bins": 0,
+                "model_total": 0.0,
+            },
+            "rejection_reasons": rejection_reasons,
+        }
+
+    global_t_shapes = []
+    for t_index, hist in enumerate(timing_payload["global_t_slices"]):
+        global_t_shapes.append(
+            _fit_global_timing_shape(
+                hist,
+                selected_config,
+                "F_proton_cleaning_t_global_{}_{}_{}".format(phi_setting, timing_branch, t_index),
+                proton_peak_is_lower=peak_is_lower,
+                display_range=fit_range,
+                fit_mode="local_peak_rescue",
+            )
+        )
+
+    delta_center_shapes = []
+    center_sources = []
+    for delta_index, hist in enumerate(timing_payload["delta_all_t_hists"]):
+        raw_shape = _fit_global_timing_shape(
+            hist,
+            selected_config,
+            "F_proton_cleaning_t_delta_all_{}_{}".format(phi_setting, delta_index),
+            proton_peak_is_lower=peak_is_lower,
+            display_range=fit_range,
+            fit_mode="local_peak_rescue",
+        )
+        source = "delta_all_t_fit"
+        if not bool(raw_shape.get("valid", False)):
+            source = "invalid_timing_center"
+            supported_hist = _clone_hist(hist, "{}_supported".format(hist.GetName()), reset=True)
+            for t_index, cell_hist in enumerate(timing_payload["delta_t_cells"][delta_index]):
+                if t_index < len(global_t_shapes) and bool(global_t_shapes[t_index].get("valid", False)):
+                    supported_hist.Add(cell_hist)
+            supported_shape = _fit_global_timing_shape(
+                supported_hist,
+                selected_config,
+                "F_proton_cleaning_t_delta_supported_{}_{}".format(phi_setting, delta_index),
+                proton_peak_is_lower=peak_is_lower,
+                display_range=fit_range,
+                fit_mode="local_peak_rescue",
+            )
+            if bool(supported_shape.get("valid", False)):
+                raw_shape = supported_shape
+                source = "delta_supported_t_fit"
+        delta_center_shapes.append(_timing_center_payload(raw_shape, source))
+        center_sources.append(source)
+
+    direct_center_valid = [bool(shape.get("valid", False)) for shape in delta_center_shapes]
+    delta_centers = [
+        0.5 * (float(timing_payload["delta_edges"][index]) + float(timing_payload["delta_edges"][index + 1]))
+        for index in range(len(timing_payload["delta_edges"]) - 1)
+    ]
+    stable_center = _timing_center_payload(stable_global_shape, "stable_global_center_fallback")
+    for delta_index, center_shape in enumerate(delta_center_shapes):
+        if bool(center_shape.get("valid", False)):
+            continue
+        left_index = delta_index - 1
+        right_index = delta_index + 1
+        left_valid = 0 <= left_index < len(delta_center_shapes) and direct_center_valid[left_index]
+        right_valid = 0 <= right_index < len(delta_center_shapes) and direct_center_valid[right_index]
+        if left_valid and right_valid:
+            interpolated = _interpolate_delta_timing_center_shape(
+                delta_center_shapes[left_index], delta_center_shapes[right_index],
+                delta_centers[left_index], delta_centers[delta_index], delta_centers[right_index],
+            )
+            if interpolated is not None:
+                interpolated["lower_neighbor_index"] = int(left_index)
+                interpolated["upper_neighbor_index"] = int(right_index)
+                delta_center_shapes[delta_index] = interpolated
+                center_sources[delta_index] = "neighbor_delta_interpolation"
+                continue
+        if left_valid or right_valid:
+            neighbor_index = left_index if left_valid else right_index
+            delta_center_shapes[delta_index] = _nearest_delta_timing_center_shape(
+                delta_center_shapes[neighbor_index], neighbor_index,
+                delta_centers[neighbor_index], delta_centers[delta_index],
+            )
+            center_sources[delta_index] = "neighbor_delta_nearest_fallback"
+        elif bool(stable_center.get("valid", False)):
+            delta_center_shapes[delta_index] = _timing_center_payload(
+                stable_center, "stable_global_center_fallback",
+                target_delta_center=delta_centers[delta_index],
+            )
+            center_sources[delta_index] = "stable_global_center_fallback"
+        else:
+            delta_center_shapes[delta_index] = _timing_center_payload(
+                {}, "invalid_timing_center",
+                target_delta_center=delta_centers[delta_index],
+                rejection_reasons=["no_valid_timing_center_fallback"],
+            )
+            center_sources[delta_index] = "invalid_timing_center"
+
+    delta_t_cell_fits = []
+    support_by_delta_t = []
+    support_by_delta = []
+    delta_support_rows = []
+    support_thresholds = dict(selected_config.get("support_thresholds") or {})
+    maximum_deviance = float(
+        (selected_config.get("slice_fit") or {}).get("maximum_poisson_deviance_per_entry", float("inf"))
+    )
+    for delta_index, cell_hists in enumerate(timing_payload["delta_t_cells"]):
+        delta_fits = []
+        center_shape = delta_center_shapes[delta_index]
+        data_total = float(timing_payload["delta_all_t_hists"][delta_index].Integral())
+        fitted_data_total = model_total = proton_total = kaon_total = other_total = 0.0
+        valid_cells = 0
+        for t_index, hist in enumerate(cell_hists):
+            timing_constraint = {
+                "valid": bool(center_shape.get("valid", False)),
+                "timing_center_model_valid": bool(center_shape.get("valid", False)),
+                "timing_center_source": center_sources[delta_index],
+                "selected_timing_center_source": center_sources[delta_index],
+                "predicted_kaon_mean": center_shape.get("kaon_mean"),
+                "predicted_proton_mean": center_shape.get("proton_mean"),
+                "wrapped_predicted_proton_mean": center_shape.get("proton_mean"),
+                "kaon_sigma": center_shape.get("kaon_sigma"),
+                "proton_sigma": center_shape.get("proton_sigma"),
+            }
+            fit = _fit_delta_timing_slice(
+                hist, center_shape, selected_config,
+                "F_proton_cleaning_delta_{}_t_{}".format(delta_index, t_index),
+                use_deviance_per_entry_validation=True,
+                maximum_poisson_deviance_per_entry=maximum_deviance,
+                support_entries=timing_payload["cell_prompt_support"][delta_index][t_index],
+                timing_constraint=timing_constraint,
+            )
+            fit.update({
+                "delta_index": int(delta_index),
+                "t_index": int(t_index),
+                "t_low": float(t_edges[t_index]),
+                "t_high": float(t_edges[t_index + 1]),
+                "timing_center_source": center_sources[delta_index],
+                "cell_fit_valid": bool(fit.get("valid", False)),
+            })
+            delta_fits.append(fit)
+            if not bool(fit.get("valid", False)):
+                continue
+            valid_cells += 1
+            fitted_data_total += float(fit.get("data_yield", 0.0) or 0.0)
+            model_total += float(fit.get("model_yield", 0.0) or 0.0)
+            proton_total += float(fit.get("proton_yield", 0.0) or 0.0)
+            kaon_total += float(fit.get("kaon_yield", 0.0) or 0.0)
+            other_total += float(fit.get("other_yield", 0.0) or 0.0)
+        coverage = float(fitted_data_total / data_total) if data_total > 0.0 else 0.0
+        delta_label = _classify_timing_t_support(valid_cells, coverage, model_total, support_thresholds)
+        for fit in delta_fits:
+            fit["support_label"] = delta_label if bool(fit.get("cell_fit_valid", False)) else SUPPORT_UNSUPPORTED
+        delta_t_cell_fits.append(delta_fits)
+        support_by_delta_t.append([str(fit["support_label"]) for fit in delta_fits])
+        support_by_delta.append(delta_label)
+        delta_support_rows.append({
+            "delta_index": int(delta_index), "support_label": delta_label,
+            "valid_t_cells": int(valid_cells), "coverage": float(coverage),
+            "data_total": float(data_total), "fitted_data_total": float(fitted_data_total),
+            "model_total": float(model_total), "proton_total": float(proton_total),
+            "kaon_total": float(kaon_total), "other_total": float(other_total),
+            "timing_center_source": center_sources[delta_index],
+        })
+    setting_support = _classify_timing_t_setting_support(delta_support_rows, support_thresholds)
+    _apply_timing_t_cell_map(delta_t_cell_fits, support_by_delta, setting_support)
+    if not bool(setting_support.get("accepted", False)):
+        rejection_reasons.append("setting_support_gate_rejected")
+    return {
+        "candidate": candidate,
+        "timing_payload": timing_payload,
+        "stable_global_shape": stable_global_shape,
+        "global_t_shapes": global_t_shapes,
+        "delta_timing_center_shapes": delta_center_shapes,
+        "timing_center_source_by_delta": center_sources,
+        "delta_t_cell_fits": delta_t_cell_fits,
+        "support_by_delta": support_by_delta,
+        "support_by_delta_t": support_by_delta_t,
+        "delta_support": delta_support_rows,
+        "setting_support": setting_support,
+        "rejection_reasons": rejection_reasons,
+    }
+
 def _build_timing_t_event_weight_result(
     result,
     inp_dict,
@@ -5088,8 +5465,12 @@ def _build_timing_t_event_weight_result(
         result["fallback_reason"] = "no configured timing branch available in prepared trees"
         return result
 
-    selected = None
-    candidate_diagnostics = []
+    candidate_evaluations = []
+    preferred_branches = list(config.get("timing_t_branch_preference") or candidates)
+    branch_preference = {
+        str(branch): int(len(preferred_branches) - index)
+        for index, branch in enumerate(preferred_branches)
+    }
     for branch in candidates:
         candidate = resolve_timing_t_candidate_configuration(
             source_bundle,
@@ -5117,198 +5498,78 @@ def _build_timing_t_event_weight_result(
             display_range=candidate["fit_range"],
             fit_mode="local_peak_rescue",
         )
-        deviance_per_entry = float(shape.get("poisson_deviance_per_entry", float("inf")) or float("inf"))
-        significance = float(shape.get("proton_component_significance", 0.0) or 0.0)
-        if not math.isfinite(significance):
-            significance = 0.0
-        score = (
-            int(bool(shape.get("valid", False))),
-            significance,
-            -deviance_per_entry if math.isfinite(deviance_per_entry) else -1.0e300,
+        evaluation = _evaluate_timing_t_candidate_production(
+            candidate, payload, shape, t_edges, phi_setting
         )
-        candidate_diagnostics.append(
-            _json_ready_value(
-                {
-                    "timing_branch": candidate["timing_branch"],
-                    "probe_kind": candidate["probe_kind"],
-                    "display_range": candidate["display_range"],
-                    "fit_range": candidate["fit_range"],
-                    "histogram_bins": candidate["histogram_bins"],
-                    "proton_peak_is_lower": candidate["proton_peak_is_lower"],
-                    "range_source": candidate["range_source"],
-                    "range_diagnostics": candidate["range_diagnostics"],
-                    "score": list(score),
-                    "global_shape": shape,
-                }
+        evaluation["candidate_selection_score"] = _timing_t_candidate_selection_score(
+            evaluation["setting_support"], shape,
+            branch_preference.get(str(branch), int(-len(candidates))),
+        )
+        candidate_evaluations.append(evaluation)
+    ranked_evaluations = _rank_timing_t_candidate_evaluations(candidate_evaluations)
+    selected_evaluation = ranked_evaluations[0]
+    candidate_diagnostics = []
+    for rank, evaluation in enumerate(ranked_evaluations, start=1):
+        candidate = evaluation["candidate"]
+        shape = evaluation["stable_global_shape"]
+        setting_support = evaluation["setting_support"]
+        summary = {
+            "timing_branch": candidate["timing_branch"],
+            "probe_kind": candidate["probe_kind"],
+            "time_hist_range": list(candidate["display_range"]),
+            "display_range": candidate["display_range"],
+            "fit_range": candidate["fit_range"],
+            "time_hist_bins": candidate["histogram_bins"],
+            "histogram_bins": candidate["histogram_bins"],
+            "range_source": candidate["range_source"],
+            "range_diagnostics": candidate["range_diagnostics"],
+            "global_fit_valid": bool(shape.get("valid", False)),
+            "global_proton_significance": _finite_float_or_none(
+                shape.get("proton_component_significance")
+            ),
+            "poisson_deviance_per_entry": _finite_float_or_none(
+                shape.get("poisson_deviance_per_entry")
+            ),
+            "setting_support_label": setting_support.get("support_label"),
+            "setting_accepted": bool(setting_support.get("accepted", False)),
+            "supported_delta_count": int(setting_support.get("supported_delta_bins", 0) or 0),
+            "marginal_delta_count": int(setting_support.get("marginal_delta_bins", 0) or 0),
+            "unsupported_delta_count": int(max(0, len(evaluation["delta_support"]) - int(setting_support.get("supported_delta_bins", 0) or 0) - int(setting_support.get("marginal_delta_bins", 0) or 0))),
+            "valid_delta_t_cell_count": int(setting_support.get("valid_t_cells", 0) or 0),
+            "valid_coverage": float(setting_support.get("coverage", 0.0) or 0.0),
+            "total_modeled_yield": float(setting_support.get("model_total", 0.0) or 0.0),
+            "candidate_selection_score": list(evaluation["candidate_selection_score"]),
+            "candidate_selection_rank": int(rank),
+            "selected": bool(evaluation is selected_evaluation),
+            "rejection_reasons": list(evaluation["rejection_reasons"]),
+            "candidate_fit_metrics": {
+                "global_fit_valid": bool(shape.get("valid", False)),
+                "proton_significance": _finite_float_or_none(
+                    shape.get("proton_component_significance")
+                ),
+                "poisson_deviance_per_entry": _finite_float_or_none(
+                    shape.get("poisson_deviance_per_entry")
+                ),
+            },
+        }
+        if bool(evaluation is selected_evaluation):
+            summary["selection_reason"] = (
+                "highest production-support-first candidate_selection_score"
             )
-        )
-        if selected is None or score > selected[0]:
-            selected = (score, candidate, payload, shape)
-    _, selected_candidate, timing_payload, stable_global_shape = selected
-    timing_branch = str(selected_candidate["timing_branch"])
+        candidate_diagnostics.append(_json_ready_value(summary))
+    selected_candidate = selected_evaluation["candidate"]
+    timing_payload = selected_evaluation["timing_payload"]
+    stable_global_shape = selected_evaluation["stable_global_shape"]
     selected_config = selected_candidate["candidate_config"]
-
-    global_t_shapes = []
-    for t_index, hist in enumerate(timing_payload["global_t_slices"]):
-        global_t_shapes.append(
-            _fit_global_timing_shape(
-                hist,
-                selected_config,
-                "F_proton_cleaning_t_global_{}_{}_{}".format(phi_setting, timing_branch, t_index),
-                proton_peak_is_lower=bool(selected_candidate["proton_peak_is_lower"]),
-                display_range=selected_candidate["fit_range"],
-                fit_mode="local_peak_rescue",
-            )
-        )
-
-    delta_center_shapes = []
-    center_sources = []
-    for delta_index, hist in enumerate(timing_payload["delta_all_t_hists"]):
-        shape = _fit_global_timing_shape(
-            hist,
-            selected_config,
-            "F_proton_cleaning_t_delta_all_{}_{}".format(phi_setting, delta_index),
-            proton_peak_is_lower=bool(selected_candidate["proton_peak_is_lower"]),
-            display_range=selected_candidate["fit_range"],
-            fit_mode="local_peak_rescue",
-        )
-        source = "delta_all_t_fit" if bool(shape.get("valid", False)) else "invalid_timing_center"
-        if not bool(shape.get("valid", False)):
-            supported_hist = _clone_hist(hist, "{}_supported".format(hist.GetName()), reset=True)
-            for t_index, cell_hist in enumerate(timing_payload["delta_t_cells"][delta_index]):
-                if t_index < len(global_t_shapes) and bool(global_t_shapes[t_index].get("valid", False)):
-                    supported_hist.Add(cell_hist)
-            supported_shape = _fit_global_timing_shape(
-                supported_hist,
-                selected_config,
-                "F_proton_cleaning_t_delta_supported_{}_{}".format(phi_setting, delta_index),
-                proton_peak_is_lower=bool(selected_candidate["proton_peak_is_lower"]),
-                display_range=selected_candidate["fit_range"],
-                fit_mode="local_peak_rescue",
-            )
-            if bool(supported_shape.get("valid", False)):
-                shape, source = supported_shape, "delta_supported_t_fit"
-        delta_center_shapes.append(shape)
-        center_sources.append(source)
-    direct_center_valid = [bool(shape.get("valid", False)) for shape in delta_center_shapes]
-    delta_centers = [
-        0.5 * (float(timing_payload["delta_edges"][index]) + float(timing_payload["delta_edges"][index + 1]))
-        for index in range(len(timing_payload["delta_edges"]) - 1)
-    ]
-    for delta_index, shape in enumerate(delta_center_shapes):
-        if bool(shape.get("valid", False)):
-            continue
-        left_index = delta_index - 1
-        right_index = delta_index + 1
-        left_valid = 0 <= left_index < len(delta_center_shapes) and direct_center_valid[left_index]
-        right_valid = 0 <= right_index < len(delta_center_shapes) and direct_center_valid[right_index]
-        if left_valid and right_valid:
-            interpolated = _interpolate_delta_timing_center_shape(
-                delta_center_shapes[left_index],
-                delta_center_shapes[right_index],
-                delta_centers[left_index],
-                delta_centers[delta_index],
-                delta_centers[right_index],
-            )
-            if interpolated is not None:
-                delta_center_shapes[delta_index] = interpolated
-                center_sources[delta_index] = "neighbor_delta_interpolated"
-                continue
-        if left_valid or right_valid:
-            neighbour_index = left_index if left_valid else right_index
-            delta_center_shapes[delta_index] = deepcopy(delta_center_shapes[neighbour_index])
-            delta_center_shapes[delta_index]["timing_center_interpolation"] = {
-                "nearest_delta_center": delta_centers[neighbour_index],
-                "target_delta_center": delta_centers[delta_index],
-                "interpolated_fields": [],
-            }
-            center_sources[delta_index] = "neighbor_delta_nearest"
-        elif bool(stable_global_shape.get("valid", False)):
-            delta_center_shapes[delta_index] = deepcopy(stable_global_shape)
-            center_sources[delta_index] = "stable_global_center_fallback"
-
-    delta_t_cell_fits = []
-    support_by_delta_t = []
-    support_by_delta = []
-    delta_support_rows = []
-    support_thresholds = dict(selected_config.get("support_thresholds") or {})
-    for delta_index, cell_hists in enumerate(timing_payload["delta_t_cells"]):
-        delta_fits = []
-        center_shape = delta_center_shapes[delta_index]
-        data_total = float(timing_payload["delta_all_t_hists"][delta_index].Integral())
-        fitted_data_total = 0.0
-        model_total = 0.0
-        proton_total = 0.0
-        kaon_total = 0.0
-        other_total = 0.0
-        valid_cells = 0
-        for t_index, hist in enumerate(cell_hists):
-            timing_constraint = {
-                "valid": bool(center_shape.get("valid", False)),
-                "timing_center_model_valid": bool(center_shape.get("valid", False)),
-                "timing_center_source": center_sources[delta_index],
-                "selected_timing_center_source": center_sources[delta_index],
-                "predicted_kaon_mean": center_shape.get("kaon_mean"),
-                "predicted_proton_mean": center_shape.get("proton_mean"),
-                "wrapped_predicted_proton_mean": center_shape.get("proton_mean"),
-                "kaon_sigma": center_shape.get("kaon_sigma"),
-                "proton_sigma": center_shape.get("proton_sigma"),
-            }
-            fit = _fit_delta_timing_slice(
-                hist,
-                center_shape,
-                selected_config,
-                "F_proton_cleaning_delta_{}_t_{}".format(delta_index, t_index),
-                use_deviance_per_entry_validation=True,
-                support_entries=(timing_payload["cell_prompt_support"][delta_index][t_index]),
-                timing_constraint=timing_constraint,
-            )
-            fit["delta_index"] = int(delta_index)
-            fit["t_index"] = int(t_index)
-            fit["t_low"] = float(t_edges[t_index])
-            fit["t_high"] = float(t_edges[t_index + 1])
-            fit["timing_center_source"] = center_sources[delta_index]
-            # The legacy fitter already records raw/applied yields when a weak
-            # component is zeroed.  Make the values explicit for consumers.
-            fit.setdefault("raw_proton_yield", float(fit.get("proton_yield", 0.0) or 0.0))
-            fit.setdefault("applied_proton_yield", float(fit.get("proton_yield", 0.0) or 0.0))
-            fit["cell_fit_valid"] = bool(fit.get("valid", False))
-            delta_fits.append(fit)
-            if not bool(fit.get("valid", False)):
-                continue
-            valid_cells += 1
-            fitted_data_total += float(fit.get("data_yield", 0.0) or 0.0)
-            model_total += float(fit.get("model_yield", 0.0) or 0.0)
-            proton_total += float(fit.get("proton_yield", 0.0) or 0.0)
-            kaon_total += float(fit.get("kaon_yield", 0.0) or 0.0)
-            other_total += float(fit.get("other_yield", 0.0) or 0.0)
-        coverage = float(fitted_data_total / data_total) if data_total > 0.0 else 0.0
-        delta_label = _classify_timing_t_support(valid_cells, coverage, model_total, support_thresholds)
-        for fit in delta_fits:
-            fit["support_label"] = (
-                delta_label if bool(fit.get("cell_fit_valid", False)) and delta_label != SUPPORT_UNSUPPORTED
-                else SUPPORT_UNSUPPORTED
-            )
-        delta_t_cell_fits.append(delta_fits)
-        support_by_delta_t.append([str(fit["support_label"]) for fit in delta_fits])
-        support_by_delta.append(delta_label)
-        delta_support_rows.append(
-            {
-                "delta_index": int(delta_index),
-                "support_label": delta_label,
-                "valid_t_cells": int(valid_cells),
-                "coverage": float(coverage),
-                "data_total": float(data_total),
-                "fitted_data_total": float(fitted_data_total),
-                "model_total": float(model_total),
-                "proton_total": float(proton_total),
-                "kaon_total": float(kaon_total),
-                "other_total": float(other_total),
-                "timing_center_source": center_sources[delta_index],
-            }
-        )
-
-    setting_support = _classify_timing_t_setting_support(delta_support_rows, support_thresholds)
+    timing_branch = str(selected_candidate["timing_branch"])
+    global_t_shapes = selected_evaluation["global_t_shapes"]
+    delta_center_shapes = selected_evaluation["delta_timing_center_shapes"]
+    center_sources = selected_evaluation["timing_center_source_by_delta"]
+    delta_t_cell_fits = selected_evaluation["delta_t_cell_fits"]
+    support_by_delta = selected_evaluation["support_by_delta"]
+    support_by_delta_t = selected_evaluation["support_by_delta_t"]
+    delta_support_rows = selected_evaluation["delta_support"]
+    setting_support = selected_evaluation["setting_support"]
 
     result.update(
         {
@@ -5334,14 +5595,16 @@ def _build_timing_t_event_weight_result(
         {
             "implementation": PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_TIMING_T_BINNED,
             "timing_branch": timing_branch,
-            "selected_timing_candidate": _json_ready_value(
-                {
-                    key: value
-                    for key, value in selected_candidate.items()
-                    if key != "candidate_config"
-                }
+            "selected_timing_candidate": next(
+                row for row in candidate_diagnostics if bool(row.get("selected", False))
             ),
             "timing_candidate_diagnostics": candidate_diagnostics,
+            "candidate_selection_tuple": [
+                "setting_accepted", "setting_support_rank", "supported_delta_count",
+                "marginal_delta_count", "valid_delta_t_cell_count", "valid_coverage",
+                "global_fit_valid", "proton_significance", "negative_poisson_deviance_per_entry",
+                "configured_branch_preference",
+            ],
             "canonical_t_binning": _json_ready_value(canonical),
             "source_stats": _json_ready_value(timing_payload["source_stats"]),
             "timing_center_source_by_delta": center_sources,
@@ -5351,6 +5614,9 @@ def _build_timing_t_event_weight_result(
             "marginal_delta_bins": int(setting_support["marginal_delta_bins"]),
             "supported_delta_t_cells": int(
                 sum(label == SUPPORT_SUPPORTED for labels in support_by_delta_t for label in labels)
+            ),
+            "applied_timing_t_cell_map": _json_ready_value(
+                [dict(fit or {}) for slices in delta_t_cell_fits for fit in (slices or [])]
             ),
         }
     )
@@ -5469,6 +5735,9 @@ def build_kaon_proton_cleaning_result(
             "fit_sample_requires_hgcer_hole_rejection": True,
             "cross_stage_t_consistency": list(
                 (source_bundle or {}).get("cross_stage_t_consistency") or []
+            ),
+            "cross_stage_t_sampling": dict(
+                (source_bundle or {}).get("cross_stage_t_sampling") or {}
             ),
         },
         "fallback_reason": "",
@@ -6984,6 +7253,21 @@ def apply_kaon_proton_cleaning_to_targets(
     }
     diagnostics_payload["cross_stage_t_consistency"] = _json_ready_value(cross_stage_rows)
     diagnostics_payload["cross_stage_t_consistency_summary"] = {
+        "sampling_method": (diagnostics_payload.get("cross_stage_t_sampling") or {}).get(
+            "sampling_method", "implementation_consistency_sample"
+        ),
+        "sample_limit": (diagnostics_payload.get("cross_stage_t_sampling") or {}).get(
+            "sample_limit", len(cross_stage_rows)
+        ),
+        "source_entry_count": (diagnostics_payload.get("cross_stage_t_sampling") or {}).get(
+            "source_entry_count", {}
+        ),
+        "source_selected_entry_count": (diagnostics_payload.get("cross_stage_t_sampling") or {}).get(
+            "source_selected_entry_count", {}
+        ),
+        "sampled_entry_count": (diagnostics_payload.get("cross_stage_t_sampling") or {}).get(
+            "sampled_entry_count", len(cross_stage_rows)
+        ),
         "sample_count": int(len(cross_stage_rows)),
         "completed_downstream_count": int(
             sum(row.get("downstream_t") is not None for row in cross_stage_rows)
@@ -8143,6 +8427,7 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
     ) or (PROTON_CLEANING_EXACT_AERO_EDGES if not method_is_t_binned else [0.0, 1.0])]
     secondary_label = "canonical -t [GeV^{2}]" if method_is_t_binned else "P_aero_npeSum"
     secondary_key = "H_proton_weight_vs_delta_t" if method_is_t_binned else "H_proton_weight_vs_delta_aero"
+    closure_yield_label = "applied p yield" if method_is_t_binned else "fitted p yield"
     page_id = abs(id(cleaning_result))
     n_delta_bins = max(len(delta_edges) - 1, 1)
     support_by_delta = [str(label) for label in (cleaning_result.get("support_by_delta") or [])]
@@ -8726,7 +9011,7 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
         )
         y_errors = array("d", [0.0 for _ in closure_rows])
         graph = ROOT.TGraphErrors(len(closure_rows), x_values, y_values, x_errors, y_errors)
-        graph.SetTitle("Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{p}^{event} / fitted p yield")
+        graph.SetTitle("Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{{p}}^{{event}} / {}".format(closure_yield_label))
         graph.SetLineColor(kViolet + 1)
         graph.SetMarkerColor(kViolet + 1)
         graph.SetMarkerStyle(20)
@@ -8738,7 +9023,7 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     else:
         empty_axis = _make_delta_axis_hist(
             "H_proton_cleaning_event_weight_closure_empty_{}".format(page_id),
-            "Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{p}^{event} / fitted p yield",
+            "Event-weight closure by #delta;SHMS #delta [%];#Sigma w_{{p}}^{{event}} / {}".format(closure_yield_label),
             delta_edges,
         )
         empty_axis.SetMinimum(0.0)
@@ -8793,6 +9078,9 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         ("consumer epsilon", canonical.get("consumer_epsilon")),
         ("pre-particle-subtraction", canonical.get("source_stage")),
         ("requested / actual t bins", "{} / {}".format(canonical.get("requested_num_t_bins"), canonical.get("actual_num_t_bins"))),
+        ("requested / actual phi bins", "{} / {}".format(canonical.get("requested_num_phi_bins"), canonical.get("actual_num_phi_bins"))),
+        ("canonical pair ID", canonical.get("canonical_interval_pair_id")),
+        ("canonical pair hash", canonical.get("canonical_interval_pair_hash")),
         ("support metric", canonical.get("support_metric")),
         ("raw counts", canonical.get("raw_event_count_by_t_bin")),
         ("signed weighted yields", canonical.get("signed_weighted_yield_by_t_bin")),
@@ -8800,6 +9088,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         ("validation status", canonical.get("validation_status")),
         ("rejection reasons", canonical.get("validation_rejection_reasons")),
         ("t edges", canonical.get("t_edges")),
+        ("phi edges", canonical.get("phi_edges")),
     ):
         provenance.AddText("{}: {}".format(label, value))
     provenance.Draw()
@@ -8816,19 +9105,52 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     candidate_text.SetTextAlign(12)
     candidate_text.SetTextSize(0.025)
     candidate_text.AddText("Timing-t RF/CT candidates; selected={}".format(diagnostics.get("timing_branch")))
+    candidate_text.AddText("rank tuple: {}".format(diagnostics.get("candidate_selection_tuple")))
     for row in candidate_rows:
-        shape = row.get("global_shape") or {}
         candidate_text.AddText(
-            "{} ({}) range={} bins={} source={} valid={} significance={} dev/entry={}".format(
+            "{} ({}) range={} bins={} valid={} significance={} dev/entry={} support={} accepted={} rank={} selected={}".format(
                 row.get("timing_branch"), row.get("probe_kind"), row.get("display_range"),
-                row.get("histogram_bins"), row.get("range_source"), shape.get("valid"),
-                shape.get("proton_component_significance"), shape.get("poisson_deviance_per_entry"),
+                row.get("histogram_bins"), row.get("global_fit_valid"),
+                row.get("global_proton_significance"), row.get("poisson_deviance_per_entry"),
+                row.get("setting_support_label"), row.get("setting_accepted"),
+                row.get("candidate_selection_rank"), row.get("selected"),
             )
         )
+        candidate_text.AddText("  supported/marginal/valid={} / {} / {}; reasons={}".format(
+            row.get("supported_delta_count"), row.get("marginal_delta_count"),
+            row.get("valid_delta_t_cell_count"), row.get("rejection_reasons"),
+        ))
     setting_support = diagnostics.get("setting_support") or {}
     candidate_text.AddText("Setting support: {}".format(setting_support))
     candidate_text.Draw()
     canvas.Print(output_pdf)
+
+    cell_rows = list(diagnostics.get("applied_timing_t_cell_map") or [])
+    page_size = 22
+    for page_start in range(0, len(cell_rows), page_size):
+        canvas = TCanvas(
+            "C_timing_t_cell_state_{}_{}".format(page_id, page_start),
+            "{} timing-t applied cell state".format(prefix), 1400, 850,
+        )
+        cell_text = TPaveText(0.03, 0.04, 0.97, 0.96, "NDC")
+        cell_text.SetBorderSize(1)
+        cell_text.SetFillStyle(0)
+        cell_text.SetTextAlign(12)
+        cell_text.SetTextSize(0.020)
+        cell_text.AddText("Raw cell fit versus applied cell state (page {})".format(page_start // page_size + 1))
+        for row in cell_rows[page_start:page_start + page_size]:
+            cell_text.AddText(
+                "d={}/t={} valid={} detected={} raw={} fitted={} applied={} enabled={} zero={} delta={} setting={} center={} closure={}".format(
+                    row.get("delta_index"), row.get("t_index"), row.get("cell_fit_valid"),
+                    row.get("proton_component_detected"), row.get("raw_proton_yield"),
+                    row.get("fitted_proton_yield"), row.get("applied_proton_yield"),
+                    row.get("applied_cell_enabled"), row.get("applied_zero_reason"),
+                    row.get("delta_support_label"), row.get("setting_support_label"),
+                    row.get("timing_center_source"), row.get("closure_status"),
+                )
+            )
+        cell_text.Draw()
+        canvas.Print(output_pdf)
 
     rows = list(diagnostics.get("cross_stage_t_consistency") or [])
     canvas = TCanvas(
@@ -8849,6 +9171,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     text.SetBorderSize(1)
     text.SetFillStyle(0)
     text.AddText("prepass / proton / downstream")
+    text.AddText("sampling: {}".format(consistency.get("sampling_method", "implementation_consistency_sample")))
     text.AddText("samples: {}".format(consistency.get("sample_count", len(rows))))
     text.AddText("completed downstream: {}".format(consistency.get("completed_downstream_count", 0)))
     text.AddText("max difference: {}".format(consistency.get("maximum_absolute_difference", 0.0)))

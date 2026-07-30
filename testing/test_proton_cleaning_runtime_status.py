@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -16,7 +17,25 @@ try:
     import ROOT  # noqa: F401
     import proton_contamination_weights as proton_cleaning
 except ImportError:
-    proton_cleaning = None
+    # The focused helpers below do not need ROOT numerics.  A narrow import
+    # stub keeps their regression coverage available in non-PyROOT CI.
+    class _RootImportStub:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+    root_stub = types.ModuleType("ROOT")
+    for name in (
+        "TCanvas", "TLatex", "TLegend", "TLine", "TPaveText", "TH1D", "TH2D",
+        "TF1", "TGraphErrors",
+    ):
+        setattr(root_stub, name, _RootImportStub)
+    root_stub.gPad = types.SimpleNamespace()
+    root_stub.gStyle = types.SimpleNamespace()
+    for name in ("kBlack", "kBlue", "kGray", "kGreen", "kMagenta", "kOrange", "kRed", "kViolet"):
+        setattr(root_stub, name, 1)
+    with mock.patch.dict(sys.modules, {"ROOT": root_stub}):
+        sys.modules.pop("proton_contamination_weights", None)
+        import proton_contamination_weights as proton_cleaning
 
 
 class _FakeAxis:
@@ -82,7 +101,6 @@ class _FakeTF1:
         return 4
 
 
-@unittest.skipUnless(proton_cleaning is not None, "PyROOT proton-cleaning environment is required")
 class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
     def setUp(self):
         self.config = {
@@ -250,7 +268,7 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertFalse(gate["accepted"])
         self.assertEqual(gate["support_label"], proton_cleaning.SUPPORT_UNSUPPORTED)
 
-    def test_delta_center_interpolation_only_changes_shape_coordinates(self):
+    def test_delta_center_interpolation_is_a_pure_timing_center_payload(self):
         left = {
             "valid": True, "kaon_mean": -0.1, "proton_mean": 0.6,
             "kaon_sigma": 0.1, "proton_sigma": 0.2, "proton_yield": 9.0,
@@ -266,7 +284,71 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertAlmostEqual(interpolated["proton_mean"], 0.8)
         self.assertAlmostEqual(interpolated["kaon_sigma"], 0.2)
         self.assertAlmostEqual(interpolated["proton_sigma"], 0.3)
-        self.assertEqual(interpolated["proton_yield"], left["proton_yield"])
+        self.assertEqual(interpolated["timing_center_source"], "neighbor_delta_interpolation")
+        self.assertNotIn("proton_yield", interpolated)
+        self.assertNotIn("proton_amplitude", interpolated)
+
+    def test_nearest_timing_center_is_pure_and_has_provenance(self):
+        nearest = proton_cleaning._nearest_delta_timing_center_shape(
+            {
+                "valid": True, "fit_min": -2.0, "fit_max": 2.0,
+                "kaon_mean": -0.1, "proton_mean": 0.8,
+                "kaon_sigma": 0.2, "proton_sigma": 0.3,
+                "proton_yield": 25.0,
+            },
+            2, 0.25, 0.75,
+        )
+        self.assertEqual(nearest["timing_center_source"], "neighbor_delta_nearest_fallback")
+        self.assertEqual(nearest["nearest_neighbor_index"], 2)
+        self.assertNotIn("proton_yield", nearest)
+
+    def test_applied_cell_map_zeroes_unsupported_and_weak_cells(self):
+        cells = [[
+            {
+                "valid": True, "cell_fit_valid": True,
+                "proton_component_detected": True,
+                "raw_proton_yield": 9.0, "proton_yield": 7.0,
+            },
+            {
+                "valid": True, "cell_fit_valid": True,
+                "proton_component_detected": False,
+                "raw_proton_yield": 11.0, "proton_yield": 0.0,
+            },
+        ]]
+        proton_cleaning._apply_timing_t_cell_map(
+            cells, [proton_cleaning.SUPPORT_UNSUPPORTED],
+            {"support_label": proton_cleaning.SUPPORT_UNSUPPORTED, "accepted": False},
+        )
+        self.assertEqual(cells[0][0]["raw_proton_yield"], 9.0)
+        self.assertEqual(cells[0][0]["applied_proton_yield"], 0.0)
+        self.assertEqual(cells[0][0]["applied_zero_reason"], "unsupported_delta")
+        self.assertEqual(cells[0][1]["applied_zero_reason"], "weak_proton_component")
+
+    def test_candidate_score_prefers_production_support_over_global_fit(self):
+        rf_score = proton_cleaning._timing_t_candidate_selection_score(
+            {
+                "accepted": False, "support_label": proton_cleaning.SUPPORT_UNSUPPORTED,
+                "supported_delta_bins": 0, "marginal_delta_bins": 0,
+                "valid_t_cells": 1, "coverage": 0.2,
+            },
+            {"valid": True, "proton_component_significance": 20.0, "poisson_deviance_per_entry": 0.01},
+            2,
+        )
+        ct_score = proton_cleaning._timing_t_candidate_selection_score(
+            {
+                "accepted": True, "support_label": proton_cleaning.SUPPORT_MARGINAL,
+                "supported_delta_bins": 0, "marginal_delta_bins": 1,
+                "valid_t_cells": 2, "coverage": 0.2,
+            },
+            {"valid": True, "proton_component_significance": 2.0, "poisson_deviance_per_entry": 0.10},
+            1,
+        )
+        self.assertGreater(ct_score, rf_score)
+        ranked = proton_cleaning._rank_timing_t_candidate_evaluations([
+            {"candidate": {"timing_branch": "RF"}, "candidate_selection_score": rf_score},
+            {"candidate": {"timing_branch": "CTime_ROC1"}, "candidate_selection_score": ct_score},
+        ])
+        self.assertEqual(ranked[0]["candidate"]["timing_branch"], "CTime_ROC1")
 
     def test_ct_candidate_uses_exact_epsilon_ranges(self):
         low = proton_cleaning.resolve_timing_t_candidate_configuration(

@@ -192,6 +192,141 @@ class PreParticleSubtractionBinningTests(unittest.TestCase):
                     self._payload(), high_inp, quiet=True
                 )
 
+    def test_reduced_phi_pair_preserves_request_and_reuses_high(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            requested = self._inp()
+            requested["NumPhiBins"] = 12
+            reduced_edges = np.linspace(-180.0, 180.0, 11)
+            reduction = {
+                "requested_num_phi_bins": 12,
+                "initial_num_phi_bins": 12,
+                "actual_num_phi_bins": 10,
+                "phi_bin_reduction_applied": True,
+                "phi_bin_reduction_reason": "minimum_event_requirement",
+                "phi_bin_reduction_iterations": 2,
+                "minimum_phi_events": 1,
+                "final_phi_event_counts": [1] * 10,
+                "status": "accepted",
+            }
+            with mock.patch.object(
+                self.find_bins,
+                "_find_phi_bins",
+                return_value=(reduced_edges, np.ones(10, dtype=int), reduction),
+            ):
+                low = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                    self._payload(), requested, quiet=True
+                )
+            with Path(low["metadata"]["phi_metadata_file"]).open(encoding="utf-8") as handle:
+                phi_metadata = json.load(handle)
+            self.assertEqual(phi_metadata["requested_num_phi_bins"], 12)
+            self.assertEqual(phi_metadata["actual_num_phi_bins"], 10)
+            self.assertTrue(phi_metadata["phi_bin_reduction_applied"])
+
+            high = self._inp()
+            high.update({"EPSSET": "high", "NumPhiBins": 12})
+            reused = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), high, quiet=True
+            )
+            self.assertEqual(reused["phi_bins"].tolist(), reduced_edges.tolist())
+
+    def test_phi_requested_and_actual_counts_validate_independently(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            first = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), self._inp(), quiet=True
+            )
+            phi_path = Path(first["metadata"]["phi_metadata_file"])
+            with phi_path.open(encoding="utf-8") as handle:
+                metadata = json.load(handle)
+            metadata["actual_num_phi_bins"] += 1
+            with phi_path.open("w", encoding="utf-8") as handle:
+                json.dump(metadata, handle)
+            validated = self.find_bins._validate_authoritative_phi_interval(self._inp(), "low")
+            self.assertIn(
+                "metadata_actual_bin_count_edge_count_mismatch",
+                validated["validation_rejection_reasons"],
+            )
+            metadata["actual_num_phi_bins"] = len(metadata["phi_edges"]) - 1
+            metadata["requested_num_phi_bins"] += 1
+            with phi_path.open("w", encoding="utf-8") as handle:
+                json.dump(metadata, handle)
+            validated = self.find_bins._validate_authoritative_phi_interval(self._inp(), "low")
+            self.assertIn("requested_bin_count_mismatch", validated["validation_rejection_reasons"])
+
+    def test_pair_identity_rejects_mixed_generations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            first = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), self._inp(), quiet=True
+            )
+            phi_path = Path(first["metadata"]["phi_metadata_file"])
+            with phi_path.open(encoding="utf-8") as handle:
+                phi_metadata = json.load(handle)
+            phi_metadata["canonical_interval_pair_id"] = "mixed-generation"
+            with phi_path.open("w", encoding="utf-8") as handle:
+                json.dump(phi_metadata, handle)
+            t_validation = self.find_bins._validate_authoritative_t_interval(self._inp(), "low")
+            phi_validation = self.find_bins._validate_authoritative_phi_interval(self._inp(), "low")
+            pair_validation = self.find_bins._validate_canonical_interval_pair(t_validation, phi_validation)
+            self.assertFalse(pair_validation["valid"])
+            self.assertIn("pair_id_mismatch", pair_validation["validation_rejection_reasons"])
+
+    def test_pair_hash_missing_or_mismatched_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            first = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), self._inp(), quiet=True
+            )
+            phi_path = Path(first["metadata"]["phi_metadata_file"])
+            with phi_path.open(encoding="utf-8") as handle:
+                phi_metadata = json.load(handle)
+            for value, expected_reason in ((None, "phi_pair_hash_missing"), ("wrong", "pair_hash_mismatch")):
+                with self.subTest(value=value):
+                    mutated = dict(phi_metadata)
+                    mutated["canonical_interval_pair_hash"] = value
+                    with phi_path.open("w", encoding="utf-8") as handle:
+                        json.dump(mutated, handle)
+                    t_validation = self.find_bins._validate_authoritative_t_interval(self._inp(), "low")
+                    phi_validation = self.find_bins._validate_authoritative_phi_interval(self._inp(), "low")
+                    pair_validation = self.find_bins._validate_canonical_interval_pair(t_validation, phi_validation)
+                    self.assertIn(expected_reason, pair_validation["validation_rejection_reasons"])
+
+    def test_interrupted_pair_write_cannot_publish_an_accepted_mixed_pair(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            first = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), self._inp(), quiet=True
+            )
+            original_replace = self.find_bins.os.replace
+            calls = {"count": 0}
+
+            def interrupt_after_text_intervals(source, target):
+                calls["count"] += 1
+                if calls["count"] == 3:
+                    raise OSError("simulated interrupted pair publication")
+                return original_replace(source, target)
+
+            with mock.patch.object(self.find_bins.os, "replace", side_effect=interrupt_after_text_intervals):
+                with self.assertRaisesRegex(OSError, "interrupted"):
+                    self.find_bins.write_bin_interval_files(
+                        self._inp(),
+                        np.array([0.0, 0.4, 1.0]),
+                        first["phi_bins"],
+                        canonical_metadata=first["metadata"],
+                    )
+            high = self._inp()
+            high["EPSSET"] = "high"
+            with self.assertRaisesRegex(RuntimeError, "t/phi interval pair"):
+                self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                    self._payload(), high, quiet=True
+                )
+
     def test_legacy_writer_cannot_overwrite_canonical_sidecars(self):
         with tempfile.TemporaryDirectory() as directory:
             self.find_bins.LTANAPATH = directory

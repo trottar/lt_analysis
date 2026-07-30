@@ -1138,6 +1138,16 @@ def _write_timing_t_validation_artifacts(
     with open(cross_json, "w", encoding="utf-8") as handle:
         json.dump(cross_stage, handle, sort_keys=True, separators=(",", ":"), allow_nan=False)
     artifacts.append(cross_json)
+    cross_summary_json = os.path.join(outpath, "{}_cross_stage_t_consistency_summary.json".format(base))
+    with open(cross_summary_json, "w", encoding="utf-8") as handle:
+        json.dump(
+            diagnostics.get("cross_stage_t_consistency_summary") or {},
+            handle,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+    artifacts.append(cross_summary_json)
     cross_csv = os.path.join(outpath, "{}_cross_stage_t_consistency.csv".format(base))
     with open(cross_csv, "w", newline="", encoding="utf-8") as handle:
         fields = (
@@ -1149,6 +1159,45 @@ def _write_timing_t_validation_artifacts(
         for row in cross_stage:
             writer.writerow({field: row.get(field) for field in fields})
     artifacts.append(cross_csv)
+    timing_diagnostics = {
+        "canonical_interval_pair": diagnostics.get("canonical_t_binning") or {},
+        "candidate_production_support": diagnostics.get("timing_candidate_diagnostics") or [],
+        "selected_candidate": diagnostics.get("selected_timing_candidate") or {},
+        "setting_support": diagnostics.get("setting_support") or {},
+        "delta_support": diagnostics.get("delta_support") or [],
+        "applied_cell_state": diagnostics.get("applied_timing_t_cell_map") or [],
+        "event_lookup_state": {
+            "boundary_counts": diagnostics.get("t_lookup_boundary_counts") or {},
+            "lookup_count": diagnostics.get("prepared_event_lookup_count", 0),
+        },
+        "closure_state": {
+            "by_cell": diagnostics.get("event_weight_closure_by_cell") or [],
+            "by_delta": diagnostics.get("event_weight_closure_by_delta") or [],
+            "by_t": diagnostics.get("event_weight_closure_by_t") or [],
+        },
+    }
+    timing_diagnostics_json = os.path.join(outpath, "{}_candidate_cell_diagnostics.json".format(base))
+    with open(timing_diagnostics_json, "w", encoding="utf-8") as handle:
+        json.dump(timing_diagnostics, handle, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    artifacts.append(timing_diagnostics_json)
+    for suffix, rows in (
+        ("candidate_support", timing_diagnostics["candidate_production_support"]),
+        ("applied_cells", timing_diagnostics["applied_cell_state"]),
+    ):
+        csv_path = os.path.join(outpath, "{}_{}.csv".format(base, suffix))
+        fields = sorted({key for row in rows for key in (row or {})})
+        with open(csv_path, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({
+                    field: (
+                        json.dumps(value, sort_keys=True, separators=(",", ":"))
+                        if isinstance(value, (dict, list, tuple)) else value
+                    )
+                    for field, value in (row or {}).items()
+                })
+        artifacts.append(csv_path)
     if aero_validation:
         aero_json = os.path.join(outpath, "{}_t_aerogel_validation.json".format(base))
         with open(aero_json, "w", encoding="utf-8") as handle:
@@ -2856,6 +2905,9 @@ def rand_sub(
             )
             proton_cleaning_tree_bundle["canonical_t_prepass_samples"] = dict(
                 (inpDict.get("canonical_t_prepass_samples") or {}).get(phi_setting, {})
+            )
+            proton_cleaning_tree_bundle["canonical_t_prepass_sampling"] = dict(
+                (inpDict.get("canonical_t_prepass_sampling") or {}).get(phi_setting, {})
             )
             proton_cleaning_tree_bundle = prepare_kaon_proton_cleaning_source_bundle(
                 proton_cleaning_tree_bundle,

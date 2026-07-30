@@ -23,7 +23,7 @@ import scipy.integrate as integrate
 from scipy.integrate import quad
 import matplotlib.pyplot as plt
 from collections import defaultdict
-import sys, math, os, subprocess
+import sys, math, os, subprocess, hashlib
 import traceback
 from array import array
 from copy import deepcopy
@@ -792,18 +792,35 @@ if canonical_t_enabled:
     canonical_prepass_start = perf_counter()
     canonical_prepass_payloads = []
     canonical_prepass_samples = {}
+    canonical_prepass_sampling = {}
     for phiset in phisetlist:
         payload = build_pre_particle_subtraction_binning_payload(phiset, inpDict)
         canonical_prepass_payloads.append(payload)
-        per_source_counts = {}
+        source_entry_counts = {
+            str(label): int((stats or {}).get("entries_seen", 0) or 0)
+            for label, stats in (payload.get("source_stats") or {}).items()
+        }
+        source_selected_entry_counts = {}
+        sample_candidates = []
         for record in payload.get("records") or []:
             label = str(record.get("source_label", ""))
-            ordinal = per_source_counts.get(label, 0)
-            per_source_counts[label] = ordinal + 1
-            if ordinal < 128:
-                canonical_prepass_samples.setdefault(phiset, {})[
-                    "{}:{}".format(label, int(record.get("entry_index", -1)))
-                ] = float(record["adj_t"])
+            source_selected_entry_counts[label] = source_selected_entry_counts.get(label, 0) + 1
+            entry_index = int(record.get("entry_index", -1))
+            signature = "{}:{}".format(label, entry_index)
+            rank = hashlib.sha256(signature.encode("utf-8")).hexdigest()
+            sample_candidates.append((rank, label, entry_index, float(record["adj_t"])))
+        selected_samples = sorted(sample_candidates)[:128]
+        canonical_prepass_samples[phiset] = {
+            "{}:{}".format(label, entry_index): adj_t
+            for _, label, entry_index, adj_t in selected_samples
+        }
+        canonical_prepass_sampling[phiset] = {
+            "sampling_method": "deterministic_hash_ranked_source_label_entry_index",
+            "sample_limit": 128,
+            "source_entry_count": source_entry_counts,
+            "source_selected_entry_count": source_selected_entry_counts,
+            "sampled_entry_count": len(selected_samples),
+        }
     canonical_bin_resolution = resolve_canonical_analysis_bins_pre_subtraction(
         canonical_prepass_payloads,
         inpDict,
@@ -812,6 +829,7 @@ if canonical_t_enabled:
         quiet=not DEBUG,
     )
     inpDict["canonical_t_prepass_samples"] = canonical_prepass_samples
+    inpDict["canonical_t_prepass_sampling"] = canonical_prepass_sampling
     prepass_provenance_path = os.path.join(
         OUTPATH, "{}_{}_canonical_t_prepass_{}.json".format(ParticleType, OutFilename, EPSSET)
     )
@@ -832,6 +850,7 @@ if canonical_t_enabled:
                 "resolution": canonical_bin_resolution.get("metadata"),
                 "payloads": prepass_provenance_payloads,
                 "cross_stage_prepass_samples": canonical_prepass_samples,
+                "cross_stage_sampling": canonical_prepass_sampling,
             },
             handle,
             sort_keys=True,

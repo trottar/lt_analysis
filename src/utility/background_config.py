@@ -441,6 +441,10 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     "implementation": PROTON_CONTAMINATION_CLEANING_IMPLEMENTATION_C_SCRIPT_EXACT,
     "timing_probe_policy": "rf_then_ct_best",
     "rf_branch_candidates": PROTON_CONTAMINATION_RF_BRANCH_CANDIDATES,
+    "timing_t_branch_preference": (
+        *PROTON_CONTAMINATION_RF_BRANCH_CANDIDATES,
+        "CTime_ROC1",
+    ),
     "allow_rf_probe": True,
     "disable_rf_timing_env": "PROTON_CHECKER_DISABLE_RF",
     "force_rf_branch_env": "PROTON_CHECKER_RF_BRANCH",
